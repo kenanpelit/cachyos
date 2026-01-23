@@ -60,6 +60,7 @@ readonly LOG_FILE="${HOME}/.config/brave-launcher/brave-launcher.log"
 		"--restore-last-session"
 		"--enable-features=TouchpadOverscrollHistoryNavigation,UseOzonePlatform,VaapiVideoDecoder"
 		"--ozone-platform=wayland"
+		"--password-store=basic"
 	)
 
 # Proxy ayarları
