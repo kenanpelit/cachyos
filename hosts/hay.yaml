@@ -134,7 +134,7 @@ default_apps:
   text_editor: kitty-nvim.desktop
   file_manager: nemo.desktop
   terminal: kitty.desktop
-  office: libreoffice.desktop
+  office: libreoffice-startcenter.desktop
   pdf: org.gnome.Evince.desktop
   archive: org.gnome.FileRoller.desktop
   video: mpv.desktop
@@ -190,16 +190,16 @@ default_apps:
     inode/directory: nemo.desktop
 
     # Office docs
-    application/vnd.oasis.opendocument.text: libreoffice.desktop
-    application/vnd.oasis.opendocument.spreadsheet: libreoffice.desktop
-    application/vnd.oasis.opendocument.presentation: libreoffice.desktop
-    application/vnd.openxmlformats-officedocument.wordprocessingml.document: libreoffice.desktop
-    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: libreoffice.desktop
-    application/vnd.openxmlformats-officedocument.presentationml.presentation: libreoffice.desktop
-    application/msword: libreoffice.desktop
-    application/vnd.ms-excel: libreoffice.desktop
-    application/vnd.ms-powerpoint: libreoffice.desktop
-    application/rtf: libreoffice.desktop
+    application/vnd.oasis.opendocument.text: libreoffice-writer.desktop
+    application/vnd.oasis.opendocument.spreadsheet: libreoffice-calc.desktop
+    application/vnd.oasis.opendocument.presentation: libreoffice-impress.desktop
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document: libreoffice-writer.desktop
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: libreoffice-calc.desktop
+    application/vnd.openxmlformats-officedocument.presentationml.presentation: libreoffice-impress.desktop
+    application/msword: libreoffice-writer.desktop
+    application/vnd.ms-excel: libreoffice-calc.desktop
+    application/vnd.ms-powerpoint: libreoffice-impress.desktop
+    application/rtf: libreoffice-writer.desktop
 
     # PDF
     application/pdf: org.gnome.Evince.desktop
