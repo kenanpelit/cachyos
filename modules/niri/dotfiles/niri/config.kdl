@@ -569,7 +569,7 @@ binds {
   }
 
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" {
-    spawn "~/.local/bin/semsumo" "launch" "--daily" "-all"
+    spawn "~/.local/bin/niri-start"
   }
 
   Mod+Return repeat=false hotkey-overlay-title="Dropdown Terminal" {
