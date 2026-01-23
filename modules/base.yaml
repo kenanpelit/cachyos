@@ -24,8 +24,7 @@ packages:
   - curl
   - wget
 
-  # CLI file management
-  - yazi
+  # CLI file management (some moved to own modules)
   - lf
   - eza
   - lsd
@@ -33,7 +32,6 @@ packages:
   - ripgrep
   - fzf
   - zoxide
-  - bat
   - duf
   - ncdu
   - trash-cli
@@ -62,15 +60,9 @@ packages:
   - podman
   - podman-compose
 
-  # Terminals / UX
-  - tmux
-  - wezterm
-  - kitty
-  - starship
-  - fastfetch
+  # Terminals / UX (moved to own modules: tmux, wezterm, kitty, starship, fastfetch, btop, bat)
   - neofetch
   - htop
-  - btop
   - procs
   - inxi
   - tealdeer
@@ -104,24 +96,19 @@ packages:
   - openfortivpn
   - wireguard-tools
 
-  # Media tooling
+  # Media tooling (moved mpv, yt-dlp)
   - ffmpeg
   - imagemagick
-  - yt-dlp
 
-  # Desktop utilities
-  - nemo
+  # Desktop utilities (moved nemo, rofi)
   - grim
   - slurp
   - wf-recorder
   - swappy
   - brightnessctl
-  - rofi
   - tigervnc
 
-  # Documents
-  - zathura
-  - evince
+  # Documents (moved evince, zathura)
   - poppler
   # pdftk pulls java-runtime-headless; pick a concrete provider to avoid pacman prompts
   - jre-openjdk-headless
@@ -131,7 +118,7 @@ packages:
   # Security
   - keepassxc
   - age
-  - sops
+  # sops moved to packages.yaml
   - pwgen
 
   # Flatpak (optional but matches nixosc)
