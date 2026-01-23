@@ -103,6 +103,7 @@ enabled_modules:
   - sesh
   - stasis
   - tmux
+  - user-services
   - admin
   # - grub
   # - cliphist
