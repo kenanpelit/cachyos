@@ -727,6 +727,17 @@ env)
     LOG_TAG="niri-env"
     log() { printf '[%s] %s\n' "$LOG_TAG" "$*" >&2; }
 
+    start_keyring() {
+      if command -v gnome-keyring-daemon >/dev/null 2>&1; then
+        # Only start if not already running or env vars missing
+        if [[ -z "${SSH_AUTH_SOCK:-}" ]]; then
+          eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
+          export SSH_AUTH_SOCK
+          export GPG_AGENT_INFO
+        fi
+      fi
+    }
+
     ensure_runtime_dir() {
       if [[ -n "${XDG_RUNTIME_DIR:-}" ]]; then
         return 0
@@ -844,6 +855,7 @@ env)
         XDG_SESSION_DESKTOP
         DESKTOP_SESSION
         SSH_AUTH_SOCK
+        GPG_AGENT_INFO
         GTK_THEME
         GTK_USE_PORTAL
         XDG_ICON_THEME
@@ -932,6 +944,7 @@ env)
       systemctl --user try-restart dms.service >/dev/null 2>&1 || true
     }
 
+    start_keyring
     ensure_runtime_dir
     detect_wayland_display
     detect_niri_socket
