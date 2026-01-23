@@ -1,5 +1,5 @@
-description: XDG mimeapps.list (ported from nixosc)
+description: XDG MIME types and custom desktop entries
 
 dotfiles:
-  - source: dotfiles/mimeapps.list
-    target: ~/.config/mimeapps.list
+  - source: dotfiles/applications
+    target: ~/.local/share/applications

@@ -124,3 +124,92 @@ services:
 config_backups:
   enabled: true
   max_backups: 5
+
+# Default applications configuration
+default_apps:
+  scope: user # "user" or "system"
+
+  # Core defaults (category-level)
+  browser: brave-browser.desktop
+  text_editor: kitty-nvim.desktop
+  file_manager: nemo.desktop
+  terminal: kitty.desktop
+  office: libreoffice.desktop
+  pdf: org.gnome.Evince.desktop
+  archive: org.gnome.FileRoller.desktop
+  video: mpv.desktop
+  music: mpv.desktop
+  image: imv-dir.desktop
+  discord: webcord.desktop
+  mpv_handler: open-in-mpv.desktop
+
+  # Custom MIME types (explicit mapping)
+  mime_types:
+    # Browser / URL handlers
+    text/html: brave-browser.desktop
+    application/xhtml+xml: brave-browser.desktop
+    x-scheme-handler/http: brave-browser.desktop
+    x-scheme-handler/https: brave-browser.desktop
+    x-scheme-handler/about: brave-browser.desktop
+    x-scheme-handler/unknown: brave-browser.desktop
+
+    # Text
+    text/plain: kitty-nvim.desktop
+
+    # Images
+    image/bmp: imv-dir.desktop
+    image/gif: imv-dir.desktop
+    image/jpeg: imv-dir.desktop
+    image/jpg: imv-dir.desktop
+    image/png: imv-dir.desktop
+    image/svg+xml: imv-dir.desktop
+    image/tiff: imv-dir.desktop
+    image/vnd.microsoft.icon: imv-dir.desktop
+    image/webp: imv-dir.desktop
+
+    # Audio
+    audio/aac: mpv.desktop
+    audio/mpeg: mpv.desktop
+    audio/ogg: mpv.desktop
+    audio/opus: mpv.desktop
+    audio/wav: mpv.desktop
+    audio/webm: mpv.desktop
+    audio/x-matroska: mpv.desktop
+
+    # Video
+    video/mp2t: mpv.desktop
+    video/mp4: mpv.desktop
+    video/mpeg: mpv.desktop
+    video/ogg: mpv.desktop
+    video/webm: mpv.desktop
+    video/x-flv: mpv.desktop
+    video/x-matroska: mpv.desktop
+    video/x-msvideo: mpv.desktop
+
+    # Directory
+    inode/directory: nemo.desktop
+
+    # Office docs
+    application/vnd.oasis.opendocument.text: libreoffice.desktop
+    application/vnd.oasis.opendocument.spreadsheet: libreoffice.desktop
+    application/vnd.oasis.opendocument.presentation: libreoffice.desktop
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document: libreoffice.desktop
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: libreoffice.desktop
+    application/vnd.openxmlformats-officedocument.presentationml.presentation: libreoffice.desktop
+    application/msword: libreoffice.desktop
+    application/vnd.ms-excel: libreoffice.desktop
+    application/vnd.ms-powerpoint: libreoffice.desktop
+    application/rtf: libreoffice.desktop
+
+    # PDF
+    application/pdf: org.gnome.Evince.desktop
+
+    # Archives
+    application/zip: org.gnome.FileRoller.desktop
+    application/rar: org.gnome.FileRoller.desktop
+    application/7z: org.gnome.FileRoller.desktop
+    application/*tar: org.gnome.FileRoller.desktop
+
+    # Custom scheme handlers
+    x-scheme-handler/discord: webcord.desktop
+    x-scheme-handler/mpv: open-in-mpv.desktop

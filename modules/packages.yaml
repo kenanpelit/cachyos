@@ -57,7 +57,7 @@ packages:
   - ttf-roboto
   - ttf-ubuntu-font-family
   - webcord
-  - flatpak:io.ente.auth
+  #- flatpak:io.ente.auth
   - xorg-server
   - xorg-xinit
   - xorg-xkill

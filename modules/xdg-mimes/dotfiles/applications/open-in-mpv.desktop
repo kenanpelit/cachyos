@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Open in MPV
+Exec=mpv %u
+Icon=mpv
+Terminal=false
+Categories=AudioVideo;Player;
+MimeType=x-scheme-handler/mpv;
+NoDisplay=true

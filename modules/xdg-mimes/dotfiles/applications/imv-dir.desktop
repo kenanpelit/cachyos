@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Imv (Directory)
+Exec=imv-dir %f
+Icon=multimedia-photo-viewer
+Terminal=false
+Categories=Graphics;Viewer;
+MimeType=image/jpeg;image/png;image/gif;image/webp;image/bmp;image/tiff;image/svg+xml;image/vnd.microsoft.icon;

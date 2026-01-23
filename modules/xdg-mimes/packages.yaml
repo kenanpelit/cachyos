@@ -1,3 +1,5 @@
-description: XDG MIME apps packages
 packages:
+  - imv
+  - libreoffice-fresh
   - xdg-utils
+  - shared-mime-info
