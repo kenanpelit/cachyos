@@ -998,8 +998,22 @@ init)
       exit 0
     fi
 
-    if ! niri msg version >/dev/null 2>&1; then
-      warn "cannot connect to niri (not in session / NIRI_SOCKET missing); exiting"
+    notify "Niri session initializing..." 3000
+
+    # Wait for Niri socket
+    log "Waiting for Niri socket..."
+    connected=0
+    for _ in {1..20}; do
+      if niri msg version >/dev/null 2>&1; then
+        connected=1
+        break
+      fi
+      sleep 0.5
+    done
+
+    if [[ "$connected" -eq 0 ]]; then
+      warn "cannot connect to niri (timeout); exiting"
+      notify "Niri socket timeout!" 5000
       exit 0
     fi
 
