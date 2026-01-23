@@ -1,0 +1,149 @@
+# This file is managed by nixosc (Home-Manager activation), but is kept
+# writable on disk so you can still tweak it manually.
+#
+# Reference:
+# - `stasis info`
+# - `stasis dump`
+
+@author "kenanpelit/nixosc"
+@description "Stasis idle config (DMS + Niri/Hyprland friendly)"
+
+stasis:
+  lock_screen:
+    timeout 31536000
+    command "stasis-lock --wait"
+  end
+
+  dpms:
+    timeout 31536000
+    command "niri msg action power-off-monitors || hyprctl dispatch dpms off || true"
+    resume-command "niri msg action power-on-monitors || hyprctl dispatch dpms on || true"
+  end
+
+  suspend:
+    timeout 31536000
+    command "systemctl suspend -i"
+  end
+
+  monitor_media true
+  ignore_remote_media true
+  respect_idle_inhibitors true
+
+  # Track locks by process lifetime (see `stasis-lock` wrapper).
+  lock_detection_type "process"
+
+  # Apps that should inhibit idle actions.
+  inhibit_apps [
+    "mpv"
+    "vlc"
+    r"steam_app_.*"
+  ]
+
+  # Schedule (matches the Hypridle module defaults in this repo):
+  # - 05:00  keyboard backlight off
+  # - 15:00  screen dim
+  # - 30:00  lock-session
+  # - 31:00  DPMS off
+  # - 60:00  suspend
+
+  # NOTE (Laptop):
+  # Stasis treats laptops specially and reads idle actions from `on_ac` and
+  # `on_battery` blocks. If you only define actions directly under `stasis:`,
+  # it will error with "no valid idle actions found".
+
+  on_ac:
+    kbd_backlight:
+      timeout 300
+      command "stasis-kbd-backlight off"
+      resume-command "stasis-kbd-backlight restore"
+    end
+
+    brightness:
+      timeout 600
+      command "sh -c 'brightnessctl -s set 10 || true'"
+      resume-command "sh -c 'brightnessctl -r || true'"
+    end
+
+    lock_screen:
+      timeout 900
+      command "stasis-lock --wait"
+      resume-command "notify-send 'Welcome back, $env.USER!'"
+    end
+
+    dpms:
+      timeout 60
+      command "niri msg action power-off-monitors || hyprctl dispatch dpms off || true"
+      resume-command "niri msg action power-on-monitors || hyprctl dispatch dpms on || true"
+    end
+
+    suspend:
+      timeout 1740
+      command "systemctl suspend -i"
+    end
+  end
+
+  # Battery: keep same schedule by default (tune later if you want).
+  on_battery:
+    kbd_backlight:
+      timeout 300
+      command "stasis-kbd-backlight off"
+      resume-command "stasis-kbd-backlight restore"
+    end
+
+    brightness:
+      timeout 600
+      command "sh -c 'brightnessctl -s set 10 || true'"
+      resume-command "sh -c 'brightnessctl -r || true'"
+    end
+
+    lock_screen:
+      timeout 900
+      command "stasis-lock --wait"
+      resume-command "notify-send 'Welcome back, $env.USER!'"
+    end
+
+    dpms:
+      timeout 60
+      command "niri msg action power-off-monitors || hyprctl dispatch dpms off || true"
+      resume-command "niri msg action power-on-monitors || hyprctl dispatch dpms on || true"
+    end
+
+    suspend:
+      timeout 1740
+      command "systemctl suspend -i"
+    end
+  end
+end
+
+# Profiles can be switched at runtime:
+# - `stasis profile work`
+# - `stasis profile none`
+profiles:
+  work:
+    lock_screen:
+      timeout 900
+      command "stasis-lock --wait"
+    end
+
+    dpms:
+      timeout 600
+      command "niri msg action power-off-monitors || hyprctl dispatch dpms off || true"
+      resume-command "niri msg action power-on-monitors || hyprctl dispatch dpms on || true"
+    end
+
+    suspend:
+      timeout 7200
+      command "systemctl suspend"
+    end
+  end
+
+  presentation:
+    # No lock/suspend; keep only mild DPMS.
+    dpms:
+      timeout 1200
+      command "niri msg action power-off-monitors || hyprctl dispatch dpms off || true"
+      resume-command "niri msg action power-on-monitors || hyprctl dispatch dpms on || true"
+    end
+  end
+end
+

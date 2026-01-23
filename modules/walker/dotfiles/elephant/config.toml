@@ -1,0 +1,4 @@
+[providers]
+# Elephant config in nixosc pointed at a Nix store path; on CachyOS we keep
+# providers under ~/.config/elephant/providers.
+path = "~/.config/elephant/providers"

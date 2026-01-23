@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+direction="${1:-}"
+case "$direction" in
+  left|l) dir="l" ;;
+  right|r) dir="r" ;;
+  *)
+    echo "usage: fusuma-hyprscrolling-focus {left|right}" >&2
+    exit 2
+    ;;
+ esac
+
+# Niri has built-in horizontal swipe navigation; avoid double-triggering.
+if [[ -n "${NIRI_SOCKET:-}" ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == "niri" ]] || [[ "${XDG_SESSION_DESKTOP:-}" == "niri" ]]; then
+  exit 0
+fi
+
+if ! command -v hyprctl >/dev/null 2>&1; then
+  echo "fusuma-hyprscrolling-focus: hyprctl not found in PATH" >&2
+  exit 127
+fi
+
+# Prefer hyprscrolling focus (also scrolls layout), but gracefully fall back.
+if hyprctl dispatch layoutmsg "focus $dir" >/dev/null 2>&1; then
+  exit 0
+fi
+
+exec hyprctl dispatch movefocus "$dir"

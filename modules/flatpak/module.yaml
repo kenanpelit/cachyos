@@ -1,0 +1,12 @@
+description: Flatpak base config ported from nixosc
+
+dotfiles:
+  - source: dotfiles/flatpak/apps.txt
+    target: ~/.config/flatpak/apps.txt
+  - source: dotfiles/systemd/user/flatpak-managed-install.service
+    target: ~/.config/systemd/user/flatpak-managed-install.service
+  - source: dotfiles/systemd/user/flatpak-managed-install.timer
+    target: ~/.config/systemd/user/flatpak-managed-install.timer
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask

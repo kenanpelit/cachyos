@@ -1,0 +1,6 @@
+description: Subliminal config template (ported from nixosc; credentials removed)
+
+
+dotfiles:
+  - source: dotfiles/subliminal
+    target: ~/.config/subliminal

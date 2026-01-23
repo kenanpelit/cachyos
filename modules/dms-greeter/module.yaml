@@ -1,0 +1,13 @@
+description: DMS Greeter (greetd + DankMaterialShell) setup
+# Note: This module installs user-level configs. You must run the post-install script 
+# (or manual steps) to apply system-level changes to /etc/greetd/config.toml.
+
+dotfiles:
+  - source: dotfiles/dms-greeter-wrapper
+    target: ~/.config/dms-greeter/dms-greeter-wrapper
+  - source: dotfiles/hyprland.conf
+    target: ~/.config/dms-greeter/hyprland.conf
+  - source: dotfiles/config.toml
+    target: ~/.config/dms-greeter/config.toml
+
+post_install_hook: scripts/install-system.sh

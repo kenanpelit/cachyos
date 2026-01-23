@@ -1,0 +1,8 @@
+description: Hyprpanel (service stub) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/systemd/user/hyprpanel.service
+    target: ~/.config/systemd/user/hyprpanel.service
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask

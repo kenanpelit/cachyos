@@ -1,0 +1,12 @@
+[Unit]
+Description=Niri Bluetooth auto-connect (delayed)
+After=niri-session.target
+PartOf=niri-session.target
+
+[Timer]
+OnActiveSec=10s
+AccuracySec=3s
+Unit=niri-bt-autoconnect.service
+
+[Install]
+WantedBy=niri-session.target

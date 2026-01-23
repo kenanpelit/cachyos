@@ -1,0 +1,7 @@
+description: foot theme snippets (ported from nixosc)
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/foot
+    target: ~/.config/foot

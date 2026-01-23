@@ -1,0 +1,5 @@
+description: Neovim packages
+
+packages:
+  - neovim
+  - git

@@ -1,0 +1,25 @@
+/* Catppuccin Mocha Nemo Customizations */
+.nemo-window {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
+.nemo-window .toolbar {
+    background-color: #181825;
+    border-bottom: 1px solid #313244;
+}
+
+.nemo-window .sidebar {
+    background-color: #181825;
+    border-right: 1px solid #313244;
+}
+
+.nemo-window .view {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
+.nemo-window .view:selected {
+    background-color: #cba6f7;
+    color: #1e1e2e;
+}

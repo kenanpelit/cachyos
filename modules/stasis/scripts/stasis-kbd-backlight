@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="${1:-}"
+if [[ "$mode" != "off" && "$mode" != "restore" ]]; then
+  echo "Usage: stasis-kbd-backlight <off|restore>" >&2
+  exit 2
+fi
+
+if ! command -v brightnessctl >/dev/null 2>&1; then
+  exit 0
+fi
+
+dev="$(
+  brightnessctl -l 2>/dev/null \
+    | awk -F"'" '/Device .*kbd_backlight.* of class .*leds/ {print $2; exit}'
+)"
+
+if [[ -z "$dev" ]]; then
+  exit 0
+fi
+
+case "$mode" in
+  off)
+    brightnessctl -sd "$dev" set 0 >/dev/null 2>&1 || true
+    ;;
+  restore)
+    brightnessctl -rd "$dev" >/dev/null 2>&1 || true
+    ;;
+esac

@@ -1,0 +1,17 @@
+description: Hyprland config (ported from nixosc)
+
+# Only manage key files; leave ~/.config/hypr/dms as real files (runtime-written)
+dotfiles:
+  - source: dotfiles/hypr/hyprland.conf
+    target: ~/.config/hypr/hyprland.conf
+  - source: dotfiles/hypr/pyprland.toml
+    target: ~/.config/hypr/pyprland.toml
+  - source: dotfiles/hypr/themes
+    target: ~/.config/hypr/themes
+  - source: dotfiles/hypr-set
+    target: ~/.local/bin/hypr-set
+  - source: dotfiles/systemd/user/hyprland-session.target
+    target: ~/.config/systemd/user/hyprland-session.target
+
+post_install_hook: scripts/ensure-runtime-files.sh
+post_hook_behavior: always

@@ -1,0 +1,8 @@
+description: Brave (launcher wrapper + config) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/brave-launcher/config.conf
+    target: ~/.config/brave-launcher/config.conf
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

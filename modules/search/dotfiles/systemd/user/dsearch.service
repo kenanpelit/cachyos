@@ -1,0 +1,15 @@
+[Unit]
+Description=dsearch - Fast filesystem search service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=dsearch serve
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dsearch
+
+[Install]
+WantedBy=default.target

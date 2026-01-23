@@ -1,0 +1,11 @@
+description: Stasis idle manager (config + wrappers) ported from nixosc
+
+# NOTE: Package name may differ on CachyOS/Arch (might be AUR). Install stasis separately if needed.
+dotfiles:
+  - source: dotfiles/stasis
+    target: ~/.config/stasis
+  - source: dotfiles/systemd/user/stasis.service
+    target: ~/.config/systemd/user/stasis.service
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

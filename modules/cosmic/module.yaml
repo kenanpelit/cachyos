@@ -1,0 +1,7 @@
+description: COSMIC Desktop (base config) ported from nixosc
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/cosmic
+    target: ~/.config/cosmic

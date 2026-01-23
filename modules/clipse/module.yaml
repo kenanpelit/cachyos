@@ -1,0 +1,9 @@
+description: clipse config (ported from nixosc)
+
+# NOTE: `clipse` may be an AUR package on Arch.
+dotfiles:
+  - source: dotfiles/clipse/custom_theme.json
+    target: ~/.config/clipse/custom_theme.json
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

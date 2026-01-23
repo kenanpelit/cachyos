@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Find and export GREETD_SOCK
+# Depending on the greetd version/config, the socket might be at /run/greetd.sock or /run/greetd-<pid>.sock
+if [ -z "${GREETD_SOCK:-}" ]; then
+    SOCK=$(find /run -maxdepth 2 -name "greetd.sock" -o -name "greetd-*.sock" 2>/dev/null | head -n 1)
+    if [ -n "$SOCK" ]; then
+        export GREETD_SOCK="$SOCK"
+        echo "Found GREETD_SOCK: $GREETD_SOCK"
+    else
+        echo "Warning: Could not find greetd socket in /run"
+    fi
+fi
+
+# Configuration
+GREETER_HOME="/var/lib/dms-greeter"
+COMPOSITOR_CONFIG="$HOME/.config/dms-greeter/hyprland.conf" # This runs as 'greeter' user, so $HOME should differ? 
+# Wait, greetd runs as the 'greeter' user.
+# If we install these files to /home/kenan/.config/dms-greeter, the 'greeter' user CANNOT read them easily.
+# SOLUTION: The install script should copy them to /etc/greetd/ or /var/lib/dms-greeter/.
+
+# For now, let's assume this script is copied to /usr/local/bin/dms-greeter
+# and the configs are in /etc/dms-greeter/
+
+export XKB_DEFAULT_LAYOUT="tr"
+export XKB_DEFAULT_VARIANT="f"
+
+# Ensure we have a valid home
+export HOME="$GREETER_HOME"
+export DMS_GREET_CFG_DIR="$GREETER_HOME"
+
+if ! cd "$HOME"; then
+    echo "Failed to cd to $HOME. Ensure user 'greeter' has valid home directory."
+    exit 1
+fi
+
+# Runtime dir
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+  export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+  mkdir -p "$XDG_RUNTIME_DIR"
+  chmod 0700 "$XDG_RUNTIME_DIR"
+fi
+
+export XDG_CONFIG_HOME="$GREETER_HOME/.config"
+export XDG_CACHE_HOME="$GREETER_HOME/.cache"
+export XDG_STATE_HOME="$GREETER_HOME/.local/state"
+export XDG_DATA_HOME="$GREETER_HOME/.local/share"
+
+# Ensure session discovery works
+export XDG_DATA_DIRS="$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share"
+
+echo "Launching dms-greeter (Hyprland)..."
+
+# Check if config exists in system location (preferred) or fallback
+if [ -f "/etc/dms-greeter/hyprland.conf" ]; then
+    CONFIG_PATH="/etc/dms-greeter/hyprland.conf"
+elif [ -f "/home/kenan/.config/dms-greeter/hyprland.conf" ]; then
+    # Fallback for testing (might fail permission)
+    CONFIG_PATH="/home/kenan/.config/dms-greeter/hyprland.conf"
+else
+    echo "Error: hyprland.conf not found."
+    exit 1
+fi
+
+if command -v start-hyprland >/dev/null 2>&1; then
+    # Use start-hyprland wrapper to avoid warnings and ensure proper env setup
+    exec start-hyprland -- --config "$CONFIG_PATH" > /tmp/dms-greeter-session.log 2>&1
+else
+    exec Hyprland --config "$CONFIG_PATH" > /tmp/dms-greeter-session.log 2>&1
+fi

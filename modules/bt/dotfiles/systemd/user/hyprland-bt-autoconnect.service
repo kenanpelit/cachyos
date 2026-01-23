@@ -1,0 +1,15 @@
+[Unit]
+Description=Hyprland Bluetooth auto-connect
+Wants=pipewire.service wireplumber.service
+After=hyprland-session.target pipewire.service wireplumber.service
+PartOf=hyprland-session.target
+
+[Service]
+Type=oneshot
+TimeoutStartSec=180s
+ExecStart=/usr/bin/bash -lc '%h/.local/bin/bluetooth_toggle --connect'
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=hyprland-session.target

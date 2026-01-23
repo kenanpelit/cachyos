@@ -1,0 +1,13 @@
+description: Zsh config (ported from nixosc)
+
+  - zsh-completions
+
+dotfiles:
+  - source: dotfiles/.zshenv
+    target: ~/.zshenv
+  - source: dotfiles/zsh/.zshrc
+    target: ~/.zshrc
+  - source: dotfiles/zsh/.zprofile
+    target: ~/.zprofile
+  - source: dotfiles/zsh
+    target: ~/.config/zsh

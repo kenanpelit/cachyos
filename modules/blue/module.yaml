@@ -1,0 +1,8 @@
+description: Blue light / night mode tooling ported from nixosc
+
+dotfiles:
+  - source: dotfiles/systemd/user/blue.service
+    target: ~/.config/systemd/user/blue.service
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask

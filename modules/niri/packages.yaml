@@ -1,0 +1,20 @@
+description: Niri compositor packages
+
+packages:
+  - niri
+  - nirius
+  - xdg-desktop-portal
+  - xdg-desktop-portal-gnome
+  - wl-clipboard
+  - cliphist
+  - grim
+  - slurp
+  # NOTE: may be AUR on Arch/CachyOS (auto-detected by dcli)
+  - satty
+  - fuzzel
+  # - mako (removed)
+  # - waybar (removed)
+  - brightnessctl
+  - wtype
+  - nirius
+  - niriswitcher

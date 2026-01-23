@@ -1,0 +1,4 @@
+description: MPD packages
+packages:
+  - mpd
+  - mpc

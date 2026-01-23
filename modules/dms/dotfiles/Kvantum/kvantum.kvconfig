@@ -1,0 +1,13 @@
+[Applications]
+dolphin,konqueror,gwenview,okular=catppuccin-mocha-mauve
+kate,kwrite,kdevelop=catppuccin-mocha-mauve
+polkit-kde-authentication-agent-1,hyprpolkitagent=catppuccin-mocha-mauve
+
+[General]
+theme=catppuccin-mocha-mauve
+
+[General]
+iconTheme=a-candy-beauty-icon-theme
+
+[General]
+theme=catppuccin-mocha-mauve

@@ -1,0 +1,9 @@
+description: Zsh packages
+
+packages:
+  - zsh
+  - git
+  - fzf
+  - zsh-syntax-highlighting
+  - zsh-autosuggestions
+  - zsh-completions

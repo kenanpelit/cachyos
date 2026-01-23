@@ -1,0 +1,6 @@
+[Unit]
+Description=Hyprland compositor session
+Documentation=man:systemd.special(7)
+After=graphical-session-pre.target
+Wants=graphical-session-pre.target xdg-desktop-autostart.target
+BindsTo=graphical-session.target

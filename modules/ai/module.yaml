@@ -1,0 +1,29 @@
+description: AI tooling (Gemini, Codex, Ollama) ported from nixosc
+
+
+dotfiles:
+  # Scripts
+  - source: scripts/bin/ai-gemini
+    target: ~/.local/bin/ai-gemini
+  - source: scripts/bin/ai-gemini-nightly
+    target: ~/.local/bin/ai-gemini-nightly
+  - source: scripts/bin/ai-gemini-update
+    target: ~/.local/bin/ai-gemini-update
+  - source: scripts/bin/ai-codex
+    target: ~/.local/bin/ai-codex
+  
+  # Desktop Entries
+  - source: dotfiles/applications/gemini-cli.desktop
+    target: ~/.local/share/applications/gemini-cli.desktop
+  - source: dotfiles/applications/codex-cli.desktop
+    target: ~/.local/share/applications/codex-cli.desktop
+
+  # Systemd Services
+  - source: dotfiles/systemd/user/ollama.service
+    target: ~/.config/systemd/user/ollama.service
+
+  # Environment Config
+  - source: dotfiles/environment.d/30-ollama.conf
+    target: ~/.config/environment.d/30-ollama.conf
+
+post_install_hook: "" # Handled by dotfile links

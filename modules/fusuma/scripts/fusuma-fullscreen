@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="${1:-toggle}"
+shift || true
+
+if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+  case "$mode" in
+    in|on|1) exec hyprctl dispatch fullscreen 1 ;;
+    out|off|0) exec hyprctl dispatch fullscreen 0 ;;
+    toggle) exec hyprctl dispatch fullscreen 1 ;;
+    *) exec hyprctl dispatch fullscreen 1 ;;
+  esac
+fi
+
+if [[ -n "${NIRI_SOCKET:-}" ]]; then
+  if command -v niri >/dev/null 2>&1; then
+    exec niri msg action fullscreen-window
+  fi
+  echo "fusuma-fullscreen: niri not found in PATH" >&2
+  exit 127
+fi
+
+case "${XDG_CURRENT_DESKTOP:-}${XDG_SESSION_DESKTOP:-}" in
+  *Hyprland*|*hyprland*)
+    exec hyprctl dispatch fullscreen 1
+    ;;
+  *niri*|*Niri*)
+    if command -v niri >/dev/null 2>&1; then
+      exec niri msg action fullscreen-window
+    fi
+    echo "fusuma-fullscreen: niri not found in PATH" >&2
+    exit 127
+    ;;
+ esac
+
+echo "fusuma-fullscreen: compositor not detected (need HYPRLAND_INSTANCE_SIGNATURE or NIRI_SOCKET)" >&2
+exit 127

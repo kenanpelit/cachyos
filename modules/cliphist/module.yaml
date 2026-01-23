@@ -1,0 +1,7 @@
+description: Clipboard history (cliphist) ported from nixosc
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/cliphist
+    target: ~/.config/cliphist

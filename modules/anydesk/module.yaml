@@ -1,0 +1,8 @@
+description: Anydesk (launcher + desktop entry) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/applications/runanydesk.desktop
+    target: ~/.local/share/applications/runanydesk.desktop
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

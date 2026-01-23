@@ -1,0 +1,50 @@
+# Appearance
+# Prefer Maple Mono; fall back to common Nerd Fonts with ligatures
+font-family = "Maple Mono NF"
+font-family = "JetBrainsMono Nerd Font"
+font-family = "Iosevka Nerd Font"
+font-family = "FiraCode Nerd Font"
+font-size = 13
+font-feature = liga,clig,calt
+background = "#1e1e2e"
+foreground = "#cdd6f4"
+cursor-color = "#cba6f7"
+selection-background = "#313244"
+window-decoration = false
+window-padding-x = 10
+window-padding-y = 10
+background-opacity = 1.0
+window-show-tab-bar = auto
+
+# Palette (Catppuccin Mocha)
+palette = 0=#45475a
+palette = 1=#f38ba8
+palette = 2=#a6e3a1
+palette = 3=#f9e2af
+palette = 4=#89b4fa
+palette = 5=#cba6f7
+palette = 6=#89dceb
+palette = 7=#cdd6f4
+palette = 8=#585b70
+palette = 9=#f38ba8
+palette = 10=#a6e3a1
+palette = 11=#f9e2af
+palette = 12=#89b4fa
+palette = 13=#cba6f7
+palette = 14=#89dceb
+palette = 15=#f5e0dc
+
+# Behaviour
+scrollback-limit = 10485760
+copy-on-select = true
+confirm-close-surface = false
+command = "zsh"
+
+# Keybindings (familiar to kitty/alacritty users)
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+w=close_surface
+keybind = ctrl+shift+enter=new_window
+keybind = ctrl+shift+tab=previous_tab
+keybind = ctrl+tab=next_tab
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift+v=paste_from_clipboard

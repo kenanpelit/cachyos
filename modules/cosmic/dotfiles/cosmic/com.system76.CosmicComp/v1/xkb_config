@@ -1,0 +1,9 @@
+(
+    rules: "",
+    model: "pc104",
+    layout: "tr",
+    variant: "f",
+    options: Some("ctrl:nocaps,ctrl:nocaps"),
+    repeat_delay: 600,
+    repeat_rate: 25,
+)

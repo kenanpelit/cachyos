@@ -1,0 +1,38 @@
+[core]
+	editor = "vim"
+	pager = "delta"
+	whitespace = "trailing-space,space-before-tab"
+
+[credential]
+	helper = "store"
+
+[diff]
+	colorMoved = "default"
+
+[filter "lfs"]
+	clean = "git-lfs clean -- %f"
+	process = "git-lfs filter-process"
+	required = true
+	smudge = "git-lfs smudge -- %f"
+
+[init]
+	defaultBranch = "main"
+
+[interactive]
+	diffFilter = "delta --color-only"
+
+[merge]
+	conflictstyle = "diff3"
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[rebase]
+	autoStash = true
+
+[user]
+	email = "kenanpelit@gmail.com"
+	name = "kenanpelit"

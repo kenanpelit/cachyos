@@ -1,0 +1,4 @@
+description: command-not-found packages
+
+packages:
+  - pkgfile

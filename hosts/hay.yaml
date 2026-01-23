@@ -1,0 +1,126 @@
+host: hay
+description: CachyOS setup (ported from nixosc via dcli)
+
+# Ordered list (requires module_processing: sequential)
+enabled_modules:
+  # --- Core ---
+  - base
+  - xdg-dirs
+  - xdg-mimes
+  - scripts
+  - packages
+  # - packages # Meta-module, usually not needed if others are enabled
+
+  # --- Shell ---
+  - zsh
+  - bash
+  - starship
+  - direnv
+
+  # --- CLI Tools ---
+  - git
+  - command-not-found
+  - bat
+  - btop
+  - fastfetch
+  - yazi
+  - lazygit
+  - rsync
+  # - gnupg
+  # - search
+
+  # --- Editors ---
+  - nvim
+
+  # --- Terminals ---
+  - kitty
+  - wezterm
+  # - alacritty
+  # - foot
+  # - ghostty
+
+  # --- Desktop Environment (WM/Compositor) ---
+  - niri
+  # - nirius
+  - hyprland
+  - sessions
+  # - sway
+  # - gnome
+  # - cosmic
+  # - xserver
+
+  # --- Desktop Components & Theming ---
+  - gtk
+  - qt
+  - dms
+  - dms-greeter
+  # - mako
+  - rofi
+  # - walker
+  - xdg-portal
+  - fusuma
+  # - hyprpanel
+  # - catppuccin
+
+  # --- Media ---
+  - mpv
+  - mpd
+  - rmpc
+  - cava
+  - ytdlp
+  # - vlc
+  - radio
+  # - audacious
+  # - subliminal
+
+  # --- Network & Connectivity ---
+  - anydesk
+  - connect # KDE Connect
+  #- blue # Gammastep/Sunset
+  - bt # Bluetooth
+  # - sunsetr
+
+  # --- Browsers ---
+  - brave
+  # - chrome
+  # - firefox
+
+  # --- Applications ---
+  # - obsidian
+  - webcord
+  - flatpak
+  # - transmission
+  # - elektron
+  # - nemo
+  # - program
+
+  # --- AI ---
+  - ai
+  # - ollama (merged into ai)
+
+  # --- System & Utility ---
+  - clipse
+  - sesh
+  - stasis
+  - tmux
+  - admin
+  # - grub
+  # - cliphist
+  # - copyq
+
+# Settings
+module_processing: sequential
+flatpak_scope: user
+# dcli will auto-detect if omitted (prefers paru → yay)
+aur_helper: paru
+
+auto_prune: false
+
+services:
+  enabled:
+    - bluetooth
+    - NetworkManager
+
+config_backups:
+  enabled: true
+  max_backups: 5

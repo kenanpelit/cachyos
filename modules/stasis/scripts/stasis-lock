@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+wait="0"
+if [[ "${1:-}" == "--wait" ]]; then
+  wait="1"
+fi
+
+if command -v logger >/dev/null 2>&1; then
+  logger -t stasis-lock "lock requested (wait=$wait)"
+fi
+
+ensure_hypr_signature() {
+  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    return 0
+  fi
+
+  local uid runtime hypr_dir sig
+  uid="$(id -u)"
+  runtime="${XDG_RUNTIME_DIR:-/run/user/${uid}}"
+  hypr_dir="${runtime}/hypr"
+
+  [[ -d "${hypr_dir}" ]] || return 1
+
+  sig="$(ls -1t "${hypr_dir}" 2>/dev/null | head -n 1 || true)"
+  [[ -n "${sig}" ]] || return 1
+  [[ -S "${hypr_dir}/${sig}/.socket.sock" ]] || return 1
+
+  export HYPRLAND_INSTANCE_SIGNATURE="${sig}"
+  return 0
+}
+
+# Prefer Hyprland lock when available.
+if command -v hyprlock >/dev/null 2>&1 && ensure_hypr_signature; then
+  if [[ "$wait" == "1" ]]; then
+    exec hyprlock
+  fi
+  hyprlock >/dev/null 2>&1 &
+  disown || true
+  exit 0
+fi
+
+# Niri (and others): use DMS lock if available and block until unlocked.
+if command -v dms >/dev/null 2>&1; then
+  (dms ipc call lock lock >/dev/null 2>&1 || true) &
+  disown || true
+
+  if [[ "$wait" != "1" ]]; then
+    exit 0
+  fi
+
+  failures="0"
+  while true; do
+    out="$(
+      dms ipc call lock isLocked 2>/dev/null \
+        | tr -d '\r' \
+        | tail -n 1 \
+        | tr -d '[:space:]' \
+        || true
+    )"
+
+    case "$out" in
+      true) ;;
+      false) exit 0 ;;
+      *)
+        failures="$((failures + 1))"
+        if [[ "$failures" -ge 20 ]]; then
+          exit 0
+        fi
+        ;;
+    esac
+
+    sleep 0.25
+  done
+fi
+
+# Fallback: logind lock (may use compositor's default locker).
+if command -v loginctl >/dev/null 2>&1; then
+  exec loginctl lock-session
+fi

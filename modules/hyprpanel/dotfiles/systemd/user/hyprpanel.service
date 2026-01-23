@@ -1,0 +1,14 @@
+[Unit]
+Description=Hyprpanel
+After=graphical-session.target
+PartOf=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=hyprpanel
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=hyprland-session.target

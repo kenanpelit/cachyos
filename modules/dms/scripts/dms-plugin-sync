@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pluginsDir="$HOME/.config/DankMaterialShell/plugins"
+mkdir -p "$pluginsDir"
+
+plugins=(
+  alarmClock
+  calculator
+  commandRunner
+  dankActions
+  dankBatteryAlerts
+  dankHooks
+  dankPomodoroTimer
+  displayMirror
+  displaySettings
+  dockerManager
+  dolarBlue
+  easyEffects
+  emojiLauncher
+  gitmojiLauncher
+  grimblast
+  linuxWallpaperEngine
+  powerUsagePlugin
+  pulsarX3
+  webSearch
+  worldClock
+  NiriWindows
+)
+
+missing=()
+for plugin in "${plugins[@]}"; do
+  if [ ! -d "$pluginsDir/$plugin" ]; then
+    missing+=("$plugin")
+  fi
+done
+
+if [ ${#missing[@]} -eq 0 ]; then
+  exit 0
+fi
+
+if ! command -v dms >/dev/null 2>&1; then
+  echo "[dms] plugin-sync: dms binary not found, skipping" >&2
+  exit 0
+fi
+
+if command -v timeout >/dev/null 2>&1; then
+  if ! timeout 2s getent hosts github.com >/dev/null 2>&1; then
+    echo "[dms] plugin-sync: github.com unreachable, skipping (${#missing[@]} plugins)" >&2
+    exit 0
+  fi
+else
+  if ! getent hosts github.com >/dev/null 2>&1; then
+    echo "[dms] plugin-sync: github.com unreachable, skipping (${#missing[@]} plugins)" >&2
+    exit 0
+  fi
+fi
+
+for plugin in "${missing[@]}"; do
+  echo "[dms] plugin-sync: installing $plugin..." >&2
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 30s dms plugins install "$plugin" >/dev/null 2>&1 || echo "[dms] plugin-sync: failed to install $plugin" >&2
+  else
+    dms plugins install "$plugin" >/dev/null 2>&1 || echo "[dms] plugin-sync: failed to install $plugin" >&2
+  fi
+done

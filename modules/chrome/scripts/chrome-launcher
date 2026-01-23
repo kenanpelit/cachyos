@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Google Chrome Launcher (portable; ported from nixosc)
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  cat <<'HELP'
+Chrome Launcher
+
+Usage:
+  chrome-launcher [extra Chrome flags...] [URL...]
+HELP
+  exit 0
+fi
+
+chrome_bin="${CHROME_BIN:-}"
+if [[ -z "$chrome_bin" ]]; then
+  if command -v google-chrome-stable >/dev/null 2>&1; then
+    chrome_bin="google-chrome-stable"
+  elif command -v google-chrome >/dev/null 2>&1; then
+    chrome_bin="google-chrome"
+  else
+    chrome_bin="google-chrome-stable"
+  fi
+fi
+
+flags=(
+  --disable-extensions-http-throttling
+  --disk-cache-size=268435456
+  --media-cache-size=134217728
+  --disable-default-apps
+  --no-default-browser-check
+  --no-first-run
+  --enable-smooth-scrolling
+  --lang=en-US
+  --accept-lang=en-US,tr-TR
+)
+
+# Hardware acceleration (best-effort)
+flags+=(
+  --enable-gpu-rasterization
+  --enable-zero-copy
+  --ignore-gpu-blocklist
+  --enable-accelerated-video-decode
+  --enable-accelerated-video-encode
+  --use-gl=egl
+)
+
+# Wayland flags (runtime detection)
+if [[ "${XDG_SESSION_TYPE:-}" == "wayland" || -n "${WAYLAND_DISPLAY:-}" ]]; then
+  flags+=(
+    --ozone-platform=wayland
+  )
+fi
+
+# Feature flags (deterministic)
+flags+=("--enable-features=BackForwardCache,OverlayScrollbar,TabFreeze,WebUIDarkMode,AutoDarkMode,VaapiVideoDecoder,VaapiVideoEncoder,VaapiVideoDecodeLinuxGL,UseOzonePlatform,WaylandWindowDecorations")
+flags+=("--disable-features=UseChromeOSDirectVideoDecoder")
+
+exec "$chrome_bin" "${flags[@]}" "$@"

@@ -1,0 +1,7 @@
+description: Core script dependencies
+packages:
+  - bash
+  - coreutils
+  - findutils
+  - grep
+  - sed

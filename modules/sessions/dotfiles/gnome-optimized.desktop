@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=GNOME (Optimized)
+Comment=GNOME with systemd user session support and custom launcher (gnome_tty)
+
+Type=Application
+DesktopNames=GNOME
+X-GDM-SessionType=wayland
+X-Session-Type=wayland
+X-GDM-SessionRegisters=true
+X-GDM-CanRunHeadless=true
+
+Exec=/home/kenan/.local/bin/gnome_tty

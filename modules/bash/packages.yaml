@@ -1,0 +1,8 @@
+description: Bash packages
+
+packages:
+  - bash
+  - bash-completion
+  - fzf
+  - starship
+  - direnv

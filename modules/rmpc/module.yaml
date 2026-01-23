@@ -1,0 +1,10 @@
+description: rmpc config ported from nixosc
+
+
+# Sync dotfiles/rmpc -> ~/.config/rmpc
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/rmpc
+    target: ~/.config/rmpc

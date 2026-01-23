@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Gemini CLI
+Comment=Google's AI agent for your terminal
+Exec=ai-gemini
+Icon=terminal
+Terminal=true
+Type=Application
+Categories=Development;ConsoleOnly;

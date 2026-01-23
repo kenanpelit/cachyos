@@ -1,0 +1,13 @@
+[Unit]
+Description=DMS plugin sync (best-effort)
+After=hyprland-session.target niri-session.target dms.service
+PartOf=hyprland-session.target niri-session.target
+
+[Service]
+Type=oneshot
+TimeoutStartSec=60
+ExecStart=%h/.local/bin/dms-plugin-sync
+
+[Install]
+WantedBy=hyprland-session.target
+WantedBy=niri-session.target

@@ -1,0 +1,5 @@
+description: mako packages
+
+packages:
+  - mako
+  - libnotify

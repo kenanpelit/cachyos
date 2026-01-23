@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == *Hyprland* ]] || [[ "${XDG_SESSION_DESKTOP:-}" == *Hyprland* ]]; then
+  if command -v dms >/dev/null 2>&1; then
+    exec dms ipc call hypr toggleOverview
+  fi
+  echo "fusuma-overview: dms not found in PATH" >&2
+  exit 127
+fi
+
+# Niri has built-in gestures for overview; avoid double-triggering.
+exit 0

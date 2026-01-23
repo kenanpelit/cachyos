@@ -1,0 +1,27 @@
+# dsearch config (portable; ported from nixosc defaults)
+
+index_path = "~/.cache/danksearch/index"
+listen_addr = ":43654"
+max_file_bytes = 2097152
+worker_count = 4
+index_all_files = true
+auto_reindex = false
+reindex_interval_hours = 24
+
+text_extensions = [
+  ".txt", ".md", ".go", ".py", ".js", ".ts",
+  ".jsx", ".tsx", ".json", ".yaml", ".yml",
+  ".toml", ".html", ".css", ".rs", ".c",
+  ".cpp", ".h", ".java", ".rb", ".php", ".sh",
+]
+
+[[index_paths]]
+path = "~"
+max_depth = 0
+exclude_hidden = false
+exclude_dirs = [
+  "Downloads",
+  ".kenp",
+  ".cache", ".direnv", ".nix-defexpr", ".git", ".venv", "venv",
+  "node_modules", "dist", "build", "target", "__pycache__",
+]

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Niri (Optimized)
+Comment=Scrollable-tiling Wayland compositor (via niri-set tty)
+Exec=/home/kenan/.local/bin/niri-set tty
+Type=Application
+DesktopNames=niri
+X-GDM-SessionType=wayland
+X-Session-Type=wayland

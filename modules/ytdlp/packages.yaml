@@ -1,0 +1,5 @@
+description: yt-dlp packages
+
+packages:
+  - yt-dlp
+  - deno

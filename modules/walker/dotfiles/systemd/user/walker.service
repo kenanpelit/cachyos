@@ -1,0 +1,21 @@
+[Unit]
+Description=Walker - Application launcher
+Documentation=https://github.com/abenz1267/walker
+PartOf=graphical-session.target niri-session.target hyprland-session.target
+After=graphical-session.target niri-session.target hyprland-session.target elephant.service
+Requires=elephant.service
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStartPre=/usr/bin/sleep 2
+ExecStart=walker --gapplication-service
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=120
+TimeoutStopSec=10
+
+[Install]
+WantedBy=niri-session.target
+WantedBy=hyprland-session.target
+WantedBy=graphical-session.target

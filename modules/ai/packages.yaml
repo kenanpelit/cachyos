@@ -1,0 +1,8 @@
+description: AI tooling packages
+
+packages:
+  - ollama
+  - nodejs
+  - npm
+  - python
+  - python-pipx

@@ -1,0 +1,69 @@
+description: Package set aggregator (use base + aur-extras) ported from nixosc
+packages:
+  - age
+  - anydesk-bin
+  - candy-icons-git
+  - clight
+  - efibootmgr
+  - ente-auth-bin
+  - ente-desktop-bin
+  # - ferdium # Duplicate
+  - ferdium-bin
+  - firefox
+  - fzf
+  - gnupg
+  - grimblast-git
+  - libsecret
+  - localsend
+  - maplemono-nf
+  - mullvad-vpn-bin
+  - nemo
+  - noto-fonts
+  - noto-fonts-cjk
+  - noto-fonts-emoji
+  - obsidian
+  - otf-monaspace
+  - otf-monaspace-nerd
+  - pass
+  - pass-otp
+  - pinentry
+  - pipe-viewer-git # Fixed name
+  - satty
+  - sops
+  - spotify
+  - snapper
+  - btrfs-assistant
+  - cpupower
+  - dmidecode
+  - hwinfo
+  - usbutils
+  - pciutils
+  - man-db
+  - man-pages
+  - os-prober
+  - pacman-contrib
+  - rebuild-detector
+  - reflector
+  - alsa-utils
+  # - spotify-cli-linux # Package not found/ambiguous
+  - sunsetr-git
+  - ttf-dejavu
+  - ttf-fira-code
+  - woff2-font-awesome
+  - ttf-hack-nerd
+  - ttf-liberation
+  - ttf-material-design-icons-webfont
+  - ttf-opensans
+  - ttf-roboto
+  - ttf-ubuntu-font-family
+  - webcord
+  - flatpak:io.ente.auth
+  - xorg-server
+  - xorg-xinit
+  - xorg-xkill
+  - xorg-xrandr
+  - xorg-xwayland
+  - xwayland-satellite
+  - ytfzf
+  - zapzap-git # Use git version to avoid provider prompt if possible
+

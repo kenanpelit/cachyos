@@ -1,0 +1,6 @@
+description: lazygit config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/lazygit
+    target: ~/.config/lazygit

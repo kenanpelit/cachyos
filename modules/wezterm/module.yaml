@@ -1,0 +1,6 @@
+description: WezTerm config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/wezterm
+    target: ~/.config/wezterm

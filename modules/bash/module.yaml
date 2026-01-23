@@ -1,0 +1,10 @@
+description: Bash config (portable; ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/.bashrc
+    target: ~/.bashrc
+  - source: dotfiles/.bash_profile
+    target: ~/.bash_profile
+  - source: dotfiles/bash/.bash_profile
+    target: ~/.config/bash/.bash_profile

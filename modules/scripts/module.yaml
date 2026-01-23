@@ -1,0 +1,6 @@
+description: Custom OSC scripts (ported from nixosc modules/home/scripts)
+
+# No packages here; scripts assume base module installed common deps.
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

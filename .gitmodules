@@ -1,0 +1,6 @@
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/calculator"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/calculator
+	url = https://github.com/rochacbruno/DankCalculator
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/worldClock"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/worldClock
+	url = https://github.com/rochacbruno/WorldClock

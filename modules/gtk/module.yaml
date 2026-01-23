@@ -1,0 +1,12 @@
+description: GTK theming (gtk-2.0/3.0/4.0) ported from nixosc
+
+
+dotfiles:
+  - source: dotfiles/gtk-2.0
+    target: ~/.config/gtk-2.0
+  - source: dotfiles/gtk-3.0
+    target: ~/.config/gtk-3.0
+  - source: dotfiles/gtk-4.0
+    target: ~/.config/gtk-4.0
+  - source: dotfiles/environment.d/10-gtk.conf
+    target: ~/.config/environment.d/10-gtk.conf

@@ -1,0 +1,21 @@
+name = "wallpapers"
+name_pretty = "Wallpapers"
+icon = "image-x-generic"
+
+[[entries]]
+text = "Select Wallpaper"
+keywords = ["wallpaper", "background", "image"]
+actions = { "open" = "waypaper" }
+icon = "preferences-desktop-wallpaper"
+
+[[entries]]
+text = "Hyprpaper Select Wallpaper"
+keywords = ["wallpaper", "background", "image"]
+actions = { "open" = "hyprpaper-manager select" }
+icon = "preferences-desktop-wallpaper"
+
+[[entries]]
+text = "Hyprpaper Manager Now"
+keywords = ["wallpaper", "manager", "now"]
+actions = { "manager_now" = "hyprpaper-manager now" }
+icon = "preferences-desktop-wallpaper"

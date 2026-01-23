@@ -1,0 +1,6 @@
+description: Git config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/git
+    target: ~/.config/git

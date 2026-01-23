@@ -1,0 +1,15 @@
+description: Hyprland packages
+
+packages:
+  - hyprland
+  - hyprpaper
+  - hyprpicker
+  - pyprland
+  - xdg-desktop-portal
+  - xdg-desktop-portal-hyprland
+  - swaybg
+  - wlogout
+  - wob
+  - uwsm
+  - hyprland-plugin-hyprexpo
+  - hyprland-plugin-hyprscrolling

@@ -1,0 +1,3 @@
+description: Electron packages
+packages:
+  - electron

@@ -1,0 +1,11 @@
+description: Electron base config ported from nixosc
+
+dotfiles:
+  - source: dotfiles/discord/electron-flags.conf
+    target: ~/.config/discord/electron-flags.conf
+  - source: dotfiles/WebCord/electron-flags.conf
+    target: ~/.config/WebCord/electron-flags.conf
+  - source: dotfiles/Ferdium/electron-flags.conf
+    target: ~/.config/Ferdium/electron-flags.conf
+  - source: dotfiles/zapzap/electron-flags.conf
+    target: ~/.config/zapzap/electron-flags.conf

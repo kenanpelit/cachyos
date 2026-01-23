@@ -1,0 +1,15 @@
+[Unit]
+Description=Hypr Blue Manager - Unified Color Temperature Manager
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/hypr-blue-manager daemon --enable-gammastep true --enable-hyprsunset true --temp-day 4000 --temp-night 3000 --gs-temp-day 4000 --gs-temp-night 3000 --bright-day 1.0 --bright-night 0.8 --location 41.0108:29.0219 --gamma 1,0.2,0.1 --interval 3600
+ExecStop=%h/.local/bin/hypr-blue-manager stop
+Restart=on-failure
+RestartSec=3
+KillMode=mixed
+
+[Install]
+WantedBy=graphical-session.target

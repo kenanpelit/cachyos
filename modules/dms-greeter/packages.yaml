@@ -1,0 +1,6 @@
+description: DMS Greeter packages
+
+packages:
+  - greetd
+  - dms-shell-git
+  - hyprland

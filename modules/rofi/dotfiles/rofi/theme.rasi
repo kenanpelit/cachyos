@@ -1,0 +1,19 @@
+* {
+  bg-col: #11111b;
+  bg-col-light: #1e1e2e;
+  border-col: #45475a;
+  selected-col: #313244;
+  green: #cba6f7;           // Ana vurgu rengi - otomatik catppuccin palette
+  fg-col: #cdd6f4;
+  fg-col2: #bac2de;
+  grey: #585b70;
+  highlight: #b4befe;    // Highlight için açık mor - otomatik palette
+  
+  /* Ekstra Catppuccin renkleri - otomatik palette */
+  mauve: #cba6f7;
+  lavender: #b4befe;
+  sapphire: #74c7ec;
+  accent: #cba6f7;
+  accent-light: #b4befe;
+  accent-dark: #cba6f7;
+}

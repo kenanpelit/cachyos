@@ -1,0 +1,18 @@
+[Unit]
+Description=Niri ready (IPC/socket)
+After=graphical-session.target niri-session.target
+PartOf=niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=NIRI_SOCKET
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+Type=oneshot
+TimeoutStartSec=60
+RemainAfterExit=true
+ExecStart=/usr/bin/bash -lc 'for ((i=0;i<600;i++)); do /usr/bin/niri msg version >/dev/null 2>&1 && exit 0; sleep 0.1; done; echo "niri-ready: timeout waiting for IPC" >&2; exit 1'
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target

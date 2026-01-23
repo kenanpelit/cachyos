@@ -1,0 +1,4 @@
+description: command-not-found (pkgfile) for Arch/CachyOS
+
+post_install_hook: scripts/install.sh
+

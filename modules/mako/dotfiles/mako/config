@@ -1,0 +1,67 @@
+# mako config (portable; ported from nixosc)
+
+# Positioning
+anchor=top-right
+margin=15,20,0,0
+
+# Typography
+font=Maple Mono NF 12
+
+# Dimensions
+width=540
+height=320
+padding=18,20
+border-size=2
+border-radius=12
+
+# History
+max-history=50
+
+# Visual
+icons=1
+max-icon-size=64
+
+# Timing
+default-timeout=8000
+ignore-timeout=0
+
+# Organization
+group-by=app-name
+layer=overlay
+max-visible=4
+
+# Formatting
+markup=1
+format=<span color="#89b4fa" size="12pt" weight="600">%a</span>\n<span color="#cdd6f4" size="13pt" weight="700">%s</span>\n<span color="#bac2de" size="12pt">%b</span>
+
+# Grouped notifications
+[grouped]
+format=<span color="#cba6f7" size="11pt" weight="600">(%g) %a</span>\n<span color="#cdd6f4" size="13pt" weight="700">%s</span>\n<span color="#bac2de" size="10pt">%b</span>
+border-size=3
+border-color=#cba6f7
+markup=1
+
+# Urgency levels
+[urgency=normal]
+background-color=#1e1e2ef0
+text-color=#cdd6f4
+border-color=#89b4faaa
+border-size=2
+markup=1
+
+[urgency=critical]
+background-color=#1e1e2ef5
+text-color=#cdd6f4
+border-color=#f38ba8
+border-size=3
+default-timeout=0
+format=<span color="#f38ba8" size="12pt" weight="700">⚠ %a</span>\n<span color="#cdd6f4" size="14pt" weight="800">%s</span>\n<span color="#bac2de" size="11pt">%b</span>
+markup=1
+
+[urgency=low]
+background-color=#1e1e2edd
+text-color=#bac2de
+border-color=#585b7080
+border-size=1
+default-timeout=5000
+markup=1

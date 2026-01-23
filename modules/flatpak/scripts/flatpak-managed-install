@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+apps_file="$HOME/.config/flatpak/apps.txt"
+
+if ! command -v flatpak >/dev/null 2>&1; then
+  echo "flatpak not found" >&2
+  exit 1
+fi
+
+# Ensure flathub exists
+if ! flatpak remotes --user --columns=name 2>/dev/null | awk '{print $1}' | grep -qx flathub; then
+  flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+fi
+
+if [ ! -f "$apps_file" ]; then
+  echo "No apps file: $apps_file" >&2
+  exit 0
+fi
+
+while IFS= read -r line; do
+  line="${line%%#*}"
+  line="${line%$'\r'}"
+  line="${line## }"
+  line="${line%% }"
+  [ -z "$line" ] && continue
+  flatpak install --user -y flathub "$line" || true
+done <"$apps_file"

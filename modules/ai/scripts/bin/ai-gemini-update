@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+export NPM_CONFIG_PREFIX="$HOME/.local"
+
+# Check for npm
+if ! command -v npm &>/dev/null; then
+    echo "❌ Error: 'npm' is not installed. Please install it first (usually via 'nodejs' and 'npm' packages)."
+    exit 1
+fi
+
+CHANNEL="${1:-stable}"
+
+echo "🔍 Checking for latest Gemini CLI version (channel: $CHANNEL)..."
+
+get_dist_tag() {
+  local tag="${1}"
+  npm view @google/gemini-cli dist-tags --json 2>/dev/null \
+    | grep -E "\"${tag}\"" \
+    | sed -n "s/.*\"${tag}\":[[:space:]]*\"\\([^\"]\\+\\)\".*/\\1/p" \
+    | head -n1
+}
+
+get_latest_for_channel() {
+  if [[ "$CHANNEL" == "stable" ]] || [[ "$CHANNEL" == "latest" ]]; then
+      get_dist_tag "latest"
+  elif [[ "$CHANNEL" == "preview" ]] || [[ "$CHANNEL" == "next" ]] || [[ "$CHANNEL" == "beta" ]]; then
+      # Gemini CLI uses preview releases (e.g. 0.22.0-preview.3). On npm this is
+      # commonly published under the "next" dist-tag. Keep fallbacks.
+      get_dist_tag "next" || true
+  elif [[ "$CHANNEL" == "nightly" ]]; then
+      get_dist_tag "nightly" || true
+  else
+      echo "❌ Unknown channel: $CHANNEL"
+      echo "💡 Usage: ai-gemini-update [stable|preview|nightly]"
+      exit 2
+  fi
+}
+
+LATEST="$(get_latest_for_channel)"
+
+# Fallbacks when dist-tags are missing or the registry blocks dist-tags.
+if [[ -z "${LATEST:-}" ]]; then
+  ALL_VERSIONS_JSON="$(npm view @google/gemini-cli versions --json 2>/dev/null || true)"
+  if [[ "$CHANNEL" == "stable" ]] || [[ "$CHANNEL" == "latest" ]]; then
+      # Pick the highest "plain" semver (no prerelease suffixes).
+      LATEST="$(
+        echo "$ALL_VERSIONS_JSON" \
+          | grep -oE '"[0-9]+\.[0-9]+\.[0-9]+"' \
+          | tr -d '"' \
+          | sort -V \
+          | tail -n1
+      )"
+  elif [[ "$CHANNEL" == "preview" ]] || [[ "$CHANNEL" == "next" ]] || [[ "$CHANNEL" == "beta" ]]; then
+      LATEST="$(
+        echo "$ALL_VERSIONS_JSON" \
+          | grep -oE '"[0-9]+\.[0-9]+\.[0-9]+-preview\.[0-9]+"' \
+          | tr -d '"' \
+          | sort -V \
+          | tail -n1
+      )"
+  elif [[ "$CHANNEL" == "nightly" ]]; then
+      LATEST="$(
+        echo "$ALL_VERSIONS_JSON" \
+          | grep -o '"[^"]*nightly[^"]*"' \
+          | tr -d '"' \
+          | sort -V \
+          | tail -n1
+      )"
+  fi
+fi
+
+if [[ -z "${LATEST:-}" ]]; then
+  echo "❌ Could not resolve latest version for channel: $CHANNEL"
+  echo "💡 Try: npm view @google/gemini-cli dist-tags"
+  exit 1
+fi
+
+echo "📦 Latest version: $LATEST"
+
+NPM_PREFIX="$HOME/.local"
+mkdir -p "$NPM_PREFIX/bin"
+
+if [ -f "$NPM_PREFIX/bin/gemini" ]; then
+    CURRENT_VERSION=$("$NPM_PREFIX/bin/gemini" --version 2>/dev/null || echo "unknown")
+    echo "💾 Installed version: $CURRENT_VERSION"
+    
+    if [ "$CURRENT_VERSION" = "$LATEST" ]; then
+        echo "✅ Latest version is already installed!"
+        exit 0
+    fi
+else
+    echo "💾 Gemini CLI is not installed yet"
+fi
+
+echo ""
+echo "⬇️  Installing $CHANNEL version: $LATEST ..."
+
+npm install -g "@google/gemini-cli@${LATEST}"
+
+echo ""
+echo "✨ Update complete!"
+echo "🎉 New version:"
+"$NPM_PREFIX/bin/gemini" --version

@@ -1,0 +1,17 @@
+description: DankMaterialShell (config + user services) ported from nixosc
+
+# NOTE: Qt theming (qt6ct/Kvantum/environment.d) moved to the `qt` module to avoid dotfile conflicts.
+dotfiles:
+  - source: dotfiles/DankMaterialShell
+    target: ~/.config/DankMaterialShell
+
+  # systemd user services
+  - source: dotfiles/systemd/user/dms.service
+    target: ~/.config/systemd/user/dms.service
+  - source: dotfiles/systemd/user/dms-plugin-sync.service
+    target: ~/.config/systemd/user/dms-plugin-sync.service
+  - source: dotfiles/systemd/user/dms-resume-restart.service
+    target: ~/.config/systemd/user/dms-resume-restart.service
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

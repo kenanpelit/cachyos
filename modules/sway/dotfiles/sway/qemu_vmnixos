@@ -1,0 +1,5 @@
+# Launch NixOS VM using the svmnixos command
+exec svmnixos
+
+# Force QEMU windows to fullscreen for better VM experience
+for_window [app_id="qemu"] fullscreen enable

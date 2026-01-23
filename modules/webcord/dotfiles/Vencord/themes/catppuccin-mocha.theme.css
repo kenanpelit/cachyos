@@ -1,0 +1,25 @@
+/**
+ * @name Catppuccin Mocha (Mauve)
+ * @description Vencord theme variables (portable; ported from nixosc)
+ */
+:root {
+  --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825;
+  --ctp-crust: #11111b;
+  --ctp-text: #cdd6f4;
+  --ctp-subtext0: #a6adc8;
+  --ctp-subtext1: #bac2de;
+  --ctp-surface0: #313244;
+  --ctp-surface1: #45475a;
+  --ctp-surface2: #585b70;
+  --ctp-mauve: #cba6f7;
+}
+
+.theme-dark {
+  --background-primary: var(--ctp-base);
+  --background-secondary: var(--ctp-mantle);
+  --background-tertiary: var(--ctp-crust);
+  --text-normal: var(--ctp-text);
+  --text-muted: var(--ctp-subtext0);
+  --brand-experiment: var(--ctp-mauve);
+}

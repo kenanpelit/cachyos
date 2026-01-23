@@ -1,0 +1,61 @@
+[qt4] # Qt interface
+qt-opacity=1.000000
+qt-fs-opacity=0.800000
+qt-system-tray=1
+qt-notification=0
+qt-start-minimized=0
+qt-pause-minimized=0
+qt-close-to-systray=0
+qt-continue=0
+qt-updates-notif=0
+qt-volume-complete=0
+qt-autosave-volume=1
+qt-embedded-open=0
+qt-recentplay=1
+qt-save-path=/home/$USER/Videos
+qt-filter-toolbar=1
+qt-adv-options=0
+qt-advanced-pref=0
+qt-error-dialogs=1
+qt-slider-colors=255;255;255;20;210;20;255;199;15;245;39;29
+qt-titlebar=1
+qt-name-in-title=1
+qt-fs-controller=1
+qt-recentplay-filter=0
+qt-menubar=1
+qt-minimal-view=0
+qt-bgcone=1
+qt-bgcone-expands=0
+qt-icon-change=1
+qt-max-volume=125
+
+[skins2] # Skins interface
+skins2-last=/usr/share/vlc/skins2/default.vlt
+skins2-config=[{"id":"main","visible":true,"x":26,"y":26,"width":580,"height":421}]
+
+[core] # Core settings
+intf=qt
+extraintf=
+
+# Catppuccin-inspired interface colors
+qt-display-mode=0
+qt-privacy-ask=0
+
+# Media library
+ml-show=0
+
+# Playlist settings
+playlist-autostart=1
+play-and-pause=0
+
+# Video settings
+video=1
+fullscreen=0
+
+# Audio settings
+audio=1
+volume=256
+
+# Subtitle settings
+sub-autodetect-file=1
+sub-autodetect-path=./Subtitles, ./subtitles, ./Subs, ./subs

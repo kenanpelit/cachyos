@@ -1,0 +1,22 @@
+description: Walker + Elephant (config + user services) ported from nixosc
+
+# NOTE: Package names may differ on CachyOS/Arch (walker/elephant might be AUR).
+# - elephant -> ~/.config/elephant (includes providers copy)
+dotfiles:
+  - source: dotfiles/walker
+    target: ~/.config/walker
+  - source: dotfiles/elephant
+    target: ~/.config/elephant
+
+  # systemd user units
+  - source: dotfiles/systemd/user/elephant.service
+    target: ~/.config/systemd/user/elephant.service
+  - source: dotfiles/systemd/user/walker.service
+    target: ~/.config/systemd/user/walker.service
+
+  # D-Bus activation
+  - source: dotfiles/dbus-1/services/io.github.abenz1267.walker.service
+    target: ~/.local/share/dbus-1/services/io.github.abenz1267.walker.service
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

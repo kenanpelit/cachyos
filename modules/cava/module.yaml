@@ -1,0 +1,6 @@
+description: cava config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/cava
+    target: ~/.config/cava

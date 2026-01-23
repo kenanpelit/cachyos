@@ -1,0 +1,5 @@
+description: Bluetooth packages
+packages:
+  - bluez
+  - bluez-utils
+  - blueman

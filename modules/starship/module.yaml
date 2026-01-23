@@ -1,0 +1,6 @@
+description: Starship prompt config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/starship.toml
+    target: ~/.config/starship.toml

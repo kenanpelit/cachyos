@@ -1,0 +1,10 @@
+description: Transmission (daemon + gui) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/systemd/user/transmission.service
+    target: ~/.config/systemd/user/transmission.service
+  - source: dotfiles/systemd/user/transmission.timer
+    target: ~/.config/systemd/user/transmission.timer
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask

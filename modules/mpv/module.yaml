@@ -1,0 +1,8 @@
+description: mpv (config + scripts) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/mpv
+    target: ~/.config/mpv
+
+post_install_hook: scripts/install-yt-dlp-mpv.sh
+post_hook_behavior: always

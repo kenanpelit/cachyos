@@ -1,0 +1,5 @@
+description: XDG mimeapps.list (ported from nixosc)
+
+dotfiles:
+  - source: dotfiles/mimeapps.list
+    target: ~/.config/mimeapps.list

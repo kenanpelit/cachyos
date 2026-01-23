@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=RunAnyDesk
+Comment=AnyDesk wrapper with theme env vars
+Exec=run-anydesk %u
+Icon=anydesk
+Terminal=false
+Type=Application
+Categories=Network;RemoteAccess;
+MimeType=x-scheme-handler/anydesk;

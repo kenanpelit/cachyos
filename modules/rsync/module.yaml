@@ -1,0 +1,5 @@
+description: Rsync config ported from nixosc
+
+dotfiles:
+  - source: dotfiles/.rsync-homedir-excludes
+    target: ~/.rsync-homedir-excludes

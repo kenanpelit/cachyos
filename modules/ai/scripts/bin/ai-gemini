@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Set HOME variable
+if [ -z "${HOME:-}" ]; then
+    export HOME=/tmp
+fi
+# NPM settings - user local dirs and suppress warnings
+export NPM_CONFIG_CACHE="$HOME/.cache/npm"
+export NPM_CONFIG_PREFIX="$HOME/.local"
+export NPM_CONFIG_UPDATE_NOTIFIER=false
+export NO_UPDATE_NOTIFIER=1
+# Create directories
+mkdir -p "$HOME/.cache/npm" "$HOME/.local/bin" "$HOME/.local/lib"
+
+if ! command -v npx &>/dev/null; then
+    echo "❌ Error: 'npx' not found. Please install 'npm' (part of nodejs)."
+    exit 1
+fi
+
+# Add nodejs to PATH (assuming system node)
+export PATH="$HOME/.local/bin:$PATH"
+
+# Run @google/gemini-cli via npx (official Google Gemini CLI)
+# Using 'npx' from PATH (should be provided by 'npm' package)
+exec npx --yes @google/gemini-cli "$@"

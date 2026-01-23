@@ -1,0 +1,6 @@
+description: fastfetch config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/fastfetch
+    target: ~/.config/fastfetch

@@ -1,0 +1,4 @@
+description: XDG Portal configuration ported from nixosc
+dotfiles:
+  - source: dotfiles/xdg-desktop-portal/portals.conf
+    target: ~/.config/xdg-desktop-portal/portals.conf

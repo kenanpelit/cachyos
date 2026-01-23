@@ -1,0 +1,6 @@
+description: Walker + Elephant packages
+
+packages:
+  # NOTE: likely AUR on Arch/CachyOS (auto-detected by dcli)
+  - walker
+  - elephant

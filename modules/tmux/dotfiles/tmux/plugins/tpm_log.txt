@@ -1,0 +1,263 @@
+[2026-01-20 22:00:13.323]	List of discovered tpm plugins: tmux-plugins/tpm tmux-plugins/tmux-sensible tmux-plugins/tmux-open kenanpelit/tmux-fzf-url tmux-plugins/tmux-prefix-highlight tmux-plugins/tmux-online-status sainnhe/tmux-fzf kenanpelit/tmux-ssh-status lljbash/tmux-update-display roosta/tmux-fuzzback joshmedeski/tmux-nerd-font-window-name vascomfnunes/tmux-kripto TheSast/tmux-nav-master omerxx/tmux-sessionx richin13/tmux-plugin-playerctl tmux-plugins/tmux-resurrect tmux-plugins/tmux-continuum tmux-plugins/tmux-sessionist fcsonline/tmux-thumbs tmux-plugins/tmux-yank tmux-plugins/tmux-copycat
+[2026-01-20 22:00:13.333]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/install_plugins
+[2026-01-20 22:00:13.371]	Installing "tmux-sensible"
+[2026-01-20 22:00:13.383]	Already installed "tpm"
+[2026-01-20 22:00:13.391]	Installing "tmux-ssh-status"
+[2026-01-20 22:00:13.400]	Installing "tmux-fzf-url"
+[2026-01-20 22:00:13.408]	Installing "tmux-prefix-highlight"
+[2026-01-20 22:00:13.418]	Installing "tmux-open"
+[2026-01-20 22:00:13.429]	Installing "tmux-online-status"
+[2026-01-20 22:00:13.438]	Installing "tmux-kripto"
+[2026-01-20 22:00:13.452]	Installing "tmux-nav-master"
+[2026-01-20 22:00:13.461]	Installing "tmux-update-display"
+[2026-01-20 22:00:13.470]	Installing "tmux-nerd-font-window-name"
+[2026-01-20 22:00:13.477]	Installing "tmux-sessionx"
+[2026-01-20 22:00:13.488]	Installing "tmux-fzf"
+[2026-01-20 22:00:13.496]	Installing "tmux-resurrect"
+[2026-01-20 22:00:13.505]	Installing "tmux-continuum"
+[2026-01-20 22:00:13.513]	Installing "tmux-sessionist"
+[2026-01-20 22:00:13.522]	Installing "tmux-plugin-playerctl"
+[2026-01-20 22:00:13.531]	Installing "tmux-fuzzback"
+[2026-01-20 22:00:13.539]	Installing "tmux-yank"
+[2026-01-20 22:00:13.549]	Installing "tmux-thumbs"
+[2026-01-20 22:00:13.558]	Installing "tmux-copycat"
+[2026-01-20 22:00:14.588]	  "tmux-sensible" download success
+[2026-01-20 22:00:14.612]	  "tmux-continuum" download success
+[2026-01-20 22:00:15.290]	  "tmux-ssh-status" download success
+[2026-01-20 22:00:15.490]	  "tmux-update-display" download success
+[2026-01-20 22:00:15.873]	  "tmux-fuzzback" download success
+[2026-01-20 22:00:16.177]	  "tmux-fzf" download success
+[2026-01-20 22:00:16.261]	  "tmux-fzf-url" download success
+[2026-01-20 22:00:17.927]	  "tmux-plugin-playerctl" download success
+[2026-01-20 22:00:18.835]	  "tmux-kripto" download success
+[2026-01-20 22:00:19.414]	  "tmux-thumbs" download success
+[2026-01-20 22:00:19.874]	  "tmux-prefix-highlight" download success
+[2026-01-20 22:00:20.069]	  "tmux-online-status" download success
+[2026-01-20 22:00:20.363]	  "tmux-copycat" download success
+[2026-01-20 22:00:20.940]	  "tmux-open" download success
+[2026-01-20 22:00:21.898]	  "tmux-yank" download success
+[2026-01-20 22:00:22.289]	  "tmux-sessionx" download success
+[2026-01-20 22:00:24.928]	  "tmux-sessionist" download success
+[2026-01-20 22:00:25.130]	  "tmux-nav-master" download success
+[2026-01-20 22:00:25.399]	  "tmux-resurrect" download success
+[2026-01-20 22:00:26.851]	  "tmux-nerd-font-window-name" download success
+[2026-01-20 22:00:26.899]	Done.
+
+[2026-01-21 11:53:18.767]	List of discovered tpm plugins: tmux-plugins/tpm tmux-plugins/tmux-sensible tmux-plugins/tmux-open kenanpelit/tmux-fzf-url tmux-plugins/tmux-prefix-highlight tmux-plugins/tmux-online-status sainnhe/tmux-fzf kenanpelit/tmux-ssh-status lljbash/tmux-update-display roosta/tmux-fuzzback joshmedeski/tmux-nerd-font-window-name vascomfnunes/tmux-kripto TheSast/tmux-nav-master omerxx/tmux-sessionx richin13/tmux-plugin-playerctl tmux-plugins/tmux-resurrect tmux-plugins/tmux-continuum tmux-plugins/tmux-sessionist fcsonline/tmux-thumbs tmux-plugins/tmux-yank tmux-plugins/tmux-copycat
+[2026-01-21 11:53:18.778]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/install_plugins
+[2026-01-21 11:53:18.812]	Already installed "tmux-sensible"
+[2026-01-21 11:53:18.820]	Already installed "tmux-fzf-url"
+[2026-01-21 11:53:18.832]	Already installed "tmux-prefix-highlight"
+[2026-01-21 11:53:18.839]	Already installed "tpm"
+[2026-01-21 11:53:18.852]	Already installed "tmux-online-status"
+[2026-01-21 11:53:18.860]	Already installed "tmux-fzf"
+[2026-01-21 11:53:18.873]	Already installed "tmux-open"
+[2026-01-21 11:53:18.880]	Already installed "tmux-sessionx"
+[2026-01-21 11:53:18.891]	Already installed "tmux-fuzzback"
+[2026-01-21 11:53:18.898]	Already installed "tmux-resurrect"
+[2026-01-21 11:53:18.908]	Already installed "tmux-ssh-status"
+[2026-01-21 11:53:18.917]	Already installed "tmux-continuum"
+[2026-01-21 11:53:18.926]	Already installed "tmux-nav-master"
+[2026-01-21 11:53:18.937]	Already installed "tmux-kripto"
+[2026-01-21 11:53:18.952]	Already installed "tmux-sessionist"
+[2026-01-21 11:53:18.961]	Already installed "tmux-nerd-font-window-name"
+[2026-01-21 11:53:18.969]	Already installed "tmux-plugin-playerctl"
+[2026-01-21 11:53:18.977]	Already installed "tmux-yank"
+[2026-01-21 11:53:18.985]	Already installed "tmux-copycat"
+[2026-01-21 11:53:18.995]	Already installed "tmux-thumbs"
+[2026-01-21 11:53:19.004]	Already installed "tmux-update-display"
+[2026-01-21 11:53:19.015]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/update_plugins all
+[2026-01-21 11:53:19.038]	Updating all plugins!
+[2026-01-21 11:53:19.047]	
+[2026-01-21 11:53:19.614]	  "tmux-online-status" update success
+[2026-01-21 11:53:19.627]	    | Already up to date.
+[2026-01-21 11:53:19.638]	  "tmux-fzf-url" update success
+[2026-01-21 11:53:19.649]	  "tmux-ssh-status" update success
+[2026-01-21 11:53:19.658]	  "tmux-sensible" update success
+[2026-01-21 11:53:19.669]	    | Already up to date.
+[2026-01-21 11:53:19.684]	  "tmux-fzf" update success
+[2026-01-21 11:53:19.696]	    | Already up to date.
+[2026-01-21 11:53:19.711]	    | Already up to date.
+[2026-01-21 11:53:19.720]	  "tmux-open" update success
+[2026-01-21 11:53:19.730]	    | Already up to date.
+[2026-01-21 11:53:19.740]	    | Already up to date.
+[2026-01-21 11:53:19.748]	  "tmux-prefix-highlight" update success
+[2026-01-21 11:53:19.759]	    | Already up to date.
+[2026-01-21 11:53:19.768]	  "tmux-yank" update success
+[2026-01-21 11:53:19.777]	    | Already up to date.
+[2026-01-21 11:53:19.790]	  "tmux-copycat" update success
+[2026-01-21 11:53:19.799]	  "tmux-sessionx" update success
+[2026-01-21 11:53:19.806]	    | Already up to date.
+[2026-01-21 11:53:19.817]	  "tmux-nav-master" update success
+[2026-01-21 11:53:19.825]	  "tmux-update-display" update success
+[2026-01-21 11:53:19.834]	  "tmux-thumbs" update success
+[2026-01-21 11:53:19.843]	    | Already up to date.
+[2026-01-21 11:53:19.852]	    | Already up to date.
+[2026-01-21 11:53:19.861]	    | Already up to date.
+[2026-01-21 11:53:19.871]	    | Already up to date.
+[2026-01-21 11:53:19.880]	  "tmux-nerd-font-window-name" update success
+[2026-01-21 11:53:19.889]	  "tmux-plugin-playerctl" update success
+[2026-01-21 11:53:19.898]	  "tmux-kripto" update success
+[2026-01-21 11:53:19.906]	  "tmux-resurrect" update success
+[2026-01-21 11:53:19.917]	    | Already up to date.
+[2026-01-21 11:53:19.925]	    | Already up to date.
+[2026-01-21 11:53:19.935]	    | Already up to date.
+[2026-01-21 11:53:19.943]	    | Already up to date.
+[2026-01-21 11:53:19.953]	  "tmux-sessionist" update success
+[2026-01-21 11:53:19.961]	  "tmux-continuum" update success
+[2026-01-21 11:53:19.971]	  "tmux-fuzzback" update success
+[2026-01-21 11:53:19.981]	    | Already up to date.
+[2026-01-21 11:53:19.990]	    | Already up to date.
+[2026-01-21 11:53:19.998]	    | Already up to date.
+[2026-01-21 11:53:22.139]	  "tpm" update success
+[2026-01-21 11:53:22.149]	    | Already up to date.
+[2026-01-21 11:53:22.162]	    | Submodule 'lib/tmux-test' (https://github.com/tmux-plugins/tmux-test.git) registered for path 'lib/tmux-test'
+[2026-01-21 11:53:22.169]	    | Cloning into '/home/kenan/.cachy/modules/tmux/dotfiles/tmux/plugins/tpm/lib/tmux-test'...
+[2026-01-21 11:53:22.181]	    | From https://github.com/tmux-plugins/tmux-test
+[2026-01-21 11:53:22.189]	    |  * branch            33fa65fbfb72ba6dd106c21bf5ee6cc353ecdbb6 -> FETCH_HEAD
+[2026-01-21 11:53:22.197]	    | Submodule path 'lib/tmux-test': checked out '33fa65fbfb72ba6dd106c21bf5ee6cc353ecdbb6'
+[2026-01-21 11:53:22.207]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/clean_plugins all
+[2026-01-21 11:53:22.286]	Done.
+
+[2026-01-21 11:55:14.504]	List of discovered tpm plugins: tmux-plugins/tpm tmux-plugins/tmux-sensible tmux-plugins/tmux-open kenanpelit/tmux-fzf-url tmux-plugins/tmux-prefix-highlight tmux-plugins/tmux-online-status sainnhe/tmux-fzf kenanpelit/tmux-ssh-status lljbash/tmux-update-display roosta/tmux-fuzzback joshmedeski/tmux-nerd-font-window-name vascomfnunes/tmux-kripto TheSast/tmux-nav-master omerxx/tmux-sessionx richin13/tmux-plugin-playerctl tmux-plugins/tmux-resurrect tmux-plugins/tmux-continuum tmux-plugins/tmux-sessionist fcsonline/tmux-thumbs tmux-plugins/tmux-yank tmux-plugins/tmux-copycat
+[2026-01-21 11:55:14.516]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/install_plugins
+[2026-01-21 11:55:14.548]	Already installed "tpm"
+[2026-01-21 11:55:14.556]	Already installed "tmux-prefix-highlight"
+[2026-01-21 11:55:14.569]	Already installed "tmux-open"
+[2026-01-21 11:55:14.576]	Already installed "tmux-sensible"
+[2026-01-21 11:55:14.587]	Already installed "tmux-fzf"
+[2026-01-21 11:55:14.595]	Already installed "tmux-online-status"
+[2026-01-21 11:55:14.605]	Already installed "tmux-fzf-url"
+[2026-01-21 11:55:14.614]	Already installed "tmux-nerd-font-window-name"
+[2026-01-21 11:55:14.624]	Already installed "tmux-sessionx"
+[2026-01-21 11:55:14.633]	Already installed "tmux-fuzzback"
+[2026-01-21 11:55:14.644]	Already installed "tmux-kripto"
+[2026-01-21 11:55:14.654]	Already installed "tmux-update-display"
+[2026-01-21 11:55:14.663]	Already installed "tmux-resurrect"
+[2026-01-21 11:55:14.673]	Already installed "tmux-ssh-status"
+[2026-01-21 11:55:14.683]	Already installed "tmux-thumbs"
+[2026-01-21 11:55:14.694]	Already installed "tmux-sessionist"
+[2026-01-21 11:55:14.703]	Already installed "tmux-continuum"
+[2026-01-21 11:55:14.713]	Already installed "tmux-copycat"
+[2026-01-21 11:55:14.723]	Already installed "tmux-yank"
+[2026-01-21 11:55:14.734]	Already installed "tmux-plugin-playerctl"
+[2026-01-21 11:55:14.743]	Already installed "tmux-nav-master"
+[2026-01-21 11:55:14.755]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/update_plugins all
+[2026-01-21 11:55:14.777]	Updating all plugins!
+[2026-01-21 11:55:14.790]	
+[2026-01-21 11:55:15.771]	  "tmux-open" update success
+[2026-01-21 11:55:15.779]	    | Already up to date.
+[2026-01-21 11:55:15.859]	  "tmux-online-status" update success
+[2026-01-21 11:55:15.872]	  "tmux-fzf-url" update success
+[2026-01-21 11:55:15.885]	    | Already up to date.
+[2026-01-21 11:55:15.895]	  "tmux-prefix-highlight" update success
+[2026-01-21 11:55:15.908]	    | Already up to date.
+[2026-01-21 11:55:15.921]	    | Already up to date.
+[2026-01-21 11:55:15.957]	  "tmux-update-display" update success
+[2026-01-21 11:55:15.970]	  "tmux-ssh-status" update success
+[2026-01-21 11:55:15.980]	  "tmux-fzf" update success
+[2026-01-21 11:55:15.991]	  "tmux-nerd-font-window-name" update success
+[2026-01-21 11:55:16.002]	    | Already up to date.
+[2026-01-21 11:55:16.015]	    | Already up to date.
+[2026-01-21 11:55:16.032]	    | Already up to date.
+[2026-01-21 11:55:16.043]	    | Already up to date.
+[2026-01-21 11:55:16.054]	  "tmux-sessionx" update success
+[2026-01-21 11:55:16.069]	  "tmux-nav-master" update success
+[2026-01-21 11:55:16.080]	    | Already up to date.
+[2026-01-21 11:55:16.089]	    | Already up to date.
+[2026-01-21 11:55:16.099]	  "tmux-kripto" update success
+[2026-01-21 11:55:16.110]	    | Already up to date.
+[2026-01-21 11:55:16.121]	  "tpm" update success
+[2026-01-21 11:55:16.130]	  "tmux-continuum" update success
+[2026-01-21 11:55:16.143]	    | Already up to date.
+[2026-01-21 11:55:16.155]	  "tmux-resurrect" update success
+[2026-01-21 11:55:16.168]	    | Already up to date.
+[2026-01-21 11:55:16.181]	    | Already up to date.
+[2026-01-21 11:55:16.194]	  "tmux-copycat" update success
+[2026-01-21 11:55:16.208]	  "tmux-thumbs" update success
+[2026-01-21 11:55:16.216]	  "tmux-sensible" update success
+[2026-01-21 11:55:16.229]	    | Already up to date.
+[2026-01-21 11:55:16.243]	    | Already up to date.
+[2026-01-21 11:55:16.256]	    | Already up to date.
+[2026-01-21 11:55:16.269]	  "tmux-fuzzback" update success
+[2026-01-21 11:55:16.282]	    | Already up to date.
+[2026-01-21 11:55:16.291]	  "tmux-plugin-playerctl" update success
+[2026-01-21 11:55:16.300]	  "tmux-sessionist" update success
+[2026-01-21 11:55:16.311]	    | Already up to date.
+[2026-01-21 11:55:16.323]	    | Already up to date.
+[2026-01-21 11:55:16.331]	  "tmux-yank" update success
+[2026-01-21 11:55:16.339]	    | Already up to date.
+[2026-01-21 11:55:16.349]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/clean_plugins all
+[2026-01-21 11:55:16.431]	Done.
+
+[2026-01-21 11:58:37.574]	List of discovered tpm plugins: tmux-plugins/tpm tmux-plugins/tmux-sensible tmux-plugins/tmux-open kenanpelit/tmux-fzf-url tmux-plugins/tmux-prefix-highlight tmux-plugins/tmux-online-status sainnhe/tmux-fzf kenanpelit/tmux-ssh-status lljbash/tmux-update-display roosta/tmux-fuzzback joshmedeski/tmux-nerd-font-window-name vascomfnunes/tmux-kripto TheSast/tmux-nav-master omerxx/tmux-sessionx richin13/tmux-plugin-playerctl tmux-plugins/tmux-resurrect tmux-plugins/tmux-continuum tmux-plugins/tmux-sessionist fcsonline/tmux-thumbs tmux-plugins/tmux-yank tmux-plugins/tmux-copycat
+[2026-01-21 11:58:37.586]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/install_plugins
+[2026-01-21 11:58:37.619]	Already installed "tpm"
+[2026-01-21 11:58:37.628]	Already installed "tmux-fzf-url"
+[2026-01-21 11:58:37.640]	Already installed "tmux-sensible"
+[2026-01-21 11:58:37.648]	Already installed "tmux-online-status"
+[2026-01-21 11:58:37.660]	Already installed "tmux-fuzzback"
+[2026-01-21 11:58:37.668]	Already installed "tmux-open"
+[2026-01-21 11:58:37.680]	Already installed "tmux-fzf"
+[2026-01-21 11:58:37.688]	Already installed "tmux-nerd-font-window-name"
+[2026-01-21 11:58:37.700]	Already installed "tmux-update-display"
+[2026-01-21 11:58:37.709]	Already installed "tmux-plugin-playerctl"
+[2026-01-21 11:58:37.719]	Already installed "tmux-sessionx"
+[2026-01-21 11:58:37.730]	Already installed "tmux-nav-master"
+[2026-01-21 11:58:37.739]	Already installed "tmux-prefix-highlight"
+[2026-01-21 11:58:37.749]	Already installed "tmux-continuum"
+[2026-01-21 11:58:37.758]	Already installed "tmux-resurrect"
+[2026-01-21 11:58:37.769]	Already installed "tmux-kripto"
+[2026-01-21 11:58:37.778]	Already installed "tmux-ssh-status"
+[2026-01-21 11:58:37.789]	Already installed "tmux-thumbs"
+[2026-01-21 11:58:37.799]	Already installed "tmux-yank"
+[2026-01-21 11:58:37.808]	Already installed "tmux-sessionist"
+[2026-01-21 11:58:37.817]	Already installed "tmux-copycat"
+[2026-01-21 11:58:37.828]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/update_plugins all
+[2026-01-21 11:58:37.851]	Updating all plugins!
+[2026-01-21 11:58:37.864]	
+[2026-01-21 11:58:38.423]	  "tmux-fzf-url" update success
+[2026-01-21 11:58:38.436]	  "tmux-open" update success
+[2026-01-21 11:58:38.444]	  "tmux-fzf" update success
+[2026-01-21 11:58:38.452]	    | Already up to date.
+[2026-01-21 11:58:38.462]	    | Already up to date.
+[2026-01-21 11:58:38.472]	    | Already up to date.
+[2026-01-21 11:58:38.482]	  "tpm" update success
+[2026-01-21 11:58:38.496]	  "tmux-update-display" update success
+[2026-01-21 11:58:38.506]	    | Already up to date.
+[2026-01-21 11:58:38.519]	    | Already up to date.
+[2026-01-21 11:58:38.527]	  "tmux-prefix-highlight" update success
+[2026-01-21 11:58:38.538]	  "tmux-fuzzback" update success
+[2026-01-21 11:58:38.546]	  "tmux-nerd-font-window-name" update success
+[2026-01-21 11:58:38.556]	    | Already up to date.
+[2026-01-21 11:58:38.565]	    | Already up to date.
+[2026-01-21 11:58:38.574]	  "tmux-online-status" update success
+[2026-01-21 11:58:38.583]	    | Already up to date.
+[2026-01-21 11:58:38.591]	    | Already up to date.
+[2026-01-21 11:58:38.600]	  "tmux-ssh-status" update success
+[2026-01-21 11:58:38.608]	  "tmux-kripto" update success
+[2026-01-21 11:58:38.617]	    | Already up to date.
+[2026-01-21 11:58:38.626]	    | Already up to date.
+[2026-01-21 11:58:38.810]	  "tmux-continuum" update success
+[2026-01-21 11:58:38.820]	    | Already up to date.
+[2026-01-21 11:58:38.832]	  "tmux-thumbs" update success
+[2026-01-21 11:58:38.840]	  "tmux-copycat" update success
+[2026-01-21 11:58:38.849]	    | Already up to date.
+[2026-01-21 11:58:38.857]	  "tmux-plugin-playerctl" update success
+[2026-01-21 11:58:38.866]	  "tmux-sessionx" update success
+[2026-01-21 11:58:38.875]	    | Already up to date.
+[2026-01-21 11:58:38.885]	  "tmux-sessionist" update success
+[2026-01-21 11:58:38.894]	    | Already up to date.
+[2026-01-21 11:58:38.902]	  "tmux-yank" update success
+[2026-01-21 11:58:38.911]	    | Already up to date.
+[2026-01-21 11:58:38.920]	  "tmux-sensible" update success
+[2026-01-21 11:58:38.930]	    | Already up to date.
+[2026-01-21 11:58:38.938]	  "tmux-nav-master" update success
+[2026-01-21 11:58:38.948]	  "tmux-resurrect" update success
+[2026-01-21 11:58:38.956]	    | Already up to date.
+[2026-01-21 11:58:38.965]	    | Already up to date.
+[2026-01-21 11:58:38.973]	    | Already up to date.
+[2026-01-21 11:58:38.983]	    | Already up to date.
+[2026-01-21 11:58:38.994]	Invoking /home/kenan/.config/tmux/plugins/tpm/bin/clean_plugins all
+[2026-01-21 11:58:39.082]	Done.
+

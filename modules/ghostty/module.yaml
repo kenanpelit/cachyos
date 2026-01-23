@@ -1,0 +1,11 @@
+description: Ghostty config (ported from nixosc)
+
+# NOTE: Ghostty may be installed from AUR depending on CachyOS.
+# packages:
+#   - ghostty
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/ghostty
+    target: ~/.config/ghostty

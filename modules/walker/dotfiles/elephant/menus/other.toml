@@ -1,0 +1,78 @@
+name = "other"
+name_pretty = "Other"
+icon = "applications-other"
+
+[[entries]]
+text = "Color Picker"
+keywords = ["color","picker","hypr"]
+actions = { "cp_use" = "wl-copy $(hyprpicker)" }
+icon = "color-picker"
+
+[[entries]]
+icon = "zoom-in"
+text = "Zoom Toggle"
+actions = { "zoom_use" = "hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '(.float) | if . > 1 then 1 else 1.5 end')" }
+
+[[entries]]
+text = "Volume"
+async = "wpctl get-volume @DEFAULT_AUDIO_SINK@"
+icon = "audio-volume-high"
+[entries.actions]
+volume_raise   = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+"
+volume_lower   = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"
+volume_mute    = "wpctl set-mute   @DEFAULT_AUDIO_SINK@ 1"
+volume_unmute  = "wpctl set-mute   @DEFAULT_AUDIO_SINK@ 0"
+volume_set     = "wpctl set-volume @DEFAULT_AUDIO_SINK@ %VALUE%"
+
+[[entries]]
+keywords = ["disk","drive","space"]
+text = "Disk"
+actions = { "disk_copy" = "wl-copy '%VALUE%'" }
+async = """df -h / | tail -1 | awk '{print "Used: " $3 " | Avail: " $4 " | Total: " $2}'"""
+icon = "drive-harddisk"
+
+[[entries]]
+text = "Mic"
+async = "wpctl get-volume @DEFAULT_AUDIO_SOURCE@"
+icon = "audio-input-microphone"
+actions = { "mic_set" = "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ %VALUE%" }
+
+[[entries]]
+text = "System"
+async = """printf "Mem: %s/%s | CPU: %s%%" "$(free -h | awk '/^Mem:/ {print $3}')" "$(free -h | awk '/^Mem:/ {print $2}')" "$(top -bn1 | awk -F'[, ]+' '/Cpu\\(s\\)/{printf \"%.1f\", 100-$8}')""""
+icon = "computer"
+
+[[entries]]
+text = "Today"
+keywords = ["date","today","calendar"]
+async = """date "+%H:%M - %d.%m. %A - KW %V""""
+icon = "clock"
+actions = { "open_cal" = "xdg-open https://calendar.google.com" }
+
+[[entries]]
+text = "Clipboard Manager"
+keywords = ["clipboard", "copy", "paste", "history"]
+actions = { "clipboard" = "clipmaster" }
+icon = "edit-paste"
+
+[[entries]]
+text = "Brightness"
+async = "brightnessctl get"
+icon = "display-brightness"
+keywords = ["brightness", "screen", "backlight"]
+[entries.actions]
+brightness_up = "brightnessctl set +10%"
+brightness_down = "brightnessctl set 10%-"
+brightness_set = "brightnessctl set %VALUE%%"
+
+[[entries]]
+text = "Screenshot - Area"
+keywords = ["screenshot", "capture", "screen", "area"]
+icon = "camera-photo"
+actions = { "screenshot" = "bash -c 'screenshot ri'" }
+
+[[entries]]
+text = "Screenshot - Pano"
+keywords = ["screenshot", "capture", "screen", "pano"]
+icon = "camera-photo"
+actions = { "screenshot" = "bash -c 'screenshot rec'" }

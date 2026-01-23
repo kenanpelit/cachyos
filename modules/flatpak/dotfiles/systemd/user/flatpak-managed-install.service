@@ -1,0 +1,15 @@
+[Unit]
+After=network-online.target
+After=multi-user.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/flatpak-managed-install
+Restart=on-failure
+RestartSec=5min
+StartLimitBurst=3
+StartLimitIntervalSec=1h
+
+[Install]
+WantedBy=default.target

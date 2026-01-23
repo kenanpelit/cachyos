@@ -1,0 +1,6 @@
+description: mako notification daemon config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/mako
+    target: ~/.config/mako

@@ -1,0 +1,6 @@
+description: tmux config ported from nixosc
+
+
+dotfiles:
+  - source: dotfiles/tmux
+    target: ~/.config/tmux

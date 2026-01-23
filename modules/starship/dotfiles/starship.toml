@@ -1,0 +1,339 @@
+add_newline = false
+command_timeout = 150
+format = "$username$hostname$directory$git_branch$git_status$python$rust$golang$nodejs$nix_shell$fill$cmd_duration$line_break$jobs$character"
+palette = "catppuccin_mocha"
+right_format = ""
+scan_timeout = 20
+
+[aws]
+disabled = true
+format = "[$symbol($profile )(\\($region\\) )(\\[$duration\\])]($style) "
+style = "yellow"
+symbol = "☁️ "
+
+[azure]
+disabled = true
+
+[battery]
+charging_symbol = "⚡ "
+disabled = true
+discharging_symbol = "💀 "
+empty_symbol = "🪫 "
+format = "[$symbol$percentage]($style) "
+full_symbol = "🔋 "
+unknown_symbol = "❓ "
+
+[[battery.display]]
+style = "bold red"
+threshold = 10
+
+[[battery.display]]
+style = "bold yellow"
+threshold = 30
+
+[c]
+commands = [["cc", "--version"], ["gcc", "--version"], ["clang", "--version"]]
+detect_extensions = ["c", "h"]
+disabled = true
+format = "[$symbol$version(-$name)]($style) "
+style = "bold blue"
+symbol = "C "
+
+[character]
+error_symbol = "[❯](bold red)"
+success_symbol = "[❯](bold mauve)"
+vimcmd_replace_symbol = "[❮](bold mauve)"
+vimcmd_symbol = "[❮](bold lavender)"
+vimcmd_visual_symbol = "[❮](bold pink)"
+
+[cmd_duration]
+format = "[$duration]($style) "
+min_time = 3000
+show_milliseconds = false
+style = "yellow"
+
+[conda]
+disabled = true
+format = "[$symbol$environment]($style) "
+ignore_base = true
+style = "green"
+symbol = "🅒 "
+truncation_length = 1
+
+[directory]
+format = "[$path]($style) "
+read_only = " "
+read_only_style = "red"
+style = "bold sapphire"
+truncate_to_repo = true
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+".config" = " "
+".cachy" = " "
+Desktop = " "
+Documents = " "
+Downloads = " "
+Music = " "
+Pictures = " "
+Projects = " "
+Videos = " "
+
+[direnv]
+detect_files = [".envrc"]
+disabled = false
+format = "[$symbol$loaded]($style) "
+style = "bold peach"
+symbol = "direnv "
+
+[docker_context]
+detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+disabled = true
+format = "[$symbol$context]($style) "
+only_with_files = true
+style = "blue"
+symbol = " "
+
+[elixir]
+detect_extensions = ["ex", "exs"]
+detect_files = ["mix.exs"]
+detect_folders = []
+disabled = true
+format = "[$symbol$version]($style) "
+style = "purple"
+symbol = "💧 "
+
+[fill]
+symbol = " "
+
+[gcloud]
+disabled = true
+
+[git_branch]
+format = "[$symbol$branch]($style) "
+style = "bold mauve"
+symbol = " "
+truncation_length = 15
+truncation_symbol = "…"
+
+[git_metrics]
+added_style = "green"
+deleted_style = "red"
+disabled = true
+format = "([+$added]([-]$deleted)) "
+only_nonzero_diffs = true
+
+[git_state]
+disabled = true
+format = "[$state( $progress_current/$progress_total)]($style) "
+style = "bold yellow"
+
+[git_status]
+ahead = "⇡$count"
+behind = "⇣$count"
+conflicted = "═"
+deleted = "✘"
+diverged = "⇕"
+format = "[$all_status$ahead_behind]($style) "
+ignore_submodules = true
+modified = "!"
+renamed = "»"
+staged = "+"
+stashed = "\\$"
+style = "bold red"
+untracked = "?"
+
+[golang]
+detect_extensions = []
+detect_files = ["go.mod", "go.sum", "go.work"]
+detect_folders = ["Godeps"]
+format = "[$symbol$version]($style) "
+style = "sapphire"
+symbol = " "
+
+[haskell]
+detect_extensions = ["hs", "hs-boot", "cabal"]
+detect_files = ["stack.yaml", "cabal.project"]
+detect_folders = []
+disabled = true
+format = "[$symbol$version]($style) "
+style = "purple"
+symbol = "λ "
+
+[hostname]
+format = "[@$hostname]($style) "
+ssh_only = true
+ssh_symbol = "↗ "
+style = "bold blue"
+
+[java]
+detect_extensions = ["java", "class", "jar"]
+detect_files = ["pom.xml", "build.gradle.kts", "build.sbt", ".java-version"]
+detect_folders = []
+disabled = true
+format = "[$symbol$version]($style) "
+style = "red"
+symbol = " "
+
+[jobs]
+format = "[$symbol$number]($style) "
+number_threshold = 1
+style = "bold blue"
+symbol = "✦ "
+
+[kubernetes]
+disabled = true
+
+[lua]
+detect_extensions = ["lua"]
+detect_files = [".lua-version"]
+detect_folders = ["lua"]
+disabled = true
+format = "[$symbol$version]($style) "
+style = "blue"
+symbol = "🌙 "
+
+[memory_usage]
+disabled = true
+
+[nix_shell]
+disabled = false
+format = "[$symbol$state( \\($name\\))]($style) "
+heuristic = false
+impure_msg = ""
+pure_msg = ""
+style = "bold blue"
+symbol = "❄ "
+unknown_msg = ""
+
+[nodejs]
+detect_extensions = []
+detect_files = [
+    "package.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "package-lock.json",
+    ".node-version",
+    ".nvmrc",
+]
+detect_folders = ["node_modules"]
+format = "[$symbol$version]($style) "
+style = "green"
+symbol = " "
+
+[package]
+disabled = true
+display_private = false
+format = "[$symbol$version]($style) "
+style = "bold 208"
+symbol = "📦 "
+
+[palettes.catppuccin_mocha]
+base = "#1e1e2e"
+blue = "#89b4fa"
+crust = "#11111b"
+flamingo = "#f2cdcd"
+green = "#a6e3a1"
+lavender = "#b4befe"
+mantle = "#181825"
+maroon = "#eba0ac"
+mauve = "#cba6f7"
+overlay0 = "#6c7086"
+overlay1 = "#7f849c"
+overlay2 = "#9399b2"
+peach = "#fab387"
+pink = "#f5c2e7"
+red = "#f38ba8"
+rosewater = "#f5e0dc"
+sapphire = "#74c7ec"
+sky = "#89dceb"
+subtext0 = "#a6adc8"
+subtext1 = "#bac2de"
+surface0 = "#313244"
+surface1 = "#45475a"
+surface2 = "#585b70"
+teal = "#94e2d5"
+text = "#cdd6f4"
+yellow = "#f9e2af"
+
+[php]
+detect_extensions = ["php"]
+detect_files = ["composer.json", ".php-version"]
+detect_folders = []
+disabled = true
+format = "[$symbol$version]($style) "
+style = "purple"
+symbol = "🐘 "
+
+[python]
+detect_extensions = []
+detect_files = [
+    "requirements.txt",
+    "pyproject.toml",
+    "Pipfile",
+    ".python-version",
+    "tox.ini",
+    "setup.py",
+]
+detect_folders = [".venv", "venv"]
+format = "[$symbol$version]($style) "
+style = "yellow"
+symbol = " "
+
+[ruby]
+detect_extensions = ["rb"]
+detect_files = ["Gemfile", ".ruby-version"]
+detect_folders = []
+disabled = true
+format = "[$symbol$version]($style) "
+style = "red"
+symbol = " "
+
+[rust]
+detect_extensions = []
+detect_files = ["Cargo.toml", "Cargo.lock"]
+detect_folders = []
+format = "[$symbol$version]($style) "
+style = "red"
+symbol = " "
+
+[status]
+disabled = true
+format = "[$symbol$status]($style) "
+recognize_signal_code = true
+style = "bold red"
+symbol = "✗ "
+
+[sudo]
+disabled = true
+
+[terraform]
+detect_extensions = ["tf", "tfplan", "tfstate"]
+detect_folders = [".terraform"]
+disabled = true
+format = "[$symbol$workspace]($style) "
+style = "purple"
+symbol = "💠 "
+
+[time]
+disabled = true
+format = "[$time]($style) "
+style = "subtext1"
+time_format = "%H:%M"
+use_12hr = false
+
+[username]
+format = "[$user]($style) "
+show_always = false
+style_root = "bold red"
+style_user = "bold sapphire"
+
+[zig]
+detect_extensions = ["zig"]
+detect_files = []
+detect_folders = []
+disabled = true
+format = "[$symbol$version]($style) "
+style = "yellow"
+symbol = "⚡ "

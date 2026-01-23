@@ -1,0 +1,5 @@
+# Launch Arch Linux VM using the svmarch command
+exec svmarch
+
+# Force QEMU windows to fullscreen for immersive experience
+for_window [app_id="qemu"] fullscreen enable

@@ -1,0 +1,7 @@
+description: CopyQ config ported from nixosc
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/copyq
+    target: ~/.config/copyq

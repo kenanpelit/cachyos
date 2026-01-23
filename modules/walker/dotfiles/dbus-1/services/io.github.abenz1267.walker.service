@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=io.github.abenz1267.walker
+Exec=walker --gapplication-service
+SystemdService=walker.service

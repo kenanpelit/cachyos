@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Ensure HOME is set (avoid empty HOME in some sandboxed shells)
+if [ -z "${HOME:-}" ]; then
+  export HOME=/tmp
+fi
+
+# NPM settings
+export NPM_CONFIG_CACHE="$HOME/.cache/npm"
+export NPM_CONFIG_PREFIX="$HOME/.local"
+export NPM_CONFIG_UPDATE_NOTIFIER=false
+export NO_UPDATE_NOTIFIER=1
+
+# Create directories
+mkdir -p "$HOME/.cache/npm" "$HOME/.local/bin" "$HOME/.local/lib"
+
+if ! command -v npx &>/dev/null; then
+    echo "❌ Error: 'npx' not found. Please install 'npm' (part of nodejs)."
+    exit 1
+fi
+
+export PATH="$HOME/.local/bin:$PATH"
+
+# Run OpenAI Codex CLI via npx
+exec npx --yes @openai/codex "$@"

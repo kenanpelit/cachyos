@@ -1,0 +1,28 @@
+#!/bin/sh
+exec tail -n +3 $0
+# Custom GRUB entries
+# - Deterministic (UUID + explicit EFI paths)
+# - Keep cross-OS jumps via UEFI chainloading
+# - Avoid NixOS -> NixOS self-chainloading loops unless you *really* need it
+
+# ============================================================
+# NixOS (on nvme0*) — EFI lives on nvme1 ESP (CE59-4A9A)
+# Verified on /dev/nvme1n1p1 (UUID CE59-4A9A):
+#   /EFI/nixos/grubx64.efi
+#   /EFI/NixOS-boot/grubx64.efi
+#   /EFI/systemd/systemd-bootx64.efi
+# ============================================================
+menuentry "NixOS-Lenovo (nvme1 ESP · /EFI/nixos/grubx64.efi)" {
+    insmod part_gpt
+    insmod fat
+    search --no-floppy --fs-uuid --set=root CE59-4A9A
+    chainloader /EFI/nixos/grubx64.efi
+}
+
+menuentry "CachyOS-Lenovo (EFI chainload)" {
+    insmod part_gpt
+    insmod fat
+    search --no-floppy --fs-uuid --set=root CE59-4A9A
+    chainloader /EFI/cachyos/grubx64.efi
+}
+

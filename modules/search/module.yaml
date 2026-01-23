@@ -1,0 +1,8 @@
+description: Search utilities (dsearch config + user service) ported from nixosc
+
+    target: ~/.config/danksearch
+  - source: dotfiles/systemd/user/dsearch.service
+    target: ~/.config/systemd/user/dsearch.service
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask

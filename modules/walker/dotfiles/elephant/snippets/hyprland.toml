@@ -1,0 +1,115 @@
+# ~/.config/elephant/snippets/hyprland.toml
+# Hyprland and Wayland specific commands
+
+[[snippets]]
+name = "Hyprland Reload"
+content = "hyprctl reload"
+
+[[snippets]]
+name = "Hyprland Version"
+content = "hyprctl version"
+
+[[snippets]]
+name = "List Windows"
+content = "hyprctl clients"
+
+[[snippets]]
+name = "List Workspaces"
+content = "hyprctl workspaces"
+
+[[snippets]]
+name = "Active Window"
+content = "hyprctl activewindow"
+
+[[snippets]]
+name = "Kill Active Window"
+content = "hyprctl dispatch killactive"
+
+[[snippets]]
+name = "Toggle Float"
+content = "hyprctl dispatch togglefloating"
+
+[[snippets]]
+name = "Toggle Fullscreen"
+content = "hyprctl dispatch fullscreen"
+
+[[snippets]]
+name = "Screenshot Full"
+content = "grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+[[snippets]]
+name = "Screenshot Area"
+content = "grim -g \"$(slurp)\" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+[[snippets]]
+name = "Screenshot Window"
+content = "hyprctl -j activewindow | jq -r '.at,.size | join(\",\")' | grim -g - ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+[[snippets]]
+name = "Copy Screenshot"
+content = "grim -g \"$(slurp)\" - | wl-copy"
+
+[[snippets]]
+name = "Screen Record"
+content = "wf-recorder -f ~/Videos/recording-$(date +%Y%m%d-%H%M%S).mp4"
+
+[[snippets]]
+name = "Screen Record Area"
+content = "wf-recorder -g \"$(slurp)\" -f ~/Videos/recording-$(date +%Y%m%d-%H%M%S).mp4"
+
+[[snippets]]
+name = "List Monitors"
+content = "hyprctl monitors"
+
+[[snippets]]
+name = "Waybar Reload"
+content = "pkill -SIGUSR2 waybar"
+
+[[snippets]]
+name = "Waybar Restart"
+content = "pkill waybar && waybar &"
+
+[[snippets]]
+name = "Clipboard History"
+content = "cliphist list"
+
+[[snippets]]
+name = "Clear Clipboard"
+content = "cliphist wipe"
+
+[[snippets]]
+name = "Hyprpicker Color"
+content = "hyprpicker -a"
+
+[[snippets]]
+name = "Change Wallpaper"
+content = "swww img ~/Pictures/Wallpapers/wallpaper.jpg"
+
+[[snippets]]
+name = "Lock Screen"
+content = "hyprlock"
+
+[[snippets]]
+name = "Logout"
+content = "hyprctl dispatch exit"
+
+[[snippets]]
+name = "Move to Workspace"
+content = "hyprctl dispatch movetoworkspace 1"
+
+[[snippets]]
+name = "Go to Workspace"
+content = "hyprctl dispatch workspace 1"
+
+[[snippets]]
+name = "Toggle Special Workspace"
+content = "hyprctl dispatch togglespecialworkspace"
+
+[[snippets]]
+name = "Center Window"
+content = "hyprctl dispatch centerwindow"
+
+[[snippets]]
+name = "Pin Window"
+content = "hyprctl dispatch pin"
+

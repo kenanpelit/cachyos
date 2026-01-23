@@ -1,0 +1,6 @@
+description: Git packages
+
+packages:
+  - git
+  - git-lfs
+  - git-delta

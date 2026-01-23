@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+restart_dms() {
+  sleep 2
+  systemctl --user restart dms.service >/dev/null 2>&1 || true
+}
+
+if ! command -v dbus-monitor >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Listen for resume events.
+dbus-monitor --system \
+  "type='signal',sender='org.freedesktop.login1',path='/org/freedesktop/login1',interface='org.freedesktop.login1.Manager',member='PrepareForSleep'" \
+  | while IFS= read -r line; do
+      case "$line" in
+        *"boolean false"*)
+          restart_dms
+          ;;
+        *)
+          ;;
+      esac
+    done

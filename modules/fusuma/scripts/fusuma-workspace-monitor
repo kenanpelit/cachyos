@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+router="wm-workspace"
+
+fusuma_mode=0
+if [[ "${1:-}" == "--fusuma" ]]; then
+  fusuma_mode=1
+  shift
+fi
+
+if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+  if [[ "$fusuma_mode" == "1" ]]; then
+    case "${1:-}" in
+      -msf) shift; set -- -wu "${@}" ;;
+      -ms)  shift; set -- -wd "${@}" ;;
+    esac
+  fi
+  exec "$router" "$@"
+fi
+
+if [[ -n "${NIRI_SOCKET:-}" ]]; then
+  if [[ "$fusuma_mode" == "1" ]]; then
+    case "${1:-}" in
+      -wl|-wr|-wu|-wd|-wt|-mt|-ms|-msf|-tn|-tp)
+        exit 0
+        ;;
+    esac
+  fi
+  exec "$router" "$@"
+fi
+
+case "${XDG_CURRENT_DESKTOP:-}${XDG_SESSION_DESKTOP:-}" in
+  *Hyprland*|*hyprland*)
+    if [[ "$fusuma_mode" == "1" ]]; then
+      case "${1:-}" in
+        -msf) shift; set -- -wu "${@}" ;;
+        -ms)  shift; set -- -wd "${@}" ;;
+      esac
+    fi
+    exec "$router" "$@"
+    ;;
+  *niri*|*Niri*)
+    if [[ "$fusuma_mode" == "1" ]]; then
+      case "${1:-}" in
+        -wl|-wr|-wt|-mt|-ms|-msf|-tn|-tp)
+          exit 0
+          ;;
+      esac
+    fi
+    exec "$router" "$@"
+    ;;
+ esac
+
+echo "fusuma-workspace-monitor: compositor not detected (need HYPRLAND_INSTANCE_SIGNATURE or NIRI_SOCKET)" >&2
+exit 127

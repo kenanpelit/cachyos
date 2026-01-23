@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Hyprland (Optimized)
+Comment=Hyprland with pinned flake build and user-session integration
+
+Type=Application
+DesktopNames=Hyprland
+X-GDM-SessionType=wayland
+X-Session-Type=wayland
+
+Exec=/home/kenan/.local/bin/hypr-set tty
+
+Keywords=wayland;wm;tiling;hyprland;compositor;

@@ -1,0 +1,11 @@
+description: sesh config (ported from nixosc)
+
+# NOTE: sesh may be installed from AUR.
+# packages:
+#   - sesh
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/sesh
+    target: ~/.config/sesh

@@ -1,0 +1,6 @@
+description: yt-dlp config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/yt-dlp
+    target: ~/.config/yt-dlp

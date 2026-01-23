@@ -1,0 +1,20 @@
+description: Niri compositor config (ported from nixosc)
+
+dotfiles:
+  - source: dotfiles/niri-set
+    target: ~/.local/bin/niri-set
+  - source: dotfiles/niri/config.kdl
+    target: ~/.config/niri/config.kdl
+  - source: dotfiles/portals.conf
+    target: ~/.config/xdg-desktop-portal/niri-portals.conf
+  - source: dotfiles/systemd/user/niri-session.target
+    target: ~/.config/systemd/user/niri-session.target
+  - source: dotfiles/systemd/user/niri-polkit-agent.service
+    target: ~/.config/systemd/user/niri-polkit-agent.service
+  - source: dotfiles/systemd/user/niri-ready.service
+    target: ~/.config/systemd/user/niri-ready.service
+  - source: dotfiles/systemd/user/niri-bootstrap.service
+    target: ~/.config/systemd/user/niri-bootstrap.service
+
+post_install_hook: scripts/ensure-runtime-files.sh
+post_hook_behavior: always

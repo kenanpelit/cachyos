@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+export PATH="$HOME/.local/bin:$PATH"
+NPM_PREFIX="$HOME/.local"
+
+if [ -f "$NPM_PREFIX/bin/gemini" ]; then
+    VERSION=$("$NPM_PREFIX/bin/gemini" --version 2>/dev/null || true)
+    if echo "$VERSION" | grep -qi "nightly"; then
+        exec "$NPM_PREFIX/bin/gemini" "$@"
+    fi
+    echo "❌ Installed Gemini CLI is not a nightly build: ${VERSION:-unknown}"
+    echo "💡 To install nightly: ai-gemini-update nightly"
+    exit 1
+else
+    echo "❌ Gemini nightly version is not installed!"
+    echo "💡 To install: ai-gemini-update nightly"
+    exit 1
+fi

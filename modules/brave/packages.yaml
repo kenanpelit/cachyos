@@ -1,0 +1,5 @@
+description: Brave packages
+
+packages:
+  - jq
+  - brave-bin

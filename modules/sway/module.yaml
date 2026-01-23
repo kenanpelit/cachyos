@@ -1,0 +1,6 @@
+description: Sway config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/sway
+    target: ~/.config/sway

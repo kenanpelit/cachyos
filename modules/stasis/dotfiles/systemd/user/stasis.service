@@ -1,0 +1,17 @@
+[Unit]
+Description=Stasis (Wayland idle manager)
+After=graphical-session.target niri-session.target hyprland-session.target
+PartOf=graphical-session.target niri-session.target hyprland-session.target
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=stasis --verbose --config %h/.config/stasis/stasis.rune
+ExecReload=stasis --verbose --config %h/.config/stasis/stasis.rune reload
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=niri-session.target
+WantedBy=hyprland-session.target
+WantedBy=graphical-session.target

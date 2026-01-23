@@ -1,0 +1,152 @@
+# ~/.config/elephant/snippets/communication.toml
+# Email templates and common phrases
+
+[[snippets]]
+name = "Professional Email Opening"
+content = """
+Dear [Name],
+
+I hope this email finds you well.
+
+"""
+
+[[snippets]]
+name = "Professional Email Closing"
+content = """
+Best regards,
+Kenan Pelit
+"""
+
+[[snippets]]
+name = "Casual Email Opening"
+content = """
+Hi [Name],
+
+Hope you're doing well!
+
+"""
+
+[[snippets]]
+name = "Casual Email Closing"
+content = """
+Cheers,
+Kenan
+"""
+
+[[snippets]]
+name = "Meeting Request"
+content = """
+Hi [Name],
+
+I'd like to schedule a meeting to discuss [topic]. Would you be available for a brief call this week?
+
+Let me know what times work best for you.
+
+Best regards,
+Kenan
+"""
+
+[[snippets]]
+name = "Follow Up"
+content = """
+Hi [Name],
+
+Just following up on my previous email regarding [topic]. 
+
+Please let me know if you need any additional information.
+
+Best regards,
+Kenan
+"""
+
+[[snippets]]
+name = "Thank You Email"
+content = """
+Hi [Name],
+
+Thank you so much for [reason]. I really appreciate your help with this.
+
+Best regards,
+Kenan
+"""
+
+[[snippets]]
+name = "Apology Email"
+content = """
+Hi [Name],
+
+I apologize for [issue]. I should have [corrective action].
+
+Moving forward, I will [prevention plan].
+
+Best regards,
+Kenan
+"""
+
+[[snippets]]
+name = "Out of Office"
+content = """
+Thank you for your email. I am currently out of the office with limited access to email.
+
+I will respond to your message as soon as possible upon my return on [date].
+
+For urgent matters, please contact [alternative contact].
+
+Best regards,
+Kenan
+"""
+
+[[snippets]]
+name = "Meeting Notes Template"
+content = """
+# Meeting Notes - [Date]
+
+**Attendees:** 
+**Agenda:** 
+**Discussion Points:**
+- 
+
+**Action Items:**
+- [ ] 
+
+**Next Meeting:** 
+"""
+
+[[snippets]]
+name = "Bug Report"
+content = """
+**Description:**
+Brief description of the issue
+
+**Steps to Reproduce:**
+1. 
+2. 
+3. 
+
+**Expected Behavior:**
+
+
+**Actual Behavior:**
+
+
+**Environment:**
+- OS: 
+- Version: 
+"""
+
+[[snippets]]
+name = "Feature Request"
+content = """
+**Feature Description:**
+
+
+**Use Case:**
+
+
+**Benefits:**
+- 
+
+**Possible Implementation:**
+
+"""
+

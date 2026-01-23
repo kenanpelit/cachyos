@@ -1,0 +1,6 @@
+description: GTK packages
+
+packages:
+  - gtk3
+  - gtk4
+  - catppuccin-gtk-theme-mocha

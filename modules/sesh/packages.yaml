@@ -1,0 +1,5 @@
+description: sesh packages
+
+packages:
+  # NOTE: likely AUR on Arch/CachyOS (auto-detected by dcli)
+  - sesh

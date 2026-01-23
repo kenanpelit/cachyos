@@ -1,0 +1,12 @@
+description: Optimized desktop sessions for Wayland compositors
+
+dotfiles:
+  - source: dotfiles/niri-optimized.desktop
+    target: ~/.local/share/wayland-sessions/niri-optimized.desktop
+  - source: dotfiles/gnome-optimized.desktop
+    target: ~/.local/share/wayland-sessions/gnome-optimized.desktop
+  # Hyprland one is already in hyprland module dotfiles, but let's centralize or leave it.
+  # For now, let's just make the hook install everything to /usr/share/wayland-sessions.
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

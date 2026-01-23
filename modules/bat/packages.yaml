@@ -1,0 +1,4 @@
+description: bat packages
+
+packages:
+  - bat

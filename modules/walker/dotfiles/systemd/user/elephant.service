@@ -1,0 +1,21 @@
+[Unit]
+Description=Elephant - Backend provider for Walker
+After=graphical-session.target niri-session.target hyprland-session.target
+PartOf=graphical-session.target niri-session.target hyprland-session.target
+StartLimitBurst=10
+StartLimitIntervalSec=120
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=elephant
+Restart=always
+RestartSec=3
+MemoryMax=500M
+CPUQuota=50%
+TimeoutStopSec=10
+
+[Install]
+WantedBy=niri-session.target
+WantedBy=hyprland-session.target
+WantedBy=graphical-session.target

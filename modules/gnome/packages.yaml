@@ -1,0 +1,32 @@
+description: GNOME Desktop packages
+packages:
+  - gnome-shell
+  - gnome-control-center
+  - gnome-tweaks
+  - gnome-terminal
+  - nautilus
+  - gnome-text-editor
+  - gnome-calculator
+  - gnome-calendar
+  - gnome-characters
+  - gnome-clocks
+  - gnome-contacts
+  - gnome-system-monitor
+  - gnome-disk-utility
+  - gnome-font-viewer
+  - gnome-keyring
+  - gnome-logs
+  - gnome-maps
+  - gnome-music
+  - gnome-weather
+  - gnome-screenshot
+  - eog
+  - loupe
+  - totem
+  - showtime
+  - decibels
+  - file-roller
+  - seahorse
+  - sushi
+  - baobab
+  - dconf-editor

@@ -1,0 +1,21 @@
+[terminal]
+# The VT to run the greeter on. Can be "next", "current" or a number
+# designating the VT.
+vt = 1
+
+# The default session configuration.
+[default_session]
+
+# The user to run the session as.
+user = "greeter"
+
+# The command to run to launch the session.
+# This points to our wrapper script which sets up the environment and launches Hyprland.
+# Ensure /usr/local/bin/dms-greeter-wrapper exists and is executable.
+command = "/usr/local/bin/dms-greeter-wrapper"
+
+# Initial configuration to start.
+# This configures the "greeter" user.
+[initial_session]
+command = "/usr/local/bin/dms-greeter-wrapper"
+user = "greeter"

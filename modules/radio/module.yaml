@@ -1,0 +1,5 @@
+description: Radio (radiotray-ng) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/radiotray-ng
+    target: ~/.config/radiotray-ng

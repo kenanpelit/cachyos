@@ -1,0 +1,29 @@
+#!/bin/sh
+exec tail -n +3 $0
+# Custom GRUB entries
+# - Keep entries deterministic (UUID + chainloader path)
+# - Avoid NixOS->NixOS self-chainloading loops or stale ESP references
+
+# ----------------------------------------------------------------------
+# NixOS (UEFI chainload) - chainload NixOS GRUB from the NVMe ESP
+# Your current /boot/efi is on /dev/nvme1n1p1 and contains:
+#   /EFI/nixos/grubx64.efi
+# ----------------------------------------------------------------------
+menuentry "NixOS (NVMe ESP - GRUB chainload)" {
+    insmod part_gpt
+    insmod fat
+    search --no-floppy --fs-uuid --set=root CE59-4A9A
+    chainloader /EFI/nixos/grubx64.efi
+}
+
+# ----------------------------------------------------------------------
+# CachyOS installed on SATA disk (sda) - chainload its own GRUB
+# Verified on /dev/sda1 (UUID 6880-73B3):
+#   /EFI/cachyos/grubx64.efi
+# ----------------------------------------------------------------------
+menuentry "CachyOS Rog (sda1 - GRUB chainload)" {
+    insmod part_gpt
+    insmod fat
+    search --no-floppy --fs-uuid --set=root 6880-73B3
+    chainloader /EFI/cachyos/grubx64.efi
+}

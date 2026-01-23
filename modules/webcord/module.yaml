@@ -1,0 +1,5 @@
+description: WebCord/Vencord theme file (ported from nixosc)
+
+dotfiles:
+  - source: dotfiles/Vencord/themes/catppuccin-mocha.theme.css
+    target: ~/.config/Vencord/themes/catppuccin-mocha.theme.css

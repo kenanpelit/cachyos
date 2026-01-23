@@ -1,0 +1,38 @@
+name = "sysops"
+name_pretty = "System Ops"
+icon = "preferences-system"
+
+[[entries]]
+text = "System: Suspend"
+icon = "system-suspend"
+actions = { "suspend" = "systemctl suspend -i" }
+
+[[entries]]
+text = "System: Reboot"
+icon = "system-reboot"
+actions = { "reboot" = "systemctl reboot -i" }
+
+[[entries]]
+text = "System: Shutdown"
+icon = "system-shutdown"
+actions = { "shutdown" = "systemctl poweroff -i" }
+
+[[entries]]
+text = "Bluetooth: Toggle"
+icon = "bluetooth"
+actions = { "bt_toggle" = "bluetooth_toggle" }
+
+[[entries]]
+text = "Mullvad: Connect"
+icon = "network-vpn"
+actions = { "vpn_connect" = "mullvad connect" }
+
+[[entries]]
+text = "Mullvad: Disconnect"
+icon = "network-vpn-disconnected"
+actions = { "vpn_disconnect" = "mullvad disconnect" }
+
+[[entries]]
+text = "Mullvad: Status"
+icon = "network-vpn"
+async = "mullvad status"

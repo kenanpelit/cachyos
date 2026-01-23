@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0" magnet="15" alpha="255" movealpha="255">
+  <ThemeInfo name="Catppuccin mocha" author="NixOS Config" email="nix@catppuccin.com"/>
+  
+  <!-- Catppuccin color definitions -->
+  <BitmapFont id="text.font" file="text.font.png" type="digits"/>
+  
+  <!-- Main window -->
+  <Window id="main" x="100" y="100" width="580" height="421" 
+          dragdrop="true" playondrop="true">
+    <Layout id="normal" width="580" height="421">
+      <!-- Background -->
+      <Rectangle x="0" y="0" width="580" height="421" 
+                 color="#1e1e2e" filled="true"/>
+      
+      <!-- Title bar -->
+      <Rectangle x="0" y="0" width="580" height="30" 
+                 color="#313244" filled="true"/>
+      
+      <!-- Control area -->
+      <Rectangle x="0" y="30" width="580" height="60" 
+                 color="#45475a" filled="true"/>
+      
+      <!-- Progress bar background -->
+      <Rectangle x="10" y="380" width="560" height="30" 
+                 color="#313244" filled="true"/>
+      
+      <!-- Window controls -->
+      <Button x="540" y="5" width="15" height="15" 
+              up="close.up.png" down="close.down.png" 
+              action="vlc.quit()"/>
+      <Button x="520" y="5" width="15" height="15" 
+              up="minimize.up.png" down="minimize.down.png" 
+              action="vlc.minimize()"/>
+    </Layout>
+  </Window>
+</Theme>

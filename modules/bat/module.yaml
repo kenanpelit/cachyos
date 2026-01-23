@@ -1,0 +1,8 @@
+description: bat config + themes (ported from nixosc)
+
+post_install_hook: scripts/build-cache.sh
+post_hook_behavior: always
+
+dotfiles:
+  - source: dotfiles/bat
+    target: ~/.config/bat

@@ -1,0 +1,6 @@
+description: mpv packages
+
+packages:
+  - mpv
+  - yt-dlp
+  - deno

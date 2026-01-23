@@ -1,0 +1,103 @@
+# ~/.config/elephant/snippets/text.toml
+# Text, emoji, and common phrases
+
+[[snippets]]
+name = "Shrug"
+content = "¯\\_(ツ)_/¯"
+
+[[snippets]]
+name = "Table Flip"
+content = "(╯°□°)╯︵ ┻━┻"
+
+[[snippets]]
+name = "Put Table Back"
+content = "┬─┬ノ( º _ ºノ)"
+
+[[snippets]]
+name = "Thumbs Up"
+content = "👍"
+
+[[snippets]]
+name = "Checkmark"
+content = "✓"
+
+[[snippets]]
+name = "Cross"
+content = "✗"
+
+[[snippets]]
+name = "Arrow Right"
+content = "→"
+
+[[snippets]]
+name = "Arrow Left"
+content = "←"
+
+[[snippets]]
+name = "Bullet Point"
+content = "•"
+
+[[snippets]]
+name = "Em Dash"
+content = "—"
+
+[[snippets]]
+name = "Ellipsis"
+content = "…"
+
+[[snippets]]
+name = "Copyright"
+content = "©"
+
+[[snippets]]
+name = "Trademark"
+content = "™"
+
+[[snippets]]
+name = "Degree"
+content = "°"
+
+[[snippets]]
+name = "Plus Minus"
+content = "±"
+
+[[snippets]]
+name = "Multiplication"
+content = "×"
+
+[[snippets]]
+name = "Division"
+content = "÷"
+
+[[snippets]]
+name = "Not Equal"
+content = "≠"
+
+[[snippets]]
+name = "Approximately"
+content = "≈"
+
+[[snippets]]
+name = "Less Equal"
+content = "≤"
+
+[[snippets]]
+name = "Greater Equal"
+content = "≥"
+
+[[snippets]]
+name = "Infinity"
+content = "∞"
+
+[[snippets]]
+name = "Look of Disapproval"
+content = "ಠ_ಠ"
+
+[[snippets]]
+name = "Happy Face"
+content = "ᕕ( ᐛ )ᕗ"
+
+[[snippets]]
+name = "Bear Hug"
+content = "ʕっ•ᴥ•ʔっ"
+

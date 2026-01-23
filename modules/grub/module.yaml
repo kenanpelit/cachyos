@@ -1,0 +1,8 @@
+description: GRUB Custom Menu Entries
+
+dotfiles:
+  - source: dotfiles/40_custom
+    target: ~/.config/grub/40_custom
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

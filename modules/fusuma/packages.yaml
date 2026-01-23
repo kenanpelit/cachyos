@@ -1,0 +1,5 @@
+description: Fusuma gestures packages
+packages:
+  - ruby-fusuma
+  - ruby-fusuma-plugin-sendkey
+  - ruby

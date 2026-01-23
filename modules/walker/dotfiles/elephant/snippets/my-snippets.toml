@@ -1,0 +1,43 @@
+# ~/.config/elephant/snippets/my-snippets.toml
+
+[[snippets]]
+name = "Email Signature"
+content = """
+Best regards,
+Kenan Pelit
+NixOS Enthusiast
+"""
+
+[[snippets]]
+name = "Git Commit"
+content = "feat: add new feature"
+
+[[snippets]]
+name = "Shrug"
+content = "¯\\_(ツ)_/¯"
+
+[[snippets]]
+name = "Code Block"
+content = """
+```bash
+# Your code here
+```
+"""
+
+[[snippets]]
+name = "Lorem Ipsum"
+content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+
+[[snippets]]
+name = "Email Template"
+content = """
+Hello,
+
+I hope this email finds you well.
+
+[Your message here]
+
+Best regards,
+Kenan
+"""
+

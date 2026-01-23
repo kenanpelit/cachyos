@@ -1,0 +1,8 @@
+description: Chrome (launcher + config) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/chrome-launcher/config.conf
+    target: ~/.config/chrome-launcher/config.conf
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

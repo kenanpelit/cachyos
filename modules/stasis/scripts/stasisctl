@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec stasis --config "${XDG_CONFIG_HOME:-$HOME/.config}/stasis/stasis.rune" "$@"

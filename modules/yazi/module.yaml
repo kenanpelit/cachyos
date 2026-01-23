@@ -1,0 +1,6 @@
+description: Yazi config + plugins (ported from nixosc)
+
+dotfiles:
+  - source: dotfiles/yazi
+    target: ~/.config/yazi
+

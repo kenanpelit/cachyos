@@ -1,0 +1,11 @@
+description: Qt theming (qt5ct/qt6ct/Kvantum) ported from nixosc
+
+dotfiles:
+  - source: dotfiles/qt5ct
+    target: ~/.config/qt5ct
+  - source: dotfiles/qt6ct
+    target: ~/.config/qt6ct
+  - source: dotfiles/Kvantum
+    target: ~/.config/Kvantum
+  - source: dotfiles/environment.d/20-qt.conf
+    target: ~/.config/environment.d/20-qt.conf

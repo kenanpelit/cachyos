@@ -1,0 +1,368 @@
+# Walker Configuration - v2.7.2 Optimized with Vim-like keybindings
+# Based on: https://github.com/abenz1267/walker/blob/master/resources/config.toml
+
+# ============================================================================
+# General Settings
+# ============================================================================
+
+force_keyboard_focus = true     # Force keyboard focus to stay in Walker
+close_when_open = true          # Close walker when invoking while already opened
+click_to_close = true           # Close walker if clicking outside main content area
+selection_wrap = false          # Wrap list if at bottom or top
+global_argument_delimiter = "#" # Query delimiter for passing args to Elephant
+exact_search_prefix = "'"       # Prefix to disable fuzzy searching (exact match)
+theme = "default"               # Default theme (change to your custom theme name if you have one)
+disable_mouse = false           # Enable mouse interaction
+debug = false                   # Disable debug printing for better performance
+width = 800
+height = 800
+
+# ============================================================================
+# Window Position (Wayland Layer Shell)
+# ============================================================================
+
+[shell]
+anchor_top = true
+anchor_bottom = false
+anchor_left = false
+anchor_right = false
+
+# ============================================================================
+# Placeholders
+# ============================================================================
+
+[placeholders]
+"default" = { input = "Search...", list = "No Results" }
+"desktopapplications" = { input = "Launch Application", list = "No Applications Found" }
+"files" = { input = "Browse Files", list = "No Files Found" }
+"runner" = { input = "Run Command", list = "No Commands" }
+"calc" = { input = "Calculate", list = "No Results" }
+"websearch" = { input = "Search Web", list = "Select Search Engine" }
+"clipboard" = { input = "Clipboard History", list = "Clipboard Empty" }
+
+# ============================================================================
+# Keybindings (Vim-like + Standard)
+# ============================================================================
+
+[keybinds]
+# Navigation - Vim-style
+close = ["Escape", "ctrl c", "ctrl q"]
+next = ["Down", "ctrl j", "ctrl n"]      # j = down (Vim), Ctrl+N (Emacs)
+previous = ["Up", "ctrl k", "ctrl p"]    # k = up (Vim), Ctrl+P (Emacs)
+
+# Page navigation - Vim-style
+page_down = ["Page_Down", "ctrl f"]      # Ctrl+F = page forward (Vim)
+page_up = ["Page_Up", "ctrl b"]          # Ctrl+B = page backward (Vim)
+
+# Line navigation - Vim-style
+first = ["Home", "g g"]                  # gg = go to top (Vim)
+last = ["End", "shift g"]                # G = go to bottom (Vim)
+
+# Word navigation - Emacs-style
+forward_word = ["ctrl Right", "alt f"]
+backward_word = ["ctrl Left", "alt b"]
+
+# Search modes
+toggle_exact = ["ctrl e"]                # Toggle exact search
+resume_last_query = ["ctrl r"]           # Resume last query
+
+# Quick activation (activate without closing)
+quick_activate = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "ctrl Return"]
+
+# ============================================================================
+# Providers Configuration
+# ============================================================================
+
+[providers]
+# Default providers when searching (most commonly used)
+default = [
+  "desktopapplications",  # Desktop applications
+  "calc",                 # Calculator
+  "runner",               # Command runner
+  "websearch",            # Web search
+  "windows",              # Window management
+  "todo",                 # Todo list
+]
+
+# Providers shown when input is empty
+#empty = ["desktopapplications", "windows", "menus:other"]
+empty   = ["desktopapplications", "windows", "menus:other", "menus:sysops"]
+
+# Global max results
+max_results = 100
+
+# ============================================================================
+# Provider Prefixes (Quick Access)
+# ============================================================================
+# All 15 available providers with letter-based shortcuts (TOML-safe)
+
+[[providers.prefixes]]
+prefix = "p"
+provider = "providerlist"       # List all providers
+
+[[providers.prefixes]]
+prefix = "f"
+provider = "files"              # File browser
+
+[[providers.prefixes]]
+prefix = "r"
+provider = "runner"             # Command runner
+
+[[providers.prefixes]]
+prefix = "c"
+provider = "calc"               # Calculator
+
+[[providers.prefixes]]
+prefix = "q"
+provider = "websearch"          # Web search (query)
+
+[[providers.prefixes]]
+prefix = "v"
+provider = "clipboard"          # Clipboard (paste)
+
+[[providers.prefixes]]
+prefix = "e"
+provider = "symbols"            # Symbols/Emojis
+
+[[providers.prefixes]]
+prefix = "t"
+provider = "todo"               # Todo list
+
+[[providers.prefixes]]
+prefix = "m"
+provider = "menus"              # Custom menus
+
+[[providers.prefixes]]
+prefix = "w"
+provider = "windows"            # Window management
+
+[[providers.prefixes]]
+prefix = "b"
+provider = "bluetooth"          # Bluetooth devices
+
+[[providers.prefixes]]
+prefix = "s"
+provider = "snippets"           # Text snippets
+
+[[providers.prefixes]]
+prefix = "u"
+provider = "unicode"            # Unicode characters
+
+[[providers.prefixes]]
+prefix = "mo"
+provider = "menus:other"
+
+[[providers.prefixes]]
+prefix = "ms"
+#provider = "menus:sysops"
+provider = "menus:scripts"
+
+[[providers.prefixes]]
+prefix = "mt"
+provider = "menus:sysops"
+
+[[providers.prefixes]]
+prefix = "mw"
+provider = "menus:wallpapers"
+
+# ============================================================================
+# Provider-specific Settings
+# ============================================================================
+
+[providers.clipboard]
+time_format = "%d.%m. - %H:%M"
+
+# ============================================================================
+# Per-provider Max Results
+# ============================================================================
+
+[providers.max_results_provider]
+desktopapplications = 50
+files = 30
+runner = 20
+websearch = 10
+clipboard = 100
+windows = 20
+todo = 30
+bluetooth = 15
+snippets = 25
+menus = 20
+symbols = 30
+unicode = 30
+
+# ============================================================================
+# Provider Actions (Keybindings per provider)
+# ============================================================================
+
+# Desktop Applications
+[providers.actions]
+desktopapplications = [
+  { action = "start", default = true, bind = "Return" },
+  { action = "start:keep", label = "open+next", bind = "shift Return", after = "KeepOpen" },
+  { action = "erase_history", label = "clear hist", bind = "ctrl h", after = "AsyncReload" },
+  { action = "pin", bind = "ctrl p", after = "AsyncReload" },
+  { action = "unpin", bind = "ctrl p", after = "AsyncReload" },
+]
+
+# Files
+files = [
+  { action = "open", default = true, bind = "Return" },
+  { action = "opendir", label = "open dir", bind = "ctrl Return" },
+  { action = "copypath", label = "copy path", bind = "ctrl shift c" },
+  { action = "copyfile", label = "copy file", bind = "ctrl c" },
+]
+
+# Runner (Command Execution)
+runner = [
+  { action = "run", default = true, bind = "Return" },
+  { action = "runterminal", label = "run in terminal", bind = "shift Return" },
+  { action = "erase_history", label = "clear hist", bind = "ctrl h", after = "Reload" },
+]
+
+# Calculator
+calc = [
+  { action = "copy", default = true, bind = "Return" },
+  { action = "delete", bind = "ctrl d", after = "AsyncReload" },
+  { action = "save", bind = "ctrl s", after = "AsyncClearReload" },
+]
+
+# Web Search
+websearch = [
+  { action = "search", default = true, bind = "Return" },
+  { action = "erase_history", label = "clear hist", bind = "ctrl h", after = "Reload" },
+]
+
+# Clipboard
+clipboard = [
+  { action = "copy", default = true, bind = "Return" },
+  { action = "remove", bind = "ctrl d", after = "ClearReload" },
+  { action = "remove_all", global = true, label = "clear all", bind = "ctrl shift d", after = "ClearReload" },
+  { action = "toggle_images", global = true, label = "toggle images", bind = "ctrl i", after = "ClearReload" },
+  { action = "edit", bind = "ctrl o" },
+]
+
+# Symbols/Emojis
+symbols = [
+  { action = "run_cmd", label = "select", default = true, bind = "Return" },
+  { action = "erase_history", label = "clear hist", bind = "ctrl h", after = "Reload" },
+]
+
+# Unicode
+unicode = [
+  { action = "run_cmd", label = "select", default = true, bind = "Return" },
+  { action = "erase_history", label = "clear hist", bind = "ctrl h", after = "Reload" },
+]
+
+# Provider List
+providerlist = [
+  { action = "activate", default = true, bind = "Return", after = "ClearReload" },
+]
+
+# Todo
+todo = [
+  { action = "save", default = true, bind = "Return", after = "ClearReload" },
+  { action = "delete", bind = "ctrl d", after = "ClearReload" },
+  { action = "active", bind = "Return", after = "ClearReload" },
+  { action = "inactive", bind = "Return", after = "ClearReload" },
+  { action = "done", bind = "ctrl f", after = "ClearReload" },
+  { action = "clear", bind = "ctrl x", after = "ClearReload", global = true },
+]
+
+# Bluetooth
+bluetooth = [
+  { action = "find", global = true, bind = "ctrl f", after = "AsyncClearReload" },
+  { action = "trust", bind = "ctrl t", after = "AsyncReload" },
+  { action = "untrust", bind = "ctrl t", after = "AsyncReload" },
+  { action = "pair", bind = "Return", after = "AsyncReload" },
+  { action = "remove", bind = "ctrl d", after = "AsyncReload" },
+  { action = "connect", bind = "Return", after = "AsyncReload" },
+  { action = "disconnect", bind = "Return", after = "AsyncReload" },
+]
+
+# Windows (Window Management)
+windows = [
+  { action = "focus", default = true, bind = "Return" },
+  { action = "close", bind = "ctrl w" },
+]
+
+# Snippets (Text Snippets)
+snippets = [
+  { action = "paste", default = true, bind = "Return" },
+  { action = "copy", bind = "ctrl c" },
+]
+
+# Menus (Custom Menus)
+menus = [
+  { action = "open", default = true, bind = "Return" },
+]
+
+# ============================================================================
+# Complete Keybinding Reference
+# ============================================================================
+#
+# VIM-LIKE NAVIGATION:
+# --------------------
+#   j / Ctrl+J / Ctrl+N  - Next item (down)
+#   k / Ctrl+K / Ctrl+P  - Previous item (up)
+#   Ctrl+F               - Page down
+#   Ctrl+B               - Page up
+#   gg                   - First item
+#   G (Shift+G)          - Last item
+#
+# SEARCH CONTROLS:
+# ----------------
+#   Ctrl+R               - Resume last query
+#   Ctrl+E               - Toggle exact search
+#   '                    - Exact search prefix (type ' before query)
+#
+# QUICK ACCESS PREFIXES (14 Useful Providers):
+# -----------------------------------------------
+#   p    - Provider list      (see all providers)
+#   f    - Files              (file browser)
+#   r    - Runner             (run commands)
+#   c    - Calculator         (math & unit conversion)
+#   q    - Web search         (query the web)
+#   v    - Clipboard          (paste from history)
+#   e    - Symbols            (emojis & special chars)
+#   t    - Todo               (task management)
+#   m    - Menus              (custom menus)
+#   w    - Windows            (window management)
+#   b    - Bluetooth          (BT device management)
+#   s    - Snippets           (text snippets)
+#   u    - Unicode            (unicode characters)
+#
+# COMMON ACTIONS:
+# ---------------
+#   Return               - Activate/Open (default action)
+#   Shift+Return         - Alternative action (e.g., run in terminal)
+#   Ctrl+D               - Delete/Remove item
+#   Ctrl+H               - Clear history
+#   Ctrl+C               - Copy
+#   Ctrl+O               - Edit
+#   Ctrl+W               - Close (windows)
+#   F1-F4                - Quick activate
+#
+# EXIT:
+# -----
+#   Esc / Ctrl+C / Ctrl+Q - Close Walker
+#
+# ============================================================================
+# PROVIDER DESCRIPTIONS:
+# ============================================================================
+#
+# 1.  desktopapplications - Launch desktop applications
+# 2.  files               - Browse and open files
+# 3.  calc                - Calculator with history & unit conversion
+# 4.  runner              - Execute shell commands
+# 5.  websearch           - Search the web (Google, DDG, etc.)
+# 6.  clipboard           - Access clipboard history (text & images)
+# 7.  symbols             - Insert symbols and emojis
+# 8.  unicode             - Search and insert unicode characters
+# 9.  todo                - Simple todo list with notifications
+# 10. bluetooth           - Manage bluetooth devices (pair, connect, etc.)
+# 11. windows             - Focus and manage open windows (Hyprland)
+# 12. menus               - Custom user-defined menus (static/dynamic)
+# 13. providerlist        - List and switch between providers
+# 14. snippets            - Quick text snippet insertion
+#
+# ============================================================================

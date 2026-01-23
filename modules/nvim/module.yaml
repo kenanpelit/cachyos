@@ -1,0 +1,5 @@
+description: Neovim config (ported from nixosc)
+
+dotfiles:
+  - source: dotfiles/nvim/init.lua
+    target: ~/.config/nvim/init.lua

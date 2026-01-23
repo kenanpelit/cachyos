@@ -1,0 +1,9 @@
+{
+	       "bookmarks" : "~/.config/radiotray-ng/bookmarks.json",	"last-station" : "VirginRadioTurkiye",
+	"last-station-group" : "Kenp Radio",
+	"last-station-notifications" : true,
+	"notification-verbose" : true,
+	"notifications" : true,
+	"split-title" : true,
+	"volume-level" : 100
+}

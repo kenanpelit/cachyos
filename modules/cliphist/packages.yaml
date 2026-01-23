@@ -1,0 +1,4 @@
+description: Clipboard history packages
+packages:
+  - cliphist
+  - wl-clipboard

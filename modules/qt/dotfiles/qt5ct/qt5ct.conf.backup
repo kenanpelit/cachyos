@@ -1,0 +1,29 @@
+[Appearance]
+color_scheme_path=/home/kenan/.local/share/color-schemes/DankMatugen.colors
+custom_palette=true
+icon_theme=a-candy-beauty-icon-theme
+standard_dialogs=gtk3
+style=kvantum
+
+[Fonts]
+fixed=Maple Mono NF,12,-1,5,400,0,0,0,0,0,Regular
+general=Maple Mono NF,12,-1,5,400,0,0,0,0,0,Regular
+
+[Interface]
+buttonbox_layout=0
+cursor_flash_time=1000
+dialog_buttons_have_icons=true
+double_click_interval=400
+gui_effects=General,AnimateMenu,AnimateCombo,AnimateTooltip,FadeTooltip,AnimateToolBox
+keyboard_scheme=2
+menus_have_icons=true
+show_shortcuts_in_context_menus=true
+stylesheets=@Invalid()
+toolbutton_style=4
+underline_shortcut=1
+wheel_scroll_lines=3
+
+[Palette]
+active_colors=#cdd6f4,#313244,#585b70,#45475a,#313244,#6c7086,#cdd6f4,#cdd6f4,#cdd6f4,#1e1e2e,#313244,#7f849c,#cba6f7,#cdd6f4,#cba6f7,#cba6f7,#181825,#cdd6f4,#45475a,#cdd6f4,#6c7086
+disabled_colors=#7f849c,#313244,#585b70,#45475a,#313244,#6c7086,#7f849c,#7f849c,#7f849c,#1e1e2e,#313244,#7f849c,#6c7086,#7f849c,#6c7086,#6c7086,#181825,#cdd6f4,#45475a,#cdd6f4,#6c7086
+inactive_colors=#a6adc8,#313244,#585b70,#45475a,#313244,#6c7086,#a6adc8,#a6adc8,#a6adc8,#1e1e2e,#313244,#7f849c,#b4befe,#a6adc8,#b4befe,#b4befe,#181825,#cdd6f4,#45475a,#cdd6f4,#6c7086

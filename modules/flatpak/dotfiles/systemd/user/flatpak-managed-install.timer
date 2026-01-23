@@ -1,0 +1,8 @@
+[Unit]
+Description=Delayed start timer for Flatpak installation
+
+[Timer]
+OnBootSec=90s
+
+[Install]
+WantedBy=timers.target

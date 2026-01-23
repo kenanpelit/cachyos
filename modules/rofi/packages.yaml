@@ -1,0 +1,5 @@
+description: Rofi packages
+
+packages:
+  - rofi
+  - wmctrl

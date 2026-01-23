@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+settings_dir="$HOME/.config/transmission-daemon"
+settings_file="$settings_dir/settings.json"
+blocklists_dir="$settings_dir/blocklists"
+
+mkdir -p "$HOME/.tor/transmission/complete" \
+  "$HOME/.tor/transmission/incomplete" \
+  "$HOME/.tor/transmission/watch" \
+  "$blocklists_dir"
+
+# Write settings.json (portable; based on nixosc)
+tmp="$settings_file.tmp"
+cat >"$tmp" <<JSON
+{
+  "download-dir": "${HOME}/.tor/transmission/complete",
+  "incomplete-dir": "${HOME}/.tor/transmission/incomplete",
+  "incomplete-dir-enabled": true,
+  "watch-dir": "${HOME}/.tor/transmission/watch",
+  "watch-dir-enabled": true,
+
+  "rpc-enabled": true,
+  "rpc-port": 9091,
+  "rpc-whitelist-enabled": true,
+  "rpc-whitelist": "127.0.0.1",
+  "rpc-authentication-required": false,
+  "rpc-username": "",
+  "rpc-password": "",
+
+  "speed-limit-down": 1000,
+  "speed-limit-down-enabled": false,
+  "speed-limit-up": 100,
+  "speed-limit-up-enabled": false,
+
+  "blocklist-enabled": true,
+  "blocklist-url": "http://www.example.com/blocklist",
+
+  "cache-size-mb": 64,
+  "peer-limit-global": 200,
+  "peer-limit-per-torrent": 50,
+
+  "peer-port": 51413,
+  "peer-port-random-on-start": false,
+  "port-forwarding-enabled": true,
+
+  "dht-enabled": true,
+  "lpd-enabled": true,
+  "pex-enabled": true,
+  "utp-enabled": true,
+
+  "encryption": 1,
+
+  "download-queue-enabled": true,
+  "download-queue-size": 5,
+  "seed-queue-enabled": false,
+  "seed-queue-size": 10,
+  "queue-stalled-enabled": true,
+  "queue-stalled-minutes": 30,
+
+  "ratio-limit": 2,
+  "ratio-limit-enabled": false,
+  "idle-seeding-limit": 30,
+  "idle-seeding-limit-enabled": false,
+
+  "alt-speed-enabled": false,
+  "alt-speed-up": 50,
+  "alt-speed-down": 50,
+  "alt-speed-time-enabled": false,
+  "alt-speed-time-begin": 540,
+  "alt-speed-time-end": 1020,
+  "alt-speed-time-day": 127,
+
+  "preallocation": 1,
+  "prefetch-enabled": true,
+  "scrape-paused-torrents-enabled": true,
+  "upload-slots-per-torrent": 8,
+
+  "start-added-torrents": true,
+  "trash-original-torrent-files": false,
+  "rename-partial-files": false,
+  "torrent-added-verify-mode": "fast",
+  "umask": 18,
+
+  "message-level": 2
+}
+JSON
+
+# Backup if changed
+if [ -f "$settings_file" ] && ! cmp -s "$tmp" "$settings_file" 2>/dev/null; then
+  cp "$settings_file" "$settings_file.backup.$(date +%Y%m%d-%H%M%S)" || true
+fi
+
+install -m 644 "$tmp" "$settings_file"
+rm -f "$tmp"

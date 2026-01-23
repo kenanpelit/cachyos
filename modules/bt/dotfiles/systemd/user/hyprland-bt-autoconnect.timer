@@ -1,0 +1,12 @@
+[Unit]
+Description=Hyprland Bluetooth auto-connect (delayed)
+After=hyprland-session.target
+PartOf=hyprland-session.target
+
+[Timer]
+OnActiveSec=10s
+AccuracySec=3s
+Unit=hyprland-bt-autoconnect.service
+
+[Install]
+WantedBy=hyprland-session.target

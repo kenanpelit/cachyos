@@ -1,0 +1,6 @@
+description: lazygit packages
+
+packages:
+  - lazygit
+  - git
+  - git-delta

@@ -1,0 +1,11 @@
+description: Fusuma gestures (config + helper scripts + user service) ported from nixosc
+
+# Config + systemd unit
+dotfiles:
+  - source: dotfiles/fusuma
+    target: ~/.config/fusuma
+  - source: dotfiles/systemd/user/fusuma.service
+    target: ~/.config/systemd/user/fusuma.service
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask

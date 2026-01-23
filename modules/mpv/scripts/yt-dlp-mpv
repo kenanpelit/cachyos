@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cookie_file="${XDG_CONFIG_HOME:-$HOME/.config}/yt-dlp/cookies-youtube.txt"
+# brave cookies: browser root dir (must contain "Local State" and "Default/")
+brave_dir="$HOME/.brave/isolated/Kenp"
+ytdlp="yt-dlp"
+
+extra_args=(
+  --extractor-args "youtube:player_client=android_sdkless,web_safari"
+  --js-runtimes "deno"
+)
+
+try_with_cookie_file_then_browser_fallback() {
+  local err
+  err="$(mktemp)"
+
+  if "$ytdlp" "${extra_args[@]}" --cookies "$cookie_file" "$@" 2>"$err"; then
+    rm -f "$err"
+    return 0
+  fi
+
+  if grep -Fq "Sign in to confirm you’re not a bot" "$err"; then
+    echo "[yt-dlp-mpv] bot-check: cookies-youtube.txt yetmedi; tarayıcıdan direkt okumayı deniyorum..." >&2
+    "$ytdlp" "${extra_args[@]}" --cookies-from-browser "brave+basictext:$brave_dir" "$@"
+    rm -f "$err"
+    return $?
+  fi
+
+  cat "$err" >&2
+  rm -f "$err"
+  return 1
+}
+
+if [[ -r "$cookie_file" ]]; then
+  echo "[yt-dlp-mpv] using cookies file: $cookie_file" >&2
+  try_with_cookie_file_then_browser_fallback "$@" || exit $?
+  exit 0
+fi
+
+if [[ -d "$brave_dir" ]]; then
+  echo "[yt-dlp-mpv] cookies file missing; using cookies-from-browser (Brave) directly" >&2
+  exec "$ytdlp" "${extra_args[@]}" --cookies-from-browser "brave+basictext:$brave_dir" "$@"
+fi
+
+echo "[yt-dlp-mpv] no cookies available; proceeding without auth" >&2
+exec "$ytdlp" "${extra_args[@]}" "$@"

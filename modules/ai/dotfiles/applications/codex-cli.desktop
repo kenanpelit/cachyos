@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=OpenAI Codex
+Comment=OpenAI's AI coding agent
+Exec=ai-codex
+Icon=terminal
+Terminal=true
+Type=Application
+Categories=Development;ConsoleOnly;

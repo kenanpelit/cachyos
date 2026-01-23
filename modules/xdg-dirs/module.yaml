@@ -1,0 +1,7 @@
+description: XDG user-dirs (ported from nixosc)
+
+dotfiles:
+  - source: dotfiles/user-dirs.dirs
+    target: ~/.config/user-dirs.dirs
+  - source: dotfiles/user-dirs.conf
+    target: ~/.config/user-dirs.conf

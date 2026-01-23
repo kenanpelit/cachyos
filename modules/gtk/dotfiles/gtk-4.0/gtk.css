@@ -1,0 +1,7 @@
+/**
+ * GTK4 user CSS overrides (portable)
+ *
+ * Keep this file free of /nix/store references.
+ * Theme is selected via gtk-4.0/settings.ini (gtk-theme-name).
+ */
+@import url("dank-colors.css");

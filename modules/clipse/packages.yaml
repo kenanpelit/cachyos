@@ -1,0 +1,6 @@
+description: clipse packages
+
+packages:
+  - wl-clipboard
+  # NOTE: likely AUR on Arch/CachyOS (auto-detected by dcli)
+  - clipse

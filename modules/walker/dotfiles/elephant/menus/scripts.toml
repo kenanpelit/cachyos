@@ -1,0 +1,196 @@
+name = "scripts"
+name_pretty = "Scripts"
+icon = "application-x-executable"
+
+[[entries]]
+text = "Brave - AI"
+keywords = ["brave", "ai", "browser"]
+actions = { "run" = "start-brave-ai" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - Compecta"
+keywords = ["brave", "compecta", "browser"]
+actions = { "run" = "start-brave-compecta" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - Discord"
+keywords = ["brave", "discord", "browser"]
+actions = { "run" = "start-brave-discord" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - Exclude"
+keywords = ["brave", "exclude", "browser"]
+actions = { "run" = "start-brave-exclude" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - Kenp"
+keywords = ["brave", "kenp", "browser"]
+actions = { "run" = "start-brave-kenp" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - Spotify"
+keywords = ["brave", "spotify", "browser", "music"]
+actions = { "run" = "start-brave-spotify" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - TikTok"
+keywords = ["brave", "tiktok", "browser"]
+actions = { "run" = "start-brave-tiktok" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - Whats"
+keywords = ["brave", "whats", "whatsapp", "browser"]
+actions = { "run" = "start-brave-whats" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - WhatsApp"
+keywords = ["brave", "whatsapp", "browser", "chat"]
+actions = { "run" = "start-brave-whatsapp" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Brave - YouTube"
+keywords = ["brave", "youtube", "browser", "video"]
+actions = { "run" = "start-brave-youtube" }
+icon = "brave-browser"
+
+[[entries]]
+text = "Chrome - AI"
+keywords = ["chrome", "ai", "browser"]
+actions = { "run" = "start-chrome-ai" }
+icon = "google-chrome"
+
+[[entries]]
+text = "Chrome - Compecta"
+keywords = ["chrome", "compecta", "browser"]
+actions = { "run" = "start-chrome-compecta" }
+icon = "google-chrome"
+
+[[entries]]
+text = "Chrome - Kenp"
+keywords = ["chrome", "kenp", "browser"]
+actions = { "run" = "start-chrome-kenp" }
+icon = "google-chrome"
+
+[[entries]]
+text = "Chrome - Whats"
+keywords = ["chrome", "whats", "whatsapp", "browser"]
+actions = { "run" = "start-chrome-whats" }
+icon = "google-chrome"
+
+[[entries]]
+text = "Discord"
+keywords = ["discord", "chat", "voice"]
+actions = { "run" = "start-discord" }
+icon = "discord"
+
+[[entries]]
+text = "Ferdium"
+keywords = ["ferdium", "messenger", "chat"]
+actions = { "run" = "start-ferdium" }
+icon = "ferdium"
+
+[[entries]]
+text = "Kitty Single"
+keywords = ["kitty", "terminal", "single"]
+actions = { "run" = "start-kitty-single" }
+icon = "kitty"
+
+[[entries]]
+text = "Kenp (K)"
+keywords = ["kkenp", "kenp"]
+actions = { "run" = "start-kkenp" }
+icon = "utilities-terminal"
+
+[[entries]]
+text = "Kenp (M)"
+keywords = ["mkenp", "kenp"]
+actions = { "run" = "start-mkenp" }
+icon = "utilities-terminal"
+
+[[entries]]
+text = "MPV"
+keywords = ["mpv", "video", "player"]
+actions = { "run" = "start-mpv" }
+icon = "mpv"
+
+[[entries]]
+text = "Spotify"
+keywords = ["spotify", "music", "player"]
+actions = { "run" = "start-spotify" }
+icon = "spotify"
+
+[[entries]]
+text = "Webcord"
+keywords = ["webcord", "discord", "chat"]
+actions = { "run" = "start-webcord" }
+icon = "webcord"
+
+[[entries]]
+text = "Wezterm - RMPC"
+keywords = ["wezterm", "rmpc", "terminal", "music"]
+actions = { "run" = "start-wezterm-rmpc" }
+icon = "wezterm"
+
+[[entries]]
+text = "Wezterm"
+keywords = ["wezterm", "terminal"]
+actions = { "run" = "start-wezterm" }
+icon = "wezterm"
+
+[[entries]]
+text = "Kenp (W)"
+keywords = ["wkenp", "kenp"]
+actions = { "run" = "start-wkenp" }
+icon = "utilities-terminal"
+
+[[entries]]
+text = "Zen - Compecta"
+keywords = ["zen", "compecta", "browser"]
+actions = { "run" = "start-zen-compecta" }
+icon = "zen-browser"
+
+[[entries]]
+text = "Zen - Discord"
+keywords = ["zen", "discord", "browser"]
+actions = { "run" = "start-zen-discord" }
+icon = "zen-browser"
+
+[[entries]]
+text = "Zen - Kenp"
+keywords = ["zen", "kenp", "browser"]
+actions = { "run" = "start-zen-kenp" }
+icon = "zen-browser"
+
+[[entries]]
+text = "Zen - No VPN"
+keywords = ["zen", "novpn", "browser"]
+actions = { "run" = "start-zen-novpn" }
+icon = "zen-browser"
+
+[[entries]]
+text = "Zen - Proxy"
+keywords = ["zen", "proxy", "browser"]
+actions = { "run" = "start-zen-proxy" }
+icon = "zen-browser"
+
+[[entries]]
+text = "Zen - Spotify"
+keywords = ["zen", "spotify", "browser", "music"]
+actions = { "run" = "start-zen-spotify" }
+icon = "zen-browser"
+
+[[entries]]
+text = "Zen - Whats"
+keywords = ["zen", "whats", "whatsapp", "browser"]
+actions = { "run" = "start-zen-whats" }
+icon = "zen-browser"
+

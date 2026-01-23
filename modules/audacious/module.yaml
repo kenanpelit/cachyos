@@ -1,0 +1,7 @@
+description: Audacious config ported from nixosc
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/audacious
+    target: ~/.config/audacious

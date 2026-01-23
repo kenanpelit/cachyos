@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Brave Browser Launcher (portable; ported from nixosc)
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  cat <<'HELP'
+Brave Launcher
+
+Usage:
+  brave-launcher [extra Brave flags...] [URL...]
+
+This wrapper always adds a fixed set of flags:
+  - cache sizes
+  - Wayland (if detected)
+  - VA-API (if available)
+HELP
+  exit 0
+fi
+
+brave_bin="${BRAVE_BIN:-}"
+if [[ -z "$brave_bin" ]]; then
+  if command -v brave >/dev/null 2>&1; then
+    brave_bin="brave"
+  elif command -v brave-browser >/dev/null 2>&1; then
+    brave_bin="brave-browser"
+  else
+    brave_bin="brave"
+  fi
+fi
+
+flags=(
+  --disable-extensions-http-throttling
+  --disk-cache-size=268435456
+  --media-cache-size=134217728
+  --disable-default-apps
+  --no-default-browser-check
+  --no-first-run
+  --enable-smooth-scrolling
+  --lang=en-US
+  --accept-lang=en-US,tr-TR
+)
+
+# Hardware acceleration (best-effort)
+flags+=(
+  --enable-gpu-rasterization
+  --enable-zero-copy
+  --ignore-gpu-blocklist
+  --enable-accelerated-video-decode
+  --enable-accelerated-video-encode
+  --use-gl=egl
+)
+
+# Wayland flags (runtime detection)
+if [[ "${XDG_SESSION_TYPE:-}" == "wayland" || -n "${WAYLAND_DISPLAY:-}" ]]; then
+  flags+=(
+    --ozone-platform=wayland
+  )
+fi
+
+# Feature flags (deterministic)
+flags+=("--enable-features=BackForwardCache,QuietNotificationPrompts,TabFreeze,OverlayScrollbar,WebUIDarkMode,AutoDarkMode,VaapiVideoDecoder,VaapiVideoEncoder,VaapiVideoDecodeLinuxGL,UseOzonePlatform,WaylandWindowDecorations")
+flags+=("--disable-features=UseChromeOSDirectVideoDecoder")
+
+exec "$brave_bin" "${flags[@]}" "$@"

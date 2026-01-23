@@ -1,0 +1,5 @@
+description: XDG Portal packages
+packages:
+  - xdg-desktop-portal
+  - xdg-desktop-portal-gtk
+  - xdg-desktop-portal-wlr

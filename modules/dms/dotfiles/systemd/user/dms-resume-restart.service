@@ -1,0 +1,15 @@
+[Unit]
+Description=DMS: restart after resume
+After=hyprland-session.target niri-session.target dms.service
+PartOf=hyprland-session.target niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/dms-resume-restart
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=hyprland-session.target
+WantedBy=niri-session.target

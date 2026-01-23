@@ -1,0 +1,83 @@
+# ~/.config/elephant/snippets/system.toml
+# System commands and productivity snippets
+
+[[snippets]]
+name = "Check Disk Space"
+content = "df -h | grep -v tmpfs"
+
+[[snippets]]
+name = "System Info"
+content = "neofetch"
+
+[[snippets]]
+name = "CPU Info"
+content = "lscpu"
+
+[[snippets]]
+name = "Memory Usage"
+content = "free -h"
+
+[[snippets]]
+name = "Top Processes"
+content = "ps aux --sort=-%mem | head -10"
+
+[[snippets]]
+name = "Network Interfaces"
+content = "ip -c a"
+
+[[snippets]]
+name = "Open Ports"
+content = "ss -tuln"
+
+[[snippets]]
+name = "Journal Errors"
+content = "journalctl -p err -b"
+
+[[snippets]]
+name = "Systemd Failed"
+content = "systemctl --failed"
+
+[[snippets]]
+name = "List Services"
+content = "systemctl list-units --type=service --state=running"
+
+[[snippets]]
+name = "File Permissions"
+content = "chmod 644 file"
+
+[[snippets]]
+name = "Recursive Permissions"
+content = "chmod -R 755 directory"
+
+[[snippets]]
+name = "Change Owner"
+content = "chown user:group file"
+
+[[snippets]]
+name = "Find Files"
+content = "find . -name '*.txt' -type f"
+
+[[snippets]]
+name = "Grep Recursively"
+content = "grep -r 'pattern' ."
+
+[[snippets]]
+name = "Rsync Backup"
+content = "rsync -avz --progress source/ destination/"
+
+[[snippets]]
+name = "Tar Create"
+content = "tar -czf archive.tar.gz folder/"
+
+[[snippets]]
+name = "Tar Extract"
+content = "tar -xzf archive.tar.gz"
+
+[[snippets]]
+name = "Watch Command"
+content = "watch -n 2 'command'"
+
+[[snippets]]
+name = "Tail Follow"
+content = "tail -f /var/log/file.log"
+

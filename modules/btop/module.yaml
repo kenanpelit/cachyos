@@ -1,0 +1,6 @@
+description: btop config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/btop
+    target: ~/.config/btop

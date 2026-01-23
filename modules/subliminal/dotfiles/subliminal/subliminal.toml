@@ -1,0 +1,40 @@
+# Subliminal Configuration File (template)
+# Fill credentials manually (do NOT commit secrets).
+
+[providers.addic7ed]
+username = ""
+password = ""
+
+[providers.opensubtitles]
+username = ""
+password = ""
+
+[providers.opensubtitlescom]
+username = ""
+password = ""
+
+[refiners]
+omdb_api_key = ""
+
+cache_dir = "~/.cache/subliminal"
+
+languages = [
+  "tur",
+  "tr",
+  "eng",
+]
+
+[providers.enabled]
+addic7ed = true
+opensubtitles = true
+opensubtitlescom = true
+legendastv = false
+shooter = false
+thesubdb = true
+tvsubtitles = true
+
+[download]
+min_score = 0
+max_subtitles = 1
+hearing_impaired = false
+force = false

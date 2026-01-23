@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# AnyDesk wrapper (ported from nixosc)
+export GTK_THEME="Catppuccin-Mocha-Blue-Standard"
+export QT_STYLE_OVERRIDE="kvantum"
+export GDK_BACKEND="x11"
+
+exec anydesk "$@"

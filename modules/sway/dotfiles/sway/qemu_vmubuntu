@@ -1,0 +1,5 @@
+# Launch Ubuntu VM using the svmubuntu command
+exec svmubuntu
+
+# Force QEMU windows to fullscreen for optimal viewing
+for_window [app_id="qemu"] fullscreen enable

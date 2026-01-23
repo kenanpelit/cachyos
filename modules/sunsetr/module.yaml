@@ -1,0 +1,6 @@
+description: sunsetr config (ported from nixosc)
+
+
+dotfiles:
+  - source: dotfiles/sunsetr
+    target: ~/.config/sunsetr

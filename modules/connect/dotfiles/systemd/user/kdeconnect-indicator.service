@@ -1,0 +1,13 @@
+[Unit]
+Description=KDE Connect indicator
+After=kdeconnect.service
+Wants=kdeconnect.service
+
+[Service]
+Type=simple
+ExecStart=kdeconnect-indicator
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

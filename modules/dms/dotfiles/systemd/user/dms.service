@@ -1,0 +1,35 @@
+[Unit]
+Description=DankMaterialShell
+After=hyprland-session.target niri-session.target niri-ready.service
+PartOf=hyprland-session.target niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+Environment=DMS_SCREENSHOT_EDITOR=swappy
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+Environment=XDG_SESSION_TYPE=wayland
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+Environment=QT_ICON_THEME=a-candy-beauty-icon-theme
+Environment=XDG_ICON_THEME=a-candy-beauty-icon-theme
+Environment=QT_QPA_PLATFORMTHEME=gtk3
+ExecStart=dms run --session
+KillSignal=SIGINT
+Restart=always
+RestartSec=3
+TimeoutStopSec=10
+StandardOutput=journal
+StandardError=journal
+
+PassEnvironment=WAYLAND_DISPLAY
+PassEnvironment=NIRI_SOCKET
+PassEnvironment=HYPRLAND_INSTANCE_SIGNATURE
+PassEnvironment=HYPRLAND_SOCKET
+PassEnvironment=SWAYSOCK
+PassEnvironment=XDG_CURRENT_DESKTOP
+PassEnvironment=XDG_SESSION_TYPE
+PassEnvironment=XDG_SESSION_DESKTOP
+
+[Install]
+WantedBy=hyprland-session.target
+WantedBy=niri-session.target

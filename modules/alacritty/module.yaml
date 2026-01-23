@@ -1,0 +1,7 @@
+description: Alacritty config ported from nixosc
+
+dotfiles_sync: true
+
+dotfiles:
+  - source: dotfiles/alacritty
+    target: ~/.config/alacritty
