@@ -1,0 +1,12 @@
+[MIME Cache]
+image/bmp=imv-dir.desktop;
+image/gif=imv-dir.desktop;
+image/jpeg=imv-dir.desktop;
+image/png=imv-dir.desktop;
+image/svg+xml=imv-dir.desktop;
+image/tiff=imv-dir.desktop;
+image/vnd.microsoft.icon=imv-dir.desktop;
+image/webp=imv-dir.desktop;
+text/plain=kitty-nvim.desktop;
+x-scheme-handler/anydesk=runanydesk.desktop;
+x-scheme-handler/mpv=open-in-mpv.desktop;
