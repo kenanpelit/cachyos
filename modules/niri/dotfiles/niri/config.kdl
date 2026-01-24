@@ -79,7 +79,6 @@ layer-rule {
 
 spawn-at-startup "niri-set" "env"
 spawn-at-startup "/usr/bin/clipse" "-listen"
-spawn-at-startup "systemctl" "--user" "start" "niri-session.target"
 
 // ------------------------------------------------------------------------
 // Input
