@@ -126,6 +126,15 @@ config_backups:
   enabled: true
   max_backups: 5
 
+# System backups (Timeshift/Snapper)
+system_backups:
+  enabled: true
+  backup_on_sync: true
+  backup_on_update: true
+  tool: snapper
+  snapper_config: root
+  max_backups: 5
+
 # Default applications configuration
 default_apps:
   scope: user # "user" or "system"
