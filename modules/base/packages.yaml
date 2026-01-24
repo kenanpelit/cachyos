@@ -109,7 +109,7 @@ packages:
   # Documents (moved evince, zathura)
   - poppler
   # pdftk pulls java-runtime-headless; pick a concrete provider to avoid pacman prompts
-  - jre-openjdk-headless
+  - jdk-openjdk
   - pdftk
   - qalculate-gtk
 
