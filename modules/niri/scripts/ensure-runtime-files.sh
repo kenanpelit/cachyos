@@ -7,14 +7,16 @@ if [ -z "${USER_HOME:-}" ]; then
   USER_HOME="$(eval echo "~$REAL_USER")"
 fi
 
-DMS_DIR="$USER_HOME/.config/niri/dms"
+NIRI_DIR="$USER_HOME/.config/niri"
+DMS_DIR="$NIRI_DIR/dms"
 USER_GROUP=""
 if [ "$(id -u)" -eq 0 ]; then
   USER_GROUP="$(id -gn "$REAL_USER" 2>/dev/null || true)"
 fi
 
 if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
-  install -d -m0755 -o "$REAL_USER" -g "$USER_GROUP" "$DMS_DIR"
+  install -d -m0755 -o "$REAL_USER" -g "$USER_GROUP" "$NIRI_DIR" "$DMS_DIR"
+  chown "$REAL_USER:$USER_GROUP" "$NIRI_DIR" "$DMS_DIR" 2>/dev/null || true
 else
   mkdir -p "$DMS_DIR"
 fi
