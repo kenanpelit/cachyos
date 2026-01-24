@@ -440,6 +440,7 @@ env)
   # ----------------------------------------------------------------------------
   (
     set -euo pipefail
+    echo "Niri Set Env Started at $(date)" > /tmp/niri-set-env.log
 
     LOG_TAG="niri-env"
     log() { printf '[%s] %s\n' "$LOG_TAG" "$*" >&2; }

@@ -77,7 +77,7 @@ layer-rule {
 // Long-running daemons are preferably started via systemd --user (niri-session.target).
 // Here we only start the minimal session bootstrap + helpers that must exist early.
 
-spawn-at-startup "niri-set" "env"
+spawn-at-startup "~/.local/bin/niri-set" "env"
 spawn-at-startup "/usr/bin/clipse" "-listen"
 
 // ------------------------------------------------------------------------
