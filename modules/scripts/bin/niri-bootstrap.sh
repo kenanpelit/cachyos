@@ -4,6 +4,9 @@ set -euo pipefail
 log() { printf "[niri-bootstrap] %s\n" "$*"; }
 warn() { printf "[niri-bootstrap] WARN: %s\n" "$*" >&2; }
 
+# Delay for visibility (User request)
+sleep 3
+
 if command -v notify-send >/dev/null 2>&1; then
   notify-send -t 2500 "Niri" "Bootstrap başladı" >/dev/null 2>&1 || true
 fi
