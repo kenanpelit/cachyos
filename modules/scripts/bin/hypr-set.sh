@@ -37,6 +37,21 @@
 
 set -euo pipefail
 
+load_dconf() {
+  # Apply GTK dark theme settings via dconf/gsettings
+  if command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-mauve-standard+default' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface icon-theme 'candy-icons' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-mauve-cursors' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface font-name 'Maple Mono NF 12' 2>/dev/null || true
+    gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu' 2>/dev/null || true
+    
+    # Legacy GTK3 settings
+    gsettings set org.gnome.desktop.interface gtk-key-theme "Default" 2>/dev/null || true
+  fi
+}
+
 start_clipse_listener() {
   command -v clipse >/dev/null 2>&1 || return 0
 
@@ -73,6 +88,7 @@ Commands:
   clipse             Start clipse clipboard listener (background)
   init               Session bootstrap
   lock               Lock session via DMS/logind
+  here               Move specific window to current workspace (smart match)
   arrange-windows     Move windows to target workspaces
   workspace-monitor  Workspace/monitor helper
   env-sync           Sync session env into systemd/dbus
@@ -96,6 +112,7 @@ Commands:
   start-batteryd     Battery daemon helper
   smart-focus        Focus existing window or spawn command
   pull-window        Find window and move to current workspace
+  here               Bring window here (or launch); `all` gathers a set
   workspace-pull     Move windows from target workspace to current
   zen                Toggle Zen Mode (hide gaps, borders, bar)
   pin                Toggle Pin Mode (PIP-style floating window)
@@ -121,6 +138,96 @@ cmd="${1:-}"
 shift || true
 
 case "${cmd}" in
+  here)
+    (
+      set -euo pipefail
+      APP_ID="${1:-}"
+      
+      if [[ -z "$APP_ID" ]]; then
+        echo "Usage: hypr-set here <app_name>" >&2
+        exit 1
+      fi
+
+      ensure_hypr_env
+      command -v hyprctl >/dev/null 2>&1 || exit 0
+      command -v jq >/dev/null 2>&1 || exit 0
+
+      launch_app() {
+        if command -v notify-send >/dev/null 2>&1; then
+            notify-send -t 1000 "Hyprland" "Launching ${APP_ID}..." 2>/dev/null || true
+        fi
+        
+        case "$APP_ID" in
+          "Kenp") start-brave-kenp & ;;
+          "TmuxKenp") start-kkenp & ;;
+          "Ai") start-brave-ai & ;;
+          "CompecTA") start-brave-compecta & ;;
+          "WebCord") webcord & ;;
+          "org.telegram.desktop") telegram-desktop & ;;
+          "brave-youtube.com__-Default") start-brave-youtube & ;;
+          "spotify") spotify & ;;
+          "ferdium") ferdium & ;;
+          "discord") discord & ;;
+          "kitty") kitty & ;;
+          *)
+            if command -v "$APP_ID" >/dev/null 2>&1; then
+              "$APP_ID" &
+            else
+              if command -v notify-send >/dev/null 2>&1; then
+                  notify-send "Error" "No command found for ${APP_ID}" "critical"
+              fi
+              exit 1
+            fi
+            ;;
+        esac
+      }
+
+      current_ws="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id // empty' || true)"
+      clients="$(hyprctl clients -j 2>/dev/null || echo '[]')"
+
+      # 1. Check if already on current workspace
+      addr_here="$(
+        echo "$clients" \
+          | jq -r --arg app "$APP_ID" --arg ws "$current_ws" '
+              .[]
+              | select(((.class // "") | ascii_downcase) == ($app | ascii_downcase)
+                    or ((.initialClass // "") | ascii_downcase) == ($app | ascii_downcase)
+                    or ((.title // "") | ascii_downcase) == ($app | ascii_downcase))
+              | select(.workspace.id == ($ws | tonumber))
+              | .address
+            ' \
+          | head -n1 || true
+      )"
+
+      if [[ -n "${addr_here}" && "${addr_here}" != "null" ]]; then
+        hyprctl dispatch focuswindow "address:${addr_here}" >/dev/null 2>&1 || true
+        exit 0
+      fi
+
+      # 2. Check anywhere else
+      addr_any="$(
+        echo "$clients" \
+          | jq -r --arg app "$APP_ID" '
+              .[]
+              | select(((.class // "") | ascii_downcase) == ($app | ascii_downcase)
+                    or ((.initialClass // "") | ascii_downcase) == ($app | ascii_downcase)
+                    or ((.title // "") | ascii_downcase) == ($app | ascii_downcase))
+              | .address
+            ' \
+          | head -n1 || true
+      )"
+
+      if [[ -n "${addr_any}" && "${addr_any}" != "null" ]]; then
+        hyprctl dispatch movetoworkspace "${current_ws},address:${addr_any}" >/dev/null 2>&1 || true
+        hyprctl dispatch focuswindow "address:${addr_any}" >/dev/null 2>&1 || true
+        exit 0
+      fi
+
+      # 3. Not found -> Launch
+      launch_app
+    )
+    ;;
+
   smart-focus)
     (
       set -euo pipefail
@@ -141,6 +248,119 @@ case "${cmd}" in
         # Not found, spawn it
         # If cmd is "anotes", handle specially or just exec
         exec "$cmd" &
+      fi
+    )
+    ;;
+
+  here)
+    (
+      set -euo pipefail
+      
+      # Default list for 'all' command
+      DEFAULT_APPS=(
+        "Kenp"
+        "TmuxKenp"
+        "Ai"
+        "CompecTA"
+        "WebCord"
+        "brave-youtube.com__-Default"
+        "spotify"
+        "ferdium"
+      )
+
+      notify() {
+        command -v notify-send >/dev/null 2>&1 || return 0
+        local body="${1:-}"
+        notify-send -t 2000 "Hyprland" "$body" 2>/dev/null || true
+      }
+
+      process_app() {
+        local APP_ID="$1"
+        
+        # 1. Find window address (Exact case-insensitive match on class or initialClass)
+        # Regex causes issues with overlapping names (e.g. Kenp vs TmuxKenp).
+        # We use ascii_downcase equality check instead.
+        
+        # Special case for Spotify (class mismatch)
+        if [[ "${APP_ID,,}" == "spotify" ]]; then
+             # Try both standard Spotify and com.spotify.Client
+             addr=$(hyprctl clients -j | jq -r '
+               .[] | select(.class == "Spotify" or .class == "com.spotify.Client" or .initialClass == "Spotify") | .address
+             ' | head -n1)
+        else
+             addr=$(hyprctl clients -j | jq -r --arg app "$APP_ID" '
+               .[]
+               | select(((.class // "") | ascii_downcase) == ($app | ascii_downcase)
+                     or ((.initialClass // "") | ascii_downcase) == ($app | ascii_downcase)
+                     or ((.title // "") | ascii_downcase) == ($app | ascii_downcase))
+               | .address
+             ' | head -n1)
+        fi
+
+        if [[ -n "$addr" ]]; then
+          current_ws=$(hyprctl activeworkspace -j | jq -r '.id')
+          
+          # Check if already on current workspace
+          win_ws=$(hyprctl clients -j | jq -r --arg addr "$addr" '.[] | select(.address == $addr) | .workspace.id')
+          
+          if [[ "$win_ws" != "$current_ws" ]]; then
+             hyprctl dispatch movetoworkspace "$current_ws,address:$addr" >/dev/null
+             notify "$APP_ID moved here."
+          else
+             notify "$APP_ID focused."
+          fi
+          
+          hyprctl dispatch focuswindow "address:$addr" >/dev/null
+          return 0
+        fi
+
+        # 2. Launch if not found
+        notify "Launching $APP_ID..."
+        case "$APP_ID" in
+          "Kenp") start-brave-kenp >/dev/null 2>&1 & ;;
+          "TmuxKenp") start-kkenp >/dev/null 2>&1 & ;;
+          "Ai") start-brave-ai >/dev/null 2>&1 & ;;
+          "CompecTA") start-brave-compecta >/dev/null 2>&1 & ;;
+          "WebCord") start-webcord >/dev/null 2>&1 & ;;
+          "brave-youtube.com__-Default") start-brave-youtube >/dev/null 2>&1 & ;;
+          "spotify") start-spotify >/dev/null 2>&1 & ;;
+          "ferdium") start-ferdium >/dev/null 2>&1 & ;;
+          "discord") start-discord >/dev/null 2>&1 & ;;
+          "kitty") kitty >/dev/null 2>&1 & ;;
+          *)
+            if command -v "$APP_ID" >/dev/null 2>&1; then
+              "$APP_ID" >/dev/null 2>&1 &
+            else
+              notify "Error: No start command found for $APP_ID"
+            fi
+            ;;
+        esac
+      }
+
+      APP_ID="${1:-}"
+      LIST="${2:-}"
+
+      if [[ -z "$APP_ID" ]]; then
+        echo "Error: App ID is required."
+        exit 1
+      fi
+
+      if [[ "$APP_ID" == "all" ]]; then
+        if [[ -n "$LIST" ]]; then
+          IFS=',' read -ra APPS <<<"$LIST"
+        else
+          APPS=("${DEFAULT_APPS[@]}")
+        fi
+
+        for app in "${APPS[@]}"; do
+          process_app "$app"
+          sleep 0.1
+        done
+        
+        process_app "Kenp"
+        notify "All apps gathered."
+      else
+        process_app "$APP_ID"
       fi
     )
     ;;
@@ -1027,6 +1247,8 @@ EOF
     (
       set -euo pipefail
       ensure_hypr_env || true
+      
+      load_dconf
 
       env_vars=(
         DISPLAY
@@ -1036,9 +1258,14 @@ EOF
         XDG_SESSION_TYPE
         XDG_SESSION_DESKTOP
         QT_QPA_PLATFORMTHEME
+        QT_QPA_PLATFORMTHEME_QT6
         QT_QPA_PLATFORM
         XCURSOR_THEME
         XCURSOR_SIZE
+        XDG_ICON_THEME
+        GTK_THEME
+        GTK_USE_PORTAL
+        GTK_APPLICATION_PREFER_DARK_THEME
         PATH
         XDG_DATA_DIRS
         SSH_AUTH_SOCK
@@ -1565,6 +1792,8 @@ setup_environment() {
 	export CATPPUCCIN_FLAVOR="$CATPPUCCIN_FLAVOR"
 	export CATPPUCCIN_ACCENT="$CATPPUCCIN_ACCENT"
 
+	load_dconf
+
 	info "Environment setup tamamlandı"
 }
 
@@ -1977,6 +2206,8 @@ set -euo pipefail
 # ==============================================================================
 
 set -euo pipefail
+
+load_dconf
 
 LOG_TAG="hypr-init"
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }

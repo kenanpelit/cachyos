@@ -1,8 +1,6 @@
 description: Niri compositor config (ported from nixosc)
 
 dotfiles:
-  - source: dotfiles/niri-set
-    target: ~/.local/bin/niri-set
   - source: dotfiles/niri/config.kdl
     target: ~/.config/niri/config.kdl
   - source: dotfiles/portals.conf

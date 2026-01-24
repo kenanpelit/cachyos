@@ -16,19 +16,9 @@ for f in outputs.conf cursor.conf; do
   chmod 0644 "$path" || true
 done
 
-# --- Local Bin Installation ---
+# --- System-wide Session Entry ---
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
-
-echo "Installing hypr-set to $HOME/.local/bin/..."
-if [ -f "$DOTFILES_DIR/hypr-set" ]; then
-    cp "$DOTFILES_DIR/hypr-set" "$HOME/.local/bin/hypr-set"
-    chmod +x "$HOME/.local/bin/hypr-set"
-else
-    echo "  ! Warning: Source file not found: $DOTFILES_DIR/hypr-set"
-fi
-
-# --- System-wide Session Entry ---
 # Desktop entry still needs to be in /usr/share/wayland-sessions to be seen by the greeter.
 echo "Checking system-wide Hyprland session entry..."
 if [ -w "/usr/share/wayland-sessions" ] || [ -n "${SUDO_USER:-}" ]; then
