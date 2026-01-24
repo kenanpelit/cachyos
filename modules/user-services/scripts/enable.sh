@@ -8,6 +8,15 @@ else
   REAL_USER="$(whoami)"
 fi
 
+USER_HOME="$(getent passwd "$REAL_USER" | cut -d: -f6 2>/dev/null || true)"
+if [ -z "${USER_HOME:-}" ]; then
+  USER_HOME="$(eval echo "~$REAL_USER")"
+fi
+
+# Repository root (this script lives at modules/user-services/scripts/enable.sh)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
+
 # Define services
 services=(
   mpd.service
@@ -37,6 +46,20 @@ run_as_user() {
     "$@"
   fi
 }
+
+# Ensure MPD uses user-scoped config, not /etc/mpd.conf (/var/lib/mpd)
+if [ -f "$REPO_ROOT/modules/mpd/dotfiles/mpd/mpd.conf" ]; then
+  run_as_user install -Dm644 \
+    "$REPO_ROOT/modules/mpd/dotfiles/mpd/mpd.conf" \
+    "$USER_HOME/.config/mpd/mpd.conf"
+fi
+if [ -f "$REPO_ROOT/modules/mpd/dotfiles/systemd/user/mpd.service" ]; then
+  run_as_user install -Dm644 \
+    "$REPO_ROOT/modules/mpd/dotfiles/systemd/user/mpd.service" \
+    "$USER_HOME/.config/systemd/user/mpd.service"
+fi
+
+run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
 for s in "${services[@]}"; do
   # Check if service exists

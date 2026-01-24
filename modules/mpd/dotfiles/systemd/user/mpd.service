@@ -5,8 +5,8 @@ After=sound.target
 
 [Service]
 Type=simple
-ExecStartPre=/usr/bin/bash -lc 'mkdir -p %h/.local/share/mpd %h/Music/playlists'
-ExecStart=mpd --no-daemon %h/.config/mpd/mpd.conf
+ExecStartPre=/usr/bin/bash -lc 'mkdir -p %h/.config/mpd %h/.local/share/mpd/playlists %h/Music'
+ExecStart=/usr/bin/mpd --no-daemon %h/.config/mpd/mpd.conf
 Restart=on-failure
 RestartSec=5
 
