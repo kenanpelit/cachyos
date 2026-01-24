@@ -19,6 +19,7 @@ services=(
   flatpak-managed-install.timer
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
+  niri-bootstrap.service
 )
 
 echo "Enabling user services for user: $REAL_USER..."
