@@ -893,6 +893,16 @@ env)
         return 0
       fi
 
+      # Wait for environment to propagate via DBus
+      sleep 1
+
+      # Verify env
+      if ! systemctl --user show-environment | grep -q "WAYLAND_DISPLAY="; then
+         notify "Retrying Env Import..."
+         systemctl --user import-environment WAYLAND_DISPLAY NIRI_SOCKET XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+         sleep 0.5
+      fi
+
       notify "Starting Session Target..."
       systemctl --user start niri-session.target 2>/dev/null || true
     }
