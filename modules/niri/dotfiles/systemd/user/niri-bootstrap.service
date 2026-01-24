@@ -8,7 +8,8 @@ ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 
 [Service]
-Type=simple
+Type=oneshot
+RemainAfterExit=yes
 TimeoutStartSec=60
 # Set environment variables if needed, though niri-bootstrap script handles defaults
 ExecStart=/usr/bin/bash -lc "%h/.local/bin/niri-bootstrap"
