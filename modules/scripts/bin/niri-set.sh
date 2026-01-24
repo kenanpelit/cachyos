@@ -346,6 +346,41 @@ here)
     process_app() {
       local APP_ID="$1"
 
+      find_window_id() {
+        local want="$1"
+        niri msg -j windows 2>/dev/null | jq -r --arg app "$want" '
+          first(.[]
+            | select(
+                ((.app_id // "") | ascii_downcase) == ($app | ascii_downcase)
+                or ((.title // "") | ascii_downcase) == ($app | ascii_downcase)
+              )
+            | .id
+          ) // empty
+        ' 2>/dev/null
+      }
+
+      get_active_workspace() {
+        niri msg -j workspaces 2>/dev/null | jq -r '
+          first(.[] | select(.is_active)) as $ws
+          | "\($ws.output // $ws.output_name // "")\t\($ws.index // $ws.workspace_index // $ws.id // "")"
+        ' 2>/dev/null
+      }
+
+      move_to_current_workspace() {
+        local window_id="$1"
+        local target_out="" target_idx=""
+        read -r target_out target_idx <<<"$(get_active_workspace)"
+
+        if [[ -n "$target_out" ]]; then
+          niri msg action move-window-to-monitor --id "$window_id" "$target_out" >/dev/null 2>&1 || true
+          niri msg action focus-monitor "$target_out" >/dev/null 2>&1 || true
+        fi
+        if [[ -n "$target_idx" ]]; then
+          niri msg action move-window-to-workspace --window-id "$window_id" --focus false "$target_idx" >/dev/null 2>&1 || true
+        fi
+        niri msg action focus-window --id "$window_id" >/dev/null 2>&1 || true
+      }
+
       # --- 1. Try to pull existing window (Nirius) ---
       if command -v nirius >/dev/null 2>&1; then
         if nirius move-to-current-workspace --app-id "^${APP_ID}$" --focus >/dev/null 2>&1; then
@@ -354,12 +389,12 @@ here)
         fi
       fi
 
-      # --- 2. Check if it's already here but not focused ---
+      # --- 2. Fallback: find by app_id/title and move to current workspace ---
       if command -v niri >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-        window_id=$(niri msg -j windows | jq -r --arg app "$APP_ID" '.[] | select(.app_id == $app) | .id' | head -n1)
+        window_id="$(find_window_id "$APP_ID")"
         if [[ -n "$window_id" ]]; then
-          niri msg action focus-window --id "$window_id"
-          send_notify "<b>$APP_ID</b> focused."
+          move_to_current_workspace "$window_id"
+          send_notify "<b>$APP_ID</b> moved to current workspace."
           return 0
         fi
       fi
@@ -387,6 +422,19 @@ here)
         fi
         ;;
       esac
+
+      # --- 4. Post-launch: wait briefly and move to current workspace ---
+      if command -v niri >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+        for _ in {1..30}; do
+          window_id="$(find_window_id "$APP_ID")"
+          if [[ -n "$window_id" ]]; then
+            move_to_current_workspace "$window_id"
+            send_notify "<b>$APP_ID</b> moved to current workspace."
+            return 0
+          fi
+          sleep 0.1
+        done
+      fi
     }
 
     APP_ID="${1:-}"
