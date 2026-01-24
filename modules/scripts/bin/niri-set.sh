@@ -40,6 +40,46 @@ start_clipse_listener() {
   clipse -listen >/dev/null 2>&1 || true
 }
 
+ensure_niri_socket() {
+  if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+    return 0
+  fi
+
+  if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+    export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+  fi
+
+  local display="${WAYLAND_DISPLAY:-}"
+  if [[ -z "$display" ]]; then
+    local sock
+    for sock in "${XDG_RUNTIME_DIR}"/wayland-*; do
+      [[ -S "$sock" ]] || continue
+      display="$(basename "$sock")"
+      export WAYLAND_DISPLAY="$display"
+      break
+    done
+  fi
+
+  shopt -s nullglob
+  local candidate
+  if [[ -n "$display" ]]; then
+    for candidate in "${XDG_RUNTIME_DIR}/niri.${display}."*.sock; do
+      [[ -S "$candidate" ]] || continue
+      export NIRI_SOCKET="$candidate"
+      shopt -u nullglob
+      return 0
+    done
+  fi
+  for candidate in "${XDG_RUNTIME_DIR}/niri."*.sock; do
+    [[ -S "$candidate" ]] || continue
+    export NIRI_SOCKET="$candidate"
+    shopt -u nullglob
+    return 0
+  done
+  shopt -u nullglob
+  return 1
+}
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -167,6 +207,7 @@ pin)
   # ----------------------------------------------------------------------------
   (
     set -euo pipefail
+    command -v jq >/dev/null 2>&1 || exit 0
 
     # Helper: Get focused window geometry (x y w h) with retry
     get_window_geo() {
@@ -408,7 +449,6 @@ tty)
     NIRI_LOG="$LOG_DIR/niri.log"
     DEBUG_LOG="$LOG_DIR/niri_debug.log"
     readonly MAX_LOG_SIZE=10485760 # 10MB
-    readonly MAX_LOG_BACKUPS=3
 
     # Terminal renk kodları
     readonly C_GREEN='\033[0;32m'
@@ -418,10 +458,6 @@ tty)
     readonly C_CYAN='\033[0;36m'
     readonly C_MAGENTA='\033[0;35m'
     readonly C_RESET='\033[0m'
-
-    # Catppuccin flavor ve accent
-    CATPPUCCIN_FLAVOR="${CATPPUCCIN_FLAVOR:-mocha}"
-    CATPPUCCIN_ACCENT="${CATPPUCCIN_ACCENT:-mauve}"
 
     # Mode flags
     DEBUG_MODE=false
@@ -1527,20 +1563,7 @@ float)
   # ----------------------------------------------------------------------------
   (
     set -euo pipefail
-
-    ensure_niri_socket() {
-      if [[ -n "${NIRI_SOCKET:-}" ]] && [[ -S "${NIRI_SOCKET}" ]]; then return 0; fi
-      [[ -n "${XDG_RUNTIME_DIR:-}" ]] || export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-      local d="${WAYLAND_DISPLAY:-}"
-      if [[ -z "$d" ]]; then
-        for s in "$XDG_RUNTIME_DIR"/wayland-*; do [[ -S "$s" ]] && d="$(basename "$s")" && break; done
-      fi
-      if [[ -n "$d" ]]; then
-        for s in "$XDG_RUNTIME_DIR"/niri."$d".*.sock; do [[ -S "$s" ]] && export NIRI_SOCKET="$s" && return 0; done
-      fi
-      for s in "$XDG_RUNTIME_DIR"/niri.*.sock; do [[ -S "$s" ]] && export NIRI_SOCKET="$s" && return 0; done
-      return 1
-    }
+    command -v jq >/dev/null 2>&1 || exit 0
 
     ensure_niri_socket || {
       echo "Niri socket not found" >&2
@@ -1572,6 +1595,10 @@ flow)
   # ----------------------------------------------------------------------------
   (
     set -euo pipefail
+    command -v jq >/dev/null 2>&1 || {
+      echo "[NiriFlow] jq not found; exiting" >&2
+      exit 1
+    }
 
     : "${XDG_RUNTIME_DIR:="/run/user/$(id -u)"}"
     PATH="/run/current-system/sw/bin:/etc/profiles/per-user/${USER}/bin:${PATH}"
@@ -1597,45 +1624,6 @@ flow)
     }
 
     log() { echo "[$SCRIPT_NAME] $1" >&2; }
-
-    detect_wayland_display() {
-      if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-        return 0
-      fi
-
-      local sock
-      for sock in "${XDG_RUNTIME_DIR}"/wayland-*; do
-        [[ -S "$sock" ]] || continue
-        export WAYLAND_DISPLAY
-        WAYLAND_DISPLAY="$(basename "$sock")"
-        return 0
-      done
-    }
-
-    ensure_niri_socket() {
-      if [[ -n "${NIRI_SOCKET:-}" ]] && [[ -S "${NIRI_SOCKET}" ]]; then
-        return 0
-      fi
-
-      detect_wayland_display || true
-
-      shopt -s nullglob
-      local candidates=()
-      if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-        candidates+=("${XDG_RUNTIME_DIR}/niri.${WAYLAND_DISPLAY}."*.sock)
-      fi
-      candidates+=("${XDG_RUNTIME_DIR}/niri."*.sock)
-
-      local sock
-      for sock in "${candidates[@]}"; do
-        [[ -S "$sock" ]] || continue
-        export NIRI_SOCKET="$sock"
-        shopt -u nullglob
-        return 0
-      done
-      shopt -u nullglob
-      return 1
-    }
 
     niri_action() {
       ensure_niri_socket >/dev/null 2>&1 || true
