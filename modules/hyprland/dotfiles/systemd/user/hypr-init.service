@@ -1,0 +1,15 @@
+[Unit]
+Description=Hyprland session bootstrap (monitors + audio)
+After=graphical-session.target hyprland-session.target
+PartOf=hyprland-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash -lc 'sleep 5 && %h/.local/bin/hypr-set init'
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=hyprland-session.target

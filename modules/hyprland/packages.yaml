@@ -4,12 +4,16 @@ packages:
   - hyprland
   - hyprpaper
   - hyprpicker
+  - polkit-gnome
   - pyprland
+  - network-manager-applet
   - xdg-desktop-portal
   - xdg-desktop-portal-hyprland
   - swaybg
+  - wl-clip-persist
   - wlogout
   - wob
   - uwsm
   - hyprland-plugin-hyprexpo
   - hyprland-plugin-hyprscrolling
+  - gnome-keyring

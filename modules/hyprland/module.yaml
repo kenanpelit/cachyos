@@ -10,6 +10,16 @@ dotfiles:
     target: ~/.config/hypr/themes
   - source: dotfiles/systemd/user/hyprland-session.target
     target: ~/.config/systemd/user/hyprland-session.target
+  - source: dotfiles/systemd/user/hyprland-polkit-agent.service
+    target: ~/.config/systemd/user/hyprland-polkit-agent.service
+  - source: dotfiles/systemd/user/hypr-nm-applet.service
+    target: ~/.config/systemd/user/hypr-nm-applet.service
+  - source: dotfiles/systemd/user/hypr-clip-persist.service
+    target: ~/.config/systemd/user/hypr-clip-persist.service
+  - source: dotfiles/systemd/user/hypr-init.service
+    target: ~/.config/systemd/user/hypr-init.service
+  - source: dotfiles/systemd/user/gnome-keyring-secrets.service
+    target: ~/.config/systemd/user/gnome-keyring-secrets.service
 
 post_install_hook: scripts/ensure-runtime-files.sh
 post_hook_behavior: always

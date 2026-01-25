@@ -23,6 +23,11 @@ services=(
   fusuma.service
   kdeconnect.service
   kdeconnect-indicator.service
+  hyprland-polkit-agent.service
+  hypr-nm-applet.service
+  hypr-clip-persist.service
+  hypr-init.service
+  gnome-keyring-secrets.service
   ollama.service
   stasis.service
   flatpak-managed-install.timer
