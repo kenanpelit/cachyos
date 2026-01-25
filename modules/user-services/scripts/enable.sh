@@ -29,6 +29,7 @@ services=(
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
   niri-bootstrap.service
+  transmission.service
 )
 
 echo "Enabling user services for user: $REAL_USER..."
