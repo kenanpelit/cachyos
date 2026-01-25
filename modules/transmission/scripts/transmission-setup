@@ -10,7 +10,7 @@ mkdir -p "$HOME/.tor/transmission/complete" \
   "$HOME/.tor/transmission/watch" \
   "$blocklists_dir"
 
-# Write settings.json (portable; based on nixosc)
+# Write settings.json (portable)
 tmp="$settings_file.tmp"
 cat >"$tmp" <<JSON
 {

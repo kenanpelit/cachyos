@@ -37,7 +37,7 @@ readonly BRAVE_DIR="$HOME/.config/BraveSoftware/Brave-Browser/Default/Extensions
 readonly SCRIPT_VERSION="2.0"
 
 # =============================================================================
-# Extension Listesi - NixOS konfigürasyonu ile senkron
+# Extension Listesi - Linux konfigürasyonu ile senkron
 # =============================================================================
 
 # Core Extensions (her zaman yüklenir)

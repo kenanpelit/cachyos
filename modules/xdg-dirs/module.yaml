@@ -1,4 +1,4 @@
-description: XDG user-dirs (ported from nixosc)
+description: XDG user-dirs (portable config)
 
 dotfiles:
   - source: dotfiles/user-dirs.dirs

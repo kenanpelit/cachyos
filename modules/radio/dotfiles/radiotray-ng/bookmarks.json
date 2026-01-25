@@ -3,7 +3,7 @@
     "group": "Kenp Radio",
     "stations": [
       {
-        "image": "~/Pictures/wallpapers/nixos/virgin.png",
+        "image": "~/Pictures/wallpapers/virgin.png",
         "name": "VirginRadioTurkiye",
         "url": "http://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC"
       }

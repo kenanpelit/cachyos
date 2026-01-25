@@ -1,4 +1,4 @@
-description: kitty config (ported from nixosc)
+description: kitty config (portable config)
 
 dotfiles:
   - source: dotfiles/kitty

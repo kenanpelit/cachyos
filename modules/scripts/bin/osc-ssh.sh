@@ -5,7 +5,7 @@
 #   Version: 1.0.0
 #   Date: 2024-05-05
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: Comprehensive SSH management utility combining ASSH management,
 #                session control, hosts backup, and secure connection setup
 #

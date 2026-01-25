@@ -5,7 +5,7 @@
 #   Version: 1.1.0
 #   Date: 2025-03-04
 #   Original Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: Comprehensive blocklist management utility for Transmission
 #                that aggregates and processes multiple IP blocklists
 #

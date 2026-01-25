@@ -1,4 +1,4 @@
-description: clipse config (ported from nixosc)
+description: clipse config (portable config)
 
 # NOTE: `clipse` may be an AUR package on Arch.
 dotfiles:

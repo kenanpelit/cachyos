@@ -1,4 +1,4 @@
-description: Neovim config (ported from nixosc)
+description: Neovim config (portable config)
 
 dotfiles:
   - source: dotfiles/nvim/init.lua

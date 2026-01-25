@@ -1,4 +1,4 @@
-description: COSMIC Desktop (base config) ported from nixosc
+description: COSMIC Desktop (base config) portable config
 
 dotfiles_sync: true
 

@@ -1,4 +1,4 @@
-description: Rofi launcher config (ported from nixosc)
+description: Rofi launcher config (portable config)
 
 dotfiles:
   - source: dotfiles/rofi

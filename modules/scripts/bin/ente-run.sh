@@ -44,8 +44,8 @@ fi
 # ------------------------------------------------------------------------------
 if ! busctl --user list 2>/dev/null | grep -q org.freedesktop.secrets; then
 	printf "${LYELLOW}→ Starting GNOME Keyring (secrets-only)...${RESET}\n"
-	if [[ -x "/run/current-system/sw/bin/gnome-keyring-daemon" ]]; then
-		/run/current-system/sw/bin/gnome-keyring-daemon --foreground --components=secrets >/dev/null 2>&1 &
+	if gkd_bin="$(command -v gnome-keyring-daemon 2>/dev/null)"; then
+		"$gkd_bin" --foreground --components=secrets >/dev/null 2>&1 &
 		sleep 0.3
 		printf "${LGREEN}✓ Secret Service started successfully.${RESET}\n"
 	else

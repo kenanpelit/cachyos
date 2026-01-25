@@ -1,4 +1,4 @@
-description: GNOME Desktop (minimal config) ported from nixosc
+description: GNOME Desktop (minimal config) portable config
 
 dotfiles:
   - source: scripts/gnome_tty
@@ -7,5 +7,5 @@ dotfiles:
 post_install_hook: scripts/setup-gnome.sh
 post_hook_behavior: ask
 
-# NOTE: The nixosc GNOME module is mostly dconf settings.
+# NOTE: GNOME module is mostly dconf settings.
 # On Arch/CachyOS, apply those via gsettings/dconf (manual or custom script).

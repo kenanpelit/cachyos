@@ -1,4 +1,4 @@
-description: mako notification daemon config (ported from nixosc)
+description: mako notification daemon config (portable config)
 
 
 dotfiles:

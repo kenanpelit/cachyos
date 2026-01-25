@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Google Chrome Launcher (portable; ported from nixosc)
+# Google Chrome Launcher (portable)
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   cat <<'HELP'

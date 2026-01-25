@@ -5,7 +5,7 @@
 #   Version: 3.3.0
 #   Date: 2025-09-06
 #   Author: Kenan Pelit
-#   Repo: https://github.com/kenanpelit/nixosc
+#   Repo: https://github.com/kenanpelit/cachyos
 #
 #   Description:
 #     Hyprland + PipeWire (wpctl) için gelişmiş ses/mikrofon anahtarlayıcı

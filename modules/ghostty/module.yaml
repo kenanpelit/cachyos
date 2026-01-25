@@ -1,4 +1,4 @@
-description: Ghostty config (ported from nixosc)
+description: Ghostty config (portable config)
 
 # NOTE: Ghostty may be installed from AUR depending on CachyOS.
 # packages:

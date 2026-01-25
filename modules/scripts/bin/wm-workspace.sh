@@ -19,21 +19,19 @@ resolve_bin() {
   command -v "${name}" 2>/dev/null || true
 }
 
-# systemd --user services often run with a minimal PATH; prefer common Nix profile locations.
+# systemd --user services often run with a minimal PATH; prefer common user bins.
 NIRI_SET="$(
   resolve_bin niri-set \
     "${WM_WORKSPACE_NIRI_SET:-}" \
-    "/etc/profiles/per-user/${USER}/bin/niri-set" \
-    "${HOME}/.nix-profile/bin/niri-set" \
-    "${HOME}/.local/state/nix/profiles/profile/bin/niri-set"
+    "${HOME}/.local/bin/niri-set" \
+    "${HOME}/bin/niri-set"
 )"
 
 HYPR_SET="$(
   resolve_bin hypr-set \
     "${WM_WORKSPACE_HYPR_SET:-}" \
-    "/etc/profiles/per-user/${USER}/bin/hypr-set" \
-    "${HOME}/.nix-profile/bin/hypr-set" \
-    "${HOME}/.local/state/nix/profiles/profile/bin/hypr-set"
+    "${HOME}/.local/bin/hypr-set" \
+    "${HOME}/bin/hypr-set"
 )"
 
 if [[ -n "${NIRI_SOCKET:-}" ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == "niri" ]] || [[ "${XDG_SESSION_DESKTOP:-}" == "niri" ]]; then

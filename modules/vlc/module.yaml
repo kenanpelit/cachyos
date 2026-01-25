@@ -1,4 +1,4 @@
-description: VLC config (ported from nixosc)
+description: VLC config (portable config)
 
 dotfiles_sync: true
 

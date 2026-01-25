@@ -2,7 +2,7 @@
 # =============================================================================
 # GNOME TTY Başlatma Script'i - Production Ready v2.0
 # =============================================================================
-# ThinkPad E14 Gen 6 + Intel Arc Graphics + NixOS
+# ThinkPad E14 Gen 6 + Intel Arc Graphics + Linux
 # Dinamik Catppuccin tema desteği ile
 # Hem GDM hem TTY başlatmayı destekler
 # =============================================================================

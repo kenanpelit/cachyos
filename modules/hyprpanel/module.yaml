@@ -1,4 +1,4 @@
-description: Hyprpanel (service stub) ported from nixosc
+description: Hyprpanel (service stub) portable config
 
 dotfiles:
   - source: dotfiles/systemd/user/hyprpanel.service

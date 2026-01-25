@@ -934,7 +934,7 @@ EOF
 
 	if ! have turbostat; then
 		echo "${RED}⚠ turbostat not found.${RST}"
-		echo "In NixOS: add linuxPackages_latest.turbostat to systemPackages"
+		echo "Tip: install turbostat to enable power telemetry"
 		exit 1
 	fi
 

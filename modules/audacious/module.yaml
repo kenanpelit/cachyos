@@ -1,4 +1,4 @@
-description: Audacious config ported from nixosc
+description: Audacious config portable config
 
 dotfiles_sync: true
 

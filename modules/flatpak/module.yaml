@@ -1,4 +1,4 @@
-description: Flatpak base config ported from nixosc
+description: Flatpak base config portable config
 
 dotfiles:
   - source: dotfiles/flatpak/apps.txt

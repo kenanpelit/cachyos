@@ -1,4 +1,4 @@
-description: sesh config (ported from nixosc)
+description: sesh config (portable config)
 
 # NOTE: sesh may be installed from AUR.
 # packages:

@@ -5,7 +5,7 @@
 #   Version: 2.0.0
 #   Date: 2024-01-23
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: Advanced PDF file management and splitting utility with
 #                interactive TUI interface and batch processing capabilities
 #

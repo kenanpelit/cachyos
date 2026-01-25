@@ -1,11 +1,10 @@
-# This file is managed by nixosc (Home-Manager activation), but is kept
-# writable on disk so you can still tweak it manually.
+# This file is managed by dcli, but is kept writable so you can tweak it.
 #
 # Reference:
 # - `stasis info`
 # - `stasis dump`
 
-@author "kenanpelit/nixosc"
+@author "kenanpelit/cachyos"
 @description "Stasis idle config (DMS + Niri/Hyprland friendly)"
 
 stasis:
@@ -146,4 +145,3 @@ profiles:
     end
   end
 end
-

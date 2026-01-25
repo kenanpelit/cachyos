@@ -1,4 +1,4 @@
-description: Anydesk (launcher + desktop entry) ported from nixosc
+description: Anydesk (launcher + desktop entry) portable config
 
 dotfiles:
   - source: dotfiles/applications/runanydesk.desktop

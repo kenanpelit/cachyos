@@ -1,4 +1,4 @@
-description: Chrome (launcher + config) ported from nixosc
+description: Chrome (launcher + config) portable config
 
 dotfiles:
   - source: dotfiles/chrome-launcher/config.conf

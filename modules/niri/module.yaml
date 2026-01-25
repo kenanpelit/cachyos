@@ -1,4 +1,4 @@
-description: Niri compositor config (ported from nixosc)
+description: Niri compositor config (portable config)
 
 dotfiles:
   - source: dotfiles/niri/config.kdl

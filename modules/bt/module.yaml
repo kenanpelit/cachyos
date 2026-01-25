@@ -1,4 +1,4 @@
-description: Bluetooth auto-connect units (ported from nixosc)
+description: Bluetooth auto-connect units (portable config)
 
 dotfiles:
   - source: dotfiles/systemd/user/hyprland-bt-autoconnect.service

@@ -1,4 +1,4 @@
-description: Electron base config ported from nixosc
+description: Electron base config portable config
 
 dotfiles:
   - source: dotfiles/discord/electron-flags.conf

@@ -119,9 +119,6 @@
   "niriWindows": {
     "enabled": true
   },
-  "nixMonitor": {
-    "enabled": true
-  },
   "hyprlandSubmap": {
     "enabled": true
   },

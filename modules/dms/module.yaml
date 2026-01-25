@@ -1,4 +1,4 @@
-description: DankMaterialShell (config + user services) ported from nixosc
+description: DankMaterialShell (config + user services) portable config
 
 # NOTE: Qt theming (qt6ct/Kvantum/environment.d) moved to the `qt` module to avoid dotfile conflicts.
 dotfiles:

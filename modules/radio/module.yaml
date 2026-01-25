@@ -1,4 +1,4 @@
-description: Radio (radiotray-ng) ported from nixosc
+description: Radio (radiotray-ng) portable config
 
 dotfiles:
   - source: dotfiles/radiotray-ng

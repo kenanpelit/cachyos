@@ -2,7 +2,7 @@
 #
 #   Date: 2025-06-10
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   monitor_brightness.sh - Dell UP2716D harici monitör parlaklık kontrolü (Otomatik Algılama)
 #
 

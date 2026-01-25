@@ -1,4 +1,4 @@
-description: Subliminal config template (ported from nixosc; credentials removed)
+description: Subliminal config template (portable config; credentials removed)
 
 
 dotfiles:

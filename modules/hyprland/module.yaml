@@ -1,4 +1,4 @@
-description: Hyprland config (ported from nixosc)
+description: Hyprland config (portable config)
 
 # Only manage key files; leave ~/.config/hypr/dms as real files (runtime-written)
 dotfiles:

@@ -1,4 +1,4 @@
-description: Blue light / night mode tooling ported from nixosc
+description: Blue light / night mode tooling portable config
 
 dotfiles:
   - source: dotfiles/systemd/user/blue.service

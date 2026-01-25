@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Complete GNOME Configuration Script for NixOS with Catppuccin Mocha Theme
+# Complete GNOME Configuration Script for Linux with Catppuccin Mocha Theme
 # Tüm DConf ayarlarını manuel olarak uygular
 # ==============================================================================
 
@@ -353,7 +353,7 @@ if command -v gnome-extensions >/dev/null 2>&1 && command -v gnome-extensions-in
   fi
 fi
 
-# Extensions - NixOS'ta yüklü olanlar
+# Extensions - Linux'ta yüklü olanlar
 EXTENSIONS="['audio-switch-shortcuts@dbatis.github.com','auto-move-windows@gnome-shell-extensions.gcampax.github.com','azwallpaper@azwallpaper.gitlab.com','bluetooth-quick-connect@bjarosze.gmail.com','clipboard-indicator@tudmotu.com','copyous@boerdereinar.dev','dash-to-panel@jderose9.github.com','disable-workspace-animation@ethnarque','extension-list@tu.berry','gnome-niri-parity@kenan','gsconnect@andyholmes.github.io','headphone-internal-switch@gustavomalta.github.com','just-perfection-desktop@just-perfection','launcher@hedgie.tech','mediacontrols@cliffniff.github.com','no-overview@fthx','notification-configurator@exposedcat','notification-icons@jiggak.io','no-titlebar-when-maximized@alec.ninja','space-bar@luchrioh','tilingshell@ferrarodomenico.com','tophat@fflewddur.github.io','trayIconsReloaded@selfmade.pl','vertical-workspaces@G-dH.github.com','veil@dagimg-dot','vpn-indicator@fthx','weatheroclock@CleoMenezesJr.github.io','zetadev@bootpaper']"
 
 dconf write /org/gnome/shell/enabled-extensions "$EXTENSIONS"
@@ -679,12 +679,10 @@ opt() {
     return 0
   fi
 
-  # 2) NixOS'ta yaygın dizinler
+  # 2) Yaygın kullanıcı dizinleri
   for cand in \
-    "/etc/profiles/per-user/$USER/bin/$n" \
     "$HOME/.local/bin/$n" \
-    "$HOME/.nix-profile/bin/$n" \
-    "/run/current-system/sw/bin/$n"; do
+    "$HOME/bin/$n"; do
     if [ -x "$cand" ]; then
       printf '%s' "$cand"
       return 0

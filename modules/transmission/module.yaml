@@ -1,4 +1,4 @@
-description: Transmission (daemon + gui) ported from nixosc
+description: Transmission (daemon + gui) portable config
 
 dotfiles:
   - source: dotfiles/systemd/user/transmission.service

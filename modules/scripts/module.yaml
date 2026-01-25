@@ -1,4 +1,4 @@
-description: Custom OSC scripts (ported from nixosc modules/home/scripts)
+description: Custom OSC scripts (portable scripts)
 
 # No packages here; scripts assume base module installed common deps.
 

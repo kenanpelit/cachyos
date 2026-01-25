@@ -1,4 +1,4 @@
-description: Brave (launcher wrapper + config) ported from nixosc
+description: Brave (launcher wrapper + config) portable config
 
 dotfiles:
   - source: dotfiles/brave-launcher/config.conf

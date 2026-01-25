@@ -1,4 +1,4 @@
-description: bat config + themes (ported from nixosc)
+description: bat config + themes (portable config)
 
 post_install_hook: scripts/build-cache.sh
 post_hook_behavior: always

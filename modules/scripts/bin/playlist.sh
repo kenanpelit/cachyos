@@ -5,7 +5,7 @@
 #   Version: 1.2.0
 #   Date: 2025-03-10
 #   Original Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: M3U playlist generator for lesson audio files with grouping
 #                and formatting support for educational content
 #

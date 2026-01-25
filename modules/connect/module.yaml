@@ -1,4 +1,4 @@
-description: KDE Connect configuration ported from nixosc
+description: KDE Connect configuration portable config
 
 # NOTE: This module does NOT copy ~/.config/kdeconnect (certificates/private keys).
 

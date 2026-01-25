@@ -1,4 +1,4 @@
-description: mpv (config + scripts) ported from nixosc
+description: mpv (config + scripts) portable config
 
 dotfiles:
   - source: dotfiles/mpv

@@ -5,7 +5,7 @@
 #   Version: 1.0.0
 #   Date: 2024-01-23
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: An automated subtitle downloader using Subliminal for video files,
 #                supporting multiple languages and batch processing
 #

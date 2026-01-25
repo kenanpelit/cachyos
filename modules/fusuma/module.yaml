@@ -1,4 +1,4 @@
-description: Fusuma gestures (config + helper scripts + user service) ported from nixosc
+description: Fusuma gestures (config + helper scripts + user service) portable config
 
 # Config + systemd unit
 dotfiles:

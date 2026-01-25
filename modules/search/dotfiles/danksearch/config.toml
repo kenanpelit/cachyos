@@ -1,4 +1,4 @@
-# dsearch config (portable; ported from nixosc defaults)
+# dsearch config (portable defaults)
 
 index_path = "~/.cache/danksearch/index"
 listen_addr = ":43654"

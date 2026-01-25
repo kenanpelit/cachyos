@@ -7,8 +7,8 @@
 #   Version: 1.1.0
 #   Date: 2024-12-27
 #   Author: Kenan Pelit
-#   Description: NixOS VM Manager
-#                Manages QEMU/KVM based NixOS virtual machines
+#   Description: Linux VM Manager
+#                Manages QEMU/KVM based Linux virtual machines
 #
 #   Features:
 #   - Easy VM creation and management
@@ -27,7 +27,7 @@
 
 # Configuration
 declare -A CONFIG=(
-  [base_dir]="/nixos/san/arch"
+  [base_dir]="${HOME}/vm/arch"
   [ovmf_code]="/usr/share/edk2-ovmf/x64/OVMF.4m.fd"
   [ovmf_vars_template]="/usr/share/edk2-ovmf/x64/OVMF_VARS.4m.fd"
   [vm_name]="arch"
@@ -47,7 +47,7 @@ CONFIG[disk_file]="${CONFIG[base_dir]}/disk.qcow2"
 
 show_help() {
   cat <<EOF
-NixOS VM Manager - Easily create and manage NixOS virtual machines
+VM Manager - Easily create and manage Linux virtual machines
 
 Usage: $(basename "$0") [OPTIONS]
 
@@ -95,7 +95,7 @@ Examples:
     $(basename "$0") --daemon --headless
     
     # Use custom ISO file
-    $(basename "$0") --iso-file /path/to/nixos.iso
+    $(basename "$0") --iso-file /path/to/linux.iso
 
 Note: Use Ctrl+Alt+G to release mouse/keyboard grab in GUI mode
 EOF
@@ -152,7 +152,7 @@ setup_vm_files() {
   fi
 
   if [[ ! -f "${CONFIG[iso_file]}" ]]; then
-    echo "Downloading NixOS ISO..."
+    echo "Downloading Linux ISO..."
     wget "${CONFIG[iso_url]}" -O "${CONFIG[iso_file]}"
   fi
 }

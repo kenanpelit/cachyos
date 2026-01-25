@@ -1,4 +1,4 @@
-description: rmpc config ported from nixosc
+description: rmpc config portable config
 
 
 # Sync dotfiles/rmpc -> ~/.config/rmpc

@@ -5,7 +5,7 @@
 #   Version: 2.0.0
 #   Date: 2025-06-13
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: Advanced Google Chrome profile launcher with comprehensive
 #                window management, proxy support, and app shortcuts
 #

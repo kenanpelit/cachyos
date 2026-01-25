@@ -647,7 +647,6 @@ tty)
       export SYSTEMD_OFFLINE=0
       debug_log "✓ SYSTEMD_OFFLINE=0 set"
 
-      # NixOS: setuid sudo wrapper lives here; ensure it wins over /run/current-system/sw/bin/sudo.
       case ":${PATH:-}:" in
       *":/run/wrappers/bin:"*) ;;
       *) export PATH="/run/wrappers/bin:${PATH:-}" ;;
@@ -676,7 +675,7 @@ tty)
       fi
 
       # Import environment to systemd user session
-      local vars="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP GTK_THEME XCURSOR_THEME SYSTEMD_OFFLINE NIXOS_OZONE_WL"
+      local vars="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP GTK_THEME XCURSOR_THEME SYSTEMD_OFFLINE"
 
       local rc=0
       if [[ -n "$timeout_bin" ]]; then
@@ -878,15 +877,7 @@ env)
 
       local xdg_data_dirs="${XDG_DATA_DIRS:-}"
       if [[ -z "$xdg_data_dirs" ]]; then
-        # Required for GLib (and xdg-desktop-portal) to find portal definitions
-        # in NixOS' /run/current-system/sw.
-        xdg_data_dirs="/run/current-system/sw/share"
-        if [[ -d "/etc/profiles/per-user/${USER:-}/share" ]]; then
-          xdg_data_dirs="${xdg_data_dirs}:/etc/profiles/per-user/${USER}/share"
-        elif [[ -d "${HOME:-}/.nix-profile/share" ]]; then
-          xdg_data_dirs="${xdg_data_dirs}:${HOME}/.nix-profile/share"
-        fi
-        xdg_data_dirs="${xdg_data_dirs}:/usr/local/share:/usr/share"
+        xdg_data_dirs="${HOME:-}/.local/share:/usr/local/share:/usr/share"
       fi
 
       local xdg_config_dirs="${XDG_CONFIG_DIRS:-/etc/xdg}"
@@ -934,7 +925,6 @@ env)
         QT_ICON_THEME
         XCURSOR_THEME
         XCURSOR_SIZE
-        NIXOS_OZONE_WL
         MOZ_ENABLE_WAYLAND
         QT_QPA_PLATFORM
         QT_QPA_PLATFORMTHEME
@@ -1649,7 +1639,6 @@ flow)
     }
 
     : "${XDG_RUNTIME_DIR:="/run/user/$(id -u)"}"
-    PATH="/run/current-system/sw/bin:/etc/profiles/per-user/${USER}/bin:${PATH}"
 
     readonly SCRIPT_NAME="NiriFlow"
 

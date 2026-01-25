@@ -1395,7 +1395,7 @@ set -euo pipefail
 # =============================================================================
 # Hyprland Universal Launcher - TTY & GDM Compatible
 # =============================================================================
-# ThinkPad E14 Gen 6 + Intel Arc Graphics + NixOS
+# ThinkPad E14 Gen 6 + Intel Arc Graphics + Linux
 # Dinamik Catppuccin tema desteği + GDM session awareness
 # =============================================================================
 # KULLANIM:
@@ -1721,7 +1721,6 @@ setup_environment() {
 	export GDK_BACKEND=wayland
 	export SDL_VIDEODRIVER=wayland
 	export CLUTTER_BACKEND=wayland
-	export NIXOS_OZONE_WL=1
 	export _JAVA_AWT_WM_NONREPARENTING=1
 
 	# -------------------------------------------------------------------------
@@ -1889,7 +1888,6 @@ setup_systemd_integration() {
 			"CATPPUCCIN_ACCENT"
 			"QT_QPA_PLATFORM"
 			"MOZ_ENABLE_WAYLAND"
-			"NIXOS_OZONE_WL"
 			"LIBVA_DRIVER_NAME"
 			"VK_ICD_FILENAMES"
 		)
@@ -2293,7 +2291,7 @@ if [ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
 fi
 
 # Ensure common Nix profiles are in PATH so dependencies resolve when invoked from minimal services
-PATH="/run/current-system/sw/bin:/etc/profiles/per-user/${USER}/bin:${PATH}"
+PATH="${PATH:-}"
 
 #######################################
 # CONFIGURATION & CONSTANTS

@@ -1,4 +1,4 @@
-description: Qt theming (qt5ct/qt6ct/Kvantum) ported from nixosc
+description: Qt theming (qt5ct/qt6ct/Kvantum) portable config
 
 dotfiles:
   - source: dotfiles/qt5ct

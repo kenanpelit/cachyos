@@ -1,4 +1,4 @@
-description: MPD user service + config (ported from nixosc)
+description: MPD user service + config (portable config)
 
 dotfiles:
   - source: dotfiles/mpd

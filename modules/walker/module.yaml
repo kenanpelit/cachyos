@@ -1,4 +1,4 @@
-description: Walker + Elephant (config + user services) ported from nixosc
+description: Walker + Elephant (config + user services) portable config
 
 # NOTE: Package names may differ on CachyOS/Arch (walker/elephant might be AUR).
 # - elephant -> ~/.config/elephant (includes providers copy)

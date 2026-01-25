@@ -1,4 +1,4 @@
-description: Rsync config ported from nixosc
+description: Rsync config portable config
 
 dotfiles:
   - source: dotfiles/.rsync-homedir-excludes

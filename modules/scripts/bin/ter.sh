@@ -5,7 +5,7 @@
 #   Version: 1.2.0
 #   Date: 2024-04-29
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: Remote SSH tunnel manager with search capabilities for
 #                filtering tunnel connections and status
 #

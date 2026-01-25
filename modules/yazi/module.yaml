@@ -1,4 +1,4 @@
-description: Yazi config + plugins (ported from nixosc)
+description: Yazi config + plugins (portable config)
 
 dotfiles:
   - source: dotfiles/yazi

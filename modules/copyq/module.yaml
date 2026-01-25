@@ -1,4 +1,4 @@
-description: CopyQ config ported from nixosc
+description: CopyQ config portable config
 
 dotfiles_sync: true
 

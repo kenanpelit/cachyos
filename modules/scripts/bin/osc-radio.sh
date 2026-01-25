@@ -24,7 +24,7 @@
 # - Automatic dependency checking
 # - Notification system integration
 # - Cross-platform compatibility (Linux, BSD, macOS)
-# - Special support for NixOS environments
+# - Special support for Linux environments
 # - CLI interface with toggle support
 #
 # Version: 1.1

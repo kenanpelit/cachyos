@@ -1,4 +1,4 @@
-description: Stasis idle manager (config + wrappers) ported from nixosc
+description: Stasis idle manager (config + wrappers) portable config
 
 # NOTE: Package name may differ on CachyOS/Arch (might be AUR). Install stasis separately if needed.
 dotfiles:

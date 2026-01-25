@@ -5,7 +5,7 @@
 #   Version: 1.1.0
 #   Date: 2025-07-20
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
+#   Repository: https://github.com/kenanpelit/cachyos
 #   Description: Manages symbolic links for configured directories between a
 #                source repository and target location with backup functionality
 #

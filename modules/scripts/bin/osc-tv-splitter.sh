@@ -6,7 +6,7 @@
 # 2. Processes tr.m3u from the streams directory
 # 3. Splits channels into individual .m3u files in ~/.iptv/channels
 # 4. Creates executable scripts in ~/.iptv/bin
-# Author: Kenan Pelit | https://github.com/kenanpelit/nixosc
+# Author: Kenan Pelit | https://github.com/kenanpelit/cachyos
 # Version: 1.1
 #===============================================================================
 

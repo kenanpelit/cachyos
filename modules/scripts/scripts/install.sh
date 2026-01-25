@@ -38,7 +38,7 @@ die() {
 
 should_install() {
   case "$1" in
-  osc-fiup | osc-nix-cleanup-script | osc-profiles | osc-sops | osc-sync | osc-test | vmnixos | svmnixos)
+  osc-fiup)
     return 1
     ;;
   *)

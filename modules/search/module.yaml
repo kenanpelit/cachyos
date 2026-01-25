@@ -1,4 +1,4 @@
-description: Search utilities (dsearch config + user service) ported from nixosc
+description: Search utilities (dsearch config + user service) portable config
 
     target: ~/.config/danksearch
   - source: dotfiles/systemd/user/dsearch.service

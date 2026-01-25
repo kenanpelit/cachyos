@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# gkr-fix.sh — GNOME keyring lag fixer (NixOS/TTY GNOME)
+# gkr-fix.sh — GNOME keyring lag fixer
 set -euo pipefail
 log() { printf '[%(%F %T)T] %s\n' -1 "$*"; }
 die() {
@@ -9,7 +9,7 @@ die() {
 }
 
 # --- notification helper ----------------------------------------------------
-NOTIFY_SEND="$(command -v notify-send || echo /run/current-system/sw/bin/notify-send)"
+NOTIFY_SEND="$(command -v notify-send || true)"
 
 notify() {
 	local title="$1"
@@ -25,23 +25,18 @@ notify() {
 
 # --- binaries ---------------------------------------------------------------
 GKD_BIN="$(command -v gnome-keyring-daemon || true)"
-[[ -n "$GKD_BIN" ]] || GKD_BIN="/run/current-system/sw/bin/gnome-keyring-daemon"
 [[ -x "$GKD_BIN" ]] || die "gnome-keyring-daemon bulunamadı"
 SYSTEMD_RUN="$(command -v systemd-run || true)"
-[[ -n "$SYSTEMD_RUN" ]] || SYSTEMD_RUN="/run/current-system/sw/bin/systemd-run"
 [[ -x "$SYSTEMD_RUN" ]] || die "systemd-run yok"
 
 SYSTEMCTL="$(command -v systemctl || true)"
-[[ -n "$SYSTEMCTL" ]] || SYSTEMCTL="/run/current-system/sw/bin/systemctl"
 [[ -x "$SYSTEMCTL" ]] || die "systemctl yok"
 
 BUSCTL_BIN="$(command -v busctl || true)"
-[[ -n "$BUSCTL_BIN" ]] || BUSCTL_BIN="/run/current-system/sw/bin/busctl"
 [[ -x "$BUSCTL_BIN" ]] || die "busctl yok"
 
 # grep kullan (ripgrep farklı syntax kullanıyor)
 GREP_BIN="$(command -v grep || true)"
-[[ -n "$GREP_BIN" ]] || GREP_BIN="/run/current-system/sw/bin/grep"
 [[ -x "$GREP_BIN" ]] || die "grep yok"
 
 # --- force user bus ---------------------------------------------------------

@@ -120,5 +120,5 @@ packages:
   # sops moved to packages.yaml
   - pwgen
 
-  # Flatpak (optional but matches nixosc)
+  # Flatpak (optional but matches previous setup)
   - flatpak

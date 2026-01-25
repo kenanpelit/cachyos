@@ -8,7 +8,7 @@
 #   Date: 2025-11-02
 #   Author: Kenan Pelit (Enhanced for Wayland/TTY)
 #   Description: Universal VM Manager
-#                Manages QEMU/KVM based virtual machines (Ubuntu/NixOS/etc.)
+#                Manages QEMU/KVM based virtual machines (Ubuntu/Linux/etc.)
 #
 #   Enhancements in 1.3.0:
 #   - Better Wayland/Sway integration
@@ -72,7 +72,7 @@ log_success() { echo -e "${GREEN}[SUCCESS]${NC} $*"; }
 
 # Configuration
 declare -A CONFIG=(
-	[base_dir]="/nixos/san/ubuntu"
+	[base_dir]="${HOME}/vm/ubuntu"
 	[ovmf_code]="/usr/share/edk2-ovmf/x64/OVMF.4m.fd"
 	[ovmf_vars_template]="/usr/share/edk2-ovmf/x64/OVMF_VARS.4m.fd"
 	[vm_name]="ubuntu"
@@ -200,7 +200,7 @@ check_dependencies() {
 		log_info "Install them using your package manager:"
 		log_info "  Arch: sudo pacman -S qemu-full wget"
 		log_info "  Ubuntu: sudo apt install qemu-system-x86 wget"
-		log_info "  NixOS: Add to your configuration.nix"
+		log_info "  Tip: Add to your config if needed"
 		exit 1
 	fi
 
