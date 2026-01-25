@@ -8,7 +8,7 @@
 
 ## Overview
 
-This repository contains a personal, declarative system configuration for **CachyOS** (Arch Linux), managed via the **dcli** tool. It provides a modular and reproducible environment, porting the declarative management philosophy of NixOS to the Arch Linux ecosystem.
+Personal, declarative system configuration for **CachyOS** (Arch Linux) managed with **dcli**. The goal is a clean, modular, reproducible setup with minimal manual drift.
 
 ## Core Features
 
@@ -18,7 +18,7 @@ This repository contains a personal, declarative system configuration for **Cach
   - **Niri:** Optimized scrollable tiling Wayland compositor.
   - **Hyprland:** Performance-tuned dynamic tiling Wayland compositor.
 - **Unified Theming:** Consistent application of the Catppuccin Mocha palette across GTK, Qt (Kvantum), and various terminal emulators.
-- **Automated Administration:** Integrated management for GRUB boot entries, Snapper snapshots, and system-level configurations.
+- **System Automation:** Managed services, snapshots, and system-level configuration hooks.
 
 ## System Components
 
@@ -46,6 +46,17 @@ This repository contains a personal, declarative system configuration for **Cach
 └── .gitignore           # Version control exclusions
 ```
 
+## Quick Start
+
+```bash
+git clone https://github.com/kenanpelit/cachyos.git ~/.cachy
+mkdir -p ~/.config/arch-config
+ln -s ~/.cachy/* ~/.config/arch-config/
+sudo -E dcli sync
+```
+
+Restart your session (or reboot) to apply environment changes.
+
 ## Installation
 
 ### Prerequisites
@@ -55,24 +66,22 @@ This repository contains a personal, declarative system configuration for **Cach
 
 ### Procedure
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/kenanpelit/cachyos.git ~/.cachy
-    ```
+1.  **Clone the repository**
+2.  **Link to dcli config root**
+3.  **Run `dcli sync`**
+4.  **Restart the session**
 
-2.  **Configure dcli path:**
-    ```bash
-    mkdir -p ~/.config/arch-config
-    ln -s ~/.cachy/* ~/.config/arch-config/
-    ```
+Commands are listed in **Quick Start**.
 
-3.  **Synchronize system state:**
-    ```bash
-    sudo -E dcli sync
-    ```
+## Usage
 
-4.  **Finalize:**
-    Reboot or restart the user session to apply all environment variables and system changes.
+- Enable/disable modules in `hosts/<hostname>.yaml`
+- Add/remove packages in `modules/*/packages.yaml`
+- Apply changes with `sudo -E dcli sync`
+ 
+## Notes
+
+- This repo is tuned for personal hardware and workflows; review modules before applying on other machines.
 
 ## Credits
 
