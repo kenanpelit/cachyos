@@ -49,6 +49,8 @@ x-scheme-handler/http=brave-kenp.desktop
 x-scheme-handler/https=brave-kenp.desktop
 x-scheme-handler/mpv=open-in-mpv.desktop
 x-scheme-handler/unknown=brave-kenp.desktop
+x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
+x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
 
 [Default Applications]
 application/*tar=org.gnome.FileRoller.desktop
