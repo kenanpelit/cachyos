@@ -105,7 +105,7 @@ packages:
   - wf-recorder
   - swappy
   - brightnessctl
-  - tigervnc
+  - extra/tigervnc
   - remmina
 
   # Documents (moved evince, zathura)
