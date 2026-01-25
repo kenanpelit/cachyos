@@ -106,6 +106,7 @@ packages:
   - swappy
   - brightnessctl
   - tigervnc
+  - remmina
 
   # Documents (moved evince, zathura)
   - poppler
