@@ -2,13 +2,15 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
-
-SRC="${REPO_ROOT}/modules/logind/dotfiles/10-lid.conf"
+SRC="${SCRIPT_DIR}/../dotfiles/10-lid.conf"
 DST_DIR="/etc/systemd/logind.conf.d"
 DST="${DST_DIR}/10-lid.conf"
 
 SUDO=""
+if [ -f "${DST}" ] && cmp -s "${SRC}" "${DST}"; then
+  exit 0
+fi
+
 if [ "$(id -u)" -ne 0 ]; then
   if ! command -v sudo >/dev/null 2>&1; then
     echo "sudo is required to install ${DST}" >&2
