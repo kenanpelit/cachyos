@@ -1,5 +1,4 @@
 description: systemd-logind settings
 
-dotfiles:
-  - source: dotfiles/10-lid.conf
-    target: /etc/systemd/logind.conf.d/10-lid.conf
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
