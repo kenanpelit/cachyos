@@ -6,9 +6,9 @@
 # =============================================================================
 # TTY Assignments:
 #   TTY1: Display Manager - Session Selection
-#   TTY2: Niri (via niri-set tty)
-#   TTY3: Hyprland (via hypr-set tty)
-#   TTY4: GNOME (via gnome_tty)
+#   TTY2: Niri (via ~/.local/bin/niri-set tty)
+#   TTY3: Hyprland (via ~/.local/bin/hypr-set tty)
+#   TTY4: GNOME (via ~/.local/bin/gnome_tty)
 #   TTY5: Ubuntu VM (Sway)
 #   TTY6: Manual start helper
 # =============================================================================
@@ -17,6 +17,10 @@
 # CRITICAL: Also check if we're being called from a desktop session startup
 # (gnome-session etc. may re-exec shell during startup)
 if [[ $- == *l* ]] && [ -z "${WAYLAND_DISPLAY}" ] && [ -z "${DISPLAY}" ] && [[ "${XDG_VTNR}" =~ ^[1-6]$ ]] && [ -z "${NIRI_TTY_GUARD:-}" ] && [ -z "${GNOME_TTY_GUARD:-}" ]; then
+
+    NIRI_SET="${HOME}/.local/bin/niri-set"
+    HYPR_SET="${HOME}/.local/bin/hypr-set"
+    GNOME_TTY="${HOME}/.local/bin/gnome_tty"
 
     # TTY1 special check: Don't interfere if session already active
     if [ "${XDG_VTNR}" = "1" ] && [ -n "${XDG_SESSION_TYPE}" ]; then
@@ -47,9 +51,9 @@ if [[ $- == *l* ]] && [ -z "${WAYLAND_DISPLAY}" ] && [ -z "${DISPLAY}" ] && [[ "
         echo "  • GNOME    - Traditional GNOME desktop"
         echo ""
         echo "Manual Start Commands:"
-        echo "  exec niri-set tty    - Start Niri with optimizations"
-        echo "  exec hypr-set tty    - Start Hyprland with optimizations"
-        echo "  exec gnome_tty       - Start GNOME with optimizations"
+        echo "  exec ${NIRI_SET} tty  - Start Niri with optimizations"
+        echo "  exec ${HYPR_SET} tty  - Start Hyprland with optimizations"
+        echo "  exec ${GNOME_TTY}     - Start GNOME with optimizations"
         echo ""
     
     # ==========================================================================
@@ -67,11 +71,11 @@ if [[ $- == *l* ]] && [ -z "${WAYLAND_DISPLAY}" ] && [ -z "${DISPLAY}" ] && [[ "
         #   sudo must be owned by uid 0 and have the setuid bit set
                 export NIRI_TTY_GUARD=1
 
-        if command -v niri-set >/dev/null 2>&1; then
+        if [ -x "${NIRI_SET}" ]; then
             echo "Starting Niri with optimized configuration..."
-            exec niri-set tty
+            exec "${NIRI_SET}" tty
         else
-            echo "ERROR: niri-set script not found in PATH"
+            echo "ERROR: niri-set not found: ${NIRI_SET}"
             echo "Falling back to direct Niri launch (not recommended)"
             sleep 3
             exec niri 2>&1 | tee /tmp/niri-tty2.log
@@ -90,11 +94,11 @@ if [[ $- == *l* ]] && [ -z "${WAYLAND_DISPLAY}" ] && [ -z "${DISPLAY}" ] && [[ "
         export XDG_RUNTIME_DIR="/run/user/$(id -u)"
         
         # Check for hypr-set script
-        if command -v hypr-set >/dev/null 2>&1; then
+        if [ -x "${HYPR_SET}" ]; then
             echo "Starting Hyprland with optimized configuration..."
-            exec hypr-set tty
+            exec "${HYPR_SET}" tty
         else
-            echo "ERROR: hypr-set script not found in PATH"
+            echo "ERROR: hypr-set not found: ${HYPR_SET}"
             echo "Falling back to direct Hyprland launch (not recommended)"
             sleep 3
             exec Hyprland
@@ -119,11 +123,11 @@ if [[ $- == *l* ]] && [ -z "${WAYLAND_DISPLAY}" ] && [ -z "${DISPLAY}" ] && [[ "
         export GNOME_TTY_GUARD_FILE="${XDG_RUNTIME_DIR}/gnome-tty4.guard"
 
         # Check for gnome_tty script
-        if command -v gnome_tty >/dev/null 2>&1; then
+        if [ -x "${GNOME_TTY}" ]; then
             echo "Starting GNOME with optimized configuration..."
-            exec gnome_tty
+            exec "${GNOME_TTY}"
         else
-            echo "ERROR: gnome_tty script not found in PATH"
+            echo "ERROR: gnome_tty not found: ${GNOME_TTY}"
             echo "Falling back to direct GNOME launch (not recommended)"
             sleep 3
 
@@ -180,16 +184,16 @@ if [[ $- == *l* ]] && [ -z "${WAYLAND_DISPLAY}" ] && [ -z "${DISPLAY}" ] && [[ "
         echo ""
         echo "Available TTY Assignments:"
         echo "  TTY1: Display Manager (gdm)"
-        echo "  TTY2: Niri (niri-set tty)"
-        echo "  TTY3: Hyprland (hypr-set tty)"
-        echo "  TTY4: GNOME (gnome_tty)"
+        echo "  TTY2: Niri (${NIRI_SET} tty)"
+        echo "  TTY3: Hyprland (${HYPR_SET} tty)"
+        echo "  TTY4: GNOME (${GNOME_TTY})"
         echo "  TTY5: Ubuntu VM (Sway)"
         echo "  TTY6: Manual start helper"
         echo ""
         echo "Manual Start Commands:"
-        echo "  exec niri-set tty    - Niri with optimizations"
-        echo "  exec hypr-set tty    - Hyprland with optimizations"
-        echo "  exec gnome_tty       - GNOME with optimizations"
+        echo "  exec ${NIRI_SET} tty  - Niri with optimizations"
+        echo "  exec ${HYPR_SET} tty  - Hyprland with optimizations"
+        echo "  exec ${GNOME_TTY}     - GNOME with optimizations"
         echo "  exec sway            - Sway compositor"
         echo ""
     fi
