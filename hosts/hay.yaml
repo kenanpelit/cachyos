@@ -104,6 +104,7 @@ enabled_modules:
   - tmux
   - user-services
   - admin
+  - logind
   # - grub
   # - cliphist
   # - copyq
