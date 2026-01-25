@@ -89,7 +89,7 @@ enabled_modules:
   # - obsidian
   - webcord
   - flatpak
-  # - transmission
+  - transmission
   # - elektron
   # - nemo
   # - program
