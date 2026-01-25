@@ -21,6 +21,7 @@ packages:
   - git
   - curl
   - wget
+  - bc
 
   # CLI file management (some moved to own modules)
   - lf
