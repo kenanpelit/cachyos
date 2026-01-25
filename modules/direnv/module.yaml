@@ -1,7 +1,0 @@
-description: Direnv config ported from nixosc
-
-dotfiles_sync: true
-
-dotfiles:
-  - source: dotfiles/direnv
-    target: ~/.config/direnv

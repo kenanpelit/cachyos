@@ -80,13 +80,6 @@ Pictures = " "
 Projects = " "
 Videos = " "
 
-[direnv]
-detect_files = [".envrc"]
-disabled = false
-format = "[$symbol$loaded]($style) "
-style = "bold peach"
-symbol = "direnv "
-
 [docker_context]
 detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
 disabled = true

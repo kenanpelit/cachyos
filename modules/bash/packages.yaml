@@ -5,4 +5,3 @@ packages:
   - bash-completion
   - fzf
   - starship
-  - direnv

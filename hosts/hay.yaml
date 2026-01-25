@@ -15,7 +15,6 @@ enabled_modules:
   - zsh
   - bash
   - starship
-  - direnv
 
   # --- CLI Tools ---
   - git
