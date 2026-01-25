@@ -430,7 +430,7 @@ setup_environment() {
   # -------------------------------------------------------------------------
   # Catppuccin Dinamik Tema - GTK
   # -------------------------------------------------------------------------
-  local gtk_theme="catppuccin-${CATPPUCCIN_FLAVOR}-${CATPPUCCIN_ACCENT}-standard+normal"
+  local gtk_theme="catppuccin-${CATPPUCCIN_FLAVOR}-${CATPPUCCIN_ACCENT}-standard+default"
   export GTK_THEME="$gtk_theme"
 
   if [[ "$CATPPUCCIN_FLAVOR" == "latte" ]]; then

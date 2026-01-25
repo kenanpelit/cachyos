@@ -104,19 +104,19 @@ dconf write /org/gnome/desktop/interface/enable-animations "true"
 # =============================================================================
 echo "🎨 GTK tema ayarları (Catppuccin Mocha)..."
 
-dconf write /org/gnome/desktop/interface/gtk-theme "'catppuccin-mocha-mauve-standard+normal'"
+dconf write /org/gnome/desktop/interface/gtk-theme "'catppuccin-mocha-mauve-standard+default'"
 dconf write /org/gnome/desktop/interface/icon-theme "'a-candy-beauty-icon-theme'"
 dconf write /org/gnome/desktop/interface/cursor-theme "'catppuccin-mocha-dark-cursors'"
 dconf write /org/gnome/desktop/interface/cursor-size "24"
 
 # Shell tema
-dconf write /org/gnome/shell/extensions/user-theme/name "'catppuccin-mocha-mauve-standard+normal'"
+dconf write /org/gnome/shell/extensions/user-theme/name "'catppuccin-mocha-mauve-standard+default'"
 
 # Accent color (GNOME 44+)
 dconf write /org/gnome/desktop/interface/accent-color "'purple'"
 
 # Window decorations
-dconf write /org/gnome/desktop/wm/preferences/theme "'catppuccin-mocha-mauve-standard+normal'"
+dconf write /org/gnome/desktop/wm/preferences/theme "'catppuccin-mocha-mauve-standard+default'"
 dconf write /org/gnome/desktop/wm/preferences/titlebar-font "'$MAIN_FONT Bold $FONT_SIZE_SM'"
 
 # Application menu
@@ -1128,7 +1128,7 @@ if mkdir -p "$ENV_DIR" 2>/dev/null; then
   cat >"$ENV_FILE" <<'EOF'
 CATPPUCCIN_THEME=mocha
 CATPPUCCIN_ACCENT=mauve
-GTK_THEME=catppuccin-mocha-mauve-standard+normal
+GTK_THEME=catppuccin-mocha-mauve-standard+default
 XCURSOR_THEME=catppuccin-mocha-dark-cursors
 XCURSOR_SIZE=24
 EOF
@@ -1188,7 +1188,7 @@ echo "🕐 Bitiş zamanı: $(date)"
 echo "📊 Script çalışma süresi: $SECONDS saniye"
 echo ""
 echo "🎨 Catppuccin Mocha Tema Özellikleri:"
-echo "   • GTK Teması: catppuccin-mocha-mauve-standard+normal"
+echo "   • GTK Teması: catppuccin-mocha-mauve-standard+default"
 echo "   • İkon Teması: a-candy-beauty-icon-theme"
 echo "   • Cursor Teması: catppuccin-mocha-dark-cursors"
 echo "   • Terminal Renkleri: Catppuccin Mocha paleti"

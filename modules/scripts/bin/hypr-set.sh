@@ -41,7 +41,7 @@ load_dconf() {
   # Apply GTK dark theme settings via dconf/gsettings
   if command -v gsettings >/dev/null 2>&1; then
     gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
-    gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-mauve-standard+normal' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-mauve-standard+default' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface icon-theme 'candy-icons' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-mauve-cursors' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface font-name 'Maple Mono NF 12' 2>/dev/null || true
@@ -1726,7 +1726,7 @@ setup_environment() {
 	# -------------------------------------------------------------------------
 	# Catppuccin Tema
 	# -------------------------------------------------------------------------
-	local gtk_theme="catppuccin-${CATPPUCCIN_FLAVOR}-${CATPPUCCIN_ACCENT}-standard+normal"
+	local gtk_theme="catppuccin-${CATPPUCCIN_FLAVOR}-${CATPPUCCIN_ACCENT}-standard+default"
 	export GTK_THEME="$gtk_theme"
 	export GTK_USE_PORTAL=1
 
