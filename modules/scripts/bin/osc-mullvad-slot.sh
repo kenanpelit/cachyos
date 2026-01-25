@@ -12,6 +12,7 @@
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
+SELF_PATH="$0"
 OSC_MULLVAD_BIN="${OSC_MULLVAD_BIN:-$HOME/.local/bin/osc-mullvad}"
 
 RED='\033[0;31m'
@@ -41,8 +42,13 @@ die() {
 
 main() {
   local dry_run=""
+  local run_mode="false"
   if [[ "${1:-}" == "--dry-run" ]]; then
     dry_run="--dry-run"
+    shift || true
+  fi
+  if [[ "${1:-}" == "--run" ]]; then
+    run_mode="true"
     shift || true
   fi
 
@@ -50,6 +56,16 @@ main() {
     usage >&2
     exit 2
   }
+
+  if [[ "$run_mode" != "true" ]]; then
+    if command -v kitty >/dev/null 2>&1; then
+      exec kitty --hold --class mullvad -T mullvad --single-instance \
+        -e bash --noprofile --norc -lc \
+        "\"$SELF_PATH\" ${dry_run:+$dry_run }--run"
+    else
+      die "kitty not found; install kitty or run with --run"
+    fi
+  fi
 
   if [[ ! -x "$OSC_MULLVAD_BIN" ]]; then
     if command -v osc-mullvad >/dev/null 2>&1; then
