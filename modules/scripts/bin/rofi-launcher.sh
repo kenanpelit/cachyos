@@ -18,6 +18,16 @@ readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rofi"
 readonly THEME_FILE="${CONFIG_DIR}/themes/launcher.rasi"
 readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/rofi"
 
+# Ensure user-local bins are visible to rofi run/custom modes.
+case ":${PATH:-}:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
+case ":${PATH:-}:" in
+  *":$HOME/bin:"*) ;;
+  *) export PATH="$HOME/bin:$PATH" ;;
+esac
+
 # Create cache directory
 mkdir -p "$CACHE_DIR"
 
