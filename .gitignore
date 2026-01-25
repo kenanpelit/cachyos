@@ -10,5 +10,6 @@ modules/mpv/dotfiles/mpv/mpvHistory.log
 modules/admin/
 modules/dms/dotfiles/DankMaterialShell/plugins/.repos/
 modules/dms/dotfiles/DankMaterialShell/plugins/.repos/
+modules/dms/dotfiles/DankMaterialShell/settings.json
 mimeinfo.cache
 brave-*.desktop

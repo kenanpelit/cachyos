@@ -526,6 +526,10 @@ binds {
   Alt+F12 repeat=false hotkey-overlay-title="VPN Toggle" {
     spawn "~/.local/bin/osc-mullvad" "toggle"
   }
+  Mod+Alt+F12 repeat=false hotkey-overlay-title="VPN Toggle" {
+    spawn "~/.local/bin/osc-mullvad" "slot" "recycle"
+  }
+
 
   // Screenshots (DMS)
   Print repeat=false hotkey-overlay-title="Screenshot Area" {
