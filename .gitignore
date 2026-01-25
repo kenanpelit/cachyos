@@ -11,5 +11,6 @@ modules/admin/
 modules/dms/dotfiles/DankMaterialShell/plugins/.repos/
 modules/dms/dotfiles/DankMaterialShell/plugins/.repos/
 modules/dms/dotfiles/DankMaterialShell/settings.json
+modules/dms/dotfiles/DankMaterialShell/plugin_settings.json
 mimeinfo.cache
 brave-*.desktop
