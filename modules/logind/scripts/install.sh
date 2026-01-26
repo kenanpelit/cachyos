@@ -15,7 +15,7 @@ SRC="${SCRIPT_DIR}/../dotfiles/10-lid.conf"
 DST_DIR="/etc/systemd/logind.conf.d"
 DST="${DST_DIR}/10-lid.conf"
 
-if [ -e "${DST}" ] && [ ! -f "${DST}" ]; then
+if [ -L "${DST}" ] || { [ -e "${DST}" ] && [ ! -f "${DST}" ]; }; then
   ${SUDO} rm -f "${DST}"
 fi
 
