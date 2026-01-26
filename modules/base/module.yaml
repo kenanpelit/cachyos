@@ -1,5 +1,1 @@
 description: Base packages (portable config)
-
-package_files:
-  - packages-core.yaml
-  - packages-desktop.yaml
