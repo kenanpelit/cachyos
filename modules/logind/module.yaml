@@ -1,4 +1,4 @@
 description: systemd-logind settings
 
 post_install_hook: scripts/install.sh
-post_hook_behavior: always
+post_hook_behavior: once

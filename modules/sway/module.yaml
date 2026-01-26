@@ -1,6 +1,5 @@
 description: Sway config (portable config)
 
-
 dotfiles:
   - source: dotfiles/sway
     target: ~/.config/sway
