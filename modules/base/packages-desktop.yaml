@@ -7,7 +7,7 @@ packages:
   - brightnessctl
   - extra/tigervnc
   - remmina
-  - gnome-monitor-config
+  - gnome-monitor-config-git
 
   # Documents (moved evince, zathura)
   - poppler
