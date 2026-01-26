@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+case "${1:-}" in
+  pre)
+    loginctl lock-sessions >/dev/null 2>&1 || true
+    ;;
+  *)
+    ;;
+esac
