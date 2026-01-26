@@ -7,6 +7,10 @@ DST_DIR="/etc/systemd/logind.conf.d"
 DST="${DST_DIR}/10-lid.conf"
 
 SUDO=""
+if [ -e "${DST}" ] && [ ! -f "${DST}" ]; then
+  ${SUDO} rm -f "${DST}"
+fi
+
 if [ -f "${DST}" ] && cmp -s "${SRC}" "${DST}"; then
   exit 0
 fi
