@@ -20,12 +20,17 @@ if [ "$(id -u)" -ne 0 ]; then
   fi
 fi
 
+target_user="${SUDO_USER:-$USER}"
+if [ -z "$target_user" ] || [ "$target_user" = "root" ]; then
+  target_user="$(logname 2>/dev/null || true)"
+fi
+
 if [ -f "$udev_src" ] && [ -n "$SUDO" ]; then
   $SUDO install -m 644 "$udev_src" "$udev_dst"
   $SUDO groupadd -f input >/dev/null 2>&1 || true
-  if ! id -nG "$USER" | tr ' ' '\n' | grep -q "^input$"; then
-    $SUDO usermod -aG input "$USER" || true
-    echo "Added $USER to input group. Re-login required for fusuma permissions."
+  if [ -n "$target_user" ] && ! id -nG "$target_user" | tr ' ' '\n' | grep -q "^input$"; then
+    $SUDO usermod -aG input "$target_user" || true
+    echo "Added $target_user to input group. Re-login required for fusuma permissions."
   fi
   $SUDO udevadm control --reload-rules >/dev/null 2>&1 || true
   $SUDO udevadm trigger --subsystem-match=input >/dev/null 2>&1 || true
