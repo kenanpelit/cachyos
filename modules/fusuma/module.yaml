@@ -6,6 +6,14 @@ dotfiles:
     target: ~/.config/fusuma
   - source: dotfiles/systemd/user/fusuma.service
     target: ~/.config/systemd/user/fusuma.service
+  - source: scripts/fusuma-workspace-monitor
+    target: ~/.local/bin/fusuma-workspace-monitor
+  - source: scripts/fusuma-hyprscrolling-focus
+    target: ~/.local/bin/fusuma-hyprscrolling-focus
+  - source: scripts/fusuma-fullscreen
+    target: ~/.local/bin/fusuma-fullscreen
+  - source: scripts/fusuma-overview
+    target: ~/.local/bin/fusuma-overview
 
 post_install_hook: scripts/install.sh
 post_hook_behavior: ask
