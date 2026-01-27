@@ -112,6 +112,7 @@ enabled_modules:
   - fail2ban
   - hblock
   - tcp
+  - oomd
   # - grub
   # - cliphist
   # - copyq

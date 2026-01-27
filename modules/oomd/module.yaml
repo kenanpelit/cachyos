@@ -1,0 +1,4 @@
+description: systemd-oomd memory pressure protection
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: once
