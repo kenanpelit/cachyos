@@ -4,7 +4,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_SRC="${SCRIPT_DIR}/../dotfiles/systemd/hblock-update.service"
 TIMER_SRC="${SCRIPT_DIR}/../dotfiles/systemd/hblock-update.timer"
-PROFILE_SRC="${SCRIPT_DIR}/../dotfiles/profile.d/hblock.sh"
 SCRIPT_SRC="${SCRIPT_DIR}/hblock-update"
 
 SERVICE_DST="/etc/systemd/system/hblock-update.service"
@@ -23,8 +22,11 @@ fi
 
 ${SUDO} install -m 644 "${SERVICE_SRC}" "${SERVICE_DST}"
 ${SUDO} install -m 644 "${TIMER_SRC}" "${TIMER_DST}"
-${SUDO} install -m 644 "${PROFILE_SRC}" "${PROFILE_DST}"
 ${SUDO} install -m 755 "${SCRIPT_SRC}" "${SCRIPT_DST}"
+
+if [ -e "${PROFILE_DST}" ] || [ -L "${PROFILE_DST}" ]; then
+  ${SUDO} rm -f "${PROFILE_DST}"
+fi
 
 ${SUDO} systemctl daemon-reload
 ${SUDO} systemctl enable --now hblock-update.timer

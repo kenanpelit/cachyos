@@ -1,32 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-for USER_HOME in /home/*; do
-  [ -d "$USER_HOME" ] || continue
-  USER="$(basename "$USER_HOME")"
-  USER_UID=$(id -u "$USER" 2>/dev/null || echo 0)
-  [ "$USER_UID" -lt 1000 ] && continue
+if ! command -v hblock >/dev/null 2>&1; then
+  echo "hblock not found in PATH" >&2
+  exit 1
+fi
 
-  CONFIG_DIR="$USER_HOME/.config/hblock"
-  HOSTS_FILE="$CONFIG_DIR/hosts"
-  TEMP_FILE="$CONFIG_DIR/hosts.tmp"
-  mkdir -p "$CONFIG_DIR"
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+  if ! command -v sudo >/dev/null 2>&1; then
+    echo "sudo is required to update /etc/hosts" >&2
+    exit 1
+  fi
+  SUDO="sudo"
+fi
 
-  {
-    echo "# Base entries"
-    echo "localhost 127.0.0.1"
-    echo "hay 127.0.0.2"
-    echo "# hBlock entries (Updated: $(date))"
-    hblock -O - 2>/dev/null | while read -r LINE; do
-      if [[ $LINE =~ ^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)[[:space:]]+(.+)$ ]]; then
-        dom="${BASH_REMATCH[2]}"
-        echo "${dom} ${dom}"
-      fi
-    done
-  } > "$TEMP_FILE"
+HOSTS_FILE="/etc/hosts"
+BLOCK_BEGIN="# hblock-start"
+BLOCK_END="# hblock-end"
+TEMP_FILE="$(mktemp)"
 
-  mv "$TEMP_FILE" "$HOSTS_FILE"
-  chown "$USER:users" "$HOSTS_FILE"
-  chmod 0644 "$HOSTS_FILE"
+if [ -f "${HOSTS_FILE}" ]; then
+  ${SUDO} awk -v begin="${BLOCK_BEGIN}" -v end="${BLOCK_END}" '
+    $0 == begin {skip=1; next}
+    $0 == end {skip=0; next}
+    skip != 1 {print}
+  ' "${HOSTS_FILE}" > "${TEMP_FILE}"
+else
+  : > "${TEMP_FILE}"
+fi
 
-done
+{
+  echo ""
+  echo "${BLOCK_BEGIN}"
+  hblock -O - 2>/dev/null
+  echo "${BLOCK_END}"
+} >> "${TEMP_FILE}"
+
+${SUDO} install -m 644 "${TEMP_FILE}" "${HOSTS_FILE}"
+rm -f "${TEMP_FILE}"
