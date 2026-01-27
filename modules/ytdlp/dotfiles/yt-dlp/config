@@ -93,4 +93,4 @@
 # YouTube için en stabil yöntem: incognito oturumundan export edilmiş cookies.txt kullan.
 # (Brave/Chrome cookie DB decrypt uyarılarını da tamamen kaldırır.)
 # Optional: export cookies (incognito) to ~/.config/yt-dlp/cookies-youtube.txt
-# --cookies ~/.config/yt-dlp/cookies-youtube.txt
+--cookies ~/.config/yt-dlp/cookies-youtube.txt
