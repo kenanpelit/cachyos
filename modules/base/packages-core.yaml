@@ -22,6 +22,8 @@ packages:
   - curl
   - wget
   - bc
+  - lsb-release
+  - etckeeper
 
   # CLI file management (some moved to own modules)
   - lf
@@ -66,6 +68,18 @@ packages:
   - inxi
   - tealdeer
   - psmisc
+  - strace
+  - lsof
+  - lshw
+  - cpulimit
+  - nmon
+  - sysstat
+  - atop
+  - glances
+  - stress-ng
+  - powertop
+  - iotop
+  - acct
 
   # Wayland tooling
   - wl-clipboard
@@ -80,8 +94,14 @@ packages:
   - nmap
   - mtr
   - iputils
+  - traceroute
   - fping
   - iftop
+  - ethtool
+  - net-tools
+  - vnstat
+  - bmon
+  - pssh
   - iptraf-ng
   - speedtest-cli
   - iperf3
