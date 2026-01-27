@@ -1834,3 +1834,7 @@ bindkey -M viins '^[s' sesh-sessions    # Alt+S in insert mode
 bindkey -M vicmd '^[s' sesh-sessions    # Alt+S in command mode
 bindkey -M viins '\es' sesh-sessions    # Alternative Alt+S binding
 bindkey -M vicmd '\es' sesh-sessions    # Alternative Alt+S binding
+
+# Go
+export GOPATH="$HOME/.local/share/go"
+export PATH="$PATH:$GOPATH/bin"

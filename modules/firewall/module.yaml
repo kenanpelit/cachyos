@@ -1,4 +1,4 @@
-description: pacman.conf settings
+description: Firewall configuration (ufw)
 
 post_install_hook: scripts/install.sh
 post_hook_behavior: once

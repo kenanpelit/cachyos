@@ -1,0 +1,4 @@
+description: Firewall packages
+packages:
+  - ufw
+  - conntrack-tools

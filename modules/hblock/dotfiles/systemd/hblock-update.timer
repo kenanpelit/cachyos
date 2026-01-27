@@ -1,0 +1,10 @@
+[Unit]
+Description=Run hBlock update weekly
+
+[Timer]
+OnCalendar=Sun *-*-* 01:00
+Persistent=true
+Unit=hblock-update.service
+
+[Install]
+WantedBy=timers.target
