@@ -152,23 +152,53 @@ case "${cmd}" in
       command -v hyprctl >/dev/null 2>&1 || exit 0
       command -v jq >/dev/null 2>&1 || exit 0
 
+      resolve_cmd() {
+        local name="$1"
+        shift || true
+        local c
+        for c in "$name" "$HOME/.local/bin/$name" "$HOME/bin/$name"; do
+          if [[ -n "$c" ]] && command -v "$c" >/dev/null 2>&1; then
+            command -v "$c"
+            return 0
+          fi
+          if [[ -n "$c" && -x "$c" ]]; then
+            printf '%s\n' "$c"
+            return 0
+          fi
+        done
+        return 1
+      }
+
+      run_cmd_bg() {
+        local name="$1"
+        shift || true
+        local cmd
+        if ! cmd="$(resolve_cmd "$name")"; then
+          if command -v notify-send >/dev/null 2>&1; then
+            notify-send "Error" "No command found for ${name}" "critical" 2>/dev/null || true
+          fi
+          exit 1
+        fi
+        "$cmd" "$@" &
+      }
+
       launch_app() {
         if command -v notify-send >/dev/null 2>&1; then
             notify-send -t 1000 "Hyprland" "Launching ${APP_ID}..." 2>/dev/null || true
         fi
         
         case "$APP_ID" in
-          "Kenp") start-brave-kenp & ;;
-          "TmuxKenp") start-kkenp & ;;
-          "Ai") start-brave-ai & ;;
-          "CompecTA") start-brave-compecta & ;;
-          "WebCord") webcord & ;;
-          "org.telegram.desktop") telegram-desktop & ;;
-          "brave-youtube.com__-Default") start-brave-youtube & ;;
-          "spotify") spotify & ;;
-          "ferdium") ferdium & ;;
-          "discord") discord & ;;
-          "kitty") kitty & ;;
+          "Kenp") run_cmd_bg start-brave-kenp ;;
+          "TmuxKenp") run_cmd_bg start-kkenp ;;
+          "Ai") run_cmd_bg start-brave-ai ;;
+          "CompecTA") run_cmd_bg start-brave-compecta ;;
+          "WebCord") run_cmd_bg webcord ;;
+          "org.telegram.desktop") run_cmd_bg telegram-desktop ;;
+          "brave-youtube.com__-Default") run_cmd_bg start-brave-youtube ;;
+          "spotify") run_cmd_bg spotify ;;
+          "ferdium") run_cmd_bg ferdium ;;
+          "discord") run_cmd_bg discord ;;
+          "kitty") run_cmd_bg kitty ;;
           *)
             if command -v "$APP_ID" >/dev/null 2>&1; then
               "$APP_ID" &
