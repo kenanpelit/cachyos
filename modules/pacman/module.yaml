@@ -1,0 +1,5 @@
+description: pacman.conf managed by dcli (Chaotic-AUR bootstrap script included)
+
+dotfiles:
+  - source: dotfiles/pacman.conf
+    target: /etc/pacman.conf
