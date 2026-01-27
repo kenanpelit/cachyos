@@ -105,6 +105,7 @@ enabled_modules:
   - user-services
   - admin
   - logind
+  - kernel
   - pacman
   - firewall
   - fail2ban
