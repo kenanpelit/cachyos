@@ -141,6 +141,7 @@ case "${cmd}" in
   here)
     (
       set -euo pipefail
+      export PATH="${HOME}/.local/bin:${HOME}/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
       APP_ID="${1:-}"
       
       if [[ -z "$APP_ID" ]]; then
