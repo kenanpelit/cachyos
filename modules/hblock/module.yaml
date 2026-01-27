@@ -1,0 +1,4 @@
+description: hBlock host blocking
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: once

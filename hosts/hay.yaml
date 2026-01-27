@@ -106,6 +106,9 @@ enabled_modules:
   - admin
   - logind
   - pacman
+  - firewall
+  - fail2ban
+  - hblock
   # - grub
   # - cliphist
   # - copyq
