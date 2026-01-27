@@ -19,6 +19,8 @@ Personal, declarative system configuration for **CachyOS** (Arch Linux) managed 
   - **Hyprland:** Performance-tuned dynamic tiling Wayland compositor.
 - **Unified Theming:** Consistent application of the Catppuccin Mocha palette across GTK, Qt (Kvantum), and various terminal emulators.
 - **System Automation:** Managed services, snapshots, and system-level configuration hooks.
+- **System Hardening:** Optional firewall (ufw), fail2ban, and host blocking (hblock).
+- **Kernel Tuning:** ThinkPad/Intel-specific modules and boot parameters via a dedicated kernel module.
 
 ## System Components
 
@@ -30,6 +32,8 @@ Personal, declarative system configuration for **CachyOS** (Arch Linux) managed 
 | **Shell** | Zsh with Starship |
 | **Theming** | Catppuccin Mocha |
 | **File Management** | Yazi, Nemo |
+| **Security** | ufw, fail2ban, hblock |
+| **Kernel** | ThinkPad/Intel tuning (modules + GRUB params) |
 
 ## Directory Structure
 
@@ -38,8 +42,12 @@ Personal, declarative system configuration for **CachyOS** (Arch Linux) managed 
 ├── modules/             # Modular system components
 │   ├── admin/           # Administrative hooks (local only)
 │   ├── grub/            # Bootloader configuration
+│   ├── kernel/          # Kernel modules & GRUB parameters
 │   ├── hyprland/        # Wayland compositor setup
 │   ├── niri/            # Primary desktop environment
+│   ├── firewall/        # ufw configuration
+│   ├── fail2ban/        # fail2ban configuration
+│   ├── hblock/          # hosts-based blocking
 │   ├── gtk/qt/          # Toolkit consistent theming
 │   └── ...
 ├── config.yaml          # Main entry point
@@ -75,13 +83,14 @@ Commands are listed in **Quick Start**.
 
 ## Usage
 
-- Enable/disable modules in `hosts/<hostname>.yaml`
-- Add/remove packages in `modules/*/packages.yaml`
-- Apply changes with `sudo -E dcli sync`
- 
+- Enable/disable modules in `hosts/<hostname>.yaml`.
+- Add/remove packages in `modules/*/packages.yaml`.
+- Apply changes with `sudo -E dcli sync`.
+
 ## Notes
 
 - This repo is tuned for personal hardware and workflows; review modules before applying on other machines.
+  - Kernel tuning assumes a ThinkPad/Intel laptop; adjust `modules/kernel` if needed.
 
 ## Credits
 
