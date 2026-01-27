@@ -16,6 +16,7 @@ modules/dms/dotfiles/DankMaterialShell/plugins/dankStickerSearch
 modules/dms/dotfiles/DankMaterialShell/plugins/dankStickerSearch.meta
 modules/dms/dotfiles/DankMaterialShell/settings.json
 modules/dms/dotfiles/DankMaterialShell/plugin_settings.json
+modules/dms/dotfiles/DankMaterialShell/plugins/dankBitwarden/
 modules/ytdlp/dotfiles/yt-dlp/cookies-youtube.txt
 mimeinfo.cache
 brave-*.desktop
