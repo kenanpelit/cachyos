@@ -109,6 +109,7 @@ enabled_modules:
   - firewall
   - fail2ban
   - hblock
+  - tcp
   # - grub
   # - cliphist
   # - copyq

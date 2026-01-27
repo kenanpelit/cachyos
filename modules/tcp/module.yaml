@@ -1,0 +1,4 @@
+description: TCP/IP kernel tuning (ultra)
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: once
