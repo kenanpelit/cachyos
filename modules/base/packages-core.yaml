@@ -101,7 +101,6 @@ packages:
   - net-tools
   - vnstat
   - bmon
-  - pssh
   - iptraf-ng
   - speedtest-cli
   - iperf3
