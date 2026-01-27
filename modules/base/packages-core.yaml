@@ -71,7 +71,7 @@ packages:
   - strace
   - lsof
   - lshw
-  - cpulimit
+  - extra/cpulimit
   - nmon
   - sysstat
   - atop
@@ -79,7 +79,7 @@ packages:
   - stress-ng
   - powertop
   - iotop
-  - acct
+  - extra/acct
 
   # Wayland tooling
   - wl-clipboard
@@ -101,7 +101,7 @@ packages:
   - net-tools
   - vnstat
   - bmon
-  - pssh
+  - extra/parallel-ssh
   - iptraf-ng
   - speedtest-cli
   - iperf3
