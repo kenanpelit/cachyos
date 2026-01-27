@@ -1,0 +1,4 @@
+description: Kernel modules and boot parameters (ThinkPad/Intel)
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: once
