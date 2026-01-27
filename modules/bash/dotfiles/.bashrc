@@ -1,39 +1,82 @@
-# ~/.bashrc (portable; ported from nixosc)
+# ~/.bashrc (portable)
 
+# ----------------------------------------------------------------------
 # Interactive shell settings
+# ----------------------------------------------------------------------
 case $- in
   *i*) ;;
   *) return ;;
 esac
 
-# Vi mode (match zsh viins)
-set -o vi
+# ----------------------------------------------------------------------
+# XDG base directories (fallbacks)
+# ----------------------------------------------------------------------
+: "${XDG_CONFIG_HOME:=$HOME/.config}"
+: "${XDG_CACHE_HOME:=$HOME/.cache}"
+: "${XDG_DATA_HOME:=$HOME/.local/share}"
+: "${XDG_STATE_HOME:=$HOME/.local/state}"
+export XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME XDG_STATE_HOME
 
-# Better history defaults
+# ----------------------------------------------------------------------
+# History configuration
+# ----------------------------------------------------------------------
+HISTFILE="$XDG_STATE_HOME/bash/history"
+mkdir -p "$(dirname "$HISTFILE")"
+export HISTFILE
 export HISTFILESIZE=200000
 export HISTSIZE=200000
 export HISTCONTROL=ignoredups:ignorespace
-export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND:-}"
+shopt -s histappend cmdhist checkwinsize
+PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND:-}"
 
-# Path helpers (preserves existing PATH)
+# ----------------------------------------------------------------------
+# Input mode (match zsh viins)
+# ----------------------------------------------------------------------
+set -o vi
+
+# ----------------------------------------------------------------------
+# PATH helpers (preserve existing PATH, avoid duplicates)
+# ----------------------------------------------------------------------
 _add_path() { case ":$PATH:" in *":$1:"*) ;; *) PATH="$1:$PATH";; esac }
 _add_path "$HOME/.local/bin"
 _add_path "$HOME/bin"
+_add_path "$HOME/.iptv/bin"
+_add_path "/usr/local/bin"
+unset -f _add_path
 
+# ----------------------------------------------------------------------
+# Completions
+# ----------------------------------------------------------------------
+if [ -r /usr/share/bash-completion/bash_completion ]; then
+  # shellcheck disable=SC1091
+  . /usr/share/bash-completion/bash_completion
+elif [ -r /etc/bash_completion ]; then
+  # shellcheck disable=SC1091
+  . /etc/bash_completion
+fi
+
+# ----------------------------------------------------------------------
 # fzf
-if [ -f "/usr/share/fzf/key-bindings.bash" ]; then
-  source "/usr/share/fzf/key-bindings.bash"
+# ----------------------------------------------------------------------
+if [ -f /usr/share/fzf/key-bindings.bash ]; then
+  # shellcheck disable=SC1091
+  . /usr/share/fzf/key-bindings.bash
 fi
-if [ -f "/usr/share/fzf/completion.bash" ]; then
-  source "/usr/share/fzf/completion.bash"
+if [ -f /usr/share/fzf/completion.bash ]; then
+  # shellcheck disable=SC1091
+  . /usr/share/fzf/completion.bash
 fi
 
-# Starship prompt
+# ----------------------------------------------------------------------
+# Prompt
+# ----------------------------------------------------------------------
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init bash)"
 fi
 
-# Common aliases (only if wrappers exist)
+# ----------------------------------------------------------------------
+# Aliases (only if wrappers exist)
+# ----------------------------------------------------------------------
 if command -v brave-launcher >/dev/null 2>&1; then
   alias brave=brave-launcher
 fi
@@ -49,6 +92,9 @@ if command -v transmission-remote >/dev/null 2>&1; then
   alias tr-info='transmission-remote -i'
 fi
 
+# ----------------------------------------------------------------------
+# Tools
+# ----------------------------------------------------------------------
 # yazi: jump to last directory
 yy() {
   local tmp
@@ -67,7 +113,7 @@ if command -v gpg-connect-agent >/dev/null 2>&1; then
   gpg-connect-agent --quiet updatestartuptty /bye >/dev/null 2>&1 || true
 fi
 
-# direnv
+# direnv (optional)
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook bash)"
 fi

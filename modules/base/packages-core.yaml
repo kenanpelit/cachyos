@@ -79,7 +79,6 @@ packages:
   - stress-ng
   - powertop
   - iotop
-  - acct
 
   # Wayland tooling
   - wl-clipboard
@@ -101,7 +100,6 @@ packages:
   - net-tools
   - vnstat
   - bmon
-  - pssh
   - iptraf-ng
   - speedtest-cli
   - iperf3
