@@ -79,7 +79,6 @@ packages:
   - stress-ng
   - powertop
   - iotop
-  - acct
 
   # Wayland tooling
   - wl-clipboard
