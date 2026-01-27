@@ -71,7 +71,7 @@ packages:
   - strace
   - lsof
   - lshw
-  - cpulimit-git
+  - cpulimit
   - nmon
   - sysstat
   - atop
@@ -79,7 +79,7 @@ packages:
   - stress-ng
   - powertop
   - iotop
-  - acct-svn
+  - acct
 
   # Wayland tooling
   - wl-clipboard
