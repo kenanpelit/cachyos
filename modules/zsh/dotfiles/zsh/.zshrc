@@ -1,4 +1,10 @@
 # ----------------------------------------------------------------------
+# Completion system (early)
+# ----------------------------------------------------------------------
+autoload -Uz compinit
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compdump"
+
+# ----------------------------------------------------------------------
 # PWD Sanity Check
 # 
 # Sometimes ZSH starts in a non-existent or plugin directory
