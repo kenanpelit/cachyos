@@ -3,6 +3,8 @@
 # ----------------------------------------------------------------------
 autoload -Uz compinit
 compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compdump"
+autoload -Uz _dcli 2>/dev/null || true
+(( $+functions[_dcli] )) && compdef _dcli dcli
 
 # ----------------------------------------------------------------------
 # PWD Sanity Check
