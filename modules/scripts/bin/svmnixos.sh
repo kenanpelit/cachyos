@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# svmcachy.sh — SVM profile: CachyOS (QEMU/KVM)
+# svmnixos.sh — SVM profile: NixOS (QEMU/KVM)
 
 #===============================================================================
 #
-#   SVM (Simple VM) — CachyOS profile
+#   SVM (Simple VM) — NixOS profile
 #
 #   Purpose:
-#     Create and run a CachyOS VM with sane defaults (Wayland/TTY friendly).
+#     Create and run a NixOS VM with sane defaults.
 #
 #   Commands:
 #     install    Boot from ISO (first install)
@@ -24,56 +24,23 @@
 #     - Optional ISO attach/download (--no-iso)
 #     - PID file is always written (status/stop works in foreground too)
 #
-#   Version: 1.4.0
+#   Env overrides (NixOS profile):
+#     VMNIXOS_BASE_DIR, VMNIXOS_MEMORY, VMNIXOS_CPUS, VMNIXOS_SSH_PORT, VMNIXOS_BOOT_MODE
+#
+#   Version: 1.3.0
 #   Date: 2026-01-27
 #   Author: Kenan Pelit
 #
 #===============================================================================
 
-set -euo pipefail
-
-#set -x
-
-# ============================================================================
-# Environment Setup for Wayland/TTY
-# ============================================================================
-setup_wayland_environment() {
-  # Disable accessibility bridge to prevent AT-SPI errors
-  export NO_AT_BRIDGE=1
-  export GTK_A11Y=none
-
-  # D-Bus timeout configuration (30 seconds instead of default 25)
-  export DBUS_SESSION_BUS_TIMEOUT=30000
-
-  # Wayland display configuration
-  if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-    export QT_QPA_PLATFORM=wayland
-    export GDK_BACKEND=wayland
-    export SDL_VIDEODRIVER=wayland
-    export CLUTTER_BACKEND=wayland
-  fi
-
-  # Initialize fontconfig to prevent warnings
-  if command -v fc-cache >/dev/null 2>&1; then
-    fc-cache -f >/dev/null 2>&1 || true
-  fi
-
-  # Suppress GVFS warnings
-  export GVFS_DISABLE_FUSE=1
-
-  # XDG Portal configuration
-  export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
-}
-
-# Call environment setup at the start
-setup_wayland_environment
+set -euo pipefail # Strict error handling
 
 # Colors for output
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[1;33m'
 readonly BLUE='\033[0;34m'
-readonly NC='\033[0m'
+readonly NC='\033[0m' # No Color
 
 # Logging functions
 log_info() { echo -e "${BLUE}[INFO]${NC} $*"; }
@@ -83,20 +50,20 @@ log_success() { echo -e "${GREEN}[SUCCESS]${NC} $*"; }
 
 # Configuration
 declare -A CONFIG=(
-  [base_dir]="/nixos/san/cachy"
+  [base_dir]="/nixos/san/nixos"
   [ovmf_code]="/usr/share/edk2-ovmf/x64/OVMF.4m.fd"
   [ovmf_vars_template]="/usr/share/edk2-ovmf/x64/OVMF_VARS.4m.fd"
-  [vm_name]="cachy"
-  [memory]="16G"
+  [vm_name]="nixos"
+  [memory]="24G"
   [cpus]="8"
   [disk_size]="128G"
-  [ssh_port]="2265"
+  [ssh_port]="2288"
   [vnc_port]="5900"
-  [iso_url]="https://cdn77.cachyos.org/ISO/desktop/260124/cachyos-desktop-linux-260124.iso"
-  [iso_checksum]=""
+  [iso_url]="https://channels.nixos.org/nixos-25.11/latest-nixos-graphical-x86_64-linux.iso"
+  [iso_checksum]="" # SHA256 checksum (optional)
   [display_mode]="gtk"
   [boot_mode]="bios"
-  [boot_order]="auto"   # auto|disk|cdrom
+  [boot_order]="auto" # auto|disk|cdrom
   [shared_dir]="/run/user/$(id -u)"
   [attach_iso]="true"
   [daemonize]="false"
@@ -104,7 +71,7 @@ declare -A CONFIG=(
 )
 
 # Derived paths
-CONFIG[iso_file]="${CONFIG[base_dir]}/$(basename "${CONFIG[iso_url]}")"
+CONFIG[iso_file]="${CONFIG[base_dir]}/latest-nixos-graphical-x86_64-linux.iso"
 CONFIG[vars_file]="${CONFIG[base_dir]}/OVMF_VARS.fd"
 CONFIG[disk_file]="${CONFIG[base_dir]}/disk.qcow2"
 CONFIG[monitor_sock]="${CONFIG[base_dir]}/monitor.sock"
@@ -116,7 +83,7 @@ HAVE_KVM="false"
 
 show_help() {
   cat <<EOF
-Universal VM Manager - Easily create and manage virtual machines
+NixOS VM Manager - Easily create and manage NixOS virtual machines
 
 Usage: $(basename "$0") [COMMAND] [OPTIONS]
 
@@ -154,15 +121,15 @@ Path Options:
 Other Options:
     -h, --help             Show this help message
     --no-iso              Do not attach ISO (skip download/verify)
-    --dry-run             Show QEMU command without executing
-    -v, --verbose         Enable verbose output
+    --dry-run              Show QEMU command without executing
+    -v, --verbose          Enable verbose output
 
 Environment Variables:
-    VM_BASE_DIR           Override base directory
-    VM_MEMORY             Override memory size
-    VM_CPUS               Override CPU count
-    VM_SSH_PORT           Override SSH port
-    VM_BOOT_MODE          Override boot mode (bios/uefi)
+    VMNIXOS_BASE_DIR       Override base directory
+    VMNIXOS_MEMORY         Override memory size
+    VMNIXOS_CPUS           Override CPU count
+    VMNIXOS_SSH_PORT       Override SSH port
+    VMNIXOS_BOOT_MODE      Override boot mode (bios/uefi)
 
 Examples:
     # Start VM with default settings
@@ -187,28 +154,27 @@ Examples:
     $(basename "$0") start --vnc 5901
 
 Note: Use Ctrl+Alt+G to release mouse/keyboard grab in GUI mode
-      Enhanced for Wayland/Sway/TTY environments
 EOF
 }
 
 apply_env_overrides() {
   # Environment variable overrides
-  [[ -n "${VM_BASE_DIR:-}" ]] && CONFIG[base_dir]="$VM_BASE_DIR"
-  [[ -n "${VM_MEMORY:-}" ]] && CONFIG[memory]="$VM_MEMORY"
-  [[ -n "${VM_CPUS:-}" ]] && CONFIG[cpus]="$VM_CPUS"
-  [[ -n "${VM_SSH_PORT:-}" ]] && CONFIG[ssh_port]="$VM_SSH_PORT"
-  [[ -n "${VM_BOOT_MODE:-}" ]] && CONFIG[boot_mode]="$VM_BOOT_MODE"
+  [[ -n "${VMNIXOS_BASE_DIR:-}" ]] && CONFIG[base_dir]="$VMNIXOS_BASE_DIR"
+  [[ -n "${VMNIXOS_MEMORY:-}" ]] && CONFIG[memory]="$VMNIXOS_MEMORY"
+  [[ -n "${VMNIXOS_CPUS:-}" ]] && CONFIG[cpus]="$VMNIXOS_CPUS"
+  [[ -n "${VMNIXOS_SSH_PORT:-}" ]] && CONFIG[ssh_port]="$VMNIXOS_SSH_PORT"
+  [[ -n "${VMNIXOS_BOOT_MODE:-}" ]] && CONFIG[boot_mode]="$VMNIXOS_BOOT_MODE"
 
   return 0
 }
 
 refresh_derived_paths() {
-  local default_iso="${CONFIG[base_dir]}/$(basename "${CONFIG[iso_url]}")"
+  local default_iso="${CONFIG[base_dir]}/latest-nixos-graphical-x86_64-linux.iso"
   if [[ "${CONFIG[iso_file_explicit]}" != "true" ]]; then
     CONFIG[iso_file]="$default_iso"
   fi
 
-  # Update derived paths
+  # Update derived paths after potential base_dir change
   CONFIG[vars_file]="${CONFIG[base_dir]}/OVMF_VARS.fd"
   CONFIG[disk_file]="${CONFIG[base_dir]}/disk.qcow2"
   CONFIG[monitor_sock]="${CONFIG[base_dir]}/monitor.sock"
@@ -270,7 +236,7 @@ verify_iso() {
 }
 
 setup_vm_files() {
-  # Create disk image
+  # Create disk image if it doesn't exist
   if [[ ! -f "${CONFIG[disk_file]}" ]]; then
     log_info "Creating new disk image (${CONFIG[disk_size]})..."
     if [[ "${CONFIG[boot_mode]}" == "bios" ]]; then
@@ -281,7 +247,7 @@ setup_vm_files() {
     log_success "Disk image created"
   fi
 
-  # Setup UEFI vars
+  # Setup UEFI vars file
   if [[ "${CONFIG[boot_mode]}" == "uefi" && ! -f "${CONFIG[vars_file]}" ]]; then
     if [[ ! -f "${CONFIG[ovmf_vars_template]}" ]]; then
       log_error "OVMF template not found: ${CONFIG[ovmf_vars_template]}"
@@ -294,9 +260,9 @@ setup_vm_files() {
   fi
 
   if [[ "${CONFIG[attach_iso]}" == "true" ]]; then
-    # Download ISO
+    # Download ISO if needed
     if [[ ! -f "${CONFIG[iso_file]}" ]]; then
-      log_info "Downloading ISO from ${CONFIG[iso_url]}..."
+      log_info "Downloading NixOS ISO..."
       if ! wget --progress=bar:force:noscroll "${CONFIG[iso_url]}" -O "${CONFIG[iso_file]}"; then
         log_error "Failed to download ISO"
         rm -f "${CONFIG[iso_file]}"
@@ -305,6 +271,7 @@ setup_vm_files() {
       log_success "ISO downloaded"
     fi
 
+    # Verify ISO if checksum provided
     verify_iso "${CONFIG[iso_file]}"
   fi
 }
@@ -339,23 +306,23 @@ build_qemu_command() {
   *) log_error "Invalid boot order: ${CONFIG[boot_order]} (expected: auto|disk|cdrom)" && exit 1 ;;
   esac
 
-  # UEFI boot
+  # UEFI boot configuration
   if [[ "${CONFIG[boot_mode]}" == "uefi" ]]; then
     out+=(-drive "file=${CONFIG[ovmf_code]},if=pflash,format=raw,readonly=on")
     out+=(-drive "file=${CONFIG[vars_file]},if=pflash,format=raw")
   fi
 
-  # Storage
+  # Drive configuration
   out+=(-drive "file=${CONFIG[disk_file]},if=virtio,cache=writeback")
   if [[ "${CONFIG[attach_iso]}" == "true" ]]; then
     out+=(-cdrom "${CONFIG[iso_file]}")
   fi
 
-  # Network with SSH
+  # Network configuration with SSH forwarding
   out+=(-netdev "user,id=net0,hostfwd=tcp::${CONFIG[ssh_port]}-:22")
   out+=(-device "virtio-net-pci,netdev=net0")
 
-  # Display
+  # Display configuration
   case "${CONFIG[display_mode]}" in
   gtk)
     out+=(-device virtio-vga-gl)
@@ -381,11 +348,11 @@ build_qemu_command() {
     ;;
   esac
 
-  # Input devices
+  # Input devices (only for graphical modes)
   if [[ "${CONFIG[display_mode]}" != "none" ]]; then
     out+=(-device qemu-xhci,id=xhci)
-    out+=(-device usb-tablet)
-    out+=(-device usb-kbd)
+    out+=(-device virtio-tablet-pci)
+    out+=(-device virtio-keyboard-pci)
   fi
 
   # Additional features
@@ -394,16 +361,16 @@ build_qemu_command() {
   else
     out+=(-cpu max)
   fi
-  out+=(-device virtio-balloon-pci)
-  out+=(-device virtio-rng-pci)
+  out+=(-device virtio-balloon-pci) # Memory ballooning support
+  out+=(-device virtio-rng-pci)     # Random number generator
 
-  # Shared directory (9p)
+  # Shared directory (9P)
   if [[ -d "${CONFIG[shared_dir]}" ]]; then
     out+=(-fsdev "local,security_model=passthrough,id=fsdev0,path=${CONFIG[shared_dir]}")
     out+=(-device "virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=hostshare")
   fi
 
-  # Audio
+  # Audio support (only for graphical modes)
   if [[ "${CONFIG[display_mode]}" != "none" ]]; then
     out+=(-audiodev pa,id=snd0)
     out+=(-device intel-hda)
@@ -418,7 +385,7 @@ build_qemu_command() {
     out+=(-daemonize)
   fi
 
-  # Monitor
+  # Monitor interface
   out+=(-monitor "unix:${CONFIG[monitor_sock]},server,nowait")
 }
 
@@ -444,13 +411,15 @@ vm_stop() {
     pid=$(cat "${CONFIG[pid_file]}")
     log_info "Stopping VM (PID: $pid)..."
 
-    # Graceful shutdown
+    # Try graceful shutdown first
     if [[ -S "${CONFIG[monitor_sock]}" ]]; then
       echo "system_powerdown" | socat - "unix:${CONFIG[monitor_sock]}" 2>/dev/null || true
     fi
+
+    # Wait a bit for graceful shutdown
     sleep 5
 
-    # Force if needed
+    # Force kill if still running
     if kill -0 "$pid" 2>/dev/null; then
       log_warn "Forcing VM shutdown..."
       kill -TERM "$pid"
@@ -473,12 +442,15 @@ vm_connect() {
   fi
 
   log_info "Connecting to VM via SSH (port ${CONFIG[ssh_port]})..."
+  log_info "Default credentials may be required for first connection"
 
+  # Test if SSH port is responding
   if timeout 5 bash -c "cat < /dev/null > /dev/tcp/localhost/${CONFIG[ssh_port]}" 2>/dev/null; then
     ssh -p "${CONFIG[ssh_port]}" -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" localhost
   else
     log_error "SSH port ${CONFIG[ssh_port]} is not responding"
     log_info "VM might still be booting or SSH service is not running"
+    log_info "Try connecting manually: ssh -p ${CONFIG[ssh_port]} username@localhost"
   fi
 }
 
@@ -489,6 +461,7 @@ vm_console() {
   fi
 
   log_info "Connecting to QEMU monitor console..."
+  log_info "Type 'help' for available commands, 'quit' to exit"
   socat - "unix:${CONFIG[monitor_sock]}"
 }
 
@@ -517,15 +490,7 @@ require_arg() {
 parse_arguments() {
   local command="start"
 
-  # Handle help first, before any parsing
-  for arg in "$@"; do
-    if [[ "$arg" == "-h" || "$arg" == "--help" ]]; then
-      show_help
-      exit 0
-    fi
-  done
-
-  # Parse command first (if not starting with -)
+  # Parse command first
   if [[ $# -gt 0 && ! "$1" =~ ^- ]]; then
     command="$1"
     shift
@@ -560,10 +525,10 @@ parse_arguments() {
       ;;
     --boot)
       require_arg "$1" "${2:-}"
-      [[ "$2" != "bios" && "$2" != "uefi" ]] && {
-        log_error "Boot mode must be 'bios' or 'uefi'"
+      if [[ "$2" != "bios" && "$2" != "uefi" ]]; then
+        log_error "Boot mode must be either 'bios' or 'uefi'"
         exit 1
-      }
+      fi
       CONFIG[boot_mode]="$2"
       shift 2
       ;;
@@ -587,10 +552,10 @@ parse_arguments() {
       ;;
     --vnc)
       CONFIG[display_mode]="vnc"
-      [[ -n "${2:-}" && "$2" =~ ^[0-9]+$ ]] && {
+      if [[ -n "${2:-}" && "$2" =~ ^[0-9]+$ ]]; then
         CONFIG[vnc_port]="$2"
         shift
-      }
+      fi
       shift
       ;;
     --base-dir)
@@ -633,6 +598,7 @@ parse_arguments() {
       ;;
     *)
       log_error "Unknown option: $1"
+      show_help
       exit 1
       ;;
     esac
@@ -708,19 +674,30 @@ main() {
       fi
     fi
     ;;
-  stop) vm_stop ;;
-  status) vm_status ;;
-  connect) vm_connect ;;
-  console) vm_console ;;
-  reset) vm_reset ;;
+  stop)
+    vm_stop
+    ;;
+  status)
+    vm_status
+    ;;
+  connect)
+    vm_connect
+    ;;
+  console)
+    vm_console
+    ;;
+  reset)
+    vm_reset
+    ;;
   *)
     log_error "Unknown command: $command"
-    log_info "Use --help to see available commands"
+    show_help
     exit 1
     ;;
   esac
 }
 
+# Trap signals for cleanup
 trap 'log_info "Interrupted"; exit 130' INT TERM
 
 main "$@"
