@@ -332,9 +332,9 @@ tmux_conf_copy_to_os_clipboard=true                            # OS clipboard en
 tmux_conf_new_session_prompt=false                             # Yeni session oluştururken isim sorma
 tmux_conf_new_session_retain_current_path=true                 # Yeni session mevcut dizinde başlasın
 tmux_conf_new_window_retain_current_path=false                 # Yeni pencere ev dizininde (~/) açılsın
-tmux_conf_new_window_reconnect_ssh=true                        # Yeni pencerede SSH bağlantısını yeniden kur
+tmux_conf_new_window_reconnect_ssh=false                       # Yeni pencerede SSH bağlantısını yeniden kur
 tmux_conf_new_pane_retain_current_path=true                    # Yeni panel mevcut dizinde açılsın
-tmux_conf_new_pane_reconnect_ssh=true                          # Yeni panelde SSH bağlantısını yeniden kur
+tmux_conf_new_pane_reconnect_ssh=false                         # Yeni panelde SSH bağlantısını yeniden kur
 
 # Urlscan options - URL tarama seçenekleri
 tmux_conf_urlscan_options="--compact --dedupe"                 # Compact görünüm ve dublikasyon kaldır
