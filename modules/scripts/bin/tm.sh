@@ -38,6 +38,28 @@ set -euo pipefail
 # Script metadata
 readonly SCRIPT_NAME="${0##*/}"
 
+# Resolve script path once (portable)
+resolve_script_path() {
+	local src="${BASH_SOURCE[0]:-$0}"
+	if command -v realpath >/dev/null 2>&1; then
+		realpath "$src"
+	elif readlink -f "$src" >/dev/null 2>&1; then
+		readlink -f "$src"
+	else
+		printf '%s\n' "$src"
+	fi
+}
+
+cmd_exists() { command -v "$1" >/dev/null 2>&1; }
+
+require_cmd() {
+	local name="$1"
+	if ! cmd_exists "$name"; then
+		error "Komut bulunamadı: $name"
+		exit 1
+	fi
+}
+
 # Global yapılandırma
 readonly VERSION="2.0.0"
 readonly CONFIG_DIR="${HOME}/.config/tmux"
@@ -48,6 +70,12 @@ readonly DEFAULT_SESSION="KENP"
 readonly BACKUP_GLOB="tmux_backup_*.tar.gz"
 readonly HISTORY_LIMIT=100
 readonly SOCKET_DIR="/tmp/tmux-${UID}"
+readonly SCRIPT_PATH="$(resolve_script_path)"
+readonly TMUX_BIN="$(command -v tmux 2>/dev/null || true)"
+
+tmux_cmd() {
+	"${TMUX_BIN:-tmux}" "$@"
+}
 
 # Gerekli dizinleri oluştur
 mkdir -p "${CONFIG_DIR}" "${PLUGIN_DIR}" "${CACHE_DIR}" "${FZF_DIR}"
@@ -131,7 +159,7 @@ setup_fzf_theme() {
 
 # Tmux kurulu mu kontrol et
 check_tmux() {
-	if ! command -v tmux >/dev/null 2>&1; then
+	if [[ -z "${TMUX_BIN:-}" ]]; then
 		error "Tmux kurulu değil. Lütfen önce tmux'u kurun."
 		exit 1
 	fi
@@ -149,12 +177,12 @@ has_session_exact() {
 	[[ -z "$name" ]] && return 1
 
 	# Prefer `has-session` (fast). Use `=name` for exact match when supported.
-	if tmux has-session -t "=${name}" 2>/dev/null; then
+	if tmux_cmd has-session -t "=${name}" 2>/dev/null; then
 		return 0
 	fi
 
 	# Fallback for older tmux: exact match via list + grep.
-	tmux list-sessions -F "#{session_name}" 2>/dev/null | grep -Fxq -- "$name"
+	tmux_cmd list-sessions -F "#{session_name}" 2>/dev/null | grep -Fxq -- "$name"
 }
 
 # Oturum adı doğrulaması - daha geniş karakter desteği
@@ -205,12 +233,12 @@ attach_or_switch() {
 	fi
 
 	if is_in_tmux; then
-		if ! tmux switch-client -t "$session_name" 2>/dev/null; then
+		if ! tmux_cmd switch-client -t "$session_name" 2>/dev/null; then
 			error "'$session_name' oturumuna geçilemedi."
 			return 1
 		fi
 	else
-		if ! tmux attach-session -t "$session_name" 2>/dev/null; then
+		if ! tmux_cmd attach-session -t "$session_name" 2>/dev/null; then
 			error "'$session_name' oturumuna bağlanılamadı."
 			return 1
 		fi
@@ -449,23 +477,23 @@ create_session() {
 		info "Oturum '$session_name' zaten var, bağlanıyor..."
 
 		# Oturum zaten başka yerde bağlıysa ve biz tmux içinde değilsek yeni pencere oluştur
-		if ! is_in_tmux && tmux list-sessions 2>/dev/null | grep -q "^${session_name}: .* (attached)$"; then
+		if ! is_in_tmux && tmux_cmd list-sessions 2>/dev/null | grep -q "^${session_name}: .* (attached)$"; then
 			warn "Oturum başka yerde bağlı, yeni pencere oluşturuluyor..."
 			local window_count
-			window_count=$(tmux list-windows -t "$session_name" 2>/dev/null | wc -l)
+			window_count=$(tmux_cmd list-windows -t "$session_name" 2>/dev/null | wc -l)
 			debug "Mevcut pencere sayısı: $window_count"
-			tmux new-window -t "$session_name" 2>/dev/null || warn "Yeni pencere oluşturulamadı"
+			tmux_cmd new-window -t "$session_name" 2>/dev/null || warn "Yeni pencere oluşturulamadı"
 		fi
 
 		attach_or_switch "$session_name"
 	else
 		info "Yeni oturum oluşturuluyor: '$session_name'..."
 
-		if ! tmux new-session -d -s "$session_name" 2>/dev/null; then
+		if ! tmux_cmd new-session -d -s "$session_name" 2>/dev/null; then
 			warn "Oturum oluşturulamadı, soket temizliği deneniyor..."
 			clean_sockets
 
-			if ! tmux new-session -d -s "$session_name" 2>/dev/null; then
+			if ! tmux_cmd new-session -d -s "$session_name" 2>/dev/null; then
 				error "Temizlikten sonra bile oturum oluşturulamadı!"
 				return 1
 			fi
@@ -490,11 +518,11 @@ open_session_in_terminal() {
 	local title="Tmux: $session_name"
 	local script_path
 
-	script_path="$(readlink -f "$0")"
+	script_path="${SCRIPT_PATH}"
 
 	case "$terminal_type" in
 	kitty)
-		if ! command -v kitty &>/dev/null; then
+		if ! cmd_exists kitty; then
 			error "Kitty terminal kurulu değil!"
 			return 1
 		fi
@@ -504,7 +532,7 @@ open_session_in_terminal() {
 			-e bash -c "$script_path session create \"$session_name\" $layout" &
 		;;
 	wezterm)
-		if ! command -v wezterm &>/dev/null; then
+		if ! cmd_exists wezterm; then
 			error "WezTerm terminal kurulu değil!"
 			return 1
 		fi
@@ -514,7 +542,7 @@ open_session_in_terminal() {
 			-- bash -c "cd '$PWD' && $script_path session create \"$session_name\" $layout" &
 		;;
 	alacritty)
-		if ! command -v alacritty &>/dev/null; then
+		if ! cmd_exists alacritty; then
 			error "Alacritty terminal kurulu değil!"
 			return 1
 		fi
