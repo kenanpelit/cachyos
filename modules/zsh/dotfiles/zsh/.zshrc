@@ -23,6 +23,12 @@
 export XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME XDG_STATE_HOME
 
 # ----------------------------------------------------------------------
+# Completion system
+# ----------------------------------------------------------------------
+autoload -Uz compinit
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compdump"
+
+# ----------------------------------------------------------------------
 # Path Deduplication
 # 
 # -U flag ensures no duplicates in these arrays
