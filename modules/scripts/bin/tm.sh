@@ -541,6 +541,7 @@ open_session_in_terminal() {
 create_layout() {
 	local session_name="$1"
 	local layout_num="$2"
+	local shell_cmd="${SHELL:-/bin/zsh} -l"
 
 	if ! has_session_exact "$session_name"; then
 		error "Oturum '$session_name' bulunamadı."
@@ -552,41 +553,41 @@ create_layout() {
 	case "$layout_num" in
 	1)
 		# Tek panel düzeni
-		tmux new-window -t "$session_name" -n 'kenp' 2>/dev/null || true
+		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 1 2>/dev/null || true
 		;;
 	2)
 		# İki panel düzeni (dikey bölme - %80 üst)
-		tmux new-window -t "$session_name" -n 'kenp' 2>/dev/null || true
-		tmux split-window -v -p 80 2>/dev/null || true
+		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
+		tmux split-window -v -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 2 2>/dev/null || true
 		;;
 	3)
 		# Üç panel L-şekilli düzen
-		tmux new-window -t "$session_name" -n 'kenp' 2>/dev/null || true
-		tmux split-window -h -p 80 2>/dev/null || true
+		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
+		tmux split-window -h -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 2 2>/dev/null || true
-		tmux split-window -v -p 85 2>/dev/null || true
+		tmux split-window -v -p 85 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 3 2>/dev/null || true
 		;;
 	4)
 		# Dört panel grid düzeni
-		tmux new-window -t "$session_name" -n 'kenp' 2>/dev/null || true
-		tmux split-window -h -p 80 2>/dev/null || true
-		tmux split-window -v -p 80 2>/dev/null || true
+		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
+		tmux split-window -h -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
+		tmux split-window -v -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 1 2>/dev/null || true
-		tmux split-window -v -p 80 2>/dev/null || true
+		tmux split-window -v -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 4 2>/dev/null || true
 		;;
 	5)
 		# Beş panel düzeni
-		tmux new-window -t "$session_name" -n 'kenp' 2>/dev/null || true
-		tmux split-window -h -p 70 2>/dev/null || true
-		tmux split-window -h -p 50 2>/dev/null || true
+		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
+		tmux split-window -h -p 70 -c "$HOME" "$shell_cmd" 2>/dev/null || true
+		tmux split-window -h -p 50 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 1 2>/dev/null || true
-		tmux split-window -v -p 50 2>/dev/null || true
+		tmux split-window -v -p 50 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 2 2>/dev/null || true
-		tmux split-window -v -p 50 2>/dev/null || true
+		tmux split-window -v -p 50 -c "$HOME" "$shell_cmd" 2>/dev/null || true
 		tmux select-pane -t 5 2>/dev/null || true
 		;;
 	*)
