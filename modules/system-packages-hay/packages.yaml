@@ -126,6 +126,8 @@ packages:
 - libnma
 - libopenraw
 - libwnck3
+- linux-cachyos
+- linux-cachyos-headers
 - linux-cachyos-lts
 - linux-cachyos-lts-headers
 - logrotate
