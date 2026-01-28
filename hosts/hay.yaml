@@ -9,6 +9,7 @@ enabled_modules:
   - xdg-mimes
   - scripts
   - packages
+  - system-packages-hay
   # - packages # Meta-module, usually not needed if others are enabled
 
   # --- Shell ---
