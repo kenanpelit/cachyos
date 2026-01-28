@@ -1,12 +1,4 @@
 # ----------------------------------------------------------------------
-# Completion system (early)
-# ----------------------------------------------------------------------
-autoload -Uz compinit
-compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compdump"
-autoload -Uz _dcli 2>/dev/null || true
-(( $+functions[_dcli] )) && compdef _dcli dcli
-
-# ----------------------------------------------------------------------
 # PWD Sanity Check
 # 
 # Sometimes ZSH starts in a non-existent or plugin directory
@@ -29,12 +21,6 @@ autoload -Uz _dcli 2>/dev/null || true
 : ${XDG_DATA_HOME:=$HOME/.local/share}
 : ${XDG_STATE_HOME:=$HOME/.local/state}
 export XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME XDG_STATE_HOME
-
-# ----------------------------------------------------------------------
-# Completion system
-# ----------------------------------------------------------------------
-autoload -Uz compinit
-compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/compdump"
 
 # ----------------------------------------------------------------------
 # Path Deduplication
@@ -504,6 +490,10 @@ fi
   # Also load bash completion compatibility
   # Allows bash completion scripts to work in ZSH
   autoload -Uz bashcompinit && bashcompinit
+
+  # Bind dcli completion explicitly (after compinit)
+  autoload -Uz _dcli 2>/dev/null || true
+  (( $+functions[_dcli] )) && compdef _dcli dcli
 
   # --------------------------------------------------------------------
   # Completion System Styles
