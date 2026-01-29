@@ -1,0 +1,4 @@
+description: FZF package
+
+packages:
+  - fzf
