@@ -4,7 +4,8 @@ After=network.target graphical-session.target
 Wants=graphical-session.target
 
 [Service]
-Type=simple
+Type=dbus
+BusName=org.kde.kdeconnect.daemon
 Environment=QT_QPA_PLATFORM=wayland;xcb
 Environment=XDG_RUNTIME_DIR=%t
 Environment=WAYLAND_DISPLAY=wayland-1
