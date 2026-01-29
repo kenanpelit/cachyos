@@ -1,10 +1,15 @@
 [Unit]
 Description=KDE Connect daemon
-After=network.target
+After=network.target graphical-session.target
+Wants=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=kdeconnectd
+Environment=QT_QPA_PLATFORM=wayland;xcb
+Environment=XDG_RUNTIME_DIR=%t
+Environment=WAYLAND_DISPLAY=wayland-1
+Environment=DISPLAY=:0
+ExecStart=%h/.local/bin/kdeconnectd-wrapper
 Restart=on-failure
 RestartSec=5
 

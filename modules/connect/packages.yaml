@@ -1,3 +1,5 @@
 description: KDE Connect packages
 packages:
   - kdeconnect
+  - xcb-util-cursor
+  - qt6-wayland

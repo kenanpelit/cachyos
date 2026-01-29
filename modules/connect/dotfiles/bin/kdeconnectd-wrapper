@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${WAYLAND_DISPLAY:=wayland-1}"
+: "${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+
+socket_path="${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}"
+
+for _ in $(seq 1 50); do
+  if [[ -S "${socket_path}" ]]; then
+    exec /usr/bin/kdeconnectd
+  fi
+  sleep 0.2
+done
+
+exec /usr/bin/kdeconnectd
