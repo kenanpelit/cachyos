@@ -51,7 +51,7 @@
       
       /* Match Fields */
       drun-match-fields: "name,generic,exec,categories,keywords";
-      window-match-fields: "title,class,name,desktop";
+      window-match-fields: "title,app-id";
       
       /* Window Management */
       window-command: "wmctrl -i -R {window}";
