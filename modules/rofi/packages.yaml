@@ -2,5 +2,4 @@ description: Rofi packages
 
 packages:
   - rofi
-  - rofi-file-browser
   - wmctrl
