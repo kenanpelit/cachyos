@@ -56,7 +56,7 @@ enabled_modules:
   - dms-greeter
   # - mako
   - rofi
-  # - walker
+  - walker
   - xdg-portal
   - fusuma
   # - hyprpanel
