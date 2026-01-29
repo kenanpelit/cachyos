@@ -4,3 +4,6 @@ description: Subliminal config template (portable config; credentials removed)
 dotfiles:
   - source: dotfiles/subliminal
     target: ~/.config/subliminal
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
