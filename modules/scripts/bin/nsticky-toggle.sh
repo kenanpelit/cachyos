@@ -18,6 +18,14 @@ if [[ -z "${WAYLAND_DISPLAY:-}" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
   done
 fi
 
+if [[ -z "${NIRI_SOCKET:-}" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
+  for sock in "$XDG_RUNTIME_DIR"/niri*.sock; do
+    [[ -S "$sock" ]] || continue
+    export NIRI_SOCKET="$sock"
+    break
+  done
+fi
+
 # One keybind, smart behaviour:
 # - If the active window is sticky -> stage it
 # - If the active window is staged -> unstage it (back to sticky)
@@ -56,9 +64,9 @@ if [[ "$out" == Error:* ]]; then
     out2="$(nsticky sticky toggle-active 2>&1 || true)"
     [[ "$out2" == Error:* ]] && die "$out2"
     case "$out2" in
-      Added*) notify low "Sticky" "Enabled" ;;
-      Removed*) notify low "Sticky" "Disabled" ;;
-      *) notify low "nsticky" "$out2" ;;
+    Added*) notify low "Sticky" "Enabled" ;;
+    Removed*) notify low "Sticky" "Disabled" ;;
+    *) notify low "nsticky" "$out2" ;;
     esac
     exit 0
   fi
@@ -67,10 +75,10 @@ if [[ "$out" == Error:* ]]; then
 fi
 
 case "$out" in
-  Added*) notify low "Sticky" "Enabled" ;;
-  Staged*) notify low "Stage" "Moved to stage" ;;
-  Unstaged*) notify low "Stage" "Restored" ;;
-  *) die "$out" ;;
+Added*) notify low "Sticky" "Enabled" ;;
+Staged*) notify low "Stage" "Moved to stage" ;;
+Unstaged*) notify low "Stage" "Restored" ;;
+*) die "$out" ;;
 esac
 
 exit 0
