@@ -17,6 +17,8 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rofi"
 readonly THEME_FILE="${CONFIG_DIR}/themes/launcher.rasi"
 readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/rofi"
+readonly ROFI_PID_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rofi-${PPID}.pid"
+readonly ROFI_BASE_ARGS=(-pid "$ROFI_PID_FILE")
 
 # Ensure user-local bins are visible to rofi run/custom modes.
 case ":${PATH:-}:" in
@@ -736,7 +738,7 @@ power_contains_label() {
 #╰──────────────────────────────────────────────────────────────────────────────╯
 
 mode_default() {
-  rofi \
+  rofi "${ROFI_BASE_ARGS[@]}" \
     -show combi \
     -combi-modi 'drun,run,window,filebrowser,ssh' \
     -modi "combi,drun,run,window,filebrowser,ssh" \
@@ -751,7 +753,7 @@ mode_default() {
 }
 
 mode_apps() {
-  rofi \
+  rofi "${ROFI_BASE_ARGS[@]}" \
     -show drun \
     -modi drun \
     -show-icons \
@@ -765,7 +767,7 @@ mode_apps() {
 }
 
 mode_run() {
-  rofi \
+  rofi "${ROFI_BASE_ARGS[@]}" \
     -show run \
     -modi run \
     -matching fuzzy \
@@ -775,7 +777,7 @@ mode_run() {
 }
 
 mode_window() {
-  rofi \
+  rofi "${ROFI_BASE_ARGS[@]}" \
     -show window \
     -modi window \
     -show-icons \
@@ -786,7 +788,7 @@ mode_window() {
 }
 
 mode_files() {
-  rofi \
+  rofi "${ROFI_BASE_ARGS[@]}" \
     -show filebrowser \
     -modi filebrowser \
     -matching fuzzy \
@@ -795,7 +797,7 @@ mode_files() {
 }
 
 mode_ssh() {
-  rofi \
+  rofi "${ROFI_BASE_ARGS[@]}" \
     -show ssh \
     -modi ssh \
     -matching fuzzy \
@@ -883,7 +885,7 @@ mode_custom() {
     return 1
   fi
 
-  echo "$commands" | rofi \
+  echo "$commands" | rofi "${ROFI_BASE_ARGS[@]}" \
     -dmenu \
     -p "󰘳 Custom Commands" \
     -i \
@@ -905,7 +907,7 @@ mode_power() {
 
   # Launch as rofi mode
   local self="$(readlink -f "${BASH_SOURCE[0]}")"
-  exec rofi -show power \
+  exec rofi "${ROFI_BASE_ARGS[@]}" -show power \
     -modi "power:${self} --power-mode-internal" \
     -theme "${POWER_THEME_FILE}" \
     -show-icons \
@@ -1007,7 +1009,7 @@ mode_keys() {
     return 1
   fi
 
-  echo "$keybinds" | rofi \
+  echo "$keybinds" | rofi "${ROFI_BASE_ARGS[@]}" \
     -dmenu \
     -p "⌨ Hyprland Keybindings" \
     -i \
