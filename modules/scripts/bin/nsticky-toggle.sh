@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Best-effort environment for compositor-launched scripts.
+: "${XDG_CONFIG_HOME:=$HOME/.config}"
+: "${XDG_STATE_HOME:=$HOME/.local/state}"
+mkdir -p "$XDG_CONFIG_HOME/nsticky" "$XDG_STATE_HOME/nsticky" 2>/dev/null || true
+
+if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+  export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+fi
+
+if [[ -z "${WAYLAND_DISPLAY:-}" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
+  for sock in "$XDG_RUNTIME_DIR"/wayland-*; do
+    [[ -S "$sock" ]] || continue
+    export WAYLAND_DISPLAY="$(basename "$sock")"
+    break
+  done
+fi
+
 # One keybind, smart behaviour:
 # - If the active window is sticky -> stage it
 # - If the active window is staged -> unstage it (back to sticky)
