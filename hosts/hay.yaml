@@ -71,7 +71,7 @@ enabled_modules:
   # - vlc
   - radio
   # - audacious
-  # - subliminal
+  - subliminal
 
   # --- Network & Connectivity ---
   - anydesk
