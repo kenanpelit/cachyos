@@ -16,6 +16,7 @@ fi
 TARGET_DIR="${XDG_CONFIG_HOME:-$USER_HOME/.config}/subliminal"
 TARGET_FILE="$TARGET_DIR/subliminal.toml"
 KEY_FILE="$USER_HOME/.config/sops/age/keys.txt"
+TEMPLATE_FILE="$SRC_DIR/assets/subliminal.template.toml"
 
 if ! command -v sops >/dev/null 2>&1; then
   echo "subliminal: sops not found; skipping decrypt" >&2
@@ -34,4 +35,13 @@ fi
 chmod 600 "$TARGET_FILE" || true
 if [[ -n "${TARGET_USER:-}" ]]; then
   chown "$TARGET_USER:$TARGET_USER" "$TARGET_FILE" 2>/dev/null || true
+fi
+
+# Drop a template for reference (non-secret).
+if [[ -f "$TEMPLATE_FILE" ]]; then
+  cp -f "$TEMPLATE_FILE" "$TARGET_DIR/subliminal.template.toml" 2>/dev/null || true
+  chmod 600 "$TARGET_DIR/subliminal.template.toml" 2>/dev/null || true
+  if [[ -n "${TARGET_USER:-}" ]]; then
+    chown "$TARGET_USER:$TARGET_USER" "$TARGET_DIR/subliminal.template.toml" 2>/dev/null || true
+  fi
 fi
