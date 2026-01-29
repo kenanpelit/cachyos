@@ -4,11 +4,12 @@ set -euo pipefail
 # ==============================================================================
 # copy-scripts-to-local-bin
 # ------------------------------------------------------------------------------
-# Copies module scripts (*.sh) into ~/.local/bin as extensionless executables.
+# Copies module scripts (*.sh, *.py) into ~/.local/bin as extensionless executables.
 # Ensures files remain owned by the real user even when run under sudo.
 #
 # Key guarantees:
 #   - foo.sh -> ~/.local/bin/foo   (NEVER keeps .sh)
+#   - bar.py -> ~/.local/bin/bar   (NEVER keeps .py)
 #   - Atomic updates (write to temp, then rename)
 #   - User ownership (prevents `dcli sync` permission issues)
 # ==============================================================================
@@ -94,9 +95,11 @@ install_from_dir() {
   local src_dir="$1"
   shopt -s nullglob
 
-  for f in "$src_dir"/*.sh; do
+  for f in "$src_dir"/*.sh "$src_dir"/*.py; do
     local name dst
-    name="$(basename "$f" .sh)" # ALWAYS strip .sh
+    name="$(basename "$f")"
+    name="${name%.sh}"
+    name="${name%.py}"
     dst="$bin_dir/$name"
 
     should_install "$name" || continue
