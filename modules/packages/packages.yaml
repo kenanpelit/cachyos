@@ -35,6 +35,7 @@ packages:
   - rustdesk-bin
   - cpupower
   - dmidecode
+  - downgrade
   - hwinfo
   - usbutils
   - pciutils
