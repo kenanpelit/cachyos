@@ -24,6 +24,9 @@ if ! command -v sops >/dev/null 2>&1; then
 fi
 
 mkdir -p "$TARGET_DIR"
+if [[ -n "${TARGET_USER:-}" ]]; then
+  chown "$TARGET_USER:$TARGET_USER" "$TARGET_DIR" 2>/dev/null || true
+fi
 
 if [[ -f "$KEY_FILE" ]]; then
   SOPS_AGE_KEY_FILE="$KEY_FILE" sops -d "$ENC_FILE" > "$TARGET_FILE"
