@@ -20,6 +20,7 @@ packages:
   - noto-fonts
   - noto-fonts-cjk
   - noto-fonts-emoji
+  - nsticky-bin
   - obsidian
   - otf-monaspace
   - otf-monaspace-nerd
