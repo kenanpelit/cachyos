@@ -15,3 +15,16 @@ menuentry "CachyOS Rog (sda1 - GRUB chainload)" {
     search --no-floppy --fs-uuid --set=root 6880-73B3
     chainloader /EFI/cachyos/grubx64.efi
 }
+
+# ----------------------------------------------------------------------
+# NixOS installed on NVMe0 EFI partition
+# EFI entry from efibootmgr:
+#   HD(1,GPT,a04a15e9-c6d2-4888-afdd-115e3e28ebf5,...)/\EFI\NixOS\grubx64.efi
+# Filesystem UUID (vfat): CE59-4A9A
+# ----------------------------------------------------------------------
+menuentry "NixOS (NVMe0 EFI - GRUB chainload)" {
+    insmod part_gpt
+    insmod fat
+    search --no-floppy --fs-uuid --set=root CE59-4A9A
+    chainloader /EFI/NixOS/grubx64.efi
+}
