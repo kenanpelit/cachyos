@@ -26,6 +26,17 @@ if [[ -z "${NIRI_SOCKET:-}" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
   done
 fi
 
+NSTICKY_SOCKET_PATH="/tmp/niri_sticky_cli.sock"
+if [[ ! -S "$NSTICKY_SOCKET_PATH" ]]; then
+  if command -v nsticky >/dev/null 2>&1; then
+    nsticky >/dev/null 2>&1 &
+    for _ in {1..20}; do
+      [[ -S "$NSTICKY_SOCKET_PATH" ]] && break
+      sleep 0.05
+    done
+  fi
+fi
+
 # One keybind, smart behaviour:
 # - If the active window is sticky -> stage it
 # - If the active window is staged -> unstage it (back to sticky)

@@ -14,6 +14,25 @@ fi
 # Ensure PATH includes local bin
 export PATH="$HOME/.local/bin:$PATH"
 
+# Ensure runtime + niri socket for daemons needing IPC.
+if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+  export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+fi
+if [[ -z "${WAYLAND_DISPLAY:-}" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
+  for sock in "$XDG_RUNTIME_DIR"/wayland-*; do
+    [[ -S "$sock" ]] || continue
+    export WAYLAND_DISPLAY="$(basename "$sock")"
+    break
+  done
+fi
+if [[ -z "${NIRI_SOCKET:-}" && -n "${XDG_RUNTIME_DIR:-}" && -n "${WAYLAND_DISPLAY:-}" ]]; then
+  for sock in "$XDG_RUNTIME_DIR"/niri."${WAYLAND_DISPLAY}".*.sock; do
+    [[ -S "$sock" ]] || continue
+    export NIRI_SOCKET="$sock"
+    break
+  done
+fi
+
 # Force GTK/GNOME theme settings
 if command -v gsettings >/dev/null 2>&1; then
     # Schema might be missing in minimal installs, ignore errors
