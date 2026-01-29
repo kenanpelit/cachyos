@@ -22,6 +22,16 @@
 
 set -euo pipefail
 
+# Ensure user-local bins are available when launched from compositor binds.
+case ":${PATH:-}:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
+case ":${PATH:-}:" in
+  *":$HOME/bin:"*) ;;
+  *) export PATH="$HOME/bin:$PATH" ;;
+esac
+
 start_clipse_listener() {
   command -v clipse >/dev/null 2>&1 || return 0
 
