@@ -4,3 +4,7 @@ packages:
   # NOTE: likely AUR on Arch/CachyOS (auto-detected by dcli)
   - walker
   - elephant-all-bin
+
+pre_install_hook: scripts/preinstall.sh
+pre_hook_behavior: always
+run_hooks_as_user: false
