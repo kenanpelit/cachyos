@@ -139,6 +139,12 @@ has_command() {
   command -v "$1" &>/dev/null
 }
 
+has_filebrowser_mode() {
+  has_command rofi-file-browser ||
+    has_command rofi-file-browser-extended ||
+    has_command rofi-file-browser.sh
+}
+
 notify() {
   local title="$1"
   local message="$2"
@@ -738,10 +744,22 @@ power_contains_label() {
 #╰──────────────────────────────────────────────────────────────────────────────╯
 
 mode_default() {
+  local combi_modi=(drun run window ssh)
+  local modi=(combi drun run window ssh)
+  if has_filebrowser_mode; then
+    combi_modi+=(filebrowser)
+    modi+=(filebrowser)
+  fi
+
+  local combi_modi_csv
+  local modi_csv
+  combi_modi_csv="$(IFS=,; echo "${combi_modi[*]}")"
+  modi_csv="$(IFS=,; echo "${modi[*]}")"
+
   rofi "${ROFI_BASE_ARGS[@]}" \
     -show combi \
-    -combi-modi 'drun,run,window,filebrowser,ssh' \
-    -modi "combi,drun,run,window,filebrowser,ssh" \
+    -combi-modi "$combi_modi_csv" \
+    -modi "$modi_csv" \
     -show-icons \
     -matching fuzzy \
     -sort \
@@ -788,6 +806,11 @@ mode_window() {
 }
 
 mode_files() {
+  if ! has_filebrowser_mode; then
+    notify "Rofi Launcher" "filebrowser mode not installed"
+    return 0
+  fi
+
   rofi "${ROFI_BASE_ARGS[@]}" \
     -show filebrowser \
     -modi filebrowser \

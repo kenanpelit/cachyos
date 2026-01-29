@@ -1,7 +1,7 @@
 /* Core Configuration */
 configuration {
   /* Basic Settings */
-  modi: "drun,run,window,ssh,filebrowser,keys,combi";
+  modi: "drun,run,window,ssh,keys,combi";
   combi-modi: "drun,run,window";
   lines: 8;
   columns: 3;
@@ -22,7 +22,6 @@ configuration {
   display-run: " Run";
   display-window: "󰖯 Windows";
   display-ssh: "󰢹 SSH";
-  display-filebrowser: "󰉋 Files";
   display-keys: "󰌌 Keys";
   display-combi: "󰛘 All";
 
@@ -51,7 +50,7 @@ configuration {
   
   /* Match Fields */
   drun-match-fields: "name,generic,exec,categories,keywords";
-  window-match-fields: "title,class,name,desktop";
+  window-match-fields: "title,app-id";
   
   /* Window Management */
   window-command: "wmctrl -i -R {window}";
