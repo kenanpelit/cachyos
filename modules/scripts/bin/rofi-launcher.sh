@@ -15,7 +15,8 @@ set -euo pipefail
 readonly SCRIPT_NAME="$(basename "$0")"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rofi"
-readonly THEME_FILE="${CONFIG_DIR}/themes/launcher.rasi"
+readonly THEME_FILE_PRIMARY="${CONFIG_DIR}/themes/launcher.rasi"
+readonly THEME_FILE_FALLBACK="${CONFIG_DIR}/theme.rasi"
 readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/rofi"
 readonly ROFI_PID_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/rofi-${PPID}.pid"
 readonly ROFI_BASE_ARGS=(-pid "$ROFI_PID_FILE")
@@ -139,12 +140,6 @@ has_command() {
   command -v "$1" &>/dev/null
 }
 
-has_filebrowser_mode() {
-  has_command rofi-file-browser ||
-    has_command rofi-file-browser-extended ||
-    has_command rofi-file-browser.sh
-}
-
 notify() {
   local title="$1"
   local message="$2"
@@ -180,8 +175,10 @@ add_to_frecency() {
 }
 
 get_theme_param() {
-  if [[ -f "$THEME_FILE" ]]; then
-    echo "-theme $THEME_FILE"
+  if [[ -f "$THEME_FILE_PRIMARY" ]]; then
+    echo "-theme $THEME_FILE_PRIMARY"
+  elif [[ -f "$THEME_FILE_FALLBACK" ]]; then
+    echo "-theme $THEME_FILE_FALLBACK"
   fi
 }
 
@@ -744,22 +741,10 @@ power_contains_label() {
 #╰──────────────────────────────────────────────────────────────────────────────╯
 
 mode_default() {
-  local combi_modi=(drun run window ssh)
-  local modi=(combi drun run window ssh)
-  if has_filebrowser_mode; then
-    combi_modi+=(filebrowser)
-    modi+=(filebrowser)
-  fi
-
-  local combi_modi_csv
-  local modi_csv
-  combi_modi_csv="$(IFS=,; echo "${combi_modi[*]}")"
-  modi_csv="$(IFS=,; echo "${modi[*]}")"
-
   rofi "${ROFI_BASE_ARGS[@]}" \
     -show combi \
-    -combi-modi "$combi_modi_csv" \
-    -modi "$modi_csv" \
+    -combi-modi 'drun,run,window,filebrowser,ssh' \
+    -modi "combi,drun,run,window,filebrowser,ssh" \
     -show-icons \
     -matching fuzzy \
     -sort \
@@ -806,11 +791,6 @@ mode_window() {
 }
 
 mode_files() {
-  if ! has_filebrowser_mode; then
-    notify "Rofi Launcher" "filebrowser mode not installed"
-    return 0
-  fi
-
   rofi "${ROFI_BASE_ARGS[@]}" \
     -show filebrowser \
     -modi filebrowser \
