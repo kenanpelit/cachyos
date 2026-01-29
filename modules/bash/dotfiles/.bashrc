@@ -66,6 +66,10 @@ if [ -f /usr/share/fzf/completion.bash ]; then
   # shellcheck disable=SC1091
   . /usr/share/fzf/completion.bash
 fi
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.bash" ]; then
+  # shellcheck disable=SC1091
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.bash"
+fi
 
 # ----------------------------------------------------------------------
 # Prompt
