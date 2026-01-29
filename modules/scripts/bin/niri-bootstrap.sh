@@ -103,10 +103,5 @@ if [[ "${#pids[@]}" -eq 0 ]]; then
   exit 0
 fi
 
-trap 'warn "stopping"; kill "${pids[@]}" 2>/dev/null || true; wait "${pids[@]}" 2>/dev/null || true; finish_notify' INT TERM EXIT
-
-# If any daemon exits, restart the whole unit for consistency.
-if wait -n "${pids[@]}"; then
-  warn "daemon exited; restarting unit"
-  exit 1
-fi
+finish_notify
+exit 0
