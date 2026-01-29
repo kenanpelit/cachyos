@@ -1,0 +1,5 @@
+description: FZF config (theme + defaults)
+
+dotfiles:
+  - source: dotfiles/fzf
+    target: ~/.config/fzf

@@ -26,6 +26,7 @@ enabled_modules:
   - yazi
   - lazygit
   - rsync
+  - fzf
   # - gnupg
   # - search
 

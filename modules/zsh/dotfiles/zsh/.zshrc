@@ -87,6 +87,10 @@ for opt in "${disabled_opts[@]}"; do
 done
 unset opt disabled_opts
 
+if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh" ]]; then
+  source "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh"
+fi
+
 if [[ $options[zle] = on ]] && command -v fzf >/dev/null 2>&1; then
   source <(fzf --zsh)
 fi
