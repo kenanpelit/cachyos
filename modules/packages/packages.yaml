@@ -34,6 +34,7 @@ packages:
   - snapper
   - btrfs-assistant
   - scrcpy
+  - android-tools
   - rustdesk-bin
   - cpupower
   - dmidecode
