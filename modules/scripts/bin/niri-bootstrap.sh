@@ -48,6 +48,20 @@ if command -v niri-set >/dev/null 2>&1; then
     warn "niri-set not found"
 fi
 
+# Trigger keyring/GPG prompts early so they don't interrupt later actions.
+if [[ "${NIRI_BOOT_PROMPT_KEYS:-1}" == "1" ]]; then
+  (
+    sleep "${NIRI_BOOT_PROMPT_DELAY:-2}"
+    if command -v gpg >/dev/null 2>&1; then
+      printf "niri-boot\n" | gpg --clearsign --output /tmp/.niri-gpg-test.asc >/dev/null 2>&1 || true
+      rm -f /tmp/.niri-gpg-test.asc 2>/dev/null || true
+    fi
+    if command -v secret-tool >/dev/null 2>&1; then
+      secret-tool lookup niri boot >/dev/null 2>&1 || true
+    fi
+  ) &
+fi
+
 # Optional Bluetooth auto-connect (delayed, non-blocking).
 # We assume enabled if the script exists
 if command -v bluetooth_toggle >/dev/null 2>&1;
