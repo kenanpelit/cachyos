@@ -44,6 +44,13 @@ _add_path "$HOME/.iptv/bin"
 _add_path "/usr/local/bin"
 unset -f _add_path
 
+# Prefer kitty terminfo locally; fall back on SSH sessions.
+if [[ -n "${SSH_CONNECTION:-}" ]]; then
+  export TERM=xterm-256color
+else
+  export TERM=xterm-kitty
+fi
+
 # ----------------------------------------------------------------------
 # Completions
 # ----------------------------------------------------------------------

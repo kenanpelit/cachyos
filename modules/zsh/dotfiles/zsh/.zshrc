@@ -45,6 +45,13 @@ path=(
   $path
 )
 
+# Prefer kitty terminfo locally; fall back on SSH sessions.
+if [[ -n "${SSH_CONNECTION:-}" ]]; then
+  export TERM=xterm-256color
+else
+  export TERM=xterm-kitty
+fi
+
 # ----------------------------------------------------------------------
 # TTY Configuration
 # 
