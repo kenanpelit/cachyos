@@ -68,3 +68,4 @@ packages:
   - xwayland-satellite
   - ytfzf
   - zapzap-git # Use git version to avoid provider prompt if possible
+  - x2goclient
