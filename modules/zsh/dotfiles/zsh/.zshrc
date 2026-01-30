@@ -52,6 +52,9 @@ else
   export TERM=xterm-kitty
 fi
 
+# Ensure remote hosts always get a safe TERM.
+ssh() { TERM=xterm-256color command ssh "$@"; }
+
 # ----------------------------------------------------------------------
 # TTY Configuration
 # 
