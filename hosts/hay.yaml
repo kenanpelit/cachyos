@@ -36,7 +36,7 @@ enabled_modules:
   # --- Terminals ---
   - kitty
   - wezterm
-  # - alacritty
+  - alacritty
   # - foot
   # - ghostty
 

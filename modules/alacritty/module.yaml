@@ -1,6 +1,4 @@
-description: Alacritty config portable config
-
-dotfiles_sync: true
+description: alacritty config (portable config)
 
 dotfiles:
   - source: dotfiles/alacritty
