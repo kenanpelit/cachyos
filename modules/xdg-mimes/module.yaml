@@ -3,3 +3,6 @@ description: XDG MIME types and custom desktop entries
 dotfiles:
   - source: dotfiles/applications
     target: ~/.local/share/applications
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask
