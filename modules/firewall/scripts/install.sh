@@ -35,6 +35,8 @@ ALLOW_CUSTOM_SERVICE_PORT="${ALLOW_CUSTOM_SERVICE_PORT:-0}"
 CUSTOM_SERVICE_PORT="${CUSTOM_SERVICE_PORT:-1401}"
 TRANSMISSION_WEB_PORT="${TRANSMISSION_WEB_PORT:-9091}"
 TRANSMISSION_PEER_PORT="${TRANSMISSION_PEER_PORT:-51413}"
+ALLOW_KDECONNECT_PORTS="${ALLOW_KDECONNECT_PORTS:-0}"
+KDECONNECT_PORT_RANGE="${KDECONNECT_PORT_RANGE:-1714:1764}"
 
 if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw --force reset
@@ -49,6 +51,11 @@ if command -v ufw >/dev/null 2>&1; then
 
   if [ "${ALLOW_CUSTOM_SERVICE_PORT}" = "1" ]; then
     ${SUDO} ufw allow "${CUSTOM_SERVICE_PORT}/tcp"
+  fi
+
+  if [ "${ALLOW_KDECONNECT_PORTS}" = "1" ]; then
+    ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/udp"
+    ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/tcp"
   fi
 
   ${SUDO} ufw --force enable
