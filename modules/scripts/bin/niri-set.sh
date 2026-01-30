@@ -685,7 +685,7 @@ tty)
       fi
 
       # Import environment to systemd user session
-      local vars="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP GTK_THEME XCURSOR_THEME SYSTEMD_OFFLINE"
+      local vars="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP GTK_THEME XCURSOR_THEME BROWSER SYSTEMD_OFFLINE"
 
       local rc=0
       if [[ -n "$timeout_bin" ]]; then

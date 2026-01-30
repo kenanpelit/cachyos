@@ -36,6 +36,7 @@ environment {
   QT_STYLE_OVERRIDE "kvantum"
   QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
   MOZ_ENABLE_WAYLAND "1"
+  BROWSER "brave-kenp-default"
 
   // Use a stable SSH agent socket provided by gnome-keyring on Wayland.
   // This helps prevent late-session passphrase prompts and gcr-prompter popups.
@@ -1177,4 +1178,3 @@ gestures {
 // ========================================================================
 // Accents:  cyan=#00BCD4 sky=#89dceb mauve=#cba6f7 red=#f38ba8
 // Surfaces: surface0=#313244 surface1=#45475a
-
