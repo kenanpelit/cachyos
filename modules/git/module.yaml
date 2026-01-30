@@ -1,6 +1,8 @@
 description: Git config (portable config)
 
-
 dotfiles:
   - source: dotfiles/git
     target: ~/.config/git
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
