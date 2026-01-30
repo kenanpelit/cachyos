@@ -25,6 +25,7 @@ packages:
   - obsidian
   - otf-monaspace
   - otf-monaspace-nerd
+  - overskride
   - pass
   - pass-otp
   - pinentry
