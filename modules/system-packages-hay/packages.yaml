@@ -90,6 +90,7 @@ packages:
 - gnome-user-docs
 - gnome-user-share
 - gnome-weather
+- gist
 - grilo-plugins
 - grub-btrfs-support
 - grub-hook
