@@ -4,3 +4,9 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/worldClock"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/worldClock
 	url = https://github.com/rochacbruno/WorldClock
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/aiAssistant"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/aiAssistant
+	url = https://github.com/devnullvoid/dms-ai-assistant
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/powerOptions"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/powerOptions
+	url = https://github.com/Nazahim/PowerOptions
