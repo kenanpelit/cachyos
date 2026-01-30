@@ -33,6 +33,7 @@ packages:
   - spotify
   - snapper
   - btrfs-assistant
+  - scrcpy
   - rustdesk-bin
   - cpupower
   - dmidecode
