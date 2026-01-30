@@ -5,7 +5,10 @@ set -euo pipefail
 # Use shared Brave instance so links open as tabs in the existing window.
 
 if command -v profile_brave >/dev/null 2>&1; then
-  exec profile_brave Kenp --no-separate "$@"
+  if [[ $# -gt 0 ]]; then
+    exec profile_brave Kenp --separate --new-tab "$@"
+  fi
+  exec profile_brave Kenp --separate
 fi
 
 if command -v brave >/dev/null 2>&1; then

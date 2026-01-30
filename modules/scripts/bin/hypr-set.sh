@@ -1807,7 +1807,7 @@ setup_environment() {
 	export VISUAL=nvim
 	export TERMINAL=kitty
 	export TERM=xterm-256color
-	export BROWSER=brave
+	export BROWSER=brave-kenp-default
 
 	# -------------------------------------------------------------------------
 	# Font Rendering
