@@ -16,6 +16,7 @@ packages:
   - localsend
   - maplemono-nf
   - mullvad-vpn-bin
+  - niri-settings-git
   - nemo
   - noto-fonts
   - noto-fonts-cjk
