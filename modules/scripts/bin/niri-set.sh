@@ -900,6 +900,7 @@ env)
         "XDG_SESSION_TYPE=${XDG_SESSION_TYPE:-}"
         "XDG_SESSION_DESKTOP=${XDG_SESSION_DESKTOP:-}"
         "DESKTOP_SESSION=${DESKTOP_SESSION:-}"
+        "BROWSER=${BROWSER:-}"
       )
 
       [[ -n "${DISPLAY:-}" ]] && args+=("DISPLAY=${DISPLAY}")
@@ -928,6 +929,7 @@ env)
         XDG_SESSION_TYPE
         XDG_SESSION_DESKTOP
         DESKTOP_SESSION
+        BROWSER
         SSH_AUTH_SOCK
         GTK_THEME
         GTK_USE_PORTAL
