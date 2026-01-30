@@ -77,9 +77,9 @@ launch_scrcpy() {
   height="${screen_size#*x}"
 
   if [[ -n "${width:-}" && "$width" -gt 1080 ]]; then
-    options="--max-size 1080 --max-fps 60 --bit-rate 16M"
+    options="--max-size 1080 --max-fps 60 --video-bit-rate 16M"
   else
-    options="--max-fps 60 --bit-rate 8M"
+    options="--max-fps 60 --video-bit-rate 8M"
   fi
 
   options="$options --window-title \"Android Screen Mirror\""

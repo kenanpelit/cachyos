@@ -867,7 +867,7 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^(clipse|org\.pulseaudio\.pavucontrol|io\.ente\.auth)$"#
+  match app-id=r#"^(clipse|scrcpy|org\.pulseaudio\.pavucontrol|io\.ente\.auth)$"#
   open-floating true
   default-column-width { proportion 0.250000; }
   default-window-height { proportion 0.800000; }
