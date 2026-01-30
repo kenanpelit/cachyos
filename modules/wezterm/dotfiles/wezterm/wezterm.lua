@@ -13,8 +13,8 @@ catppuccin.apply_to_config(config, { flavor = "mocha", accent = "mauve" })
 
 
 -- Performance & GPU
-config.front_end = "WebGpu"
-config.webgpu_power_preference = "HighPerformance"
+-- WebGpu can fail silently on some Wayland setups; OpenGL is more reliable.
+config.front_end = "OpenGL"
 config.max_fps = 120
 config.animation_fps = 60
 config.enable_wayland = true
