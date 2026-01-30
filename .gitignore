@@ -20,3 +20,4 @@ modules/dms/dotfiles/DankMaterialShell/plugins/dankBitwarden/
 modules/ytdlp/dotfiles/yt-dlp/cookies-youtube.txt
 mimeinfo.cache
 brave-*.desktop
+!modules/xdg-mimes/dotfiles/applications/brave-kenp.desktop

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Brave (Kenp)
+GenericName=Web Browser
+Comment=Open the Kenp Brave profile
+Exec=start-brave-kenp %U
+Terminal=false
+Icon=brave-browser
+Categories=Network;WebBrowser;
+StartupNotify=true
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/about;x-scheme-handler/unknown;
+Keywords=brave;browser;web;kenp;
