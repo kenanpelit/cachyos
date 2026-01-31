@@ -137,6 +137,9 @@ blocky_stop() {
 	if have_cmd resolvconf; then
 		sudo_run "resolvconf -f -d blocky || true; resolvconf -u" || true
 	fi
+
+	# Override any lingering stub resolver state (NetworkManager/resolved).
+	set_resolv_mullvad || true
 }
 
 blocky_start() {
