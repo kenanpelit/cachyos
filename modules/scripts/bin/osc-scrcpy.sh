@@ -69,7 +69,7 @@ setup_wifi() {
 }
 
 launch_scrcpy() {
-  local options=""
+  local -a scrcpy_cmd
   local screen_size width height max_size
 
   screen_size="$(adb shell wm size 2>/dev/null | awk -F: '{print $2}' | tr -d ' ' || true)"
@@ -95,17 +95,22 @@ launch_scrcpy() {
   fi
 
   if [[ -n "${width:-}" && "$width" -gt 1080 ]]; then
-    options="--max-fps 60 --video-bit-rate 16M"
+    scrcpy_cmd+=(--max-fps 60 --video-bit-rate 16M)
   else
-    options="--max-fps 60 --video-bit-rate 8M"
+    scrcpy_cmd+=(--max-fps 60 --video-bit-rate 8M)
   fi
   if [[ -n "${max_size:-}" ]]; then
-    options="--max-size ${max_size} ${options}"
+    scrcpy_cmd+=(--max-size "$max_size")
   fi
 
-  options="$options --window-title \"Android Screen Mirror\" --mouse=uhid --keyboard=uhid --no-mouse-hover --disable-screensaver"
+  scrcpy_cmd+=(
+    --window-title "Android Screen Mirror"
+    --mouse=uhid
+    --keyboard=uhid
+    --disable-screensaver
+  )
   info "Starting scrcpy..."
-  eval "scrcpy $options > \"$LOG_FILE\" 2>&1 &"
+  SCRCPY_OPTS= SCRCPY_ARGS= scrcpy "${scrcpy_cmd[@]}" >"$LOG_FILE" 2>&1 &
 }
 
 try_saved_connection() {
