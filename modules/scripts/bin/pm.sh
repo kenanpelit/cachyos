@@ -414,7 +414,8 @@ paru_info() {
 }
 
 paru_list_all() {
-    paru -Sl --color=never | awk '{ print $2 " " $1 " " $3 " " $4 }'
+    # Use pacman for repo listing to avoid occasional alpm.rs panics in paru.
+    pacman -Sl --color=never | awk '{ print $2 " " $1 " " $3 " " $4 }'
 }
 
 paru_list_installed() {
