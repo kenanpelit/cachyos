@@ -70,16 +70,37 @@ setup_wifi() {
 
 launch_scrcpy() {
   local options=""
-  local screen_size width height
+  local screen_size width height max_size
 
   screen_size="$(adb shell wm size 2>/dev/null | awk -F: '{print $2}' | tr -d ' ' || true)"
   width="${screen_size%x*}"
   height="${screen_size#*x}"
 
+  # Allow override via env (e.g., SCRCPY_MAX_SIZE=1200)
+  if [[ -n "${SCRCPY_MAX_SIZE:-}" ]]; then
+    max_size="$SCRCPY_MAX_SIZE"
+  else
+    # For wide screens, prefer scaling to the shorter edge.
+    if [[ -n "${width:-}" && -n "${height:-}" ]]; then
+      if [[ "$width" -ge "$height" ]]; then
+        max_size="$height"
+      else
+        max_size="$width"
+      fi
+    fi
+    # Cap default scale to 1200 for performance and to fit floating window.
+    if [[ -n "${max_size:-}" && "$max_size" -gt 1200 ]]; then
+      max_size=1200
+    fi
+  fi
+
   if [[ -n "${width:-}" && "$width" -gt 1080 ]]; then
-    options="--max-size 1080 --max-fps 60 --video-bit-rate 16M"
+    options="--max-fps 60 --video-bit-rate 16M"
   else
     options="--max-fps 60 --video-bit-rate 8M"
+  fi
+  if [[ -n "${max_size:-}" ]]; then
+    options="--max-size ${max_size} ${options}"
   fi
 
   options="$options --window-title \"Android Screen Mirror\""
