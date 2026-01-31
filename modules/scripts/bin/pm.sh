@@ -271,6 +271,39 @@ aur_search() {
     fi
     [ -n "${query:-}" ] || die "empty AUR query"
 
+    if is_command paru; then
+        if paru --aur -Ss --color=never "$query" 2>/dev/null | awk '
+            BEGIN { name=""; ver=""; desc="" }
+            /^aur\// {
+                # format: aur/pkgname version (votes) [out-of-date]
+                split($1, a, "/"); name=a[2]; ver=$2; next
+            }
+            name != "" {
+                desc=$0; sub(/^[[:space:]]+/, "", desc);
+                print name " aur " ver " " desc;
+                name=""; ver=""; desc="";
+            }
+        '; then
+            return 0
+        fi
+    fi
+
+    if is_command yay; then
+        if yay --aur -Ss --color=never "$query" 2>/dev/null | awk '
+            BEGIN { name=""; ver=""; desc="" }
+            /^aur\// {
+                split($1, a, "/"); name=a[2]; ver=$2; next
+            }
+            name != "" {
+                desc=$0; sub(/^[[:space:]]+/, "", desc);
+                print name " aur " ver " " desc;
+                name=""; ver=""; desc="";
+            }
+        '; then
+            return 0
+        fi
+    fi
+
     if is_command python3; then
         python3 - "$query" <<'PY'
 import json
