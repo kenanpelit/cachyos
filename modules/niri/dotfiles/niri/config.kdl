@@ -867,10 +867,24 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^(clipse|scrcpy|org\.pulseaudio\.pavucontrol|io\.ente\.auth)$"#
+  match app-id=r#"^(clipse|org\.pulseaudio\.pavucontrol|io\.ente\.auth)$"#
   open-floating true
   default-column-width { proportion 0.250000; }
   default-window-height { proportion 0.800000; }
+  default-floating-position x=32 y=144 relative-to="top-right"
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^scrcpy$"#
+  open-floating true
+  # Keep scrcpy at a phone-like 9:20 ratio to avoid side gaps.
+  default-column-width { fixed 432; }
+  default-window-height { fixed 960; }
+  min-width 432
+  max-width 432
+  min-height 960
+  max-height 960
   default-floating-position x=32 y=144 relative-to="top-right"
   open-focused true
 }
