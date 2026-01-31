@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 CFG_SRC="${SCRIPT_DIR}/../dotfiles/blocky/config.yml"
-CFG_DST="/etc/blocky/config.yml"
+CFG_DST="/etc/blocky/blocky.yml"
 OVERRIDE_DIR="/etc/systemd/system/blocky.service.d"
 OVERRIDE_DST="${OVERRIDE_DIR}/override.conf"
 
