@@ -28,6 +28,12 @@ CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 OVR
 
+if command -v setcap >/dev/null 2>&1; then
+  ${SUDO} setcap cap_net_bind_service=+ep /usr/bin/blocky || true
+else
+  echo "setcap not found; port 53 may require root or systemd caps" >&2
+fi
+
 ${SUDO} systemctl daemon-reload
 if ${SUDO} systemctl list-unit-files blocky.service >/dev/null 2>&1; then
   ${SUDO} systemctl enable --now blocky.service
