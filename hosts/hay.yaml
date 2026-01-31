@@ -111,7 +111,7 @@ enabled_modules:
   - pacman
   - firewall
   - fail2ban
-  - hblock
+  - blocky
   - tcp
   - oomd
   # - grub

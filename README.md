@@ -19,7 +19,7 @@ Personal, declarative system configuration for **CachyOS** (Arch Linux) managed 
   - **Hyprland:** Performance-tuned dynamic tiling Wayland compositor.
 - **Unified Theming:** Consistent application of the Catppuccin Mocha palette across GTK, Qt (Kvantum), and various terminal emulators.
 - **System Automation:** Managed services, snapshots, and system-level configuration hooks.
-- **System Hardening:** Optional firewall (ufw), fail2ban, and host blocking (hblock).
+- **System Hardening:** Optional firewall (ufw), fail2ban, and DNS blocking (blocky).
 - **Kernel Tuning:** ThinkPad/Intel-specific modules and boot parameters via a dedicated kernel module.
 
 ## System Components
@@ -32,7 +32,7 @@ Personal, declarative system configuration for **CachyOS** (Arch Linux) managed 
 | **Shell** | Zsh with Starship |
 | **Theming** | Catppuccin Mocha |
 | **File Management** | Yazi, Nemo |
-| **Security** | ufw, fail2ban, hblock |
+| **Security** | ufw, fail2ban, blocky |
 | **Kernel** | ThinkPad/Intel tuning (modules + GRUB params) |
 
 ## Directory Structure
@@ -47,7 +47,7 @@ Personal, declarative system configuration for **CachyOS** (Arch Linux) managed 
 │   ├── niri/            # Primary desktop environment
 │   ├── firewall/        # ufw configuration
 │   ├── fail2ban/        # fail2ban configuration
-│   ├── hblock/          # hosts-based blocking
+│   ├── blocky/          # DNS ad-blocking
 │   ├── gtk/qt/          # Toolkit consistent theming
 │   └── ...
 ├── config.yaml          # Main entry point
