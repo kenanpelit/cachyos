@@ -29,7 +29,7 @@ usage() {
     echo "  la, list all         List all packages."
     echo "  li, list installed   List installed packages."
     echo "  sa  search all       Interactively search between repo packages."
-    echo "  sr  search aur       Interactively search AUR packages (paru/yay)."
+    echo "  sr  search aur <q>   Search AUR packages by query."
     echo "  si  search installed Interactively search between installed packages."
     echo "  w,  which            Print which package manager is being used."
     echo "  h,  help             Print this help."
@@ -151,11 +151,20 @@ info() {
 
 list() {
     check_source "$@"
+    if [ "$1" = aur ]; then
+        die_wrong_usage "use 'search aur <query>' for AUR"
+    fi
     pm_list "$1" | pm_format "$1"
 }
 
 search() {
     check_source "$@"
+
+    if [ "$1" = aur ]; then
+        shift
+        aur_search "$@" | interactive_filter_aur
+        return
+    fi
 
     if [ -t 0 ]; then
         pm_list "$1" | pm_format "$1" | interactive_filter
@@ -234,6 +243,80 @@ interactive_filter() {
             cut -d" " -f1
     else
         die "fzf is not available, run '$0 install fzf' first"
+    fi
+}
+
+interactive_filter_aur() {
+    if is_command fzf; then
+        fzf --exit-0 \
+            --multi \
+            --no-sort \
+            --ansi \
+            --layout=reverse \
+            --exact \
+            --cycle |
+            cut -d" " -f1
+    else
+        die "fzf is not available, run '$0 install fzf' first"
+    fi
+}
+
+urlencode() {
+    if is_command python3; then
+        python3 - "$1" <<'PY'
+import sys, urllib.parse
+print(urllib.parse.quote(sys.argv[1]))
+PY
+    elif is_command python; then
+        python - "$1" <<'PY'
+import sys, urllib.parse
+print(urllib.parse.quote(sys.argv[1]))
+PY
+    else
+        die "python3/python is required for AUR search"
+    fi
+}
+
+aur_search() {
+    local query
+    if [ $# -gt 0 ]; then
+        query=$*
+    else
+        printf "AUR query: " >/dev/tty
+        read -r query </dev/tty
+    fi
+    [ -n "${query:-}" ] || die "empty AUR query"
+
+    if ! is_command curl; then
+        die "curl is required for AUR search"
+    fi
+
+    local encoded url
+    encoded=$(urlencode "$query")
+    url="https://aur.archlinux.org/rpc/?v=5&type=search&arg=${encoded}"
+
+    if is_command python3; then
+        curl -fsSL "$url" | python3 - <<'PY'
+import json, sys
+data = json.load(sys.stdin)
+for r in data.get("results", []):
+    name = r.get("Name","")
+    ver = r.get("Version","")
+    desc = (r.get("Description","") or "").replace("\t"," ")
+    print(f"{name} aur {ver} {desc}")
+PY
+    elif is_command python; then
+        curl -fsSL "$url" | python - <<'PY'
+import json, sys
+data = json.load(sys.stdin)
+for r in data.get("results", []):
+    name = r.get("Name","")
+    ver = r.get("Version","")
+    desc = (r.get("Description","") or "").replace("\t"," ")
+    print(f"{name} aur {ver} {desc}")
+PY
+    else
+        die "python3/python is required for AUR search"
     fi
 }
 
@@ -420,10 +503,6 @@ paru_list_all() {
     pacman -Sl --color=never | awk '{ print $2 " " $1 " " $3 " " $4 }'
 }
 
-paru_list_aur() {
-    paru -Sla --color=never | awk '{ print $2 " aur " $3 " " $4 }'
-}
-
 paru_list_installed() {
     paru -Q --color=never
 }
@@ -468,9 +547,6 @@ yay_list_all() {
     } | awk '{ print $2 " " $1 " " $3 " " $4 }'
 }
 
-yay_list_aur() {
-    yay -Sla --color=never | awk '{ print $2 " aur " $3 " " $4 }'
-}
 yay_list_installed() {
     yay -Q --color=never
 }
