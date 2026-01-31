@@ -28,7 +28,8 @@ usage() {
     echo "  n,  info <pkg>       Print package information."
     echo "  la, list all         List all packages."
     echo "  li, list installed   List installed packages."
-    echo "  sa  search all       Interactively search between all packages."
+    echo "  sa  search all       Interactively search between repo packages."
+    echo "  sr  search aur       Interactively search AUR packages (paru/yay)."
     echo "  si  search installed Interactively search between installed packages."
     echo "  w,  which            Print which package manager is being used."
     echo "  h,  help             Print this help."
@@ -103,6 +104,7 @@ main() {
     li) list installed ;;
     la) list all ;;
     s | search) search "$@" ;;
+    sr) search aur ;;
     si) search installed ;;
     sa) search all ;;
     f | fetch) fetch ;;
@@ -193,7 +195,7 @@ current_date() {
 check_source() {
     if [ $# -eq 0 ]; then
         die_wrong_usage "expected <source> argument"
-    elif [ "$1" != installed ] && [ "$1" != all ]; then
+    elif [ "$1" != installed ] && [ "$1" != all ] && [ "$1" != aur ]; then
         die_wrong_usage "invalid <source> argument '$1'"
     fi
 }
@@ -418,6 +420,10 @@ paru_list_all() {
     pacman -Sl --color=never | awk '{ print $2 " " $1 " " $3 " " $4 }'
 }
 
+paru_list_aur() {
+    paru -Sla --color=never | awk '{ print $2 " aur " $3 " " $4 }'
+}
+
 paru_list_installed() {
     paru -Q --color=never
 }
@@ -462,6 +468,9 @@ yay_list_all() {
     } | awk '{ print $2 " " $1 " " $3 " " $4 }'
 }
 
+yay_list_aur() {
+    yay -Sla --color=never | awk '{ print $2 " aur " $3 " " $4 }'
+}
 yay_list_installed() {
     yay -Q --color=never
 }
