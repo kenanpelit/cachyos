@@ -40,3 +40,7 @@ if ${SUDO} systemctl list-unit-files blocky.service >/dev/null 2>&1; then
 else
   echo "blocky.service not found; install package first" >&2
 fi
+
+# Ensure system resolver points to Blocky.
+${SUDO} rm -f /etc/resolv.conf
+printf "nameserver 127.0.0.1\nnameserver ::1\n" | ${SUDO} tee /etc/resolv.conf >/dev/null
