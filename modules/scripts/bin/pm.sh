@@ -261,22 +261,6 @@ interactive_filter_aur() {
     fi
 }
 
-urlencode() {
-    if is_command python3; then
-        python3 - "$1" <<'PY'
-import sys, urllib.parse
-print(urllib.parse.quote(sys.argv[1]))
-PY
-    elif is_command python; then
-        python - "$1" <<'PY'
-import sys, urllib.parse
-print(urllib.parse.quote(sys.argv[1]))
-PY
-    else
-        die "python3/python is required for AUR search"
-    fi
-}
-
 aur_search() {
     local query
     if [ $# -gt 0 ]; then
@@ -287,18 +271,24 @@ aur_search() {
     fi
     [ -n "${query:-}" ] || die "empty AUR query"
 
-    if ! is_command curl; then
-        die "curl is required for AUR search"
-    fi
-
-    local encoded url
-    encoded=$(urlencode "$query")
-    url="https://aur.archlinux.org/rpc/?v=5&type=search&arg=${encoded}"
-
     if is_command python3; then
-        curl -fsSL "$url" | python3 - <<'PY'
-import json, sys
-data = json.load(sys.stdin)
+        python3 - "$query" <<'PY'
+import json
+import sys
+import urllib.parse
+import urllib.request
+
+query = " ".join(sys.argv[1:]).strip()
+if not query:
+    raise SystemExit("empty query")
+
+params = urllib.parse.urlencode({"v": "5", "type": "search", "arg": query})
+url = "https://aur.archlinux.org/rpc/?" + params
+
+with urllib.request.urlopen(url, timeout=10) as resp:
+    body = resp.read().decode("utf-8", errors="replace")
+
+data = json.loads(body)
 for r in data.get("results", []):
     name = r.get("Name","")
     ver = r.get("Version","")
@@ -306,9 +296,23 @@ for r in data.get("results", []):
     print(f"{name} aur {ver} {desc}")
 PY
     elif is_command python; then
-        curl -fsSL "$url" | python - <<'PY'
-import json, sys
-data = json.load(sys.stdin)
+        python - "$query" <<'PY'
+import json
+import sys
+import urllib.parse
+import urllib.request
+
+query = " ".join(sys.argv[1:]).strip()
+if not query:
+    raise SystemExit("empty query")
+
+params = urllib.parse.urlencode({"v": "5", "type": "search", "arg": query})
+url = "https://aur.archlinux.org/rpc/?" + params
+
+with urllib.request.urlopen(url, timeout=10) as resp:
+    body = resp.read().decode("utf-8", errors="replace")
+
+data = json.loads(body)
 for r in data.get("results", []):
     name = r.get("Name","")
     ver = r.get("Version","")
