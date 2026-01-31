@@ -93,6 +93,10 @@ have_cmd() { command -v "$1" >/dev/null 2>&1; }
 
 sudo_run() {
 	local cmd="$1"
+	if [ "$(id -u)" -eq 0 ]; then
+		bash -c "$cmd"
+		return $?
+	fi
 	if ! have_cmd sudo; then
 		log "Hata: sudo bulunamadı (Blocky yönetimi atlanıyor)."
 		notify "⚠️ MULLVAD VPN" "Blocky toggle needs sudo" "security-low"
