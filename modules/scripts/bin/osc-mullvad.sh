@@ -107,8 +107,12 @@ sudo_run() {
 
 	# If no tty, avoid hanging.
 	if ! tty -s; then
-		log "Hata: root yetkisi gerekiyor ama TTY yok ve askpass bulunamadı. (Blocky yönetimi atlanıyor)"
-		notify "⚠️ MULLVAD VPN" "Blocky toggle needs sudo; no TTY/askpass" "security-low"
+		if have_cmd pkexec; then
+			pkexec bash -c "$cmd"
+			return $?
+		fi
+		log "Hata: root yetkisi gerekiyor ama TTY yok ve askpass/pkexec bulunamadı. (Blocky yönetimi atlanıyor)"
+		notify "⚠️ MULLVAD VPN" "Blocky toggle needs sudo; no TTY/askpass/pkexec" "security-low"
 		return 1
 	fi
 
