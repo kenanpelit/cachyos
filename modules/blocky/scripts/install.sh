@@ -19,8 +19,9 @@ fi
 ${SUDO} install -d -m 755 "$(dirname "${CFG_DST}")"
 ${SUDO} install -m 644 "${CFG_SRC}" "${CFG_DST}"
 
-${SUDO} install -d -m 755 "${OVERRIDE_DIR}"
-${SUDO} tee "${OVERRIDE_DST}" >/dev/null <<'OVR'
+if command -v resolvconf >/dev/null 2>&1; then
+  ${SUDO} install -d -m 755 "${OVERRIDE_DIR}"
+  ${SUDO} tee "${OVERRIDE_DST}" >/dev/null <<'OVR'
 [Service]
 ExecStartPost=+ /usr/bin/resolvconf -m 0 -x -a blocky <<'EOFX'
 nameserver 127.0.0.1
@@ -30,6 +31,13 @@ ExecStartPost=+ /usr/bin/resolvconf -u
 ExecStopPost=+ /usr/bin/resolvconf -f -d blocky
 ExecStopPost=+ /usr/bin/resolvconf -u
 OVR
+else
+  echo "resolvconf not found; skipping DNS hook override" >&2
+fi
 
 ${SUDO} systemctl daemon-reload
-${SUDO} systemctl enable --now blocky.service
+if ${SUDO} systemctl list-unit-files blocky.service >/dev/null 2>&1; then
+  ${SUDO} systemctl enable --now blocky.service
+else
+  echo "blocky.service not found; install package first" >&2
+fi
