@@ -878,7 +878,7 @@ window-rule {
 window-rule {
   match app-id=r#"^scrcpy$"#
   open-floating true
-  # Keep scrcpy at a phone-like 9:20 ratio to avoid side gaps.
+  // Keep scrcpy at a phone-like 9x20 ratio to avoid side gaps.
   default-column-width { fixed 432; }
   default-window-height { fixed 960; }
   min-width 432
