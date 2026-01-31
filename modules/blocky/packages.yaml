@@ -1,4 +1,4 @@
 description: blocky packages
 packages:
-  - blocky
+  - blocky-bin
   - openresolv
