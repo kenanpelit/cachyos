@@ -146,6 +146,10 @@ blocky_start() {
 	sudo_run "systemctl start blocky.service" || return 1
 }
 
+set_resolv_localhost() {
+	sudo_run "printf 'nameserver 127.0.0.1\\nnameserver ::1\\n' > /etc/resolv.conf"
+}
+
 toggle_basic_vpn_with_blocky() {
 	check_vpn_status
 	local status=$?
@@ -153,7 +157,9 @@ toggle_basic_vpn_with_blocky() {
 	if [[ $status -eq 0 ]]; then
 		# VPN currently ON -> turning OFF: disconnect first, then enable Blocky.
 		if disconnect_basic_vpn; then
-			blocky_start || true
+			if blocky_start; then
+				set_resolv_localhost || true
+			fi
 		fi
 		return 0
 	fi
