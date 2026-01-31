@@ -30,10 +30,10 @@ RCF
   ${SUDO} install -d -m 755 "${OVERRIDE_DIR}"
   ${SUDO} tee "${OVERRIDE_DST}" >/dev/null <<'OVR'
 [Service]
-ExecStartPost=+ /bin/sh -c '/usr/bin/resolvconf -m 0 -x -a blocky < /etc/blocky/resolvconf.conf'
-ExecStartPost=+ /usr/bin/resolvconf -u
-ExecStopPost=+ /usr/bin/resolvconf -f -d blocky
-ExecStopPost=+ /usr/bin/resolvconf -u
+ExecStartPost=+/bin/sh -c '/usr/bin/resolvconf -m 0 -x -a blocky < /etc/blocky/resolvconf.conf'
+ExecStartPost=+/usr/bin/resolvconf -u
+ExecStopPost=+/usr/bin/resolvconf -f -d blocky
+ExecStopPost=+/usr/bin/resolvconf -u
 OVR
 else
   echo "resolvconf not found; skipping DNS hook override" >&2
