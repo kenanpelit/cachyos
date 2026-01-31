@@ -150,6 +150,10 @@ set_resolv_localhost() {
 	sudo_run "printf 'nameserver 127.0.0.1\\nnameserver ::1\\n' > /etc/resolv.conf"
 }
 
+set_resolv_mullvad() {
+	sudo_run "printf 'nameserver 10.64.0.1\\noptions edns0\\noptions trust-ad\\n' > /etc/resolv.conf"
+}
+
 toggle_basic_vpn_with_blocky() {
 	check_vpn_status
 	local status=$?
@@ -174,7 +178,9 @@ toggle_basic_vpn_with_blocky() {
 				return 1
 			fi
 		fi
-		connect_basic_vpn
+		if connect_basic_vpn; then
+			set_resolv_mullvad || true
+		fi
 		return 0
 	fi
 

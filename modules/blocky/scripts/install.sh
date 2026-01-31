@@ -6,6 +6,8 @@ CFG_SRC="${SCRIPT_DIR}/../dotfiles/blocky/config.yml"
 CFG_DST="/etc/blocky/blocky.yml"
 OVERRIDE_DIR="/etc/systemd/system/blocky.service.d"
 OVERRIDE_DST="${OVERRIDE_DIR}/override.conf"
+NM_CONF_DIR="/etc/NetworkManager/conf.d"
+NM_CONF_DST="${NM_CONF_DIR}/90-blocky-dns.conf"
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -44,3 +46,13 @@ fi
 # Ensure system resolver points to Blocky.
 ${SUDO} rm -f /etc/resolv.conf
 printf "nameserver 127.0.0.1\nnameserver ::1\n" | ${SUDO} tee /etc/resolv.conf >/dev/null
+
+# Prevent NetworkManager from overwriting resolv.conf.
+if command -v nmcli >/dev/null 2>&1; then
+  ${SUDO} install -d -m 755 "${NM_CONF_DIR}"
+  ${SUDO} tee "${NM_CONF_DST}" >/dev/null <<'NMCONF'
+[main]
+dns=none
+rc-manager=unmanaged
+NMCONF
+fi
