@@ -48,6 +48,7 @@ main() {
         exit
     fi
 
+    # Color policy: auto by TTY unless overridden.
     if [ ! "${PM_COLOR+is_set}" ]; then
         if [ -t 1 ]; then
             PM_COLOR="always"
@@ -56,6 +57,7 @@ main() {
         fi
     fi
 
+    # Sudo helper detection (disabled for Termux).
     if [ ! "${PM_SUDO+is_set}" ]; then
         PM_SUDO=
         # Termux package installation does not require sudo
@@ -69,10 +71,10 @@ main() {
         fi
     fi
 
-    # We cannot pass empty sudo command option to AUR helpers, so we use `env` as workaround.
+    # AUR helpers do not accept empty sudo, so fallback to `env`.
     AUR_SUDO=${PM_SUDO:-env}
 
-    # Output formatting
+    # Output formatting (colorized table).
     if [ "$PM_COLOR" = always ]; then
         FMT_NAME='"\033[1m"'
         FMT_GROUP='" \033[1;35m"'
@@ -87,8 +89,10 @@ main() {
         FMT_RESET='""'
     fi
 
+    # Select package manager (unless PM is explicitly set).
     pm_detect
 
+    # Cache used for fetch timestamps and optional indexes.
     PM_CACHE_DIR=${XDG_CACHE_DIR:-$HOME/.cache}/pm/$PM
     mkdir -p "$PM_CACHE_DIR"
 
@@ -114,7 +118,7 @@ main() {
 }
 
 # =============================================================================
-# Commands
+# Commands (user-facing)
 # =============================================================================
 
 install() {
@@ -210,10 +214,10 @@ check_source() {
 }
 
 compile_stdin_filter() {
-    # 1. Remove comments '#...'
-    # 2. Trim lines
-    # 3. Remove empty lines
-    # 4. Insert matching context ("start of line" ... "end of line" or "whitespace")
+    # 1) Remove comments
+    # 2) Trim
+    # 3) Drop empty lines
+    # 4) Anchor to whole package name
     sed -E 's/#.*//;s/^\s+//;s/\s+$//' |
         { grep . || die "empty stdin filter"; } |
         awk '{ print "^" $1 "($|\\s)" }'
@@ -271,6 +275,7 @@ aur_search() {
     fi
     [ -n "${query:-}" ] || die "empty AUR query"
 
+    # Prefer AUR helper search to avoid network + keep parity with paru/yay output.
     if is_command paru; then
         if paru --aur -Ss --color=never "$query" 2>/dev/null | awk '
             BEGIN { name=""; ver=""; desc="" }
@@ -304,6 +309,7 @@ aur_search() {
         fi
     fi
 
+    # Fallback to AUR RPC over HTTPS (python is required).
     if is_command python3; then
         python3 - "$query" <<'PY'
 import json
