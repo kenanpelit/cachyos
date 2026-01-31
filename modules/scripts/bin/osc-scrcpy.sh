@@ -169,7 +169,6 @@ launch_scrcpy() {
     --window-title "Android Screen Mirror"
     --mouse=uhid
     --keyboard=uhid
-    --no-mouse-hover
     --disable-screensaver
   )
 
