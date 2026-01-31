@@ -103,7 +103,7 @@ launch_scrcpy() {
     options="--max-size ${max_size} ${options}"
   fi
 
-  options="$options --window-title \"Android Screen Mirror\" --mouse=uhid"
+  options="$options --window-title \"Android Screen Mirror\" --mouse=uhid --keyboard=uhid --no-mouse-hover --disable-screensaver"
   info "Starting scrcpy..."
   eval "scrcpy $options > \"$LOG_FILE\" 2>&1 &"
 }
