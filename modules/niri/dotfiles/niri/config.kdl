@@ -525,7 +525,7 @@ binds {
     spawn "~/.local/bin/bluetooth_toggle"
   }
   Alt+F12 repeat=false hotkey-overlay-title="VPN Toggle" {
-    spawn "~/.local/bin/osc-mullvad" "toggle"
+    spawn "~/.local/bin/osc-mullvad" "toggle" "--with-blocky"
   }
   Mod+Alt+F12 repeat=false hotkey-overlay-title="VPN Slot Recycle" {
     spawn "~/.local/bin/osc-mullvad-slot"
