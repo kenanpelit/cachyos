@@ -8,6 +8,30 @@ log() {
   printf "%s %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >>"$LOG_FILE"
 }
 
+# Best-effort user notification
+notify_user() {
+  command -v notify-send >/dev/null 2>&1 || return 0
+
+  local vpn_state="Unknown"
+  local blocky_state="unknown"
+
+  if command -v mullvad >/dev/null 2>&1; then
+    if mullvad status 2>/dev/null | grep -q "Connected"; then
+      vpn_state="Connected"
+    else
+      vpn_state="Disconnected"
+    fi
+  fi
+
+  if systemctl is-active --quiet blocky.service 2>/dev/null; then
+    blocky_state="on"
+  else
+    blocky_state="off"
+  fi
+
+  notify-send -t 4000 "Mullvad: ${vpn_state}" "Blocky: ${blocky_state}"
+}
+
 # Keep log size sane (last 200 lines).
 if [ -f "$LOG_FILE" ] && [ "$(wc -l <"$LOG_FILE")" -gt 200 ]; then
   tail -n 200 "$LOG_FILE" >"${LOG_FILE}.tmp" && mv "${LOG_FILE}.tmp" "$LOG_FILE"
@@ -37,6 +61,9 @@ if command -v pkexec >/dev/null 2>&1; then
     "OSC_MULLVAD_NO_NOTIFY=1 \"$HOME/.local/bin/osc-mullvad\" toggle --with-blocky >>/tmp/osc-mullvad-toggle.root.log 2>&1"
   rc=$?
   log "pkexec exit=${rc}"
+  if [ "$rc" -eq 0 ]; then
+    notify_user || true
+  fi
   exit "${rc}"
 fi
 
