@@ -13,23 +13,30 @@ notify_user() {
   command -v notify-send >/dev/null 2>&1 || return 0
 
   local vpn_state="Unknown"
+  local vpn_icon="network-vpn"
   local blocky_state="unknown"
+  local blocky_icon="security-medium"
 
   if command -v mullvad >/dev/null 2>&1; then
     if mullvad status 2>/dev/null | grep -q "Connected"; then
       vpn_state="Connected"
+      vpn_icon="network-vpn"
     else
       vpn_state="Disconnected"
+      vpn_icon="network-vpn-disconnected"
     fi
   fi
 
   if systemctl is-active --quiet blocky.service 2>/dev/null; then
     blocky_state="on"
+    blocky_icon="security-high"
   else
     blocky_state="off"
+    blocky_icon="security-low"
   fi
 
-  notify-send -t 4000 "Mullvad: ${vpn_state}" "Blocky: ${blocky_state}"
+  notify-send -t 4000 -i "$vpn_icon" "Mullvad: ${vpn_state}" "Blocky: ${blocky_state}"
+  notify-send -t 4000 -i "$blocky_icon" "Blocky: ${blocky_state}" "Mullvad: ${vpn_state}"
 }
 
 # Keep log size sane (last 200 lines).
