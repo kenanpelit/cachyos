@@ -237,12 +237,10 @@ show_dns_status() {
 
 	if [[ "$blocky_active" -eq 1 && "$mullvad_connected" -eq 1 ]]; then
 		mode='conflict (blocky+mullvad)'
-	elif [[ "$ns_has_mullvad" -eq 1 ]]; then
+	elif [[ "$ns_has_mullvad" -eq 1 || "$mullvad_connected" -eq 1 ]]; then
 		mode='mullvad'
 	elif [[ "$blocky_active" -eq 1 || "$ns_has_local" -eq 1 ]]; then
 		mode='blocky'
-	elif [[ "$mullvad_connected" -eq 1 ]]; then
-		mode='mullvad'
 	fi
 
 	if have resolvconf; then
@@ -260,6 +258,7 @@ show_dns_status() {
 		print_kv "default" "$(fmt_state "$DIG_STATUS") example.com"
 	fi
 
+	# If no resolvers detected, still run a single default test.
 	hr
 	echo "${CYN}Resolvers${RST}"
 	if [[ ${#ns_list[@]} -eq 0 ]]; then
