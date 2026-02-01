@@ -622,6 +622,9 @@ binds {
   Mod+Ctrl+F12 repeat=false hotkey-overlay-title="MPV Wallpaper" {
     spawn "~/.local/bin/mpv-manager" "wallpaper"
   }
+  Ctrl+Alt+P repeat=false hotkey-overlay-title="Power Profile Toggle" {
+    spawn "~/.local/bin/powerprofilesctl-toggle"
+  }
 
   // ----------------------------------------------------------------------
   // Workspace focus (1..9)
