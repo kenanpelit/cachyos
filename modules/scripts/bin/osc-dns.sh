@@ -200,19 +200,13 @@ show_dns_status() {
 	if is_active mullvad-daemon.service; then mullvad_active=1; fi
 	if have mullvad; then
 		mullvad_state="$(mullvad status 2>/dev/null | head -n 1 || true)"
-		if [[ "$mullvad_state" == Connected* ]]; then
+		if mullvad status 2>/dev/null | command grep -qi 'Connected' \
+			&& ! mullvad status 2>/dev/null | command grep -qi 'Disconnected\|Not connected'; then
 			mullvad_connected=1
 		fi
 	fi
 
 	local mode='system'
-	if [[ "$blocky_active" -eq 1 && "$mullvad_connected" -eq 1 ]]; then
-		mode='conflict (blocky+mullvad)'
-	elif [[ "$blocky_active" -eq 1 ]]; then
-		mode='blocky'
-	elif [[ "$mullvad_connected" -eq 1 ]]; then
-		mode='mullvad'
-	fi
 
 	hr
 	print_kv "Mode" "$mode"
@@ -231,6 +225,25 @@ show_dns_status() {
 	local ns_line
 	ns_line="$(join_by ", " "${ns_list[@]:-}")"
 	print_kv "resolv.conf" "${ns_line:-<no nameserver>}"
+
+	local ns_has_mullvad=0
+	local ns_has_local=0
+	for ns in "${ns_list[@]:-}"; do
+		case "$ns" in
+		10.64.0.1) ns_has_mullvad=1 ;;
+		127.0.0.1 | ::1) ns_has_local=1 ;;
+		esac
+	done
+
+	if [[ "$blocky_active" -eq 1 && "$mullvad_connected" -eq 1 ]]; then
+		mode='conflict (blocky+mullvad)'
+	elif [[ "$ns_has_mullvad" -eq 1 ]]; then
+		mode='mullvad'
+	elif [[ "$blocky_active" -eq 1 || "$ns_has_local" -eq 1 ]]; then
+		mode='blocky'
+	elif [[ "$mullvad_connected" -eq 1 ]]; then
+		mode='mullvad'
+	fi
 
 	if have resolvconf; then
 		local sources
