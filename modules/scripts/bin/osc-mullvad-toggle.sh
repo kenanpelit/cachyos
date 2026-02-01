@@ -16,7 +16,7 @@ fi
 log "triggered: uid=$(id -u) tty=$(tty 2>/dev/null || echo none)"
 log "env: DISPLAY=${DISPLAY-} WAYLAND_DISPLAY=${WAYLAND_DISPLAY-} XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR-}"
 
-CMD=(/home/kenan/.local/bin/osc-mullvad toggle --with-blocky)
+CMD=("$HOME/.local/bin/osc-mullvad" toggle --with-blocky)
 
 if [ "$(id -u)" -eq 0 ]; then
   log "running as root"
@@ -34,7 +34,7 @@ if command -v pkexec >/dev/null 2>&1; then
     DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS-}" \
     PATH="/usr/sbin:/usr/bin:/sbin:/bin" \
     /bin/bash -lc \
-    "OSC_MULLVAD_NO_NOTIFY=1 /home/kenan/.local/bin/osc-mullvad toggle --with-blocky >>/tmp/osc-mullvad-toggle.root.log 2>&1"
+    "OSC_MULLVAD_NO_NOTIFY=1 \"$HOME/.local/bin/osc-mullvad\" toggle --with-blocky >>/tmp/osc-mullvad-toggle.root.log 2>&1"
   rc=$?
   log "pkexec exit=${rc}"
   exit "${rc}"
