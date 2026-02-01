@@ -9,6 +9,12 @@ log:
   level: info
 
 upstreams:
+  # Don't block service start if upstreams aren't reachable yet.
+  init:
+    strategy: fast
+  # Pick the fastest upstreams per query.
+  strategy: parallel_best
+  timeout: 2s
   groups:
     default:
       - 1.1.1.1
