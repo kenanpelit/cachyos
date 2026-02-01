@@ -28,7 +28,8 @@ if command -v pkexec >/dev/null 2>&1; then
     XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR-}" \
     DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS-}" \
     PATH="/usr/sbin:/usr/bin:/sbin:/bin" \
-    "${CMD[@]}"
+    /bin/bash -lc \
+    "/home/kenan/.local/bin/osc-mullvad toggle --with-blocky >>/tmp/osc-mullvad-toggle.root.log 2>&1"
   rc=$?
   log "pkexec exit=${rc}"
   exit "${rc}"
