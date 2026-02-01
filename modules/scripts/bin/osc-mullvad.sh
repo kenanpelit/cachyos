@@ -227,6 +227,9 @@ notify() {
 	local message="$2"
 	local icon="$3"
 
+	if [ -n "${OSC_MULLVAD_NO_NOTIFY:-}" ]; then
+		return 0
+	fi
 	notify-send -t 5000 "$title" "$message" -i "$icon"
 }
 
