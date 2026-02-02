@@ -3,7 +3,7 @@ command_timeout = 150
 format = "$username$hostname$directory$git_branch$git_status$python$rust$golang$nodejs$nix_shell$fill$cmd_duration$line_break$jobs$character"
 palette = "catppuccin_mocha"
 right_format = ""
-scan_timeout = 20
+scan_timeout = 120
 
 [aws]
 disabled = true
