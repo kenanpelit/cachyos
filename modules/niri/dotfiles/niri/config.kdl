@@ -469,18 +469,18 @@ binds {
   }
 
   // Media control (MPRIS)
-  XF86AudioPlay allow-when-locked=true hotkey-overlay-title="Play/Pause" {
-    spawn "/usr/bin/dms" "ipc" "call" "mpris" "playPause"
-  }
-  XF86AudioNext allow-when-locked=true hotkey-overlay-title="Next" {
-    spawn "/usr/bin/dms" "ipc" "call" "mpris" "next"
-  }
-  XF86AudioPrev allow-when-locked=true hotkey-overlay-title="Prev" {
-    spawn "/usr/bin/dms" "ipc" "call" "mpris" "previous"
-  }
-  XF86AudioStop allow-when-locked=true hotkey-overlay-title="Stop" {
-    spawn "/usr/bin/dms" "ipc" "call" "mpris" "stop"
-  }
+  // XF86AudioPlay allow-when-locked=true hotkey-overlay-title="Play/Pause" {
+  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "playPause"
+  // }
+  // XF86AudioNext allow-when-locked=true hotkey-overlay-title="Next" {
+  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "next"
+  // }
+  // XF86AudioPrev allow-when-locked=true hotkey-overlay-title="Prev" {
+  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "previous"
+  // }
+  // XF86AudioStop allow-when-locked=true hotkey-overlay-title="Stop" {
+  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "stop"
+  // }
 
   // ----------------------------------------------------------------------
   // Custom scripts (Audio/Media)
