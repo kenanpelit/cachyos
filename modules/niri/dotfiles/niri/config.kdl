@@ -330,27 +330,27 @@ binds {
   Mod+Shift+WheelScrollUp hotkey-overlay-title="Opacity +10%" { spawn "niri" "msg" "action" "set-window-opacity" "+0.1";}
 
   // ----------------------------------------------------------------------
-  // Scratchpad (requires nirius)
+  // Scratchpad (niri-flow)
   // ----------------------------------------------------------------------
   Mod+BackSpace repeat=false hotkey-overlay-title="Scratch: Toggle" {
-    spawn "nirius" "scratchpad-toggle"
+    spawn "niri-flow" "scratchpad-toggle"
   }
   Alt+BackSpace repeat=false hotkey-overlay-title="Scratch: Cycle" {
-    spawn "nirius" "scratchpad-show"
+    spawn "niri-flow" "scratchpad-show"
   }
   Mod+Alt+BackSpace repeat=false hotkey-overlay-title="Scratch: Show All" {
-    spawn "nirius" "scratchpad-show-all"
+    spawn "niri-flow" "scratchpad-show-all"
   }
 
-  // Marks (requires nirius)
+  // Marks (niri-flow)
   Mod+Alt+G repeat=false hotkey-overlay-title="Mark: Toggle Default" {
-    spawn "nirius" "toggle-mark"
+    spawn "niri-flow" "toggle-mark"
   }
   Mod+Alt+Shift+1 repeat=false hotkey-overlay-title="Mark: Set Term" {
-    spawn "nirius" "toggle-mark" "term"
+    spawn "niri-flow" "toggle-mark" "term"
   }
   Mod+Alt+1 repeat=false hotkey-overlay-title="Mark: Go Term" {
-    spawn "nirius" "focus-marked" "term"
+    spawn "niri-flow" "focus-marked" "term"
   }
 
   // ----------------------------------------------------------------------
@@ -623,7 +623,7 @@ binds {
     spawn "~/.local/bin/mpv-manager" "wallpaper"
   }
   Ctrl+Alt+P repeat=false hotkey-overlay-title="Power Profile Toggle" {
-    spawn "~/.local/bin/powerprofilesctl-toggle"
+    spawn "~/.local/bin/power-profile"
   }
 
   // ----------------------------------------------------------------------

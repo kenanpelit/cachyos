@@ -34,6 +34,7 @@ services=(
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
   niri-bootstrap.service
+  ppp-auto-profile.timer
   elephant.service
   walker.service
   transmission.service

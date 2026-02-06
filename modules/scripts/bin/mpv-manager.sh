@@ -169,7 +169,7 @@ niri_require() {
       "$runtime"/niri.*.sock \
       "$runtime"/niri.wayland-*.sock \
       "$runtime"/niri*.sock; do
-      if [[ -S "$candidate" && "$candidate" != *nirius* ]]; then
+      if [[ -S "$candidate" && "$candidate" != *niri-flow* ]]; then
         export NIRI_SOCKET="$candidate"
         break
       fi

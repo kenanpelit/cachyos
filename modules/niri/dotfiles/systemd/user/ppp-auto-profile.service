@@ -1,0 +1,7 @@
+[Unit]
+Description=Auto-switch power profile based on system load
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/ppp-auto-profile

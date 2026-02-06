@@ -391,9 +391,9 @@ here)
         niri msg action focus-window --id "$window_id" >/dev/null 2>&1 || true
       }
 
-      # --- 1. Try to pull existing window (Nirius) ---
-      if command -v nirius >/dev/null 2>&1; then
-        if nirius move-to-current-workspace --app-id "^${APP_ID}$" --focus >/dev/null 2>&1; then
+      # --- 1. Try to pull existing window (niri-flow) ---
+      if command -v niri-flow >/dev/null 2>&1; then
+        if niri-flow move-to-current-workspace --app-id "^${APP_ID}$" --focus >/dev/null 2>&1; then
           send_notify "<b>$APP_ID</b> moved to current workspace."
           return 0
         fi
@@ -1519,8 +1519,8 @@ EOF
 
       if [[ -z "${kenp_id:-}" ]]; then
         # Best-effort fallback: just try to focus/spawn without moving.
-        if command -v nirius >/dev/null 2>&1; then
-          nirius focus-or-spawn --app-id '^Kenp$' start-brave-kenp >/dev/null 2>&1 || true
+        if command -v niri-flow >/dev/null 2>&1; then
+          niri-flow focus-or-spawn --app-id '^Kenp$' start-brave-kenp >/dev/null 2>&1 || true
         fi
         return 0
       fi
