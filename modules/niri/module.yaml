@@ -13,6 +13,10 @@ dotfiles:
     target: ~/.config/systemd/user/niri-ready.service
   - source: dotfiles/systemd/user/niri-bootstrap.service
     target: ~/.config/systemd/user/niri-bootstrap.service
+  - source: dotfiles/systemd/user/ppp-auto-profile.service
+    target: ~/.config/systemd/user/ppp-auto-profile.service
+  - source: dotfiles/systemd/user/ppp-auto-profile.timer
+    target: ~/.config/systemd/user/ppp-auto-profile.timer
 
 post_install_hook: scripts/ensure-runtime-files.sh
 post_hook_behavior: always

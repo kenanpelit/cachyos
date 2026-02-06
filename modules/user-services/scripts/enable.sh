@@ -78,6 +78,14 @@ safe_install \
   "$REPO_ROOT/modules/mpd/dotfiles/systemd/user/mpd.service" \
   "$USER_HOME/.config/systemd/user/mpd.service"
 
+# Ensure ppp auto-profile units exist before enable pass.
+safe_install \
+  "$REPO_ROOT/modules/niri/dotfiles/systemd/user/ppp-auto-profile.service" \
+  "$USER_HOME/.config/systemd/user/ppp-auto-profile.service"
+safe_install \
+  "$REPO_ROOT/modules/niri/dotfiles/systemd/user/ppp-auto-profile.timer" \
+  "$USER_HOME/.config/systemd/user/ppp-auto-profile.timer"
+
 run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
 for s in "${services[@]}"; do

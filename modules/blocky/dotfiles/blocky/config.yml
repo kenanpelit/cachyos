@@ -25,23 +25,6 @@ blocking:
     ads:
       - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
       - https://raw.githubusercontent.com/blocklistproject/Lists/master/ads.txt
-    # Optional aggressive Google/YouTube blocking (enable in clientGroupsBlock if desired)
-    nogoogle:
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/pihole-google.txt
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/youtubeparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/shortlinksparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/proxiesparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/productsparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/mailparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/generalparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/fontsparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/firebaseparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/doubleclickparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/domainsparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/dnsparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/androidparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/analyticsparsed
-      - https://raw.githubusercontent.com/nickspaargaren/no-google/master/categories/fiberparsed
 
   clientGroupsBlock:
     default:
