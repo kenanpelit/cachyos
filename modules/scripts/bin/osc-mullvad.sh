@@ -338,11 +338,23 @@ blocky_stop() {
 	fi
 }
 
+blocky_force_local_dns() {
+	# Mullvad can leave /etc/resolv.conf at 10.64.0.1 after disconnect.
+	# Force localhost resolvers whenever Blocky mode is expected.
+	sudo_run "printf 'nameserver 127.0.0.1\nnameserver ::1\n' >/etc/resolv.conf" || return 1
+}
+
 blocky_start() {
 	blocky_unit_exists || return 0
-	blocky_is_active && return 0
-	log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
-	sudo_run "systemctl start blocky.service" || return 1
+	if blocky_is_active; then
+		log "Blocky zaten aktif (DNS localhost olarak zorlanıyor)..."
+	else
+		log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
+		sudo_run "systemctl start blocky.service" || return 1
+	fi
+
+	# Always enforce local resolver when switching to Blocky mode.
+	blocky_force_local_dns || return 1
 }
 
 toggle_basic_vpn_with_blocky() {
@@ -352,7 +364,11 @@ toggle_basic_vpn_with_blocky() {
 	if [[ $status -eq 0 ]]; then
 		# VPN currently ON -> turning OFF: disconnect first, then enable Blocky.
 		if disconnect_basic_vpn; then
-			blocky_start || true
+			if ! blocky_start; then
+				log "Hata: Blocky başlatıldı ama DNS localhost'a ayarlanamadı."
+				notify "⚠️ MULLVAD VPN" "Blocky DNS restore failed" "security-low"
+				return 1
+			fi
 		fi
 		return 0
 	fi
