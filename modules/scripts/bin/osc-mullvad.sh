@@ -6,7 +6,7 @@
 #   Version: 3.0.0
 #   Date: 2025-04-13
 #   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
+#   Repository: https://github.com/kenanpelit/nixosc
 #   Description: Comprehensive Mullvad VPN management utility combining basic
 #                connection management with advanced relay selection and control
 #
@@ -86,116 +86,6 @@ ALL_COUNTRIES=("${EUROPE_COUNTRIES[@]}" "${AMERICAS_COUNTRIES[@]}" "${ASIA_COUNT
 [[ "${BASH_SOURCE[0]}" != "$0" ]] && echo "Script source edilemez!" && exit 1
 
 # ----------------------------------------------------------------------------
-# Optional DNS helper: Blocky <-> Mullvad coexistence
-# ----------------------------------------------------------------------------
-
-have_cmd() { command -v "$1" >/dev/null 2>&1; }
-
-sudo_run() {
-	local cmd="$1"
-	if [ "$(id -u)" -eq 0 ]; then
-		bash -c "$cmd"
-		return $?
-	fi
-	if ! have_cmd sudo; then
-		log "Hata: sudo bulunamadı (Blocky yönetimi atlanıyor)."
-		notify "⚠️ MULLVAD VPN" "Blocky toggle needs sudo" "security-low"
-		return 1
-	fi
-
-	if [ -n "${SUDO_ASKPASS:-}" ] && [ -x "${SUDO_ASKPASS:-}" ]; then
-		export SUDO_ASKPASS
-		sudo -A bash -c "$cmd"
-		return $?
-	fi
-
-	# If no tty, avoid hanging.
-	if ! tty -s; then
-		if have_cmd pkexec; then
-			pkexec bash -c "$cmd"
-			return $?
-		fi
-		log "Hata: root yetkisi gerekiyor ama TTY yok ve askpass/pkexec bulunamadı. (Blocky yönetimi atlanıyor)"
-		notify "⚠️ MULLVAD VPN" "Blocky toggle needs sudo; no TTY/askpass/pkexec" "security-low"
-		return 1
-	fi
-
-	sudo bash -c "$cmd"
-}
-
-blocky_unit_exists() {
-	systemctl list-unit-files blocky.service >/dev/null 2>&1
-}
-
-blocky_is_active() {
-	systemctl is-active --quiet blocky.service 2>/dev/null
-}
-
-blocky_stop() {
-	blocky_unit_exists || return 0
-	blocky_is_active || return 0
-	log "Blocky durduruluyor (VPN açıkken çakışmayı önlemek için)..."
-	sudo_run "systemctl stop blocky.service" || return 1
-
-	# Extra safety: if resolvconf still has a stale "blocky" key, remove it.
-	if have_cmd resolvconf; then
-		sudo_run "resolvconf -f -d blocky || true; resolvconf -u" || true
-	fi
-
-	# Override any lingering stub resolver state (NetworkManager/resolved).
-	set_resolv_mullvad || true
-}
-
-blocky_start() {
-	blocky_unit_exists || return 0
-	blocky_is_active && return 0
-	log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
-	sudo_run "systemctl start blocky.service" || return 1
-}
-
-set_resolv_localhost() {
-	sudo_run "printf 'nameserver 127.0.0.1\\nnameserver ::1\\n' > /etc/resolv.conf"
-}
-
-set_resolv_mullvad() {
-	sudo_run "printf 'nameserver 10.64.0.1\\noptions edns0\\noptions trust-ad\\n' > /etc/resolv.conf"
-}
-
-toggle_basic_vpn_with_blocky() {
-	check_vpn_status
-	local status=$?
-
-	if [[ $status -eq 0 ]]; then
-		# VPN currently ON -> turning OFF: disconnect first, then enable Blocky.
-		if disconnect_basic_vpn; then
-			if blocky_start; then
-				set_resolv_localhost || true
-			fi
-		fi
-		return 0
-	fi
-
-	if [[ $status -eq 1 ]]; then
-		# VPN currently OFF -> turning ON: disable Blocky first, then connect.
-		if ! blocky_stop; then
-			# If Blocky is still active, connecting Mullvad tends to break DNS/internet.
-			if blocky_is_active; then
-				log "Hata: Blocky durdurulamadı. VPN bağlantısı başlatılmıyor."
-				notify "⚠️ MULLVAD VPN" "Blocky couldn't be stopped; not connecting" "security-low"
-				return 1
-			fi
-		fi
-		if connect_basic_vpn; then
-			set_resolv_mullvad || true
-		fi
-		return 0
-	fi
-
-	# Transitional/unknown states: keep previous behaviour.
-	toggle_basic_vpn
-}
-
-# ----------------------------------------------------------------------------
 # Basic functions from original mullvad-manager script
 # ----------------------------------------------------------------------------
 
@@ -227,9 +117,11 @@ notify() {
 	local message="$2"
 	local icon="$3"
 
-	if [ -n "${OSC_MULLVAD_NO_NOTIFY:-}" ]; then
+	# Useful when running under pkexec wrapper; avoid duplicate notifications.
+	if [[ "${OSC_MULLVAD_NO_NOTIFY:-0}" == "1" ]]; then
 		return 0
 	fi
+
 	notify-send -t 5000 "$title" "$message" -i "$icon"
 }
 
@@ -378,6 +270,109 @@ toggle_basic_vpn() {
 		log "Hata: VPN durumu belirlenemedi."
 		notify "❌ MULLVAD VPN" "Status unknown" "security-low"
 	fi
+}
+
+# ----------------------------------------------------------------------------
+# Optional DNS helper: Blocky <-> Mullvad coexistence
+# ----------------------------------------------------------------------------
+
+have_cmd() { command -v "$1" >/dev/null 2>&1; }
+
+sudo_run() {
+	# Runs a command as root.
+	# - In terminals: normal sudo prompt works.
+	# - In GUI hotkeys: uses askpass if available.
+	local cmd="$1"
+
+	# Already root (e.g. via pkexec wrapper) → no sudo needed.
+	if [[ "$(id -u)" -eq 0 ]]; then
+		bash -c "$cmd"
+		return $?
+	fi
+
+	have_cmd sudo || {
+		log "Hata: sudo bulunamadı (Blocky yönetimi atlanıyor)."
+		return 1
+	}
+
+	# If we already have NOPASSWD or cached creds, prefer that.
+	if sudo -n true 2>/dev/null; then
+		sudo bash -c "$cmd"
+		return $?
+	fi
+
+	# GUI/hotkey context: no TTY; try askpass if present.
+	if [[ ! -t 0 || ! -t 1 ]]; then
+		if have_cmd askpass; then
+			export SUDO_ASKPASS="${SUDO_ASKPASS:-askpass}"
+			sudo -A bash -c "$cmd"
+			return $?
+		fi
+
+		log "Hata: root yetkisi gerekiyor ama TTY yok ve askpass bulunamadı. (Blocky yönetimi atlanıyor)"
+		notify "⚠️ MULLVAD VPN" "Blocky toggle needs sudo; no TTY/askpass" "security-low"
+		return 1
+	fi
+
+	# Terminal context: interactive sudo is fine.
+	sudo bash -c "$cmd"
+}
+
+blocky_unit_exists() {
+	systemctl list-unit-files blocky.service >/dev/null 2>&1
+}
+
+blocky_is_active() {
+	systemctl is-active --quiet blocky.service 2>/dev/null
+}
+
+blocky_stop() {
+	blocky_unit_exists || return 0
+	blocky_is_active || return 0
+	log "Blocky durduruluyor (VPN açıkken çakışmayı önlemek için)..."
+	sudo_run "systemctl stop blocky.service" || return 1
+
+	# Extra safety: if resolvconf still has a stale "blocky" key, remove it.
+	if have_cmd resolvconf; then
+		sudo_run "resolvconf -f -d blocky || true; resolvconf -u" || true
+	fi
+}
+
+blocky_start() {
+	blocky_unit_exists || return 0
+	blocky_is_active && return 0
+	log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
+	sudo_run "systemctl start blocky.service" || return 1
+}
+
+toggle_basic_vpn_with_blocky() {
+	check_vpn_status
+	local status=$?
+
+	if [[ $status -eq 0 ]]; then
+		# VPN currently ON -> turning OFF: disconnect first, then enable Blocky.
+		if disconnect_basic_vpn; then
+			blocky_start || true
+		fi
+		return 0
+	fi
+
+	if [[ $status -eq 1 ]]; then
+		# VPN currently OFF -> turning ON: disable Blocky first, then connect.
+		if ! blocky_stop; then
+			# If Blocky is still active, connecting Mullvad tends to break DNS/internet.
+			if blocky_is_active; then
+				log "Hata: Blocky durdurulamadı. VPN bağlantısı başlatılmıyor."
+				notify "⚠️ MULLVAD VPN" "Blocky couldn't be stopped; not connecting" "security-low"
+				return 1
+			fi
+		fi
+		connect_basic_vpn
+		return 0
+	fi
+
+	# Transitional/unknown states: keep previous behaviour.
+	toggle_basic_vpn
 }
 
 # ----------------------------------------------------------------------------
@@ -583,6 +578,55 @@ ping_avg_ms() {
 	fi
 }
 
+mullvad_is_connected() {
+	mullvad status 2>/dev/null | grep -q "Connected"
+}
+
+wait_for_connected_relay() {
+	local expected_relay="${1:-}"
+	local timeout_s="${2:-$TIMEOUT}"
+	local counter=0
+
+	while ((counter < timeout_s)); do
+		if mullvad_is_connected; then
+			if [[ -z "$expected_relay" ]]; then
+				return 0
+			fi
+			local current_relay
+			current_relay="$(get_current_relay)"
+			if [[ -n "$current_relay" && "$current_relay" == "$expected_relay" ]]; then
+				return 0
+			fi
+		fi
+		sleep 1
+		((counter++))
+	done
+
+	return 1
+}
+
+mullvad_internet_ok() {
+	# Connectivity check: requires actual internet and DNS (unless URL is an IP).
+	# Defaults to Mullvad's own check endpoint.
+	local url="${OSC_MULLVAD_CONNECTIVITY_URL:-https://am.i.mullvad.net/connected}"
+	local expect="${OSC_MULLVAD_CONNECTIVITY_EXPECT:-You are connected}"
+	local connect_timeout="${OSC_MULLVAD_CONNECTIVITY_CONNECT_TIMEOUT:-2}"
+	local max_time="${OSC_MULLVAD_CONNECTIVITY_MAX_TIME:-4}"
+	local tries="${OSC_MULLVAD_CONNECTIVITY_TRIES:-1}"
+
+	command -v curl >/dev/null 2>&1 || return 0
+
+	local i
+	for ((i = 1; i <= tries; i++)); do
+		if curl -fsS --connect-timeout "$connect_timeout" --max-time "$max_time" "$url" 2>/dev/null | grep -qi "$expect"; then
+			return 0
+		fi
+		sleep 1
+	done
+
+	return 1
+}
+
 favorites_upsert() {
 	local relay="$1"
 	local ping_avg="${2:-N/A}"
@@ -595,6 +639,93 @@ favorites_upsert() {
 		END { if (!updated) print r "|" p }
 	' "$FAVORITES_FILE" >"$tmp_file"
 	mv "$tmp_file" "$FAVORITES_FILE"
+}
+
+is_number() {
+	[[ "${1:-}" =~ ^[0-9]+$ ]]
+}
+
+country_group_codes() {
+	local group="${1:-}"
+	case "$group" in
+	europe) printf '%s\n' "${EUROPE_COUNTRIES[@]}" ;;
+	americas) printf '%s\n' "${AMERICAS_COUNTRIES[@]}" ;;
+	asia | apac | "asia/pacific" | "asia-pacific") printf '%s\n' "${ASIA_COUNTRIES[@]}" ;;
+	africa | "africa/me" | "africa-me") printf '%s\n' "${AFRICA_ME_COUNTRIES[@]}" ;;
+	other) printf '%s\n' "${MISC_COUNTRIES[@]}" ;;
+	all) printf '%s\n' "${ALL_COUNTRIES[@]}" ;;
+	*) return 1 ;;
+	esac
+}
+
+fastest_fav_sweep() {
+	local per_country="${OSC_MULLVAD_FASTEST_SWEEP_COUNT:-1}"
+	local restore_at_end="${OSC_MULLVAD_FASTEST_SWEEP_RESTORE:-1}"
+
+	local args=("$@")
+	if (( ${#args[@]} == 0 )); then
+		echo -e "${RED}Error:${NC} missing group or country codes"
+		echo "Usage: ${SCRIPT_NAME} fastest-fav-sweep <all|europe|americas|asia|africa|other|cc...> [per-country]"
+		return 1
+	fi
+
+	# Optional last numeric arg = per-country favorite count.
+	local last_index=$((${#args[@]} - 1))
+	local last="${args[$last_index]}"
+	if is_number "$last"; then
+		per_country="$last"
+		unset "args[$last_index]"
+	fi
+
+	local countries=()
+	if (( ${#args[@]} == 1 )); then
+		local group="${args[0]}"
+		if mapfile -t countries < <(country_group_codes "$group" 2>/dev/null); then
+			:
+		else
+			countries=("$group")
+		fi
+	else
+		countries=("${args[@]}")
+	fi
+
+	if (( ${#countries[@]} == 0 )); then
+		echo -e "${RED}Error:${NC} no countries selected"
+		return 1
+	fi
+
+	local was_connected="false"
+	local start_relay=""
+	if mullvad_is_connected; then
+		was_connected="true"
+		start_relay="$(get_current_relay)"
+	fi
+
+	local saved_no_notify="${OSC_MULLVAD_NO_NOTIFY:-0}"
+	OSC_MULLVAD_NO_NOTIFY=1
+
+	log "Sweep: adding up to ${per_country} favorite(s) per country (${#countries[@]} country/countries)"
+
+	local cc
+	for cc in "${countries[@]}"; do
+		if [[ ! " ${ALL_COUNTRIES[*]} " =~ " ${cc} " ]]; then
+			log "Sweep: skipping unknown country code: ${cc}"
+			continue
+		fi
+
+		log "Sweep: ${cc}..."
+		OSC_MULLVAD_FASTEST_FAV_COUNT="$per_country" find_fastest_relay "$cc" "true" || {
+			log "Sweep: ${cc} failed"
+			continue
+		}
+	done
+
+	OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+
+	if [[ "$restore_at_end" == "1" && "$was_connected" == "true" && -n "$start_relay" ]]; then
+		log "Sweep: restoring starting relay: ${start_relay}"
+		connect_to_relay "$start_relay" "${OSC_MULLVAD_FASTEST_CONNECT_TIMEOUT:-10}" "${OSC_MULLVAD_FASTEST_CONNECT_RETRIES:-2}" "1" >/dev/null 2>&1 || true
+	fi
 }
 
 # Get random relay
@@ -670,7 +801,9 @@ toggle_protocol() {
 # Connect to a specific relay
 connect_to_relay() {
 	local relay=$1
-	local max_retries=$CONNECTION_RETRIES
+	local connect_timeout_s="${2:-$TIMEOUT}"
+	local max_retries="${3:-$CONNECTION_RETRIES}"
+	local allow_fallback="${4:-1}"
 	local retry_count=0
 
 	if [[ -z "$relay" ]]; then
@@ -686,13 +819,22 @@ connect_to_relay() {
 	log "Connecting to relay: $relay (${protocol^^} in $(get_city_name $city), $(get_country_name $country))"
 	notify "🔄 MULLVAD VPN" "Connecting to $(get_city_name $city), $(get_country_name $country)" "security-medium"
 
-	while [ $retry_count -lt $max_retries ]; do
+	while [ $retry_count -lt "$max_retries" ]; do
 		mullvad relay set location $country $city $relay >/dev/null 2>&1
 
 		if [ $? -eq 0 ]; then
-			log "Successfully connected to: $relay"
-			notify "🔒 MULLVAD VPN" "Connected to $(get_city_name $city), $(get_country_name $country)" "security-high"
-			return 0
+			# Ensure a connection exists (no-op if already connected).
+			mullvad connect >/dev/null 2>&1 || true
+
+			if wait_for_connected_relay "$relay" "$connect_timeout_s"; then
+				log "Successfully connected to: $relay"
+				notify "🔒 MULLVAD VPN" "Connected to $(get_city_name $city), $(get_country_name $country)" "security-high"
+				return 0
+			fi
+
+			retry_count=$((retry_count + 1))
+			log "Connected state not confirmed yet (attempt $retry_count/$max_retries, timeout ${connect_timeout_s}s). Retrying..."
+			sleep 1
 		else
 			retry_count=$((retry_count + 1))
 			log "Connection attempt $retry_count failed. Retrying..."
@@ -701,6 +843,11 @@ connect_to_relay() {
 	done
 
 	log "Failed to connect after $max_retries attempts."
+
+	if [[ "$allow_fallback" != "1" ]]; then
+		notify "❌ MULLVAD VPN" "Failed to connect" "security-low"
+		return 1
+	fi
 
 	# Try a different relay in the same city
 	log "Trying a different relay..."
@@ -804,6 +951,8 @@ manage_favorites() {
 		echo -e "${CYAN}Favorite relays:${NC}"
 		local i=1
 		while IFS="|" read -r relay ping_time; do
+			relay="$(echo "${relay:-}" | xargs)"
+			[[ -n "$relay" ]] || continue
 			local country=$(echo "$relay" | cut -d'-' -f1)
 			local city=$(echo "$relay" | cut -d'-' -f2)
 			local protocol=$(echo "$relay" | cut -d'-' -f3)
@@ -825,9 +974,20 @@ manage_favorites() {
 			return 1
 		fi
 
+		local was_connected="false"
+		local previous_relay=""
+		if mullvad_is_connected; then
+			was_connected="true"
+			previous_relay="$(get_current_relay)"
+		fi
+
 		echo -e "${CYAN}Select relay to connect to:${NC}"
+		local relays=()
+		local pings=()
 		local i=1
 		while IFS="|" read -r relay ping_time; do
+			relay="$(echo "${relay:-}" | xargs)"
+			[[ -n "$relay" ]] || continue
 			local country=$(echo "$relay" | cut -d'-' -f1)
 			local city=$(echo "$relay" | cut -d'-' -f2)
 			local protocol=$(echo "$relay" | cut -d'-' -f3)
@@ -838,10 +998,19 @@ manage_favorites() {
 			fi
 
 			echo -e "${YELLOW}$i)${NC} $relay (${GREEN}$(get_country_name $country)${NC}, ${GREEN}$(get_city_name $city)${NC}, ${BLUE}${protocol^^}${NC})${ping_display}"
+			relays+=("$relay")
+			pings+=("${ping_time:-N/A}")
 			i=$((i + 1))
 		done <"$FAVORITES_FILE"
 
-		echo -e "${CYAN}Enter number (1-$((i - 1))) or 'q' to cancel:${NC} "
+		local total="${#relays[@]}"
+		if ((total == 0)); then
+			log "Favorites list is empty"
+			notify "ℹ️ MULLVAD VPN" "Favorites list is empty" "security-medium"
+			return 1
+		fi
+
+		echo -e "${CYAN}Enter number (1-${total}) or 'q' to cancel:${NC} "
 		read -r choice
 
 		if [[ "$choice" == "q" ]]; then
@@ -849,13 +1018,64 @@ manage_favorites() {
 			return 0
 		fi
 
-		if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -lt "$i" ]; then
-			local selected_relay=$(sed -n "${choice}p" "$FAVORITES_FILE" | cut -d"|" -f1)
-			connect_to_relay "$selected_relay"
-		else
+		if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt "$total" ]; then
 			log "Invalid selection"
 			notify "❌ MULLVAD VPN" "Invalid selection" "security-low"
+			return 1
 		fi
+
+		local start_index=$((choice - 1))
+		local timeout_s="${OSC_MULLVAD_FAVORITE_CONNECT_TIMEOUT:-10}"
+		local retries="${OSC_MULLVAD_FAVORITE_CONNECT_RETRIES:-1}"
+		local require_internet="${OSC_MULLVAD_FAVORITE_CONNECT_REQUIRE_INTERNET:-1}"
+		local restore_at_end="${OSC_MULLVAD_FAVORITE_CONNECT_RESTORE:-1}"
+
+		local saved_no_notify="${OSC_MULLVAD_NO_NOTIFY:-0}"
+		OSC_MULLVAD_NO_NOTIFY=1
+
+		local offset
+		for ((offset = 0; offset < total; offset++)); do
+			local idx=$(((start_index + offset) % total))
+			local candidate="${relays[$idx]}"
+			local ping_avg="${pings[$idx]}"
+
+			log "Favorite connect: trying ${candidate} (ping: ${ping_avg} ms)"
+
+			if ! connect_to_relay "$candidate" "$timeout_s" "$retries" "0"; then
+				continue
+			fi
+
+			# Sanity: ensure we actually ended up on the candidate relay.
+			local current_relay
+			current_relay="$(get_current_relay)"
+			if [[ -z "$current_relay" || "$current_relay" != "$candidate" ]]; then
+				log "Favorite connect: relay mismatch (expected ${candidate}, got ${current_relay:-unknown}); trying next"
+				continue
+			fi
+
+			if [[ "$require_internet" == "1" ]]; then
+				if ! mullvad_internet_ok; then
+					log "Favorite connect: no internet on ${candidate}; trying next"
+					continue
+				fi
+			fi
+
+			OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+			log "Favorite connect: connected to ${candidate}"
+			notify "🔒 MULLVAD VPN" "Connected (favorite): ${candidate}" "security-high"
+			return 0
+		done
+
+		OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+		log "Favorite connect: no favorites worked"
+		notify "❌ MULLVAD VPN" "No favorite relay worked" "security-low"
+
+		if [[ "$restore_at_end" == "1" && "$was_connected" == "true" && -n "$previous_relay" ]]; then
+			log "Favorite connect: restoring previous relay: ${previous_relay}"
+			connect_to_relay "$previous_relay" "$timeout_s" "$retries" "1" >/dev/null 2>&1 || true
+		fi
+
+		return 1
 		;;
 
 	*)
@@ -1658,9 +1878,23 @@ find_fastest_relay() {
 	local timeout=2           # Timeout in seconds for ping
 	local iterations=3        # Number of pings per relay
 	local max_relays=10       # Maximum number of relays to test
+	local require_internet="${OSC_MULLVAD_FASTEST_REQUIRE_INTERNET:-1}"
+	local connect_timeout_s="${OSC_MULLVAD_FASTEST_CONNECT_TIMEOUT:-10}"
+	local connect_retries="${OSC_MULLVAD_FASTEST_CONNECT_RETRIES:-2}"
+	local fav_count="${OSC_MULLVAD_FASTEST_FAV_COUNT:-1}"
 
 	log "Finding fastest relay..."
 	notify "🔍 MULLVAD VPN" "Finding fastest relay..." "security-medium"
+
+	local saved_no_notify="${OSC_MULLVAD_NO_NOTIFY:-0}"
+	local OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+
+	local was_connected="false"
+	local previous_relay=""
+	if mullvad_is_connected; then
+		was_connected="true"
+		previous_relay="$(get_current_relay)"
+	fi
 
 	# Get relays to test
 	local relays=()
@@ -1678,63 +1912,128 @@ find_fastest_relay() {
 		return 1
 	fi
 
-	local best_relay=""
-	local best_avg=9999
+	local scored=()
 
 	for relay in "${relays[@]}"; do
-		local ip=$(mullvad relay list | grep -E "^[[:space:]]*$relay" | awk '{print $2}' | tr -d '(),')
+		local ip
+		ip="$(get_relay_ipv4 "$relay")"
 
-		# Skip if we can't extract an IP
-		if [[ -z "$ip" || "$ip" == *":"* ]]; then # Skip IPv6 addresses
+		# Skip if we can't extract an IPv4
+		if [[ -z "$ip" ]]; then
 			continue
 		fi
 
-		local country=$(echo $relay | cut -d'-' -f1)
-		local city=$(echo $relay | cut -d'-' -f2)
+		local relay_country
+		relay_country=$(echo "$relay" | cut -d'-' -f1)
+		local city
+		city=$(echo "$relay" | cut -d'-' -f2)
 
-		echo -en "${CYAN}Testing $relay (${YELLOW}$(get_city_name $city), $(get_country_name $country)${CYAN})...${NC} "
+		echo -en "${CYAN}Testing $relay (${YELLOW}$(get_city_name $city), $(get_country_name $relay_country)${CYAN})...${NC} "
 
 		# Run ping and get average
-		local ping_result=$(ping -c $iterations -W $timeout $ip 2>/dev/null | grep 'avg' | awk -F '/' '{print $5}')
+		local ping_result
+		ping_result="$(ping_avg_ms "$ip" "$iterations" "$timeout")"
 
-		if [[ -n "$ping_result" ]]; then
+		if [[ -n "$ping_result" && "$ping_result" != "N/A" ]]; then
 			echo -e "${GREEN}${ping_result} ms${NC}"
-
-			# Check if this is better than our current best
-			if (($(echo "$ping_result < $best_avg" | bc -l))); then
-				best_avg=$ping_result
-				best_relay=$relay
-			fi
+			scored+=("${ping_result}\t${relay}")
 		else
 			echo -e "${RED}timeout${NC}"
 		fi
 	done
 
-	if [[ -n "$best_relay" ]]; then
-		echo -e "\n${GREEN}Best relay: $best_relay with average ping ${best_avg} ms${NC}"
-
-		# Bağlantıyı kur
-		connect_to_relay "$best_relay"
-
-		if [[ "$add_to_favorites" == "true" ]]; then
-			local existed="false"
-			if grep -q "^${best_relay}|" "$FAVORITES_FILE"; then
-				existed="true"
-			fi
-
-			favorites_upsert "$best_relay" "$best_avg"
-			if [[ "$existed" == "true" ]]; then
-				log "Relay ping time updated in favorites (${best_avg} ms): ${best_relay}"
-				notify "ℹ️ MULLVAD VPN" "Relay ping updated (${best_avg} ms)" "security-medium"
-			else
-				log "Added $best_relay to favorites (ping: ${best_avg} ms)"
-				notify "⭐ MULLVAD VPN" "Added fastest relay (${best_avg} ms)" "security-high"
-			fi
-		fi
-	else
+	if [ ${#scored[@]} -eq 0 ]; then
 		echo -e "${RED}Could not find a responsive relay${NC}"
 		notify "❌ MULLVAD VPN" "No responsive relay found" "security-low"
 		return 1
+	fi
+
+	local sorted=()
+	IFS=$'\n' read -r -d '' -a sorted < <(printf '%b\n' "${scored[@]}" | sort -n && printf '\0')
+	unset IFS
+
+	local best_relay=""
+	local best_avg=""
+	local tried=0
+	local fav_added=0
+
+	OSC_MULLVAD_NO_NOTIFY=1
+
+	for row in "${sorted[@]}"; do
+			local ping_avg="${row%%$'\t'*}"
+			local candidate="${row#*$'\t'}"
+			((tried++))
+
+			echo -e "\n${CYAN}Trying candidate #$tried: ${candidate} (${ping_avg} ms)${NC}"
+
+			if ! connect_to_relay "$candidate" "$connect_timeout_s" "$connect_retries" "0"; then
+				log "Failed to connect to candidate relay: ${candidate}"
+				continue
+			fi
+
+			# Sanity: ensure we actually ended up on the candidate relay.
+			local current_relay
+			current_relay="$(get_current_relay)"
+			if [[ -z "$current_relay" || "$current_relay" != "$candidate" ]]; then
+				log "Connected relay mismatch (expected ${candidate}, got ${current_relay:-unknown}); trying next"
+				continue
+			fi
+
+		if [[ "$require_internet" == "1" ]]; then
+			if ! mullvad_internet_ok; then
+				log "Candidate relay has no verified internet connectivity: ${candidate}"
+				continue
+			fi
+		fi
+
+		# First passing candidate becomes the best (fastest) relay.
+		if [[ -z "$best_relay" ]]; then
+			best_relay="$candidate"
+			best_avg="$ping_avg"
+		fi
+
+		if [[ "$add_to_favorites" == "true" ]]; then
+			local existed="false"
+			if grep -q "^${candidate}|" "$FAVORITES_FILE"; then
+				existed="true"
+			fi
+
+			favorites_upsert "$candidate" "$ping_avg"
+			((fav_added++))
+
+			if [[ "$existed" == "true" ]]; then
+				log "Relay ping time updated in favorites (${ping_avg} ms): ${candidate}"
+			else
+				log "Added ${candidate} to favorites (ping: ${ping_avg} ms)"
+			fi
+
+			if ((fav_added >= fav_count)); then
+				break
+			fi
+		else
+			# Not favoriting: stop at the first verified candidate.
+			break
+		fi
+	done
+
+	OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+
+	if [[ -z "$best_relay" ]]; then
+		log "No candidate relay passed connectivity checks"
+		notify "❌ MULLVAD VPN" "No relay passed connectivity checks" "security-low"
+
+		# Best-effort: restore previous working relay if we were connected.
+		if [[ "$was_connected" == "true" && -n "$previous_relay" ]]; then
+			log "Restoring previous relay: ${previous_relay}"
+			connect_to_relay "$previous_relay" >/dev/null 2>&1 || true
+		fi
+
+		return 1
+	fi
+
+	echo -e "\n${GREEN}Best relay: $best_relay with average ping ${best_avg} ms${NC}"
+	if [[ "$add_to_favorites" == "true" ]]; then
+		notify "⭐ MULLVAD VPN" "Favorites updated (${fav_added}/${fav_count}), fastest: ${best_relay} (${best_avg} ms)" "security-high"
 	fi
 }
 
@@ -1764,6 +2063,8 @@ show_help() {
 	echo -e "${YELLOW}Advanced Selection:${NC}"
 	echo -e "    ${GREEN}fastest${NC} [country]            Find and connect to the fastest relay (optionally in a specific country)"
 	echo -e "    ${GREEN}fastest-fav${NC} [country]       Find fastest relay, connect and add to favorites"
+	echo -e "    ${GREEN}fastest-fav-many${NC} [country] [count]  Add multiple working relays to favorites"
+	echo -e "    ${GREEN}fastest-fav-sweep${NC} <group|cc...> [count]  Sweep countries and seed favorites"
 	echo -e "    ${GREEN}owned${NC} [country]              Connect to a Mullvad-owned relay (not rented)"
 	echo -e "    ${GREEN}rented${NC} [country]             Connect to a rented relay infrastructure"
 	echo -e ""
@@ -1893,6 +2194,26 @@ main() {
 		;;
 	"fastest-fav")
 		find_fastest_relay "$2" "true"
+		;;
+	"fastest-fav-many")
+		# Usage:
+		#   fastest-fav-many [country] [count]
+		#   fastest-fav-many [count]   (global)
+		local country_arg="${2:-}"
+		local count_arg="${3:-}"
+		local count="3"
+
+		if is_number "$country_arg" && [[ -z "$count_arg" ]]; then
+			count="$country_arg"
+			country_arg=""
+		elif is_number "$count_arg"; then
+			count="$count_arg"
+		fi
+
+		OSC_MULLVAD_FASTEST_FAV_COUNT="$count" find_fastest_relay "$country_arg" "true"
+		;;
+	"fastest-fav-sweep")
+		fastest_fav_sweep "${@:2}"
 		;;
 	"owned")
 		relay=$(get_random_relay "$2" "" "owned")
