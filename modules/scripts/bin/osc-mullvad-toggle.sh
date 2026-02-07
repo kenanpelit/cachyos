@@ -55,6 +55,23 @@ resolve_osc_mullvad() {
     return 0
   fi
 
+  # In pkexec root context, prefer caller user's binary explicitly.
+  if [[ "${run_as_root:-0}" == "1" ]]; then
+    local caller_uid caller_user caller_home
+    caller_uid="${PKEXEC_UID:-}"
+    if [[ -n "${caller_uid}" ]]; then
+      caller_user="$(id -nu "${caller_uid}" 2>/dev/null || true)"
+      if [[ -n "${caller_user}" ]]; then
+        caller_home="$(getent passwd "${caller_user}" 2>/dev/null | cut -d: -f6)"
+        [[ -n "${caller_home}" ]] || caller_home="/home/${caller_user}"
+        if [[ -x "${caller_home}/.local/bin/osc-mullvad" ]]; then
+          OSC_MULLVAD_BIN="${caller_home}/.local/bin/osc-mullvad"
+          return 0
+        fi
+      fi
+    fi
+  fi
+
   OSC_MULLVAD_BIN="$(command -v osc-mullvad 2>/dev/null || true)"
   if [[ -z "${OSC_MULLVAD_BIN}" ]]; then
     OSC_MULLVAD_BIN="$HOME/.local/bin/osc-mullvad"
@@ -109,7 +126,12 @@ run_toggle() {
   [[ "${with_blocky}" == "1" ]] && cmd+=(--with-blocky)
 
   log "run: ${cmd[*]}"
-  "${cmd[@]}"
+  # Root helper should not emit desktop notifications directly.
+  if [[ "$(id -u)" -eq 0 ]]; then
+    OSC_MULLVAD_NO_NOTIFY=1 "${cmd[@]}"
+  else
+    "${cmd[@]}"
+  fi
 }
 
 preview_toggle() {
