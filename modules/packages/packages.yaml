@@ -33,6 +33,7 @@ packages:
   - satty
   - sops
   - spotify
+  - wiremix
   - snapper
   - btrfs-assistant
   - scrcpy

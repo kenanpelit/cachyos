@@ -625,6 +625,9 @@ binds {
   Ctrl+Alt+P repeat=false hotkey-overlay-title="Power Profile Toggle" {
     spawn "~/.local/bin/power-profile"
   }
+  Ctrl+Alt+M repeat=false hotkey-overlay-title="Wiremix" {
+    spawn "~/.local/bin/osc-wiremix"
+  }
 
   // ----------------------------------------------------------------------
   // Workspace focus (1..9)
