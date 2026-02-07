@@ -10,8 +10,8 @@ Environment=DMS_SCREENSHOT_EDITOR=swappy
 Environment=XDG_RUNTIME_DIR=/run/user/%U
 Environment=XDG_SESSION_TYPE=wayland
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
-Environment=QT_ICON_THEME=a-candy-beauty-icon-theme
-Environment=XDG_ICON_THEME=a-candy-beauty-icon-theme
+Environment=QT_ICON_THEME=kora
+Environment=XDG_ICON_THEME=kora
 Environment=QT_QPA_PLATFORMTHEME=gtk3
 ExecStart=dms run --session
 KillSignal=SIGINT

@@ -26,8 +26,8 @@ environment {
   GTK_USE_PORTAL "1"
   XCURSOR_THEME "catppuccin-mocha-dark-cursors"
   XCURSOR_SIZE "24"
-  XDG_ICON_THEME "candy-icons"
-  QT_ICON_THEME "candy-icons"
+  XDG_ICON_THEME "kora"
+  QT_ICON_THEME "kora"
 
   QT_QPA_PLATFORM "wayland;xcb"
   ELECTRON_OZONE_PLATFORM_HINT "auto"

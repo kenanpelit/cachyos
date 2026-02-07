@@ -1,7 +1,7 @@
 [Appearance]
 color_scheme_path=/home/kenan/.local/share/color-schemes/DankMatugen.colors
 custom_palette=true
-icon_theme=a-candy-beauty-icon-theme
+icon_theme=kora
 standard_dialogs=gtk3
 style=kvantum
 

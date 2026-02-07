@@ -1,5 +1,6 @@
 description: Packages installed manually on the system (auto-synced by dcli)
 packages:
+  - kora-icon-theme
   - accountsservice
   - adwaita-icon-theme
   - alacritty

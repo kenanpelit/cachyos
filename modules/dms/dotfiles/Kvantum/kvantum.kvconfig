@@ -7,7 +7,7 @@ polkit-kde-authentication-agent-1,hyprpolkitagent=catppuccin-mocha-mauve
 theme=catppuccin-mocha-mauve
 
 [General]
-iconTheme=a-candy-beauty-icon-theme
+iconTheme=kora
 
 [General]
 theme=catppuccin-mocha-mauve

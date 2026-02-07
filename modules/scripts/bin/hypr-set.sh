@@ -42,7 +42,7 @@ load_dconf() {
   if command -v gsettings >/dev/null 2>&1; then
     gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-mauve-standard+default' 2>/dev/null || true
-    gsettings set org.gnome.desktop.interface icon-theme 'candy-icons' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface icon-theme 'kora' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-mauve-cursors' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface font-name 'Maple Mono NF 12' 2>/dev/null || true
     gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu' 2>/dev/null || true
