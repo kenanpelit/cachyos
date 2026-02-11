@@ -13,6 +13,10 @@ dotfiles:
     target: ~/.config/systemd/user/niri-ready.service
   - source: dotfiles/systemd/user/niri-bootstrap.service
     target: ~/.config/systemd/user/niri-bootstrap.service
+  - source: dotfiles/systemd/user/niri-sticky.service
+    target: ~/.config/systemd/user/niri-sticky.service
+  - source: dotfiles/systemd/user/niri-niriswitcher.service
+    target: ~/.config/systemd/user/niri-niriswitcher.service
   - source: dotfiles/systemd/user/ppp-auto-profile.service
     target: ~/.config/systemd/user/ppp-auto-profile.service
   - source: dotfiles/systemd/user/ppp-auto-profile.timer

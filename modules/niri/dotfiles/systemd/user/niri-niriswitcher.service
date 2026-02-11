@@ -1,0 +1,19 @@
+[Unit]
+Description=Niri niriswitcher daemon
+After=graphical-session.target niri-session.target niri-ready.service
+PartOf=niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=NIRI_SOCKET
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+ConditionPathExists=/usr/bin/niriswitcher
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/niriswitcher
+Restart=on-failure
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target

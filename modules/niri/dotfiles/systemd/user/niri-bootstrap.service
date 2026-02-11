@@ -1,7 +1,8 @@
 [Unit]
-Description=Niri bootstrap (init + daemons)
-Wants=pipewire.service wireplumber.service niri-ready.service dms.service
-After=graphical-session.target niri-session.target niri-ready.service pipewire.service wireplumber.service dms.service
+Description=Niri bootstrap (init)
+Requires=niri-ready.service
+Wants=pipewire.service wireplumber.service
+After=graphical-session.target niri-session.target niri-ready.service pipewire.service wireplumber.service
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET
@@ -9,9 +10,9 @@ ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 TimeoutStartSec=60
-# Set environment variables if needed, though niri-bootstrap script handles defaults
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
+Environment=NIRI_BOOT_DELAY=1
 ExecStart=/usr/bin/bash -lc "%h/.local/bin/niri-bootstrap"
 StandardOutput=journal
 StandardError=journal
