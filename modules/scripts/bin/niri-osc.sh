@@ -74,11 +74,21 @@ niri_osc_cache_dir() {
 niri_osc_source_stamp() {
   # Fast-path stamp (mtime + size) is enough for cache invalidation.
   # Hash fallback is only used when stat format is unavailable.
+  local source_path="$NIRI_OSC_SELF"
+  if command -v readlink >/dev/null 2>&1; then
+    # Follow profile symlinks so cache invalidation tracks the real script content.
+    local resolved
+    resolved="$(readlink -f "$source_path" 2>/dev/null || true)"
+    if [[ -n "$resolved" ]]; then
+      source_path="$resolved"
+    fi
+  fi
+
   if command -v stat >/dev/null 2>&1; then
     local stamp=""
-    stamp="$(stat -c '%Y:%s' "$NIRI_OSC_SELF" 2>/dev/null || true)"
+    stamp="$(stat -c '%Y:%s' "$source_path" 2>/dev/null || true)"
     if [[ -z "$stamp" ]]; then
-      stamp="$(stat -f '%m:%z' "$NIRI_OSC_SELF" 2>/dev/null || true)"
+      stamp="$(stat -f '%m:%z' "$source_path" 2>/dev/null || true)"
     fi
     if [[ -n "$stamp" ]]; then
       printf '%s\n' "$stamp"
@@ -87,11 +97,11 @@ niri_osc_source_stamp() {
   fi
 
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "$NIRI_OSC_SELF" | awk '{print $1}'
+    sha256sum "$source_path" | awk '{print $1}'
     return 0
   fi
 
-  cksum "$NIRI_OSC_SELF" 2>/dev/null | awk '{print $1 ":" $2}'
+  cksum "$source_path" 2>/dev/null | awk '{print $1 ":" $2}'
 }
 
 niri_osc_cache_is_fresh() {
@@ -601,27 +611,21 @@ here)
       fi
     }
 
-    # Helper function to process a single app
-    process_app() {
-      local APP_ID="$1"
-      local allow_launch="${2:-1}"
-      local current_ws_id=""
-      local current_ws_name=""
-      local current_ws_idx=""
-      local window_id=""
-      local candidate_id=""
+    move_existing_window_here() {
+      local app_id="$1"
+      local focus_after="${2:-0}"
       local windows_json=""
       local workspaces_json=""
-      local app_re=""
+      local current_ws_id=""
+      local current_ws_idx=""
+      local target_id=""
 
-      if ! command -v niri >/dev/null 2>&1 || ! command -v jq >/dev/null 2>&1; then
-        return 1
-      fi
+      command -v niri >/dev/null 2>&1 || return 1
+      command -v jq >/dev/null 2>&1 || return 1
 
       windows_json="$(niri msg -j windows 2>/dev/null || true)"
       workspaces_json="$(niri msg -j workspaces 2>/dev/null || true)"
 
-      # 0) Resolve current workspace (id/name/idx) robustly.
       current_ws_id="$(
         jq -n \
           --argjson wins "${windows_json:-[]}" \
@@ -633,75 +637,100 @@ here)
             // empty
           ' 2>/dev/null || true
       )"
-      if [[ -n "$current_ws_id" ]]; then
-        read -r current_ws_name current_ws_idx < <(
-          jq -n --argjson wss "${workspaces_json:-[]}" --arg id "$current_ws_id" -r '
-            first(
-              $wss[]?
-              | select(((.id // "") | tostring) == $id)
-              | [(.name // ""), ((.idx // empty) | tostring)]
-              | @tsv
-            ) // "\t"
-          ' 2>/dev/null
-        )
+      [[ -n "$current_ws_id" ]] || return 1
+
+      current_ws_idx="$(
+        echo "$workspaces_json" \
+          | jq -r --arg ws "$current_ws_id" \
+            'first(.[] | select((.id | tostring) == $ws) | .idx) // empty' \
+              2>/dev/null || true
+      )"
+      [[ -n "$current_ws_idx" ]] || return 1
+
+      target_id="$(
+        echo "$windows_json" \
+          | jq -r --arg app "$app_id" --arg ws "$current_ws_id" \
+            'first(.[] | select((.app_id // "") == $app and ((.workspace_id | tostring) != $ws)) | .id) // empty' \
+              2>/dev/null || true
+      )"
+      [[ -n "$target_id" ]] || return 1
+
+      niri msg action move-window-to-workspace --window-id "$target_id" --focus false "$current_ws_idx" >/dev/null 2>&1 || return 1
+      if [[ "$focus_after" == "1" ]]; then
+        niri msg action focus-window --id "$target_id" >/dev/null 2>&1 || true
       fi
+      return 0
+    }
 
-      # Escape app-id for exact regex match.
-      app_re="$(printf '%s' "$APP_ID" | sed -E 's/[][^$.|?*+(){}\\]/\\&/g')"
+    # Helper function to process a single app
+    process_app() {
+      local APP_ID="$1"
+      local allow_launch="${2:-1}"
+      local focus_after="${3:-1}"
+      local any_window_id=""
+      local current_ws_id=""
+      local window_id=""
+      local windows_json=""
+      local workspaces_json=""
 
-      # 1) If the app already exists on current workspace, just focus it.
-      if [[ -n "$current_ws_id" ]]; then
-        window_id="$(
-          jq -r --arg app_re "^${app_re}$" --arg ws "$current_ws_id" '
-            first(
-              .[]
-              | select((.app_id // "") | test($app_re))
-              | select(((.workspace_id // "") | tostring) == $ws)
-              | .id
-            ) // empty
-          ' <<<"${windows_json:-[]}" 2>/dev/null || true
+      if command -v niri >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+        windows_json="$(niri msg -j windows 2>/dev/null || true)"
+        workspaces_json="$(niri msg -j workspaces 2>/dev/null || true)"
+
+        any_window_id="$(
+          echo "$windows_json" \
+            | jq -r --arg app "$APP_ID" \
+              'first(.[] | select((.app_id // "") == $app) | .id) // empty' \
+                2>/dev/null || true
         )"
-        if [[ -n "$window_id" ]]; then
-          niri msg action focus-window --id "$window_id" >/dev/null 2>&1 || true
-          send_notify "<b>$APP_ID</b> focused."
-          return 0
-        fi
       fi
 
-      # --- 1. Try to pull existing window (niri-osc flow) ---
-      if command -v niri-osc >/dev/null 2>&1; then
-        if niri-osc flow move-to-current-workspace --app-id "^${APP_ID}$" --focus >/dev/null 2>&1; then
+      # --- 1. If a window exists, NEVER launch. Move/focus only. ---
+      if [[ -n "$any_window_id" ]]; then
+        if move_existing_window_here "$APP_ID" "$focus_after"; then
           send_notify "<b>$APP_ID</b> moved to current workspace."
           return 0
         fi
-      fi
 
-      # --- 2. Deterministic fallback: find any matching window and move it here ---
-      candidate_id="$(
-        jq -r --arg app_re "^${app_re}$" --arg ws "${current_ws_id:-}" '
-          first(
-            .[]
-            | select((.app_id // "") | test($app_re))
-            | select($ws == "" or ((.workspace_id // "") | tostring) != $ws)
-            | .id
-          ) // empty
-        ' <<<"${windows_json:-[]}" 2>/dev/null || true
-      )"
+        # If move failed, try focusing an existing one instead of launching a duplicate.
+        current_ws_id="$(
+          jq -n \
+            --argjson wins "${windows_json:-[]}" \
+            --argjson wss "${workspaces_json:-[]}" \
+            -r '
+              first($wins[]? | select(.is_focused == true and .workspace_id != null) | .workspace_id)
+              // first($wss[]? | select(.is_focused == true) | .id)
+              // first($wss[]? | select(.is_active == true) | .id)
+              // empty
+            ' 2>/dev/null || true
+        )"
+        if [[ -n "$current_ws_id" ]]; then
+          window_id="$(
+            echo "$windows_json" \
+              | jq -r --arg app "$APP_ID" --arg ws "$current_ws_id" \
+                'first(.[] | select(.app_id == $app and ((.workspace_id|tostring) == $ws)) | .id) // empty' \
+                  2>/dev/null || true
+          )"
+        fi
 
-      if [[ -n "$candidate_id" && -n "$current_ws_id" ]]; then
-        if [[ -n "$current_ws_name" ]]; then
-          niri msg action move-window-to-workspace --window-id "$candidate_id" --focus false "$current_ws_name" >/dev/null 2>&1 || true
+        if [[ -n "$window_id" ]]; then
+          if [[ "$focus_after" == "1" ]]; then
+            niri msg action focus-window --id "$window_id" >/dev/null 2>&1 || true
+            send_notify "<b>$APP_ID</b> focused."
+          fi
+          return 0
         fi
-        if [[ -n "$current_ws_idx" ]]; then
-          niri msg action move-window-to-workspace --window-id "$candidate_id" --focus false "$current_ws_idx" >/dev/null 2>&1 || true
+
+        if [[ "$focus_after" == "1" ]]; then
+          niri msg action focus-window --id "$any_window_id" >/dev/null 2>&1 || true
+          send_notify "<b>$APP_ID</b> exists; focused existing window."
+        else
+          send_notify "<b>$APP_ID</b> exists; skipped launch."
         fi
-        niri msg action move-window-to-workspace --window-id "$candidate_id" --focus false "$current_ws_id" >/dev/null 2>&1 || true
-        niri msg action focus-window --id "$candidate_id" >/dev/null 2>&1 || true
-        send_notify "<b>$APP_ID</b> moved to current workspace."
         return 0
       fi
 
-      # --- 3. Launching logic (Window not found) ---
+      # --- 2. Launching logic (only when no matching window exists) ---
       if [[ "$allow_launch" != "1" ]]; then
         return 0
       fi
@@ -748,17 +777,16 @@ here)
 
       for app in "${APPS[@]}"; do
         [[ "$app" == "Kenp" ]] && continue
-        process_app "$app" 0 &
+        process_app "$app" 0 0
       done
-      wait
 
       # Explicit workflow: always end focused on Kenp.
-      process_app "Kenp" 0
+      process_app "Kenp" 0 1
 
       send_notify "All specified apps gathered here."
     else
       # Process single app
-      process_app "$APP_ID"
+      process_app "$APP_ID" 1 1
     fi
   )
   ;;
@@ -1743,17 +1771,25 @@ EOF
     declare -a RULE_TITLE_PATTERNS=()
 
     resolve_workspace_ref() {
-      local want_name="${1:-}"
-      [[ -n "$want_name" ]] || return 1
+      local want_ref="${1:-}"
+      [[ -n "$want_ref" ]] || return 1
 
       [[ -n "$WORKSPACES_JSON" ]] || WORKSPACES_JSON="$("${NIRI[@]}" -j workspaces 2>/dev/null || echo '[]')"
-      jq -n --argjson wss "${WORKSPACES_JSON:-[]}" --arg want "$want_name" -r '
-        first(
-          $wss[]?
-          | select(((.name // "") == $want) or ((.idx | tostring) == $want) or ((.id | tostring) == $want))
-          | [(.output // ""), ((.idx // empty) | tostring), ((.id // empty) | tostring), (.name // "")]
-          | @tsv
-        ) // empty
+      jq -n --argjson wss "${WORKSPACES_JSON:-[]}" --arg want "$want_ref" -r '
+        def row($ws):
+          [
+            ($ws.output // ""),
+            (($ws.idx // empty) | tostring),
+            (($ws.id // empty) | tostring),
+            (($ws.name // ""))
+          ] | @tsv;
+
+        (
+          # In multi-output layouts idx can repeat; prefer exact name first.
+          first($wss[]? | select((.name // "") == $want))
+          // first($wss[]? | select((.idx | tostring) == $want))
+        ) as $ws
+        | if $ws == null then empty else row($ws) end
       ' 2>/dev/null
     }
 
@@ -1772,6 +1808,21 @@ EOF
       ws_id="$(jq -r '.workspace_id // .workspace.id // empty' <<<"$win_json")"
       ws_out="$(jq -r '.output // .output_name // .workspace.output // .workspace_output // empty' <<<"$win_json")"
       ws_idx="$(jq -r '.workspace.index // .workspace_idx // empty' <<<"$win_json")"
+
+      # Newer niri window JSON usually has workspace_id only; enrich from workspaces.
+      if [[ -n "$ws_id" ]] && { [[ -z "$ws_name" ]] || [[ -z "$ws_out" ]] || [[ -z "$ws_idx" ]]; }; then
+        [[ -n "$WORKSPACES_JSON" ]] || WORKSPACES_JSON="$("${NIRI[@]}" -j workspaces 2>/dev/null || echo '[]')"
+        read -r ws_name ws_out ws_idx < <(
+          jq -n --argjson wss "${WORKSPACES_JSON:-[]}" --arg wid "$ws_id" -r '
+            first(
+              $wss[]?
+              | select((.id | tostring) == $wid)
+              | [(.name // ""), (.output // ""), ((.idx // empty) | tostring)]
+              | @tsv
+            ) // empty
+          ' 2>/dev/null || true
+        )
+      fi
 
       printf 'name=%s id=%s out=%s idx=%s\n' "${ws_name:-?}" "${ws_id:-?}" "${ws_out:-?}" "${ws_idx:-?}"
     }
@@ -1858,7 +1909,7 @@ EOF
     planned=0
     failed=0
 
-    while IFS=$'\t' read -r id app_id title current_ws_name; do
+    while IFS=$'\t' read -r id app_id title current_ws_name current_ws_id; do
       [[ -n "$id" ]] || continue
 
       # Never move temporary screen-share picker windows.
@@ -1878,19 +1929,23 @@ EOF
 
       target_out=""
       target_idx=""
-      target_id=""
-      target_name=""
-      if ! read -r target_out target_idx target_id target_name < <(resolve_workspace_ref "$target_ws"); then
+      target_ws_id=""
+      target_ws_name=""
+      if ! read -r target_out target_idx target_ws_id target_ws_name < <(resolve_workspace_ref "$target_ws"); then
         echo " !! cannot resolve workspace name '$target_ws' to output/index (niri msg workspaces)" >&2
         continue
       fi
 
-      if [[ -n "$current_ws_name" && "$current_ws_name" == "$target_ws" ]]; then
-        [[ "$VERBOSE" -eq 1 ]] && echo " == $id: '$app_id' already on ws:$target_ws (by name)"
+      if [[ -n "$current_ws_id" && -n "$target_ws_id" && "$current_ws_id" == "$target_ws_id" ]]; then
+        [[ "$VERBOSE" -eq 1 ]] && echo " == $id: '$app_id' already on ws:$target_ws (id:$target_ws_id)"
+        continue
+      fi
+      if [[ -n "$current_ws_name" && -n "$target_ws_name" && "$current_ws_name" == "$target_ws_name" ]]; then
+        [[ "$VERBOSE" -eq 1 ]] && echo " == $id: '$app_id' already on ws:$target_ws (name:$target_ws_name)"
         continue
       fi
 
-      echo " -> $id: '$app_id' -> ws:$target_ws (output:$target_out idx:$target_idx id:${target_id:-?})"
+      echo " -> $id: '$app_id' -> ws:$target_ws (resolved: name:${target_ws_name:-?} id:${target_ws_id:-?} output:$target_out idx:$target_idx)"
       planned=$((planned + 1))
       if [[ "$DRY_RUN" -eq 1 ]]; then
         continue
@@ -1902,19 +1957,8 @@ EOF
         continue
       fi
 
-      "${NIRI[@]}" action focus-monitor "$target_out" >/dev/null 2>&1 || true
-
-      move_ok=0
-      if "${NIRI[@]}" action move-window-to-workspace --window-id "$id" --focus false "$target_ws" >/dev/null 2>&1; then
-        move_ok=1
-      elif [[ -n "$target_id" ]] && "${NIRI[@]}" action move-window-to-workspace --window-id "$id" --focus false "$target_id" >/dev/null 2>&1; then
-        move_ok=1
-      elif [[ -n "$target_idx" ]] && "${NIRI[@]}" action move-window-to-workspace --window-id "$id" --focus false "$target_idx" >/dev/null 2>&1; then
-        move_ok=1
-      fi
-
-      if [[ "$move_ok" -ne 1 ]]; then
-        echo " !! move-window-to-workspace failed for id=$id -> ws:$target_ws (out:$target_out idx:$target_idx id:${target_id:-?})" >&2
+      if ! "${NIRI[@]}" action move-window-to-workspace --window-id "$id" --focus false "$target_idx" >/dev/null 2>&1; then
+        echo " !! move-window-to-workspace failed for id=$id -> ws:$target_ws (out:$target_out idx:$target_idx)" >&2
         failed=$((failed + 1))
         continue
       fi
@@ -1925,15 +1969,13 @@ EOF
         after_name="$(jq -r '.workspace.name // .workspace_name // empty' <<<"$after")"
         after_id="$(jq -r '.workspace_id // .workspace.id // empty' <<<"$after")"
 
-        if [[ -n "$after_name" && "$after_name" == "$target_ws" ]]; then
+        if [[ -n "$target_ws_id" && -n "$after_id" && "$after_id" == "$target_ws_id" ]]; then
           [[ "$VERBOSE" -eq 1 ]] && echo "    ok: $(get_window_loc "$after")"
         else
-          if [[ -n "$target_id" && -n "$after_id" && "$after_id" == "$target_id" ]]; then
-            [[ "$VERBOSE" -eq 1 ]] && echo "    ok (by workspace id): $(get_window_loc "$after")"
-          elif [[ -n "$after_id" && "$after_id" == "$target_idx" ]]; then
-            [[ "$VERBOSE" -eq 1 ]] && echo "    ok (by idx, output unknown): $(get_window_loc "$after")"
+          if [[ -n "$after_name" && -n "$target_ws_name" && "$after_name" == "$target_ws_name" ]]; then
+            [[ "$VERBOSE" -eq 1 ]] && echo "    ok (by name): $(get_window_loc "$after")"
           else
-            echo " !! move did not land on ws:$target_ws for id=$id ($app_id), now: $(get_window_loc "$after")" >&2
+            echo " !! move did not land on ws:$target_ws for id=$id ($app_id), now: $(get_window_loc "$after"), expected-id:${target_ws_id:-?}" >&2
             failed=$((failed + 1))
           fi
         fi
@@ -1945,7 +1987,8 @@ EOF
             (.id // empty | tostring),
             (.app_id // ""),
             (.title // ""),
-            (.workspace.name // .workspace_name // "")
+            (.workspace.name // .workspace_name // ""),
+            ((.workspace_id // .workspace.id // empty) | tostring)
           ]
         | @tsv
       ' <<<"$windows_json" 2>/dev/null || true
@@ -1954,9 +1997,9 @@ EOF
     if [[ -n "$FOCUS_OVERRIDE" ]]; then
       if [[ "$FOCUS_OVERRIDE" =~ ^ws:(.+)$ ]]; then
         focus_ws_name="${BASH_REMATCH[1]}"
-        if read -r focus_out focus_idx focus_id focus_name < <(resolve_workspace_ref "$focus_ws_name"); then
+        if read -r focus_out focus_idx _focus_ws_id _focus_ws_name < <(resolve_workspace_ref "$focus_ws_name"); then
           "${NIRI[@]}" action focus-monitor "$focus_out" >/dev/null 2>&1 || true
-          "${NIRI[@]}" action focus-workspace "$focus_ws_name" >/dev/null 2>&1 || true
+          "${NIRI[@]}" action focus-workspace "$focus_idx" >/dev/null 2>&1 || true
         else
           "${NIRI[@]}" action focus-workspace "$focus_ws_name" >/dev/null 2>&1 || true
         fi
@@ -1972,12 +2015,10 @@ EOF
       home_ws="$(target_for_app_id "Kenp" "" 2>/dev/null || true)"
       [[ -n "${home_ws:-}" ]] || home_ws="1"
 
-      local home_out="" home_idx="" home_id="" home_name=""
-      if ! read -r home_out home_idx home_id home_name < <(resolve_workspace_ref "$home_ws"); then
+      local home_out="" home_idx="" _home_id="" _home_name=""
+      if ! read -r home_out home_idx _home_id _home_name < <(resolve_workspace_ref "$home_ws"); then
         home_out=""
         home_idx=""
-        home_id=""
-        home_name=""
       fi
 
       if command -v jq >/dev/null 2>&1; then
@@ -2005,10 +2046,10 @@ EOF
       fi
 
       # Ensure Kenp ends up on its home workspace (default: "1"), then focus it.
-      if [[ -n "${home_out:-}" ]]; then
+      if [[ -n "${home_out:-}" && -n "${home_idx:-}" ]]; then
         "${NIRI[@]}" action move-window-to-monitor --id "$kenp_id" "$home_out" >/dev/null 2>&1 || true
         "${NIRI[@]}" action focus-monitor "$home_out" >/dev/null 2>&1 || true
-        "${NIRI[@]}" action move-window-to-workspace --window-id "$kenp_id" --focus false "$home_ws" >/dev/null 2>&1 || true
+        "${NIRI[@]}" action move-window-to-workspace --window-id "$kenp_id" --focus false "$home_idx" >/dev/null 2>&1 || true
       fi
       "${NIRI[@]}" action focus-window "$kenp_id" >/dev/null 2>&1 || true
       return 0
@@ -3234,19 +3275,15 @@ cmd_focus_or_spawn() {
 }
 
 move_one_to_current_workspace() {
-  local windows_json workspaces_json current_workspace current_workspace_idx current_workspace_name target_id window_workspace after_workspace
+  local windows_json workspaces_json current_workspace current_workspace_idx target_id window_workspace
   local -a ids
 
   windows_json="$(niri_windows_json)"
   workspaces_json="$(niri_workspaces_json)"
   current_workspace="$(current_workspace_id "$windows_json" "$workspaces_json")"
   current_workspace_idx="$(current_workspace_index "$windows_json" "$workspaces_json")"
-  current_workspace_name="$(
-    echo "$workspaces_json" | jq -r --arg id "$current_workspace" '
-      first(.[] | select(((.id // "") | tostring) == $id) | .name) // empty
-    ' 2>/dev/null || true
-  )"
   [[ -n "$current_workspace" ]] || return 1
+  [[ -n "$current_workspace_idx" ]] || return 1
 
   mapfile -t ids < <(matched_window_ids "$windows_json" "$workspaces_json")
   [[ "${#ids[@]}" -gt 0 ]] || return 1
@@ -3262,19 +3299,7 @@ move_one_to_current_workspace() {
   done
   [[ -n "$target_id" ]] || return 1
 
-  move_ok=0
-  if [[ -n "$current_workspace_name" ]] && niri msg action move-window-to-workspace --window-id "$target_id" --focus false "$current_workspace_name" >/dev/null 2>&1; then
-    move_ok=1
-  elif niri msg action move-window-to-workspace --window-id "$target_id" --focus false "$current_workspace" >/dev/null 2>&1; then
-    move_ok=1
-  elif [[ -n "$current_workspace_idx" ]] && niri msg action move-window-to-workspace --window-id "$target_id" --focus false "$current_workspace_idx" >/dev/null 2>&1; then
-    move_ok=1
-  fi
-  [[ "$move_ok" -eq 1 ]] || return 1
-
-  after_workspace="$(window_workspace_id "$(niri_windows_json)" "$target_id")"
-  [[ "$after_workspace" == "$current_workspace" ]] || return 1
-
+  niri msg action move-window-to-workspace --window-id "$target_id" --focus false "$current_workspace_idx" >/dev/null
   if [[ "$MATCH_FOCUS" -eq 1 ]]; then
     niri msg action focus-window --id "$target_id" >/dev/null 2>&1 || true
   fi
