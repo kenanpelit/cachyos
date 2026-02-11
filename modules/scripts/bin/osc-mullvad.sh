@@ -62,6 +62,16 @@ SLOT_REVOKE_OTHERS="${OSC_MULLVAD_REVOKE_OTHERS:-true}"
 SLOT_DRY_RUN="false"
 SLOT_ACCOUNT_NUMBER=""
 
+# Keybind/systemd-launched shells may not inherit shell rc exports.
+# Auto-detect common pass store locations when PASSWORD_STORE_DIR is unset.
+if [[ -z "${PASSWORD_STORE_DIR:-}" ]]; then
+	if [[ -f "$HOME/.pass/.gpg-id" ]]; then
+		export PASSWORD_STORE_DIR="$HOME/.pass"
+	elif [[ -f "$HOME/.password-store/.gpg-id" ]]; then
+		export PASSWORD_STORE_DIR="$HOME/.password-store"
+	fi
+fi
+
 # Create directories if they don't exist
 mkdir -p "$LOG_DIR"
 mkdir -p "$CONFIG_DIR"
@@ -2310,8 +2320,6 @@ main() {
 	esac
 }
 
-# Execute main function with all arguments
+# Execute main function and propagate its real exit status.
 main "$@"
-
-# Exit successfully
-exit 0
+exit $?
