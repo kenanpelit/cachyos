@@ -116,7 +116,6 @@ cleanup_legacy_bins() {
     niri-set
     niri-flow
     niri-keybinds
-    niri-start
   )
 
   local b p
