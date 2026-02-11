@@ -310,14 +310,14 @@ binds {
   Mod+Alt+O  repeat=false hotkey-overlay-title="Overview (Niri)" { toggle-overview; }
   Mod+Ctrl+W hotkey-overlay-title="Toggle Tabbed Mode" { toggle-column-tabbed-display; }
 
-  Mod+G hotkey-overlay-title="Toggle Float/Tile" { spawn "niri-osc" "set" "float"; }
+  Mod+G hotkey-overlay-title="Toggle Float/Tile" { spawn "~/.local/bin/niri-osc" "set" "float"; }
   Mod+Ctrl+BackSpace hotkey-overlay-title="Focus Float/Tile" { switch-focus-between-floating-and-tiling; }
 
   Mod+Ctrl+Shift+F hotkey-overlay-title="Expand Column (Fill)" { expand-column-to-available-width;}
   Mod+Ctrl+Shift+C hotkey-overlay-title="Center Visible Columns" { center-visible-columns;}
 
-  Mod+Z repeat=false hotkey-overlay-title="Zen Mode" { spawn "niri-osc" "set" "zen"; }
-  Mod+P repeat=false hotkey-overlay-title="Pin Window (PiP)" { spawn "niri-osc" "set" "pin"; }
+  Mod+Z repeat=false hotkey-overlay-title="Zen Mode" { spawn "~/.local/bin/niri-osc" "set" "zen"; }
+  Mod+P repeat=false hotkey-overlay-title="Pin Window (PiP)" { spawn "~/.local/bin/niri-osc" "set" "pin"; }
 
   // Consume / Expel (Window Grouping)
   Mod+Ctrl+Left  hotkey-overlay-title="Consume/Expel Left"  { consume-or-expel-window-left; }
@@ -334,24 +334,24 @@ binds {
   // Scratchpad (niri-osc flow)
   // ----------------------------------------------------------------------
   Mod+BackSpace repeat=false hotkey-overlay-title="Scratch: Toggle" {
-    spawn "niri-osc" "flow" "scratchpad-toggle"
+    spawn "~/.local/bin/niri-osc" "flow" "scratchpad-toggle"
   }
   Alt+BackSpace repeat=false hotkey-overlay-title="Scratch: Cycle" {
-    spawn "niri-osc" "flow" "scratchpad-show"
+    spawn "~/.local/bin/niri-osc" "flow" "scratchpad-show"
   }
   Mod+Alt+BackSpace repeat=false hotkey-overlay-title="Scratch: Show All" {
-    spawn "niri-osc" "flow" "scratchpad-show-all"
+    spawn "~/.local/bin/niri-osc" "flow" "scratchpad-show-all"
   }
 
   // Marks (niri-osc flow)
   Mod+Alt+G repeat=false hotkey-overlay-title="Mark: Toggle Default" {
-    spawn "niri-osc" "flow" "toggle-mark"
+    spawn "~/.local/bin/niri-osc" "flow" "toggle-mark"
   }
   Mod+Alt+Shift+1 repeat=false hotkey-overlay-title="Mark: Set Term" {
-    spawn "niri-osc" "flow" "toggle-mark" "term"
+    spawn "~/.local/bin/niri-osc" "flow" "toggle-mark" "term"
   }
   Mod+Alt+1 repeat=false hotkey-overlay-title="Mark: Go Term" {
-    spawn "niri-osc" "flow" "focus-marked" "term"
+    spawn "~/.local/bin/niri-osc" "flow" "focus-marked" "term"
   }
 
   // ----------------------------------------------------------------------
@@ -487,27 +487,27 @@ binds {
   // Custom scripts (Audio/Media)
   // ----------------------------------------------------------------------
   Alt+A repeat=false hotkey-overlay-title="Switch Audio Output" {
-    spawn "osc-soundctl" "switch"
+    spawn "~/.local/bin/osc-soundctl" "switch"
   }
   Alt+Ctrl+A repeat=false hotkey-overlay-title="Switch Mic Input" {
-    spawn "osc-soundctl" "switch-mic"
+    spawn "~/.local/bin/osc-soundctl" "switch-mic"
   }
 
   Alt+E repeat=false hotkey-overlay-title="Spotify Toggle" {
-    spawn "osc-spotify"
+    spawn "~/.local/bin/osc-spotify"
   }
   Alt+Ctrl+N repeat=false hotkey-overlay-title="Spotify Next" {
-    spawn "osc-spotify" "next"
+    spawn "~/.local/bin/osc-spotify" "next"
   }
   Alt+Ctrl+B repeat=false hotkey-overlay-title="Spotify Prev" {
-    spawn "osc-spotify" "prev"
+    spawn "~/.local/bin/osc-spotify" "prev"
   }
 
   Alt+Ctrl+E repeat=false hotkey-overlay-title="MPC Toggle" {
-    spawn "mpc-control" "toggle"
+    spawn "~/.local/bin/mpc-control" "toggle"
   }
   Alt+I repeat=false hotkey-overlay-title="VLC Toggle" {
-    spawn "vlc-toggle"
+    spawn "~/.local/bin/vlc-toggle"
   }
 
   // ----------------------------------------------------------------------
@@ -523,13 +523,13 @@ binds {
   }
 
   F10 repeat=false hotkey-overlay-title="Bluetooth Toggle" {
-    spawn "bluetooth_toggle"
+    spawn "~/.local/bin/bluetooth_toggle"
   }
   Alt+F12 repeat=false hotkey-overlay-title="VPN Toggle" {
-    spawn "osc-mullvad-toggle"
+    spawn "~/.local/bin/osc-mullvad-toggle"
   }
   Mod+Alt+F12 repeat=false hotkey-overlay-title="VPN Slot Recycle" {
-    spawn "osc-mullvad-slot"
+    spawn "~/.local/bin/osc-mullvad-slot"
   }
 
 
@@ -551,7 +551,7 @@ binds {
     spawn "niri" "msg" "action" "load-config-file"
   }
   Mod+Ctrl+Alt+S repeat=false hotkey-overlay-title="Session Refresh" {
-    spawn "niri-osc" "set" "env"
+    spawn "~/.local/bin/niri-osc" "set" "env"
   }
 
   Mod+Ctrl+Alt+D repeat=false hotkey-overlay-title="Session Doctor" {
@@ -567,30 +567,30 @@ binds {
   // Custom apps
   // ----------------------------------------------------------------------
   Alt+T repeat=false hotkey-overlay-title="KKENP Start" {
-    spawn "start-kkenp"
+    spawn "~/.local/bin/start-kkenp"
   }
   Alt+N repeat=false hotkey-overlay-title="Notes (Anotes)" {
-    spawn "anotes"
+    spawn "~/.local/bin/anotes"
   }
 
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" {
-    spawn "niri-start"
+    spawn "~/.local/bin/niri-start"
   }
 
   Mod+Return repeat=false hotkey-overlay-title="Dropdown Terminal" {
-    spawn "niri-osc" "drop" "kitty" "--class" "dropdown-terminal"
+    spawn "~/.local/bin/niri-osc" "drop" "kitty" "--class" "dropdown-terminal"
   }
 
   Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" {
-    spawn "rofi-launcher"
+    spawn "~/.local/bin/rofi-launcher"
   }
 
   Mod+Ctrl+Space repeat=false hotkey-overlay-title="Walk Launcher" {
-    spawn "walk"
+    spawn "~/.local/bin/walk"
   }
 
   Mod+Ctrl+S repeat=false hotkey-overlay-title="Sticky Toggle" {
-    spawn "niri-osc" "sticky" "stage" "toggle-active"
+    spawn "~/.local/bin/niri-osc" "sticky" "stage" "toggle-active"
   }
 
   Mod+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Nemo)" {
@@ -606,28 +606,28 @@ binds {
 
   // MPV manager helpers (your scripts live in ~/.local/bin)
   Alt+U repeat=false hotkey-overlay-title="MPV Playback" {
-    spawn "mpv-manager" "playback"
+    spawn "~/.local/bin/mpv-manager" "playback"
   }
   Mod+Ctrl+Y repeat=false hotkey-overlay-title="MPV Play YouTube" {
-    spawn "mpv-manager" "play-yt"
+    spawn "~/.local/bin/mpv-manager" "play-yt"
   }
   Mod+Ctrl+F9 repeat=false hotkey-overlay-title="MPV Stick" {
-    spawn "mpv-manager" "stick"
+    spawn "~/.local/bin/mpv-manager" "stick"
   }
   Mod+Ctrl+F10 repeat=false hotkey-overlay-title="MPV Move" {
-    spawn "mpv-manager" "move"
+    spawn "~/.local/bin/mpv-manager" "move"
   }
   Mod+Ctrl+F11 repeat=false hotkey-overlay-title="MPV Save YT" {
-    spawn "mpv-manager" "save-yt"
+    spawn "~/.local/bin/mpv-manager" "save-yt"
   }
   Mod+Ctrl+F12 repeat=false hotkey-overlay-title="MPV Wallpaper" {
-    spawn "mpv-manager" "wallpaper"
+    spawn "~/.local/bin/mpv-manager" "wallpaper"
   }
   Ctrl+Alt+P repeat=false hotkey-overlay-title="Power Profile Toggle" {
-    spawn "power-profile"
+    spawn "~/.local/bin/power-profile"
   }
   Ctrl+Alt+M repeat=false hotkey-overlay-title="Wiremix" {
-    spawn "osc-wiremix"
+    spawn "~/.local/bin/osc-wiremix"
   }
 
   // ----------------------------------------------------------------------
