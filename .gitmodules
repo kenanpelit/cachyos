@@ -10,3 +10,123 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/powerOptions"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/powerOptions
 	url = https://github.com/Nazahim/PowerOptions
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/appShortcut"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/appShortcut
+	url = https://github.com/oabragh/AppShortcut
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dmsPass"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/dmsPass
+	url = https://github.com/LouisKottmann/dms-pass
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/commandRunner"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/commandRunner
+	url = https://github.com/devnullvoid/dms-command-runner
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/desktopCommand"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/desktopCommand
+	url = https://github.com/yayuuu/desktopCommand
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/displayManager"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/displayManager
+	url = https://github.com/felri/display-manager-plugin-niri-dank-linux
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/displayMirror"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/displayMirror
+	url = https://github.com/jfchenier/dms-display-mirror
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dmsLenovoBatterySettings"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/dmsLenovoBatterySettings
+	url = https://github.com/neoscaler/dms-lenovo-battery-settings
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dockerManager"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/dockerManager
+	url = https://github.com/LuckShiba/DmsDockerManager
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/easyEffects"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/easyEffects
+	url = https://github.com/jonkristian/dms-easyeffects
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/emojiLauncher"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/emojiLauncher
+	url = https://github.com/devnullvoid/dms-emoji-launcher
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/hyprlandSubmap"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/hyprlandSubmap
+	url = https://github.com/mesteryui/DMS_HyprlandSubmap
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/linuxWallpaperEngine"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/linuxWallpaperEngine
+	url = https://github.com/sgtaziz/dms-wallpaperengine
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/mediaPlayer"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/mediaPlayer
+	url = https://github.com/arrifat346afs/mediaPlayer
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/niriWindows"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/niriWindows
+	url = https://github.com/rochacbruno/DankNiriWindows
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/powerUsagePlugin"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/powerUsagePlugin
+	url = https://github.com/Daniel-42-z/dms-power-usage
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/sathiAi"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/sathiAi
+	url = https://github.com/ss44/sathi.ai
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/wallpaperBing"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/wallpaperBing
+	url = https://github.com/max72bra/DankPluginBingWallpaper
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/wallpaperShufflerPlugin"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/wallpaperShufflerPlugin
+	url = https://github.com/Daniel-42-z/dms-wallpaper-shuffler
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/webSearch"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/webSearch
+	url = https://github.com/devnullvoid/dms-web-search
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-continuum"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-continuum
+	url = https://git::@github.com/tmux-plugins/tmux-continuum
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-copycat"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-copycat
+	url = https://git::@github.com/tmux-plugins/tmux-copycat
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fuzzback"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-fuzzback
+	url = https://git::@github.com/roosta/tmux-fuzzback
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fzf"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-fzf
+	url = https://git::@github.com/sainnhe/tmux-fzf
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url
+	url = https://git::@github.com/kenanpelit/tmux-fzf-url
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-kripto"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-kripto
+	url = https://git::@github.com/vascomfnunes/tmux-kripto
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-nav-master"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-nav-master
+	url = https://git::@github.com/TheSast/tmux-nav-master
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-nerd-font-window-name"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-nerd-font-window-name
+	url = https://git::@github.com/joshmedeski/tmux-nerd-font-window-name
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-online-status"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-online-status
+	url = https://git::@github.com/tmux-plugins/tmux-online-status
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-open"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-open
+	url = https://git::@github.com/tmux-plugins/tmux-open
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-plugin-playerctl"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-plugin-playerctl
+	url = https://git::@github.com/richin13/tmux-plugin-playerctl
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-prefix-highlight"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-prefix-highlight
+	url = https://git::@github.com/tmux-plugins/tmux-prefix-highlight
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-resurrect"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-resurrect
+	url = https://git::@github.com/tmux-plugins/tmux-resurrect
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-sensible"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-sensible
+	url = https://git::@github.com/tmux-plugins/tmux-sensible
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-sessionist"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-sessionist
+	url = https://git::@github.com/tmux-plugins/tmux-sessionist
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-sessionx"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-sessionx
+	url = https://git::@github.com/omerxx/tmux-sessionx
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-ssh-status"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-ssh-status
+	url = https://git::@github.com/kenanpelit/tmux-ssh-status
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-thumbs"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-thumbs
+	url = https://git::@github.com/fcsonline/tmux-thumbs
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-update-display"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-update-display
+	url = https://git::@github.com/lljbash/tmux-update-display
+[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-yank"]
+	path = modules/tmux/dotfiles/tmux/plugins/tmux-yank
+	url = https://git::@github.com/tmux-plugins/tmux-yank
+[submodule "modules/tmux/dotfiles/tmux/plugins/tpm"]
+	path = modules/tmux/dotfiles/tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm
