@@ -1,10 +1,61 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+log_error() {
+  local message="$1"
+  echo "$message" >&2
+  if command -v logger >/dev/null 2>&1; then
+    logger -t fusuma-helper -- "$message"
+  fi
+}
+
+detect_compositor() {
+  case "${FUSUMA_COMPOSITOR:-}" in
+    niri|hyprland)
+      echo "${FUSUMA_COMPOSITOR}"
+      return 0
+      ;;
+  esac
+
+  if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+    echo "niri"
+    return 0
+  fi
+
+  case "${XDG_CURRENT_DESKTOP:-}${XDG_SESSION_DESKTOP:-}" in
+    *niri*|*Niri*)
+      echo "niri"
+      return 0
+      ;;
+    *Hyprland*|*hyprland*)
+      echo "hyprland"
+      return 0
+      ;;
+  esac
+
+  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    local runtime_dir hypr_socket
+    runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    hypr_socket="$runtime_dir/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket.sock"
+    if [[ -S "$hypr_socket" ]]; then
+      echo "hyprland"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 mode="${1:-toggle}"
 shift || true
 
-if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+compositor="$(detect_compositor || true)"
+
+if [[ "$compositor" == "hyprland" ]]; then
+  if ! command -v hyprctl >/dev/null 2>&1; then
+    log_error "fusuma-fullscreen: hyprctl not found in PATH"
+    exit 127
+  fi
   case "$mode" in
     in|on|1) exec hyprctl dispatch fullscreen 1 ;;
     out|off|0) exec hyprctl dispatch fullscreen 0 ;;
@@ -13,26 +64,19 @@ if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
   esac
 fi
 
-if [[ -n "${NIRI_SOCKET:-}" ]]; then
+if [[ "$compositor" == "niri" ]]; then
+  case "$mode" in
+    out|off|0)
+      # Niri fullscreen action is a toggle; avoid accidental unpaired toggles.
+      exit 0
+      ;;
+  esac
   if command -v niri >/dev/null 2>&1; then
     exec niri msg action fullscreen-window
   fi
-  echo "fusuma-fullscreen: niri not found in PATH" >&2
+  log_error "fusuma-fullscreen: niri not found in PATH"
   exit 127
 fi
 
-case "${XDG_CURRENT_DESKTOP:-}${XDG_SESSION_DESKTOP:-}" in
-  *Hyprland*|*hyprland*)
-    exec hyprctl dispatch fullscreen 1
-    ;;
-  *niri*|*Niri*)
-    if command -v niri >/dev/null 2>&1; then
-      exec niri msg action fullscreen-window
-    fi
-    echo "fusuma-fullscreen: niri not found in PATH" >&2
-    exit 127
-    ;;
- esac
-
-echo "fusuma-fullscreen: compositor not detected (need HYPRLAND_INSTANCE_SIGNATURE or NIRI_SOCKET)" >&2
+log_error "fusuma-fullscreen: compositor not detected (need HYPRLAND_INSTANCE_SIGNATURE or NIRI_SOCKET)"
 exit 127

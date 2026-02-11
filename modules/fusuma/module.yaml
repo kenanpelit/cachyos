@@ -8,8 +8,8 @@ dotfiles:
     target: ~/.config/systemd/user/fusuma.service
   - source: scripts/fusuma-workspace-monitor
     target: ~/.local/bin/fusuma-workspace-monitor
-  - source: scripts/fusuma-hyprscrolling-focus
-    target: ~/.local/bin/fusuma-hyprscrolling-focus
+  - source: scripts/fusuma-swipe
+    target: ~/.local/bin/fusuma-swipe
   - source: scripts/fusuma-fullscreen
     target: ~/.local/bin/fusuma-fullscreen
   - source: scripts/fusuma-overview

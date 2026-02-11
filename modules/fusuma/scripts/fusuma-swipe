@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log_error() {
+  local message="$1"
+  echo "$message" >&2
+  if command -v logger >/dev/null 2>&1; then
+    logger -t fusuma-helper -- "$message"
+  fi
+}
+
+detect_compositor() {
+  case "${FUSUMA_COMPOSITOR:-}" in
+    niri|hyprland)
+      echo "${FUSUMA_COMPOSITOR}"
+      return 0
+      ;;
+  esac
+
+  # Prefer explicit Niri markers first to avoid stale Hyprland envs.
+  if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+    echo "niri"
+    return 0
+  fi
+
+  case "${XDG_CURRENT_DESKTOP:-}${XDG_SESSION_DESKTOP:-}" in
+    *niri*|*Niri*)
+      echo "niri"
+      return 0
+      ;;
+    *Hyprland*|*hyprland*)
+      echo "hyprland"
+      return 0
+      ;;
+  esac
+
+  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    local runtime_dir hypr_socket
+    runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    hypr_socket="$runtime_dir/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket.sock"
+    if [[ -S "$hypr_socket" ]]; then
+      echo "hyprland"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+fingers="${1:-}"
+direction="${2:-}"
+
+case "$fingers:$direction" in
+  3:left|3:right|3:up|3:down|4:left|4:right|4:up|4:down) ;;
+  *)
+    echo "usage: fusuma-swipe <3|4> <left|right|up|down>" >&2
+    exit 2
+    ;;
+esac
+
+compositor="$(detect_compositor || true)"
+case "$fingers" in
+  4)
+    case "$direction" in
+      left) exec fusuma-workspace-monitor --fusuma -mp ;;
+      right) exec fusuma-workspace-monitor --fusuma -mn ;;
+      up|down) exec fusuma-overview ;;
+    esac
+    ;;
+  3)
+    if [[ "$compositor" == "niri" ]]; then
+      # Niri already has native workspace/overview swipe gestures.
+      exit 0
+    fi
+    if [[ "$compositor" != "hyprland" ]]; then
+      log_error "fusuma-swipe: compositor not detected"
+      exit 127
+    fi
+
+    case "$direction" in
+      up) exec fusuma-workspace-monitor --fusuma -wu ;;
+      down) exec fusuma-workspace-monitor --fusuma -wd ;;
+      left|right)
+        if ! command -v hyprctl >/dev/null 2>&1; then
+          log_error "fusuma-swipe: hyprctl not found in PATH"
+          exit 127
+        fi
+        if [[ "$direction" == "left" ]]; then
+          dir="l"
+        else
+          dir="r"
+        fi
+
+        # Prefer hyprscrolling focus (also scrolls layout), fall back to standard focus.
+        if hyprctl dispatch layoutmsg "focus $dir" >/dev/null 2>&1; then
+          exit 0
+        fi
+
+        exec hyprctl dispatch movefocus "$dir"
+        ;;
+    esac
+    ;;
+esac

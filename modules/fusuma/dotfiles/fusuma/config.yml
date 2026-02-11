@@ -1,10 +1,10 @@
 interval:
   pinch: 1.0
-  swipe: 0.6
+  swipe: 0.7
 
 threshold:
   pinch: 0.3
-  swipe: 0.7
+  swipe: 0.8
 
 pinch:
   3:
@@ -16,24 +16,24 @@ pinch:
 swipe:
   3:
     left:
-      command: "fusuma-hyprscrolling-focus left"
+      command: "fusuma-swipe 3 left"
       threshold: 0.6
     right:
-      command: "fusuma-hyprscrolling-focus right"
+      command: "fusuma-swipe 3 right"
       threshold: 0.6
     up:
-      command: "fusuma-workspace-monitor --fusuma -wu"
+      command: "fusuma-swipe 3 up"
       threshold: 0.6
     down:
-      command: "fusuma-workspace-monitor --fusuma -wd"
+      command: "fusuma-swipe 3 down"
       threshold: 0.6
 
   4:
     up:
-      command: "fusuma-overview"
+      command: "fusuma-swipe 4 up"
     down:
-      command: "fusuma-overview"
+      command: "fusuma-swipe 4 down"
     left:
-      command: "fusuma-workspace-monitor --fusuma -mp"
+      command: "fusuma-swipe 4 left"
     right:
-      command: "fusuma-workspace-monitor --fusuma -mn"
+      command: "fusuma-swipe 4 right"

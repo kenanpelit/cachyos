@@ -1,11 +1,58 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == *Hyprland* ]] || [[ "${XDG_SESSION_DESKTOP:-}" == *Hyprland* ]]; then
+log_error() {
+  local message="$1"
+  echo "$message" >&2
+  if command -v logger >/dev/null 2>&1; then
+    logger -t fusuma-helper -- "$message"
+  fi
+}
+
+detect_compositor() {
+  case "${FUSUMA_COMPOSITOR:-}" in
+    niri|hyprland)
+      echo "${FUSUMA_COMPOSITOR}"
+      return 0
+      ;;
+  esac
+
+  if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+    echo "niri"
+    return 0
+  fi
+
+  case "${XDG_CURRENT_DESKTOP:-}${XDG_SESSION_DESKTOP:-}" in
+    *niri*|*Niri*)
+      echo "niri"
+      return 0
+      ;;
+    *Hyprland*|*hyprland*)
+      echo "hyprland"
+      return 0
+      ;;
+  esac
+
+  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    local runtime_dir hypr_socket
+    runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    hypr_socket="$runtime_dir/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket.sock"
+    if [[ -S "$hypr_socket" ]]; then
+      echo "hyprland"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+compositor="$(detect_compositor || true)"
+
+if [[ "$compositor" == "hyprland" ]]; then
   if command -v dms >/dev/null 2>&1; then
     exec dms ipc call hypr toggleOverview
   fi
-  echo "fusuma-overview: dms not found in PATH" >&2
+  log_error "fusuma-overview: dms not found in PATH"
   exit 127
 fi
 

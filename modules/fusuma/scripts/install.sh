@@ -8,10 +8,13 @@ udev_dst="/etc/udev/rules.d/90-fusuma.rules"
 
 mkdir -p "$bin_dir"
 
-for name in fusuma-workspace-monitor fusuma-hyprscrolling-focus fusuma-fullscreen fusuma-overview; do
+for name in fusuma-workspace-monitor fusuma-swipe fusuma-fullscreen fusuma-overview; do
   chmod +x "$module_root/scripts/$name" || true
   ln -sf "$module_root/scripts/$name" "$bin_dir/$name"
 done
+
+# Remove legacy helper that is no longer used.
+rm -f "$bin_dir/fusuma-hyprscrolling-focus"
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
