@@ -13,6 +13,26 @@
 
 set -euo pipefail
 
+# Niri/DM launches may provide a minimal PATH; normalize it so helper binaries
+# (anote, kitty/wezterm/alacritty/foot, etc.) are always discoverable.
+case ":${PATH:-}:" in
+*":$HOME/.local/bin:"*) ;;
+*) PATH="$HOME/.local/bin:${PATH:-}" ;;
+esac
+case ":${PATH:-}:" in
+*":$HOME/bin:"*) ;;
+*) PATH="$HOME/bin:${PATH:-}" ;;
+esac
+case ":${PATH:-}:" in
+*":/usr/local/bin:"*) ;;
+*) PATH="/usr/local/bin:${PATH:-}" ;;
+esac
+case ":${PATH:-}:" in
+*":/usr/bin:"*) ;;
+*) PATH="/usr/bin:${PATH:-}" ;;
+esac
+export PATH
+
 # =================================================================
 # KONFİGÜRASYON
 # =================================================================

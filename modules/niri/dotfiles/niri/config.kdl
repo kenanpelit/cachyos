@@ -357,7 +357,10 @@ binds {
   // ----------------------------------------------------------------------
   // Launchers (DMS)
   // ----------------------------------------------------------------------
-  Mod+Space repeat=false hotkey-overlay-title="Spotlight" {
+  Mod+Space repeat=false hotkey-overlay-title="Launcher" {
+    spawn "/usr/bin/dms" "ipc" "call" "launcher" "toggle"
+  }
+  Mod+Shift+Space repeat=false hotkey-overlay-title="Spotlight" {
     spawn "/usr/bin/dms" "ipc" "call" "spotlight" "toggle"
   }
   Mod+D repeat=false hotkey-overlay-title="Dash / Apps" {
@@ -570,7 +573,7 @@ binds {
     spawn-sh "$HOME/.local/bin/start-kkenp >>$HOME/.cache/niri-hotkeys.log 2>&1"
   }
   Alt+N allow-inhibiting=false repeat=false hotkey-overlay-title="Notes (Anotes)" {
-    spawn-sh "$HOME/.local/bin/anotes >>$HOME/.cache/niri-hotkeys.log 2>&1"
+    spawn-sh "$HOME/.local/bin/anotes"
   }
 
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" {
