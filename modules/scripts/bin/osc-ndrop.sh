@@ -289,9 +289,9 @@ launch_command() {
 
 niri_toggle() {
   command -v jq >/dev/null 2>&1 || { launch_command; return 0; }
-  local has_niri_flow=false
-  if command -v niri-flow >/dev/null 2>&1; then
-    has_niri_flow=true
+  local has_niri_osc_flow=false
+  if command -v niri-osc >/dev/null 2>&1; then
+    has_niri_osc_flow=true
   fi
 
   local windows workspaces current_ws_id current_ws_ref
@@ -345,10 +345,10 @@ niri_toggle() {
       return 0
     fi
 
-    if $has_niri_flow; then
-      # Hide using niri-flow scratchpad (stays on current workspace).
+    if $has_niri_osc_flow; then
+      # Hide using niri-osc flow scratchpad (stays on current workspace).
       niri msg action focus-window --id "$window_id_here" >/dev/null 2>&1 || true
-      niri-flow scratchpad-toggle --app-id "$app_id_re" --workspace-id "$current_ws_id" >/dev/null 2>&1 || true
+      niri-osc flow scratchpad-toggle --app-id "$app_id_re" --workspace-id "$current_ws_id" >/dev/null 2>&1 || true
     else
       # Hide by moving to a dedicated workspace (does not follow focus).
       niri msg action move-window-to-workspace --window-id "$window_id_here" --focus false "$NIRI_HIDE_WORKSPACE" >/dev/null 2>&1 || true
@@ -385,15 +385,15 @@ niri_toggle() {
     return 0
   fi
 
-  if $has_niri_flow; then
+  if $has_niri_osc_flow; then
     # Show from scratchpad first (if applicable).
-    if niri-flow scratchpad-show --app-id "$app_id_re" >/dev/null 2>&1; then
+    if niri-osc flow scratchpad-show --app-id "$app_id_re" >/dev/null 2>&1; then
       $VERBOSE && notify "Niri" "Shown: ${CLASS}" "low"
       return 0
     fi
 
     # Bring it from any unfocused workspace (including a hide workspace).
-    if niri-flow move-to-current-workspace --app-id "$app_id_re" --focus >/dev/null 2>&1; then
+    if niri-osc flow move-to-current-workspace --app-id "$app_id_re" --focus >/dev/null 2>&1; then
       $VERBOSE && notify "Niri" "Moved here: ${CLASS}" "low"
       return 0
     fi

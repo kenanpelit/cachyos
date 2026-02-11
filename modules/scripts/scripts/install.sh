@@ -111,11 +111,28 @@ install_from_dir() {
   done
 }
 
+cleanup_legacy_bins() {
+  local legacy_bins=(
+    niri-set
+    niri-flow
+    niri-keybinds
+    niri-start
+  )
+
+  local b p
+  for b in "${legacy_bins[@]}"; do
+    p="$bin_dir/$b"
+    [[ -e "$p" ]] || continue
+    rm -f "$p" || true
+  done
+}
+
 main() {
   ensure_bin_dir
 
   install_from_dir "$module_root/bin"
   install_from_dir "$module_root/start"
+  cleanup_legacy_bins
 }
 
 main "$@"

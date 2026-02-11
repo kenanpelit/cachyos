@@ -25,6 +25,6 @@ fi
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload >/dev/null 2>&1 || true
 
-  # Enable into session targets so `niri-set env` / hyprland exec-once starts them.
+  # Enable into session targets so `niri-osc set env` / hyprland exec-once starts them.
   systemctl --user enable dms.service dms-plugin-sync.service dms-resume-restart.service >/dev/null 2>&1 || true
 fi
