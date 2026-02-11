@@ -2,7 +2,7 @@
 # wm-workspace.sh
 # Workspace router across compositors (Hyprland, Niri).
 # Used by Fusuma (and other callers) to route workspace/monitor actions to the
-# correct backend (`hypr-set`, `niri-set`).
+# correct backend (`hypr-set`, `niri-osc`).
 
 set -euo pipefail
 
@@ -20,11 +20,11 @@ resolve_bin() {
 }
 
 # systemd --user services often run with a minimal PATH; prefer common user bins.
-NIRI_SET="$(
-  resolve_bin niri-set \
-    "${WM_WORKSPACE_NIRI_SET:-}" \
-    "${HOME}/.local/bin/niri-set" \
-    "${HOME}/bin/niri-set"
+NIRI_OSC="$(
+  resolve_bin niri-osc \
+    "${WM_WORKSPACE_NIRI_OSC:-}" \
+    "${HOME}/.local/bin/niri-osc" \
+    "${HOME}/bin/niri-osc"
 )"
 
 HYPR_SET="$(
@@ -35,10 +35,10 @@ HYPR_SET="$(
 )"
 
 if [[ -n "${NIRI_SOCKET:-}" ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == "niri" ]] || [[ "${XDG_SESSION_DESKTOP:-}" == "niri" ]]; then
-  if [[ -n "${NIRI_SET:-}" ]]; then
-    exec "${NIRI_SET}" flow "$@"
+  if [[ -n "${NIRI_OSC:-}" ]]; then
+    exec "${NIRI_OSC}" set flow "$@"
   else
-    echo "niri-set not found in PATH" >&2
+    echo "niri-osc not found in PATH" >&2
     exit 1
   fi
 else

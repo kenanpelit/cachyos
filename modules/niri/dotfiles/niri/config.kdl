@@ -78,7 +78,7 @@ layer-rule {
 // Long-running daemons are preferably started via systemd --user (niri-session.target).
 // Here we only start the minimal session bootstrap + helpers that must exist early.
 
-spawn-at-startup "~/.local/bin/niri-set" "env"
+spawn-at-startup "~/.local/bin/niri-osc" "set" "env"
 spawn-at-startup "/usr/bin/clipse" "-listen"
 
 // ------------------------------------------------------------------------
@@ -139,7 +139,7 @@ debug {
 switch-events {
   // Lock when the lid is closed (logind integration).
   lid-close {
-    spawn "sh" "-lc" "command -v ~/.local/bin/niri-set >/dev/null 2>&1 && ~/.local/bin/niri-set lock --logind || true"
+    spawn "sh" "-lc" "command -v ~/.local/bin/niri-osc >/dev/null 2>&1 && ~/.local/bin/niri-osc set lock --logind || true"
   }
 }
 
@@ -309,14 +309,14 @@ binds {
   Mod+Alt+O  repeat=false hotkey-overlay-title="Overview (Niri)" { toggle-overview; }
   Mod+Ctrl+W hotkey-overlay-title="Toggle Tabbed Mode" { toggle-column-tabbed-display; }
 
-  Mod+G hotkey-overlay-title="Toggle Float/Tile" { spawn "~/.local/bin/niri-set" "float"; }
+  Mod+G hotkey-overlay-title="Toggle Float/Tile" { spawn "~/.local/bin/niri-osc" "set" "float"; }
   Mod+Ctrl+BackSpace hotkey-overlay-title="Focus Float/Tile" { switch-focus-between-floating-and-tiling; }
 
   Mod+Ctrl+Shift+F hotkey-overlay-title="Expand Column (Fill)" { expand-column-to-available-width;}
   Mod+Ctrl+Shift+C hotkey-overlay-title="Center Visible Columns" { center-visible-columns;}
 
-  Mod+Z repeat=false hotkey-overlay-title="Zen Mode" { spawn "~/.local/bin/niri-set" "zen"; }
-  Mod+P repeat=false hotkey-overlay-title="Pin Window (PiP)" { spawn "~/.local/bin/niri-set" "pin"; }
+  Mod+Z repeat=false hotkey-overlay-title="Zen Mode" { spawn "~/.local/bin/niri-osc" "set" "zen"; }
+  Mod+P repeat=false hotkey-overlay-title="Pin Window (PiP)" { spawn "~/.local/bin/niri-osc" "set" "pin"; }
 
   // Consume / Expel (Window Grouping)
   Mod+Ctrl+Left  hotkey-overlay-title="Consume/Expel Left"  { consume-or-expel-window-left; }
@@ -330,27 +330,27 @@ binds {
   Mod+Shift+WheelScrollUp hotkey-overlay-title="Opacity +10%" { spawn "niri" "msg" "action" "set-window-opacity" "+0.1";}
 
   // ----------------------------------------------------------------------
-  // Scratchpad (niri-flow)
+  // Scratchpad (niri-osc flow)
   // ----------------------------------------------------------------------
   Mod+BackSpace repeat=false hotkey-overlay-title="Scratch: Toggle" {
-    spawn "niri-flow" "scratchpad-toggle"
+    spawn "~/.local/bin/niri-osc" "flow" "scratchpad-toggle"
   }
   Alt+BackSpace repeat=false hotkey-overlay-title="Scratch: Cycle" {
-    spawn "niri-flow" "scratchpad-show"
+    spawn "~/.local/bin/niri-osc" "flow" "scratchpad-show"
   }
   Mod+Alt+BackSpace repeat=false hotkey-overlay-title="Scratch: Show All" {
-    spawn "niri-flow" "scratchpad-show-all"
+    spawn "~/.local/bin/niri-osc" "flow" "scratchpad-show-all"
   }
 
-  // Marks (niri-flow)
+  // Marks (niri-osc flow)
   Mod+Alt+G repeat=false hotkey-overlay-title="Mark: Toggle Default" {
-    spawn "niri-flow" "toggle-mark"
+    spawn "~/.local/bin/niri-osc" "flow" "toggle-mark"
   }
   Mod+Alt+Shift+1 repeat=false hotkey-overlay-title="Mark: Set Term" {
-    spawn "niri-flow" "toggle-mark" "term"
+    spawn "~/.local/bin/niri-osc" "flow" "toggle-mark" "term"
   }
   Mod+Alt+1 repeat=false hotkey-overlay-title="Mark: Go Term" {
-    spawn "niri-flow" "focus-marked" "term"
+    spawn "~/.local/bin/niri-osc" "flow" "focus-marked" "term"
   }
 
   // ----------------------------------------------------------------------
@@ -413,7 +413,7 @@ binds {
     spawn "/usr/bin/dms" "ipc" "call" "powermenu" "toggle"
   }
   Alt+L repeat=false hotkey-overlay-title="Lock Screen" {
-    spawn "~/.local/bin/niri-set" "lock"
+    spawn "~/.local/bin/niri-osc" "set" "lock"
   }
   Mod+Shift+Delete repeat=false hotkey-overlay-title="Inhibit Idle" {
     spawn "/usr/bin/dms" "ipc" "call" "inhibit" "toggle"
@@ -550,11 +550,11 @@ binds {
     spawn "niri" "msg" "action" "load-config-file"
   }
   Mod+Ctrl+Alt+S repeat=false hotkey-overlay-title="Session Refresh" {
-    spawn "~/.local/bin/niri-set" "env"
+    spawn "~/.local/bin/niri-osc" "set" "env"
   }
 
   Mod+Ctrl+Alt+D repeat=false hotkey-overlay-title="Session Doctor" {
-    spawn "/usr/bin/kitty" "--class" "niri-doctor" "-e" "bash" "-lc" "~/.local/bin/niri-set doctor; echo; read -n 1 -s -r -p 'Press any key to close'"
+    spawn "/usr/bin/kitty" "--class" "niri-doctor" "-e" "bash" "-lc" "~/.local/bin/niri-osc set doctor; echo; read -n 1 -s -r -p 'Press any key to close'"
   }
 
   // Toggle Wayland shortcut inhibition. Use with care.
@@ -577,7 +577,7 @@ binds {
   }
 
   Mod+Return repeat=false hotkey-overlay-title="Dropdown Terminal" {
-    spawn "~/.local/bin/osc-ndrop" "kitty" "--class" "dropdown-terminal"
+    spawn "~/.local/bin/niri-osc" "drop" "kitty" "--class" "dropdown-terminal"
   }
 
   Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" {
@@ -589,7 +589,7 @@ binds {
   }
 
   Mod+Ctrl+S repeat=false hotkey-overlay-title="Sticky Toggle" {
-    spawn "~/.local/bin/nsticky-toggle"
+    spawn "~/.local/bin/niri-osc" "sticky" "stage" "toggle-active"
   }
 
   Mod+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Nemo)" {
@@ -659,18 +659,18 @@ binds {
   // If Alt+Number doesn't work, you are likely pressing Right Alt (AltGr) on TR-F.
   // Test with `wev`: Right Alt often shows as ISO_Level3_Shift (Mod5), not Alt.
 
-  Alt+1 repeat=false hotkey-overlay-title="Here: Kenp" { spawn "~/.local/bin/niri-set" "here" "Kenp"; }
-  Alt+2 repeat=false hotkey-overlay-title="Here: TmuxKenp" { spawn "~/.local/bin/niri-set" "here" "TmuxKenp"; }
-  Alt+3 repeat=false hotkey-overlay-title="Here: Ai" { spawn "~/.local/bin/niri-set" "here" "Ai"; }
-  Alt+4 repeat=false hotkey-overlay-title="Here: CompecTA" { spawn "~/.local/bin/niri-set" "here" "CompecTA"; }
-  Alt+5 repeat=false hotkey-overlay-title="Here: WebCord" { spawn "~/.local/bin/niri-set" "here" "WebCord"; }
-  Alt+6 repeat=false hotkey-overlay-title="Here: Telegram" { spawn "~/.local/bin/niri-set" "here" "org.telegram.desktop"; }
-  Alt+7 repeat=false hotkey-overlay-title="Here: YouTube" { spawn "~/.local/bin/niri-set" "here" "brave-youtube.com__-Default"; }
-  Alt+8 repeat=false hotkey-overlay-title="Here: Spotify" { spawn "~/.local/bin/niri-set" "here" "spotify"; }
-  Alt+9 repeat=false hotkey-overlay-title="Here: Ferdium" { spawn "~/.local/bin/niri-set" "here" "ferdium"; }
-  Alt+0 repeat=false hotkey-overlay-title="Here: ALL" { spawn "~/.local/bin/niri-set" "here" "all"; }
+  Alt+1 repeat=false hotkey-overlay-title="Here: Kenp" { spawn "~/.local/bin/niri-osc" "set" "here" "Kenp"; }
+  Alt+2 repeat=false hotkey-overlay-title="Here: TmuxKenp" { spawn "~/.local/bin/niri-osc" "set" "here" "TmuxKenp"; }
+  Alt+3 repeat=false hotkey-overlay-title="Here: Ai" { spawn "~/.local/bin/niri-osc" "set" "here" "Ai"; }
+  Alt+4 repeat=false hotkey-overlay-title="Here: CompecTA" { spawn "~/.local/bin/niri-osc" "set" "here" "CompecTA"; }
+  Alt+5 repeat=false hotkey-overlay-title="Here: WebCord" { spawn "~/.local/bin/niri-osc" "set" "here" "WebCord"; }
+  Alt+6 repeat=false hotkey-overlay-title="Here: Telegram" { spawn "~/.local/bin/niri-osc" "set" "here" "org.telegram.desktop"; }
+  Alt+7 repeat=false hotkey-overlay-title="Here: YouTube" { spawn "~/.local/bin/niri-osc" "set" "here" "brave-youtube.com__-Default"; }
+  Alt+8 repeat=false hotkey-overlay-title="Here: Spotify" { spawn "~/.local/bin/niri-osc" "set" "here" "spotify"; }
+  Alt+9 repeat=false hotkey-overlay-title="Here: Ferdium" { spawn "~/.local/bin/niri-osc" "set" "here" "ferdium"; }
+  Alt+0 repeat=false hotkey-overlay-title="Here: ALL" { spawn "~/.local/bin/niri-osc" "set" "here" "all"; }
 
-  Mod+Alt+0 repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "~/.local/bin/niri-set" "go"; }
+  Mod+Alt+0 repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "~/.local/bin/niri-osc" "set" "go"; }
 
   // ----------------------------------------------------------------------
   // Workspace navigation / wheel / monitors

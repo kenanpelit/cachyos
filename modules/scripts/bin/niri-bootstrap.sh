@@ -42,10 +42,10 @@ if command -v gsettings >/dev/null 2>&1; then
     gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-dark-cursors' 2>/dev/null || true
 fi
 
-if command -v niri-set >/dev/null 2>&1; then
-  niri-set init || warn "niri-set init failed"
+if command -v niri-osc >/dev/null 2>&1; then
+  niri-osc set init || warn "niri-osc set init failed"
   else
-    warn "niri-set not found"
+    warn "niri-osc not found"
 fi
 
 # Optional Bluetooth auto-connect (delayed, non-blocking).
@@ -72,8 +72,11 @@ start_bg() {
   log "started: $* (pid=${!})"
 }
 
-# Start nsticky if available
-if command -v nsticky >/dev/null 2>&1;
+# Start sticky daemon (new niri-osc implementation; keep nsticky as fallback)
+if command -v niri-osc >/dev/null 2>&1;
+  then
+    start_bg niri-osc sticky
+elif command -v nsticky >/dev/null 2>&1;
   then
     start_bg nsticky
 fi
