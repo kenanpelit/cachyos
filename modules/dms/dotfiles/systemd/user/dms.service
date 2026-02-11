@@ -2,7 +2,6 @@
 Description=DankMaterialShell
 After=hyprland-session.target niri-session.target niri-ready.service
 PartOf=hyprland-session.target niri-session.target
-ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
 Type=simple
@@ -13,7 +12,7 @@ Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
 Environment=QT_ICON_THEME=kora
 Environment=XDG_ICON_THEME=kora
 Environment=QT_QPA_PLATFORMTHEME=gtk3
-ExecStart=dms run --session
+ExecStart=/usr/bin/bash -lc 'set -euo pipefail; : "${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"; if [[ -z "${WAYLAND_DISPLAY:-}" ]]; then for _ in {1..200}; do for sock in "$XDG_RUNTIME_DIR"/wayland-*; do [[ -S "$sock" ]] || continue; export WAYLAND_DISPLAY="$(basename "$sock")"; break 2; done; sleep 0.05; done; fi; exec dms run --session'
 KillSignal=SIGINT
 Restart=always
 RestartSec=3
