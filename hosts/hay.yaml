@@ -109,6 +109,7 @@ enabled_modules:
   - logind
   - kernel
   - pacman
+  - paru
   - firewall
   - fail2ban
   - blocky
