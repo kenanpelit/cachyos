@@ -62,16 +62,6 @@ SLOT_REVOKE_OTHERS="${OSC_MULLVAD_REVOKE_OTHERS:-true}"
 SLOT_DRY_RUN="false"
 SLOT_ACCOUNT_NUMBER=""
 
-# Keybind/systemd-launched shells may not inherit shell rc exports.
-# Auto-detect common pass store locations when PASSWORD_STORE_DIR is unset.
-if [[ -z "${PASSWORD_STORE_DIR:-}" ]]; then
-	if [[ -f "$HOME/.pass/.gpg-id" ]]; then
-		export PASSWORD_STORE_DIR="$HOME/.pass"
-	elif [[ -f "$HOME/.password-store/.gpg-id" ]]; then
-		export PASSWORD_STORE_DIR="$HOME/.password-store"
-	fi
-fi
-
 # Create directories if they don't exist
 mkdir -p "$LOG_DIR"
 mkdir -p "$CONFIG_DIR"
@@ -132,7 +122,14 @@ notify() {
 		return 0
 	fi
 
-	notify-send -t 5000 "$title" "$message" -i "$icon"
+	# Without a session bus/display (common under pkexec root helper),
+	# notify-send may print: "Cannot autolaunch D-Bus without X11 $DISPLAY".
+	# Skip desktop notifications in that context.
+	if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" && -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+		return 0
+	fi
+
+	notify-send -t 5000 "$title" "$message" -i "$icon" >/dev/null 2>&1 || true
 }
 
 # Loglama fonksiyonu
@@ -348,23 +345,138 @@ blocky_stop() {
 	fi
 }
 
-blocky_force_local_dns() {
-	# Mullvad can leave /etc/resolv.conf at 10.64.0.1 after disconnect.
-	# Force localhost resolvers whenever Blocky mode is expected.
-	sudo_run "printf 'nameserver 127.0.0.1\nnameserver ::1\n' >/etc/resolv.conf" || return 1
-}
-
 blocky_start() {
 	blocky_unit_exists || return 0
-	if blocky_is_active; then
-		log "Blocky zaten aktif (DNS localhost olarak zorlanıyor)..."
-	else
-		log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
-		sudo_run "systemctl start blocky.service" || return 1
+	blocky_is_active && return 0
+	log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
+	sudo_run "systemctl start blocky.service" || return 1
+}
+
+mullvad_account_ready() {
+	mullvad account get >/dev/null 2>&1
+}
+
+mullvad_is_blocked_state() {
+	local status_text=""
+	status_text="$(mullvad status 2>/dev/null || true)"
+	[[ -n "$status_text" ]] || return 1
+
+	if echo "$status_text" | grep -qi "Blocked:"; then
+		return 0
 	fi
 
-	# Always enforce local resolver when switching to Blocky mode.
-	blocky_force_local_dns || return 1
+	if echo "$status_text" | grep -qi "device has been revoked"; then
+		return 0
+	fi
+
+	return 1
+}
+
+mullvad_soft_disable_for_fallback() {
+	log "Mullvad fallback: disconnect + disable risky states (auto-connect/lockdown)."
+	mullvad disconnect >/dev/null 2>&1 || true
+	mullvad auto-connect set off >/dev/null 2>&1 || true
+	mullvad lockdown-mode set off >/dev/null 2>&1 || true
+}
+
+vpn_connected_and_healthy() {
+	local require_internet="${1:-1}"
+
+	check_vpn_status
+	local status=$?
+	[[ $status -eq 0 ]] || return 1
+
+	if [[ "$require_internet" == "1" ]]; then
+		mullvad_internet_ok || return 1
+	fi
+
+	return 0
+}
+
+ensure_blocky_for_vpn_state() {
+	local grace_s="${1:-${OSC_MULLVAD_ENSURE_GRACE_SEC:-35}}"
+	local poll_s="${2:-${OSC_MULLVAD_ENSURE_POLL_SEC:-2}}"
+	local require_internet="${3:-${OSC_MULLVAD_ENSURE_REQUIRE_INTERNET:-1}}"
+	local force_disconnect="${4:-${OSC_MULLVAD_ENSURE_FORCE_DISCONNECT:-1}}"
+
+	[[ "$grace_s" =~ ^[0-9]+$ ]] || grace_s=35
+	[[ "$poll_s" =~ ^[0-9]+$ ]] || poll_s=2
+	((poll_s > 0)) || poll_s=2
+
+	local elapsed=0
+	while :; do
+		if vpn_connected_and_healthy "$require_internet"; then
+			log "Ensure: Mullvad sağlıklı; Blocky kapalı tutuluyor."
+			blocky_stop || true
+			return 0
+		fi
+
+		((elapsed >= grace_s)) && break
+		sleep "$poll_s"
+		elapsed=$((elapsed + poll_s))
+	done
+
+	log "Ensure: Mullvad sağlıklı değil; Blocky açılıyor."
+	if [[ "$force_disconnect" == "1" ]]; then
+		mullvad_soft_disable_for_fallback
+	elif ! mullvad_account_ready || mullvad_is_blocked_state; then
+		# Even when caller asks "no-disconnect", broken/revoked states should not keep routing blocked.
+		mullvad_soft_disable_for_fallback
+	fi
+	blocky_start || true
+	return 0
+}
+
+connect_basic_vpn_with_blocky_guard() {
+	local require_internet="${OSC_MULLVAD_TOGGLE_REQUIRE_INTERNET:-1}"
+	local force_disconnect="${OSC_MULLVAD_TOGGLE_FORCE_DISCONNECT_ON_FAIL:-1}"
+
+	if ! mullvad_account_ready; then
+		log "Mullvad account yok/oturum kapalı: VPN connect atlanıyor, Blocky fallback uygulanıyor."
+		notify "⚠️ MULLVAD VPN" "No account/session; using Blocky fallback" "security-low"
+		mullvad_soft_disable_for_fallback
+		blocky_start || true
+		return 1
+	fi
+
+	if mullvad_is_blocked_state; then
+		log "Mullvad blocked/revoked state tespit edildi; VPN connect atlanıyor, Blocky fallback uygulanıyor."
+		notify "⚠️ MULLVAD VPN" "Device blocked/revoked; using Blocky fallback" "security-low"
+		mullvad_soft_disable_for_fallback
+		blocky_start || true
+		return 1
+	fi
+
+	# VPN OFF -> ON path: stop Blocky before connect.
+	if ! blocky_stop; then
+		if blocky_is_active; then
+			log "Hata: Blocky durdurulamadı. VPN bağlantısı başlatılmıyor."
+			notify "⚠️ MULLVAD VPN" "Blocky couldn't be stopped; not connecting" "security-low"
+			return 1
+		fi
+	fi
+
+	if ! connect_basic_vpn; then
+		log "VPN bağlantısı başarısız; Blocky geri açılıyor."
+		mullvad_soft_disable_for_fallback
+		blocky_start || true
+		return 1
+	fi
+
+	# Optional health check: if tunnel came up but internet check fails, rollback.
+	if [[ "$require_internet" == "1" ]] && ! mullvad_internet_ok; then
+		log "VPN bağlı görünüyor ama internet doğrulanamadı; Blocky fallback uygulanıyor."
+		notify "⚠️ MULLVAD VPN" "Connected state unhealthy; falling back to Blocky" "security-low"
+		if [[ "$force_disconnect" == "1" ]]; then
+			mullvad_soft_disable_for_fallback
+		fi
+		blocky_start || true
+		return 1
+	fi
+
+	# Keep Blocky off while VPN is healthy.
+	blocky_stop || true
+	return 0
 }
 
 toggle_basic_vpn_with_blocky() {
@@ -374,31 +486,26 @@ toggle_basic_vpn_with_blocky() {
 	if [[ $status -eq 0 ]]; then
 		# VPN currently ON -> turning OFF: disconnect first, then enable Blocky.
 		if disconnect_basic_vpn; then
-			if ! blocky_start; then
-				log "Hata: Blocky başlatıldı ama DNS localhost'a ayarlanamadı."
-				notify "⚠️ MULLVAD VPN" "Blocky DNS restore failed" "security-low"
-				return 1
-			fi
+			blocky_start || true
 		fi
 		return 0
 	fi
 
 	if [[ $status -eq 1 ]]; then
-		# VPN currently OFF -> turning ON: disable Blocky first, then connect.
-		if ! blocky_stop; then
-			# If Blocky is still active, connecting Mullvad tends to break DNS/internet.
-			if blocky_is_active; then
-				log "Hata: Blocky durdurulamadı. VPN bağlantısı başlatılmıyor."
-				notify "⚠️ MULLVAD VPN" "Blocky couldn't be stopped; not connecting" "security-low"
-				return 1
-			fi
-		fi
-		connect_basic_vpn
+		# VPN currently OFF -> turning ON with rollback protection.
+		connect_basic_vpn_with_blocky_guard
+		return $?
+	fi
+
+	if [[ $status -eq 3 || $status -eq 4 ]]; then
+		log "VPN geçiş durumunda; fail-safe ensure uygulanıyor."
+		ensure_blocky_for_vpn_state
 		return 0
 	fi
 
-	# Transitional/unknown states: keep previous behaviour.
-	toggle_basic_vpn
+	# Unknown/error state -> enforce safe fallback rule.
+	log "VPN durumu belirsiz; fail-safe ensure uygulanıyor."
+	ensure_blocky_for_vpn_state
 }
 
 # ----------------------------------------------------------------------------
@@ -2074,6 +2181,7 @@ show_help() {
 	echo -e "    ${GREEN}disconnect${NC}        Disconnect from Mullvad VPN"
 	echo -e "    ${GREEN}toggle${NC}            Toggle VPN connection on/off"
 	echo -e "    ${GREEN}toggle --with-blocky${NC}  Toggle VPN and stop/start Blocky accordingly"
+	echo -e "    ${GREEN}ensure${NC}            Enforce fail-safe DNS rule (VPN unhealthy => Blocky ON)"
 	echo -e "    ${GREEN}status${NC}            Show current connection status and details"
 	echo -e "    ${GREEN}test${NC}              Test current connection for leaks/issues"
 	echo -e "    ${GREEN}help${NC}              Show this help message"
@@ -2116,6 +2224,7 @@ show_help() {
 	echo -e "    ${GREEN}$SCRIPT_NAME disconnect${NC}        # Disconnect from VPN"
 	echo -e "    ${GREEN}$SCRIPT_NAME toggle${NC}            # Toggle VPN connection on/off"
 	echo -e "    ${GREEN}$SCRIPT_NAME toggle --with-blocky${NC}  # Toggle VPN + Blocky auto"
+	echo -e "    ${GREEN}$SCRIPT_NAME ensure${NC}            # VPN unhealthy/disconnected => Blocky fallback"
 	echo -e "    ${GREEN}$SCRIPT_NAME protocol${NC}          # Switch between OpenVPN/WireGuard"
 	echo -e "    ${GREEN}$SCRIPT_NAME random${NC}            # Switch to any random relay"
 	echo -e "    ${GREEN}$SCRIPT_NAME fr${NC}                # Switch to French relay"
@@ -2137,6 +2246,12 @@ show_help() {
 	echo -e "    ${GREEN}obf <mode>${NC}        Set mode directly (udp2tcp|shadowsocks|off|auto) and reconnect"
 	echo -e "    ${GREEN}obf hunt443${NC}       Try to find a relay that yields TCP/443 in udp2tcp mode"
 	echo -e "    ${GREEN}obf cycle${NC}         Cycle udp2tcp → shadowsocks → off → auto (show status each)"
+	echo -e ""
+	echo -e "${YELLOW}Fail-safe Env Vars (ensure):${NC}"
+	echo -e "    OSC_MULLVAD_ENSURE_GRACE_SEC=35"
+	echo -e "    OSC_MULLVAD_ENSURE_POLL_SEC=2"
+	echo -e "    OSC_MULLVAD_ENSURE_REQUIRE_INTERNET=1"
+	echo -e "    OSC_MULLVAD_ENSURE_FORCE_DISCONNECT=1"
 	echo -e ""
 }
 
@@ -2176,6 +2291,41 @@ main() {
 			toggle_basic_vpn
 			;;
 		esac
+		;;
+	"ensure")
+		shift || true
+		local ensure_grace="${OSC_MULLVAD_ENSURE_GRACE_SEC:-35}"
+		local ensure_poll="${OSC_MULLVAD_ENSURE_POLL_SEC:-2}"
+		local ensure_require_internet="${OSC_MULLVAD_ENSURE_REQUIRE_INTERNET:-1}"
+		local ensure_force_disconnect="${OSC_MULLVAD_ENSURE_FORCE_DISCONNECT:-1}"
+
+		while [[ $# -gt 0 ]]; do
+			case "$1" in
+			--grace)
+				ensure_grace="${2:-}"
+				shift 2
+				;;
+			--poll)
+				ensure_poll="${2:-}"
+				shift 2
+				;;
+			--no-internet-check)
+				ensure_require_internet="0"
+				shift
+				;;
+			--no-disconnect)
+				ensure_force_disconnect="0"
+				shift
+				;;
+			*)
+				echo -e "${RED}Unknown ensure option:${NC} $1"
+				echo "Usage: ${SCRIPT_NAME} ensure [--grace N] [--poll N] [--no-internet-check] [--no-disconnect]"
+				exit 2
+				;;
+			esac
+		done
+
+		ensure_blocky_for_vpn_state "$ensure_grace" "$ensure_poll" "$ensure_require_internet" "$ensure_force_disconnect"
 		;;
 	"status")
 		show_status
@@ -2320,6 +2470,8 @@ main() {
 	esac
 }
 
-# Execute main function and propagate its real exit status.
+# Execute main function with all arguments
 main "$@"
-exit $?
+
+# Exit successfully
+exit 0
