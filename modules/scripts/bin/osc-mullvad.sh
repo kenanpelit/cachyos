@@ -1396,6 +1396,19 @@ slot_list_devices() {
   '
 }
 
+slot_prepare_pass_store() {
+	# Ensure `pass` can find the user's store even in keybind/non-login shells.
+	[[ -n "${PASSWORD_STORE_DIR:-}" ]] && return 0
+
+	local candidate
+	for candidate in "$HOME/.pass" "$HOME/.password-store"; do
+		if [[ -f "$candidate/.gpg-id" ]]; then
+			export PASSWORD_STORE_DIR="$candidate"
+			return 0
+		fi
+	done
+}
+
 slot_resolve_account_number() {
 	if [[ -n "${MULLVAD_ACCOUNT_NUMBER:-}" ]]; then
 		printf '%s' "$MULLVAD_ACCOUNT_NUMBER"
@@ -1403,6 +1416,7 @@ slot_resolve_account_number() {
 	fi
 
 	if command -v pass >/dev/null 2>&1; then
+		slot_prepare_pass_store || true
 		if pass show "$SLOT_PASS_ENTRY" >/dev/null 2>&1; then
 			pass show "$SLOT_PASS_ENTRY" | head -n1 | tr -d '[:space:]'
 			return 0
@@ -2470,8 +2484,6 @@ main() {
 	esac
 }
 
-# Execute main function with all arguments
+# Execute main function and preserve its real exit status.
 main "$@"
-
-# Exit successfully
-exit 0
+exit $?
