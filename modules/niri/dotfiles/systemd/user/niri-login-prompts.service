@@ -1,0 +1,19 @@
+[Unit]
+Description=Niri login prompts warmup
+After=graphical-session.target niri-session.target niri-ready.service niri-bootstrap.service
+PartOf=niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=NIRI_SOCKET
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+ConditionPathExists=%h/.local/bin/osc-login-prompts
+
+[Service]
+Type=oneshot
+TimeoutStartSec=30
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
+ExecStart=/usr/bin/bash -lc "%h/.local/bin/osc-login-prompts"
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target

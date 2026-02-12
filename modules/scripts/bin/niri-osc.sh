@@ -2816,6 +2816,7 @@ doctor)
           xdg-desktop-autostart.target \
           niri-ready.service \
           niri-bootstrap.service \
+          niri-login-prompts.service \
           niri-polkit-agent.service \
           dms.service \
           dms-plugin-sync.service \

@@ -65,13 +65,4 @@ finish_notify() {
 
 finish_notify
 
-# Trigger keyring/GPG prompts near the end of bootstrap so user can unlock once.
-if [[ "${NIRI_BOOT_PROMPT_KEYS:-1}" == "1" ]]; then
-  if command -v osc-login-prompts >/dev/null 2>&1; then
-    osc-login-prompts &
-  else
-    warn "osc-login-prompts not found; skipping login prompts"
-  fi
-fi
-
 exit 0
