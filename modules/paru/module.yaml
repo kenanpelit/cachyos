@@ -1,8 +1,6 @@
 description: Paru configuration (sudo pacman wrapper + user config)
 
 dotfiles:
-  - source: dotfiles/paru/paru.conf
-    target: ~/.config/paru/paru.conf
   - source: dotfiles/bin/pacman-sudo-paru
     target: ~/.local/bin/pacman-sudo-paru
 
