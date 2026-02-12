@@ -55,11 +55,37 @@ resolve_osc_mullvad() {
     return 0
   fi
 
+  # In pkexec root context, prefer caller user's up-to-date local script.
+  if [[ "${run_as_root:-0}" == "1" ]]; then
+    local caller_uid caller_user caller_home
+    caller_uid="${PKEXEC_UID:-}"
+    if [[ -n "${caller_uid}" ]]; then
+      caller_user="$(id -nu "${caller_uid}" 2>/dev/null || true)"
+      if [[ -n "${caller_user}" ]]; then
+        caller_home="$(getent passwd "${caller_user}" 2>/dev/null | cut -d: -f6)"
+        [[ -n "${caller_home}" ]] || caller_home="/home/${caller_user}"
+
+        if [[ -x "${caller_home}/.local/bin/osc-mullvad" ]]; then
+          OSC_MULLVAD_BIN="${caller_home}/.local/bin/osc-mullvad"
+          log "resolved osc-mullvad (caller local): ${OSC_MULLVAD_BIN}"
+          return 0
+        fi
+
+        if [[ -x "/etc/profiles/per-user/${caller_user}/bin/osc-mullvad" ]]; then
+          OSC_MULLVAD_BIN="/etc/profiles/per-user/${caller_user}/bin/osc-mullvad"
+          log "resolved osc-mullvad (caller profile): ${OSC_MULLVAD_BIN}"
+          return 0
+        fi
+      fi
+    fi
+  fi
+
   OSC_MULLVAD_BIN="$(command -v osc-mullvad 2>/dev/null || true)"
   if [[ -z "${OSC_MULLVAD_BIN}" ]]; then
     OSC_MULLVAD_BIN="$HOME/.local/bin/osc-mullvad"
   fi
   [[ -x "${OSC_MULLVAD_BIN}" ]] || die "osc-mullvad not found: ${OSC_MULLVAD_BIN}"
+  log "resolved osc-mullvad (PATH/default): ${OSC_MULLVAD_BIN}"
 }
 
 notify_user() {
@@ -110,7 +136,20 @@ run_toggle() {
 
   # Parent wrapper is responsible for user-facing notifications.
   log "run: OSC_MULLVAD_NO_NOTIFY=1 ${cmd[*]}"
-  OSC_MULLVAD_NO_NOTIFY=1 "${cmd[@]}"
+  if ! OSC_MULLVAD_NO_NOTIFY=1 "${cmd[@]}"; then
+    local rc=$?
+    # Fail-safe: enforce DNS rule if toggle failed in blocky-coupled mode.
+    if [[ "${with_blocky}" == "1" ]]; then
+      log "toggle failed (rc=${rc}), running ensure fallback"
+      OSC_MULLVAD_NO_NOTIFY=1 "${OSC_MULLVAD_BIN}" ensure --grace "${OSC_MULLVAD_TOGGLE_ENSURE_GRACE_SEC:-0}" || true
+    fi
+    return "$rc"
+  fi
+
+  # Reconcile final state after successful toggle, so stale states self-heal.
+  if [[ "${with_blocky}" == "1" ]]; then
+    OSC_MULLVAD_NO_NOTIFY=1 "${OSC_MULLVAD_BIN}" ensure --grace "${OSC_MULLVAD_TOGGLE_ENSURE_GRACE_SEC:-0}" || true
+  fi
 }
 
 preview_toggle() {
@@ -198,6 +237,10 @@ if [[ "${run_as_root}" == "1" ]]; then
 
       if [[ -z "${OSC_MULLVAD_DIR:-}" ]]; then
         export OSC_MULLVAD_DIR="${caller_home}/.mullvad"
+      fi
+
+      if [[ -d "${caller_home}/.local/bin" ]]; then
+        export PATH="${caller_home}/.local/bin:${PATH}"
       fi
 
       # Preserve user profile tools (jq/bc/etc.) in pkexec root context.

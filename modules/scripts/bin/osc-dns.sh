@@ -234,7 +234,7 @@ show_dns_status() {
 
 	if have resolvconf; then
 		local sources
-		sources="$(resolvconf -i 2>/dev/null | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//')"
+		sources="$(resolvconf -i 2>/dev/null | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//' || true)"
 		[[ -n "$sources" ]] || sources="<none>"
 		print_kv "sources" "$sources"
 	fi
@@ -305,6 +305,9 @@ EOF
 
 main() {
 	case "${1:-status}" in
+	-v | --verbose)
+		show_dns_status --verbose
+		;;
 	status)
 		shift || true
 		show_dns_status "$@"
