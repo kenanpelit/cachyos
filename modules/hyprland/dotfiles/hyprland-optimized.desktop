@@ -7,6 +7,6 @@ DesktopNames=Hyprland
 X-GDM-SessionType=wayland
 X-Session-Type=wayland
 
-Exec=/home/kenan/.local/bin/hypr-set tty
+Exec=/usr/bin/env sh -lc "$HOME/.local/bin/hypr-set tty"
 
 Keywords=wayland;wm;tiling;hyprland;compositor;

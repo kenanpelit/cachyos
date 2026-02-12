@@ -86,6 +86,7 @@ Commands are listed in **Quick Start**.
 - Enable/disable modules in `hosts/<hostname>.yaml`.
 - Add/remove packages in `modules/*/packages.yaml`.
 - Apply changes with `sudo -E dcli sync`.
+- Operational runbook: `docs/OPERATIONS.md`.
 
 ## Notes
 

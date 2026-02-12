@@ -7,7 +7,7 @@
     password: None,
     theme: "kenp",
 
-    on_song_change: ["/home/kenan/.config/rmpc/on_song_change.sh"], 
+    on_song_change: ["/usr/bin/env", "sh", "-lc", "$HOME/.config/rmpc/on_song_change.sh"], 
     volume_step: 5,
     max_fps: 60,
     scrolloff: 0,

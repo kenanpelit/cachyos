@@ -407,7 +407,7 @@ fi
   
   # Add our custom completions and functions to fpath
   # Must be done before compinit runs
-  fpath=("/home/kenan/.config/zsh/completions" "/home/kenan/.config/zsh/functions" $fpath)
+  fpath=("${XDG_CONFIG_HOME}/zsh/completions" "${XDG_CONFIG_HOME}/zsh/functions" $fpath)
 
   # Load completion system module
   autoload -Uz compinit
@@ -415,7 +415,7 @@ fi
 
   # Set completion dump file location
   # Uses hostname and ZSH version to prevent conflicts
-  : ${ZSH_COMPDUMP:="/home/kenan/.cache/zsh/zcompdump-$HOST-$ZSH_VERSION"}
+  : ${ZSH_COMPDUMP:="${XDG_CACHE_HOME}/zsh/zcompdump-$HOST-$ZSH_VERSION"}
   zstyle ':completion:*' dump-file "$ZSH_COMPDUMP"
 
   # ----------------------------------------------------------------------
@@ -444,7 +444,7 @@ fi
   # • Runs in background (&!) to not block shell startup
   # ----------------------------------------------------------------------
   _safe_compinit() {
-    local _lock_file="/home/kenan/.cache/zsh/.compinit-${HOST}-${ZSH_VERSION}.lock"
+    local _lock_file="${XDG_CACHE_HOME}/zsh/.compinit-${HOST}-${ZSH_VERSION}.lock"
     local _dump_dir="$(dirname "$ZSH_COMPDUMP")"
 
     # Ensure dump directory exists
@@ -528,7 +528,7 @@ fi
   # Enable caching for better performance
   # Cache stores results of expensive completions
   zstyle ':completion:*' use-cache on
-  zstyle ':completion:*' cache-path "/home/kenan/.cache/zsh/.zcompcache"
+  zstyle ':completion:*' cache-path "${XDG_CACHE_HOME}/zsh/.zcompcache"
   
   # Enable full completion features
   zstyle ':completion:*' complete true
@@ -722,8 +722,8 @@ fi
 # Functions are lazy-loaded: loaded into memory but not executed
 # until called, saving startup time
 # ----------------------------------------------------------------------
-if [[ -d "/home/kenan/.config/zsh/functions" ]]; then
-  for func in "/home/kenan/.config/zsh/functions"/*(.N); do
+if [[ -d "${XDG_CONFIG_HOME}/zsh/functions" ]]; then
+  for func in "${XDG_CONFIG_HOME}/zsh/functions"/*(.N); do
     autoload -Uz "${func:t}"
   done
 fi
