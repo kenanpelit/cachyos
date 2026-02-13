@@ -634,6 +634,7 @@ here)
       local cmd="$1"
       shift || true
       local bin=""
+      local launch_path=""
 
       if bin="$(command -v "$cmd" 2>/dev/null)"; then
         :
@@ -643,7 +644,10 @@ here)
         return 1
       fi
 
-      "$bin" "$@" >/dev/null 2>&1 &
+      # Keybind-launched shells can carry a minimal/broken PATH (especially under DM).
+      # Normalize PATH so helper scripts that call other local binaries keep working.
+      launch_path="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:${PATH:-}"
+      PATH="$launch_path" "$bin" "$@" >/dev/null 2>&1 &
       disown || true
       return 0
     }
