@@ -591,11 +591,30 @@ here)
       "Ai"
       "CompecTA"
       "WebCord"
-      #"org.telegram.desktop"
+      "org.telegram.desktop"
       "brave-youtube.com__-Default"
       "spotify"
       "ferdium"
     )
+
+    app_id_regex() {
+      local app_id="$1"
+      case "$app_id" in
+      "Kenp") echo '^Kenp$' ;;
+      "TmuxKenp") echo '^(TmuxKenp|Tmux)$' ;;
+      "Ai") echo '^Ai$' ;;
+      "CompecTA") echo '^CompecTA$' ;;
+      "WebCord") echo '^WebCord$' ;;
+      "org.telegram.desktop") echo '^(org\.telegram\.desktop|TelegramDesktop)$' ;;
+      "brave-youtube.com__-Default") echo '^brave-youtube\.com__-Default$' ;;
+      "spotify") echo '^(spotify|Spotify|com\.spotify\.Client)$' ;;
+      "ferdium") echo '^ferdium$' ;;
+      *)
+        # Escape regex metacharacters for literal fallback.
+        printf '%s\n' "$app_id" | sed -E 's/[][(){}.^$*+?|\\]/\\&/g'
+        ;;
+      esac
+    }
 
     send_notify() {
       local msg="$1"
@@ -611,9 +630,36 @@ here)
       fi
     }
 
+    run_detached_cmd() {
+      local cmd="$1"
+      shift || true
+      local bin=""
+
+      if bin="$(command -v "$cmd" 2>/dev/null)"; then
+        :
+      elif [[ -x "$HOME/.local/bin/$cmd" ]]; then
+        bin="$HOME/.local/bin/$cmd"
+      else
+        return 1
+      fi
+
+      "$bin" "$@" >/dev/null 2>&1 &
+      disown || true
+      return 0
+    }
+
+    launch_from_candidates() {
+      local candidate=""
+      for candidate in "$@"; do
+        run_detached_cmd "$candidate" && return 0
+      done
+      return 1
+    }
+
     move_existing_window_here() {
       local app_id="$1"
-      local focus_after="${2:-0}"
+      local app_re="$2"
+      local focus_after="${3:-0}"
       local windows_json=""
       local workspaces_json=""
       local current_ws_id=""
@@ -649,8 +695,8 @@ here)
 
       target_id="$(
         echo "$windows_json" \
-          | jq -r --arg app "$app_id" --arg ws "$current_ws_id" \
-            'first(.[] | select((.app_id // "") == $app and ((.workspace_id | tostring) != $ws)) | .id) // empty' \
+          | jq -r --arg app_re "$app_re" --arg ws "$current_ws_id" \
+            'first(.[] | select((((.app_id // "") | tostring) | test($app_re)) and ((.workspace_id | tostring) != $ws)) | .id) // empty' \
               2>/dev/null || true
       )"
       [[ -n "$target_id" ]] || return 1
@@ -667,6 +713,7 @@ here)
       local APP_ID="$1"
       local allow_launch="${2:-1}"
       local focus_after="${3:-1}"
+      local app_re=""
       local any_window_id=""
       local current_ws_id=""
       local window_id=""
@@ -674,20 +721,21 @@ here)
       local workspaces_json=""
 
       if command -v niri >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+        app_re="$(app_id_regex "$APP_ID")"
         windows_json="$(niri msg -j windows 2>/dev/null || true)"
         workspaces_json="$(niri msg -j workspaces 2>/dev/null || true)"
 
         any_window_id="$(
           echo "$windows_json" \
-            | jq -r --arg app "$APP_ID" \
-              'first(.[] | select((.app_id // "") == $app) | .id) // empty' \
+            | jq -r --arg app_re "$app_re" \
+              'first(.[] | select(((.app_id // "") | tostring) | test($app_re)) | .id) // empty' \
                 2>/dev/null || true
         )"
       fi
 
       # --- 1. If a window exists, NEVER launch. Move/focus only. ---
       if [[ -n "$any_window_id" ]]; then
-        if move_existing_window_here "$APP_ID" "$focus_after"; then
+        if move_existing_window_here "$APP_ID" "$app_re" "$focus_after"; then
           send_notify "<b>$APP_ID</b> moved to current workspace."
           return 0
         fi
@@ -707,8 +755,8 @@ here)
         if [[ -n "$current_ws_id" ]]; then
           window_id="$(
             echo "$windows_json" \
-              | jq -r --arg app "$APP_ID" --arg ws "$current_ws_id" \
-                'first(.[] | select(.app_id == $app and ((.workspace_id|tostring) == $ws)) | .id) // empty' \
+              | jq -r --arg app_re "$app_re" --arg ws "$current_ws_id" \
+                'first(.[] | select((((.app_id // "") | tostring) | test($app_re)) and ((.workspace_id|tostring) == $ws)) | .id) // empty' \
                   2>/dev/null || true
           )"
         fi
@@ -737,26 +785,23 @@ here)
 
       send_notify "Launching <b>$APP_ID</b>..."
 
-      case "$APP_ID" in
-      "Kenp") start-brave-kenp >/dev/null 2>&1 & ;;
-      "TmuxKenp") start-kkenp >/dev/null 2>&1 & ;;
-      "Ai") start-brave-ai >/dev/null 2>&1 & ;;
-      "CompecTA") start-brave-compecta >/dev/null 2>&1 & ;;
-      "WebCord") start-webcord >/dev/null 2>&1 & ;;
-      #"org.telegram.desktop") Telegram >/dev/null 2>&1 & ;;
-      "brave-youtube.com__-Default") start-brave-youtube >/dev/null 2>&1 & ;;
-      "spotify") start-spotify >/dev/null 2>&1 & ;;
-      "ferdium") start-ferdium >/dev/null 2>&1 & ;;
-      "discord") start-discord >/dev/null 2>&1 & ;;
-      "kitty") kitty >/dev/null 2>&1 & ;;
-      *)
-        if command -v "$APP_ID" >/dev/null 2>&1; then
-          "$APP_ID" >/dev/null 2>&1 &
-        else
-          send_notify "Error: No start command found for <b>$APP_ID</b>" "critical"
-        fi
-        ;;
-      esac
+      if ! case "$APP_ID" in
+      "Kenp") launch_from_candidates start-brave-kenp ;;
+      "TmuxKenp") launch_from_candidates start-kkenp ;;
+      "Ai") launch_from_candidates start-brave-ai ;;
+      "CompecTA") launch_from_candidates start-brave-compecta ;;
+      "WebCord") launch_from_candidates start-webcord ;;
+      "org.telegram.desktop") launch_from_candidates telegram-desktop Telegram telegram ;;
+      "brave-youtube.com__-Default") launch_from_candidates start-brave-youtube ;;
+      "spotify") launch_from_candidates start-spotify ;;
+      "ferdium") launch_from_candidates start-ferdium ;;
+      "discord") launch_from_candidates start-discord ;;
+      "kitty") launch_from_candidates kitty ;;
+      *) launch_from_candidates "$APP_ID" ;;
+      esac; then
+        send_notify "Error: No start command found for <b>$APP_ID</b>" "critical"
+        return 1
+      fi
     }
 
     APP_ID="${1:-}"
