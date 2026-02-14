@@ -100,19 +100,21 @@ _sudo() {
   fi
 }
 
-# Run bluetoothctl with a hard timeout and capture output (do not trust exit code)
-_btctl_capture() {
-  if [ $# -gt 0 ]; then
-    timeout "$BLUETOOTH_TIMEOUT" bluetoothctl "$@" 2>&1 || true
-  else
-    timeout "$BLUETOOTH_TIMEOUT" bluetoothctl 2>&1 || true
-  fi
+# Feed a command batch into bluetoothctl and capture output.
+# We always append `quit` because non-interactive arg mode can be flaky under
+# user systemd units on some setups.
+_btctl_batch() {
+  local input="${1:-}"
+  printf '%b\nquit\n' "$input" | timeout "$BLUETOOTH_TIMEOUT" bluetoothctl 2>&1 || true
 }
 
-# Feed a command batch into bluetoothctl and capture output
-_btctl_batch() {
-  local input="$1"
-  printf '%s\n' "$input" | timeout "$BLUETOOTH_TIMEOUT" bluetoothctl 2>&1 || true
+# Run a single bluetoothctl command with a hard timeout and capture output.
+_btctl_capture() {
+  if [ $# -gt 0 ]; then
+    _btctl_batch "$*"
+  else
+    _btctl_batch "show"
+  fi
 }
 
 # ==============================================================================
@@ -128,12 +130,12 @@ check_bluetooth_service() {
 }
 
 check_bluetooth_power() {
-  if ! bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
+  if ! _btctl_capture show | grep -q "Powered: yes"; then
     log "Bluetooth is powered off. Powering on..." "WARNING"
-    bluetoothctl power on >/dev/null 2>&1 || true
+    _btctl_capture power on >/dev/null 2>&1 || true
     sleep 2
   fi
-  bluetoothctl show 2>/dev/null | grep -q "Powered: yes" || {
+  _btctl_capture show | grep -q "Powered: yes" || {
     log "Bluetooth could not be powered on." "ERROR"
     return 1
   }
@@ -142,17 +144,17 @@ check_bluetooth_power() {
 
 _detect_adapter_address() {
   # bluetoothctl list: "Controller AA:BB:CC:DD:EE:FF <name> [default]"
-  bluetoothctl list 2>/dev/null | awk '/Controller/ {print $2; exit}'
+  _btctl_capture list | awk '/Controller/ {print $2; exit}'
 }
 
 _is_paired() {
   local mac="$1"
-  bluetoothctl paired-devices 2>/dev/null | grep -qi "$mac"
+  _btctl_capture paired-devices | grep -qi "$mac"
 }
 
 _is_connected() {
   local mac="$1"
-  bluetoothctl info "$mac" 2>/dev/null | awk -F': ' '/Connected:/ {print $2}' | grep -qi "yes"
+  _btctl_capture info "$mac" | awk -F': ' '/Connected:/ {print $2}' | grep -qi "yes"
 }
 
 _wait_connected_yes() {
@@ -170,7 +172,7 @@ _wait_until_device_visible() {
   local mac="$1"
   local t=0
   while [ $t -lt "$SCAN_WAIT_SECONDS" ]; do
-    bluetoothctl devices 2>/dev/null | grep -qi "$mac" && return 0
+    _btctl_capture devices | grep -qi "$mac" && return 0
     sleep 1
     t=$((t + 1))
   done
@@ -181,7 +183,7 @@ _wait_until_device_visible() {
 get_battery_percentage() {
   local addr="$1"
   local raw pct
-  raw="$(bluetoothctl info "$addr" 2>/dev/null | awk -F': ' '/Battery Percentage/ {gsub(/[[:space:]]*/,"",$2); print $2; exit}')"
+  raw="$(_btctl_capture info "$addr" | awk -F': ' '/Battery Percentage/ {gsub(/[[:space:]]*/,"",$2); print $2; exit}')"
   [ -z "$raw" ] && return 0
   if echo "$raw" | grep -q '([0-9]\+)'; then
     pct="$(echo "$raw" | sed -n 's/.*(\([0-9]\+\)).*/\1/p')"
@@ -516,14 +518,14 @@ _pair_trust_connect_strict() {
   # Wait for paired-devices to settle (bluetoothctl lists can lag behind events)
   local t=0
   while [ $t -lt 10 ]; do
-    if bluetoothctl paired-devices 2>/dev/null | grep -qi "$mac"; then
+    if _btctl_capture paired-devices | grep -qi "$mac"; then
       break
     fi
     sleep 1
     t=$((t + 1))
   done
 
-  if ! bluetoothctl paired-devices 2>/dev/null | grep -qi "$mac"; then
+  if ! _btctl_capture paired-devices | grep -qi "$mac"; then
     # Accept if we saw explicit success in the captured output
     if echo "$out" | grep -qiE "Pairing successful|\[CHG\].*Paired: yes|\[CHG\].*Bonded: yes"; then
       log "paired-devices lag detected; proceeding because pairing success was reported." "WARNING"
@@ -664,7 +666,7 @@ _connect_device_with_scan() {
 
 _disconnect_device() {
   local mac="$1"
-  timeout "$BLUETOOTH_TIMEOUT" bluetoothctl disconnect "$mac" >/dev/null 2>&1 || true
+  _btctl_capture disconnect "$mac" >/dev/null 2>&1 || true
   _is_connected "$mac" && return 1
   return 0
 }
@@ -673,7 +675,7 @@ manage_connection() {
   local mac="$1" name="$2"
 
   local connected="no"
-  connected="$(bluetoothctl info "$mac" 2>/dev/null | awk -F': ' '/Connected:/ {print $2; exit}' || true)"
+  connected="$(_btctl_capture info "$mac" | awk -F': ' '/Connected:/ {print $2; exit}' || true)"
   [ -z "${connected:-}" ] && connected="no"
 
   if [ "$connected" = "yes" ]; then
