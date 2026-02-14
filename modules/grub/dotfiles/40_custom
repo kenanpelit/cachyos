@@ -1,49 +1,43 @@
 #!/bin/sh
 exec tail -n +3 $0
-# Custom GRUB entries
-# - Keep entries deterministic (UUID + chainloader path)
-# - Avoid stale ESP references
+# Cross-install GRUB jump entries for dual CachyOS setup.
+# Use each install's own grub.cfg via `configfile` (not kernel stanzas),
+# so whichever side you boot from can delegate to the other side cleanly.
 
-# ----------------------------------------------------------------------
-# CachyOS installed on SATA disk (sda) - chainload its own GRUB
-# Verified on /dev/sda1 (UUID 6880-73B3):
-#   /EFI/cachyos/grubx64.efi
-# ----------------------------------------------------------------------
-menuentry "CachyOS Rog (sda1 - GRUB chainload)" {
-    insmod part_gpt
-    insmod fat
-    search --no-floppy --fs-uuid --set=root 6880-73B3
-    chainloader /EFI/cachyos/grubx64.efi
+submenu "CachyOS installs (cross-GRUB)" {
+    menuentry "CachyOS A (nvme0n1p1, UUID 6784b6e4-7e6e-4662-9554-7bb313b427ee)" {
+        insmod part_gpt
+        insmod btrfs
+        search --no-floppy --fs-uuid --set=root 6784b6e4-7e6e-4662-9554-7bb313b427ee
+        if [ -f /@/boot/grub/grub.cfg ]; then
+            configfile /@/boot/grub/grub.cfg
+        elif [ -f /boot/grub/grub.cfg ]; then
+            configfile /boot/grub/grub.cfg
+        else
+            echo "grub.cfg not found on CachyOS A partition"
+            sleep 3
+        fi
+    }
+
+    menuentry "CachyOS B (nvme1n1p2, UUID 3f8b9c99-b595-464c-8aad-65c406da06de)" {
+        insmod part_gpt
+        insmod btrfs
+        search --no-floppy --fs-uuid --set=root 3f8b9c99-b595-464c-8aad-65c406da06de
+        if [ -f /@/boot/grub/grub.cfg ]; then
+            configfile /@/boot/grub/grub.cfg
+        elif [ -f /boot/grub/grub.cfg ]; then
+            configfile /boot/grub/grub.cfg
+        else
+            echo "grub.cfg not found on CachyOS B partition"
+            sleep 3
+        fi
+    }
 }
 
-# ----------------------------------------------------------------------
-# Current system CachyOS EFI chainload entry
-# EFI UUID (vfat): 9287-D3F5
-# ----------------------------------------------------------------------
-menuentry "CachyOS Lenovo (EFI - GRUB chainload)" {
+# Shared ESP fallback entry.
+menuentry "CachyOS EFI fallback (ESP 9287-D3F5)" {
     insmod part_gpt
     insmod fat
     search --no-floppy --fs-uuid --set=root 9287-D3F5
     chainloader /EFI/cachyos/grubx64.efi
-}
-
-# ----------------------------------------------------------------------
-# Second CachyOS on /dev/nvme0n1p1 (btrfs UUID 6784b6e4-7e6e-4662-9554-7bb313b427ee)
-# Root subvolume: @
-# Boot files available at /@/boot/*
-# ----------------------------------------------------------------------
-menuentry "CachyOS NVMe0 (linux-cachyos-bore)" {
-    insmod part_gpt
-    insmod btrfs
-    search --no-floppy --fs-uuid --set=root 6784b6e4-7e6e-4662-9554-7bb313b427ee
-    linux /@/boot/vmlinuz-linux-cachyos-bore root=UUID=6784b6e4-7e6e-4662-9554-7bb313b427ee rw rootflags=subvol=@ nowatchdog nvme_load=YES zswap.enabled=0 splash loglevel=3 intel_pstate=active intel_idle.max_cstate=7 processor.ignore_ppc=1 i915.enable_guc=3 i915.enable_fbc=1 i915.enable_dc=2 i915.enable_psr=1 i915.fastboot=1 mem_sleep_default=s2idle
-    initrd /@/boot/intel-ucode.img /@/boot/initramfs-linux-cachyos-bore.img
-}
-
-menuentry "CachyOS NVMe0 (linux-cachyos)" {
-    insmod part_gpt
-    insmod btrfs
-    search --no-floppy --fs-uuid --set=root 6784b6e4-7e6e-4662-9554-7bb313b427ee
-    linux /@/boot/vmlinuz-linux-cachyos root=UUID=6784b6e4-7e6e-4662-9554-7bb313b427ee rw rootflags=subvol=@ nowatchdog nvme_load=YES zswap.enabled=0 splash loglevel=3 intel_pstate=active intel_idle.max_cstate=7 processor.ignore_ppc=1 i915.enable_guc=3 i915.enable_fbc=1 i915.enable_dc=2 i915.enable_psr=1 i915.fastboot=1 mem_sleep_default=s2idle
-    initrd /@/boot/intel-ucode.img /@/boot/initramfs-linux-cachyos.img
 }
