@@ -130,3 +130,12 @@
 [submodule "modules/tmux/dotfiles/tmux/plugins/tpm"]
 	path = modules/tmux/dotfiles/tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/customRunningApps"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/customRunningApps
+	url = https://github.com/heyitsmikey128/DankCustomRunningApps
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dankRssWidget"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/dankRssWidget
+	url = https://github.com/BrendonJL/dms-rss-widget
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/developerUtilities"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/developerUtilities
+	url = https://github.com/xxyangyoulin/dms-plugin-developer-utilities
