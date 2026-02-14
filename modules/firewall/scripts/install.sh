@@ -37,6 +37,7 @@ TRANSMISSION_WEB_PORT="${TRANSMISSION_WEB_PORT:-9091}"
 TRANSMISSION_PEER_PORT="${TRANSMISSION_PEER_PORT:-51413}"
 ALLOW_KDECONNECT_PORTS="${ALLOW_KDECONNECT_PORTS:-0}"
 KDECONNECT_PORT_RANGE="${KDECONNECT_PORT_RANGE:-1714:1764}"
+KDECONNECT_ALLOWED_SUBNETS="${KDECONNECT_ALLOWED_SUBNETS:-}"
 
 if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw --force reset
@@ -54,8 +55,18 @@ if command -v ufw >/dev/null 2>&1; then
   fi
 
   if [ "${ALLOW_KDECONNECT_PORTS}" = "1" ]; then
-    ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/udp"
-    ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/tcp"
+    if [ -n "${KDECONNECT_ALLOWED_SUBNETS// /}" ]; then
+      # Accept comma and/or whitespace separated subnet list.
+      IFS=', ' read -r -a kde_subnets <<< "${KDECONNECT_ALLOWED_SUBNETS}"
+      for subnet in "${kde_subnets[@]}"; do
+        [ -n "${subnet}" ] || continue
+        ${SUDO} ufw allow from "${subnet}" to any port "${KDECONNECT_PORT_RANGE}" proto udp
+        ${SUDO} ufw allow from "${subnet}" to any port "${KDECONNECT_PORT_RANGE}" proto tcp
+      done
+    else
+      ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/udp"
+      ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/tcp"
+    fi
   fi
 
   ${SUDO} ufw --force enable
