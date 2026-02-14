@@ -102,7 +102,7 @@ enabled_modules:
   # --- System & Utility ---
   - clipse
   - sesh
-  - stasis
+  #- stasis
   - tmux
   - user-services
   - admin
