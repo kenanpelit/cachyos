@@ -48,7 +48,6 @@ packages:
   - eog
   - epiphany
   - evince
-  - ex-vi-compat
   - exfatprogs
   - f2fs-tools
   - ffmpegthumbnailer
