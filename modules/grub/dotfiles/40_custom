@@ -32,12 +32,11 @@ submenu "CachyOS installs (cross-GRUB)" {
             sleep 3
         fi
     }
-}
 
-# Shared ESP fallback entry.
-menuentry "CachyOS EFI fallback (ESP 9287-D3F5)" {
-    insmod part_gpt
-    insmod fat
-    search --no-floppy --fs-uuid --set=root 9287-D3F5
-    chainloader /EFI/cachyos/grubx64.efi
+    menuentry "CachyOS EFI fallback (ESP 9287-D3F5)" {
+        insmod part_gpt
+        insmod fat
+        search --no-floppy --fs-uuid --set=root 9287-D3F5
+        chainloader /EFI/cachyos/grubx64.efi
+    }
 }
