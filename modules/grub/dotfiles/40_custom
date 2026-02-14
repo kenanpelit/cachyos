@@ -5,7 +5,7 @@ exec tail -n +3 $0
 # so whichever side you boot from can delegate to the other side cleanly.
 
 submenu "CachyOS installs (cross-GRUB)" {
-    menuentry "CachyOS A (nvme0n1p1, UUID 6784b6e4-7e6e-4662-9554-7bb313b427ee)" {
+    menuentry "Other CachyOS (nvme0n1p1, UUID 6784b6e4-7e6e-4662-9554-7bb313b427ee)" {
         insmod part_gpt
         insmod btrfs
         search --no-floppy --fs-uuid --set=root 6784b6e4-7e6e-4662-9554-7bb313b427ee
@@ -14,23 +14,16 @@ submenu "CachyOS installs (cross-GRUB)" {
         elif [ -f /boot/grub/grub.cfg ]; then
             configfile /boot/grub/grub.cfg
         else
-            echo "grub.cfg not found on CachyOS A partition"
+            echo "grub.cfg not found on other CachyOS partition"
             sleep 3
         fi
     }
 
-    menuentry "CachyOS B (nvme1n1p2, UUID 3f8b9c99-b595-464c-8aad-65c406da06de)" {
+    menuentry "CachyOS Rog (sda1, EFI UUID 6880-73B3)" {
         insmod part_gpt
-        insmod btrfs
-        search --no-floppy --fs-uuid --set=root 3f8b9c99-b595-464c-8aad-65c406da06de
-        if [ -f /@/boot/grub/grub.cfg ]; then
-            configfile /@/boot/grub/grub.cfg
-        elif [ -f /boot/grub/grub.cfg ]; then
-            configfile /boot/grub/grub.cfg
-        else
-            echo "grub.cfg not found on CachyOS B partition"
-            sleep 3
-        fi
+        insmod fat
+        search --no-floppy --fs-uuid --set=root 6880-73B3
+        chainloader /EFI/cachyos/grubx64.efi
     }
 
     menuentry "CachyOS EFI fallback (ESP 9287-D3F5)" {
