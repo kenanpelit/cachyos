@@ -83,7 +83,7 @@ log_success() { echo -e "${GREEN}[SUCCESS]${NC} $*"; }
 
 # Configuration
 declare -A CONFIG=(
-  [base_dir]="/nixos/san/cachy"
+  [base_dir]="/sun/san/cachy"
   [ovmf_code]="/usr/share/edk2-ovmf/x64/OVMF.4m.fd"
   [ovmf_vars_template]="/usr/share/edk2-ovmf/x64/OVMF_VARS.4m.fd"
   [vm_name]="cachy"
@@ -96,7 +96,7 @@ declare -A CONFIG=(
   [iso_checksum]=""
   [display_mode]="gtk"
   [boot_mode]="bios"
-  [boot_order]="auto"   # auto|disk|cdrom
+  [boot_order]="auto" # auto|disk|cdrom
   [shared_dir]="/run/user/$(id -u)"
   [attach_iso]="true"
   [daemonize]="false"

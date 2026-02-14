@@ -50,7 +50,7 @@ log_success() { echo -e "${GREEN}[SUCCESS]${NC} $*"; }
 
 # Configuration
 declare -A CONFIG=(
-  [base_dir]="/nixos/san/nixos"
+  [base_dir]="/sun/san/nixos"
   [ovmf_code]="/usr/share/edk2-ovmf/x64/OVMF.4m.fd"
   [ovmf_vars_template]="/usr/share/edk2-ovmf/x64/OVMF_VARS.4m.fd"
   [vm_name]="nixos"
