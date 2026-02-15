@@ -15,18 +15,21 @@ set -euo pipefail
 readonly SCRIPT_NAME="$(basename "$0")"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rofi"
-readonly THEME_FILE="${CONFIG_DIR}/themes/launcher.rasi"
 readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/rofi"
 
-# Ensure user-local bins are visible to rofi run/custom modes.
-case ":${PATH:-}:" in
-	*":$HOME/.local/bin:"*) ;;
-	*) export PATH="$HOME/.local/bin:$PATH" ;;
-esac
-case ":${PATH:-}:" in
-	*":$HOME/bin:"*) ;;
-	*) export PATH="$HOME/bin:$PATH" ;;
-esac
+THEME_FILE=""
+for candidate in \
+	"${CONFIG_DIR}/themes/launcher.rasi" \
+	"${CONFIG_DIR}/config.rasi" \
+	"${CONFIG_DIR}/theme.rasi"; do
+	if [[ -f "$candidate" ]]; then
+		THEME_FILE="$candidate"
+		break
+	fi
+done
+
+# Ensure common user/system bins are visible to rofi run/custom modes.
+export PATH="/usr/local/bin:/usr/bin:${HOME}/.local/bin:${HOME}/bin:${PATH:-}"
 
 # Create cache directory
 mkdir -p "$CACHE_DIR"
@@ -40,7 +43,6 @@ MODE="default"
 # Command prefixes for custom mode
 readonly CMD_PREFIXES=("start-")
 readonly CUSTOM_BIN_DIRS=(
-	"/etc/profiles/per-user/${USER:-kenan}/bin"
 	"$HOME/.local/bin"
 	"$HOME/bin"
 )
@@ -173,7 +175,7 @@ add_to_frecency() {
 }
 
 get_theme_param() {
-	if [[ -f "$THEME_FILE" ]]; then
+	if [[ -n "$THEME_FILE" && -f "$THEME_FILE" ]]; then
 		echo "-theme $THEME_FILE"
 	fi
 }
@@ -1082,7 +1084,6 @@ POWER MENU ENVIRONMENT:
 
 CUSTOM COMMANDS:
     Search locations:
-    - /etc/profiles/per-user/kenan/bin
     - \$HOME/.local/bin
     - \$HOME/bin
     - All directories in \$PATH
@@ -1099,7 +1100,6 @@ POWER MENU ENVIRONMENT:
 
 CUSTOM COMMANDS:
     Search locations:
-    - /etc/profiles/per-user/${USER:-kenan}/bin
     - \$HOME/.local/bin
     - \$HOME/bin
     - All directories in \$PATH
@@ -1248,32 +1248,31 @@ if [[ "$MODE" == "power" ]]; then
 	exit $?
 fi
 
-# Execute the selected mode
-SELECTED=$(mode_${MODE})
-exit_code=$?
-
-if [[ $exit_code -ne 0 ]]; then
-	exit $exit_code
+# Rofi handles execution internally for built-in modes.
+if [[ "$MODE" != "custom" ]]; then
+	mode_${MODE}
+	exit $?
 fi
 
-# Handle command execution for non-power modes
-if [[ -n "$SELECTED" ]]; then
-	if [[ "$MODE" == "custom" ]]; then
-		add_to_frecency "$SELECTED"
-	fi
+# Custom mode returns a command string via dmenu; execute it ourselves.
+if ! SELECTED=$(mode_custom); then
+	exit 0
+fi
 
-	if has_command "$SELECTED"; then
-		"$SELECTED" >/dev/null 2>&1 &
-		exec_result=$?
-	else
-		eval "$SELECTED" >/dev/null 2>&1 &
-		exec_result=$?
-	fi
+[[ -n "$SELECTED" ]] || exit 0
+add_to_frecency "$SELECTED"
 
-	if [[ $exec_result -ne 0 ]]; then
-		notify "Rofi Launcher" "Failed to execute: $SELECTED" "dialog-error"
-		exit 1
-	fi
+if has_command "$SELECTED"; then
+	"$SELECTED" >/dev/null 2>&1 &
+	exec_result=$?
+else
+	eval "$SELECTED" >/dev/null 2>&1 &
+	exec_result=$?
+fi
+
+if [[ $exec_result -ne 0 ]]; then
+	notify "Rofi Launcher" "Failed to execute: $SELECTED" "dialog-error"
+	exit 1
 fi
 
 exit 0
