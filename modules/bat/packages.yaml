@@ -2,3 +2,4 @@ description: bat packages
 
 packages:
   - bat
+  - llhttp
