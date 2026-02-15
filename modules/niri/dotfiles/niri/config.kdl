@@ -1024,7 +1024,7 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^ferdium$"#
+  match app-id=r#"^(ferdium|Ferdium)$"#
   open-on-workspace "9"
 }
 window-rule {
@@ -1041,7 +1041,7 @@ window-rule {
   match app-id=r#"^clipse$"#
   match app-id=r#"^gcr-prompter$"#
   match app-id=r#"^polkit-gnome-authentication-agent-1$"#
-  match app-id=r#"^(discord|WebCord|ferdium|com\.rtosta\.zapzap|org\.telegram\.desktop|Signal|Slack|whatsapp-for-linux)$"#
+  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|com\.rtosta\.zapzap|org\.telegram\.desktop|Signal|Slack|whatsapp-for-linux)$"#
   match app-id=r#"^(nm-connection-editor|blueman-manager)$"#
   block-out-from "screencast"
 }
@@ -1070,7 +1070,7 @@ window-rule {
 
 window-rule {
   match app-id=r#"^(org\.gnome\..*|org\.wezfurlong\.wezterm|zen|com\.mitchellh\.ghostty|kitty|firefox|brave-browser)$"#
-  match app-id=r#"^(Kenp|Ai|CompecTA|Whats|Exclude|brave-youtube\.com__-Default|ferdium)$"#
+  match app-id=r#"^(Kenp|Ai|CompecTA|Whats|Exclude|brave-youtube\.com__-Default|ferdium|Ferdium)$"#
   draw-border-with-background false
 }
 

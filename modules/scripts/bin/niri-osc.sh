@@ -608,7 +608,7 @@ here)
       "org.telegram.desktop") echo '^(org\.telegram\.desktop|TelegramDesktop)$' ;;
       "brave-youtube.com__-Default") echo '^brave-youtube\.com__-Default$' ;;
       "spotify") echo '^(spotify|Spotify|com\.spotify\.Client)$' ;;
-      "ferdium") echo '^ferdium$' ;;
+      "ferdium") echo '^(ferdium|Ferdium)$' ;;
       *)
         # Escape regex metacharacters for literal fallback.
         printf '%s\n' "$app_id" | sed -E 's/[][(){}.^$*+?|\\]/\\&/g'
@@ -1917,7 +1917,7 @@ EOF
       RULE_PATTERNS+=("^(spotify|Spotify|com\\.spotify\\.Client)$")
       RULE_WORKSPACES+=("8")
       RULE_TITLE_PATTERNS+=("")
-      RULE_PATTERNS+=("^ferdium$")
+      RULE_PATTERNS+=("^(ferdium|Ferdium)$")
       RULE_WORKSPACES+=("9")
       RULE_TITLE_PATTERNS+=("")
       RULE_PATTERNS+=("^org\\.keepassxc\\.KeePassXC$")
