@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export NODE_OPTIONS="--disable-warning=DEP0040 ${NODE_OPTIONS:-}"
 export PATH="$HOME/.local/bin:$PATH"
 NPM_PREFIX="$HOME/.local"
 
