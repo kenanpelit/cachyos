@@ -2,4 +2,5 @@ description: bat packages
 
 packages:
   - bat
+  - extra/libgit2
   - llhttp
