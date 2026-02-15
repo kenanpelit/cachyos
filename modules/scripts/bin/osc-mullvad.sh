@@ -345,11 +345,18 @@ blocky_stop() {
 	fi
 }
 
+blocky_set_resolver_local() {
+	# Blocky fallback must be used as resolver when VPN is down.
+	sudo_run "rm -f /etc/resolv.conf; printf 'nameserver 127.0.0.1\nnameserver ::1\n' > /etc/resolv.conf" || return 1
+}
+
 blocky_start() {
 	blocky_unit_exists || return 0
-	blocky_is_active && return 0
-	log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
-	sudo_run "systemctl start blocky.service" || return 1
+	if ! blocky_is_active; then
+		log "Blocky başlatılıyor (VPN kapalıyken DNS ad-block)..."
+		sudo_run "systemctl start blocky.service" || return 1
+	fi
+	blocky_set_resolver_local || true
 }
 
 mullvad_account_ready() {

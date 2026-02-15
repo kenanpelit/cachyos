@@ -1,3 +1,3 @@
 description: blocky DNS ad-blocking
 post_install_hook: scripts/install.sh
-post_hook_behavior: once
+post_hook_behavior: always

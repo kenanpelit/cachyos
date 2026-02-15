@@ -2,8 +2,12 @@
 # https://0xerr0r.github.io/blocky/latest/
 
 ports:
-  dns: 53
-  http: 4000
+  # Bind only loopback to avoid port 53 conflict with systemd-resolved (127.0.0.53).
+  dns:
+    - 127.0.0.1:53
+    - "[::1]:53"
+  http:
+    - 127.0.0.1:4000
 
 log:
   level: info
