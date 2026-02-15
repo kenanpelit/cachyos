@@ -25,6 +25,7 @@ ENABLE_ICONS=${ENABLE_ICONS:-true}
 PREFER_BLUETOOTH=${PREFER_BLUETOOTH:-false}
 SAVE_PREFERENCES=${SAVE_PREFERENCES:-true}
 EXCLUDE_SINK_REGEX=${EXCLUDE_SINK_REGEX:-"HDMI|DisplayPort"} # HDMI/DP’leri döngüden çıkar
+INCLUDE_UNAVAILABLE_SINKS=${INCLUDE_UNAVAILABLE_SINKS:-false}
 VERSION="3.3.0"
 
 # --- Kalıcı dosyalar (config yok; sadece state/profiller) -----------------------
@@ -165,10 +166,24 @@ get_device_icon() {
 }
 get_sink_display_name() {
 	local raw="$1" id="$2"
-	local desc
-	desc=$(echo "$raw" | sed -e 's/bluez_output\.//; s/alsa_output\.//; s/\.analog-stereo//; s/[[:space:]]+$//')
+	local desc=""
+	if [[ -n "${id}" ]]; then
+		desc="$(__node_description "${id}")"
+		if [[ -z "${desc}" || "${desc}" == "bluez_output."* ]]; then
+			desc="$(__node_media_name "${id}")"
+			desc="$(echo "${desc}" | sed -E 's/[[:space:]]+(input|output)$//I')"
+		fi
+	fi
+	if [[ -z "${desc}" ]]; then
+		desc="$(echo "$raw" | sed -e 's/bluez_output\.//; s/alsa_output\.//; s/\.analog-stereo//; s/[[:space:]]+$//')"
+	fi
+	desc="$(echo "${desc}" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//')"
 	local icon
-	icon=$(get_device_icon "$desc")
+	if echo "${raw} ${desc}" | grep -qiE 'bluez|bluetooth|([0-9A-F]{2}:){5}[0-9A-F]{2}'; then
+		icon="$ICON_BLUETOOTH"
+	else
+		icon=$(get_device_icon "$desc")
+	fi
 	echo "${icon} ${desc}"
 }
 get_source_display_name() {
@@ -187,6 +202,97 @@ __find_active_from_block() {
       /^\*/ { line=$0; sub(/^\*[[:space:]]*/,"", line);
                if (match(line, /^([0-9]+)/, m)) { print m[1]; exit } }
     '
+}
+
+# wpctl inspect üzerinden varsayılan node ID'sini güvenilir şekilde al.
+__default_node_id() {
+	local token="$1"
+	local line
+	line="$(wpctl inspect "${token}" 2>/dev/null | head -n1)"
+	if [[ "${line}" =~ id[[:space:]]+([0-9]+) ]]; then
+		echo "${BASH_REMATCH[1]}"
+	fi
+}
+__node_media_class() {
+	local node_id="$1"
+	wpctl inspect "${node_id}" 2>/dev/null |
+		sed -n -E 's/^[[:space:]]*\*?[[:space:]]*media.class = "(.*)"/\1/p' |
+		head -n1
+}
+__node_name() {
+	local node_id="$1"
+	wpctl inspect "${node_id}" 2>/dev/null |
+		sed -n -E 's/^[[:space:]]*\*?[[:space:]]*node.name = "(.*)"/\1/p' |
+		head -n1
+}
+__node_description() {
+	local node_id="$1"
+	wpctl inspect "${node_id}" 2>/dev/null |
+		sed -n -E 's/^[[:space:]]*\*?[[:space:]]*node.description = "(.*)"/\1/p' |
+		head -n1
+}
+__node_media_name() {
+	local node_id="$1"
+	wpctl inspect "${node_id}" 2>/dev/null |
+		sed -n -E 's/^[[:space:]]*\*?[[:space:]]*media.name = "(.*)"/\1/p' |
+		head -n1
+}
+__pulse_sink_name_from_node_id() {
+	local node_id="$1"
+	local node_name
+	node_name="$(__node_name "${node_id}")"
+	[[ -n "${node_name}" ]] || return 1
+	command -v pactl >/dev/null 2>&1 || return 1
+	pactl list short sinks 2>/dev/null |
+		awk -v needle="${node_name}" '$2==needle {print $2; exit}'
+}
+__sink_active_port_available() {
+	local node_id="$1"
+	command -v pactl >/dev/null 2>&1 || return 0
+
+	local pulse_sink_name
+	pulse_sink_name="$(__pulse_sink_name_from_node_id "${node_id}")"
+	[[ -n "${pulse_sink_name}" ]] || return 0
+
+	local sink_block
+	sink_block="$(
+		pactl list sinks 2>/dev/null | awk -v name="${pulse_sink_name}" '
+      BEGIN{capture=0; found=0}
+      /^Sink #[0-9]+/ {
+        if (capture) exit
+      }
+      {
+        if ($0 ~ /^[[:space:]]*Name:[[:space:]]*/) {
+          line=$0
+          sub(/^[[:space:]]*Name:[[:space:]]*/, "", line)
+          if (line == name) { capture=1; found=1 }
+        }
+        if (capture) print
+      }
+      END { if (!found) exit 1 }'
+	)" || return 0
+
+	local active_port
+	active_port="$(printf "%s\n" "${sink_block}" | sed -n 's/^[[:space:]]*Active Port:[[:space:]]*//p' | head -n1)"
+	[[ -z "${active_port}" ]] && return 0
+
+	if printf "%s\n" "${sink_block}" | awk -v ap="${active_port}" '
+      BEGIN { found=0 }
+      {
+        line=$0
+        sub(/^[[:space:]]*/, "", line)
+        if (index(line, ap ":") == 1) {
+          found=1
+          if (line ~ /not available\)/) exit 1
+          exit 0
+        }
+      }
+      END {
+        if (!found) exit 0
+      }'; then
+		return 0
+	fi
+	return 1
 }
 
 # --- Bluetooth’u öne alma -------------------------------------------------------
@@ -212,6 +318,8 @@ get_sinks() {
 	SINK_IDS=()
 	local block
 	block="$(wpctl status | sed -n '/Sinks:/,/Sources:/p')"
+	local filter_block
+	filter_block="$(wpctl status | sed -n '/Filters:/,/Streams:/p')"
 
 	while IFS= read -r line; do
 		line="$(echo "$line" | __strip)"
@@ -220,12 +328,40 @@ get_sinks() {
 		id="$(echo "$line" | sed -E 's/^\*?[[:space:]]*([0-9]+)\..*/\1/')"
 		name="$(echo "$line" | sed -E 's/^\*?[[:space:]]*[0-9]+\.\s*//; s/\[vol:.*\]//; s/[[:space:]]+$//')"
 		[[ -n "$id" && -n "$name" ]] || continue
+		local media_class
+		media_class="$(__node_media_class "$id")"
+		[[ -n "${media_class}" && "${media_class}" != "Audio/Sink" ]] && continue
+		if [[ "${INCLUDE_UNAVAILABLE_SINKS}" != true ]] && ! __sink_active_port_available "${id}"; then
+			continue
+		fi
 		if [[ -n "$EXCLUDE_SINK_REGEX" ]] && echo "$name" | grep -Eq "$EXCLUDE_SINK_REGEX"; then
 			continue
 		fi
 		SINK_IDS+=("$id")
 		SINKS+=("$name")
 	done <<<"$block"
+
+	# Bazı bluetooth sink'ler "Sinks" yerine "Filters" bloğunda [Audio/Sink] olarak görünür.
+	while IFS= read -r line; do
+		line="$(echo "$line" | __strip)"
+		[[ "$line" =~ ^\*?[[:space:]]*[0-9]+\. ]] || continue
+		[[ "$line" =~ \[Audio/Sink\] ]] || continue
+		local id name media_class
+		id="$(echo "$line" | sed -E 's/^\*?[[:space:]]*([0-9]+)\..*/\1/')"
+		name="$(echo "$line" | sed -E 's/^\*?[[:space:]]*[0-9]+\.\s*//; s/\s*\[Audio\/Sink\]\s*$//; s/[[:space:]]+$//')"
+		[[ -n "$id" && -n "$name" ]] || continue
+		id_in_array "$id" "${SINK_IDS[@]}" && continue
+		media_class="$(__node_media_class "$id")"
+		[[ -n "${media_class}" && "${media_class}" != "Audio/Sink" ]] && continue
+		if [[ "${INCLUDE_UNAVAILABLE_SINKS}" != true ]] && ! __sink_active_port_available "${id}"; then
+			continue
+		fi
+		if [[ -n "$EXCLUDE_SINK_REGEX" ]] && echo "$name" | grep -Eq "$EXCLUDE_SINK_REGEX"; then
+			continue
+		fi
+		SINK_IDS+=("$id")
+		SINKS+=("$name")
+	done <<<"$filter_block"
 
 	if [ "${PREFER_BLUETOOTH}" = true ] && (printf "%s\n" "${SINKS[@]}" | grep -qiE 'bluez|bluetooth'); then
 		__prefer_bluetooth_arrays
@@ -234,6 +370,7 @@ get_sinks() {
 	SINKS_COUNT=${#SINKS[@]}
 	local active_id
 	active_id="$(__find_active_from_block "$block")"
+	[[ -z "${active_id}" ]] && active_id="$(__default_node_id @DEFAULT_AUDIO_SINK@)"
 	RUNNING_SINK=""
 	SINK_INDEX=-1
 	for i in "${!SINK_IDS[@]}"; do
@@ -277,6 +414,7 @@ get_sources() {
 	SOURCES_COUNT=${#SOURCES[@]}
 	local active_id
 	active_id="$(__find_active_from_block "$block")"
+	[[ -z "${active_id}" ]] && active_id="$(__default_node_id @DEFAULT_AUDIO_SOURCE@)"
 	DEFAULT_SOURCE=""
 	SOURCE_INDEX=-1
 	for i in "${!SOURCE_IDS[@]}"; do
@@ -365,15 +503,39 @@ notify_mic_mute() {
 }
 
 # --- Streams’leri yeni varsayılan sink’e taşı ----------------------------------
-migrate_streams_to_default() {
+migrate_streams_to_sink() {
+	local target_sink_id="$1"
+	[[ -n "${target_sink_id}" ]] || return 0
+
+	local pulse_sink_name
+	pulse_sink_name="$(__pulse_sink_name_from_node_id "${target_sink_id}")"
+	if [[ -n "${pulse_sink_name}" ]]; then
+		while read -r stream_id _; do
+			[[ "${stream_id}" =~ ^[0-9]+$ ]] || continue
+			pactl move-sink-input "${stream_id}" "${pulse_sink_name}" >/dev/null 2>&1 || true
+		done < <(pactl list short sink-inputs 2>/dev/null)
+		return 0
+	fi
+
+	wpctl --help 2>/dev/null | grep -q 'move-node' || return 0
+
 	local streams
-	streams="$(wpctl status | sed -n '/Streams:/,/Settings:/p' |
-		grep -E '^[[:space:]]*[0-9]+\.' |
-		__strip |
-		sed -E 's/^([0-9]+)\..*/\1/')"
+	streams="$(
+		wpctl status | awk '
+      BEGIN{in_streams=0}
+      /^[[:space:]]*└─ Streams:/ {in_streams=1; next}
+      in_streams {
+        if ($0 ~ /^[[:space:]]*[A-Za-z][A-Za-z[:space:]]*$/) exit
+        line=$0
+        if (line ~ /[><]/) next
+        gsub(/^[[:space:]│└┌┐┘├┤┬┴─*]+/, "", line)
+        if (match(line, /^([0-9]+)\./, m)) print m[1]
+      }'
+	)"
 	while IFS= read -r sid; do
 		[[ -n "$sid" ]] || continue
-		wpctl move-node "$sid" @DEFAULT_AUDIO_SINK@ >/dev/null 2>&1 || true
+		wpctl inspect "$sid" 2>/dev/null | grep -q 'media.class = "Stream/Output/Audio"' || continue
+		wpctl move-node "$sid" "${target_sink_id}" >/dev/null 2>&1 || true
 	done <<<"$streams"
 }
 
@@ -384,7 +546,22 @@ switch_sink() {
 		error "Failed to set default sink: ${target_sink_id}"
 		return 1
 	fi
-	migrate_streams_to_default
+	local pulse_sink_name
+	pulse_sink_name="$(__pulse_sink_name_from_node_id "${target_sink_id}")"
+	if [[ -n "${pulse_sink_name}" ]]; then
+		pactl set-default-sink "${pulse_sink_name}" >/dev/null 2>&1 || true
+	fi
+
+	# WirePlumber güncellemesini bekle ve gerekirse bir kez daha zorla.
+	sleep 0.05
+	local confirmed_sink_id
+	confirmed_sink_id="$(__default_node_id @DEFAULT_AUDIO_SINK@)"
+	if [[ -n "${confirmed_sink_id}" && "${confirmed_sink_id}" != "${target_sink_id}" ]]; then
+		wpctl set-default "${target_sink_id}" >/dev/null 2>&1 || true
+		sleep 0.05
+	fi
+
+	migrate_streams_to_sink "${target_sink_id}"
 	save_state "last_sink" "${target_sink_id}"
 
 	get_sinks
@@ -450,12 +627,33 @@ handle_switch() {
 		notify "Bilgi" "Sadece bir uygun ses cihazı mevcut" "dialog-information"
 		return 0
 	fi
+	local base_index="${SINK_INDEX}"
+	local last_sink last_index=-1
+	last_sink="$(load_state "last_sink")"
+	if [[ -n "${last_sink}" && "${last_sink}" =~ ^[0-9]+$ ]]; then
+		for i in "${!SINK_IDS[@]}"; do
+			if [[ "${SINK_IDS[$i]}" == "${last_sink}" ]]; then
+				last_index="$i"
+				break
+			fi
+		done
+	fi
+
+	if ((last_index >= 0)); then
+		local active_id=""
+		((base_index >= 0)) && active_id="${SINK_IDS[$base_index]}"
+		if [[ "${active_id}" != "${last_sink}" ]]; then
+			base_index="${last_index}"
+			debug_print "Switch Fallback" "Aktif sink tespiti güvenilir değil; last_sink (${last_sink}) baz alındı."
+		fi
+	fi
+
 	local next_index
-	if ((SINK_INDEX < 0)); then
+	if ((base_index < 0)); then
 		next_index=0
 		debug_print "İlk Cihaz" "Aktif mevcut listede değil, 0'a geçiliyor"
 	else
-		next_index=$(((SINK_INDEX + 1) % SINKS_COUNT))
+		next_index=$(((base_index + 1) % SINKS_COUNT))
 	fi
 	switch_to_sink_index "${next_index}"
 }
