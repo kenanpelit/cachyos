@@ -16,6 +16,7 @@ readonly SCRIPT_NAME="$(basename "$0")"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rofi"
 readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/rofi"
+readonly ROFI_PID_FILE="${CACHE_DIR}/launcher.pid"
 
 THEME_FILE=""
 for candidate in \
@@ -148,6 +149,25 @@ notify() {
 	if has_command notify-send; then
 		notify-send "$title" "$message" -i "$icon" 2>/dev/null || true
 	fi
+}
+
+cleanup_rofi_pid() {
+	[[ -f "$ROFI_PID_FILE" ]] || return 0
+
+	local pid comm
+	pid="$(cat "$ROFI_PID_FILE" 2>/dev/null || true)"
+
+	if [[ "$pid" =~ ^[0-9]+$ ]]; then
+		comm="$(ps -p "$pid" -o comm= 2>/dev/null | tr -d '[:space:]' || true)"
+		[[ "$comm" == "rofi" ]] && return 0
+	fi
+
+	rm -f "$ROFI_PID_FILE" 2>/dev/null || true
+}
+
+rofi_cmd() {
+	cleanup_rofi_pid
+	rofi -pid "$ROFI_PID_FILE" "$@"
 }
 
 frecency_add() {
@@ -739,7 +759,7 @@ power_contains_label() {
 #╰──────────────────────────────────────────────────────────────────────────────╯
 
 mode_default() {
-	rofi \
+	rofi_cmd \
 		-show combi \
 		-combi-modi 'drun,run,window,filebrowser,ssh' \
 		-modi "combi,drun,run,window,filebrowser,ssh" \
@@ -754,7 +774,7 @@ mode_default() {
 }
 
 mode_apps() {
-	rofi \
+	rofi_cmd \
 		-show drun \
 		-modi drun \
 		-show-icons \
@@ -768,7 +788,7 @@ mode_apps() {
 }
 
 mode_run() {
-	rofi \
+	rofi_cmd \
 		-show run \
 		-modi run \
 		-matching fuzzy \
@@ -778,7 +798,7 @@ mode_run() {
 }
 
 mode_window() {
-	rofi \
+	rofi_cmd \
 		-show window \
 		-modi window \
 		-show-icons \
@@ -789,7 +809,7 @@ mode_window() {
 }
 
 mode_files() {
-	rofi \
+	rofi_cmd \
 		-show filebrowser \
 		-modi filebrowser \
 		-matching fuzzy \
@@ -798,7 +818,7 @@ mode_files() {
 }
 
 mode_ssh() {
-	rofi \
+	rofi_cmd \
 		-show ssh \
 		-modi ssh \
 		-matching fuzzy \
@@ -886,7 +906,7 @@ mode_custom() {
 		return 1
 	fi
 
-	echo "$commands" | rofi \
+	echo "$commands" | rofi_cmd \
 		-dmenu \
 		-p "󰘳 Custom Commands" \
 		-i \
@@ -908,7 +928,7 @@ mode_power() {
 
 	# Launch as rofi mode
 	local self="$(readlink -f "${BASH_SOURCE[0]}")"
-	exec rofi -show power \
+	exec rofi_cmd -show power \
 		-modi "power:${self} --power-mode-internal" \
 		-theme "${POWER_THEME_FILE}" \
 		-show-icons \
@@ -1010,7 +1030,7 @@ mode_keys() {
 		return 1
 	fi
 
-	echo "$keybinds" | rofi \
+	echo "$keybinds" | rofi_cmd \
 		-dmenu \
 		-p "⌨ Hyprland Keybindings" \
 		-i \

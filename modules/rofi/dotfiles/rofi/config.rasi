@@ -60,7 +60,6 @@
       
       /* Behavior */
       sort: true;
-      pid: "/run/user/1000/rofi.pid";
       auto-select: false;
       parse-hosts: true;
       parse-known-hosts: true;
