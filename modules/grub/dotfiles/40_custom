@@ -1,20 +1,33 @@
 #!/bin/sh
 exec tail -n +3 $0
 # Cross-install GRUB jump entries for dual CachyOS setup.
-# Use each install's own grub.cfg via `configfile` (not kernel stanzas),
-# so whichever side you boot from can delegate to the other side cleanly.
+# Use each install's own grub.cfg via `configfile` (not kernel stanzas).
 
 submenu "CachyOS installs (cross-GRUB)" {
-    menuentry "Other CachyOS (nvme0n1p1, UUID 6784b6e4-7e6e-4662-9554-7bb313b427ee)" {
+    menuentry "CachyOS (nvme1n1p2, UUID 3f8b9c99-b595-464c-8aad-65c406da06de)" {
         insmod part_gpt
         insmod btrfs
-        search --no-floppy --fs-uuid --set=root 6784b6e4-7e6e-4662-9554-7bb313b427ee
+        search --no-floppy --fs-uuid --set=root 3f8b9c99-b595-464c-8aad-65c406da06de
         if [ -f /@/boot/grub/grub.cfg ]; then
             configfile /@/boot/grub/grub.cfg
         elif [ -f /boot/grub/grub.cfg ]; then
             configfile /boot/grub/grub.cfg
         else
-            echo "grub.cfg not found on other CachyOS partition"
+            echo "grub.cfg not found on nvme1n1p2"
+            sleep 3
+        fi
+    }
+
+    menuentry "CachyOS (nvme0n1p1, UUID 8a26da5e-603a-4895-ab78-b273d9e1fde4)" {
+        insmod part_gpt
+        insmod btrfs
+        search --no-floppy --fs-uuid --set=root 8a26da5e-603a-4895-ab78-b273d9e1fde4
+        if [ -f /@/boot/grub/grub.cfg ]; then
+            configfile /@/boot/grub/grub.cfg
+        elif [ -f /boot/grub/grub.cfg ]; then
+            configfile /boot/grub/grub.cfg
+        else
+            echo "grub.cfg not found on nvme0n1p1"
             sleep 3
         fi
     }
