@@ -7,4 +7,4 @@ dotfiles:
     target: ~/.config/systemd/user/transmission.timer
 
 post_install_hook: scripts/install.sh
-post_hook_behavior: ask
+post_hook_behavior: always
