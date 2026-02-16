@@ -6,6 +6,7 @@ PartOf=hyprland-session.target niri-session.target
 [Service]
 Type=simple
 Environment=DMS_SCREENSHOT_EDITOR=swappy
+Environment=TERMINAL=kitty
 Environment=XDG_RUNTIME_DIR=/run/user/%U
 Environment=XDG_SESSION_TYPE=wayland
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
