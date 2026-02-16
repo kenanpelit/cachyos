@@ -139,3 +139,6 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/developerUtilities"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/developerUtilities
 	url = https://github.com/xxyangyoulin/dms-plugin-developer-utilities
+[submodule "modules/dms/dotfiles/DankMaterialShell/themes/dmsRegistry"]
+	path = modules/dms/dotfiles/DankMaterialShell/themes/dmsRegistry
+	url = https://github.com/AvengeMedia/dms-plugin-registry.git
