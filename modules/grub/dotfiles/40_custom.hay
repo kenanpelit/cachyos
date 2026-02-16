@@ -1,0 +1,28 @@
+#!/bin/sh
+exec tail -n +3 $0
+# Machine-specific GRUB entries for host "hay".
+# This file is intended to be installed manually via:
+#   modules/grub/scripts/install-hay.sh
+
+submenu "CachyOS installs (hay)" {
+    menuentry "CachyOS Hay (self, nvme0n1p1, UUID 4c9b9c8a-398c-41f4-97a7-3ae12196f129)" {
+        insmod part_gpt
+        insmod btrfs
+        search --no-floppy --fs-uuid --set=root 4c9b9c8a-398c-41f4-97a7-3ae12196f129
+        if [ -f /@/boot/grub/grub.cfg ]; then
+            configfile /@/boot/grub/grub.cfg
+        elif [ -f /boot/grub/grub.cfg ]; then
+            configfile /boot/grub/grub.cfg
+        else
+            echo "grub.cfg not found on nvme0n1p1"
+            sleep 3
+        fi
+    }
+
+    menuentry "CachyOS EFI fallback (ESP 0BAC-3F29)" {
+        insmod part_gpt
+        insmod fat
+        search --no-floppy --fs-uuid --set=root 0BAC-3F29
+        chainloader /EFI/cachyos/grubx64.efi
+    }
+}
