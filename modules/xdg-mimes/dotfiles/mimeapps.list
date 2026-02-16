@@ -115,5 +115,6 @@ x-scheme-handler/unknown=brave-kenp.desktop
 text/x-log=kitty-nvim.desktop
 text/x-readme=kitty-nvim.desktop
 x-scheme-handler/terminal=kitty.desktop
+x-scheme-handler/ferdium=ferdium.desktop
 
 [Removed Associations]

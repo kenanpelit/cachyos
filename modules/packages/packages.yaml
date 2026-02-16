@@ -2,6 +2,7 @@ packages:
   - age
   - anydesk-bin
   - kora-icon-theme
+  - kimageformats
   - clight
   - efibootmgr
   - ente-auth-bin
@@ -15,6 +16,7 @@ packages:
   - libsecret
   - localsend
   - maplemono-nf
+  - matugen
   - mullvad-vpn-bin
   - niri-settings-git
   - nemo
