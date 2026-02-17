@@ -6,6 +6,8 @@
 #   PM           Force package manager selection
 #   PM_COLOR     "always" | "never" (default: auto by TTY)
 #   PM_SUDO      sudo command (auto-detected)
+#   PM_DEVEL_REGEX Regex used to detect development packages
+#                  (default: -(git|svn|hg|bzr|darcs|cvs|nightly|daily)$)
 
 # shellcheck disable=SC2064
 
@@ -23,7 +25,8 @@ usage() {
     echo "  i,  install <pkg>... Install one or more packages."
     echo "  r,  remove           Interactively select packages to remove."
     echo "  r,  remove <pkg>...  Remove one or more packages."
-    echo "  u,  upgrade          Upgrade all installed packages."
+    echo "  u,  upgrade [mode]   Upgrade packages. mode: all (default), devel/git."
+    echo "  ug, upgrade-git      Upgrade only development packages (*-git, *-svn, ...)."
     echo "  f,  fetch            Update local package database."
     echo "  n,  info <pkg>       Print package information."
     echo "  la, list all         List all packages."
@@ -74,6 +77,9 @@ main() {
     # AUR helpers do not accept empty sudo, so fallback to `env`.
     AUR_SUDO=${PM_SUDO:-env}
 
+    # Detect development package names (can be overridden from env).
+    PM_DEVEL_REGEX=${PM_DEVEL_REGEX:--(git|svn|hg|bzr|darcs|cvs|nightly|daily)$}
+
     # Output formatting (colorized table).
     if [ "$PM_COLOR" = always ]; then
         FMT_NAME='"\033[1m"'
@@ -101,7 +107,8 @@ main() {
 
     case "$COMMAND" in
     i | install) install "$@" ;;
-    u | upgrade) upgrade ;;
+    u | upgrade) upgrade "$@" ;;
+    ug | upgrade-git | upgrade-devel) upgrade devel "$@" ;;
     r | remove) remove "$@" ;;
     n | info) info "$@" ;;
     l | list) list "$@" ;;
@@ -141,8 +148,30 @@ remove() {
 }
 
 upgrade() {
-    pm_fetch
-    pm_upgrade
+    MODE=${1:-all}
+    if [ $# -gt 0 ]; then
+        shift
+    fi
+
+    case "$MODE" in
+    all)
+        if [ $# -gt 0 ]; then
+            die_wrong_usage "too many arguments for 'upgrade all'"
+        fi
+        pm_fetch
+        pm_upgrade
+        ;;
+    devel | git)
+        if [ $# -gt 0 ]; then
+            die_wrong_usage "too many arguments for 'upgrade $MODE'"
+        fi
+        pm_fetch
+        pm_upgrade_devel
+        ;;
+    *)
+        die_wrong_usage "invalid upgrade mode '$MODE' (expected: all|devel|git)"
+        ;;
+    esac
 }
 
 fetch() {
@@ -411,6 +440,10 @@ pm_upgrade() {
     "${PM}_upgrade"
 }
 
+pm_upgrade_devel() {
+    "${PM}_upgrade_devel"
+}
+
 pm_fetch() {
     "${PM}_fetch"
     current_date >"$PM_CACHE_DIR/last-fetch"
@@ -533,6 +566,27 @@ paru_upgrade() {
     paru --sudo "$AUR_SUDO" -Su
 }
 
+paru_upgrade_devel() {
+    # Ensure devel DB is initialized when available.
+    paru --gendb >/dev/null 2>&1 || true
+
+    PARU_DEVEL_UPDATES=$(
+        paru -Qua --devel --color=never 2>/dev/null |
+            awk -v re="$PM_DEVEL_REGEX" '$1 ~ re { print $1 }' |
+            sort -u
+    )
+
+    if [ -z "$PARU_DEVEL_UPDATES" ]; then
+        echo "No development package upgrades available"
+        return 0
+    fi
+
+    echo "Upgrading development packages:"
+    printf "%s\n" "$PARU_DEVEL_UPDATES"
+    # shellcheck disable=SC2086
+    paru --sudo "$AUR_SUDO" -S --needed --devel $PARU_DEVEL_UPDATES
+}
+
 paru_fetch() {
     paru --sudo "$AUR_SUDO" -Sy
 }
@@ -572,6 +626,24 @@ yay_remove() {
 
 yay_upgrade() {
     yay --sudo "$AUR_SUDO" -Su
+}
+
+yay_upgrade_devel() {
+    YAY_DEVEL_UPDATES=$(
+        yay -Qua --devel --color=never 2>/dev/null |
+            awk -v re="$PM_DEVEL_REGEX" '$1 ~ re { print $1 }' |
+            sort -u
+    )
+
+    if [ -z "$YAY_DEVEL_UPDATES" ]; then
+        echo "No development package upgrades available"
+        return 0
+    fi
+
+    echo "Upgrading development packages:"
+    printf "%s\n" "$YAY_DEVEL_UPDATES"
+    # shellcheck disable=SC2086
+    yay --sudo "$AUR_SUDO" -S --needed --devel $YAY_DEVEL_UPDATES
 }
 
 yay_fetch() {
@@ -616,6 +688,10 @@ apt_remove() {
 
 apt_upgrade() {
     with_sudo apt upgrade
+}
+
+apt_upgrade_devel() {
+    die "development-only upgrades are not supported for apt"
 }
 
 apt_fetch() {
@@ -665,6 +741,28 @@ dnf_fetch() {
 
 dnf_upgrade() {
     with_sudo dnf upgrade
+}
+
+dnf_upgrade_devel() {
+    die "development-only upgrades are not supported for dnf"
+}
+
+pacman_upgrade_devel() {
+    PACMAN_DEVEL_UPDATES=$(
+        pacman -Qu --color=never 2>/dev/null |
+            awk -v re="$PM_DEVEL_REGEX" '$1 ~ re { print $1 }' |
+            sort -u
+    )
+
+    if [ -z "$PACMAN_DEVEL_UPDATES" ]; then
+        echo "No development package upgrades available"
+        return 0
+    fi
+
+    echo "Upgrading development packages:"
+    printf "%s\n" "$PACMAN_DEVEL_UPDATES"
+    # shellcheck disable=SC2086
+    with_sudo pacman -S --needed $PACMAN_DEVEL_UPDATES
 }
 
 dnf_info() {
