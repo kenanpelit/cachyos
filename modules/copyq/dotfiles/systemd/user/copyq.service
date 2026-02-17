@@ -1,0 +1,20 @@
+[Unit]
+Description=CopyQ clipboard manager daemon
+After=graphical-session.target niri-session.target hyprland-session.target dbus.service
+PartOf=graphical-session.target niri-session.target hyprland-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+Environment=QT_QPA_PLATFORM=wayland;xcb
+ExecStart=/usr/bin/copyq
+ExecStop=/usr/bin/copyq exit
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target
+WantedBy=hyprland-session.target
+WantedBy=graphical-session.target

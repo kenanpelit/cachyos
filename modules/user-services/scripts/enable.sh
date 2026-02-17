@@ -40,6 +40,7 @@ services=(
   niri-sticky.service
   niri-niriswitcher.service
   niri-polkit-agent.service
+  copyq.service
   ppp-auto-profile.timer
   elephant.service
   walker.service
