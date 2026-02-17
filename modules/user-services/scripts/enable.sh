@@ -103,3 +103,13 @@ for s in "${services[@]}"; do
     echo "  -> Skipped $s (not found or user bus inaccessible)"
   fi
 done
+
+# PipeWire stacks often pull compatibility references to legacy user units.
+# Mask them to avoid not-found noise in `systemctl --user list-units --all`.
+if run_as_user systemctl --user list-unit-files pipewire-pulse.service >/dev/null 2>&1; then
+  for legacy in pulseaudio.service pipewire-media-session.service; do
+    run_as_user systemctl --user stop "$legacy" >/dev/null 2>&1 || true
+    run_as_user systemctl --user mask "$legacy" >/dev/null 2>&1 || true
+    echo "  -> Masked $legacy (PipeWire compatibility)"
+  done
+fi

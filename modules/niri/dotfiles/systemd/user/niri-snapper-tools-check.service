@@ -4,11 +4,13 @@ After=niri-session.target niri-ready.service
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-ConditionPathExists=/usr/bin/snapper-tools-check
+ConditionPathExists=/usr/bin/snapper-tools
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/bash -lc "/usr/bin/snapper-tools-check || true"
+# Match upstream autostart behavior:
+# only run when booted into a snapshot environment.
+ExecStart=/usr/bin/bash -lc "grep -q .snapshots /proc/cmdline || exit 0; sleep 3; /usr/bin/snapper-tools --autostart || true"
 StandardOutput=journal
 StandardError=journal
 
