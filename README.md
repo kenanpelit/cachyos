@@ -2,104 +2,130 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/CachyOS-Arch_Linux-blue?style=for-the-badge&logo=archlinux&logoColor=white" alt="CachyOS">
-  <img src="https://img.shields.io/badge/Catppuccin-Mocha-mauve?style=for-the-badge&logo=catppuccin&logoColor=white" alt="Catppuccin">
   <img src="https://img.shields.io/badge/Manager-dcli-green?style=for-the-badge&logo=yaml&logoColor=white" alt="dcli">
+  <img src="https://img.shields.io/badge/Compositors-Niri%20%2B%20Hyprland-6c5ce7?style=for-the-badge" alt="Niri + Hyprland">
 </div>
 
-## Overview
+Declarative, modular desktop/system configuration for CachyOS (Arch Linux), managed with [dcli](https://gitlab.com/theblackdon/dcli).
 
-Personal, declarative system configuration for **CachyOS** (Arch Linux) managed with **dcli**. The goal is a clean, modular, reproducible setup with minimal manual drift.
+The repository is tuned for a real daily-driver workstation and emphasizes:
 
-## Core Features
+- reproducibility (minimal config drift)
+- modularity (small, focused modules)
+- operational reliability (service orchestration + documented runbooks)
 
-- **Modular Architecture:** Self-contained modules for system components, ensuring high maintainability and portability.
-- **Declarative Package Management:** Centralized definitions for system and AUR packages.
-- **Advanced Window Management:**
-  - **Niri:** Optimized scrollable tiling Wayland compositor.
-  - **Hyprland:** Performance-tuned dynamic tiling Wayland compositor.
-- **Unified Theming:** Consistent application of the Catppuccin Mocha palette across GTK, Qt (Kvantum), and various terminal emulators.
-- **System Automation:** Managed services, snapshots, and system-level configuration hooks.
-- **System Hardening:** Optional firewall (ufw), fail2ban, and DNS blocking (blocky).
-- **Kernel Tuning:** ThinkPad/Intel-specific modules and boot parameters via a dedicated kernel module.
+## Scope
 
-## System Components
+This repo manages:
 
-| Component | Implementation |
-|-----------|----------------|
-| **Operating System** | CachyOS (Arch Linux) |
-| **Configuration Manager** | [dcli](https://gitlab.com/theblackdon/dcli) |
-| **Compositors** | Niri, Hyprland |
-| **Shell** | Zsh with Starship |
-| **Theming** | Catppuccin Mocha |
-| **File Management** | Yazi, Nemo |
-| **Security** | ufw, fail2ban, blocky |
-| **Kernel** | ThinkPad/Intel tuning (modules + GRUB params) |
+- base system packages (official + AUR)
+- shells and CLI tools (`zsh`, `nvim`, `tmux`, `yazi`, etc.)
+- Wayland desktop stack (`niri`, `hyprland`, portals, session entries)
+- user services (systemd `--user` units and timers)
+- networking/security modules (`ufw`, `fail2ban`, `blocky`, Mullvad helpers)
+- media/workflow tooling (`mpv`, `mpd`, `copyq`, `dms`, `walker`, etc.)
+- MIME/default app mappings
 
-## Directory Structure
+## Configuration Model
 
-```text
-├── hosts/               # Host-specific configurations
-├── modules/             # Modular system components
-│   ├── admin/           # Administrative hooks (local only)
-│   ├── grub/            # Bootloader configuration
-│   ├── kernel/          # Kernel modules & GRUB parameters
-│   ├── hyprland/        # Wayland compositor setup
-│   ├── niri/            # Primary desktop environment
-│   ├── firewall/        # ufw configuration
-│   ├── fail2ban/        # fail2ban configuration
-│   ├── blocky/          # DNS ad-blocking
-│   ├── gtk/qt/          # Toolkit consistent theming
-│   └── ...
-├── config.yaml          # Main entry point
-└── .gitignore           # Version control exclusions
-```
+The repo uses a host-pointer + host-profile model:
+
+- `config.yaml`: points to active host (currently `hay`)
+- `hosts/<host>.yaml`: ordered module list + host-specific settings
+- `modules/<name>/`: each module defines packages, dotfiles, and hooks
+
+Most modules follow this pattern:
+
+- `module.yaml` -> metadata, dotfile mappings, hook policy
+- `packages.yaml` -> package list
+- `dotfiles/` -> managed files
+- `scripts/` -> install/post-install logic
 
 ## Quick Start
 
+### 1. Clone
+
 ```bash
-git clone https://github.com/kenanpelit/cachyos.git ~/.cachy
-mkdir -p ~/.config/arch-config
-ln -s ~/.cachy/* ~/.config/arch-config/
+git clone --recurse-submodules https://github.com/kenanpelit/cachyos.git ~/.cachy
+```
+
+### 2. Register repo as dcli config root
+
+```bash
+mkdir -p ~/.config
+ln -sfn ~/.cachy ~/.config/arch-config
+```
+
+### 3. Sync
+
+```bash
+cd ~/.cachy
 sudo -E dcli sync
 ```
 
-Restart your session (or reboot) to apply environment changes.
+After first sync, log out/in (or reboot) to ensure session-level services and desktop entries are fully applied.
 
-## Installation
+## Daily Workflow
 
-### Prerequisites
-- A functional CachyOS or Arch Linux installation.
-- [dcli](https://gitlab.com/theblackdon/dcli) installed and available in system PATH.
-- A valid AUR helper (paru recommended).
+```bash
+cd ~/.cachy
+# edit modules or host profile
+sudo -E dcli sync
+```
 
-### Procedure
+Recommended maintenance:
 
-1.  **Clone the repository**
-2.  **Link to dcli config root**
-3.  **Run `dcli sync`**
-4.  **Restart the session**
+```bash
+git pull --rebase
+git submodule update --init --recursive
+sudo -E dcli sync
+```
 
-Commands are listed in **Quick Start**.
+## Repository Layout
 
-## Usage
+```text
+.
+├── config.yaml            # active host pointer
+├── hosts/                 # host profiles (module order + host settings)
+├── modules/               # modular configuration units
+│   ├── niri/              # primary compositor profile
+│   ├── hyprland/          # secondary compositor profile
+│   ├── dms/               # shell/launcher stack
+│   ├── user-services/     # user service enable/normalize flow
+│   ├── grub/              # bootloader customization
+│   ├── firewall/          # ufw policy
+│   ├── fail2ban/          # intrusion mitigation
+│   ├── blocky/            # DNS filtering/failsafe integration
+│   └── ...
+└── docs/
+    └── OPERATIONS.md      # runtime checks and incident playbooks
+```
 
-- Enable/disable modules in `hosts/<hostname>.yaml`.
-- Add/remove packages in `modules/*/packages.yaml`.
-- Apply changes with `sudo -E dcli sync`.
-- Operational runbook: `docs/OPERATIONS.md`.
+## Operational Notes
 
-## Notes
+- Runbook: `docs/OPERATIONS.md`
+- Host profile: `hosts/hay.yaml`
+- Active host pointer: `config.yaml`
+- Some modules intentionally use `post_hook_behavior: ask`; review prompt output during `dcli sync`.
 
-- This repo is tuned for personal hardware and workflows; review modules before applying on other machines.
-  - Kernel tuning assumes a ThinkPad/Intel laptop; adjust `modules/kernel` if needed.
+## Portability and Safety
+
+This configuration is opinionated and hardware/workflow specific.
+
+Before applying on another machine, review at minimum:
+
+- `hosts/<target>.yaml`
+- `modules/kernel/`
+- `modules/grub/`
+- `modules/firewall/`
+- `modules/blocky/`
+- `modules/sessions/`
+
+## License
+
+MIT (`LICENSE`).
 
 ## Credits
 
-- **[dcli](https://gitlab.com/theblackdon/dcli):** Declarative configuration manager for Arch Linux.
-- **[CachyOS](https://cachyos.org/):** Performance-oriented Arch Linux derivative.
-- **[Catppuccin](https://github.com/catppuccin/catppuccin):** Aesthetic color palette.
-
----
-<div align="center">
-  Managed by <b><a href="https://gitlab.com/theblackdon/dcli">dcli</a></b>
-</div>
+- [dcli](https://gitlab.com/theblackdon/dcli)
+- [CachyOS](https://cachyos.org/)
