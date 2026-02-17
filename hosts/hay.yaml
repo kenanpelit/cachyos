@@ -3,35 +3,47 @@ description: CachyOS setup (ported from nixosc via dcli)
 
 # Ordered list (requires module_processing: sequential)
 enabled_modules:
-  # --- Core ---
+  # --- Bootstrap & Base ---
   - base
+  - pacman
+  - paru
   - xdg-dirs
-  - xdg-mimes
   - scripts
   - packages
   - system-packages-hay
   # - packages # Meta-module, usually not needed if others are enabled
 
-  # --- Shell ---
-  - zsh
-  - bash
-  - starship
+  # --- Core System ---
+  - admin
+  - logind
+  - kernel
+  - firewall
+  - fail2ban
+  - blocky
+  - tcp
+  - oomd
+  # - grub
 
-  # --- CLI Tools ---
+  # --- Shell & CLI ---
+  - bash
+  - zsh
+  - starship
   - git
   - command-not-found
   - bat
   - btop
   - fastfetch
-  - yazi
-  - lazygit
-  - rsync
   - fzf
+  - rsync
+  - lazygit
+  - yazi
+  - nvim
+  - tmux
+  - sesh
+  - clipse
   # - gnupg
   # - search
-
-  # --- Editors ---
-  - nvim
+  # - cliphist
 
   # --- Terminals ---
   - kitty
@@ -40,7 +52,9 @@ enabled_modules:
   # - foot
   # - ghostty
 
-  # --- Desktop Environment (WM/Compositor) ---
+  # --- Desktop Stack ---
+  - gtk
+  - qt
   - niri
   # - nirius
   - hyprland
@@ -49,75 +63,52 @@ enabled_modules:
   # - gnome
   # - cosmic
   # - xserver
-
-  # --- Desktop Components & Theming ---
-  - gtk
-  - qt
-  - dms
-  - dms-greeter
-  # - mako
+  - xdg-portal
   - rofi
   - walker
-  - xdg-portal
+  - dms
+  - dms-greeter
   - fusuma
+  # - mako
   # - hyprpanel
   # - catppuccin
 
+  # --- Connectivity ---
+  - bt # Bluetooth
+  - connect # KDE Connect
+  #- blue # Gammastep/Sunset
+  # - sunsetr
+  - anydesk
+
   # --- Media ---
   - mpv
+  - ytdlp
   - mpd
   - rmpc
   - cava
-  - ytdlp
   # - vlc
   - radio
   # - audacious
   - subliminal
+  - transmission
 
-  # --- Network & Connectivity ---
-  - anydesk
-  - connect # KDE Connect
-  #- blue # Gammastep/Sunset
-  - bt # Bluetooth
-  # - sunsetr
-
-  # --- Browsers ---
+  # --- Applications ---
   - brave
   # - chrome
   # - firefox
-
-  # --- Applications ---
-  # - obsidian
   - webcord
   - flatpak
-  - transmission
+  - ai
+  # - ollama (merged into ai)
+  - copyq
+  # - obsidian
   # - elektron
   # - nemo
   # - program
 
-  # --- AI ---
-  - ai
-  # - ollama (merged into ai)
-
-  # --- System & Utility ---
-  - clipse
-  - sesh
-  #- stasis
-  - tmux
+  # --- Defaults & Service Activation ---
+  - xdg-mimes
   - user-services
-  - admin
-  - logind
-  - kernel
-  - pacman
-  - paru
-  - firewall
-  - fail2ban
-  - blocky
-  - tcp
-  - oomd
-  # - grub
-  # - cliphist
-  - copyq
 
 # Settings
 module_processing: sequential
