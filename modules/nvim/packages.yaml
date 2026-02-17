@@ -3,3 +3,7 @@ description: Neovim packages
 packages:
   - neovim
   - git
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
+run_hooks_as_user: false
