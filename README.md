@@ -6,7 +6,11 @@
   <img src="https://img.shields.io/badge/Compositors-Niri%20%2B%20Hyprland-6c5ce7?style=for-the-badge" alt="Niri + Hyprland">
 </div>
 
-Declarative, modular desktop/system configuration for CachyOS (Arch Linux), managed with [dcli](https://gitlab.com/theblackdon/dcli).
+<p align="center">
+  <strong>Declarative, modular desktop/system configuration for CachyOS (Arch Linux), managed with <a href="https://gitlab.com/theblackdon/dcli">dcli</a>.</strong>
+</p>
+
+## Design Goals
 
 The repository is tuned for a real daily-driver workstation and emphasizes:
 
