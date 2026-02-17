@@ -6,7 +6,7 @@ bin_dir="$HOME/.local/bin"
 
 mkdir -p "$bin_dir"
 
-for name in stasisctl stasis-lock stasis-kbd-backlight; do
+for name in stasisctl stasis-lock stasis-kbd-backlight stasis-start; do
   chmod +x "$module_root/scripts/$name" || true
   ln -sf "$module_root/scripts/$name" "$bin_dir/$name"
 done

@@ -1,3 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-exec stasis --config "${XDG_CONFIG_HOME:-$HOME/.config}/stasis/stasis.rune" "$@"
+
+config="${XDG_CONFIG_HOME:-$HOME/.config}/stasis/stasis.rune"
+
+if [[ "${1:-}" == "dump" ]]; then
+  stasis --config "$config" "$@" | awk '!(index($0,"logind liveness probe failed:") && index($0,"NoSessionForPID"))'
+  exit "${PIPESTATUS[0]}"
+fi
+
+exec stasis --config "$config" "$@"

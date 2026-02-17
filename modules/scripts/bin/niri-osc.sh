@@ -1237,6 +1237,26 @@ env)
       export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-niri}"
       export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-niri}"
       export DESKTOP_SESSION="${DESKTOP_SESSION:-niri}"
+
+      if [[ -z "${XDG_SESSION_ID:-}" ]] && command -v loginctl >/dev/null 2>&1; then
+        local sid out s_name s_type s_active user_name
+        user_name="${USER:-$(id -un)}"
+
+        while read -r sid _; do
+          [[ -n "${sid:-}" ]] || continue
+          out="$(loginctl show-session "$sid" -p Name -p Type -p Active --value 2>/dev/null || true)"
+          [[ -n "$out" ]] || continue
+
+          s_name="$(printf '%s\n' "$out" | sed -n '1p')"
+          s_type="$(printf '%s\n' "$out" | sed -n '2p')"
+          s_active="$(printf '%s\n' "$out" | sed -n '3p')"
+
+          if [[ "$s_name" == "$user_name" && "$s_type" == "wayland" && "$s_active" == "yes" ]]; then
+            export XDG_SESSION_ID="$sid"
+            break
+          fi
+        done < <(loginctl --no-legend list-sessions 2>/dev/null || true)
+      fi
     }
 
     set_env_in_systemd() {
@@ -1278,6 +1298,7 @@ env)
 
       [[ -n "${DISPLAY:-}" ]] && args+=("DISPLAY=${DISPLAY}")
       [[ -n "${NIRI_SOCKET:-}" ]] && args+=("NIRI_SOCKET=${NIRI_SOCKET}")
+      [[ -n "${XDG_SESSION_ID:-}" ]] && args+=("XDG_SESSION_ID=${XDG_SESSION_ID}")
 
       if [[ -n "$timeout_bin" ]]; then
         $timeout_bin 2s systemctl --user set-environment "${args[@]}" >/dev/null 2>&1 || true
@@ -1296,6 +1317,7 @@ env)
         WAYLAND_DISPLAY
         DISPLAY
         NIRI_SOCKET
+        XDG_SESSION_ID
         XDG_DATA_DIRS
         XDG_CONFIG_DIRS
         XDG_CURRENT_DESKTOP

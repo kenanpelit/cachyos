@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+resolve_session_id() {
+  [[ -n "${XDG_SESSION_ID:-}" ]] && return 0
+  command -v loginctl >/dev/null 2>&1 || return 0
+
+  local user sid out name type active
+  user="${USER:-$(id -un)}"
+
+  while read -r sid _; do
+    [[ -n "${sid:-}" ]] || continue
+    out="$(loginctl show-session "$sid" -p Name -p User -p Type -p Active --value 2>/dev/null || true)"
+    [[ -n "$out" ]] || continue
+
+    name="$(printf '%s\n' "$out" | sed -n '1p')"
+    type="$(printf '%s\n' "$out" | sed -n '3p')"
+    active="$(printf '%s\n' "$out" | sed -n '4p')"
+
+    if [[ "$name" == "$user" && "$type" == "wayland" && "$active" == "yes" ]]; then
+      export XDG_SESSION_ID="$sid"
+      return 0
+    fi
+  done < <(loginctl --no-legend list-sessions 2>/dev/null || true)
+}
+
+resolve_session_id
+
+# Stasis on systemd --user can emit a noisy, non-fatal logind probe warning:
+# "logind liveness probe failed ... NoSessionForPID".
+# Keep output clean by filtering only that specific line.
+exec stasis "$@" \
+  > >(awk '!(index($0,"logind liveness probe failed:") && index($0,"NoSessionForPID")) { print; fflush() }') \
+  2> >(awk '!(index($0,"logind liveness probe failed:") && index($0,"NoSessionForPID")) { print > "/dev/stderr"; fflush("/dev/stderr") }')

@@ -6,8 +6,8 @@ PartOf=graphical-session.target niri-session.target hyprland-session.target
 [Service]
 Type=simple
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
-ExecStart=stasis --verbose --config %h/.config/stasis/stasis.rune
-ExecReload=stasis --verbose --config %h/.config/stasis/stasis.rune reload
+ExecStart=%h/.local/bin/stasis-start --verbose --config %h/.config/stasis/stasis.rune
+ExecReload=%h/.local/bin/stasis-start --verbose --config %h/.config/stasis/stasis.rune reload
 Restart=on-failure
 RestartSec=2
 
