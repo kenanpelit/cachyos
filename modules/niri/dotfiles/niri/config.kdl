@@ -373,9 +373,9 @@ binds {
     spawn "/usr/bin/dms" "ipc" "call" "notifications" "toggle"
   }
 
-  // DMS tools
-  Mod+V repeat=false hotkey-overlay-title="Clipboard History" {
-    spawn "/usr/bin/dms" "ipc" "call" "clipboard" "toggle"
+  // Clipboard tools
+  Mod+V repeat=false hotkey-overlay-title="CopyQ Toggle" {
+    spawn "copyq" "toggle"
   }
   Mod+Shift+V repeat=false hotkey-overlay-title="Clipboard Preview" {
     spawn "osc-clipview"
@@ -520,8 +520,12 @@ binds {
     spawn "/usr/bin/hyprpicker" "-a"
   }
 
+  Mod+Ctrl+V repeat=false hotkey-overlay-title="Clipboard History (DMS)" {
+    spawn "/usr/bin/dms" "ipc" "call" "clipboard" "toggle"
+  }
+
   // Clipse in a floating kitty window
-  Mod+Ctrl+V repeat=false hotkey-overlay-title="Clipse (Floating)" {
+  Mod+Alt+V repeat=false hotkey-overlay-title="Clipse (Floating)" {
     spawn "/usr/bin/kitty" "--class" "clipse" "-e" "clipse"
   }
 
@@ -534,7 +538,6 @@ binds {
   Mod+Alt+F12 repeat=false hotkey-overlay-title="VPN Slot Recycle" {
     spawn-sh "$HOME/.local/bin/osc-mullvad-slot"
   }
-
 
   // Screenshots (DMS)
   Print repeat=false hotkey-overlay-title="Screenshot Area" {
