@@ -25,6 +25,9 @@ services=(
   kdeconnect-indicator.service
   hyprland-polkit-agent.service
   hypr-nm-applet.service
+  niri-nm-applet.service
+  niri-blueman-applet.service
+  niri-snapper-tools-check.service
   hypr-clip-persist.service
   hypr-init.service
   gnome-keyring-secrets.service

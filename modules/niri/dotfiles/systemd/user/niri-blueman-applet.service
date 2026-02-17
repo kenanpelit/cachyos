@@ -1,0 +1,18 @@
+[Unit]
+Description=Blueman applet (Niri)
+After=niri-session.target niri-ready.service dbus.service
+PartOf=niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+Type=simple
+Environment=GDK_BACKEND=wayland,x11
+ExecStart=/usr/bin/blueman-applet
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target
