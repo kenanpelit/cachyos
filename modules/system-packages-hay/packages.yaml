@@ -39,6 +39,7 @@ packages:
   - dhclient
   - diffutils
   - direnv
+  - distro-grub-themes-arch
   - dmraid
   - dnsmasq
   - dolphin
@@ -115,6 +116,8 @@ packages:
   - hwdetect
   - inetutils
   - intel-media-driver
+  - name: io.ente.auth
+    type: flatpak
   - iwd
   - jfsutils
   - kvantum-theme-nordic-git
@@ -128,6 +131,8 @@ packages:
   - libopenraw
   - libwnck3
   - linux-cachyos
+  - linux-cachyos-bore
+  - linux-cachyos-bore-headers
   - linux-cachyos-headers
   - logrotate
   - loupe
@@ -153,6 +158,16 @@ packages:
   - octopi
   - opencl-mesa
   - orca
+  - name: org.ferdium.Ferdium
+    type: flatpak
+  - name: org.freedesktop.Platform.GL.default
+    type: flatpak
+  - name: org.freedesktop.Platform.VAAPI.Intel
+    type: flatpak
+  - name: org.freedesktop.Platform.codecs-extra
+    type: flatpak
+  - name: org.gnome.Platform
+    type: flatpak
   - otf-font-awesome
   - pamixer
   - papers
@@ -178,8 +193,12 @@ packages:
   - showtime
   - simple-scan
   - smartmontools
+  - snapper-gui-git
+  - snapper-tools
   - snapshot
   - sof-firmware
+  - stasis-git
+  - statis
   - sushi
   - swaylock-effects-git
   - swaylock-fancy-git
@@ -211,6 +230,7 @@ packages:
   - xorg-xinput
   - yelp
   - zathura
+  - zsh-history-substring-search
 exclude: []
 conflicts: []
 pre_install_hook: null
