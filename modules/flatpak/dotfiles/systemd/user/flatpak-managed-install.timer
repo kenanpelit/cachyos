@@ -3,6 +3,7 @@ Description=Delayed start timer for Flatpak installation
 
 [Timer]
 OnBootSec=90s
+Persistent=true
 
 [Install]
 WantedBy=timers.target

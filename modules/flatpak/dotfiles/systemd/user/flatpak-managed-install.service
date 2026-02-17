@@ -1,15 +1,11 @@
 [Unit]
+Description=Managed Flatpak installer
 After=network-online.target
-After=multi-user.target
 Wants=network-online.target
+ConditionPathExists=%h/.local/bin/flatpak-managed-install
+StartLimitIntervalSec=1h
+StartLimitBurst=3
 
 [Service]
 Type=oneshot
 ExecStart=%h/.local/bin/flatpak-managed-install
-Restart=on-failure
-RestartSec=5min
-StartLimitBurst=3
-StartLimitIntervalSec=1h
-
-[Install]
-WantedBy=default.target
