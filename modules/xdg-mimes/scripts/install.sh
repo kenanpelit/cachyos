@@ -10,3 +10,17 @@ if command -v xdg-settings >/dev/null 2>&1; then
     xdg-settings set default-web-browser brave-kenp.desktop >/dev/null 2>&1 || true
   fi
 fi
+
+# Ensure directory handlers resolve to Nemo for file attach/open flows.
+if command -v xdg-mime >/dev/null 2>&1; then
+  if command -v nemo >/dev/null 2>&1 || [[ -f /usr/share/applications/nemo.desktop ]]; then
+    xdg-mime default nemo.desktop inode/directory >/dev/null 2>&1 || true
+    xdg-mime default nemo.desktop application/x-directory >/dev/null 2>&1 || true
+  fi
+fi
+
+if command -v gio >/dev/null 2>&1; then
+  if command -v nemo >/dev/null 2>&1 || [[ -f /usr/share/applications/nemo.desktop ]]; then
+    gio mime inode/directory nemo.desktop >/dev/null 2>&1 || true
+  fi
+fi

@@ -7,4 +7,4 @@ dotfiles:
     target: ~/.config/mimeapps.list
 
 post_install_hook: scripts/install.sh
-post_hook_behavior: ask
+post_hook_behavior: always

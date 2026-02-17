@@ -6,6 +6,7 @@ packages:
   - power-profiles-daemon
   - xdg-desktop-portal
   - xdg-desktop-portal-gnome
+  - xdg-desktop-portal-gtk
   - wl-clipboard
   - cliphist
   - grim
