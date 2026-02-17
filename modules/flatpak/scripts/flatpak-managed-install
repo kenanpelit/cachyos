@@ -2,19 +2,38 @@
 set -euo pipefail
 
 apps_file="$HOME/.config/flatpak/apps.txt"
+flathub_url="https://dl.flathub.org/repo/flathub.flatpakrepo"
+retries="${FLATPAK_REMOTE_ADD_RETRIES:-3}"
+retry_delay="${FLATPAK_REMOTE_ADD_DELAY_SEC:-5}"
+
+log() { printf "[flatpak-managed-install] %s\n" "$*"; }
+warn() { printf "[flatpak-managed-install] WARN: %s\n" "$*" >&2; }
 
 if ! command -v flatpak >/dev/null 2>&1; then
-  echo "flatpak not found" >&2
-  exit 1
+  warn "flatpak not found, skipping"
+  exit 0
 fi
 
-# Ensure flathub exists
+# Ensure flathub exists. Network/DNS can be unavailable briefly at login;
+# treat remote-add failures as transient and retry on later timer runs.
 if ! flatpak remotes --user --columns=name 2>/dev/null | awk '{print $1}' | grep -qx flathub; then
-  flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  ok=0
+  for ((i = 1; i <= retries; i++)); do
+    if flatpak remote-add --user --if-not-exists flathub "$flathub_url"; then
+      ok=1
+      break
+    fi
+    warn "flathub remote-add failed (attempt ${i}/${retries})"
+    sleep "$retry_delay"
+  done
+  if [[ "$ok" -ne 1 ]]; then
+    warn "could not add flathub remote, skipping this run"
+    exit 0
+  fi
 fi
 
-if [ ! -f "$apps_file" ]; then
-  echo "No apps file: $apps_file" >&2
+if [[ ! -f "$apps_file" ]]; then
+  log "no apps file: $apps_file"
   exit 0
 fi
 
@@ -23,6 +42,8 @@ while IFS= read -r line; do
   line="${line%$'\r'}"
   line="${line## }"
   line="${line%% }"
-  [ -z "$line" ] && continue
-  flatpak install --user -y flathub "$line" || true
+  [[ -z "$line" ]] && continue
+  if ! flatpak install --user -y flathub "$line"; then
+    warn "failed to install $line (will retry next run)"
+  fi
 done <"$apps_file"
