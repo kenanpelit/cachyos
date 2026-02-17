@@ -877,7 +877,7 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^(clipse|wiremix|org\.pulseaudio\.pavucontrol|io\.ente\.auth)$"#
+  match app-id=r#"^(clipse|wiremix|org\.pulseaudio\.pavucontrol|io\.ente\.auth|com\.github\.hluk\.copyq|copyq)$"#
   open-floating true
   default-column-width { proportion 0.250000; }
   default-window-height { proportion 0.800000; }
@@ -1039,6 +1039,7 @@ window-rule {
   match app-id=r#"^com\.bitwarden\.desktop$"#
   match app-id=r#"^io\.ente\.auth$"#
   match app-id=r#"^clipse$"#
+  match app-id=r#"^(com\.github\.hluk\.copyq|copyq)$"#
   match app-id=r#"^gcr-prompter$"#
   match app-id=r#"^polkit-gnome-authentication-agent-1$"#
   match app-id=r#"^(discord|WebCord|ferdium|Ferdium|com\.rtosta\.zapzap|org\.telegram\.desktop|Signal|Slack|whatsapp-for-linux)$"#
