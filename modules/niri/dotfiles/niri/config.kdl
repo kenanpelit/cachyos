@@ -1101,6 +1101,9 @@ window-rule {
   opacity 1.0
 }
 
+// DMS-managed dynamic window rules (generated at runtime).
+include "dms/windowrules.kdl"
+
 // Layers
 layer-rule {
   match namespace=r#"^dms:blurwallpaper$"#
@@ -1200,9 +1203,3 @@ gestures {
 // Recent windows
 // ========================================================================
 
-
-// ========================================================================
-// Catppuccin Color Palette Reference
-// ========================================================================
-// Accents:  cyan=#00BCD4 sky=#89dceb mauve=#cba6f7 red=#f38ba8
-// Surfaces: surface0=#313244 surface1=#45475a

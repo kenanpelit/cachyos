@@ -21,7 +21,7 @@ else
   mkdir -p "$DMS_DIR"
 fi
 
-for f in outputs.kdl monitor-auto.kdl zen.kdl cursor.kdl alttab.kdl layout.kdl; do
+for f in outputs.kdl monitor-auto.kdl zen.kdl cursor.kdl alttab.kdl layout.kdl windowrules.kdl; do
   path="$DMS_DIR/$f"
   # If it's a broken symlink or doesn't exist, create it
   if [ ! -e "$path" ]; then
