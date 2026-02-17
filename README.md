@@ -1,4 +1,4 @@
-# CachyOS Declarative Configuration
+<h1 align="center">CachyOS Declarative Configuration</h1>
 
 <div align="center">
   <img src="https://img.shields.io/badge/CachyOS-Arch_Linux-blue?style=for-the-badge&logo=archlinux&logoColor=white" alt="CachyOS">
