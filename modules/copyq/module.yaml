@@ -3,5 +3,5 @@ description: CopyQ config portable config
 dotfiles_sync: true
 
 dotfiles:
-  - source: dotfiles/copyq
-    target: ~/.config/copyq
+  - source: dotfiles/copyq/copyq.conf
+    target: ~/.config/copyq/copyq.conf

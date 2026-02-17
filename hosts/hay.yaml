@@ -117,7 +117,7 @@ enabled_modules:
   - oomd
   # - grub
   # - cliphist
-  # - copyq
+  - copyq
 
 # Settings
 module_processing: sequential
