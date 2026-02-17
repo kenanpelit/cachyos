@@ -1,6 +1,6 @@
 description: CopyQ config portable config
 
-dotfiles_sync: true
+dotfiles_sync: false
 
 dotfiles:
   - source: dotfiles/copyq/copyq.conf
