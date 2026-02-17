@@ -15,6 +15,9 @@ modules/copyq/dotfiles/copyq/copyq.conf.backup
 modules/copyq/dotfiles/copyq/copyq.lock
 modules/copyq/dotfiles/copyq/copyq.pub
 modules/copyq/dotfiles/copyq/copyq_tab*
+modules/copyq/dotfiles/copyq/copyq-monitor.ini
+modules/copyq/dotfiles/copyq/copyq_geometry.ini
+modules/copyq/dotfiles/copyq/copyq_tabs.ini
 modules/copyq/dotfiles/copyq/copyq_geometry.ini.*
 modules/paru/dotfiles/paru/paru.conf
 modules/admin/
