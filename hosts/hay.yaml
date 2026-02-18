@@ -61,6 +61,7 @@ enabled_modules:
   - hyprland
   - sessions
   - sway
+  - stasis
   # - gnome
   # - cosmic
   # - xserver
