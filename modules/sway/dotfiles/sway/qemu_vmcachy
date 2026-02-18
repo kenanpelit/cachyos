@@ -1,0 +1,5 @@
+# Launch CachyOS VM using the svmcachy command
+exec svmcachy
+
+# Force QEMU windows to fullscreen for immersive experience
+for_window [app_id="qemu"] fullscreen enable
