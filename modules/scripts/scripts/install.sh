@@ -116,6 +116,7 @@ cleanup_legacy_bins() {
     niri-set
     niri-flow
     niri-keybinds
+    osc-perf-mode
   )
 
   local b p
