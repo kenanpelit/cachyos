@@ -10,6 +10,7 @@ enabled_modules:
   - xdg-dirs
   - scripts
   - packages
+  - flatpak
   - system-packages-hay
   # - packages # Meta-module, usually not needed if others are enabled
 
@@ -97,7 +98,6 @@ enabled_modules:
   # - chrome
   # - firefox
   - webcord
-  - flatpak
   - ai
   # - ollama (merged into ai)
   - copyq

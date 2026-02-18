@@ -9,4 +9,4 @@ dotfiles:
     target: ~/.config/systemd/user/flatpak-managed-install.timer
 
 post_install_hook: scripts/install.sh
-post_hook_behavior: ask
+post_hook_behavior: once
