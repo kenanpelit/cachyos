@@ -59,7 +59,7 @@ enabled_modules:
   # - nirius
   - hyprland
   - sessions
-  # - sway
+  - sway
   # - gnome
   # - cosmic
   # - xserver
