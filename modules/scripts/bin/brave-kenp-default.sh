@@ -4,6 +4,24 @@ set -euo pipefail
 # Default browser entry for Kenp profile.
 # Use shared Brave instance so links open as tabs in the existing window.
 
+resolve_profile_brave() {
+  local script_dir candidate
+  script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+  for candidate in \
+    "${script_dir}/profile_brave" \
+    "${HOME}/.local/bin/profile_brave" \
+    "/usr/local/bin/profile_brave" \
+    "profile_brave"; do
+    if command -v "${candidate}" >/dev/null 2>&1; then
+      command -v "${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 focus_kenp_window_niri() {
   command -v niri >/dev/null 2>&1 || return 0
 
@@ -37,12 +55,12 @@ focus_kenp_window_niri() {
   return 0
 }
 
-if command -v profile_brave >/dev/null 2>&1; then
+if profile_brave_cmd="$(resolve_profile_brave 2>/dev/null)"; then
   if [[ $# -gt 0 ]]; then
     # For URL handlers keep a shared instance so links reuse the existing Kenp window/tab.
-    profile_brave Kenp --no-separate --new-tab "$@"
+    "${profile_brave_cmd}" Kenp --no-separate --new-tab "$@"
   else
-    profile_brave Kenp --no-separate
+    "${profile_brave_cmd}" Kenp --no-separate
   fi
   focus_kenp_window_niri
   exit 0
