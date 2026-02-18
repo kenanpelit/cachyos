@@ -1,0 +1,4 @@
+description: Sway compositor packages
+
+packages:
+  - sway
