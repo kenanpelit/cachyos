@@ -1,6 +1,58 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+refresh_from_systemd_env() {
+  command -v systemctl >/dev/null 2>&1 || return 0
+
+  local line key val
+  while IFS= read -r line; do
+    [[ "$line" == *=* ]] || continue
+    key="${line%%=*}"
+    val="${line#*=}"
+    case "$key" in
+      NIRI_SOCKET|WAYLAND_DISPLAY|XDG_CURRENT_DESKTOP)
+        export "${key}=${val}"
+        ;;
+    esac
+  done < <(systemctl --user show-environment 2>/dev/null || true)
+}
+
+in_niri_session() {
+  [[ -n "${NIRI_SOCKET:-}" ]] && return 0
+  [[ "${XDG_CURRENT_DESKTOP:-}" =~ [Nn][Ii][Rr][Ii] ]] && return 0
+  systemctl --user is-active --quiet niri-session.target >/dev/null 2>&1 && return 0
+  return 1
+}
+
+wait_for_niri_ipc() {
+  command -v niri >/dev/null 2>&1 || return 0
+  refresh_from_systemd_env
+  in_niri_session || return 0
+
+  local max_wait_sec="${STASIS_NIRI_WAIT_SEC:-30}"
+  local sleep_step_sec="0.2"
+  local max_iters
+
+  if ! [[ "$max_wait_sec" =~ ^[0-9]+$ ]]; then
+    max_wait_sec=30
+  fi
+  (( max_wait_sec > 0 )) || max_wait_sec=30
+
+  max_iters=$((max_wait_sec * 5))
+
+  local i
+  for ((i = 0; i < max_iters; i++)); do
+    refresh_from_systemd_env
+    if [[ -n "${NIRI_SOCKET:-}" ]] && niri msg version >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep "$sleep_step_sec"
+  done
+
+  echo "stasis-start: niri IPC not ready after ${max_wait_sec}s; deferring start." >&2
+  return 1
+}
+
 resolve_session_id() {
   [[ -n "${XDG_SESSION_ID:-}" ]] && return 0
   command -v loginctl >/dev/null 2>&1 || return 0
@@ -25,6 +77,7 @@ resolve_session_id() {
 }
 
 resolve_session_id
+wait_for_niri_ipc
 
 # Stasis on systemd --user can emit a noisy, non-fatal logind probe warning:
 # "logind liveness probe failed ... NoSessionForPID".
