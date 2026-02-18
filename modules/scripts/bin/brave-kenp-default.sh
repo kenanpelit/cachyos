@@ -39,9 +39,10 @@ focus_kenp_window_niri() {
 
 if command -v profile_brave >/dev/null 2>&1; then
   if [[ $# -gt 0 ]]; then
-    profile_brave Kenp --separate --new-tab "$@"
+    # For URL handlers keep a shared instance so links reuse the existing Kenp window/tab.
+    profile_brave Kenp --no-separate --new-tab "$@"
   else
-    profile_brave Kenp --separate
+    profile_brave Kenp --no-separate
   fi
   focus_kenp_window_niri
   exit 0
