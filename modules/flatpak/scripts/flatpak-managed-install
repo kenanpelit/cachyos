@@ -2,7 +2,7 @@
 set -euo pipefail
 
 apps_file="$HOME/.config/flatpak/apps.txt"
-flathub_url="https://dl.flathub.org/repo/flathub.flatpakrepo"
+flathub_url="https://flathub.org/repo/flathub.flatpakrepo"
 retries="${FLATPAK_REMOTE_ADD_RETRIES:-3}"
 retry_delay="${FLATPAK_REMOTE_ADD_DELAY_SEC:-5}"
 
