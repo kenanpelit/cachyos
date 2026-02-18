@@ -4,6 +4,12 @@ set -euo pipefail
 module_root="$(cd "$(dirname "$0")/.." && pwd)"
 bin_dir="$HOME/.local/bin"
 flathub_url="https://flathub.org/repo/flathub.flatpakrepo"
+retries="${FLATPAK_REMOTE_ADD_RETRIES:-3}"
+retry_delay="${FLATPAK_REMOTE_ADD_DELAY_SEC:-5}"
+
+log() { printf "[flatpak-install] %s\n" "$*"; }
+warn() { printf "[flatpak-install] WARN: %s\n" "$*" >&2; }
+die() { printf "[flatpak-install] ERROR: %s\n" "$*" >&2; exit 1; }
 
 mkdir -p "$bin_dir" "$HOME/.config/flatpak"
 chmod +x "$module_root/scripts/flatpak-managed-install" || true
@@ -12,8 +18,21 @@ ln -sf "$module_root/scripts/flatpak-managed-install" "$bin_dir/flatpak-managed-
 # Ensure flathub remote exists early (before timer-driven installs).
 if command -v flatpak >/dev/null 2>&1; then
   if ! flatpak remotes --user --columns=name 2>/dev/null | awk '{print $1}' | grep -qx flathub; then
-    flatpak remote-add --user --if-not-exists flathub "$flathub_url" >/dev/null 2>&1 || true
+    log "Adding flathub remote (user scope)..."
+    ok=0
+    for ((i = 1; i <= retries; i++)); do
+      if flatpak remote-add --user --if-not-exists flathub "$flathub_url"; then
+        ok=1
+        break
+      fi
+      warn "flathub remote-add failed (attempt ${i}/${retries})"
+      sleep "$retry_delay"
+    done
+    [[ "$ok" -eq 1 ]] || die "could not add flathub remote (user scope)"
   fi
+
+  # Keep remote enabled in user scope.
+  flatpak remote-modify --user --enable flathub >/dev/null 2>&1 || true
 fi
 
 if command -v systemctl >/dev/null 2>&1; then
