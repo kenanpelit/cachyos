@@ -127,8 +127,23 @@ if $is_login_shell \
       sleep 3
       ;;
 
+    6)
+      echo "TTY6: manual mode (no autostart)"
+      echo "Available routes:"
+      echo "  TTY2 -> Niri      (${NIRI_OSC_CMD:-niri-osc} set tty)"
+      echo "  TTY3 -> Hyprland  (${HYPR_SET_CMD:-hypr-set} tty)"
+      echo "  TTY4 -> GNOME     (${GNOME_TTY_CMD:-gnome_tty})"
+      echo "  TTY5 -> Sway VM   (sway -c ~/.config/sway/qemu_vmubuntu)"
+      echo
+      echo "Manual start commands:"
+      echo "  exec ${NIRI_OSC_CMD:-niri-osc} set tty"
+      echo "  exec ${HYPR_SET_CMD:-hypr-set} tty"
+      echo "  exec ${GNOME_TTY_CMD:-gnome_tty}"
+      ;;
+
     *)
       echo "TTY${XDG_VTNR}: no autostart route configured"
+      echo "Use TTY6 for manual launch hints."
       ;;
   esac
 fi
