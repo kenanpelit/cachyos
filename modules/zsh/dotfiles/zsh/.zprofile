@@ -1,202 +1,134 @@
+# shellcheck shell=bash
 # =============================================================================
-# NixOS Multi-TTY Desktop Environment Auto-Start Configuration
+# Multi-TTY desktop autostart router (login shell only)
 # =============================================================================
-# This profile handles ONLY TTY detection and session routing.
-# All environment variables are set in their respective startup scripts.
-# =============================================================================
-# TTY Assignments:
-#   TTY1: Display Manager - Session Selection
-#   TTY2: Niri (via ~/.local/bin/niri-set tty)
-#   TTY3: Hyprland (via ~/.local/bin/hypr-set tty)
-#   TTY4: GNOME (via ~/.local/bin/gnome_tty)
-#   TTY5: Ubuntu VM (Sway)
-#   TTY6: Manual start helper
+# TTY1: display manager / manual launch info
+# TTY2: Niri (niri-osc set tty)
+# TTY3: Hyprland (hypr-set tty)
+# TTY4: GNOME (gnome_tty)
+# TTY5: Sway (Ubuntu VM profile)
+# TTY6: manual
 # =============================================================================
 
-# Only run in login shell when no desktop is active
-# CRITICAL: Also check if we're being called from a desktop session startup
-# (gnome-session etc. may re-exec shell during startup)
-if [[ $- == *l* ]] && [ -z "${WAYLAND_DISPLAY}" ] && [ -z "${DISPLAY}" ] && [[ "${XDG_VTNR}" =~ ^[1-6]$ ]] && [ -z "${NIRI_TTY_GUARD:-}" ] && [ -z "${GNOME_TTY_GUARD:-}" ]; then
+resolve_cmd() {
+  local preferred="$1"
+  local fallback_name="$2"
 
-    NIRI_SET="${HOME}/.local/bin/niri-set"
-    HYPR_SET="${HOME}/.local/bin/hypr-set"
-    GNOME_TTY="${HOME}/.local/bin/gnome_tty"
+  if [[ -n "$preferred" && -x "$preferred" ]]; then
+    printf '%s\n' "$preferred"
+    return 0
+  fi
 
-    # TTY1 special check: Don't interfere if session already active
-    if [ "${XDG_VTNR}" = "1" ] && [ -n "${XDG_SESSION_TYPE}" ]; then
+  if command -v "$fallback_name" >/dev/null 2>&1; then
+    command -v "$fallback_name"
+    return 0
+  fi
+
+  return 1
+}
+
+is_login_shell=false
+[[ $- == *l* ]] && is_login_shell=true
+
+if $is_login_shell \
+  && [[ -z "${WAYLAND_DISPLAY:-}" ]] \
+  && [[ -z "${DISPLAY:-}" ]] \
+  && [[ "${XDG_VTNR:-}" =~ ^[1-6]$ ]] \
+  && [[ -z "${NIRI_TTY_GUARD:-}" ]] \
+  && [[ -z "${GNOME_TTY_GUARD:-}" ]]; then
+
+  # Avoid recursive autostart when desktop startup re-execs shell.
+  if pgrep -x gnome-shell >/dev/null 2>&1 \
+    || [[ -n "${GNOME_DESKTOP_SESSION_ID:-}" ]] \
+    || [[ -n "${GNOME_SHELL_SESSION_MODE:-}" ]]; then
+    return
+  fi
+
+  # TTY1 can already have an active session; do not interfere.
+  if [[ "${XDG_VTNR}" == "1" && -n "${XDG_SESSION_TYPE:-}" ]]; then
+    return
+  fi
+
+  uid="$(id -u)"
+  export XDG_RUNTIME_DIR="/run/user/${uid}"
+
+  NIRI_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/niri-osc" "niri-osc" 2>/dev/null || true)"
+  HYPR_SET_CMD="$(resolve_cmd "${HOME}/.local/bin/hypr-set" "hypr-set" 2>/dev/null || true)"
+  GNOME_TTY_CMD="$(resolve_cmd "${HOME}/.local/bin/gnome_tty" "gnome_tty" 2>/dev/null || true)"
+
+  case "${XDG_VTNR}" in
+    1)
+      echo "TTY1: display manager / manual launch helper"
+      echo "  Niri:     exec ${NIRI_OSC_CMD:-niri-osc} set tty"
+      echo "  Hyprland: exec ${HYPR_SET_CMD:-hypr-set} tty"
+      echo "  GNOME:    exec ${GNOME_TTY_CMD:-gnome_tty}"
+      ;;
+
+    2)
+      echo "TTY2: launching Niri via niri-osc set tty"
+      export XDG_SESSION_TYPE=wayland
+      export NIRI_TTY_GUARD=1
+
+      if [[ -n "${NIRI_OSC_CMD}" ]]; then
+        exec "${NIRI_OSC_CMD}" set tty
+      fi
+
+      echo "ERROR: niri-osc not found, falling back to direct niri"
+      sleep 2
+      exec niri --session 2>&1 | tee /tmp/niri-tty2.log
+      ;;
+
+    3)
+      echo "TTY3: launching Hyprland via hypr-set tty"
+      export XDG_SESSION_TYPE=wayland
+
+      if [[ -n "${HYPR_SET_CMD}" ]]; then
+        exec "${HYPR_SET_CMD}" tty
+      fi
+
+      echo "ERROR: hypr-set not found, falling back to direct Hyprland"
+      sleep 2
+      exec Hyprland 2>&1 | tee /tmp/hyprland-tty3.log
+      ;;
+
+    4)
+      echo "TTY4: launching GNOME via gnome_tty"
+      export GNOME_TTY_GUARD=1
+      export GNOME_TTY_GUARD_FILE="${XDG_RUNTIME_DIR}/gnome-tty4.guard"
+
+      if [[ -e "${GNOME_TTY_GUARD_FILE}" ]]; then
+        echo "GNOME guard active, skip duplicate launch."
         return
-    fi
+      fi
 
-    # CRITICAL FIX: Prevent re-running when called from desktop session startup
-    # Desktop sessions (GNOME) may re-exec shell with login flag
-    # Check if we're in a desktop session startup context
-    # IMPORTANT: Only check for actual running sessions, not just env vars
-    if pgrep -x "gnome-shell" >/dev/null 2>&1 || \
-       [ -n "${GNOME_DESKTOP_SESSION_ID:-}" ] || \
-       [ -n "${GNOME_SHELL_SESSION_MODE:-}" ]; then
-        return
-    fi
-    
-    # ==========================================================================
-    # TTY1: Display Manager
-    # ==========================================================================
-    if [ "${XDG_VTNR}" = "1" ]; then
-        echo "╔════════════════════════════════════════════════════════════╗"
-        echo "║  TTY1: Display Manager                                     ║"
-        echo "╚════════════════════════════════════════════════════════════╝"
-        echo ""
-        echo "Available Desktop Sessions:"
-        echo "  • Niri    - Minimal Wayland compositor"
-        echo "  • Hyprland - Dynamic tiling Wayland compositor"
-        echo "  • GNOME    - Traditional GNOME desktop"
-        echo ""
-        echo "Manual Start Commands:"
-        echo "  exec ${NIRI_SET} tty  - Start Niri with optimizations"
-        echo "  exec ${HYPR_SET} tty  - Start Hyprland with optimizations"
-        echo "  exec ${GNOME_TTY}     - Start GNOME with optimizations"
-        echo ""
-    
-    # ==========================================================================
-    # TTY2: Niri Wayland Compositor
-    # ==========================================================================
-    elif [ "${XDG_VTNR}" = "2" ]; then
-        echo "╔════════════════════════════════════════════════════════════╗"
-        echo "║  TTY2: Launching Niri via niri-set tty                     ║"
-        echo "╚════════════════════════════════════════════════════════════╝"
+      if [[ -n "${GNOME_TTY_CMD}" ]]; then
+        exec "${GNOME_TTY_CMD}"
+      fi
 
-        export XDG_SESSION_TYPE=wayland
-        export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-        # NixOS'ta setuid sudo sadece /run/wrappers/bin içindedir.
-        # /run/current-system/sw/bin/sudo setuid değildir ve şu hataya yol açar:
-        #   sudo must be owned by uid 0 and have the setuid bit set
-                export NIRI_TTY_GUARD=1
+      echo "ERROR: gnome_tty not found, falling back to gnome-session"
+      sleep 2
+      export XDG_SESSION_TYPE=wayland
+      exec gnome-session --session=gnome --no-reexec 2>&1 | tee /tmp/gnome-session-tty4.log
+      ;;
 
-        if [ -x "${NIRI_SET}" ]; then
-            echo "Starting Niri with optimized configuration..."
-            exec "${NIRI_SET}" tty
-        else
-            echo "ERROR: niri-set not found: ${NIRI_SET}"
-            echo "Falling back to direct Niri launch (not recommended)"
-            sleep 3
-            exec niri 2>&1 | tee /tmp/niri-tty2.log
-        fi
-    
-    # ==========================================================================
-    # TTY3: Hyprland Wayland Compositor
-    # ==========================================================================
-    elif [ "${XDG_VTNR}" = "3" ]; then
-        echo "╔════════════════════════════════════════════════════════════╗"
-        echo "║  TTY3: Launching Hyprland via hypr-set tty                 ║"
-        echo "╚════════════════════════════════════════════════════════════╝"
-        
-        # Minimum required variables - rest configured in hyprland_tty
-        export XDG_SESSION_TYPE=wayland
-        export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-        
-        # Check for hypr-set script
-        if [ -x "${HYPR_SET}" ]; then
-            echo "Starting Hyprland with optimized configuration..."
-            exec "${HYPR_SET}" tty
-        else
-            echo "ERROR: hypr-set not found: ${HYPR_SET}"
-            echo "Falling back to direct Hyprland launch (not recommended)"
-            sleep 3
-            exec Hyprland
-        fi
-    
-    # ==========================================================================
-    # TTY4: GNOME Desktop Environment
-    # ==========================================================================
-    elif [ "${XDG_VTNR}" = "4" ]; then
-        echo "╔════════════════════════════════════════════════════════════╗"
-        echo "║  TTY4: Launching GNOME via gnome_tty                       ║"
-        echo "╚════════════════════════════════════════════════════════════╝"
+    5)
+      echo "TTY5: launching Ubuntu VM profile in Sway"
+      unset XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP DESKTOP_SESSION
+      export XDG_SESSION_TYPE=wayland
+      export XDG_SESSION_DESKTOP=sway
+      export XDG_CURRENT_DESKTOP=sway
+      export DESKTOP_SESSION=sway
 
-        # CRITICAL: Only set XDG_RUNTIME_DIR - let gnome_tty handle everything else
-        # Setting XDG_SESSION_TYPE, XDG_SESSION_DESKTOP etc here causes problems
-        export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-        export GNOME_TTY_GUARD=1
-        if [ -e "${XDG_RUNTIME_DIR}/gnome-tty4.guard" ]; then
-            echo "GNOME zaten başlatılıyor (guard aktif), tekrar tetiklenmiyor."
-            return
-        fi
-        export GNOME_TTY_GUARD_FILE="${XDG_RUNTIME_DIR}/gnome-tty4.guard"
+      if [[ -f "${HOME}/.config/sway/qemu_vmubuntu" ]]; then
+        exec sway -c "${HOME}/.config/sway/qemu_vmubuntu" 2>&1 | tee /tmp/sway-tty5.log
+      fi
 
-        # Check for gnome_tty script
-        if [ -x "${GNOME_TTY}" ]; then
-            echo "Starting GNOME with optimized configuration..."
-            exec "${GNOME_TTY}"
-        else
-            echo "ERROR: gnome_tty not found: ${GNOME_TTY}"
-            echo "Falling back to direct GNOME launch (not recommended)"
-            sleep 3
+      echo "ERROR: missing sway config: ${HOME}/.config/sway/qemu_vmubuntu"
+      sleep 3
+      ;;
 
-            # Fallback: Start GNOME with proper environment
-            export XDG_SESSION_TYPE=wayland
-            export SYSTEMD_OFFLINE=0
-
-            # Start GNOME session directly (no dbus-run-session wrapper)
-            exec gnome-session --session=gnome --no-reexec 2>&1 | tee /tmp/gnome-session-tty4.log
-        fi
-    
-    # ==========================================================================
-    # TTY5: Ubuntu VM in Sway
-    # ==========================================================================
-    elif [ "${XDG_VTNR}" = "5" ]; then
-        echo "╔════════════════════════════════════════════════════════════╗"
-        echo "║  TTY5: Starting Ubuntu VM in Sway                          ║"
-        echo "╚════════════════════════════════════════════════════════════╝"
-        
-        # Clean environment
-        unset XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP DESKTOP_SESSION
-        
-        # Sway environment settings
-        export XDG_SESSION_TYPE=wayland
-        export XDG_SESSION_DESKTOP=sway
-        export XDG_CURRENT_DESKTOP=sway
-        export DESKTOP_SESSION=sway
-        export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-        
-        # Add user bin to PATH for svmubuntu command
-                
-        echo "Environment: Sway compositor for Ubuntu VM"
-        echo "VM Command: svmubuntu"
-        
-        # Check Sway config
-        if [ -f ~/.config/sway/qemu_vmubuntu ]; then
-            echo "Starting Sway with Ubuntu VM configuration..."
-            exec sway -c ~/.config/sway/qemu_vmubuntu 2>&1 | tee /tmp/sway-tty5.log
-        else
-            echo "ERROR: Sway config not found: ~/.config/sway/qemu_vmubuntu"
-            echo "Expected location: ~/.config/sway/qemu_vmubuntu"
-            echo "Please verify the configuration file exists"
-            sleep 5
-            return
-        fi
-    
-    # ==========================================================================
-    # Other TTYs: Manual use information
-    # ==========================================================================
-    else
-        echo "╔════════════════════════════════════════════════════════════╗"
-        echo "║  TTY${XDG_VTNR}: No auto-start configured                ║"
-        echo "╚════════════════════════════════════════════════════════════╝"
-        echo ""
-        echo "Available TTY Assignments:"
-        echo "  TTY1: Display Manager (gdm)"
-        echo "  TTY2: Niri (${NIRI_SET} tty)"
-        echo "  TTY3: Hyprland (${HYPR_SET} tty)"
-        echo "  TTY4: GNOME (${GNOME_TTY})"
-        echo "  TTY5: Ubuntu VM (Sway)"
-        echo "  TTY6: Manual start helper"
-        echo ""
-        echo "Manual Start Commands:"
-        echo "  exec ${NIRI_SET} tty  - Niri with optimizations"
-        echo "  exec ${HYPR_SET} tty  - Hyprland with optimizations"
-        echo "  exec ${GNOME_TTY}     - GNOME with optimizations"
-        echo "  exec sway            - Sway compositor"
-        echo ""
-    fi
-    
+    *)
+      echo "TTY${XDG_VTNR}: no autostart route configured"
+      ;;
+  esac
 fi
-# Silent continue if not login shell or desktop already running
