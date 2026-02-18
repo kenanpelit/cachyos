@@ -394,7 +394,7 @@ set -g @prefix_highlight_sync_prompt 'Sync'                    # Sync modunda g�
 set -g @fzf-url-bind 'u'                                       # u tuşu ile URL tarayıcısını aç
 set -g @fzf-url-history-limit '2000'                           # URL geçmişi limiti (2000 satır)
 set -g @fzf-url-fzf-options '-w 50% -h 50% --multi -0 --no-preview --no-border'  # FZF görünüm seçenekleri
-set -g @fzf-url-open 'brave-kenp-default'                      # URL açıcıyı sabitle (BROWSER fallback yine aktif)
+set -g @fzf-url-open '$HOME/.local/bin/brave-kenp-default'        # Portable opener path
 
 # tmux-fzf settings - Ana FZF menü ayarları
 set -g @fzf-bind 'C-f'                                         # Ctrl-f ile ana FZF menüsünü aç
