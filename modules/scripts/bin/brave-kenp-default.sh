@@ -57,10 +57,10 @@ focus_kenp_window_niri() {
 
 if profile_brave_cmd="$(resolve_profile_brave 2>/dev/null)"; then
   if [[ $# -gt 0 ]]; then
-    # For URL handlers keep a shared instance so links reuse the existing Kenp window/tab.
-    "${profile_brave_cmd}" Kenp --no-separate --new-tab "$@"
+    # Keep Kenp app-id/class by targeting the isolated Kenp instance.
+    "${profile_brave_cmd}" Kenp --separate --new-tab "$@"
   else
-    "${profile_brave_cmd}" Kenp --no-separate
+    "${profile_brave_cmd}" Kenp --separate
   fi
   focus_kenp_window_niri
   exit 0
