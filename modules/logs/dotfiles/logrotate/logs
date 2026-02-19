@@ -1,4 +1,8 @@
-/var/log/boot.log /var/log/pacman.log /var/log/snapper.log {
+# NOTE:
+# /var/log/boot.log and /var/log/snapper.log are already handled by
+# distro-provided logrotate configs (bootlog, snapper).
+# Keep this file conflict-free to avoid duplicate entry errors.
+/var/log/pacman.log {
     weekly
     rotate 8
     size 10M
