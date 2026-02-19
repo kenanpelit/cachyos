@@ -267,6 +267,7 @@ Commands:
   cast               Dynamic screencast helpers (window/monitor/clear/pick)
   flow               Legacy workspace/monitor compatibility shim
   doctor             Print session diagnostics (try: --tree, --logs)
+  autogaps           Auto-set gaps=2 when focused workspace has one tiled window
   float              Toggle between floating and tiling modes with preset size
   zen                Toggle Zen Mode (hide gaps, borders, bar)
   pin                Toggle Pin Mode (PIP-style floating window)
@@ -274,6 +275,7 @@ Commands:
 Examples:
   niri-osc set env
   niri-osc set lock
+  niri-osc set autogaps
   niri-osc set zen
   niri-osc set pin
 EOF
@@ -468,6 +470,127 @@ EOF
       notify "On"
       echo "Zen Mode: On"
     fi
+  )
+  ;;
+
+autogaps)
+  # ----------------------------------------------------------------------------
+  # Auto-gaps daemon:
+  # - focused workspace has 1 tiled window -> gaps 2
+  # - otherwise                           -> default config gaps
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    AUTOGAPS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/niri/dms/autogaps.kdl"
+    POLL_INTERVAL="${NIRI_AUTOGAPS_POLL_INTERVAL:-0.35}"
+    LOG_TAG="niri-autogaps"
+
+    log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
+
+    ensure_autogaps_file() {
+      mkdir -p "$(dirname "$AUTOGAPS_FILE")" 2>/dev/null || true
+      if [[ -L "$AUTOGAPS_FILE" ]]; then
+        rm -f "$AUTOGAPS_FILE" 2>/dev/null || true
+      fi
+      [[ -f "$AUTOGAPS_FILE" ]] || : >"$AUTOGAPS_FILE"
+    }
+
+    write_single_gap_config() {
+      cat >"$AUTOGAPS_FILE" <<'EOF'
+layout {
+  gaps 2;
+}
+EOF
+    }
+
+    write_default_gap_config() {
+      : >"$AUTOGAPS_FILE"
+    }
+
+    reload_config() {
+      niri msg action load-config-file >/dev/null 2>&1 || true
+    }
+
+    focused_workspace_tiled_count() {
+      local windows_json workspaces_json
+      windows_json="$(niri msg -j windows 2>/dev/null || echo '[]')"
+      workspaces_json="$(niri msg -j workspaces 2>/dev/null || echo '[]')"
+
+      jq -nr \
+        --argjson wins "${windows_json:-[]}" \
+        --argjson wss "${workspaces_json:-[]}" '
+          def focused_ws:
+            (first($wins[]? | select(.is_focused == true and .workspace_id != null) | .workspace_id)
+             // first($wss[]? | select(.is_focused == true) | .id)
+             // first($wss[]? | select(.is_active == true) | .id)
+             // empty);
+
+          focused_ws as $ws
+          | if (($ws | tostring) == "") then
+              0
+            else
+              [
+                $wins[]?
+                | select((.workspace_id | tostring) == ($ws | tostring))
+                | select((.is_floating // false) | not)
+                | select((.is_window_cast_target // false) | not)
+              ] | length
+            end
+        ' 2>/dev/null || echo 0
+    }
+
+    apply_mode_if_needed() {
+      local tiled_count="$1"
+      local next_mode="normal"
+      if [[ "$tiled_count" == "1" ]]; then
+        next_mode="single"
+      fi
+
+      [[ "$next_mode" != "$CURRENT_MODE" ]] || return 1
+
+      if [[ "$next_mode" == "single" ]]; then
+        write_single_gap_config
+      else
+        write_default_gap_config
+      fi
+
+      reload_config
+      CURRENT_MODE="$next_mode"
+      log "mode=${CURRENT_MODE} tiled_windows=${tiled_count}"
+      return 0
+    }
+
+    cleanup() {
+      write_default_gap_config
+      reload_config
+    }
+
+    trap cleanup EXIT INT TERM
+
+    if ! command -v niri >/dev/null 2>&1; then
+      log "niri not found; exiting"
+      exit 0
+    fi
+    if ! command -v jq >/dev/null 2>&1; then
+      log "jq not found; exiting"
+      exit 0
+    fi
+
+    ensure_autogaps_file
+    CURRENT_MODE=""
+
+    while true; do
+      if ! niri msg version >/dev/null 2>&1; then
+        sleep "$POLL_INTERVAL"
+        continue
+      fi
+
+      count="$(focused_workspace_tiled_count)"
+      [[ "$count" =~ ^[0-9]+$ ]] || count=0
+      apply_mode_if_needed "$count" || true
+      sleep "$POLL_INTERVAL"
+    done
   )
   ;;
 
@@ -2887,6 +3010,7 @@ doctor)
           xdg-desktop-autostart.target \
           niri-ready.service \
           niri-bootstrap.service \
+          niri-autogaps.service \
           niri-login-prompts.service \
           niri-polkit-agent.service \
           dms.service \
@@ -2941,6 +3065,7 @@ doctor)
     kv "config.kdl" "$([[ -f "$niri_config_file" ]] && echo "$niri_config_file" || echo "missing")"
     check_runtime_include_file "include:dms/outputs.kdl" "dms/outputs.kdl" "${niri_dms_dir}/outputs.kdl"
     check_runtime_include_file "include:dms/monitor-auto.kdl" "dms/monitor-auto.kdl" "${niri_dms_dir}/monitor-auto.kdl"
+    check_runtime_include_file "include:dms/autogaps.kdl" "dms/autogaps.kdl" "${niri_dms_dir}/autogaps.kdl"
     check_runtime_include_file "include:dms/zen.kdl" "dms/zen.kdl" "${niri_dms_dir}/zen.kdl"
     check_runtime_include_file "include:dms/cursor.kdl" "dms/cursor.kdl" "${niri_dms_dir}/cursor.kdl"
   )

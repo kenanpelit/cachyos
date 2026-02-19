@@ -1,0 +1,18 @@
+[Unit]
+Description=Niri auto-gaps daemon (single tiled window => gaps 2)
+After=graphical-session.target niri-session.target niri-ready.service
+PartOf=niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=NIRI_SOCKET
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bash -lc "%h/.local/bin/niri-osc set autogaps"
+Restart=on-failure
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target

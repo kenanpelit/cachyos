@@ -37,6 +37,7 @@ services=(
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
   niri-bootstrap.service
+  niri-autogaps.service
   niri-sticky.service
   niri-niriswitcher.service
   niri-polkit-agent.service
