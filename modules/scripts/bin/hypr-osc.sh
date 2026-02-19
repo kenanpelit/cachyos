@@ -1354,6 +1354,7 @@ EOF
           hypr-clip-persist.service
           xdg-desktop-portal.service
           xdg-desktop-portal-hyprland.service
+          xdg-desktop-portal-gtk.service
           dms.service
         )
         for u in "${units[@]}"; do
@@ -2229,8 +2230,10 @@ set -euo pipefail
 # hypr-init - Session bootstrap for Hyprland (monitors + audio)
 # ------------------------------------------------------------------------------
 # Runs early in the Hyprland session to:
-#   1) Normalize monitor/workspace focus via hypr-switch
-#   2) Initialize PipeWire defaults via osc-soundctl init
+#   1) Sync Hyprland env into systemd/dbus
+#   2) Normalize monitor/workspace focus
+#   3) Initialize PipeWire defaults via osc-soundctl init
+#   4) Reconcile XDG portal backend selection for screen share
 # Safe to run multiple times; each step is optional if the tool is missing.
 # ==============================================================================
 
@@ -2251,16 +2254,54 @@ run_if_present() {
   fi
 }
 
+portal_start_if_present() {
+  local svc="$1"
+  if ! command -v systemctl >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 2s systemctl --user start "$svc" >/dev/null 2>&1 || true
+  else
+    systemctl --user start "$svc" >/dev/null 2>&1 || true
+  fi
+}
+
+portal_restart_frontend() {
+  if ! command -v systemctl >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 2s systemctl --user restart xdg-desktop-portal.service >/dev/null 2>&1 || true
+  else
+    systemctl --user restart xdg-desktop-portal.service >/dev/null 2>&1 || true
+  fi
+}
+
+# Populate HYPRLAND_INSTANCE_SIGNATURE in service contexts where only
+# XDG_RUNTIME_DIR is available.
+ensure_hypr_env || true
+
 # Ensure we are in a Hyprland session (best-effort)
 if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
   warn "HYPRLAND_INSTANCE_SIGNATURE is unset; continuing anyway"
 fi
 
-# Step 1: monitor/workspace normalization
+# Step 1: sync desktop env into systemd --user / dbus activation
+run_if_present hypr-osc env-sync
+
+# Step 2: monitor/workspace normalization
 run_if_present hypr-osc switch
 
-# Step 2: audio defaults (volume + last sink/source)
+# Step 3: audio defaults (volume + last sink/source)
 run_if_present osc-soundctl init
+
+# Step 4: make sure portal backends are up, then restart desktop portal so it
+# re-reads Hyprland-specific backend preferences.
+portal_start_if_present xdg-desktop-portal-hyprland.service
+portal_start_if_present xdg-desktop-portal-gtk.service
+portal_restart_frontend
 
 log "hypr-init completed."
     )

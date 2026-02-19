@@ -6,6 +6,10 @@ dotfiles:
     target: ~/.config/hypr/hyprland.conf
   - source: dotfiles/hypr/pyprland.toml
     target: ~/.config/hypr/pyprland.toml
+  - source: dotfiles/portals.conf
+    target: ~/.config/xdg-desktop-portal/hyprland-portals.conf
+  - source: dotfiles/portals.conf
+    target: ~/.config/xdg-desktop-portal/Hyprland-portals.conf
   - source: dotfiles/hypr/themes
     target: ~/.config/hypr/themes
   - source: dotfiles/systemd/user/hyprland-session.target

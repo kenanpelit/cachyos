@@ -9,6 +9,7 @@ packages:
   - network-manager-applet
   - xdg-desktop-portal
   - xdg-desktop-portal-hyprland
+  - xdg-desktop-portal-gtk
   - swaybg
   - wl-clip-persist
   - wlogout
