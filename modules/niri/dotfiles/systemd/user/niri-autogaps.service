@@ -1,5 +1,5 @@
 [Unit]
-Description=Niri auto-gaps daemon (single tiled window => gaps 3)
+Description=Niri auto-gaps daemon (single tiled window => gaps 4)
 After=graphical-session.target niri-session.target niri-ready.service
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY

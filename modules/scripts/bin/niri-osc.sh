@@ -267,7 +267,7 @@ Commands:
   cast               Dynamic screencast helpers (window/monitor/clear/pick)
   flow               Legacy workspace/monitor compatibility shim
   doctor             Print session diagnostics (try: --tree, --logs)
-  autogaps           Auto-set gaps=3 when focused workspace has one tiled window
+  autogaps           Auto-set gaps=4 when focused workspace has one tiled window
   float              Toggle between floating and tiling modes with preset size
   zen                Toggle Zen Mode (hide gaps, borders, bar)
   pin                Toggle Pin Mode (PIP-style floating window)
@@ -476,7 +476,7 @@ EOF
 autogaps)
   # ----------------------------------------------------------------------------
   # Auto-gaps daemon:
-  # - focused workspace has 1 tiled window -> gaps 3
+  # - focused workspace has 1 tiled window -> gaps 4
   # - otherwise                           -> default config gaps
   # ----------------------------------------------------------------------------
   (
@@ -499,7 +499,7 @@ autogaps)
     write_single_gap_config() {
       cat >"$AUTOGAPS_FILE" <<'EOF'
 layout {
-  gaps 3;
+  gaps 4;
 }
 EOF
     }
