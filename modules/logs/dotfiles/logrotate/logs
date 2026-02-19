@@ -1,0 +1,21 @@
+/var/log/boot.log /var/log/pacman.log /var/log/snapper.log {
+    weekly
+    rotate 8
+    size 10M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 640 root root
+}
+
+/var/log/mullvad-vpn/*.log {
+    weekly
+    rotate 6
+    size 5M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

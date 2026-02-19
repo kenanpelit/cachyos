@@ -17,6 +17,7 @@ enabled_modules:
   # --- Core System ---
   - admin
   - logind
+  - logs
   - kernel
   - firewall
   - fail2ban

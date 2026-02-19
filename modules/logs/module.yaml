@@ -1,0 +1,4 @@
+description: System log management (journald + logrotate + atop retention)
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
