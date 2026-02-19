@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# hypr-set - Hyprland session helper multiplexer (single-file)
+# hypr-osc - Hyprland session helper multiplexer (single-file)
 # ==============================================================================
 # This script intentionally embeds all Hyprland helper logic that used to live in
 # separate scripts under `modules/home/scripts/bin/`.
 #
 # Usage:
-#   hypr-set <subcommand> [args...]
+#   hypr-osc <subcommand> [args...]
 #
 # Commands:
 #   tty                Start Hyprland from TTY/DM (was: hyprland_tty)
@@ -81,7 +81,7 @@ ensure_hypr_env() {
 usage() {
   cat <<'EOF'
 Usage:
-  hypr-set <command> [args...]
+  hypr-osc <command> [args...]
 
 Commands:
   tty                Start Hyprland from TTY/DM
@@ -119,18 +119,18 @@ Commands:
   opacity            Adjust active window opacity (+/-0.1|toggle)
 
 Examples:
-  hypr-set zen
-  hypr-set smart-focus kitty
-  hypr-set pull-window spotify
-  hypr-set workspace-pull 5
-  hypr-set arrange-windows
-  hypr-set consume-or-expel left
-  hypr-set maximize-column
-  hypr-set maximize-window-to-edges
-  hypr-set focus-float-tile
-  hypr-set column-move monitor left
-  hypr-set workspace-move-or-focus
-  hypr-set env-sync
+  hypr-osc zen
+  hypr-osc smart-focus kitty
+  hypr-osc pull-window spotify
+  hypr-osc workspace-pull 5
+  hypr-osc arrange-windows
+  hypr-osc consume-or-expel left
+  hypr-osc maximize-column
+  hypr-osc maximize-window-to-edges
+  hypr-osc focus-float-tile
+  hypr-osc column-move monitor left
+  hypr-osc workspace-move-or-focus
+  hypr-osc env-sync
 EOF
 }
 
@@ -145,7 +145,7 @@ case "${cmd}" in
       APP_ID="${1:-}"
       
       if [[ -z "$APP_ID" ]]; then
-        echo "Usage: hypr-set here <app_name>" >&2
+        echo "Usage: hypr-osc here <app_name>" >&2
         exit 1
       fi
 
@@ -266,7 +266,7 @@ case "${cmd}" in
       cmd="${2:-$app}" # If 2nd arg not provided, use app name as command
 
       if [[ -z "$app" ]]; then
-        echo "Usage: hypr-set smart-focus <class_regex> [command]" >&2
+        echo "Usage: hypr-osc smart-focus <class_regex> [command]" >&2
         exit 1
       fi
 
@@ -402,7 +402,7 @@ case "${cmd}" in
       app="${1:-}"
       
       if [[ -z "$app" ]]; then
-        echo "Usage: hypr-set pull-window <class_regex>" >&2
+        echo "Usage: hypr-osc pull-window <class_regex>" >&2
         exit 1
       fi
 
@@ -424,7 +424,7 @@ case "${cmd}" in
       target_ws="${1:-}"
       
       if [[ -z "$target_ws" ]]; then
-        echo "Usage: hypr-set workspace-pull <workspace_id>" >&2
+        echo "Usage: hypr-osc workspace-pull <workspace_id>" >&2
         exit 1
       fi
 
@@ -468,7 +468,7 @@ case "${cmd}" in
       usage_arrange() {
         cat <<'EOF'
 Usage:
-  hypr-set arrange-windows [--dry-run] [--verbose]
+  hypr-osc arrange-windows [--dry-run] [--verbose]
 
 Notes:
   - Uses workspace rules from (first found):
@@ -545,9 +545,9 @@ EOF
 
       if (( VERBOSE )); then
         if [[ -n "$rules_file" ]]; then
-          echo "hypr-set arrange-windows: rules_file=$rules_file" >&2
+          echo "hypr-osc arrange-windows: rules_file=$rules_file" >&2
         else
-          echo "hypr-set arrange-windows: using built-in rules" >&2
+          echo "hypr-osc arrange-windows: using built-in rules" >&2
         fi
       fi
 
@@ -623,7 +623,7 @@ EOF
       case "$dir" in
         l|left) dir="l" ;;
         r|right) dir="r" ;;
-        *) echo "Usage: hypr-set consume-or-expel left|right" >&2; exit 1 ;;
+        *) echo "Usage: hypr-osc consume-or-expel left|right" >&2; exit 1 ;;
       esac
 
       active="$(hyprctl activewindow -j 2>/dev/null || echo '{}')"
@@ -744,7 +744,7 @@ EOF
 
       case "$sub" in
         monitor) ;;
-        *) echo "Usage: hypr-set column-move monitor left|right|up|down" >&2; exit 1 ;;
+        *) echo "Usage: hypr-osc column-move monitor left|right|up|down" >&2; exit 1 ;;
       esac
 
       dir="${1:-}"
@@ -753,7 +753,7 @@ EOF
         r|right) dir="r" ;;
         u|up) dir="u" ;;
         d|down) dir="d" ;;
-        *) echo "Usage: hypr-set column-move monitor left|right|up|down" >&2; exit 1 ;;
+        *) echo "Usage: hypr-osc column-move monitor left|right|up|down" >&2; exit 1 ;;
       esac
 
       monitors_json="$(hyprctl monitors -j 2>/dev/null || echo '[]')"
@@ -980,7 +980,7 @@ EOF
 	          direction="${1:-}"
 	          case "$direction" in
 	            prev|next) ;;
-	            *) echo "Usage: hypr-set window-move workspace prev|next" >&2; exit 1 ;;
+	            *) echo "Usage: hypr-osc window-move workspace prev|next" >&2; exit 1 ;;
 	          esac
 
 	          active="$(hyprctl activewindow -j 2>/dev/null || echo '{}')"
@@ -1046,7 +1046,7 @@ EOF
 	          action="${1:-}"
 	          case "$action" in
 	            other) ;;
-	            *) echo "Usage: hypr-set window-move monitor other" >&2; exit 1 ;;
+	            *) echo "Usage: hypr-osc window-move monitor other" >&2; exit 1 ;;
 	          esac
 
 	          active="$(hyprctl activewindow -j 2>/dev/null || echo '{}')"
@@ -1071,7 +1071,7 @@ EOF
 	          ;;
 
 	        *)
-	          echo "Usage: hypr-set window-move workspace prev|next | monitor other" >&2
+	          echo "Usage: hypr-osc window-move workspace prev|next | monitor other" >&2
 	          exit 1
 	          ;;
 	      esac
@@ -1169,7 +1169,7 @@ EOF
 
       delta="${1:-}"
       if [[ -z "${delta:-}" ]]; then
-        echo "Usage: hypr-set opacity +/-0.1 | toggle" >&2
+        echo "Usage: hypr-osc opacity +/-0.1 | toggle" >&2
         exit 1
       fi
 
@@ -1235,7 +1235,7 @@ EOF
       fi
 
       if ! [[ "$delta" =~ ^[-+]?[0-9]*\\.?[0-9]+$ ]]; then
-        echo "Usage: hypr-set opacity +/-0.1 | toggle" >&2
+        echo "Usage: hypr-osc opacity +/-0.1 | toggle" >&2
         exit 1
       fi
 
@@ -1320,7 +1320,7 @@ EOF
       uid="$(id -u)"
       runtime="${XDG_RUNTIME_DIR:-/run/user/${uid}}"
 
-      printf '%s\n' "hypr-set doctor"
+      printf '%s\n' "hypr-osc doctor"
       printf '%s\n' "time: $(date -Is 2>/dev/null || date)"
       printf '%s\n' "runtime: ${runtime}"
       printf '\n'
@@ -2257,7 +2257,7 @@ if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
 fi
 
 # Step 1: monitor/workspace normalization
-run_if_present hypr-set switch
+run_if_present hypr-osc switch
 
 # Step 2: audio defaults (volume + last sink/source)
 run_if_present osc-soundctl init

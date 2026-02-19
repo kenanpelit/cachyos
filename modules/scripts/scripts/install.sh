@@ -113,6 +113,7 @@ install_from_dir() {
 
 cleanup_legacy_bins() {
   local legacy_bins=(
+    hypr-set
     niri-set
     niri-flow
     niri-keybinds

@@ -2,7 +2,7 @@
 # wm-workspace.sh
 # Workspace router across compositors (Hyprland, Niri).
 # Used by Fusuma (and other callers) to route workspace/monitor actions to the
-# correct backend (`hypr-set`, `niri-osc`).
+# correct backend (`hypr-osc`, `niri-osc`).
 
 set -euo pipefail
 
@@ -27,11 +27,11 @@ NIRI_OSC="$(
     "${HOME}/bin/niri-osc"
 )"
 
-HYPR_SET="$(
-  resolve_bin hypr-set \
-    "${WM_WORKSPACE_HYPR_SET:-}" \
-    "${HOME}/.local/bin/hypr-set" \
-    "${HOME}/bin/hypr-set"
+HYPR_OSC="$(
+  resolve_bin hypr-osc \
+    "${WM_WORKSPACE_HYPR_OSC:-${WM_WORKSPACE_HYPR_SET:-}}" \
+    "${HOME}/.local/bin/hypr-osc" \
+    "${HOME}/bin/hypr-osc"
 )"
 
 if [[ -n "${NIRI_SOCKET:-}" ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == "niri" ]] || [[ "${XDG_SESSION_DESKTOP:-}" == "niri" ]]; then
@@ -42,10 +42,10 @@ if [[ -n "${NIRI_SOCKET:-}" ]] || [[ "${XDG_CURRENT_DESKTOP:-}" == "niri" ]] || 
     exit 1
   fi
 else
-  if [[ -n "${HYPR_SET:-}" ]]; then
-    exec "${HYPR_SET}" workspace-monitor "$@"
+  if [[ -n "${HYPR_OSC:-}" ]]; then
+    exec "${HYPR_OSC}" workspace-monitor "$@"
   else
-    echo "hypr-set not found in PATH" >&2
+    echo "hypr-osc not found in PATH" >&2
     exit 1
   fi
 fi

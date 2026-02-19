@@ -1,5 +1,6 @@
 [Unit]
 Description=Hyprland session bootstrap (monitors + audio)
+Wants=pipewire.service wireplumber.service
 After=graphical-session.target hyprland-session.target
 PartOf=hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
@@ -7,7 +8,10 @@ ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/bash -lc 'sleep 5 && %h/.local/bin/hypr-set init'
+TimeoutStartSec=60
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
+Environment=HYPR_BOOT_DELAY=5
+ExecStart=/usr/bin/bash -lc 'sleep "${HYPR_BOOT_DELAY:-5}" && %h/.local/bin/hypr-osc init'
 StandardOutput=journal
 StandardError=journal
 

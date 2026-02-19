@@ -43,7 +43,7 @@ Operational checks:
 
 ```bash
 which niri-osc
-which hypr-set
+which hypr-osc
 which gnome_tty
 niri validate -c "$HOME/.config/niri/config.kdl"
 ```
