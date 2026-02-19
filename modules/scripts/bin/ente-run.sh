@@ -60,7 +60,23 @@ fi
 # 🚀 Launch Ente Auth
 # ------------------------------------------------------------------------------
 printf "${LMAUVE}Launching Ente Auth...${RESET}\n"
-exec ente_auth
+
+# Prefer native binaries first, then Flatpak app id.
+if ente_bin="$(command -v enteauth 2>/dev/null)"; then
+	exec "$ente_bin"
+elif ente_bin="$(command -v ente-auth 2>/dev/null)"; then
+	exec "$ente_bin"
+elif ente_bin="$(command -v ente_auth 2>/dev/null)"; then
+	exec "$ente_bin"
+elif command -v flatpak >/dev/null 2>&1 && flatpak info --user io.ente.auth >/dev/null 2>&1; then
+	exec flatpak run --user io.ente.auth
+elif command -v flatpak >/dev/null 2>&1 && flatpak info io.ente.auth >/dev/null 2>&1; then
+	exec flatpak run io.ente.auth
+else
+	printf "${LRED}✗ Ente Auth executable not found.${RESET}\n"
+	printf "${LYELLOW}Hint:${RESET} install with ${BOLD}flatpak install flathub io.ente.auth${RESET}\n"
+	exit 1
+fi
 
 # ------------------------------------------------------------------------------
 # EOF
