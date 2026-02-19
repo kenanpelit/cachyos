@@ -18,7 +18,7 @@ export LC_ALL=C
 usage() {
     echo "Package manager wrapper (supports: $PMS)"
     echo
-    echo "Usage: $0 <command>"
+    echo "Usage: $0 <command> [options]"
     echo
     echo "Commands:"
     echo "  i,  install          Interactively select packages to install."
@@ -26,7 +26,9 @@ usage() {
     echo "  r,  remove           Interactively select packages to remove."
     echo "  r,  remove <pkg>...  Remove one or more packages."
     echo "  u,  upgrade [mode]   Upgrade packages. mode: all (default), devel/git."
+    echo "  uy, upgrade-yes      Upgrade all packages with auto-confirm."
     echo "  ug, upgrade-git      Upgrade only development packages (*-git, *-svn, ...)."
+    echo "  ugy, upgrade-git-yes Upgrade development packages with auto-confirm."
     echo "  f,  fetch            Update local package database."
     echo "  n,  info <pkg>       Print package information."
     echo "  la, list all         List all packages."
@@ -36,6 +38,10 @@ usage() {
     echo "  si  search installed Interactively search between installed packages."
     echo "  w,  which            Print which package manager is being used."
     echo "  h,  help             Print this help."
+    echo
+    echo "Options:"
+    echo "  -y, --yes, --noconfirm"
+    echo "      Auto-confirm install/remove/upgrade operations."
     echo
     echo "Interactive commands can read additional filters from standard input."
     echo "Each line is a regular expression (POSIX extended), matching whole package name."
@@ -79,6 +85,7 @@ main() {
 
     # Detect development package names (can be overridden from env).
     PM_DEVEL_REGEX=${PM_DEVEL_REGEX:--(git|svn|hg|bzr|darcs|cvs|nightly|daily)$}
+    PM_NOCONFIRM=${PM_NOCONFIRM:-0}
 
     # Output formatting (colorized table).
     if [ "$PM_COLOR" = always ]; then
@@ -108,7 +115,15 @@ main() {
     case "$COMMAND" in
     i | install) install "$@" ;;
     u | upgrade) upgrade "$@" ;;
+    uy | upgrade-yes)
+        PM_NOCONFIRM=1
+        upgrade all "$@"
+        ;;
     ug | upgrade-git | upgrade-devel) upgrade devel "$@" ;;
+    ugy | upgrade-git-yes | upgrade-devel-yes)
+        PM_NOCONFIRM=1
+        upgrade devel "$@"
+        ;;
     r | remove) remove "$@" ;;
     n | info) info "$@" ;;
     l | list) list "$@" ;;
@@ -129,6 +144,22 @@ main() {
 # =============================================================================
 
 install() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        -y | --yes | --noconfirm)
+            PM_NOCONFIRM=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            break
+            ;;
+        esac
+    done
+
     if [ ! -f "$PM_CACHE_DIR/last-fetch" ] || [ "$(cat "$PM_CACHE_DIR/last-fetch")" != "$(current_date)" ]; then
         pm_fetch
     fi
@@ -140,6 +171,22 @@ install() {
 }
 
 remove() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        -y | --yes | --noconfirm)
+            PM_NOCONFIRM=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            break
+            ;;
+        esac
+    done
+
     if [ $# -eq 0 ]; then
         search installed | PM=$PM PM_COLOR=$PM_COLOR xargs_self remove
     else
@@ -148,23 +195,33 @@ remove() {
 }
 
 upgrade() {
-    MODE=${1:-all}
-    if [ $# -gt 0 ]; then
+    MODE=all
+    MODE_SET=0
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        -y | --yes | --noconfirm)
+            PM_NOCONFIRM=1
+            ;;
+        all | devel | git)
+            if [ "$MODE_SET" -eq 1 ]; then
+                die_wrong_usage "multiple upgrade modes provided"
+            fi
+            MODE="$1"
+            MODE_SET=1
+            ;;
+        *)
+            die_wrong_usage "invalid upgrade argument '$1' (expected mode: all|devel|git or -y|--yes)"
+            ;;
+        esac
         shift
-    fi
+    done
 
     case "$MODE" in
     all)
-        if [ $# -gt 0 ]; then
-            die_wrong_usage "too many arguments for 'upgrade all'"
-        fi
         pm_fetch
         pm_upgrade
         ;;
     devel | git)
-        if [ $# -gt 0 ]; then
-            die_wrong_usage "too many arguments for 'upgrade $MODE'"
-        fi
         pm_fetch
         pm_upgrade_devel
         ;;
@@ -407,6 +464,10 @@ with_sudo() {
     fi
 }
 
+is_noconfirm() {
+    [ "${PM_NOCONFIRM:-0}" = "1" ]
+}
+
 # =============================================================================
 # PM wrapper
 # =============================================================================
@@ -475,15 +536,27 @@ pacman_install() {
             return
         fi
     done
-    with_sudo pacman -S --needed "$@"
+    if is_noconfirm; then
+        with_sudo pacman -S --needed --noconfirm "$@"
+    else
+        with_sudo pacman -S --needed "$@"
+    fi
 }
 
 pacman_remove() {
-    with_sudo pacman -Rsc "$@"
+    if is_noconfirm; then
+        with_sudo pacman -Rsc --noconfirm "$@"
+    else
+        with_sudo pacman -Rsc "$@"
+    fi
 }
 
 pacman_upgrade() {
-    with_sudo pacman -Su
+    if is_noconfirm; then
+        with_sudo pacman -Su --noconfirm
+    else
+        with_sudo pacman -Su
+    fi
 }
 
 pacman_fetch() {
@@ -531,12 +604,20 @@ aur_helpers_contain() {
 }
 
 aur_helpers_install() {
-    with_sudo pacman -S --needed git base-devel
+    if is_noconfirm; then
+        with_sudo pacman -S --needed --noconfirm git base-devel
+    else
+        with_sudo pacman -S --needed git base-devel
+    fi
     AUR_DIR=$(mktemp -d)
     trap "rm -rf -- '$AUR_DIR'" EXIT
     git clone "https://aur.archlinux.org/$1.git" "$AUR_DIR"
     cd "$AUR_DIR"
-    makepkg -si
+    if is_noconfirm; then
+        makepkg -si --noconfirm
+    else
+        makepkg -si
+    fi
 }
 
 aur_helpers_info() {
@@ -555,15 +636,27 @@ aur_helpers_list() {
 # =============================================================================
 
 paru_install() {
-    paru --sudo "$AUR_SUDO" -S --needed "$@"
+    if is_noconfirm; then
+        paru --sudo "$AUR_SUDO" -S --needed --noconfirm "$@"
+    else
+        paru --sudo "$AUR_SUDO" -S --needed "$@"
+    fi
 }
 
 paru_remove() {
-    paru --sudo "$AUR_SUDO" -Rsc "$@"
+    if is_noconfirm; then
+        paru --sudo "$AUR_SUDO" -Rsc --noconfirm "$@"
+    else
+        paru --sudo "$AUR_SUDO" -Rsc "$@"
+    fi
 }
 
 paru_upgrade() {
-    paru --sudo "$AUR_SUDO" -Su
+    if is_noconfirm; then
+        paru --sudo "$AUR_SUDO" -Su --noconfirm
+    else
+        paru --sudo "$AUR_SUDO" -Su
+    fi
 }
 
 paru_upgrade_devel() {
@@ -584,7 +677,13 @@ paru_upgrade_devel() {
     echo "Upgrading development packages:"
     printf "%s\n" "$PARU_DEVEL_UPDATES"
     # shellcheck disable=SC2086
-    paru --sudo "$AUR_SUDO" -S --needed --devel $PARU_DEVEL_UPDATES
+    if is_noconfirm; then
+        # shellcheck disable=SC2086
+        paru --sudo "$AUR_SUDO" -S --needed --devel --noconfirm $PARU_DEVEL_UPDATES
+    else
+        # shellcheck disable=SC2086
+        paru --sudo "$AUR_SUDO" -S --needed --devel $PARU_DEVEL_UPDATES
+    fi
 }
 
 paru_fetch() {
@@ -617,15 +716,27 @@ paru_format_installed() {
 # =============================================================================
 
 yay_install() {
-    yay --sudo "$AUR_SUDO" -S --needed "$@"
+    if is_noconfirm; then
+        yay --sudo "$AUR_SUDO" -S --needed --noconfirm "$@"
+    else
+        yay --sudo "$AUR_SUDO" -S --needed "$@"
+    fi
 }
 
 yay_remove() {
-    yay --sudo "$AUR_SUDO" -Rsc "$@"
+    if is_noconfirm; then
+        yay --sudo "$AUR_SUDO" -Rsc --noconfirm "$@"
+    else
+        yay --sudo "$AUR_SUDO" -Rsc "$@"
+    fi
 }
 
 yay_upgrade() {
-    yay --sudo "$AUR_SUDO" -Su
+    if is_noconfirm; then
+        yay --sudo "$AUR_SUDO" -Su --noconfirm
+    else
+        yay --sudo "$AUR_SUDO" -Su
+    fi
 }
 
 yay_upgrade_devel() {
@@ -643,7 +754,13 @@ yay_upgrade_devel() {
     echo "Upgrading development packages:"
     printf "%s\n" "$YAY_DEVEL_UPDATES"
     # shellcheck disable=SC2086
-    yay --sudo "$AUR_SUDO" -S --needed --devel $YAY_DEVEL_UPDATES
+    if is_noconfirm; then
+        # shellcheck disable=SC2086
+        yay --sudo "$AUR_SUDO" -S --needed --devel --noconfirm $YAY_DEVEL_UPDATES
+    else
+        # shellcheck disable=SC2086
+        yay --sudo "$AUR_SUDO" -S --needed --devel $YAY_DEVEL_UPDATES
+    fi
 }
 
 yay_fetch() {
@@ -679,15 +796,27 @@ yay_format_installed() {
 # =============================================================================
 
 apt_install() {
-    with_sudo apt install "$@"
+    if is_noconfirm; then
+        with_sudo apt install -y "$@"
+    else
+        with_sudo apt install "$@"
+    fi
 }
 
 apt_remove() {
-    with_sudo apt remove "$@"
+    if is_noconfirm; then
+        with_sudo apt remove -y "$@"
+    else
+        with_sudo apt remove "$@"
+    fi
 }
 
 apt_upgrade() {
-    with_sudo apt upgrade
+    if is_noconfirm; then
+        with_sudo apt upgrade -y
+    else
+        with_sudo apt upgrade
+    fi
 }
 
 apt_upgrade_devel() {
@@ -727,11 +856,19 @@ apt_format_installed() {
 # =============================================================================
 
 dnf_install() {
-    with_sudo dnf install "$@"
+    if is_noconfirm; then
+        with_sudo dnf install -y "$@"
+    else
+        with_sudo dnf install "$@"
+    fi
 }
 
 dnf_remove() {
-    with_sudo dnf remove "$@"
+    if is_noconfirm; then
+        with_sudo dnf remove -y "$@"
+    else
+        with_sudo dnf remove "$@"
+    fi
 }
 
 dnf_fetch() {
@@ -740,7 +877,11 @@ dnf_fetch() {
 }
 
 dnf_upgrade() {
-    with_sudo dnf upgrade
+    if is_noconfirm; then
+        with_sudo dnf upgrade -y
+    else
+        with_sudo dnf upgrade
+    fi
 }
 
 dnf_upgrade_devel() {
@@ -762,7 +903,13 @@ pacman_upgrade_devel() {
     echo "Upgrading development packages:"
     printf "%s\n" "$PACMAN_DEVEL_UPDATES"
     # shellcheck disable=SC2086
-    with_sudo pacman -S --needed $PACMAN_DEVEL_UPDATES
+    if is_noconfirm; then
+        # shellcheck disable=SC2086
+        with_sudo pacman -S --needed --noconfirm $PACMAN_DEVEL_UPDATES
+    else
+        # shellcheck disable=SC2086
+        with_sudo pacman -S --needed $PACMAN_DEVEL_UPDATES
+    fi
 }
 
 dnf_info() {
