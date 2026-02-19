@@ -1,7 +1,7 @@
 description: Niri compositor packages
 
 packages:
-  - niri
+  - niri-git
   - jq
   - power-profiles-daemon
   - xdg-desktop-portal
