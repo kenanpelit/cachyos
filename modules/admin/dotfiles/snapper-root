@@ -1,0 +1,36 @@
+# subvolume to snapshot
+SUBVOLUME="/"
+
+# filesystem type
+FSTYPE="btrfs"
+
+# btrfs qgroup (boş bırakmak OK)
+QGROUP=""
+
+# snapshotlar max %25 disk kullansın
+SPACE_LIMIT="0.25"
+
+# her zaman en az %30 boş alan kalsın
+FREE_LIMIT="0.3"
+
+# snapshot yönetimine izin verilecek kullanıcı
+ALLOW_USERS="kenan"
+ALLOW_GROUPS=""
+
+SYNC_ACL="no"
+
+BACKGROUND_COMPARISON="yes"
+
+# pacman snapshot cleanup
+NUMBER_CLEANUP="yes"
+NUMBER_MIN_AGE="1800"
+NUMBER_LIMIT="20"
+NUMBER_LIMIT_IMPORTANT="10"
+
+# timeline snapshot KAPALI
+TIMELINE_CREATE="no"
+TIMELINE_CLEANUP="no"
+
+# pre/post çöp temizliği
+EMPTY_PRE_POST_CLEANUP="yes"
+EMPTY_PRE_POST_MIN_AGE="1800"
