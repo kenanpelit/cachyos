@@ -2,10 +2,6 @@
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
-SELF_PATH="$(command -v "$0" 2>/dev/null || true)"
-if [[ -z "${SELF_PATH}" ]]; then
-  SELF_PATH="$0"
-fi
 LOG_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/osc-mullvad-toggle.log"
 LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/osc-mullvad-toggle.$(id -u).lock"
 
@@ -27,15 +23,15 @@ die() {
 }
 
 usage() {
-  cat <<EOF
+  cat <<USAGE
 Usage:
   $SCRIPT_NAME [--no-blocky] [--dry-run] [--no-notify]
 
 Options:
-  --no-blocky     Do not toggle Blocky together with Mullvad
-  --dry-run       Preview actions only (no state-changing action)
-  --no-notify     Suppress desktop notifications
-EOF
+  --no-blocky     Toggle only Mullvad (without Blocky coupling)
+  --dry-run       Print expected action, do not change state
+  --no-notify     Disable desktop notifications
+USAGE
 }
 
 trim_log() {
@@ -55,37 +51,13 @@ resolve_osc_mullvad() {
     return 0
   fi
 
-  # In pkexec root context, prefer caller user's up-to-date local script.
-  if [[ "${run_as_root:-0}" == "1" ]]; then
-    local caller_uid caller_user caller_home
-    caller_uid="${PKEXEC_UID:-}"
-    if [[ -n "${caller_uid}" ]]; then
-      caller_user="$(id -nu "${caller_uid}" 2>/dev/null || true)"
-      if [[ -n "${caller_user}" ]]; then
-        caller_home="$(getent passwd "${caller_user}" 2>/dev/null | cut -d: -f6)"
-        [[ -n "${caller_home}" ]] || caller_home="/home/${caller_user}"
-
-        if [[ -x "${caller_home}/.local/bin/osc-mullvad" ]]; then
-          OSC_MULLVAD_BIN="${caller_home}/.local/bin/osc-mullvad"
-          log "resolved osc-mullvad (caller local): ${OSC_MULLVAD_BIN}"
-          return 0
-        fi
-
-        if [[ -x "/etc/profiles/per-user/${caller_user}/bin/osc-mullvad" ]]; then
-          OSC_MULLVAD_BIN="/etc/profiles/per-user/${caller_user}/bin/osc-mullvad"
-          log "resolved osc-mullvad (caller profile): ${OSC_MULLVAD_BIN}"
-          return 0
-        fi
-      fi
-    fi
-  fi
-
   OSC_MULLVAD_BIN="$(command -v osc-mullvad 2>/dev/null || true)"
   if [[ -z "${OSC_MULLVAD_BIN}" ]]; then
     OSC_MULLVAD_BIN="$HOME/.local/bin/osc-mullvad"
   fi
+
   [[ -x "${OSC_MULLVAD_BIN}" ]] || die "osc-mullvad not found: ${OSC_MULLVAD_BIN}"
-  log "resolved osc-mullvad (PATH/default): ${OSC_MULLVAD_BIN}"
+  log "resolved osc-mullvad: ${OSC_MULLVAD_BIN}"
 }
 
 notify_user() {
@@ -98,13 +70,11 @@ notify_user() {
   local body=""
   local icon=""
 
-  if command -v mullvad >/dev/null 2>&1; then
-    if mullvad status 2>/dev/null | grep -q "Connected"; then
-      vpn_connected="1"
-    fi
+  if command -v mullvad >/dev/null 2>&1 && mullvad status 2>/dev/null | grep -q "Connected"; then
+    vpn_connected="1"
   fi
 
-  if systemctl is-active --quiet blocky.service 2>/dev/null; then
+  if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet blocky.service 2>/dev/null; then
     blocky_active="1"
   fi
 
@@ -125,33 +95,6 @@ notify_user() {
   notify-send -t 3500 -i "$icon" "$title" "$body" || true
 }
 
-run_toggle() {
-  if [[ "${dry_run}" == "1" ]]; then
-    preview_toggle
-    return 0
-  fi
-
-  local cmd=("${OSC_MULLVAD_BIN}" toggle)
-  [[ "${with_blocky}" == "1" ]] && cmd+=(--with-blocky)
-
-  # Parent wrapper is responsible for user-facing notifications.
-  log "run: OSC_MULLVAD_NO_NOTIFY=1 ${cmd[*]}"
-  if ! OSC_MULLVAD_NO_NOTIFY=1 "${cmd[@]}"; then
-    local rc=$?
-    # Fail-safe: enforce DNS rule if toggle failed in blocky-coupled mode.
-    if [[ "${with_blocky}" == "1" ]]; then
-      log "toggle failed (rc=${rc}), running ensure fallback"
-      OSC_MULLVAD_NO_NOTIFY=1 "${OSC_MULLVAD_BIN}" ensure --grace "${OSC_MULLVAD_TOGGLE_ENSURE_GRACE_SEC:-0}" || true
-    fi
-    return "$rc"
-  fi
-
-  # Reconcile final state after successful toggle, so stale states self-heal.
-  if [[ "${with_blocky}" == "1" ]]; then
-    OSC_MULLVAD_NO_NOTIFY=1 "${OSC_MULLVAD_BIN}" ensure --grace "${OSC_MULLVAD_TOGGLE_ENSURE_GRACE_SEC:-0}" || true
-  fi
-}
-
 preview_toggle() {
   local vpn_connected="0"
   local blocky_active="0"
@@ -159,7 +102,8 @@ preview_toggle() {
   if command -v mullvad >/dev/null 2>&1 && mullvad status 2>/dev/null | grep -q "Connected"; then
     vpn_connected="1"
   fi
-  if systemctl is-active --quiet blocky.service 2>/dev/null; then
+
+  if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet blocky.service 2>/dev/null; then
     blocky_active="1"
   fi
 
@@ -177,72 +121,41 @@ preview_toggle() {
       echo "[dry-run] next: connect Mullvad"
     fi
   fi
-  log "dry-run preview emitted"
 }
 
-run_via_pkexec() {
-  command -v pkexec >/dev/null 2>&1 || die "pkexec not found"
-
-  local pkexec_cmd=(
-    pkexec "$SELF_PATH" --as-root
-  )
-  [[ "${with_blocky}" == "0" ]] && pkexec_cmd+=(--no-blocky)
-  [[ "${notify_enabled}" == "0" ]] && pkexec_cmd+=(--no-notify)
-
-  log "pkexec: exec root helper"
-  "${pkexec_cmd[@]}"
-}
-
-vpn_is_connected_now() {
-  command -v mullvad >/dev/null 2>&1 && mullvad status 2>/dev/null | grep -q "Connected"
-}
-
-blocky_unit_exists_now() {
-  command -v systemctl >/dev/null 2>&1 && systemctl list-unit-files blocky.service >/dev/null 2>&1
-}
-
-blocky_is_active_now() {
-  command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet blocky.service 2>/dev/null
-}
-
-needs_pkexec_now() {
-  # --no-blocky path has no mandatory root work.
-  [[ "${with_blocky}" == "1" ]] || return 1
-
-  # If Blocky is not installed/enabled as a unit, root escalation is not needed.
-  if ! blocky_unit_exists_now; then
-    log "root-check: blocky.service missing, pkexec not required"
-    return 1
-  fi
-
-  local vpn_connected="0"
-  local blocky_active="0"
-  vpn_is_connected_now && vpn_connected="1"
-  blocky_is_active_now && blocky_active="1"
-
-  # Root is required only if this toggle is expected to start/stop Blocky now.
-  # - VPN connected   -> disconnect + start Blocky (root)
-  # - VPN disconnected + Blocky active -> stop Blocky (root)
-  if [[ "$vpn_connected" == "1" || "$blocky_active" == "1" ]]; then
-    log "root-check: pkexec required (vpn_connected=${vpn_connected}, blocky_active=${blocky_active})"
+run_toggle() {
+  if [[ "${dry_run}" == "1" ]]; then
+    preview_toggle
     return 0
   fi
 
-  log "root-check: pkexec not required (vpn_connected=${vpn_connected}, blocky_active=${blocky_active})"
-  return 1
+  local cmd=("${OSC_MULLVAD_BIN}" toggle)
+  [[ "${with_blocky}" == "1" ]] && cmd+=(--with-blocky)
+
+  log "run: OSC_MULLVAD_NO_NOTIFY=1 ${cmd[*]}"
+  if ! OSC_MULLVAD_NO_NOTIFY=1 "${cmd[@]}"; then
+    local rc=$?
+    if [[ "${with_blocky}" == "1" ]]; then
+      log "toggle failed (rc=${rc}), running ensure fallback"
+      OSC_MULLVAD_NO_NOTIFY=1 "${OSC_MULLVAD_BIN}" ensure --grace "${OSC_MULLVAD_TOGGLE_ENSURE_GRACE_SEC:-0}" || true
+    fi
+    return "$rc"
+  fi
+
+  if [[ "${with_blocky}" == "1" ]]; then
+    OSC_MULLVAD_NO_NOTIFY=1 "${OSC_MULLVAD_BIN}" ensure --grace "${OSC_MULLVAD_TOGGLE_ENSURE_GRACE_SEC:-0}" || true
+  fi
 }
 
 with_blocky="1"
 dry_run="0"
 notify_enabled="1"
-run_as_root="0"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --no-blocky) with_blocky="0" ;;
     --dry-run) dry_run="1" ;;
     --no-notify) notify_enabled="0" ;;
-    --as-root) run_as_root="1" ;;
     -h|--help)
       usage
       exit 0
@@ -259,45 +172,9 @@ trim_log
 log "triggered: uid=$(id -u) tty=$(tty 2>/dev/null || echo none)"
 log "env: DISPLAY=${DISPLAY-} WAYLAND_DISPLAY=${WAYLAND_DISPLAY-} XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR-}"
 
-if [[ "${run_as_root}" == "1" ]]; then
-  caller_uid="${PKEXEC_UID:-}"
-  if [[ -n "${caller_uid}" ]]; then
-    caller_user="$(id -nu "${caller_uid}" 2>/dev/null || true)"
-    if [[ -n "${caller_user}" ]]; then
-      caller_home="$(getent passwd "${caller_user}" 2>/dev/null | cut -d: -f6)"
-      [[ -n "${caller_home}" ]] || caller_home="/home/${caller_user}"
-
-      if [[ -z "${OSC_MULLVAD_BIN:-}" ]]; then
-        candidate_bin="/etc/profiles/per-user/${caller_user}/bin/osc-mullvad"
-        if [[ -x "${candidate_bin}" ]]; then
-          OSC_MULLVAD_BIN="${candidate_bin}"
-        fi
-      fi
-
-      if [[ -z "${OSC_MULLVAD_DIR:-}" ]]; then
-        export OSC_MULLVAD_DIR="${caller_home}/.mullvad"
-      fi
-
-      if [[ -d "${caller_home}/.local/bin" ]]; then
-        export PATH="${caller_home}/.local/bin:${PATH}"
-      fi
-
-      # Preserve user profile tools (jq/bc/etc.) in pkexec root context.
-      user_profile_bin="/etc/profiles/per-user/${caller_user}/bin"
-      if [[ -d "${user_profile_bin}" ]]; then
-        export PATH="${user_profile_bin}:/run/current-system/sw/bin:${PATH}"
-      fi
-    fi
-  fi
-fi
-
 resolve_osc_mullvad
 
-# Prevent accidental double-trigger from keybindings.
-# Skip locking in the root helper path to avoid self-deadlock when pkexec
-# re-enters this script with --as-root while the parent process still holds
-# the lock.
-if [[ "${run_as_root}" != "1" ]] && command -v flock >/dev/null 2>&1; then
+if command -v flock >/dev/null 2>&1; then
   lock_wait_sec="${OSC_MULLVAD_TOGGLE_LOCK_WAIT_SEC:-3}"
   [[ "$lock_wait_sec" =~ ^[0-9]+$ ]] || lock_wait_sec=3
   if ! { exec 9>"$LOCK_FILE"; } 2>/dev/null; then
@@ -307,31 +184,9 @@ if [[ "${run_as_root}" != "1" ]] && command -v flock >/dev/null 2>&1; then
   fi
 fi
 
-if [[ "${run_as_root}" == "1" ]] && [[ "$(id -u)" -ne 0 ]]; then
-  die "--as-root can only be used by root"
-fi
-
-if [[ "${dry_run}" == "1" ]]; then
-  run_toggle
-  exit 0
-fi
-
-if [[ "$(id -u)" -eq 0 ]]; then
-  run_toggle
-  # Parent process sends user-facing notification after pkexec returns.
-  [[ "${run_as_root}" != "1" ]] && notify_user
-  exit 0
-fi
-
-if needs_pkexec_now; then
-  run_via_pkexec
-  rc=$?
-  log "pkexec exit=${rc}"
-else
-  run_toggle
-  rc=$?
-  log "direct exit=${rc}"
-fi
+run_toggle
+rc=$?
+log "direct exit=${rc}"
 
 if [[ "$rc" -eq 0 ]]; then
   notify_user
