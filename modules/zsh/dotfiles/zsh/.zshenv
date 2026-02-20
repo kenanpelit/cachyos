@@ -2,7 +2,15 @@
 # Only source this once
 if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
   export __HM_ZSH_SESS_VARS_SOURCED=1
-  export BROWSER="brave"
+  if [[ -z "${BROWSER:-}" || "${BROWSER}" == "brave" ]]; then
+    if command -v start-brave-kenp >/dev/null 2>&1; then
+      export BROWSER="start-brave-kenp"
+    elif command -v brave-kenp-default >/dev/null 2>&1; then
+      export BROWSER="brave-kenp-default"
+    else
+      export BROWSER="brave"
+    fi
+  fi
   export COMPLETION_WAITING_DOTS="true"
   export EDITOR="nvim"
   export HISTFILE="${HOME}/.config/zsh/history"

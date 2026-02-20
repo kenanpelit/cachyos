@@ -30,6 +30,9 @@ APP_ARGS=()
 if [[ -n "$ARGS_STR" ]]; then
     read -r -a APP_ARGS <<<"$ARGS_STR"
 fi
+if [[ $# -gt 0 ]]; then
+    APP_ARGS+=("$@")
+fi
 
 # External monitor setup (GNOME only)
 if [[ "$WM_TYPE" == "gnome" ]] && command -v xrandr >/dev/null 2>&1; then
