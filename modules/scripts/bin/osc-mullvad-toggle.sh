@@ -193,6 +193,45 @@ run_via_pkexec() {
   "${pkexec_cmd[@]}"
 }
 
+vpn_is_connected_now() {
+  command -v mullvad >/dev/null 2>&1 && mullvad status 2>/dev/null | grep -q "Connected"
+}
+
+blocky_unit_exists_now() {
+  command -v systemctl >/dev/null 2>&1 && systemctl list-unit-files blocky.service >/dev/null 2>&1
+}
+
+blocky_is_active_now() {
+  command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet blocky.service 2>/dev/null
+}
+
+needs_pkexec_now() {
+  # --no-blocky path has no mandatory root work.
+  [[ "${with_blocky}" == "1" ]] || return 1
+
+  # If Blocky is not installed/enabled as a unit, root escalation is not needed.
+  if ! blocky_unit_exists_now; then
+    log "root-check: blocky.service missing, pkexec not required"
+    return 1
+  fi
+
+  local vpn_connected="0"
+  local blocky_active="0"
+  vpn_is_connected_now && vpn_connected="1"
+  blocky_is_active_now && blocky_active="1"
+
+  # Root is required only if this toggle is expected to start/stop Blocky now.
+  # - VPN connected   -> disconnect + start Blocky (root)
+  # - VPN disconnected + Blocky active -> stop Blocky (root)
+  if [[ "$vpn_connected" == "1" || "$blocky_active" == "1" ]]; then
+    log "root-check: pkexec required (vpn_connected=${vpn_connected}, blocky_active=${blocky_active})"
+    return 0
+  fi
+
+  log "root-check: pkexec not required (vpn_connected=${vpn_connected}, blocky_active=${blocky_active})"
+  return 1
+}
+
 with_blocky="1"
 dry_run="0"
 notify_enabled="1"
@@ -284,9 +323,16 @@ if [[ "$(id -u)" -eq 0 ]]; then
   exit 0
 fi
 
-run_via_pkexec
-rc=$?
-log "pkexec exit=${rc}"
+if needs_pkexec_now; then
+  run_via_pkexec
+  rc=$?
+  log "pkexec exit=${rc}"
+else
+  run_toggle
+  rc=$?
+  log "direct exit=${rc}"
+fi
+
 if [[ "$rc" -eq 0 ]]; then
   notify_user
 fi
