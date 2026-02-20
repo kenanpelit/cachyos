@@ -186,7 +186,7 @@ include "dms/outputs.kdl"
 include "dms/monitor-auto.kdl"
 
 layout {
-  gaps 12
+  gaps 4
   center-focused-column "on-overflow"
   always-center-single-column
   background-color "#00000000"
