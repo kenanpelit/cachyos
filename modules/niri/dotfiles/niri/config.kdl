@@ -186,7 +186,7 @@ include "dms/outputs.kdl"
 include "dms/monitor-auto.kdl"
 
 layout {
-  gaps 4
+  gaps 6
   center-focused-column "on-overflow"
   always-center-single-column
   background-color "#00000000"
@@ -237,7 +237,6 @@ layout {
 }
 
 include "dms/zen.kdl"
-include "dms/autogaps.kdl"
 include "dms/cursor.kdl"
 
 // ========================================================================
