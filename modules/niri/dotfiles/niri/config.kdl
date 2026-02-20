@@ -580,7 +580,7 @@ binds {
   }
 
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" {
-    spawn-sh "$HOME/.local/bin/niri-start"
+    spawn-sh "$HOME/.local/bin/semsumo-daily"
   }
 
   Mod+Return repeat=false hotkey-overlay-title="Dropdown Terminal" {
