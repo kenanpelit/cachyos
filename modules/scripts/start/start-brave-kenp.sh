@@ -13,6 +13,21 @@ readonly COMMAND="profile_brave"
 readonly ARGS_STR="Kenp --separate --restore-last-session"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
+warmup_login_once() {
+    local runtime_dir stamp
+    runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+    stamp="${runtime_dir}/osc-login-prompts.done"
+
+    command -v osc-login-prompts >/dev/null 2>&1 || return 0
+
+    if [[ ! -f "$stamp" ]]; then
+        OSC_LOGIN_PROMPTS_SESSION="Browser Warmup" \
+            OSC_LOGIN_PROMPTS_NOTIFY=0 \
+            OSC_LOGIN_PROMPTS_LOG=1 \
+            osc-login-prompts --delay 0 --once --stamp "$stamp" >/dev/null 2>&1 || true
+    fi
+}
+
 # Detect window manager
 if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
     WM_TYPE="hyprland"
@@ -25,6 +40,7 @@ else
 fi
 
 echo "Initializing brave-kenp on $WM_TYPE..."
+warmup_login_once
 
 APP_ARGS=()
 if [[ -n "$ARGS_STR" ]]; then

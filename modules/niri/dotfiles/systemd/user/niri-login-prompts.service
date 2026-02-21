@@ -11,7 +11,9 @@ ConditionPathExists=%h/.local/bin/osc-login-prompts
 Type=oneshot
 TimeoutStartSec=30
 Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
-ExecStart=/usr/bin/bash -lc "%h/.local/bin/osc-login-prompts"
+Environment=OSC_LOGIN_PROMPTS_DELAY=3
+Environment=OSC_LOGIN_PROMPTS_SESSION=Niri Login
+ExecStart=/usr/bin/bash -lc "%h/.local/bin/osc-login-prompts --once"
 StandardOutput=journal
 StandardError=journal
 

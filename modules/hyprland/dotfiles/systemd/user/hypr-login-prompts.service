@@ -1,0 +1,20 @@
+[Unit]
+Description=Hyprland login prompts warmup
+After=graphical-session.target hyprland-session.target hypr-init.service gnome-keyring-secrets.service
+PartOf=hyprland-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+ConditionPathExists=%h/.local/bin/osc-login-prompts
+
+[Service]
+Type=oneshot
+TimeoutStartSec=30
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
+Environment=OSC_LOGIN_PROMPTS_DELAY=3
+Environment=OSC_LOGIN_PROMPTS_SESSION=Hyprland Login
+ExecStart=/usr/bin/bash -lc "%h/.local/bin/osc-login-prompts --once --stamp %t/osc-login-prompts.hypr.done"
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=hyprland-session.target

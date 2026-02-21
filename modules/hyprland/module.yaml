@@ -22,6 +22,8 @@ dotfiles:
     target: ~/.config/systemd/user/hypr-clip-persist.service
   - source: dotfiles/systemd/user/hypr-init.service
     target: ~/.config/systemd/user/hypr-init.service
+  - source: dotfiles/systemd/user/hypr-login-prompts.service
+    target: ~/.config/systemd/user/hypr-login-prompts.service
   - source: dotfiles/systemd/user/gnome-keyring-secrets.service
     target: ~/.config/systemd/user/gnome-keyring-secrets.service
 

@@ -1351,6 +1351,8 @@ EOF
           hyprland-session.target
           hyprland-polkit-agent.service
           hypr-nm-applet.service
+          hypr-login-prompts.service
+          gnome-keyring-secrets.service
           hypr-clip-persist.service
           xdg-desktop-portal.service
           xdg-desktop-portal-hyprland.service
