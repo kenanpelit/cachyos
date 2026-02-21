@@ -1,11 +1,5 @@
 description: Ghostty config (portable config)
 
-# NOTE: Ghostty may be installed from AUR depending on CachyOS.
-# packages:
-#   - ghostty
-
-dotfiles_sync: true
-
 dotfiles:
   - source: dotfiles/ghostty
     target: ~/.config/ghostty

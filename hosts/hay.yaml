@@ -52,7 +52,7 @@ enabled_modules:
   - wezterm
   - alacritty
   # - foot
-  # - ghostty
+  - ghostty
 
   # --- Desktop Stack ---
   - gtk
