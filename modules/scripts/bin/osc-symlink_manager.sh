@@ -54,6 +54,8 @@ EXTRA_LINKS=(
   "/repo/archive/.mozilla|$HOME/.mozilla"
   "/repo/archive/.kenp|$HOME/.kenp"
   "/repo/archive/.keep|$HOME/.keep"
+  "/repo/archive/.pass|$HOME/.pass"
+  "/repo/archive/.keyrings|$HOME/.local/share/keyrings"
   "/repo/tor|$HOME/.tor"
 )
 
