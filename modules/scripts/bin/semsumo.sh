@@ -136,6 +136,8 @@ declare -A APPS=(
   ["spotify"]="spotify|--class Spotify -T Spotify|8|bypass|1|false"
   ["mpv"]="mpv|--player-operation-mode=pseudo-gui --input-ipc-server=/tmp/mpvsocket|6|bypass|1|true"
   ["ferdium"]="ferdium||9|secure|1|false"
+  ["telegram"]="Telegram||6|secure|1|false"
+  ["zapzap"]="env|QT_QPA_PLATFORM=wayland XDG_SESSION_TYPE=wayland zapzap --wayland|9|secure|1|false"
 )
 
 #-------------------------------------------------------------------------------
@@ -562,6 +564,8 @@ get_class_pattern() {
   discord) echo "discord|Discord" ;;
   spotify) echo "spotify|Spotify" ;;
   ferdium) echo "ferdium|Ferdium" ;;
+  telegram) echo "Telegram|telegram-desktop|org.telegram.desktop" ;;
+  zapzap) echo "zapzap|ZapZap|com.rtosta.zapzap" ;;
   kitty* | kkenp | mkenp) echo "kitty" ;;
   wezterm* | wkenp) echo "wezterm|org.wezfurlong.wezterm" ;;
   *) echo "$profile" ;;

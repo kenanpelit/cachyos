@@ -35,6 +35,7 @@ packages:
   - satty
   - sops
   - spotify
+  - telegram-desktop
   - wiremix
   - snapper
   - btrfs-assistant
