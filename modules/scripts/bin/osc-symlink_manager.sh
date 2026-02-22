@@ -50,6 +50,8 @@ EXTRA_LINKS=(
   "/repo/archive/.mullvad|$HOME/.mullvad"
   "/repo/archive/.anote|$HOME/.anote"
   "/repo/archive/.backups|$HOME/.backups"
+  "/repo/archive/.brave|$HOME/.brave"
+  "/repo/archive/.mozilla|$HOME/.mozilla"
   "/repo/archive/.kenp|$HOME/.kenp"
   "/repo/archive/.keep|$HOME/.keep"
   "/repo/tor|$HOME/.tor"
