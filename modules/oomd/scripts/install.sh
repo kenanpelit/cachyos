@@ -24,4 +24,5 @@ ${SUDO} install -m 644 "${SYS_SRC}" "${SYS_DST}"
 ${SUDO} install -m 644 "${USR_SRC}" "${USR_DST}"
 
 ${SUDO} systemctl daemon-reload
+${SUDO} systemctl enable --now systemd-oomd.socket
 ${SUDO} systemctl enable --now systemd-oomd.service
