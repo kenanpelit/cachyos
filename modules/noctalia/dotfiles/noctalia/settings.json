@@ -168,6 +168,12 @@
                         "useCustomColors": false
                     },
                     "id": "plugin:todo"
+                },
+                {
+                    "displayMode": "onhover",
+                    "iconColor": "none",
+                    "id": "VPN",
+                    "textColor": "none"
                 }
             ],
             "left": [
@@ -330,11 +336,6 @@
                     "id": "Tray",
                     "pinned": [
                     ]
-                },
-                {
-                    "defaultSettings": {
-                    },
-                    "id": "plugin:network-manager-vpn"
                 },
                 {
                     "defaultSettings": {
