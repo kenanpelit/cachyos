@@ -79,7 +79,7 @@ layer-rule {
 // Here we only start the minimal session bootstrap + helpers that must exist early.
 
 spawn-at-startup "sh" "-lc" "$HOME/.local/bin/niri-osc set env"
-spawn-at-startup "osc-shell" "ensure"
+spawn-at-startup "sh" "-lc" "$HOME/.local/bin/osc-shell ensure"
 spawn-at-startup "/usr/bin/clipse" "-listen"
 
 // ------------------------------------------------------------------------
@@ -359,19 +359,19 @@ binds {
   // Launchers (Shell Router: DMS/Noctalia)
   // ----------------------------------------------------------------------
   Mod+Space repeat=false hotkey-overlay-title="Launcher" {
-    spawn "osc-shell" "ipc" "call" "launcher" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher toggle"
   }
   Mod+Shift+Space repeat=false hotkey-overlay-title="Spotlight" {
-    spawn "osc-shell" "ipc" "call" "launcher" "command"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher command"
   }
   Mod+D repeat=false hotkey-overlay-title="Dash / Apps" {
-    spawn "osc-shell" "ipc" "call" "launcher" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher toggle"
   }
   Mod+Ctrl+D repeat=false hotkey-overlay-title="Control Center" {
-    spawn "osc-shell" "ipc" "call" "controlCenter" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call controlCenter toggle"
   }
   Mod+N repeat=false hotkey-overlay-title="Notifications" {
-    spawn "osc-shell" "ipc" "call" "notifications" "toggleHistory"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call notifications toggleHistory"
   }
 
   // Clipboard tools
@@ -382,71 +382,71 @@ binds {
     spawn "osc-clipview"
   }
   Mod+Shift+D repeat=false hotkey-overlay-title="Dash Overview" {
-    spawn "osc-shell" "ipc" "call" "launcher" "windows"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher windows"
   }
   Mod+Shift+P repeat=false hotkey-overlay-title="Process List" {
-    spawn "osc-shell" "ipc" "call" "systemMonitor" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call systemMonitor toggle"
   }
   Mod+Ctrl+N repeat=false hotkey-overlay-title="Notepad" {
-    spawn "osc-shell" "ipc" "call" "launcher" "command"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher command"
   }
   Mod+Comma repeat=false hotkey-overlay-title="Settings" {
-    spawn "osc-shell" "ipc" "call" "settings" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call settings toggle"
   }
   Mod+U repeat=false hotkey-overlay-title="Widget: SathiAi" {
-    spawn "osc-shell" "ipc" "call" "plugin:assistant-panel" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:assistant-panel toggle"
   }
 
   // Window switching
   Alt+Tab hotkey-overlay-title="Switch Windows" {
-    spawn "osc-shell" "ipc" "call" "launcher" "windows"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher windows"
   }
 
   // UI toggles
   Mod+B repeat=false hotkey-overlay-title="Toggle Bar" {
-    spawn "osc-shell" "ipc" "call" "bar" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call bar toggle"
   }
   Mod+Shift+B repeat=false hotkey-overlay-title="Toggle Dock" {
-    spawn "osc-shell" "ipc" "call" "dock" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call dock toggle"
   }
   Mod+Ctrl+B repeat=false hotkey-overlay-title="Auto-Hide Bar" {
-    spawn "osc-shell" "ipc" "call" "bar" "toggleAutoHide"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call bar toggleAutoHide"
   }
 
   // Power & session
   Mod+Delete repeat=false hotkey-overlay-title="Power Menu" {
-    spawn "osc-shell" "ipc" "call" "sessionMenu" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call sessionMenu toggle"
   }
   Alt+L repeat=false hotkey-overlay-title="Lock Screen" {
     spawn-sh "$HOME/.local/bin/niri-osc set lock"
   }
   Mod+Shift+Delete repeat=false hotkey-overlay-title="Inhibit Idle" {
-    spawn "osc-shell" "ipc" "call" "idleInhibitor" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call idleInhibitor toggle"
   }
 
   // Appearance
   Mod+Y repeat=false hotkey-overlay-title="Wallpaper Menu" {
-    spawn "osc-shell" "ipc" "call" "wallpaper" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call wallpaper toggle"
   }
   Mod+W hotkey-overlay-title="Next Wallpaper" {
-    spawn "osc-shell" "ipc" "call" "wallpaper" "next"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call wallpaper next"
   }
   Mod+Shift+W hotkey-overlay-title="Prev Wallpaper" {
-    spawn "osc-shell" "ipc" "call" "wallpaper" "prev"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call wallpaper prev"
   }
   Mod+Shift+T repeat=false hotkey-overlay-title="Toggle Theme" {
-    spawn "osc-shell" "ipc" "call" "darkMode" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call darkMode toggle"
   }
   Mod+Shift+N repeat=false hotkey-overlay-title="Toggle Night Mode" {
-    spawn "osc-shell" "ipc" "call" "nightLight" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call nightLight toggle"
   }
 
   // Help
   Mod+Alt+Slash repeat=false hotkey-overlay-title="Keybind Settings" {
-    spawn "osc-shell" "ipc" "call" "plugin:keybind-cheatsheet" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:keybind-cheatsheet toggle"
   }
   Mod+F1 repeat=false hotkey-overlay-title="Keybinds (DMS)" {
-    spawn "osc-shell" "ipc" "call" "plugin:keybind-cheatsheet" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:keybind-cheatsheet toggle"
   }
   Alt+F1 repeat=false hotkey-overlay-title="Keybinds (Niri)" { show-hotkey-overlay; }
 
@@ -454,23 +454,23 @@ binds {
   // System hardware (Audio/Brightness)
   // ----------------------------------------------------------------------
   XF86AudioRaiseVolume allow-when-locked=true hotkey-overlay-title="Vol +" {
-    spawn "osc-shell" "ipc" "call" "volume" "increase"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call volume increase"
   }
   XF86AudioLowerVolume allow-when-locked=true hotkey-overlay-title="Vol -" {
-    spawn "osc-shell" "ipc" "call" "volume" "decrease"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call volume decrease"
   }
   XF86AudioMute allow-when-locked=true hotkey-overlay-title="Mute" {
-    spawn "osc-shell" "ipc" "call" "volume" "muteOutput"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call volume muteOutput"
   }
   XF86AudioMicMute allow-when-locked=true hotkey-overlay-title="Mic Mute" {
-    spawn "osc-shell" "ipc" "call" "volume" "muteInput"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call volume muteInput"
   }
 
   XF86MonBrightnessUp allow-when-locked=true hotkey-overlay-title="Bright +" {
-    spawn "osc-shell" "ipc" "call" "brightness" "increase"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call brightness increase"
   }
   XF86MonBrightnessDown allow-when-locked=true hotkey-overlay-title="Bright -" {
-    spawn "osc-shell" "ipc" "call" "brightness" "decrease"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call brightness decrease"
   }
 
   // Media control (MPRIS)
@@ -522,7 +522,7 @@ binds {
   }
 
   Mod+Ctrl+V repeat=false hotkey-overlay-title="Clipboard History" {
-    spawn "osc-shell" "ipc" "call" "plugin:clipper" "toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:clipper toggle"
   }
 
   // Clipse in a floating kitty window
@@ -542,13 +542,13 @@ binds {
 
   // Screenshots
   Print repeat=false hotkey-overlay-title="Screenshot Area" {
-    spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "region"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:screenshot takeScreenshot region"
   }
   Ctrl+Print repeat=false hotkey-overlay-title="Screenshot Screen" {
-    spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "output"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:screenshot takeScreenshot output"
   }
   Alt+Print repeat=false hotkey-overlay-title="Screenshot Window" {
-    spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "window"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:screenshot takeScreenshot window"
   }
 
   // ----------------------------------------------------------------------
