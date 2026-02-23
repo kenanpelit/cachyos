@@ -6,6 +6,7 @@ bin_dir="$HOME/.local/bin"
 
 mkdir -p "$bin_dir"
 ln -sf "$module_root/scripts/blue-manager" "$bin_dir/blue-manager"
+rm -f "$bin_dir/hypr-blue-manager"
 
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload >/dev/null 2>&1 || true
