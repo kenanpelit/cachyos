@@ -142,3 +142,9 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/themes/dmsRegistry"]
 	path = modules/dms/dotfiles/DankMaterialShell/themes/dmsRegistry
 	url = https://github.com/AvengeMedia/dms-plugin-registry.git
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/flatpakUpdates"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/flatpakUpdates
+	url = https://github.com/merdely/dms-plugins
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/musicLyrics"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/musicLyrics
+	url = https://github.com/gasiyu/dms-plugin-musiclyrics
