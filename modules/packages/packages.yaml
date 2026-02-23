@@ -4,6 +4,8 @@ packages:
   - kora-icon-theme
   - kimageformats
   - clight
+  - gammastep
+  - hyprsunset
   - efibootmgr
   - ente-auth-bin
   - ente-desktop-bin
