@@ -6,6 +6,7 @@ settings_file="$settings_dir/settings.json"
 blocklists_dir="$settings_dir/blocklists"
 blocklist_file="$blocklists_dir/blocklist"
 blocklist_url="file://${blocklist_file}"
+max_backups="${TRANSMISSION_SETTINGS_BACKUP_KEEP:-3}"
 
 mkdir -p "$HOME/.tor/transmission/complete" \
   "$HOME/.tor/transmission/incomplete" \
@@ -91,6 +92,16 @@ JSON
 # Backup if changed
 if [ -f "$settings_file" ] && ! cmp -s "$tmp" "$settings_file" 2>/dev/null; then
   cp "$settings_file" "$settings_file.backup.$(date +%Y%m%d-%H%M%S)" || true
+fi
+
+# Keep only the newest N backups (default: 3).
+if [[ "$max_backups" =~ ^[0-9]+$ ]]; then
+  mapfile -t backups < <(ls -1t "$settings_file".backup.* 2>/dev/null || true)
+  if (( ${#backups[@]} > max_backups )); then
+    for old in "${backups[@]:max_backups}"; do
+      rm -f "$old" || true
+    done
+  fi
 fi
 
 install -m 644 "$tmp" "$settings_file"
