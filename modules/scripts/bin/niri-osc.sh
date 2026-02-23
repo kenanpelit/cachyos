@@ -373,6 +373,27 @@ EOF
       esac
     }
 
+    get_noctalia_bar_mode() {
+      local mode_file mode
+      mode_file="${XDG_CACHE_HOME:-$HOME/.cache}/osc-shell/noctalia-bar-mode"
+      mode=""
+      if [[ -f "$mode_file" ]]; then
+        mode="$(tr '[:upper:]' '[:lower:]' <"$mode_file" 2>/dev/null | xargs || true)"
+      fi
+      case "$mode" in
+      auto_hide | always_visible | non_exclusive) printf '%s\n' "$mode" ;;
+      *) printf 'always_visible\n' ;;
+      esac
+    }
+
+    set_noctalia_bar_mode() {
+      local mode="${1:-always_visible}"
+      shell_ipc_call bar setDisplayMode "$mode" "all" >/dev/null 2>&1 || true
+      # Keep osc-shell mode cache in sync so other bar helpers behave consistently.
+      mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/osc-shell" 2>/dev/null || true
+      printf '%s\n' "$mode" >"${XDG_CACHE_HOME:-$HOME/.cache}/osc-shell/noctalia-bar-mode"
+    }
+
     SHELL_BACKEND="$(detect_shell_backend)"
 
     get_bar_state() {
@@ -489,6 +510,17 @@ EOF
 
       if [[ "$STATE_VERSION" == "2" ]]; then
         [[ "$STATE_BAR" == "visible" || "$STATE_BAR" == "hidden" ]] && set_bar_state "$STATE_BAR"
+        if [[ "$STATE_BAR" == mode:* ]]; then
+          mode_restore="${STATE_BAR#mode:}"
+          case "$mode_restore" in
+          auto_hide | always_visible | non_exclusive)
+            set_noctalia_bar_mode "$mode_restore"
+            shell_ipc_call bar showBar >/dev/null 2>&1 || true
+            ;;
+          *)
+            ;;
+          esac
+        fi
         [[ "$STATE_BAR" == "toggle" ]] && shell_ipc_call bar toggle >/dev/null 2>&1 || true
         [[ "$STATE_DND" == "true" || "$STATE_DND" == "false" ]] && set_dnd_state "$STATE_DND"
         [[ "$STATE_DND" == "toggle" ]] && shell_ipc_call notifications toggleDND >/dev/null 2>&1 || true
@@ -510,8 +542,8 @@ EOF
 
       bar_before="$(get_bar_state)"
       dnd_before="$(get_dnd_state)"
-      if [[ "$SHELL_BACKEND" == "noctalia" && "$bar_before" == "unknown" ]]; then
-        bar_before="toggle"
+      if [[ "$SHELL_BACKEND" == "noctalia" ]]; then
+        bar_before="mode:$(get_noctalia_bar_mode)"
       fi
       if [[ "$SHELL_BACKEND" == "noctalia" && "$dnd_before" == "unknown" ]]; then
         dnd_before="toggle"
@@ -519,8 +551,11 @@ EOF
       write_state_file "$bar_before" "$dnd_before"
 
       # Hide bar + enable DND only if needed.
-      if [[ "$bar_before" == "toggle" ]]; then
-        shell_ipc_call bar toggle >/dev/null 2>&1 || true
+      if [[ "$bar_before" == mode:* ]]; then
+        set_noctalia_bar_mode "auto_hide"
+        shell_ipc_call bar hideBar >/dev/null 2>&1 || true
+      elif [[ "$bar_before" == "toggle" ]]; then
+        shell_ipc_call bar hideBar >/dev/null 2>&1 || shell_ipc_call bar toggle >/dev/null 2>&1 || true
       else
         set_bar_state "hidden"
       fi
