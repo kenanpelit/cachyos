@@ -5,7 +5,7 @@
   "arrowType": "fold",
   "minWidth": 0,
   "byteThresholdActive": 1024,
-  "fontSizeModifier": 1,
+  "fontSizeModifier": 1.05,
   "iconSizeModifier": 1,
   "spacingInbetween": 0
 }

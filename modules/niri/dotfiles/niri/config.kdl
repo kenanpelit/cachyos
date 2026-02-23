@@ -364,10 +364,10 @@ binds {
   Mod+Shift+Space repeat=false hotkey-overlay-title="Spotlight" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher command"
   }
-  Mod+D repeat=false hotkey-overlay-title="Dash / Apps" {
-    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher toggle"
+  Mod+Ctrl+D repeat=false hotkey-overlay-title="Settings" {
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call settings toggle"
   }
-  Mod+Ctrl+D repeat=false hotkey-overlay-title="Control Center" {
+  Mod+D repeat=false hotkey-overlay-title="Control Center" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call controlCenter toggle"
   }
   Mod+N repeat=false hotkey-overlay-title="Notifications" {
@@ -418,7 +418,7 @@ binds {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call sessionMenu toggle"
   }
   Alt+L repeat=false hotkey-overlay-title="Lock Screen" {
-    spawn-sh "$HOME/.local/bin/niri-osc set lock"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call lockScreen lock"
   }
   Mod+Shift+Delete repeat=false hotkey-overlay-title="Inhibit Idle" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call idleInhibitor toggle"
