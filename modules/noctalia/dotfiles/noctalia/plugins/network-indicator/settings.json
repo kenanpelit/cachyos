@@ -2,10 +2,10 @@
   "useCustomColors": false,
   "showNumbers": true,
   "forceMegabytes": false,
-  "arrowType": "caret",
+  "arrowType": "fold",
   "minWidth": 0,
   "byteThresholdActive": 1024,
-  "fontSizeModifier": 1.5,
-  "iconSizeModifier": 1.5,
+  "fontSizeModifier": 1,
+  "iconSizeModifier": 1,
   "spacingInbetween": 0
 }
