@@ -14,6 +14,7 @@ application/vnd.openxmlformats-officedocument.presentationml.presentation=libreo
 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=libreoffice.desktop
 application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice.desktop
 application/xhtml+xml=brave-kenp.desktop
+application/x-bittorrent=transmission-gtk.desktop;
 application/zip=org.gnome.FileRoller.desktop
 audio/aac=mpv.desktop
 audio/mpeg=mpv.desktop
@@ -52,6 +53,7 @@ x-scheme-handler/mpv=open-in-mpv.desktop
 x-scheme-handler/unknown=brave-kenp.desktop
 x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
 x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
+x-scheme-handler/magnet=transmission-gtk.desktop;
 
 [Default Applications]
 application/*tar=org.gnome.FileRoller.desktop
@@ -73,6 +75,7 @@ application/x-extension-html=brave-kenp.desktop
 application/x-extension-shtml=brave-kenp.desktop
 application/x-extension-xht=brave-kenp.desktop
 application/x-extension-xhtml=brave-kenp.desktop
+application/x-bittorrent=transmission-gtk.desktop
 application/xhtml+xml=brave-kenp.desktop
 application/zip=org.gnome.FileRoller.desktop
 audio/aac=mpv.desktop
@@ -116,5 +119,6 @@ text/x-log=kitty-nvim.desktop
 text/x-readme=kitty-nvim.desktop
 x-scheme-handler/terminal=kitty.desktop
 x-scheme-handler/ferdium=ferdium.desktop
+x-scheme-handler/magnet=transmission-gtk.desktop
 
 [Removed Associations]
