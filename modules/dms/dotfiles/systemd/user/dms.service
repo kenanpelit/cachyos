@@ -32,4 +32,3 @@ PassEnvironment=XDG_SESSION_DESKTOP
 
 [Install]
 WantedBy=hyprland-session.target
-WantedBy=niri-session.target

@@ -165,6 +165,8 @@ ensure_backend() {
         import_session_environment
         systemctl --user stop noctalia.service >/dev/null 2>&1 || true
         systemctl --user start dms.service >/dev/null 2>&1 || true
+        systemctl --user start dms-plugin-sync.service >/dev/null 2>&1 || true
+        systemctl --user start dms-resume-restart.service >/dev/null 2>&1 || true
       fi
       ;;
   esac

@@ -25,6 +25,10 @@ fi
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload >/dev/null 2>&1 || true
 
-  # Enable into session targets so `niri-osc set env` / hyprland exec-once starts them.
+  # Re-sync unit symlinks to avoid stale target.wants links after unit changes.
+  # (e.g. dms no longer bound to niri-session.target).
+  systemctl --user disable dms.service dms-plugin-sync.service dms-resume-restart.service >/dev/null 2>&1 || true
+
+  # Enable into currently declared session targets.
   systemctl --user enable dms.service dms-plugin-sync.service dms-resume-restart.service >/dev/null 2>&1 || true
 fi

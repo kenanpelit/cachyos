@@ -12,4 +12,3 @@ RestartSec=2
 
 [Install]
 WantedBy=hyprland-session.target
-WantedBy=niri-session.target

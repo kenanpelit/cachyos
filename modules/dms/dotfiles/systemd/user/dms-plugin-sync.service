@@ -10,4 +10,3 @@ ExecStart=%h/.local/bin/dms-plugin-sync
 
 [Install]
 WantedBy=hyprland-session.target
-WantedBy=niri-session.target
