@@ -70,6 +70,7 @@ enabled_modules:
   - rofi
   - walker
   - dms
+  - noctalia
   - dms-greeter
   - fusuma
   # - mako

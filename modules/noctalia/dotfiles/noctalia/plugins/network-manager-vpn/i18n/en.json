@@ -1,0 +1,20 @@
+{
+  "panel": {
+    "emptyTitle": "No VPN found",
+    "emptyDescription": "Use Network Manager to add a VPN"
+  },
+  "toast": {
+    "connectedTo": "Connected to {name}",
+    "disconnectedFrom": "Disconnected from {name}",
+    "connectionError": "Failed to connect {name}",
+    "disconnectionError": "Failed to disconnect {name}"
+  },
+  "common": {
+    "vpn": "VPN",
+    "refresh": "Refresh",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "connect": "Connect",
+    "disconnect": "Disconnect"
+  }
+}

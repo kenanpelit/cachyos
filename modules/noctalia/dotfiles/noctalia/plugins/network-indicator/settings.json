@@ -1,0 +1,11 @@
+{
+  "useCustomColors": false,
+  "showNumbers": true,
+  "forceMegabytes": false,
+  "arrowType": "caret",
+  "minWidth": 0,
+  "byteThresholdActive": 1024,
+  "fontSizeModifier": 1.5,
+  "iconSizeModifier": 1.5,
+  "spacingInbetween": 0
+}
