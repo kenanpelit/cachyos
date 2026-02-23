@@ -286,117 +286,262 @@ route_dms_ipc() {
   local -a args=("$@")
 
   case "${target}:${method}" in
-    launcher:toggle) exec dms_ipc_call launcher toggle ;;
-    launcher:command) exec dms_ipc_call spotlight toggle ;;
-    launcher:windows) exec dms_ipc_call spotlight openQuery "!" ;;
-    launcher:emoji) exec dms_ipc_call dash toggle overview ;;
-    launcher:clipboard) exec dms_ipc_call clipboard toggle ;;
-    launcher:settings) exec dms_ipc_call settings focusOrToggle ;;
+    launcher:toggle)
+      dms_ipc_call launcher toggle
+      return $?
+      ;;
+    launcher:command)
+      dms_ipc_call spotlight toggle
+      return $?
+      ;;
+    launcher:windows)
+      dms_ipc_call spotlight openQuery "!"
+      return $?
+      ;;
+    launcher:emoji)
+      dms_ipc_call dash toggle overview
+      return $?
+      ;;
+    launcher:clipboard)
+      dms_ipc_call clipboard toggle
+      return $?
+      ;;
+    launcher:settings)
+      dms_ipc_call settings focusOrToggle
+      return $?
+      ;;
 
-    controlCenter:toggle) exec dms_ipc_call control-center toggle "" ;;
+    controlCenter:toggle)
+      dms_ipc_call control-center toggle ""
+      return $?
+      ;;
 
-    settings:toggle | settings:open) exec dms_ipc_call settings focusOrToggle ;;
+    settings:toggle | settings:open)
+      dms_ipc_call settings focusOrToggle
+      return $?
+      ;;
     settings:toggleTab | settings:openTab)
       if [[ "${args[0]:-}" == "keybinds" || "${args[0]:-}" == keybinds/* ]]; then
-        exec dms_ipc_call settings openWith keybinds
+        dms_ipc_call settings openWith keybinds
+        return $?
       fi
-      exec dms_ipc_call settings focusOrToggle
+      dms_ipc_call settings focusOrToggle
+      return $?
       ;;
 
-    notifications:toggleHistory) exec dms_ipc_call notifications toggle ;;
-    notifications:toggleDND) exec dms_ipc_call notifications toggle-dnd ;;
-    notifications:dismissAll) exec dms_ipc_call notifications dismissAll ;;
+    notifications:toggleHistory)
+      dms_ipc_call notifications toggle
+      return $?
+      ;;
+    notifications:toggleDND)
+      dms_ipc_call notifications toggle-dnd
+      return $?
+      ;;
+    notifications:dismissAll)
+      dms_ipc_call notifications dismissAll
+      return $?
+      ;;
 
-    systemMonitor:toggle) exec dms_ipc_call processlist focusOrToggle ;;
+    systemMonitor:toggle)
+      dms_ipc_call processlist focusOrToggle
+      return $?
+      ;;
 
-    sessionMenu:toggle) exec dms_ipc_call powermenu toggle ;;
-    sessionMenu:lock | lockScreen:lock) exec dms_ipc_call lock lock ;;
+    sessionMenu:toggle)
+      dms_ipc_call powermenu toggle
+      return $?
+      ;;
+    sessionMenu:lock | lockScreen:lock)
+      dms_ipc_call lock lock
+      return $?
+      ;;
     sessionMenu:lockAndSuspend)
       dms_ipc_call lock lock >/dev/null 2>&1 || true
-      exec systemctl suspend -i
+      systemctl suspend -i
+      return $?
       ;;
 
-    plugin:clipper:toggle) exec dms_ipc_call clipboard toggle ;;
-    plugin:keybind-cheatsheet:toggle) exec dms_ipc_call keybinds toggle niri ;;
-    plugin:assistant-panel:toggle) exec dms_ipc_call widget toggle sathiAi ;;
+    plugin:clipper:toggle)
+      dms_ipc_call clipboard toggle
+      return $?
+      ;;
+    plugin:keybind-cheatsheet:toggle)
+      dms_ipc_call keybinds toggle niri
+      return $?
+      ;;
+    plugin:assistant-panel:toggle)
+      dms_ipc_call widget toggle sathiAi
+      return $?
+      ;;
 
-    bar:toggle) exec dms_ipc_call bar toggle index 0 ;;
-    bar:showBar) exec dms_ipc_call bar reveal index 0 ;;
-    bar:hideBar) exec dms_ipc_call bar hide index 0 ;;
-    bar:toggleAutoHide) exec dms_ipc_call bar toggleAutoHide index 0 ;;
+    bar:toggle)
+      dms_ipc_call bar toggle index 0
+      return $?
+      ;;
+    bar:showBar)
+      dms_ipc_call bar reveal index 0
+      return $?
+      ;;
+    bar:hideBar)
+      dms_ipc_call bar hide index 0
+      return $?
+      ;;
+    bar:toggleAutoHide)
+      dms_ipc_call bar toggleAutoHide index 0
+      return $?
+      ;;
 
-    dock:toggle) exec dms_ipc_call dock toggle ;;
+    dock:toggle)
+      dms_ipc_call dock toggle
+      return $?
+      ;;
 
-    wallpaper:toggle) exec dms_ipc_call dankdash wallpaper ;;
-    wallpaper:random | wallpaper:next) exec dms_ipc_call wallpaper next ;;
-    wallpaper:prev) exec dms_ipc_call wallpaper prev ;;
+    wallpaper:toggle)
+      dms_ipc_call dankdash wallpaper
+      return $?
+      ;;
+    wallpaper:random | wallpaper:next)
+      dms_ipc_call wallpaper next
+      return $?
+      ;;
+    wallpaper:prev)
+      dms_ipc_call wallpaper prev
+      return $?
+      ;;
 
-    darkMode:toggle) exec dms_ipc_call theme toggle ;;
-    nightLight:toggle) exec dms_ipc_call night toggle ;;
+    darkMode:toggle)
+      dms_ipc_call theme toggle
+      return $?
+      ;;
+    nightLight:toggle)
+      dms_ipc_call night toggle
+      return $?
+      ;;
 
-    volume:increase) exec dms_ipc_call audio increment 5 ;;
-    volume:decrease) exec dms_ipc_call audio decrement 5 ;;
-    volume:muteOutput) exec dms_ipc_call audio mute ;;
-    volume:muteInput) exec dms_ipc_call audio micmute ;;
+    volume:increase)
+      dms_ipc_call audio increment 5
+      return $?
+      ;;
+    volume:decrease)
+      dms_ipc_call audio decrement 5
+      return $?
+      ;;
+    volume:muteOutput)
+      dms_ipc_call audio mute
+      return $?
+      ;;
+    volume:muteInput)
+      dms_ipc_call audio micmute
+      return $?
+      ;;
 
-    brightness:increase) exec dms_ipc_call brightness increment 5 "" ;;
-    brightness:decrease) exec dms_ipc_call brightness decrement 5 "" ;;
+    brightness:increase)
+      dms_ipc_call brightness increment 5 ""
+      return $?
+      ;;
+    brightness:decrease)
+      dms_ipc_call brightness decrement 5 ""
+      return $?
+      ;;
     brightness:set)
-      command -v brightnessctl >/dev/null 2>&1 || exit 1
-      exec brightnessctl set "${args[0]:-50}%"
+      command -v brightnessctl >/dev/null 2>&1 || return 1
+      brightnessctl set "${args[0]:-50}%"
+      return $?
       ;;
 
-    media:playPause) exec dms_ipc_call mpris playPause ;;
-    media:next) exec dms_ipc_call mpris next ;;
-    media:previous) exec dms_ipc_call mpris previous ;;
-    media:pause) exec dms_ipc_call mpris pause ;;
-    media:play) exec dms_ipc_call mpris play ;;
-    media:stop) exec dms_ipc_call mpris stop ;;
+    media:playPause)
+      dms_ipc_call mpris playPause
+      return $?
+      ;;
+    media:next)
+      dms_ipc_call mpris next
+      return $?
+      ;;
+    media:previous)
+      dms_ipc_call mpris previous
+      return $?
+      ;;
+    media:pause)
+      dms_ipc_call mpris pause
+      return $?
+      ;;
+    media:play)
+      dms_ipc_call mpris play
+      return $?
+      ;;
+    media:stop)
+      dms_ipc_call mpris stop
+      return $?
+      ;;
 
-    idleInhibitor:toggle) exec dms_ipc_call inhibit toggle ;;
+    idleInhibitor:toggle)
+      dms_ipc_call inhibit toggle
+      return $?
+      ;;
 
     plugin:screenshot:takeScreenshot)
       case "${args[0]:-region}" in
-        output | screen | fullscreen) exec dms_ipc_call niri screenshotScreen ;;
-        window) exec dms_ipc_call niri screenshotWindow ;;
-        *) exec dms_ipc_call niri screenshot ;;
+        output | screen | fullscreen)
+          dms_ipc_call niri screenshotScreen
+          return $?
+          ;;
+        window)
+          dms_ipc_call niri screenshotWindow
+          return $?
+          ;;
+        *)
+          dms_ipc_call niri screenshot
+          return $?
+          ;;
       esac
       ;;
 
     powerProfile:cycle)
-      exec power_profile_cycle
+      power_profile_cycle
+      return $?
       ;;
     powerProfile:set)
-      command -v powerprofilesctl >/dev/null 2>&1 || exit 1
+      command -v powerprofilesctl >/dev/null 2>&1 || return 1
       case "$(to_lower "${args[0]:-balanced}")" in
-        powersaver | power_saver) exec powerprofilesctl set power-saver ;;
-        *) exec powerprofilesctl set "${args[0]:-balanced}" ;;
+        powersaver | power_saver)
+          powerprofilesctl set power-saver
+          return $?
+          ;;
+        *)
+          powerprofilesctl set "${args[0]:-balanced}"
+          return $?
+          ;;
       esac
       ;;
 
     wifi:toggle)
-      command -v nmcli >/dev/null 2>&1 || exit 1
+      command -v nmcli >/dev/null 2>&1 || return 1
       if [[ "$(nmcli radio wifi 2>/dev/null | tr '[:upper:]' '[:lower:]')" == "enabled" ]]; then
-        exec nmcli radio wifi off
+        nmcli radio wifi off
+        return $?
       fi
-      exec nmcli radio wifi on
+      nmcli radio wifi on
+      return $?
       ;;
     wifi:enable)
-      command -v nmcli >/dev/null 2>&1 || exit 1
-      exec nmcli radio wifi on
+      command -v nmcli >/dev/null 2>&1 || return 1
+      nmcli radio wifi on
+      return $?
       ;;
     wifi:disable)
-      command -v nmcli >/dev/null 2>&1 || exit 1
-      exec nmcli radio wifi off
+      command -v nmcli >/dev/null 2>&1 || return 1
+      nmcli radio wifi off
+      return $?
       ;;
 
     bluetooth:toggle)
-      command -v bluetooth_toggle >/dev/null 2>&1 || exit 1
-      exec bluetooth_toggle
+      command -v bluetooth_toggle >/dev/null 2>&1 || return 1
+      bluetooth_toggle
+      return $?
       ;;
   esac
 
-  exec dms_ipc_call "$target" "$method" "${args[@]}"
+  dms_ipc_call "$target" "$method" "${args[@]}"
 }
 
 route_noctalia_ipc() {
@@ -538,7 +683,8 @@ cmd_ipc() {
   case "$sub" in
     show)
       if [[ "$backend" == "noctalia" ]]; then
-        exec qs -c noctalia-shell ipc show
+        qs -c noctalia-shell ipc show
+        return $?
       fi
       echo "${SCRIPT_NAME}: ipc show is only supported for noctalia backend" >&2
       return 1
@@ -552,9 +698,11 @@ cmd_ipc() {
       }
       normalize_ipc "$target" "$method" "$@"
       if [[ "$backend" == "noctalia" ]]; then
-        exec route_noctalia_ipc "$IPC_TARGET" "$IPC_METHOD" "${IPC_ARGS[@]}"
+        route_noctalia_ipc "$IPC_TARGET" "$IPC_METHOD" "${IPC_ARGS[@]}"
+        return $?
       fi
-      exec route_dms_ipc "$IPC_TARGET" "$IPC_METHOD" "${IPC_ARGS[@]}"
+      route_dms_ipc "$IPC_TARGET" "$IPC_METHOD" "${IPC_ARGS[@]}"
+      return $?
       ;;
     *)
       echo "Usage: ${SCRIPT_NAME} ipc <show|call>" >&2
