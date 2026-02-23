@@ -1,0 +1,346 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# blue-manager
+# -----------------------------------------------------------------------------
+# Gammastep-only color temperature manager.
+# - Keeps a single managed Gammastep process.
+# - Supports systemd-friendly foreground daemon mode.
+# - Exposes start/stop/toggle/status helpers for manual use.
+# -----------------------------------------------------------------------------
+
+SCRIPT_NAME="$(basename "$0")"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+STATE_FILE="${CACHE_DIR}/blue-manager.state"
+DAEMON_PID_FILE="${CACHE_DIR}/blue-manager.pid"
+GAMMASTEP_PID_FILE="${CACHE_DIR}/blue-manager-gammastep.pid"
+LOG_FILE="${CACHE_DIR}/blue-manager.log"
+
+MODE="wayland"
+LOCATION="41.0108:29.0219"
+TEMP_DAY="4000"
+TEMP_NIGHT="3000"
+BRIGHTNESS_DAY="1.0"
+BRIGHTNESS_NIGHT="0.8"
+GAMMA="1,0.2,0.1"
+CHECK_INTERVAL="30"
+
+ensure_dirs() {
+  mkdir -p "$CACHE_DIR"
+  touch "$LOG_FILE"
+}
+
+log() {
+  ensure_dirs
+  printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >>"$LOG_FILE"
+}
+
+notify() {
+  command -v notify-send >/dev/null 2>&1 || return 0
+  notify-send -t 2000 "Blue" "$*" >/dev/null 2>&1 || true
+}
+
+usage() {
+  cat <<USAGE
+$SCRIPT_NAME - Gammastep manager
+
+Usage:
+  $SCRIPT_NAME start [options]
+  $SCRIPT_NAME daemon [options]
+  $SCRIPT_NAME stop
+  $SCRIPT_NAME toggle [options]
+  $SCRIPT_NAME status
+
+Options:
+  --temp-day VALUE     Day temperature in Kelvin (default: $TEMP_DAY)
+  --temp-night VALUE   Night temperature in Kelvin (default: $TEMP_NIGHT)
+  --bright-day VALUE   Day brightness 0.1-1.0 (default: $BRIGHTNESS_DAY)
+  --bright-night VALUE Night brightness 0.1-1.0 (default: $BRIGHTNESS_NIGHT)
+  --location LAT:LON   Location (default: $LOCATION)
+  --gamma R,G,B        Gamma triple (default: $GAMMA)
+  --interval SEC       Daemon health-check interval (default: $CHECK_INTERVAL)
+  -h, --help           Show help
+USAGE
+}
+
+require_gammastep() {
+  if ! command -v gammastep >/dev/null 2>&1; then
+    echo "$SCRIPT_NAME: gammastep not found" >&2
+    log "ERROR: gammastep not found"
+    return 1
+  fi
+}
+
+is_pid_running() {
+  local pid="${1:-}"
+  [[ -n "$pid" && "$pid" =~ ^[0-9]+$ ]] || return 1
+  kill -0 "$pid" 2>/dev/null
+}
+
+read_pid_file() {
+  local file="$1"
+  [[ -f "$file" ]] || return 1
+  tr -d '[:space:]' <"$file"
+}
+
+is_daemon_running() {
+  local pid
+  pid="$(read_pid_file "$DAEMON_PID_FILE" 2>/dev/null || true)"
+  is_pid_running "$pid"
+}
+
+is_gammastep_running() {
+  local pid
+  pid="$(read_pid_file "$GAMMASTEP_PID_FILE" 2>/dev/null || true)"
+  is_pid_running "$pid"
+}
+
+validate_numeric() {
+  local name="$1"
+  local value="$2"
+  if [[ ! "$value" =~ ^[0-9]+$ ]]; then
+    echo "$SCRIPT_NAME: $name must be an integer (got: $value)" >&2
+    return 1
+  fi
+}
+
+validate_config() {
+  validate_numeric "temp-day" "$TEMP_DAY"
+  validate_numeric "temp-night" "$TEMP_NIGHT"
+  validate_numeric "interval" "$CHECK_INTERVAL"
+
+  if (( TEMP_DAY < 1000 || TEMP_DAY > 10000 )); then
+    echo "$SCRIPT_NAME: temp-day must be 1000..10000" >&2
+    return 1
+  fi
+  if (( TEMP_NIGHT < 1000 || TEMP_NIGHT > 10000 )); then
+    echo "$SCRIPT_NAME: temp-night must be 1000..10000" >&2
+    return 1
+  fi
+  if (( CHECK_INTERVAL < 5 )); then
+    echo "$SCRIPT_NAME: interval must be >= 5" >&2
+    return 1
+  fi
+
+  if [[ ! "$LOCATION" =~ ^-?[0-9]+(\.[0-9]+)?:-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "$SCRIPT_NAME: location must be LAT:LON" >&2
+    return 1
+  fi
+}
+
+stop_gammastep_only() {
+  local pid
+  pid="$(read_pid_file "$GAMMASTEP_PID_FILE" 2>/dev/null || true)"
+  if is_pid_running "$pid"; then
+    kill -TERM "$pid" 2>/dev/null || true
+    sleep 0.4
+    is_pid_running "$pid" && kill -KILL "$pid" 2>/dev/null || true
+  fi
+  rm -f "$GAMMASTEP_PID_FILE"
+
+  # Fallback for stale unmanaged processes.
+  pkill -x gammastep >/dev/null 2>&1 || true
+}
+
+start_gammastep_only() {
+  require_gammastep
+  stop_gammastep_only
+
+  gammastep \
+    -m "$MODE" \
+    -l "$LOCATION" \
+    -t "${TEMP_DAY}:${TEMP_NIGHT}" \
+    -b "${BRIGHTNESS_DAY}:${BRIGHTNESS_NIGHT}" \
+    -g "$GAMMA" \
+    >/dev/null 2>&1 &
+
+  local gs_pid=$!
+  echo "$gs_pid" >"$GAMMASTEP_PID_FILE"
+  disown
+
+  sleep 0.5
+  if is_pid_running "$gs_pid"; then
+    log "Gammastep started (pid=$gs_pid, temp=${TEMP_DAY}:${TEMP_NIGHT}, bright=${BRIGHTNESS_DAY}:${BRIGHTNESS_NIGHT})"
+    return 0
+  fi
+
+  log "ERROR: failed to start gammastep"
+  rm -f "$GAMMASTEP_PID_FILE"
+  return 1
+}
+
+cleanup_daemon() {
+  log "Daemon cleanup"
+  rm -f "$STATE_FILE" "$DAEMON_PID_FILE"
+  stop_gammastep_only
+}
+
+daemon_loop() {
+  ensure_dirs
+  validate_config
+  require_gammastep
+
+  echo "$$" >"$DAEMON_PID_FILE"
+  : >"$STATE_FILE"
+
+  trap 'cleanup_daemon; exit 0' EXIT INT TERM
+
+  log "Daemon started (pid=$$, interval=${CHECK_INTERVAL}s)"
+  start_gammastep_only
+
+  while [[ -f "$STATE_FILE" ]]; do
+    sleep "$CHECK_INTERVAL"
+
+    if ! is_gammastep_running; then
+      log "Gammastep not running; restarting"
+      start_gammastep_only || true
+    fi
+  done
+
+  log "State file removed; daemon exiting"
+}
+
+start_service() {
+  validate_config
+  require_gammastep
+
+  if is_daemon_running; then
+    echo "Blue already running" >&2
+    return 1
+  fi
+
+  rm -f "$STATE_FILE" "$DAEMON_PID_FILE" "$GAMMASTEP_PID_FILE"
+
+  (
+    daemon_loop
+  ) &
+  disown
+
+  sleep 0.8
+  if is_daemon_running; then
+    log "Start command successful"
+    notify "Gammastep started"
+    echo "Blue started"
+    return 0
+  fi
+
+  echo "Blue failed to start" >&2
+  return 1
+}
+
+stop_service() {
+  local dpid
+  dpid="$(read_pid_file "$DAEMON_PID_FILE" 2>/dev/null || true)"
+
+  rm -f "$STATE_FILE"
+
+  if is_pid_running "$dpid"; then
+    kill -TERM "$dpid" 2>/dev/null || true
+    sleep 0.6
+    is_pid_running "$dpid" && kill -KILL "$dpid" 2>/dev/null || true
+  fi
+
+  rm -f "$DAEMON_PID_FILE"
+  stop_gammastep_only
+
+  log "Stop command completed"
+  notify "Gammastep stopped"
+  echo "Blue stopped"
+}
+
+show_status() {
+  echo "=== Blue Status ==="
+  if is_daemon_running; then
+    echo "daemon: running (pid=$(read_pid_file "$DAEMON_PID_FILE"))"
+  else
+    echo "daemon: stopped"
+  fi
+
+  if is_gammastep_running; then
+    echo "gammastep: running (pid=$(read_pid_file "$GAMMASTEP_PID_FILE"))"
+  else
+    echo "gammastep: stopped"
+  fi
+
+  echo "temp: ${TEMP_DAY}:${TEMP_NIGHT}"
+  echo "brightness: ${BRIGHTNESS_DAY}:${BRIGHTNESS_NIGHT}"
+  echo "location: $LOCATION"
+  echo "gamma: $GAMMA"
+  echo "interval: ${CHECK_INTERVAL}s"
+  echo "log: $LOG_FILE"
+}
+
+COMMAND=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  start | daemon | stop | toggle | status)
+    COMMAND="$1"
+    shift
+    ;;
+  --temp-day)
+    TEMP_DAY="$2"
+    shift 2
+    ;;
+  --temp-night)
+    TEMP_NIGHT="$2"
+    shift 2
+    ;;
+  --bright-day)
+    BRIGHTNESS_DAY="$2"
+    shift 2
+    ;;
+  --bright-night)
+    BRIGHTNESS_NIGHT="$2"
+    shift 2
+    ;;
+  --location)
+    LOCATION="$2"
+    shift 2
+    ;;
+  --gamma)
+    GAMMA="$2"
+    shift 2
+    ;;
+  --interval)
+    CHECK_INTERVAL="$2"
+    shift 2
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "$SCRIPT_NAME: invalid argument: $1" >&2
+    usage
+    exit 1
+    ;;
+  esac
+done
+
+case "${COMMAND:-}" in
+start)
+  start_service
+  ;;
+daemon)
+  daemon_loop
+  ;;
+stop)
+  stop_service
+  ;;
+toggle)
+  if is_daemon_running; then
+    stop_service
+  else
+    start_service
+  fi
+  ;;
+status)
+  show_status
+  ;;
+*)
+  usage
+  exit 1
+  ;;
+esac

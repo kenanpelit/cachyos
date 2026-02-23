@@ -192,6 +192,12 @@
                     "id": "Launcher"
                 },
                 {
+                    "defaultSettings": {
+                        "compactMode": false,
+                        "defaultDuration": 0,
+                        "iconColor": "none",
+                        "textColor": "none"
+                    },
                     "id": "plugin:timer"
                 },
                 {
@@ -353,6 +359,14 @@
                     "id": "plugin:keybind-cheatsheet"
                 },
                 {
+                    "defaultSettings": {
+                        "activeColor": "primary",
+                        "enableToast": true,
+                        "hideInactive": false,
+                        "iconSpacing": 4,
+                        "inactiveColor": "none",
+                        "removeMargins": false
+                    },
                     "id": "plugin:privacy-indicator"
                 }
             ]
@@ -387,7 +401,7 @@
         "manualSunrise": "06:30",
         "manualSunset": "18:30",
         "monitorForColors": "",
-        "predefinedScheme": "Dracula",
+        "predefinedScheme": "Catppuccin",
         "schedulingMode": "off",
         "useWallpaperColors": false
     },
@@ -632,7 +646,7 @@
             1,
             2
         ],
-        "location": "top_right",
+        "location": "bottom",
         "monitors": [
         ],
         "overlayLayer": true
@@ -746,7 +760,7 @@
     },
     "wallpaper": {
         "automationEnabled": true,
-        "directory": "/home/kenan/Pictures/Wallpapers",
+        "directory": "/home/kenan/Pictures/wallpapers/others",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [

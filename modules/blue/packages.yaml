@@ -1,5 +1,4 @@
-description: Blue (Gammastep/Sunset) packages
+description: Blue (Gammastep) packages
 packages:
   - gammastep
-  - hyprsunset
   - libnotify

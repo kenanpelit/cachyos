@@ -5,7 +5,7 @@ module_root="$(cd "$(dirname "$0")/.." && pwd)"
 bin_dir="$HOME/.local/bin"
 
 mkdir -p "$bin_dir"
-ln -sf "$module_root/scripts/hypr-blue-manager" "$bin_dir/hypr-blue-manager"
+ln -sf "$module_root/scripts/blue-manager" "$bin_dir/blue-manager"
 
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload >/dev/null 2>&1 || true
