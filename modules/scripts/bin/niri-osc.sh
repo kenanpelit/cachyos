@@ -345,7 +345,43 @@ EOF
       dms ipc call "$@" 2>/dev/null | tr -d '\r' || return 1
     }
 
+    shell_ipc_call() {
+      if command -v osc-shell >/dev/null 2>&1; then
+        osc-shell ipc call "$@" 2>/dev/null | tr -d '\r' || return 1
+      elif [[ -x "${HOME}/.local/bin/osc-shell" ]]; then
+        "${HOME}/.local/bin/osc-shell" ipc call "$@" 2>/dev/null | tr -d '\r' || return 1
+      else
+        return 1
+      fi
+    }
+
+    detect_shell_backend() {
+      local out=""
+      if command -v osc-shell >/dev/null 2>&1; then
+        out="$(osc-shell backend niri 2>/dev/null | tr '[:upper:]' '[:lower:]' | xargs || true)"
+      elif [[ -x "${HOME}/.local/bin/osc-shell" ]]; then
+        out="$("${HOME}/.local/bin/osc-shell" backend niri 2>/dev/null | tr '[:upper:]' '[:lower:]' | xargs || true)"
+      fi
+
+      case "$out" in
+      dms | noctalia)
+        printf '%s\n' "$out"
+        ;;
+      *)
+        printf 'dms\n'
+        ;;
+      esac
+    }
+
+    SHELL_BACKEND="$(detect_shell_backend)"
+
     get_bar_state() {
+      if [[ "$SHELL_BACKEND" == "noctalia" ]]; then
+        # No portable "bar status" method in Noctalia IPC yet.
+        echo "unknown"
+        return 0
+      fi
+
       local out norm
       out="$(dms_ipc_call bar status index 0 2>/dev/null | tail -n 1 || echo "unknown")"
       norm="$(printf '%s' "$out" | tr '[:upper:]' '[:lower:]' | xargs || echo "unknown")"
@@ -357,6 +393,12 @@ EOF
     }
 
     get_dnd_state() {
+      if [[ "$SHELL_BACKEND" == "noctalia" ]]; then
+        # No portable DND getter in Noctalia IPC yet.
+        echo "unknown"
+        return 0
+      fi
+
       local out norm
       out="$(dms_ipc_call notifications getDoNotDisturb | tail -n 1 || true)"
       norm="$(printf '%s' "$out" | tr '[:upper:]' '[:lower:]' | xargs || true)"
@@ -374,10 +416,10 @@ EOF
 
       case "$desired" in
       visible)
-        dms_ipc_call bar reveal index 0 >/dev/null 2>&1 || true
+        shell_ipc_call bar showBar >/dev/null 2>&1 || dms_ipc_call bar reveal index 0 >/dev/null 2>&1 || true
         ;;
       hidden)
-        dms_ipc_call bar hide index 0 >/dev/null 2>&1 || true
+        shell_ipc_call bar hideBar >/dev/null 2>&1 || dms_ipc_call bar hide index 0 >/dev/null 2>&1 || true
         ;;
       *)
         ;;
@@ -394,6 +436,13 @@ EOF
         # DMS notifications IPC exposes toggle + getter (no explicit set).
         if [[ "$current" != "unknown" ]]; then
           dms_ipc_call notifications toggleDoNotDisturb >/dev/null 2>&1 || true
+        elif [[ "$SHELL_BACKEND" == "noctalia" ]]; then
+          # Noctalia has explicit DND methods.
+          if [[ "$desired" == "true" ]]; then
+            shell_ipc_call notifications enableDND >/dev/null 2>&1 || true
+          else
+            shell_ipc_call notifications disableDND >/dev/null 2>&1 || true
+          fi
         fi
         ;;
       *)
@@ -440,10 +489,12 @@ EOF
 
       if [[ "$STATE_VERSION" == "2" ]]; then
         [[ "$STATE_BAR" == "visible" || "$STATE_BAR" == "hidden" ]] && set_bar_state "$STATE_BAR"
+        [[ "$STATE_BAR" == "toggle" ]] && shell_ipc_call bar toggle >/dev/null 2>&1 || true
         [[ "$STATE_DND" == "true" || "$STATE_DND" == "false" ]] && set_dnd_state "$STATE_DND"
+        [[ "$STATE_DND" == "toggle" ]] && shell_ipc_call notifications toggleDND >/dev/null 2>&1 || true
       else
         # Legacy fallback for older empty marker files.
-        dms_ipc_call bar toggle index 0 >/dev/null 2>&1 || true
+        shell_ipc_call bar toggle >/dev/null 2>&1 || dms_ipc_call bar toggle index 0 >/dev/null 2>&1 || true
         dms_ipc_call notifications toggle-dnd >/dev/null 2>&1 || dms_ipc_call notifications toggleDoNotDisturb >/dev/null 2>&1 || true
       fi
 
@@ -459,11 +510,25 @@ EOF
 
       bar_before="$(get_bar_state)"
       dnd_before="$(get_dnd_state)"
+      if [[ "$SHELL_BACKEND" == "noctalia" && "$bar_before" == "unknown" ]]; then
+        bar_before="toggle"
+      fi
+      if [[ "$SHELL_BACKEND" == "noctalia" && "$dnd_before" == "unknown" ]]; then
+        dnd_before="toggle"
+      fi
       write_state_file "$bar_before" "$dnd_before"
 
       # Hide bar + enable DND only if needed.
-      set_bar_state "hidden"
-      set_dnd_state "true"
+      if [[ "$bar_before" == "toggle" ]]; then
+        shell_ipc_call bar toggle >/dev/null 2>&1 || true
+      else
+        set_bar_state "hidden"
+      fi
+      if [[ "$dnd_before" == "toggle" ]]; then
+        shell_ipc_call notifications toggleDND >/dev/null 2>&1 || true
+      else
+        set_dnd_state "true"
+      fi
 
       notify "On"
       echo "Zen Mode: On"
