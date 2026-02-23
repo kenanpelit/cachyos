@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 ExecStartPre=%h/.local/bin/transmission-setup
-ExecStart=transmission-daemon -f --log-level=error
+ExecStart=transmission-daemon -f --log-level=error --config-dir %h/.config/transmission-daemon
 ExecReload=/usr/bin/kill -s HUP $MAINPID
 Restart=on-failure
 RestartSec=10

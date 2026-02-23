@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Transmission
+GenericName=BitTorrent Client
+Comment=Download and share files over BitTorrent
+Exec=transmission-ui %U
+TryExec=transmission-ui
+Icon=transmission
+Terminal=false
+StartupNotify=true
+Categories=Network;FileTransfer;P2P;GTK;
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;

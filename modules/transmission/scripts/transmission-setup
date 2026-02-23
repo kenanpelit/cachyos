@@ -4,6 +4,8 @@ set -euo pipefail
 settings_dir="$HOME/.config/transmission-daemon"
 settings_file="$settings_dir/settings.json"
 blocklists_dir="$settings_dir/blocklists"
+blocklist_file="$blocklists_dir/blocklist"
+blocklist_url="file://${blocklist_file}"
 
 mkdir -p "$HOME/.tor/transmission/complete" \
   "$HOME/.tor/transmission/incomplete" \
@@ -23,7 +25,7 @@ cat >"$tmp" <<JSON
   "rpc-enabled": true,
   "rpc-port": 9091,
   "rpc-whitelist-enabled": true,
-  "rpc-whitelist": "127.0.0.1",
+  "rpc-whitelist": "127.0.0.1,::1",
   "rpc-authentication-required": false,
   "rpc-username": "",
   "rpc-password": "",
@@ -34,7 +36,7 @@ cat >"$tmp" <<JSON
   "speed-limit-up-enabled": false,
 
   "blocklist-enabled": true,
-  "blocklist-url": "http://www.example.com/blocklist",
+  "blocklist-url": "${blocklist_url}",
 
   "cache-size-mb": 64,
   "peer-limit-global": 200,
