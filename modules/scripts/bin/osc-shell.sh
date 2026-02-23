@@ -89,6 +89,21 @@ EOF
 }
 
 detect_compositor() {
+  # Prefer compositor-specific runtime sockets first; these are reliable even
+  # when XDG desktop/session variables are not populated yet at early startup.
+  if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+    printf 'niri\n'
+    return 0
+  fi
+  if [[ -n "${HYPRLAND_SOCKET:-}" && -S "${HYPRLAND_SOCKET}" ]]; then
+    printf 'hyprland\n'
+    return 0
+  fi
+  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" && -n "${XDG_RUNTIME_DIR:-}" && -d "${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}" ]]; then
+    printf 'hyprland\n'
+    return 0
+  fi
+
   local all
   all="$(to_lower "${XDG_CURRENT_DESKTOP:-} ${XDG_SESSION_DESKTOP:-} ${DESKTOP_SESSION:-}")"
 
@@ -118,19 +133,36 @@ ensure_systemd_user() {
   systemctl --user show-environment >/dev/null 2>&1
 }
 
+import_session_environment() {
+  # Keep user service environment aligned with active compositor session.
+  systemctl --user import-environment \
+    XDG_CURRENT_DESKTOP \
+    XDG_SESSION_DESKTOP \
+    XDG_SESSION_TYPE \
+    WAYLAND_DISPLAY \
+    DISPLAY \
+    NIRI_SOCKET \
+    HYPRLAND_INSTANCE_SIGNATURE \
+    HYPRLAND_SOCKET \
+    SWAYSOCK >/dev/null 2>&1 || true
+}
+
 ensure_backend() {
   local backend="$1"
 
   case "$backend" in
     noctalia)
       if ensure_systemd_user; then
+        import_session_environment
         systemctl --user stop dms.service >/dev/null 2>&1 || true
         systemctl --user stop dms-plugin-sync.service >/dev/null 2>&1 || true
+        systemctl --user stop dms-resume-restart.service >/dev/null 2>&1 || true
         systemctl --user start noctalia.service >/dev/null 2>&1 || true
       fi
       ;;
     dms)
       if ensure_systemd_user; then
+        import_session_environment
         systemctl --user stop noctalia.service >/dev/null 2>&1 || true
         systemctl --user start dms.service >/dev/null 2>&1 || true
       fi
@@ -566,7 +598,14 @@ route_noctalia_ipc() {
   fi
 
   if ! qs -c noctalia-shell ipc call "$target" "$method" "${args[@]}" >/dev/null 2>&1; then
+    local i
     ensure_backend noctalia
+    for i in {1..30}; do
+      if qs -c noctalia-shell ipc call "$target" "$method" "${args[@]}" >/dev/null 2>&1; then
+        return 0
+      fi
+      sleep 0.1
+    done
   fi
 
   qs -c noctalia-shell ipc call "$target" "$method" "${args[@]}"
