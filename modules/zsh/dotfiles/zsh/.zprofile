@@ -4,9 +4,9 @@
 # =============================================================================
 # TTY1: display manager / manual launch info
 # TTY2: Niri (niri-osc set tty)
-# TTY3: Hyprland (hypr-set tty)
+# TTY3: Hyprland (hypr-osc tty)
 # TTY4: GNOME (gnome_tty)
-# TTY5: Sway (Ubuntu VM profile)
+# TTY5: VM route (svmubuntu via Sway profile)
 # TTY6: manual
 # =============================================================================
 
@@ -53,14 +53,24 @@ if $is_login_shell \
   export XDG_RUNTIME_DIR="/run/user/${uid}"
 
   NIRI_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/niri-osc" "niri-osc" 2>/dev/null || true)"
-  HYPR_SET_CMD="$(resolve_cmd "${HOME}/.local/bin/hypr-set" "hypr-set" 2>/dev/null || true)"
+  HYPR_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/hypr-osc" "hypr-osc" 2>/dev/null || true)"
   GNOME_TTY_CMD="$(resolve_cmd "${HOME}/.local/bin/gnome_tty" "gnome_tty" 2>/dev/null || true)"
+  SVM_UBUNTU_CMD="$(resolve_cmd "${HOME}/.local/bin/svmubuntu" "svmubuntu" 2>/dev/null || true)"
+  SVM_ARCH_CMD="$(resolve_cmd "${HOME}/.local/bin/svmarch" "svmarch" 2>/dev/null || true)"
+  SVM_CACHY_CMD="$(resolve_cmd "${HOME}/.local/bin/svmcachy" "svmcachy" 2>/dev/null || true)"
+  SVM_NIXOS_CMD="$(resolve_cmd "${HOME}/.local/bin/svmnixos" "svmnixos" 2>/dev/null || true)"
+
+  if command -v niri-session >/dev/null 2>&1; then
+    NIRI_TTY_CMD="niri-session"
+  else
+    NIRI_TTY_CMD="niri --session"
+  fi
 
   case "${XDG_VTNR}" in
     1)
       echo "TTY1: display manager / manual launch helper"
-      echo "  Niri:     exec ${NIRI_OSC_CMD:-niri-osc} set tty"
-      echo "  Hyprland: exec ${HYPR_SET_CMD:-hypr-set} tty"
+      echo "  Niri:     exec ${NIRI_TTY_CMD}"
+      echo "  Hyprland: exec ${HYPR_OSC_CMD:-hypr-osc} tty"
       echo "  GNOME:    exec ${GNOME_TTY_CMD:-gnome_tty}"
       ;;
 
@@ -79,14 +89,14 @@ if $is_login_shell \
       ;;
 
     3)
-      echo "TTY3: launching Hyprland via hypr-set tty"
+      echo "TTY3: launching Hyprland via hypr-osc tty"
       export XDG_SESSION_TYPE=wayland
 
-      if [[ -n "${HYPR_SET_CMD}" ]]; then
-        exec "${HYPR_SET_CMD}" tty
+      if [[ -n "${HYPR_OSC_CMD}" ]]; then
+        exec "${HYPR_OSC_CMD}" tty
       fi
 
-      echo "ERROR: hypr-set not found, falling back to direct Hyprland"
+      echo "ERROR: hypr-osc not found, falling back to direct Hyprland"
       sleep 2
       exec Hyprland 2>&1 | tee /tmp/hyprland-tty3.log
       ;;
@@ -130,15 +140,19 @@ if $is_login_shell \
     6)
       echo "TTY6: manual mode (no autostart)"
       echo "Available routes:"
-      echo "  TTY2 -> Niri      (${NIRI_OSC_CMD:-niri-osc} set tty)"
-      echo "  TTY3 -> Hyprland  (${HYPR_SET_CMD:-hypr-set} tty)"
+      echo "  TTY2 -> Niri      (${NIRI_TTY_CMD})"
+      echo "  TTY3 -> Hyprland  (${HYPR_OSC_CMD:-hypr-osc} tty)"
       echo "  TTY4 -> GNOME     (${GNOME_TTY_CMD:-gnome_tty})"
-      echo "  TTY5 -> Sway VM   (sway -c ~/.config/sway/qemu_vmubuntu)"
+      echo "  TTY5 -> VM tools  (${SVM_UBUNTU_CMD:-svmubuntu} / ${SVM_ARCH_CMD:-svmarch} / ${SVM_CACHY_CMD:-svmcachy} / ${SVM_NIXOS_CMD:-svmnixos})"
       echo
       echo "Manual start commands:"
-      echo "  exec ${NIRI_OSC_CMD:-niri-osc} set tty"
-      echo "  exec ${HYPR_SET_CMD:-hypr-set} tty"
+      echo "  exec ${NIRI_TTY_CMD}"
+      echo "  exec ${HYPR_OSC_CMD:-hypr-osc} tty"
       echo "  exec ${GNOME_TTY_CMD:-gnome_tty}"
+      echo "  ${SVM_UBUNTU_CMD:-svmubuntu} start"
+      echo "  ${SVM_ARCH_CMD:-svmarch} start"
+      echo "  ${SVM_CACHY_CMD:-svmcachy} start"
+      echo "  ${SVM_NIXOS_CMD:-svmnixos} start"
       ;;
 
     *)
