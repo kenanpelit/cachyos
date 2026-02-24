@@ -34,6 +34,11 @@ set -euo pipefail
 
 VERSION="18.0"
 SCRIPT_NAME=$(basename "$0")
+SCRIPT_ABS_PATH="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || true)"
+if [[ -z "$SCRIPT_ABS_PATH" ]]; then
+	SCRIPT_ABS_PATH="$(command -v "$SCRIPT_NAME" 2>/dev/null || true)"
+fi
+SUDO_SCRIPT_CMD="${SCRIPT_ABS_PATH:-$SCRIPT_NAME}"
 LOG_BASE_DIR="${HOME}/.logs"
 THERMAL_LOG_DIR="${LOG_BASE_DIR}/thermal"
 
@@ -89,9 +94,9 @@ ${BOLD}Examples:${RST}
   ${SCRIPT_NAME} status
   ${SCRIPT_NAME} status --json
   ${SCRIPT_NAME} thermal -d 300 -p
-  sudo ${SCRIPT_NAME} turbostat-quick
+  sudo ${SUDO_SCRIPT_CMD} turbostat-quick
   ${SCRIPT_NAME} power-monitor
-  sudo ${SCRIPT_NAME} profile-refresh
+  sudo ${SUDO_SCRIPT_CMD} profile-refresh
 
 ${BOLD}For command-specific help:${RST}
   ${SCRIPT_NAME} <command> --help
@@ -620,7 +625,7 @@ EOF
 			if awk -v l="$LOAD1" -v mhz="${CPUINFO_FREQ_AVG_MHZ:-0}" 'BEGIN{exit !(l>=1.0 && mhz>0 && mhz<=600)}'; then
 				echo "  ${YLW}⚠ load yüksek ama CPU MHz düşük görünüyor.${RST}"
 				echo "  ${DIM}Bu HWP raporlama artefaktı da olabilir, gerçek throttling de olabilir.${RST}"
-				echo "  ${DIM}→ Doğrulama: sudo ${SCRIPT_NAME} turbostat-quick${RST}"
+				echo "  ${DIM}→ Doğrulama: sudo ${SUDO_SCRIPT_CMD} turbostat-quick${RST}"
 			fi
 		fi
 
@@ -1014,7 +1019,7 @@ cmd_turbostat_quick() {
 		cat <<EOF
 ${BOLD}Turbostat Quick${RST} - Real CPU frequency analysis
 
-${BOLD}Usage:${RST} sudo ${SCRIPT_NAME} turbostat-quick
+${BOLD}Usage:${RST} sudo ${SUDO_SCRIPT_CMD} turbostat-quick
 
 Real CPU frequency analysis using turbostat.
 Shows actual CPU behavior by reading hardware counters.
@@ -1044,7 +1049,7 @@ EOF
 
 	if [[ $EUID -ne 0 ]]; then
 		echo "${RED}⚠ This command requires root privileges to read MSRs.${RST}"
-		echo "   Please run: sudo ${SCRIPT_NAME} turbostat-quick"
+		echo "   Please run: sudo ${SUDO_SCRIPT_CMD} turbostat-quick"
 		exit 1
 	fi
 
@@ -1066,7 +1071,7 @@ cmd_turbostat_stress() {
 			cat <<EOF
 ${BOLD}Turbostat Stress${RST} - Performance testing under load
 
-${BOLD}Usage:${RST} sudo ${SCRIPT_NAME} turbostat-stress [--analyze]
+${BOLD}Usage:${RST} sudo ${SUDO_SCRIPT_CMD} turbostat-stress [--analyze]
 
 Runs stress test while monitoring CPU behavior with turbostat.
 
@@ -1102,7 +1107,7 @@ EOF
 	fi
 
 	if [[ $EUID -ne 0 ]]; then
-		echo "${RED}⚠ Root required. Run: sudo ${SCRIPT_NAME} turbostat-stress${RST}"
+		echo "${RED}⚠ Root required. Run: sudo ${SUDO_SCRIPT_CMD} turbostat-stress${RST}"
 		exit 1
 	fi
 
@@ -1155,7 +1160,7 @@ cmd_turbostat_analyze() {
 			cat <<EOF
 ${BOLD}Turbostat Analyze${RST} - Parse and analyze turbostat output
 
-${BOLD}Usage:${RST} sudo ${SCRIPT_NAME} turbostat-analyze [OPTIONS]
+${BOLD}Usage:${RST} sudo ${SUDO_SCRIPT_CMD} turbostat-analyze [OPTIONS]
 
 ${BOLD}Options:${RST}
   --interval SECS    Sample interval (default: 2)
@@ -1168,7 +1173,7 @@ ${BOLD}Features:${RST}
   • Shows frequency and power analysis
 
 ${BOLD}Example:${RST}
-  sudo ${SCRIPT_NAME} turbostat-analyze --interval 1 --iters 5
+  sudo ${SUDO_SCRIPT_CMD} turbostat-analyze --interval 1 --iters 5
 
 EOF
 			return 0
@@ -1393,7 +1398,7 @@ cmd_profile_refresh() {
 		cat <<EOF
 ${BOLD}Profile Refresh${RST} - Restart power management services
 
-${BOLD}Usage:${RST} sudo ${SCRIPT_NAME} profile-refresh
+${BOLD}Usage:${RST} sudo ${SUDO_SCRIPT_CMD} profile-refresh
 
 Restart all custom power management services.
 Useful for testing configuration changes or recovering
