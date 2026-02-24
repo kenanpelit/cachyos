@@ -8,8 +8,6 @@
 [[ ! -d "$PWD" ]] && { export PWD="$HOME"; builtin cd "$HOME"; }
 [[ "$PWD" == *"/zinit/"* ]] && { export PWD="$HOME"; builtin cd "$HOME"; }
 
-
-
 # ----------------------------------------------------------------------
 # XDG Base Directory Fallbacks
 # 
@@ -330,279 +328,279 @@ if [[ -d "$HOME/.conda/miniconda3" || -d "$HOME/.conda/anaconda3" ]]; then
   alias conda='_lazy_conda'
 fi
 
+# ====================================================================
+# ZINIT PLUGINS - CRITICAL: Correct Load Order
+# ====================================================================
+# 
+# Plugin load order is CRITICAL for correct operation:
+# 
+# 1. zsh-completions  → Adds completion definitions to fpath
+# 2. fzf-tab          → Hooks into completion system (before compinit)
+# 3. compinit         → Initializes completion system
+# 4. Other plugins    → Load after completion system is ready
+# 5. syntax highlight → MUST BE LAST (wraps all ZLE widgets)
+# 
+# Loading in wrong order causes:
+# • Missing completions (if completions loaded after compinit)
+# • Widget conflicts (if fzf-tab loaded after compinit)
+# • Keybinding failures (if syntax highlighting not last)
+# • Performance degradation (if heavy plugins load too early)
+# 
+# ====================================================================
 
-  # ====================================================================
-  # ZINIT PLUGINS - CRITICAL: Correct Load Order
-  # ====================================================================
-  # 
-  # Plugin load order is CRITICAL for correct operation:
-  # 
-  # 1. zsh-completions  → Adds completion definitions to fpath
-  # 2. fzf-tab          → Hooks into completion system (before compinit)
-  # 3. compinit         → Initializes completion system
-  # 4. Other plugins    → Load after completion system is ready
-  # 5. syntax highlight → MUST BE LAST (wraps all ZLE widgets)
-  # 
-  # Loading in wrong order causes:
-  # • Missing completions (if completions loaded after compinit)
-  # • Widget conflicts (if fzf-tab loaded after compinit)
-  # • Keybinding failures (if syntax highlighting not last)
-  # • Performance degradation (if heavy plugins load too early)
-  # 
-  # ====================================================================
+# --------------------------------------------------------------------
+# 1. COMPLETIONS - MUST BE FIRST
+# 
+# Loads additional completion definitions before compinit runs
+# This plugin adds thousands of completions for common tools
+# 
+# blockf: Block default fpath modification
+# atpull: Rebuild completions when plugin updates
+# --------------------------------------------------------------------
+zinit ice blockf atpull'zinit creinstall -q .'
+zinit light zsh-users/zsh-completions
 
-  # --------------------------------------------------------------------
-  # 1. COMPLETIONS - MUST BE FIRST
-  # 
-  # Loads additional completion definitions before compinit runs
-  # This plugin adds thousands of completions for common tools
-  # 
-  # blockf: Block default fpath modification
-  # atpull: Rebuild completions when plugin updates
-  # --------------------------------------------------------------------
-  zinit ice blockf atpull'zinit creinstall -q .'
-  zinit light zsh-users/zsh-completions
+# --------------------------------------------------------------------
+# 2. FZF-TAB - MUST BE BEFORE COMPINIT
+# 
+# Replaces ZSH's default completion menu with FZF
+# CRITICAL: Must load before compinit to hook into the system
+# If loaded after, tab completion won't be fuzzy
+# 
+# depth=1: Shallow clone for faster download
+# --------------------------------------------------------------------
+zinit ice depth=1
+zinit light Aloxaf/fzf-tab
 
-  # --------------------------------------------------------------------
-  # 2. FZF-TAB - MUST BE BEFORE COMPINIT
-  # 
-  # Replaces ZSH's default completion menu with FZF
-  # CRITICAL: Must load before compinit to hook into the system
-  # If loaded after, tab completion won't be fuzzy
-  # 
-  # depth=1: Shallow clone for faster download
-  # --------------------------------------------------------------------
-  zinit ice depth=1
-  zinit light Aloxaf/fzf-tab
+# Configure fzf-tab behavior
+# These styles control how the fuzzy completion menu looks and behaves
+zstyle ':fzf-tab:*' fzf-command fzf
+zstyle ':fzf-tab:*' fzf-min-height 100
+zstyle ':fzf-tab:*' switch-group ',' '.'
+zstyle ':fzf-tab:*' continuous-trigger '/'
+zstyle ':fzf-tab:complete:*:*' fzf-preview ""
+zstyle ':fzf-tab:complete:*:*' fzf-flags --height=80% --border=rounded --bind='ctrl-/:toggle-preview'
 
-  # Configure fzf-tab behavior
-  # These styles control how the fuzzy completion menu looks and behaves
-  zstyle ':fzf-tab:*' fzf-command fzf
-  zstyle ':fzf-tab:*' fzf-min-height 100
-  zstyle ':fzf-tab:*' switch-group ',' '.'
-  zstyle ':fzf-tab:*' continuous-trigger '/'
-  zstyle ':fzf-tab:complete:*:*' fzf-preview ""
-  zstyle ':fzf-tab:complete:*:*' fzf-flags --height=80% --border=rounded --bind='ctrl-/:toggle-preview'
+# Context-specific preview commands
+# Shows helpful previews for different completion types
+zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview 'ps --pid=$word -o cmd --no-headers -w'
+zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
+zstyle ':fzf-tab:complete:git-(add|diff|restore):*' fzf-preview 'git diff $word | delta'
+zstyle ':fzf-tab:complete:git-log:*' fzf-preview 'git log --color=always $word'
+zstyle ':fzf-tab:complete:git-show:*' fzf-preview 'git show --color=always $word | delta'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -T -L2 --icons --color=always $realpath 2>/dev/null'
 
-  # Context-specific preview commands
-  # Shows helpful previews for different completion types
-  zstyle ':fzf-tab:complete:kill:argument-rest' fzf-preview 'ps --pid=$word -o cmd --no-headers -w'
-  zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
-  zstyle ':fzf-tab:complete:git-(add|diff|restore):*' fzf-preview 'git diff $word | delta'
-  zstyle ':fzf-tab:complete:git-log:*' fzf-preview 'git log --color=always $word'
-  zstyle ':fzf-tab:complete:git-show:*' fzf-preview 'git show --color=always $word | delta'
-  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -T -L2 --icons --color=always $realpath 2>/dev/null'
+# --------------------------------------------------------------------
+# 3. COMPINIT - MUST BE AFTER COMPLETIONS AND FZF-TAB
+# 
+# Initializes ZSH's completion system
+# This is the core completion engine that makes tab completion work
+# 
+# We use aggressive caching to make this fast:
+# • Cache is valid for 24 hours
+# • Bytecode compilation for faster loading
+# • File locking to prevent race conditions
+# --------------------------------------------------------------------
 
-  # --------------------------------------------------------------------
-  # 3. COMPINIT - MUST BE AFTER COMPLETIONS AND FZF-TAB
-  # 
-  # Initializes ZSH's completion system
-  # This is the core completion engine that makes tab completion work
-  # 
-  # We use aggressive caching to make this fast:
-  # • Cache is valid for 24 hours
-  # • Bytecode compilation for faster loading
-  # • File locking to prevent race conditions
-  # --------------------------------------------------------------------
+# Add our custom completions and functions to fpath
+# Must be done before compinit runs
+fpath=("${XDG_CONFIG_HOME}/zsh/completions" "${XDG_CONFIG_HOME}/zsh/functions" $fpath)
+
+# Load completion system module
+autoload -Uz compinit
+zmodload zsh/system 2>/dev/null || true
+
+# Set completion dump file location
+# Uses hostname and ZSH version to prevent conflicts
+: ${ZSH_COMPDUMP:="${XDG_CACHE_HOME}/zsh/zcompdump-$HOST-$ZSH_VERSION"}
+zstyle ':completion:*' dump-file "$ZSH_COMPDUMP"
+
+# ----------------------------------------------------------------------
+# _safe_compinit: Smart Completion Initialization
+# 
+# This function intelligently decides whether to rebuild completions:
+# 
+# Decision logic:
+# • If dump doesn't exist → Full rebuild
+# • If dump is >24h old → Full rebuild
+# • If dump is fresh → Use cached version (-C flag = trust cache)
+# 
+# Performance optimization:
+# • Full rebuild: ~200ms (cold start)
+# • Cached version: ~10ms (warm start)
+# • Bytecode compilation: Runs in background, doesn't block
+# 
+# Race condition prevention:
+# • Uses file locking to prevent multiple shells from rebuilding
+# • If lock acquisition fails, falls back to cached version
+# • This prevents corruption and wasted CPU cycles
+# 
+# Bytecode compilation:
+# • Compiles .zcompdump to .zcompdump.zwc for faster loading
+# • Only recompiles if source is newer than bytecode
+# • Runs in background (&!) to not block shell startup
+# ----------------------------------------------------------------------
+_safe_compinit() {
+  local _lock_file="${XDG_CACHE_HOME}/zsh/.compinit-${HOST}-${ZSH_VERSION}.lock"
+  local _dump_dir="$(dirname "$ZSH_COMPDUMP")"
+
+  # Ensure dump directory exists
+  [[ -d "$_dump_dir" ]] || mkdir -p "$_dump_dir"
+
+  local -i need_rebuild=0
   
-  # Add our custom completions and functions to fpath
-  # Must be done before compinit runs
-  fpath=("${XDG_CONFIG_HOME}/zsh/completions" "${XDG_CONFIG_HOME}/zsh/functions" $fpath)
+  # Check if dump exists and is fresh (less than 24 hours old)
+  # Glob qualifier: (#qN.mh+24) = hidden, no error if not exist, modified >24h ago
+  if [[ ! -s "$ZSH_COMPDUMP" || -n $ZSH_COMPDUMP(#qN.mh+24) ]]; then
+    need_rebuild=1
+  fi
 
-  # Load completion system module
-  autoload -Uz compinit
-  zmodload zsh/system 2>/dev/null || true
-
-  # Set completion dump file location
-  # Uses hostname and ZSH version to prevent conflicts
-  : ${ZSH_COMPDUMP:="${XDG_CACHE_HOME}/zsh/zcompdump-$HOST-$ZSH_VERSION"}
-  zstyle ':completion:*' dump-file "$ZSH_COMPDUMP"
-
-  # ----------------------------------------------------------------------
-  # _safe_compinit: Smart Completion Initialization
-  # 
-  # This function intelligently decides whether to rebuild completions:
-  # 
-  # Decision logic:
-  # • If dump doesn't exist → Full rebuild
-  # • If dump is >24h old → Full rebuild
-  # • If dump is fresh → Use cached version (-C flag = trust cache)
-  # 
-  # Performance optimization:
-  # • Full rebuild: ~200ms (cold start)
-  # • Cached version: ~10ms (warm start)
-  # • Bytecode compilation: Runs in background, doesn't block
-  # 
-  # Race condition prevention:
-  # • Uses file locking to prevent multiple shells from rebuilding
-  # • If lock acquisition fails, falls back to cached version
-  # • This prevents corruption and wasted CPU cycles
-  # 
-  # Bytecode compilation:
-  # • Compiles .zcompdump to .zcompdump.zwc for faster loading
-  # • Only recompiles if source is newer than bytecode
-  # • Runs in background (&!) to not block shell startup
-  # ----------------------------------------------------------------------
-  _safe_compinit() {
-    local _lock_file="${XDG_CACHE_HOME}/zsh/.compinit-${HOST}-${ZSH_VERSION}.lock"
-    local _dump_dir="$(dirname "$ZSH_COMPDUMP")"
-
-    # Ensure dump directory exists
-    [[ -d "$_dump_dir" ]] || mkdir -p "$_dump_dir"
-
-    local -i need_rebuild=0
-    
-    # Check if dump exists and is fresh (less than 24 hours old)
-    # Glob qualifier: (#qN.mh+24) = hidden, no error if not exist, modified >24h ago
-    if [[ ! -s "$ZSH_COMPDUMP" || -n $ZSH_COMPDUMP(#qN.mh+24) ]]; then
-      need_rebuild=1
-    fi
-
-    # If dump is fresh, use cached version (fast path)
-    if (( need_rebuild == 0 )); then
-      # -C: Skip security check (trust cache)
-      # -i: Ignore insecure directories
-      # -d: Specify dump file location
-      compinit -C -i -d "$ZSH_COMPDUMP"
-      
-      # Compile dump to bytecode in background if needed
-      if [[ ! -f "$ZSH_COMPDUMP.zwc" || "$ZSH_COMPDUMP" -nt "$ZSH_COMPDUMP.zwc" ]]; then
-        # -U: Compile for use only (no execution)
-        # &!: Run in background, disown from job table
-        { zcompile -U "$ZSH_COMPDUMP" 2>/dev/null || true; } &!
-      fi
-      return 0
-    fi
-
-    # If we need to rebuild, try to acquire lock
-    # If lock fails, another shell is already rebuilding
-    if command -v zsystem &>/dev/null; then
-      # -t 0.1: Try for 0.1 seconds, then give up
-      if ! zsystem flock -t 0.1 "$_lock_file" 2>/dev/null; then
-        # Lock acquisition failed, use cached version
-        compinit -C -i -d "$ZSH_COMPDUMP"
-        return 0
-      fi
-    fi
-
-    # We have the lock, do full rebuild
-    # -u: Skip security check during rebuild
+  # If dump is fresh, use cached version (fast path)
+  if (( need_rebuild == 0 )); then
+    # -C: Skip security check (trust cache)
     # -i: Ignore insecure directories
     # -d: Specify dump file location
-    compinit -u -i -d "$ZSH_COMPDUMP"
+    compinit -C -i -d "$ZSH_COMPDUMP"
     
-    # Compile to bytecode in background
-    { zcompile -U "$ZSH_COMPDUMP" 2>/dev/null || true; } &!
-    
-    # Release lock
-    command -v zsystem &>/dev/null && zsystem flock -u "$_lock_file" 2>/dev/null || true
-  }
+    # Compile dump to bytecode in background if needed
+    if [[ ! -f "$ZSH_COMPDUMP.zwc" || "$ZSH_COMPDUMP" -nt "$ZSH_COMPDUMP.zwc" ]]; then
+      # -U: Compile for use only (no execution)
+      # &!: Run in background, disown from job table
+      { zcompile -U "$ZSH_COMPDUMP" 2>/dev/null || true; } &!
+    fi
+    return 0
+  fi
 
-  # Initialize completion system using smart function
-  _safe_compinit
+  # If we need to rebuild, try to acquire lock
+  # If lock fails, another shell is already rebuilding
+  if command -v zsystem &>/dev/null; then
+    # -t 0.1: Try for 0.1 seconds, then give up
+    if ! zsystem flock -t 0.1 "$_lock_file" 2>/dev/null; then
+      # Lock acquisition failed, use cached version
+      compinit -C -i -d "$ZSH_COMPDUMP"
+      return 0
+    fi
+  fi
+
+  # We have the lock, do full rebuild
+  # -u: Skip security check during rebuild
+  # -i: Ignore insecure directories
+  # -d: Specify dump file location
+  compinit -u -i -d "$ZSH_COMPDUMP"
   
-  # Also load bash completion compatibility
-  # Allows bash completion scripts to work in ZSH
-  autoload -Uz bashcompinit && bashcompinit
-
-  # Bind dcli completion explicitly (after compinit)
-  autoload -Uz _dcli 2>/dev/null || true
-  (( $+functions[_dcli] )) && compdef _dcli dcli
-
-  # --------------------------------------------------------------------
-  # Completion System Styles
-  # 
-  # These zstyle commands control how completions look and behave
-  # They affect the completion menu, matching, caching, and display
-  # --------------------------------------------------------------------
-  autoload -Uz colors && colors
-  _comp_options+=(globdots)  # Include hidden files in completion
-
-  # Completion strategy: try multiple methods in order
-  # 1. _extensions: Try matching file extensions
-  # 2. _complete: Standard completion
-  # 3. _approximate: Try approximate matching (typo tolerance)
-  # 4. _ignored: Try previously ignored matches
-  zstyle ':completion:*' completer _extensions _complete _approximate _ignored
+  # Compile to bytecode in background
+  { zcompile -U "$ZSH_COMPDUMP" 2>/dev/null || true; } &!
   
-  # Enable caching for better performance
-  # Cache stores results of expensive completions
-  zstyle ':completion:*' use-cache on
-  zstyle ':completion:*' cache-path "${XDG_CACHE_HOME}/zsh/.zcompcache"
+  # Release lock
+  command -v zsystem &>/dev/null && zsystem flock -u "$_lock_file" 2>/dev/null || true
+}
+
+# Initialize completion system using smart function
+_safe_compinit
+
+# Also load bash completion compatibility
+# Allows bash completion scripts to work in ZSH
+autoload -Uz bashcompinit && bashcompinit
+
+# Bind dcli completion explicitly (after compinit)
+autoload -Uz _dcli 2>/dev/null || true
+(( $+functions[_dcli] )) && compdef _dcli dcli
+
+# --------------------------------------------------------------------
+# Completion System Styles
+# 
+# These zstyle commands control how completions look and behave
+# They affect the completion menu, matching, caching, and display
+# --------------------------------------------------------------------
+autoload -Uz colors && colors
+_comp_options+=(globdots)  # Include hidden files in completion
+
+# Completion strategy: try multiple methods in order
+# 1. _extensions: Try matching file extensions
+# 2. _complete: Standard completion
+# 3. _approximate: Try approximate matching (typo tolerance)
+# 4. _ignored: Try previously ignored matches
+zstyle ':completion:*' completer _extensions _complete _approximate _ignored
+
+# Enable caching for better performance
+# Cache stores results of expensive completions
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME}/zsh/.zcompcache"
+
+# Enable full completion features
+zstyle ':completion:*' complete true
+zstyle ':completion:*' complete-options true
+
+# Smart case-insensitive matching
+# Three matchers for maximum flexibility:
+# 1. Case-insensitive: 'a' matches 'A'
+# 2. Partial matching: 'f-b' matches 'foo-bar'
+# 3. Left-anchored: 'fb' matches 'foobar'
+zstyle ':completion:*' matcher-list \
+  'm:{a-zA-Z}={A-Za-z}' \
+  'r:|[._-]=* r:|=*' \
+  'l:|=* r:|=*'
+
+# File sorting and listing options
+zstyle ':completion:*' file-sort modification  # Sort by modification time
+zstyle ':completion:*' sort false              # Don't sort results
+zstyle ':completion:*' list-suffixes true      # Show suffixes in list
+zstyle ':completion:*' expand prefix suffix    # Expand on both sides
+zstyle ':completion:*' menu select=2           # Menu select on 2+ matches
+zstyle ':completion:*' group-name ""           # Group completions by type
+zstyle ':completion:*' verbose yes             # Show descriptions
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}  # Use LS_COLORS
+zstyle ':completion:*' special-dirs true       # Include . and ..
+zstyle ':completion:*' squeeze-slashes true    # Remove duplicate slashes
+
+# Colored completion messages
+zstyle ':completion:*:descriptions' format '%F{yellow}━━ %d ━━%f'
+zstyle ':completion:*:messages'     format '%F{purple}━━ %d ━━%f'
+zstyle ':completion:*:warnings'     format '%F{red}━━ no matches found ━━%f'
+zstyle ':completion:*:corrections'  format '%F{green}━━ %d (errors: %e) ━━%f'
+
+# Process completion for kill command
+# Shows processes with PID, user, and command
+zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w"
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
+zstyle ':completion:*:*:kill:*' menu yes select
+zstyle ':completion:*:*:kill:*' force-list always
+zstyle ':completion:*:*:kill:*' insert-ids single
+
+# Man page completion
+# Separates man sections for better navigation
+zstyle ':completion:*:manuals'    separate-sections true
+zstyle ':completion:*:manuals.*'  insert-sections true
+
+# SSH/SCP/rsync completion
+# Organizes hosts by type (hostname, domain, IP)
+zstyle ':completion:*:(ssh|scp|rsync):*' tag-order \
+  'hosts:-host:host hosts:-domain:domain hosts:-ipaddr:ip\ address'
+zstyle ':completion:*:(ssh|scp|rsync):*:hosts-host' \
+  ignored-patterns '*(.|:)*' loopback localhost broadcasthost
+zstyle ':completion:*:(ssh|scp|rsync):*:hosts-domain' \
+  ignored-patterns '<->.<->.<->.<->' '*@*'
+zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' \
+  ignored-patterns '^(<->.<->.<->.<->)' '127.0.0.<->' '::1' 'fe80::*'
+
+# Always rehash for new commands
+# Checks for new executables in PATH
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' accept-exact-dirs true
+
+# ====================================================================
+# 4. OTHER PLUGINS - AFTER COMPINIT
+# ====================================================================
+# 
+# These plugins can safely load after the completion system is ready
+# They don't interact with compinit so order among themselves doesn't matter
+# 
+# All plugins load synchronously (no wait) for simplicity and reliability
+# This adds ~50ms to startup but prevents timing issues
+# 
+# ====================================================================
+# ------------------------------------------------------------------
   
-  # Enable full completion features
-  zstyle ':completion:*' complete true
-  zstyle ':completion:*' complete-options true
-
-  # Smart case-insensitive matching
-  # Three matchers for maximum flexibility:
-  # 1. Case-insensitive: 'a' matches 'A'
-  # 2. Partial matching: 'f-b' matches 'foo-bar'
-  # 3. Left-anchored: 'fb' matches 'foobar'
-  zstyle ':completion:*' matcher-list \
-    'm:{a-zA-Z}={A-Za-z}' \
-    'r:|[._-]=* r:|=*' \
-    'l:|=* r:|=*'
-
-  # File sorting and listing options
-  zstyle ':completion:*' file-sort modification  # Sort by modification time
-  zstyle ':completion:*' sort false              # Don't sort results
-  zstyle ':completion:*' list-suffixes true      # Show suffixes in list
-  zstyle ':completion:*' expand prefix suffix    # Expand on both sides
-  zstyle ':completion:*' menu select=2           # Menu select on 2+ matches
-  zstyle ':completion:*' group-name ""           # Group completions by type
-  zstyle ':completion:*' verbose yes             # Show descriptions
-  zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}  # Use LS_COLORS
-  zstyle ':completion:*' special-dirs true       # Include . and ..
-  zstyle ':completion:*' squeeze-slashes true    # Remove duplicate slashes
-
-  # Colored completion messages
-  zstyle ':completion:*:descriptions' format '%F{yellow}━━ %d ━━%f'
-  zstyle ':completion:*:messages'     format '%F{purple}━━ %d ━━%f'
-  zstyle ':completion:*:warnings'     format '%F{red}━━ no matches found ━━%f'
-  zstyle ':completion:*:corrections'  format '%F{green}━━ %d (errors: %e) ━━%f'
-
-  # Process completion for kill command
-  # Shows processes with PID, user, and command
-  zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w"
-  zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
-  zstyle ':completion:*:*:kill:*' menu yes select
-  zstyle ':completion:*:*:kill:*' force-list always
-  zstyle ':completion:*:*:kill:*' insert-ids single
-
-  # Man page completion
-  # Separates man sections for better navigation
-  zstyle ':completion:*:manuals'    separate-sections true
-  zstyle ':completion:*:manuals.*'  insert-sections true
-
-  # SSH/SCP/rsync completion
-  # Organizes hosts by type (hostname, domain, IP)
-  zstyle ':completion:*:(ssh|scp|rsync):*' tag-order \
-    'hosts:-host:host hosts:-domain:domain hosts:-ipaddr:ip\ address'
-  zstyle ':completion:*:(ssh|scp|rsync):*:hosts-host' \
-    ignored-patterns '*(.|:)*' loopback localhost broadcasthost
-  zstyle ':completion:*:(ssh|scp|rsync):*:hosts-domain' \
-    ignored-patterns '<->.<->.<->.<->' '*@*'
-  zstyle ':completion:*:(ssh|scp|rsync):*:hosts-ipaddr' \
-    ignored-patterns '^(<->.<->.<->.<->)' '127.0.0.<->' '::1' 'fe80::*'
-
-  # Always rehash for new commands
-  # Checks for new executables in PATH
-  zstyle ':completion:*' rehash true
-  zstyle ':completion:*' accept-exact-dirs true
-
-  # ====================================================================
-  # 4. OTHER PLUGINS - AFTER COMPINIT
-  # ====================================================================
-  # 
-  # These plugins can safely load after the completion system is ready
-  # They don't interact with compinit so order among themselves doesn't matter
-  # 
-  # All plugins load synchronously (no wait) for simplicity and reliability
-  # This adds ~50ms to startup but prevents timing issues
-  # 
-  # ====================================================================
-  # ------------------------------------------------------------------
 # History substring search
 # 
 # Provides up/down arrow history search with substring matching
@@ -675,7 +673,6 @@ zinit snippet OMZ::plugins/git/git.plugin.zsh
 # ------------------------------------------------------------------
 zinit light zsh-users/zsh-syntax-highlighting
 
-
   # Fallback if zinitTurbo is disabled
   # Loads same plugins in non-turbo mode
   
@@ -743,7 +740,6 @@ fi
 # If debug mode is enabled, show profiling results
 # Helps identify slow parts of shell startup
 # ----------------------------------------------------------------------
-
 
 # ----------------------------------------------------------------------
 # Starship Prompt
@@ -1076,16 +1072,16 @@ alias -- gwho='git shortlog -s --'
 alias -- gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign --message "--wip-- [skip ci]"'
 alias -- gwipe='git reset --hard && git clean --force -df'
 alias -- gwt='git worktree'
-  alias -- gwta='git worktree add'
-  alias -- gwtls='git worktree list'
-  alias -- gwtmv='git worktree move'
-  alias -- gwtrm='git worktree remove'
-  alias -- h='history | tail -20'
-  alias -- hw='hwinfo --short'
-  alias -- ip='ip -color=auto'
-  alias -- ipy=ipython
-  alias -- j='jobs -l'
-  alias -- l='eza --icons -a --group-directories-first -1'
+alias -- gwta='git worktree add'
+alias -- gwtls='git worktree list'
+alias -- gwtmv='git worktree move'
+alias -- gwtrm='git worktree remove'
+alias -- h='history | tail -20'
+alias -- hw='hwinfo --short'
+alias -- ip='ip -color=auto'
+alias -- ipy=ipython
+alias -- j='jobs -l'
+alias -- l='eza --icons -a --group-directories-first -1'
 alias -- la='eza --icons -la --group-directories-first'
 alias -- ldot='eza --icons -ld .*'
 alias -- less='bat --paging=always'
@@ -1100,21 +1096,21 @@ alias -- lt='eza --icons --tree --level=2 --group-directories-first'
 alias -- lzg=lazygit
 alias -- mem='free -h && echo && cat /proc/meminfo | grep MemTotal'
 alias -- microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
-  alias -- mkdir='mkdir -pv'
-  alias -- moon='curl wttr.in/moon'
-  alias -- mv='mv -i'
-  alias -- myip='curl -s ifconfig.me'
-  alias -- news='curl getnews.tech'
-  alias -- now='date +'\''%T'\'''
-  alias -- nowdate='date +'\''%d-%m-%Y'\'''
-  alias -- nowtime='date +'\''%d-%m-%Y %T'\'''
-  alias -- open=xdg-open
-  alias -- osc='cd ~/.cachy'
-  alias -- p=pass
-  alias -- paste='xclip -selection clipboard -o'
-  alias -- path='echo -e ${PATH//:/\\n}'
-  alias -- paudit='pass audit'
-  alias -- pc='pass -c'
+alias -- mkdir='mkdir -pv'
+alias -- moon='curl wttr.in/moon'
+alias -- mv='mv -i'
+alias -- myip='curl -s ifconfig.me'
+alias -- news='curl getnews.tech'
+alias -- now='date +'\''%T'\'''
+alias -- nowdate='date +'\''%d-%m-%Y'\'''
+alias -- nowtime='date +'\''%d-%m-%Y %T'\'''
+alias -- open=xdg-open
+alias -- osc='cd ~/.cachy'
+alias -- p=pass
+alias -- paste='xclip -selection clipboard -o'
+alias -- path='echo -e ${PATH//:/\\n}'
+alias -- paudit='pass audit'
+alias -- pc='pass -c'
 alias -- pci=lspci
 alias -- pdf=tdf
 alias -- pe='pass edit'
@@ -1287,9 +1283,9 @@ alias -- yt=yt-dlp
 alias -- yta='yt-dlp --extract-audio --audio-format mp3'
 alias -- ytp-mp3='yt-dlp --yes-playlist --extract-audio --audio-format mp3 -o '\''%(playlist_index)s-%(title)s.%(ext)s'\'''
 alias -- ytp-mp4='yt-dlp --yes-playlist -f '\''bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio'\'' --merge-output-format mp4 -o '\''%(playlist_index)s-%(title)s.%(ext)s'\'''
-  alias -- ytv=yt-dlp
-  alias -- yy=yazi
-  alias -- zshrc='nvim ~/.config/zsh/.zshrc'
+alias -- ytv=yt-dlp
+alias -- yy=yazi
+alias -- zshrc='nvim ~/.config/zsh/.zshrc'
 # =============================================================================
 # Environment Variables and Core Setup
 # =============================================================================
