@@ -1,136 +1,87 @@
 host: hay
 description: CachyOS setup (ported from nixosc via dcli)
-
-# Ordered list (requires module_processing: sequential)
 enabled_modules:
-  # --- Bootstrap & Base ---
-  - base
-  - pacman
-  - paru
-  - xdg-dirs
-  - scripts
-  - packages
-  - flatpak
-  - system-packages-hay
-  # - packages # Meta-module, usually not needed if others are enabled
-
-  # --- Core System ---
-  - admin
-  - logind
-  - tty
-  - logs
-  - kernel
-  - firewall
-  - fail2ban
-  - blocky
-  - tcp
-  - oomd
-  # - grub
-
-  # --- Shell & CLI ---
-  - bash
-  - zsh
-  - starship
-  - git
-  - command-not-found
-  - bat
-  - btop
-  - fastfetch
-  - fzf
-  - rsync
-  - lazygit
-  - yazi
-  - nvim
-  - tmux
-  - sesh
-  - clipse
-  # - gnupg
-  # - search
-  # - cliphist
-
-  # --- Terminals ---
-  - kitty
-  - wezterm
-  - alacritty
-  # - foot
-  - ghostty
-
-  # --- Desktop Stack ---
-  - gtk
-  - qt
-  - niri
-  # - nirius
-  - hyprland
-  - sessions
-  - sway
-  - stasis
-  # - gnome
-  # - cosmic
-  # - xserver
-  - xdg-portal
-  - rofi
-  - walker
-  - dms
-  - noctalia
-  - dms-greeter
-  - fusuma
-  # - mako
-  # - hyprpanel
-  # - catppuccin
-
-  # --- Connectivity ---
-  - bt # Bluetooth
-  - connect # KDE Connect
-  - sunsetr
-  - anydesk
-
-  # --- Media ---
-  - mpv
-  - ytdlp
-  - mpd
-  - rmpc
-  - cava
-  # - vlc
-  - radio
-  # - audacious
-  - subliminal
-  - transmission
-
-  # --- Applications ---
-  - brave
-  # - chrome
-  # - firefox
-  - webcord
-  - ai
-  # - ollama (merged into ai)
-  - copyq
-  # - obsidian
-  # - elektron
-  # - nemo
-  # - program
-
-  # --- Defaults & Service Activation ---
-  - xdg-mimes
-  - user-services
-
-# Settings
+- base
+- pacman
+- paru
+- xdg-dirs
+- scripts
+- packages
+- flatpak
+- system-packages-hay
+- admin
+- logind
+- tty
+- logs
+- kernel
+- firewall
+- fail2ban
+- blocky
+- tcp
+- oomd
+- bash
+- zsh
+- starship
+- git
+- command-not-found
+- bat
+- btop
+- fastfetch
+- fzf
+- rsync
+- lazygit
+- yazi
+- nvim
+- tmux
+- sesh
+- clipse
+- kitty
+- wezterm
+- alacritty
+- ghostty
+- gtk
+- qt
+- niri
+- hyprland
+- sessions
+- sway
+- stasis
+- xdg-portal
+- rofi
+- walker
+- dms
+- noctalia
+- dms-greeter
+- fusuma
+- bt
+- connect
+- sunsetr
+- anydesk
+- mpv
+- ytdlp
+- mpd
+- rmpc
+- cava
+- radio
+- subliminal
+- transmission
+- brave
+- webcord
+- user-services
+- ai
+- copyq
+- xdg-mimes
 module_processing: sequential
 flatpak_scope: user
-# dcli will auto-detect if omitted (prefers paru → yay)
 aur_helper: paru
-
 auto_prune: false
-
 services:
   enabled:
-    - bluetooth
-    - NetworkManager
-
+  - bluetooth
+  - NetworkManager
 config_backups:
   enabled: true
   max_backups: 5
-
-# System backups (Timeshift/Snapper)
 system_backups:
   enabled: true
   backup_on_sync: true
@@ -138,12 +89,8 @@ system_backups:
   tool: snapper
   snapper_config: root
   max_backups: 5
-
-# Default applications configuration
 default_apps:
-  scope: user # "user" or "system"
-
-  # Core defaults (category-level)
+  scope: user
   browser: brave-browser.desktop
   text_editor: kitty-nvim.desktop
   file_manager: nemo.desktop
@@ -156,21 +103,14 @@ default_apps:
   image: imv-dir.desktop
   discord: webcord.desktop
   mpv_handler: open-in-mpv.desktop
-
-  # Custom MIME types (explicit mapping)
   mime_types:
-    # Browser / URL handlers
     text/html: brave-browser.desktop
     application/xhtml+xml: brave-browser.desktop
     x-scheme-handler/http: brave-browser.desktop
     x-scheme-handler/https: brave-browser.desktop
     x-scheme-handler/about: brave-browser.desktop
     x-scheme-handler/unknown: brave-browser.desktop
-
-    # Text
     text/plain: kitty-nvim.desktop
-
-    # Images
     image/bmp: imv-dir.desktop
     image/gif: imv-dir.desktop
     image/jpeg: imv-dir.desktop
@@ -180,8 +120,6 @@ default_apps:
     image/tiff: imv-dir.desktop
     image/vnd.microsoft.icon: imv-dir.desktop
     image/webp: imv-dir.desktop
-
-    # Audio
     audio/aac: mpv.desktop
     audio/mpeg: mpv.desktop
     audio/ogg: mpv.desktop
@@ -189,8 +127,6 @@ default_apps:
     audio/wav: mpv.desktop
     audio/webm: mpv.desktop
     audio/x-matroska: mpv.desktop
-
-    # Video
     video/mp2t: mpv.desktop
     video/mp4: mpv.desktop
     video/mpeg: mpv.desktop
@@ -199,11 +135,7 @@ default_apps:
     video/x-flv: mpv.desktop
     video/x-matroska: mpv.desktop
     video/x-msvideo: mpv.desktop
-
-    # Directory
     inode/directory: nemo.desktop
-
-    # Office docs
     application/vnd.oasis.opendocument.text: libreoffice-writer.desktop
     application/vnd.oasis.opendocument.spreadsheet: libreoffice-calc.desktop
     application/vnd.oasis.opendocument.presentation: libreoffice-impress.desktop
@@ -214,16 +146,10 @@ default_apps:
     application/vnd.ms-excel: libreoffice-calc.desktop
     application/vnd.ms-powerpoint: libreoffice-impress.desktop
     application/rtf: libreoffice-writer.desktop
-
-    # PDF
     application/pdf: org.gnome.Evince.desktop
-
-    # Archives
     application/zip: org.gnome.FileRoller.desktop
     application/rar: org.gnome.FileRoller.desktop
     application/7z: org.gnome.FileRoller.desktop
     application/*tar: org.gnome.FileRoller.desktop
-
-    # Custom scheme handlers
     x-scheme-handler/discord: webcord.desktop
     x-scheme-handler/mpv: open-in-mpv.desktop
