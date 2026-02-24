@@ -2,8 +2,8 @@
 # ==============================================================================
 # OSC-SYSTEM: Unified Power Management & Monitoring Utility
 # ==============================================================================
-# Version: 17.1 - v17 Power Stack Integration
-# Author: OSC Power Management Suite
+# Version: 18.0
+# Author: Kenan
 # License: MIT
 #
 # Description:
@@ -32,7 +32,7 @@
 
 set -euo pipefail
 
-VERSION="17.1"
+VERSION="18.0"
 SCRIPT_NAME=$(basename "$0")
 LOG_BASE_DIR="${HOME}/.logs"
 THERMAL_LOG_DIR="${LOG_BASE_DIR}/thermal"
@@ -102,7 +102,7 @@ ${BOLD}Features:${RST}
   ✓ CPU frequency analysis (turbostat)
   ✓ RAPL power limit awareness
   ✓ Battery health & thresholds
-  ✓ Service status tracking (v17 stack)
+  ✓ Service status tracking
   ✓ JSON output for automation
 
 EOF
@@ -144,7 +144,7 @@ ${BOLD}Features:${RST}
   ✅ Temperature (sensors)
   ✅ RAPL Power Limits (PL1/PL2/PL4)
   ✅ Battery Status & Charge Thresholds
-  ✅ Service Health Status (v17 stack)
+  ✅ Service Health Status
   ✅ MMIO Status (intel_rapl_mmio)
 
 ${BOLD}Examples:${RST}
@@ -354,6 +354,38 @@ EOF
 		fi
 	done
 
+	# Power backend / auto-profile automation status
+	PPD_LOAD="$(systemctl show -p LoadState --value power-profiles-daemon.service 2>/dev/null || true)"
+	PPD_STATE="$(systemctl show -p ActiveState --value power-profiles-daemon.service 2>/dev/null || true)"
+	PPD_SUBSTATE="$(systemctl show -p SubState --value power-profiles-daemon.service 2>/dev/null || true)"
+	PPD_RESULT="$(systemctl show -p Result --value power-profiles-daemon.service 2>/dev/null || true)"
+	PPD_CURRENT="$(powerprofilesctl get 2>/dev/null || true)"
+	[[ -z "$PPD_CURRENT" ]] && PPD_CURRENT="unknown"
+
+	USER_SYSTEMD_AVAILABLE=false
+	PPP_TIMER_LOAD="" PPP_TIMER_STATE="" PPP_TIMER_SUBSTATE="" PPP_TIMER_RESULT=""
+	PPP_SERVICE_LOAD="" PPP_SERVICE_STATE="" PPP_SERVICE_SUBSTATE="" PPP_SERVICE_RESULT=""
+	if systemctl --user show-environment >/dev/null 2>&1; then
+		USER_SYSTEMD_AVAILABLE=true
+		PPP_TIMER_LOAD="$(systemctl --user show -p LoadState --value ppp-auto-profile.timer 2>/dev/null || true)"
+		PPP_TIMER_STATE="$(systemctl --user show -p ActiveState --value ppp-auto-profile.timer 2>/dev/null || true)"
+		PPP_TIMER_SUBSTATE="$(systemctl --user show -p SubState --value ppp-auto-profile.timer 2>/dev/null || true)"
+		PPP_TIMER_RESULT="$(systemctl --user show -p Result --value ppp-auto-profile.timer 2>/dev/null || true)"
+
+		PPP_SERVICE_LOAD="$(systemctl --user show -p LoadState --value ppp-auto-profile.service 2>/dev/null || true)"
+		PPP_SERVICE_STATE="$(systemctl --user show -p ActiveState --value ppp-auto-profile.service 2>/dev/null || true)"
+		PPP_SERVICE_SUBSTATE="$(systemctl --user show -p SubState --value ppp-auto-profile.service 2>/dev/null || true)"
+		PPP_SERVICE_RESULT="$(systemctl --user show -p Result --value ppp-auto-profile.service 2>/dev/null || true)"
+	fi
+
+	PPP_LOCK_FILE="${HOME}/.local/state/ppd-auto-profile/lock"
+	PPP_LOCKED=false
+	PPP_LOCK_PROFILE=""
+	if [[ -f "$PPP_LOCK_FILE" ]]; then
+		PPP_LOCKED=true
+		PPP_LOCK_PROFILE="$(awk -F= '/^profile=/{print $2; exit}' "$PPP_LOCK_FILE" 2>/dev/null || true)"
+	fi
+
 	# Sample Power (if requested)
 	PKG_W_NOW=""
 	if $sample_power && [[ -r /sys/class/powercap/intel-rapl:0/energy_uj ]]; then
@@ -401,13 +433,29 @@ EOF
 			--arg pstate "$PSTATE" \
 			--arg epp_any "$EPP_ANY" \
 			--arg epp_desired "$EPP_DESIRED" \
-			--arg platform_profile "$PLATFORM_PROFILE_SYSFS" \
-			--arg platform_profile_desired "$PLATFORM_PROFILE_DESIRED" \
-			--arg mmio_status "$MMIO_STATUS" \
-			--arg ts "$TS" \
-			--argjson turbo "$TURBO_ENABLED" \
-			--argjson hwp_boost "$HWP_BOOST_BOOL" \
-			--argjson mmio_loaded "$MMIO_LOADED" \
+				--arg platform_profile "$PLATFORM_PROFILE_SYSFS" \
+				--arg platform_profile_desired "$PLATFORM_PROFILE_DESIRED" \
+				--arg mmio_status "$MMIO_STATUS" \
+				--arg ppd_profile "$PPD_CURRENT" \
+				--arg ppd_load "$PPD_LOAD" \
+				--arg ppd_state "$PPD_STATE" \
+				--arg ppd_substate "$PPD_SUBSTATE" \
+				--arg ppd_result "$PPD_RESULT" \
+				--arg ppp_timer_load "$PPP_TIMER_LOAD" \
+				--arg ppp_timer_state "$PPP_TIMER_STATE" \
+				--arg ppp_timer_substate "$PPP_TIMER_SUBSTATE" \
+				--arg ppp_timer_result "$PPP_TIMER_RESULT" \
+				--arg ppp_service_load "$PPP_SERVICE_LOAD" \
+				--arg ppp_service_state "$PPP_SERVICE_STATE" \
+				--arg ppp_service_substate "$PPP_SERVICE_SUBSTATE" \
+				--arg ppp_service_result "$PPP_SERVICE_RESULT" \
+				--arg ppp_lock_profile "$PPP_LOCK_PROFILE" \
+				--arg ts "$TS" \
+				--argjson user_systemd_available "$([[ "$USER_SYSTEMD_AVAILABLE" == true ]] && echo true || echo false)" \
+				--argjson ppp_locked "$([[ "$PPP_LOCKED" == true ]] && echo true || echo false)" \
+				--argjson turbo "$TURBO_ENABLED" \
+				--argjson hwp_boost "$HWP_BOOST_BOOL" \
+				--argjson mmio_loaded "$MMIO_LOADED" \
 			--argjson min_perf "${MIN_PERF//[^0-9]/}" \
 			--argjson max_perf "${MAX_PERF//[^0-9]/}" \
 			--argjson freq_avg "$FREQ_AVG_MHZ" \
@@ -444,15 +492,43 @@ EOF
         freq_avg_mhz: $freq_avg,
         freq_avg_mhz_cpuinfo: $freq_avg_cpuinfo,
         temp_celsius: $temp,
-        power_limits: {
-          pl1_watts: $pl1,
-          pl2_watts: $pl2,
-          pl4_watts: $pl4,
-          base_pl2_watts: $base_pl2
-        },
-        pkg_watts_now: $pkg_w_now,
-        batteries: $bat,
-        timestamp: $ts
+	        power_limits: {
+	          pl1_watts: $pl1,
+	          pl2_watts: $pl2,
+	          pl4_watts: $pl4,
+	          base_pl2_watts: $base_pl2
+	        },
+	        power_backend: {
+	          profile: $ppd_profile,
+	          daemon: {
+	            load: $ppd_load,
+	            state: $ppd_state,
+	            substate: $ppd_substate,
+	            result: $ppd_result
+	          }
+	        },
+	        ppp_auto_profile: {
+	          user_systemd_available: $user_systemd_available,
+	          timer: {
+	            load: $ppp_timer_load,
+	            state: $ppp_timer_state,
+	            substate: $ppp_timer_substate,
+	            result: $ppp_timer_result
+	          },
+	          service: {
+	            load: $ppp_service_load,
+	            state: $ppp_service_state,
+	            substate: $ppp_service_substate,
+	            result: $ppp_service_result
+	          },
+	          lock: {
+	            enabled: $ppp_locked,
+	            profile: $ppp_lock_profile
+	          }
+	        },
+	        pkg_watts_now: $pkg_w_now,
+	        batteries: $bat,
+	        timestamp: $ts
       }'
 		return 0
 	fi
@@ -591,29 +667,57 @@ EOF
 	((${#BAT_LINES[@]} == 0)) && echo "  ${DIM}No battery detected${RST}" || printf "%s\n" "${BAT_LINES[@]}"
 
 	echo ""
-		echo "SERVICE STATUS (v${VERSION} / v17 stack):"
-		# Must match v17 system module exactly:
-		SERVICES=(platform-profile cpu-governor cpu-epp cpu-min-freq-guard rapl-power-limits rapl-thermo-guard disable-rapl-mmio battery-thresholds power-policy-guard)
-		for svc in "${SERVICES[@]}"; do
-			STATE="$(systemctl show -p ActiveState --value "$svc.service" 2>/dev/null || echo "")"
-			RESULT="$(systemctl show -p Result --value "$svc.service" 2>/dev/null || echo "")"
-			SUBSTATE="$(systemctl show -p SubState --value "$svc.service" 2>/dev/null || echo "")"
-
-		if [[ "$STATE" == "active" ]]; then
-			printf "  %-30s ${GRN}✓ ACTIVE${RST}" "$svc"
-			[[ "$SUBSTATE" == "running" ]] && echo " ${DIM}(running)${RST}" || echo " ${DIM}(exited)${RST}"
-		elif [[ "$STATE" == "inactive" && "$RESULT" == "success" ]]; then
-			printf "  %-30s ${GRN}✓ OK${RST} ${DIM}(completed)${RST}\n" "$svc"
-		elif [[ -z "$STATE" ]]; then
-			printf "  %-30s ${DIM}– not found (masked/disabled)${RST}\n" "$svc"
+		echo "SERVICE STATUS:"
+		if [[ -z "$PPD_LOAD" ]]; then
+			echo "  power-profiles-daemon          ${DIM}– systemd unavailable in this session${RST}"
+		elif [[ "$PPD_LOAD" == "not-found" ]]; then
+			echo "  power-profiles-daemon          ${RED}✗ NOT INSTALLED${RST}"
+		elif [[ "$PPD_STATE" == "active" ]]; then
+			printf "  %-30s ${GRN}✓ ACTIVE${RST} ${DIM}(%s)${RST}\n" "power-profiles-daemon" "${PPD_SUBSTATE:-running}"
+		elif [[ "$PPD_STATE" == "inactive" ]]; then
+			printf "  %-30s ${YLW}⚠ INACTIVE${RST} ${DIM}(%s)${RST}\n" "power-profiles-daemon" "${PPD_RESULT:-unknown}"
 		else
-			printf "  %-30s ${RED}✗ %s${RST} ${DIM}(%s)${RST}\n" "$svc" "$STATE" "$RESULT"
+			printf "  %-30s ${RED}✗ %s${RST} ${DIM}(%s)${RST}\n" "power-profiles-daemon" "${PPD_STATE:-unknown}" "${PPD_RESULT:-unknown}"
+		fi
+		[[ "$PPD_CURRENT" != "unknown" ]] && echo "    ${DIM}Current profile: ${PPD_CURRENT}${RST}"
+
+		if [[ "$USER_SYSTEMD_AVAILABLE" == true ]]; then
+			if [[ -z "$PPP_TIMER_LOAD" || "$PPP_TIMER_LOAD" == "not-found" ]]; then
+				echo "  ppp-auto-profile.timer         ${DIM}– not installed${RST}"
+			elif [[ "$PPP_TIMER_STATE" == "active" ]]; then
+				printf "  %-30s ${GRN}✓ ACTIVE${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.timer" "${PPP_TIMER_SUBSTATE:-waiting}"
+			elif [[ "$PPP_TIMER_STATE" == "inactive" ]]; then
+				printf "  %-30s ${YLW}⚠ INACTIVE${RST} ${DIM}(auto-switch disabled)${RST}\n" "ppp-auto-profile.timer"
+			else
+				printf "  %-30s ${RED}✗ %s${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.timer" "${PPP_TIMER_STATE:-unknown}" "${PPP_TIMER_RESULT:-unknown}"
 			fi
-		done
+
+			if [[ -z "$PPP_SERVICE_LOAD" || "$PPP_SERVICE_LOAD" == "not-found" ]]; then
+				echo "  ppp-auto-profile.service       ${DIM}– not installed${RST}"
+			elif [[ "$PPP_SERVICE_STATE" == "active" ]]; then
+				printf "  %-30s ${GRN}✓ ACTIVE${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.service" "${PPP_SERVICE_SUBSTATE:-running}"
+			elif [[ "$PPP_SERVICE_STATE" == "inactive" && "$PPP_SERVICE_RESULT" == "success" ]]; then
+				printf "  %-30s ${GRN}✓ OK${RST} ${DIM}(oneshot completed)${RST}\n" "ppp-auto-profile.service"
+			else
+				printf "  %-30s ${RED}✗ %s${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.service" "${PPP_SERVICE_STATE:-unknown}" "${PPP_SERVICE_RESULT:-unknown}"
+			fi
+		else
+			echo "  ppp-auto-profile               ${DIM}– user systemd unavailable in this session${RST}"
+		fi
+
+		if [[ "$PPP_LOCKED" == true ]]; then
+			if [[ -n "$PPP_LOCK_PROFILE" ]]; then
+				echo "  auto-profile lock              ${YLW}⚠ LOCKED${RST} ${DIM}(${PPP_LOCK_PROFILE})${RST}"
+			else
+				echo "  auto-profile lock              ${YLW}⚠ LOCKED${RST}"
+			fi
+		else
+			echo "  auto-profile lock              ${GRN}✓ unlocked${RST}"
+		fi
 
 		echo ""
 		echo "POTENTIAL CONFLICTS:"
-		CONFLICTS=(power-profiles-daemon auto-cpufreq tlp thermald tuned)
+		CONFLICTS=(auto-cpufreq tlp thermald tuned)
 		found_any=0
 		for svc in "${CONFLICTS[@]}"; do
 			if systemctl list-unit-files "${svc}.service" >/dev/null 2>&1; then
@@ -1287,22 +1391,16 @@ EOF
 cmd_profile_refresh() {
 	if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
 		cat <<EOF
-${BOLD}Profile Refresh${RST} - Restart v17 power management services
+${BOLD}Profile Refresh${RST} - Restart power management services
 
 ${BOLD}Usage:${RST} sudo ${SCRIPT_NAME} profile-refresh
 
-Restart all custom power management services (v17 stack).
+Restart all custom power management services.
 Useful for testing configuration changes or recovering
 from a failed state without a full reboot.
 
 ${BOLD}Services restarted:${RST}
-  • platform-profile
-  • cpu-epp
-  • cpu-min-freq-guard
-  • rapl-power-limits
-  • rapl-thermo-guard
-  • disable-rapl-mmio
-  • battery-thresholds
+  • Only tracked services that exist on this host
 
 ${BOLD}Note:${RST} Requires root privileges
 
@@ -1310,7 +1408,7 @@ EOF
 		return 0
 	fi
 
-	echo "=== RESTARTING POWER PROFILE SERVICES (v17) ==="
+	echo "=== RESTARTING POWER PROFILE SERVICES ==="
 	echo ""
 	if [[ $EUID -ne 0 ]]; then
 		echo "${RED}⚠ This command requires root privileges. Please run with sudo.${RST}"
@@ -1326,18 +1424,30 @@ EOF
 		"disable-rapl-mmio.service"
 		"battery-thresholds.service"
 	)
+	RESTARTED=0
+	SKIPPED=0
+	FAILED=0
 
 	for SVC in "${SERVICES[@]}"; do
+		LOAD_STATE="$(systemctl show -p LoadState --value "$SVC" 2>/dev/null || true)"
+		if [[ -z "$LOAD_STATE" || "$LOAD_STATE" == "not-found" ]]; then
+			printf "Skipping %-31s ... ${DIM}[ NOT INSTALLED ]${RST}\n" "$SVC"
+			SKIPPED=$((SKIPPED + 1))
+			continue
+		fi
+
 		printf "Restarting %-30s ... " "$SVC"
 		if systemctl restart "$SVC" 2>/dev/null; then
 			echo "${GRN}[ OK ]${RST}"
+			RESTARTED=$((RESTARTED + 1))
 		else
 			echo "${RED}[ FAILED ]${RST}"
+			FAILED=$((FAILED + 1))
 		fi
 	done
 
 	echo ""
-	echo "${GRN}✓ All v17 power-related services have been refreshed.${RST}"
+	echo "${GRN}✓ Power-related services processed.${RST} ${DIM}(restarted: ${RESTARTED}, skipped: ${SKIPPED}, failed: ${FAILED})${RST}"
 	echo "-------------------------------------------------"
 	cmd_status --brief
 }
