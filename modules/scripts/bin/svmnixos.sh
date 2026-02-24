@@ -25,7 +25,7 @@
 #     - PID file is always written (status/stop works in foreground too)
 #
 #   Env overrides (NixOS profile):
-#     VMNIXOS_BASE_DIR, VMNIXOS_MEMORY, VMNIXOS_CPUS, VMNIXOS_SSH_PORT, VMNIXOS_BOOT_MODE
+#     VMNIXOS_BASE_DIR, VMNIXOS_MEMORY, VMNIXOS_CPUS, VMNIXOS_SSH_PORT, VMNIXOS_BOOT_MODE, VMNIXOS_GTK_GL
 #
 #   Version: 1.3.0
 #   Date: 2026-01-27
@@ -62,6 +62,7 @@ declare -A CONFIG=(
   [iso_url]="https://channels.nixos.org/nixos-25.11/latest-nixos-graphical-x86_64-linux.iso"
   [iso_checksum]="" # SHA256 checksum (optional)
   [display_mode]="gtk"
+  [gtk_gl]="off" # off|on
   [boot_mode]="bios"
   [boot_order]="auto" # auto|disk|cdrom
   [shared_dir]="/run/user/$(id -u)"
@@ -80,6 +81,7 @@ CONFIG[log_file]="${CONFIG[base_dir]}/${CONFIG[vm_name]}.log"
 
 DRY_RUN=0
 HAVE_KVM="false"
+PARSED_COMMAND="start"
 
 show_help() {
   cat <<EOF
@@ -110,6 +112,7 @@ Display Options:
     --headless             Run without display
     --spice                Use SPICE display
     --vnc [PORT]           Use VNC display (default port: ${CONFIG[vnc_port]})
+    --gtk-gl MODE          GTK OpenGL mode: on|off (default: ${CONFIG[gtk_gl]})
     
 Path Options:
     --base-dir DIR         Set base directory (default: ${CONFIG[base_dir]})
@@ -130,6 +133,7 @@ Environment Variables:
     VMNIXOS_CPUS           Override CPU count
     VMNIXOS_SSH_PORT       Override SSH port
     VMNIXOS_BOOT_MODE      Override boot mode (bios/uefi)
+    VMNIXOS_GTK_GL         Override GTK OpenGL mode (on/off)
 
 Examples:
     # Start VM with default settings
@@ -164,6 +168,7 @@ apply_env_overrides() {
   [[ -n "${VMNIXOS_CPUS:-}" ]] && CONFIG[cpus]="$VMNIXOS_CPUS"
   [[ -n "${VMNIXOS_SSH_PORT:-}" ]] && CONFIG[ssh_port]="$VMNIXOS_SSH_PORT"
   [[ -n "${VMNIXOS_BOOT_MODE:-}" ]] && CONFIG[boot_mode]="$VMNIXOS_BOOT_MODE"
+  [[ -n "${VMNIXOS_GTK_GL:-}" ]] && CONFIG[gtk_gl]="$VMNIXOS_GTK_GL"
 
   return 0
 }
@@ -325,8 +330,13 @@ build_qemu_command() {
   # Display configuration
   case "${CONFIG[display_mode]}" in
   gtk)
-    out+=(-device virtio-vga-gl)
-    out+=(-display "gtk,gl=on")
+    if [[ "${CONFIG[gtk_gl]}" == "on" ]]; then
+      out+=(-device virtio-vga-gl)
+      out+=(-display "gtk,gl=on")
+    else
+      out+=(-device virtio-vga)
+      out+=(-display "gtk,gl=off")
+    fi
     ;;
   spice)
     out+=(-device "qxl-vga,vgamem_mb=64")
@@ -550,6 +560,15 @@ parse_arguments() {
       CONFIG[display_mode]="spice"
       shift
       ;;
+    --gtk-gl)
+      require_arg "$1" "${2:-}"
+      if [[ "$2" != "on" && "$2" != "off" ]]; then
+        log_error "--gtk-gl must be 'on' or 'off'"
+        exit 1
+      fi
+      CONFIG[gtk_gl]="$2"
+      shift 2
+      ;;
     --vnc)
       CONFIG[display_mode]="vnc"
       if [[ -n "${2:-}" && "$2" =~ ^[0-9]+$ ]]; then
@@ -604,7 +623,7 @@ parse_arguments() {
     esac
   done
 
-  echo "$command"
+  PARSED_COMMAND="$command"
 }
 
 print_cmd() {
@@ -625,7 +644,8 @@ main() {
   done
 
   apply_env_overrides
-  command=$(parse_arguments "$@")
+  parse_arguments "$@"
+  command="$PARSED_COMMAND"
   prepare_environment
 
   case "$command" in

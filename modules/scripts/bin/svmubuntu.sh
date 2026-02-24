@@ -95,6 +95,7 @@ declare -A CONFIG=(
   [iso_url]="https://mirror.rabisu.com/ubuntu/ubuntu-releases/24.04.2/ubuntu-24.04.2-desktop-amd64.iso"
   [iso_checksum]=""
   [display_mode]="gtk"
+  [gtk_gl]="off" # off|on
   [boot_mode]="bios"
   [boot_order]="auto" # auto|disk|cdrom
   [shared_dir]="/run/user/$(id -u)"
@@ -113,6 +114,7 @@ CONFIG[log_file]="${CONFIG[base_dir]}/${CONFIG[vm_name]}.log"
 
 DRY_RUN=0
 HAVE_KVM="false"
+PARSED_COMMAND="start"
 
 show_help() {
   cat <<EOF
@@ -143,6 +145,7 @@ Display Options:
     --headless             Run without display
     --spice                Use SPICE display
     --vnc [PORT]           Use VNC display (default port: ${CONFIG[vnc_port]})
+    --gtk-gl MODE          GTK OpenGL mode: on|off (default: ${CONFIG[gtk_gl]})
     
 Path Options:
     --base-dir DIR         Set base directory (default: ${CONFIG[base_dir]})
@@ -163,6 +166,7 @@ Environment Variables:
     VM_CPUS               Override CPU count
     VM_SSH_PORT           Override SSH port
     VM_BOOT_MODE          Override boot mode (bios/uefi)
+    VM_GTK_GL             Override GTK OpenGL mode (on/off)
 
 Examples:
     # Start VM with default settings
@@ -198,6 +202,7 @@ apply_env_overrides() {
   [[ -n "${VM_CPUS:-}" ]] && CONFIG[cpus]="$VM_CPUS"
   [[ -n "${VM_SSH_PORT:-}" ]] && CONFIG[ssh_port]="$VM_SSH_PORT"
   [[ -n "${VM_BOOT_MODE:-}" ]] && CONFIG[boot_mode]="$VM_BOOT_MODE"
+  [[ -n "${VM_GTK_GL:-}" ]] && CONFIG[gtk_gl]="$VM_GTK_GL"
 
   return 0
 }
@@ -358,8 +363,13 @@ build_qemu_command() {
   # Display
   case "${CONFIG[display_mode]}" in
   gtk)
-    out+=(-device virtio-vga-gl)
-    out+=(-display "gtk,gl=on")
+    if [[ "${CONFIG[gtk_gl]}" == "on" ]]; then
+      out+=(-device virtio-vga-gl)
+      out+=(-display "gtk,gl=on")
+    else
+      out+=(-device virtio-vga)
+      out+=(-display "gtk,gl=off")
+    fi
     ;;
   spice)
     out+=(-device "qxl-vga,vgamem_mb=64")
@@ -585,6 +595,15 @@ parse_arguments() {
       CONFIG[display_mode]="spice"
       shift
       ;;
+    --gtk-gl)
+      require_arg "$1" "${2:-}"
+      if [[ "$2" != "on" && "$2" != "off" ]]; then
+        log_error "--gtk-gl must be 'on' or 'off'"
+        exit 1
+      fi
+      CONFIG[gtk_gl]="$2"
+      shift 2
+      ;;
     --vnc)
       CONFIG[display_mode]="vnc"
       [[ -n "${2:-}" && "$2" =~ ^[0-9]+$ ]] && {
@@ -638,7 +657,7 @@ parse_arguments() {
     esac
   done
 
-  echo "$command"
+  PARSED_COMMAND="$command"
 }
 
 print_cmd() {
@@ -659,7 +678,8 @@ main() {
   done
 
   apply_env_overrides
-  command=$(parse_arguments "$@")
+  parse_arguments "$@"
+  command="$PARSED_COMMAND"
   prepare_environment
 
   case "$command" in
