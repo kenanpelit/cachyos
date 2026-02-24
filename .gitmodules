@@ -1,9 +1,6 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/calculator"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/calculator
 	url = https://github.com/rochacbruno/DankCalculator
-[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/worldClock"]
-	path = modules/dms/dotfiles/DankMaterialShell/plugins/worldClock
-	url = https://github.com/rochacbruno/WorldClock
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/aiAssistant"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/aiAssistant
 	url = https://github.com/devnullvoid/dms-ai-assistant
@@ -148,3 +145,12 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/musicLyrics"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/musicLyrics
 	url = https://github.com/gasiyu/dms-plugin-musiclyrics
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dankObsidian"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/dankObsidian
+	url = https://github.com/Samoggino/dankObsidian
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/displayOutput"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/displayOutput
+	url = https://github.com/xyzsteven/dms-displayoutput
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/niriScreenshot"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/niriScreenshot
+	url = https://github.com/jfchenier/dms-niri-screenshot

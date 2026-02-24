@@ -31,6 +31,8 @@ modules/dms/dotfiles/DankMaterialShell/settings.json
 modules/dms/dotfiles/DankMaterialShell/plugin_settings.json
 modules/noctalia/dotfiles/noctalia/plugins/assistant-panel/settings.json
 modules/dms/dotfiles/DankMaterialShell/plugins/dankBitwarden/
+modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections
+modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections.meta
 modules/ytdlp/dotfiles/yt-dlp/cookies-youtube.txt
 mimeinfo.cache
 brave-*.desktop
