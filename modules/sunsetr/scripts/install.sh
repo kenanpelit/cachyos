@@ -44,6 +44,6 @@ run_as_user() {
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
-  # Activate sunsetr as the single source of truth for color temperature.
-  run_as_user systemctl --user enable --now sunsetr.service >/dev/null 2>&1 || true
+  # Keep sunsetr manual-only: do not auto-start at login.
+  run_as_user systemctl --user disable --now sunsetr.service >/dev/null 2>&1 || true
 fi
