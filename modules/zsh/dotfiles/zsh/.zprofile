@@ -55,6 +55,7 @@ if $is_login_shell \
   NIRI_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/niri-osc" "niri-osc" 2>/dev/null || true)"
   HYPR_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/hypr-osc" "hypr-osc" 2>/dev/null || true)"
   GNOME_TTY_CMD="$(resolve_cmd "${HOME}/.local/bin/gnome_tty" "gnome_tty" 2>/dev/null || true)"
+  TTY_LAUNCHER_CMD="$(resolve_cmd "${HOME}/.local/bin/osc-tty-launcher" "osc-tty-launcher" 2>/dev/null || true)"
   SVM_UBUNTU_CMD="$(resolve_cmd "${HOME}/.local/bin/svmubuntu" "svmubuntu" 2>/dev/null || true)"
   SVM_ARCH_CMD="$(resolve_cmd "${HOME}/.local/bin/svmarch" "svmarch" 2>/dev/null || true)"
   SVM_CACHY_CMD="$(resolve_cmd "${HOME}/.local/bin/svmcachy" "svmcachy" 2>/dev/null || true)"
@@ -139,20 +140,25 @@ if $is_login_shell \
 
     6)
       echo "TTY6: manual mode (no autostart)"
+      echo "Launcher:"
+      echo "  exec ${TTY_LAUNCHER_CMD:-osc-tty-launcher}"
+      echo
       echo "Available routes:"
       echo "  TTY2 -> Niri      (${NIRI_TTY_CMD})"
       echo "  TTY3 -> Hyprland  (${HYPR_OSC_CMD:-hypr-osc} tty)"
       echo "  TTY4 -> GNOME     (${GNOME_TTY_CMD:-gnome_tty})"
-      echo "  TTY5 -> VM tools  (${SVM_UBUNTU_CMD:-svmubuntu} / ${SVM_ARCH_CMD:-svmarch} / ${SVM_CACHY_CMD:-svmcachy} / ${SVM_NIXOS_CMD:-svmnixos})"
+      echo "  VM via Sway cfgs  (qemu_vmubuntu / qemu_vmarch / qemu_vmcachy / qemu_vmnixos)"
       echo
       echo "Manual start commands:"
+      echo "  exec ${TTY_LAUNCHER_CMD:-osc-tty-launcher}"
       echo "  exec ${NIRI_TTY_CMD}"
       echo "  exec ${HYPR_OSC_CMD:-hypr-osc} tty"
       echo "  exec ${GNOME_TTY_CMD:-gnome_tty}"
-      echo "  ${SVM_UBUNTU_CMD:-svmubuntu} start"
-      echo "  ${SVM_ARCH_CMD:-svmarch} start"
-      echo "  ${SVM_CACHY_CMD:-svmcachy} start"
-      echo "  ${SVM_NIXOS_CMD:-svmnixos} start"
+      echo "  exec sway -c ~/.config/sway/qemu_vmubuntu"
+      echo "  exec sway -c ~/.config/sway/qemu_vmarch"
+      echo "  exec sway -c ~/.config/sway/qemu_vmcachy"
+      echo "  exec sway -c ~/.config/sway/qemu_vmnixos"
+      echo "  (${SVM_UBUNTU_CMD:-svmubuntu} start --gtk-gl off)"
       ;;
 
     *)
