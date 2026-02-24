@@ -3,127 +3,148 @@
 <div align="center">
   <img src="https://img.shields.io/badge/CachyOS-Arch_Linux-blue?style=for-the-badge&logo=archlinux&logoColor=white" alt="CachyOS">
   <img src="https://img.shields.io/badge/Manager-dcli-green?style=for-the-badge&logo=yaml&logoColor=white" alt="dcli">
-  <img src="https://img.shields.io/badge/Compositors-Niri%20%2B%20Hyprland-6c5ce7?style=for-the-badge" alt="Niri + Hyprland">
+  <img src="https://img.shields.io/badge/Host-hay-orange?style=for-the-badge" alt="hay">
+  <img src="https://img.shields.io/badge/Wayland-Niri%20%2B%20Hyprland-1f6feb?style=for-the-badge" alt="Niri + Hyprland">
 </div>
 
 <p align="center">
-  <strong>Declarative, modular desktop/system configuration for CachyOS (Arch Linux), managed with <a href="https://gitlab.com/theblackdon/dcli">dcli</a>.</strong>
+  <strong>Declarative, modular, and operations-focused workstation configuration for CachyOS, powered by <a href="https://gitlab.com/theblackdon/dcli">dcli</a>.</strong>
 </p>
 
-## Design Goals
+## Overview
 
-The repository is tuned for a real daily-driver workstation and emphasizes:
+This repository is the source of truth for one production desktop host (`hay`).
+It manages system packages, desktop sessions, user services, shell tooling, MIME/default apps, and day-2 operations through composable modules.
 
-- reproducibility (minimal config drift)
-- modularity (small, focused modules)
-- operational reliability (service orchestration + documented runbooks)
+Core goals:
 
-## Scope
+- reproducibility: minimize configuration drift
+- modularity: small, focused, reusable modules
+- operational discipline: explicit runbooks and service orchestration
 
-This repo manages:
+## Architecture
 
-- base system packages (official + AUR)
-- shells and CLI tools (`zsh`, `nvim`, `tmux`, `yazi`, etc.)
-- Wayland desktop stack (`niri`, `hyprland`, portals, session entries)
-- user services (systemd `--user` units and timers)
-- networking/security modules (`ufw`, `fail2ban`, `blocky`, Mullvad helpers)
-- media/workflow tooling (`mpv`, `mpd`, `copyq`, `dms`, `walker`, etc.)
-- MIME/default app mappings
+The configuration model is intentionally simple:
 
-## Configuration Model
+- `config.yaml`: active host pointer
+- `hosts/hay.yaml`: ordered module stack and host-level settings
+- `modules/<name>/`: implementation units
 
-The repo uses a host-pointer + host-profile model:
+Typical module contract:
 
-- `config.yaml`: points to active host (currently `hay`)
-- `hosts/<host>.yaml`: ordered module list + host-specific settings
-- `modules/<name>/`: each module defines packages, dotfiles, and hooks
+- `module.yaml`: metadata and hook behavior
+- `packages.yaml`: package sources (repo/AUR/flatpak depending on module)
+- `dotfiles/`: managed files
+- `scripts/`: install/post-install logic
 
-Most modules follow this pattern:
+## Repository Map
 
-- `module.yaml` -> metadata, dotfile mappings, hook policy
-- `packages.yaml` -> package list
-- `dotfiles/` -> managed files
-- `scripts/` -> install/post-install logic
+```text
+.
+├── config.yaml
+├── hosts/
+│   └── hay.yaml
+├── modules/
+│   ├── base, pacman, paru, packages, system-packages-hay
+│   ├── admin, logind, tty, logs, kernel, firewall, fail2ban, blocky, tcp, oomd
+│   ├── zsh, bash, git, nvim, tmux, yazi, fzf, fastfetch, btop, lazygit, ...
+│   ├── niri, hyprland, sway, sessions, stasis, xdg-portal, dms, noctalia, ...
+│   ├── mpv, mpd, rmpc, transmission, cava, ytdlp, radio, subliminal
+│   └── xdg-mimes, user-services, scripts, flatpak, copyq, brave, webcord, ai
+└── docs/
+    └── OPERATIONS.md
+```
+
+## Active Host Profile (`hay`)
+
+`hosts/hay.yaml` currently enables:
+
+- bootstrap/core: `base`, `pacman`, `paru`, `scripts`, `packages`, `flatpak`, `system-packages-hay`
+- system/security: `admin`, `logind`, `tty`, `logs`, `kernel`, `firewall`, `fail2ban`, `blocky`, `tcp`, `oomd`
+- shell/cli: `zsh`, `bash`, `git`, `nvim`, `tmux`, `yazi`, `sesh`, `clipse`, `starship`, `command-not-found`
+- desktop: `niri`, `hyprland`, `sway`, `sessions`, `stasis`, `xdg-portal`, `rofi`, `walker`, `dms`, `noctalia`, `dms-greeter`, `fusuma`
+- media/apps: `mpv`, `mpd`, `rmpc`, `transmission`, `cava`, `brave`, `webcord`, `copyq`, `ai`
+- defaults/services: `xdg-mimes`, `user-services`
 
 ## Quick Start
 
-### 1. Clone
+### 1) Clone
 
 ```bash
 git clone --recurse-submodules https://github.com/kenanpelit/cachyos.git ~/.cachy
 ```
 
-### 2. Register repo as dcli config root
+### 2) Register as dcli root
 
 ```bash
 mkdir -p ~/.config
 ln -sfn ~/.cachy ~/.config/arch-config
 ```
 
-### 3. Sync
+### 3) Apply
 
 ```bash
 cd ~/.cachy
 sudo -E dcli sync
 ```
 
-After first sync, log out/in (or reboot) to ensure session-level services and desktop entries are fully applied.
+## Daily Operations
 
-## Daily Workflow
+Update + apply:
 
 ```bash
 cd ~/.cachy
-# edit modules or host profile
-sudo -E dcli sync
-```
-
-Recommended maintenance:
-
-```bash
 git pull --rebase
 git submodule update --init --recursive
 sudo -E dcli sync
 ```
 
-## Repository Layout
+Capture unmanaged installs into a host module:
 
-```text
-.
-├── config.yaml            # active host pointer
-├── hosts/                 # host profiles (module order + host settings)
-├── modules/               # modular configuration units
-│   ├── niri/              # primary compositor profile
-│   ├── hyprland/          # secondary compositor profile
-│   ├── dms/               # shell/launcher stack
-│   ├── user-services/     # user service enable/normalize flow
-│   ├── grub/              # bootloader customization
-│   ├── firewall/          # ufw policy
-│   ├── fail2ban/          # intrusion mitigation
-│   ├── blocky/            # DNS filtering/failsafe integration
-│   └── ...
-└── docs/
-    └── OPERATIONS.md      # runtime checks and incident playbooks
+```bash
+dcli merge
 ```
 
-## Operational Notes
+Operational checks:
 
-- Runbook: `docs/OPERATIONS.md`
-- Host profile: `hosts/hay.yaml`
-- Active host pointer: `config.yaml`
-- Some modules intentionally use `post_hook_behavior: ask`; review prompt output during `dcli sync`.
+- runbook: `docs/OPERATIONS.md`
+- active host: `config.yaml`
+- host stack: `hosts/hay.yaml`
 
-## Portability and Safety
+## TTY and Session Routes
 
-This configuration is opinionated and hardware/workflow specific.
+TTY routes are managed via `zsh/.zprofile` and helper scripts:
 
-Before applying on another machine, review at minimum:
+- `tty2`: Niri
+- `tty3`: Hyprland
+- `tty4`: GNOME
+- `tty5`: Sway VM profile
+- `tty6`: manual mode + launcher (`exec osc-tty-launcher`)
 
-- `hosts/<target>.yaml`
+For VM routes from TTY, Sway `qemu_vm*` profiles are preferred.
+
+## Submodules Policy
+
+This repository uses git submodules for third-party/plugin code (for example under `modules/dms/.../plugins` and tmux plugin paths).
+
+Use:
+
+```bash
+git submodule update --init --recursive
+```
+
+after clone, pull, and branch switches.
+
+## Portability Checklist
+
+Before applying on a different machine, review:
+
+- `hosts/<new-host>.yaml`
 - `modules/kernel/`
-- `modules/grub/`
 - `modules/firewall/`
 - `modules/blocky/`
 - `modules/sessions/`
+- hardware-specific desktop/service modules (`niri`, `hyprland`, `stasis`, `fusuma`, `dms-greeter`)
 
 ## License
 
