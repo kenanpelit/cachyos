@@ -1,5 +1,7 @@
 description: Search utilities (dsearch config + user service) portable config
 
+dotfiles:
+  - source: dotfiles/danksearch
     target: ~/.config/danksearch
   - source: dotfiles/systemd/user/dsearch.service
     target: ~/.config/systemd/user/dsearch.service
