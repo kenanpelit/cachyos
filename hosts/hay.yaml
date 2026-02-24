@@ -80,7 +80,7 @@ enabled_modules:
   # --- Connectivity ---
   - bt # Bluetooth
   - connect # KDE Connect
-  - blue # Gammastep
+  # - blue # Gammastep
   # - sunsetr
   - anydesk
 
