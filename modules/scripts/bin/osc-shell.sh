@@ -205,13 +205,6 @@ normalize_ipc() {
     spotlight:openQuery)
       target="launcher"; method="windows"; args=()
       ;;
-    dash:toggle)
-      if [[ "${args[0]:-}" == "overview" ]]; then
-        target="launcher"; method="windows"; args=()
-      else
-        target="launcher"; method="toggle"; args=()
-      fi
-      ;;
     control-center:toggle)
       target="controlCenter"; method="toggle"; args=()
       ;;
@@ -585,6 +578,13 @@ route_noctalia_ipc() {
   local -a args=("$@")
 
   case "${target}:${method}" in
+    dash:toggle)
+      if [[ "${args[0]:-}" == "overview" ]]; then
+        target="launcher"; method="windows"; args=()
+      else
+        target="launcher"; method="toggle"; args=()
+      fi
+      ;;
     wallpaper:next | wallpaper:prev)
       target="wallpaper"; method="random"; args=()
       ;;
