@@ -361,14 +361,11 @@ binds {
   Mod+Space repeat=false hotkey-overlay-title="Launcher" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher toggle"
   }
-  Mod+Shift+Space repeat=false hotkey-overlay-title="Spotlight" {
-    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher command"
-  }
   Mod+Ctrl+D repeat=false hotkey-overlay-title="Settings" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call settings toggle"
   }
   Mod+D repeat=false hotkey-overlay-title="Control Center" {
-    spawn-sh "$HOME/.local/bin/osc-shell ipc call controlCenter toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call control-center toggle"
   }
   Mod+N repeat=false hotkey-overlay-title="Notifications" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call notifications toggleHistory"
@@ -388,7 +385,7 @@ binds {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call systemMonitor toggle"
   }
   Mod+Ctrl+N repeat=false hotkey-overlay-title="Notepad" {
-    spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher command"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call notepad toggle"
   }
   Mod+Comma repeat=false hotkey-overlay-title="Settings" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call settings toggle"
