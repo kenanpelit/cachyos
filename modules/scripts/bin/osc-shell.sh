@@ -346,7 +346,7 @@ route_dms_ipc() {
       ;;
 
     controlCenter:toggle)
-      dms_ipc_call control-center toggle ""
+      dms_ipc_call control-center toggle
       return $?
       ;;
 
@@ -599,18 +599,36 @@ route_noctalia_ipc() {
     return 127
   fi
 
-  if ! qs -c noctalia-shell ipc call "$target" "$method" "${args[@]}" >/dev/null 2>&1; then
-    local i
+  local i output status call_target
+
+  if ! qs -c noctalia-shell ipc show >/dev/null 2>&1; then
     ensure_backend noctalia
     for i in {1..30}; do
-      if qs -c noctalia-shell ipc call "$target" "$method" "${args[@]}" >/dev/null 2>&1; then
-        return 0
+      if qs -c noctalia-shell ipc show >/dev/null 2>&1; then
+        break
       fi
       sleep 0.1
     done
   fi
 
-  qs -c noctalia-shell ipc call "$target" "$method" "${args[@]}"
+  if output="$(qs -c noctalia-shell ipc call "$target" "$method" "${args[@]}" 2>&1)"; then
+    [[ -n "$output" ]] && printf '%s\n' "$output"
+    return 0
+  fi
+  status=$?
+
+  # Newer quickshell builds expect "target.method" form for ipc call.
+  if [[ "$output" == *"Too many arguments provided"* || "$output" == *"Function definition:"* ]]; then
+    call_target="${target}.${method}"
+    if output="$(qs -c noctalia-shell ipc call "$call_target" "${args[@]}" 2>&1)"; then
+      [[ -n "$output" ]] && printf '%s\n' "$output"
+      return 0
+    fi
+    status=$?
+  fi
+
+  [[ -n "$output" ]] && printf '%s\n' "$output" >&2
+  return "$status"
 }
 
 cmd_backend() {
