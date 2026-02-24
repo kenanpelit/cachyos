@@ -1,0 +1,10 @@
+==============================================================
+  CachyOS Declarative Console
+  Host: \n  |  TTY: \l  |  Kernel: \r
+==============================================================
+  Quick routes:
+    tty2 -> Niri
+    tty3 -> Hyprland
+    tty4 -> GNOME
+    tty5 -> Sway VM
+

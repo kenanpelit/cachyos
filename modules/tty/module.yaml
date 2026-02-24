@@ -1,0 +1,4 @@
+description: Linux TTY readability profile (vconsole + issue banner)
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

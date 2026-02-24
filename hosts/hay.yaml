@@ -17,6 +17,7 @@ enabled_modules:
   # --- Core System ---
   - admin
   - logind
+  - tty
   - logs
   - kernel
   - firewall
