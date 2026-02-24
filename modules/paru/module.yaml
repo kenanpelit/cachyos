@@ -1,4 +1,7 @@
 description: Paru configuration (sudo pacman wrapper + user config)
+depends_on:
+  - pacman
+  - base
 
 dotfiles:
   - source: dotfiles/bin/pacman-sudo-paru

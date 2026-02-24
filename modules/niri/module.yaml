@@ -1,4 +1,9 @@
 description: Niri compositor config (portable config)
+depends_on:
+  - base
+  - xdg-dirs
+  - scripts
+  - fonts
 
 dotfiles:
   - source: dotfiles/niri/config.kdl

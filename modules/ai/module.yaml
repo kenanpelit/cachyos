@@ -1,4 +1,7 @@
 description: AI tooling (Gemini, Codex, Ollama) portable config
+depends_on:
+  - scripts
+  - user-services
 
 
 dotfiles:
