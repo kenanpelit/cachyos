@@ -600,7 +600,7 @@
         "autoSchedule": true,
         "dayTemp": "3499",
         "enabled": true,
-        "forced": false,
+        "forced": true,
         "manualSunrise": "06:30",
         "manualSunset": "18:30",
         "nightTemp": "2999"
@@ -664,14 +664,14 @@
             {
                 "action": "lock",
                 "command": "",
-                "countdownEnabled": true,
+                "countdownEnabled": false,
                 "enabled": true,
                 "keybind": "1"
             },
             {
                 "action": "suspend",
                 "command": "",
-                "countdownEnabled": true,
+                "countdownEnabled": false,
                 "enabled": true,
                 "keybind": "2"
             },
@@ -685,7 +685,7 @@
             {
                 "action": "reboot",
                 "command": "~/.local/bin/osc-safe-reboot",
-                "countdownEnabled": true,
+                "countdownEnabled": false,
                 "enabled": true,
                 "keybind": "4"
             },
@@ -699,7 +699,7 @@
             {
                 "action": "shutdown",
                 "command": "",
-                "countdownEnabled": true,
+                "countdownEnabled": false,
                 "enabled": true,
                 "keybind": "6"
             },
