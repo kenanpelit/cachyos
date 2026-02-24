@@ -6,6 +6,7 @@ enabled_modules:
 - paru
 - xdg-dirs
 - scripts
+- sops
 - packages
 - flatpak
 - system-packages-hay

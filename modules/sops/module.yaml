@@ -1,0 +1,5 @@
+name: sops
+description: "Declarative sops secret management with age"
+hooks:
+  post_install:
+    - "scripts/setup-sops.sh"
