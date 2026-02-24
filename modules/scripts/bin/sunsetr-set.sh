@@ -90,13 +90,13 @@ is_preset() {
 list_presets() {
   cat <<'EOF'
 Presetler:
-  day     (4500/4000K, 100/95)
-  night   (3500/3300K, 90/85)
-  warm    (4200/3200K, 100/90)
-  dim     (3500/3000K, 90/80)
-  focus   (5000/4500K, 100/95)
+  day     (5000/4200K, 100/96)
+  night   (3900/3000K, 92/82)
+  warm    (4200/3200K, 97/88)
+  dim     (3400/2800K, 85/72)
+  focus   (5200/4300K, 100/94)
   best    (3500/3300K, 90/85)
-  cinema  (3800/2700K, 95/85)
+  cinema  (3900/2600K, 92/78)
 EOF
 }
 
@@ -135,25 +135,25 @@ apply_preset() {
 
   case "$preset" in
   day)
-    day_temp=4500; night_temp=4000; day_gamma=100; night_gamma=95
+    day_temp=5000; night_temp=4200; day_gamma=100; night_gamma=96
     ;;
   night)
-    day_temp=3500; night_temp=3300; day_gamma=90; night_gamma=85
+    day_temp=3900; night_temp=3000; day_gamma=92; night_gamma=82
     ;;
   warm)
-    day_temp=4200; night_temp=3200; day_gamma=100; night_gamma=90
+    day_temp=4200; night_temp=3200; day_gamma=97; night_gamma=88
     ;;
   dim)
-    day_temp=3500; night_temp=3000; day_gamma=90; night_gamma=80
+    day_temp=3400; night_temp=2800; day_gamma=85; night_gamma=72
     ;;
   focus)
-    day_temp=5000; night_temp=4500; day_gamma=100; night_gamma=95
+    day_temp=5200; night_temp=4300; day_gamma=100; night_gamma=94
     ;;
   best)
     day_temp=3500; night_temp=3300; day_gamma=90; night_gamma=85
     ;;
   cinema)
-    day_temp=3800; night_temp=2700; day_gamma=95; night_gamma=85
+    day_temp=3900; night_temp=2600; day_gamma=92; night_gamma=78
     ;;
   *)
     die "unknown preset: $preset"
