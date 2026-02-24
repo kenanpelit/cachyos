@@ -1,6 +1,8 @@
-description: sunsetr config (portable config)
-
+description: Sunsetr profiles + helper management
 
 dotfiles:
   - source: dotfiles/sunsetr
     target: ~/.config/sunsetr
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask
