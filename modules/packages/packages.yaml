@@ -58,7 +58,6 @@ packages:
   - reflector
   - alsa-utils
   # - spotify-cli-linux # Package not found/ambiguous
-  - sunsetr-git
   - ttf-dejavu
   - ttf-fira-code
   - woff2-font-awesome
