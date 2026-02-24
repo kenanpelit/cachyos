@@ -55,6 +55,7 @@ packages:
   - man-pages
   - os-prober
   - pacman-contrib
+  - turbostat
   - rebuild-detector
   - reflector
   - alsa-utils
