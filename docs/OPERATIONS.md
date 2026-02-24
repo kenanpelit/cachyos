@@ -61,7 +61,6 @@ Current `ask` modules:
 - `modules/connect`
 - `modules/mpd`
 - `modules/transmission`
-- `modules/blue`
 - `modules/gnome`
 - `modules/search`
 - `modules/bt`

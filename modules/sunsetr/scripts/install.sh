@@ -44,9 +44,6 @@ run_as_user() {
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
-  # If blue/gammastep is active, stop it to avoid double color managers.
-  run_as_user systemctl --user disable --now blue.service >/dev/null 2>&1 || true
-
   # Activate sunsetr as the single source of truth for color temperature.
   run_as_user systemctl --user enable --now sunsetr.service >/dev/null 2>&1 || true
 fi
