@@ -367,6 +367,9 @@ binds {
   Mod+D repeat=false hotkey-overlay-title="Control Center" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call control-center toggle"
   }
+  Mod+Alt+D repeat=false hotkey-overlay-title="Dash Center" {
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call dash toggle overview"
+  }
   Mod+N repeat=false hotkey-overlay-title="Notifications" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call notifications toggleHistory"
   }
