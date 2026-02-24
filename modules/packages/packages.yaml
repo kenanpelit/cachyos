@@ -48,6 +48,7 @@ packages:
   - dmidecode
   - downgrade
   - hwinfo
+  - intel-gpu-tools
   - usbutils
   - pciutils
   - man-db
