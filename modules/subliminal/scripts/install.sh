@@ -15,8 +15,14 @@ fi
 
 TARGET_DIR="${XDG_CONFIG_HOME:-$USER_HOME/.config}/subliminal"
 TARGET_FILE="$TARGET_DIR/subliminal.toml"
-KEY_FILE="$USER_HOME/.config/sops/age/keys.txt"
 TEMPLATE_FILE="$SRC_DIR/assets/subliminal.template.toml"
+
+# 3. Öneri Uygulaması: Global DCLI_SOPS_KEY_PATH kullanımı
+# Eğer global değişken tanımlıysa onu kullan, yoksa standart konumu dene.
+KEY_FILE="${DCLI_SOPS_KEY_PATH:-$USER_HOME/.config/sops/age/keys.txt}"
+
+# Tilde (~) karakterini bash içinde manuel çöz (çünkü tırnak içinde genişlemez)
+KEY_FILE="${KEY_FILE/#\~/$USER_HOME}"
 
 if ! command -v sops >/dev/null 2>&1; then
   echo "subliminal: sops not found; skipping decrypt" >&2
@@ -31,7 +37,7 @@ fi
 if [[ -f "$KEY_FILE" ]]; then
   SOPS_AGE_KEY_FILE="$KEY_FILE" sops -d "$ENC_FILE" > "$TARGET_FILE"
 else
-  # Fallback: try default sops locations
+  # Fallback: try default sops locations (will use default gpg/age config)
   sops -d "$ENC_FILE" > "$TARGET_FILE"
 fi
 

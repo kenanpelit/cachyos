@@ -12,3 +12,4 @@ export XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME XDG_STATE_HOME
 if [ -f "$ZDOTDIR/.zshenv" ]; then
   . "$ZDOTDIR/.zshenv"
 fi
+export DCLI_SOPS_KEY_PATH="$HOME/.config/sops/age/keys.txt"
