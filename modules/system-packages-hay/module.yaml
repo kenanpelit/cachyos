@@ -1,1 +1,20 @@
-description: Packages installed manually on the system (auto-synced by dcli)
+description: System packages for hay (auto-synced by dcli merge)
+conflicts: []
+pre_install_hook: null
+post_install_hook: null
+hook_behavior: ask
+pre_hook_behavior: null
+post_hook_behavior: null
+run_hooks_as_user: false
+post_disable_hook: null
+post_disable_behavior: null
+package_files:
+- packages.yaml
+dotfiles_sync: null
+dotfiles: []
+author: null
+version: null
+category: null
+tags: []
+license: null
+upstream_url: null
