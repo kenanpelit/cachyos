@@ -38,7 +38,7 @@ Options:
   -h, --help              Show help
 
 Presets:
-  day, night, warm, dim, focus, best, cinema
+  day, night, warm, dim, focus, best, cinema, dms
 
 Examples:
   $SCRIPT_NAME night
@@ -82,7 +82,7 @@ ensure_runtime_dir() {
 
 is_preset() {
   case "${1,,}" in
-  day | night | warm | dim | focus | best | cinema) return 0 ;;
+  day | night | warm | dim | focus | best | cinema | dms) return 0 ;;
   *) return 1 ;;
   esac
 }
@@ -97,6 +97,7 @@ Presetler:
   focus   (5200/4300K, 100/94)
   best    (3500/3300K, 90/85)
   cinema  (3900/2600K, 92/78)
+  dms     (3000/2500K, 100/100)
 EOF
 }
 
@@ -112,7 +113,7 @@ profile_to_dir() {
   if [[ "$profile" == "$DEFAULT_PROFILE" ]]; then
     printf '%s\n' "$CONFIG_ROOT"
   else
-    printf '%s\n' "$CONFIG_ROOT/profiles/$profile"
+    printf '%s\n' "$CONFIG_ROOT/presets/$profile"
   fi
 }
 
@@ -128,10 +129,15 @@ ensure_config_dir() {
 
 apply_preset() {
   local preset="${1,,}"
-  local cfg_dir="$2"
+  local profile="$2"
   local latitude="$3"
   local longitude="$4"
   local day_temp night_temp day_gamma night_gamma
+  local target="default"
+
+  if [[ "$profile" != "$DEFAULT_PROFILE" ]]; then
+    target="$profile"
+  fi
 
   case "$preset" in
   day)
@@ -155,12 +161,16 @@ apply_preset() {
   cinema)
     day_temp=3900; night_temp=2600; day_gamma=92; night_gamma=78
     ;;
+  dms)
+    day_temp=3000; night_temp=2500; day_gamma=100; night_gamma=100
+    ;;
   *)
     die "unknown preset: $preset"
     ;;
   esac
 
-  sunsetr --config "$cfg_dir" set \
+  # Force explicit target to avoid interactive prompt based on active preset.
+  sunsetr --config "$CONFIG_ROOT" set --target "$target" \
     day_temp="$day_temp" \
     night_temp="$night_temp" \
     day_gamma="$day_gamma" \
@@ -284,7 +294,7 @@ main() {
     cfg_dir="$(profile_to_dir "$profile")"
 
     ensure_config_dir "$cfg_dir"
-    apply_preset "$action" "$cfg_dir" "$latitude" "$longitude"
+    apply_preset "$action" "$profile" "$latitude" "$longitude"
 
     log "preset written: $action -> $profile"
     notify "sunsetr" "Preset yazıldı: $action -> $profile"
