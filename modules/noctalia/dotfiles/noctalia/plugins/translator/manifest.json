@@ -1,0 +1,28 @@
+{
+  "id": "translator",
+  "name": "Translator",
+  "version": "1.2.3",
+  "minNoctaliaVersion": "4.4.1",
+  "author": "Cleboost",
+  "license": "MIT",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+  "description": "Quick translate in launcher",
+  "tags": [
+    "Launcher"
+  ],
+  "entryPoints": {
+    "main": "Main.qml",
+    "launcherProvider": "LauncherProvider.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "commandPrefix": "translate",
+    "defaultSettings": {
+      "backend": "google",
+      "realTime": true
+    }
+  }
+}
