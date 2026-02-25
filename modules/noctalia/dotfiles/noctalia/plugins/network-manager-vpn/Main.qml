@@ -9,7 +9,7 @@ QtObject {
     property var pluginApi: null
 
     property var vpnList: []
-    property bool anyConnected: false
+    property real connectedCount: 0
 
     property var _pending: ({})
 
@@ -40,7 +40,7 @@ QtObject {
                 const newPending = Object.assign({}, root._pending)
                 for (const line of root._lines) {
                     const parts = line.split(":")
-                    if (parts.length >= 3) {
+                    if (parts.length >= 4) {
                         const name  = parts[0]
                         const type  = parts[1]
                         const state = parts[2]
@@ -65,7 +65,7 @@ QtObject {
                 }
                 root._pending = newPending
                 root.vpnList = parsed
-                root.anyConnected = parsed.some(v => v.connected)
+                root.connectedCount = parsed.filter(v => v.connected).length
             }
             root._lines = []
         }
@@ -77,9 +77,9 @@ QtObject {
         command: ["nmcli", "connection", "up", "uuid", targetUuid]
         onExited: (exitCode) => {
             if (exitCode === 0)
-                ToastService.showNotice(pluginApi?.tr("toast.connectedTo", { name: targetName }) || "Connected to " + targetName)
+                ToastService.showNotice(t("toast.connectedTo", { name: targetName }) || "Connected to " + targetName)
             else
-                ToastService.showError(pluginApi?.tr("toast.connectionError", { name: targetName }) || "Failed connect to " + targetName)
+                ToastService.showError(t("toast.connectionError", { name: targetName }) || "Failed connect to " + targetName)
             root.refresh()
         }
     }
@@ -90,16 +90,54 @@ QtObject {
         command: ["nmcli", "connection", "down", "uuid", targetUuid]
         onExited: (exitCode) => {
             if (exitCode === 0)
-                ToastService.showNotice(pluginApi?.tr("toast.disconnectedFrom", { name: targetName }) || "Disconnected from " + targetName)
+                ToastService.showNotice(t("toast.disconnectedFrom", { name: targetName }) || "Disconnected from " + targetName)
             else
-                ToastService.showError(pluginApi?.tr("toast.disconnectionError", { name: targetName }) || "Failed disconnect from " + targetName)
+                ToastService.showError(t("toast.disconnectionError", { name: targetName }) || "Failed disconnect from " + targetName)
             root.refresh()
         }
     }
 
-    function refresh() {
-        // Logger.i("NetworkManagerVPN", "Refresh")
+    property var _addProc: Process {
+        property string targetType: ""
 
+        command: ["nm-connection-editor", "--create", "--type", targetType]
+        onExited: (exitCode) => {
+            root.refresh();
+        }
+    }
+
+    property var _editProc: Process {
+        property string targetName: ""
+        property string targetUuid: ""
+
+        command: ["nm-connection-editor", "--edit", targetUuid]
+        onExited: (exitCode) => {
+            root.refresh();
+        }
+    }
+
+    property var _removeProc: Process {
+        property string targetName: ""
+        property string targetUuid: ""
+
+        command: ["nmcli", "connection", "delete", "uuid", targetUuid]
+        onExited: (exitCode) => {
+            if (exitCode === 0)
+                ToastService.showNotice(t("toast.vpnRemoved", { "name": targetName }) || "VPN \"" + targetName + "\" removed");
+            else
+                ToastService.showError(t("toast.vpnRemoveError", { "name": targetName }) || "Failed to remove VPN \"" + targetName + "\"");
+            root.refresh();
+        }
+    }
+
+    function t(key: string, data) {
+        if (!pluginApi)
+            return null;
+
+        return pluginApi.tr(key, data);
+    }
+
+    function refresh() {
         _listProc.running = true
     }
 
@@ -137,6 +175,29 @@ QtObject {
         _disconnectProc.targetName = name
         _disconnectProc.targetUuid = uuid
         _disconnectProc.running = true
+    }
+
+    function addConnection(type) {
+        _addProc.targetType = type || "vpn";
+        _addProc.running = true;
+    }
+
+    function editConnection(uuid) {
+        const vpn = vpnList.find((v) => {
+            return v.uuid === uuid;
+        });
+        _editProc.targetName = vpn ? vpn.name : uuid;
+        _editProc.targetUuid = uuid;
+        _editProc.running = true;
+    }
+
+    function removeConnection(uuid) {
+        const vpn = vpnList.find((v) => {
+            return v.uuid === uuid;
+        });
+        _removeProc.targetName = vpn ? vpn.name : uuid;
+        _removeProc.targetUuid = uuid;
+        _removeProc.running = true;
     }
 
     Component.onCompleted: {

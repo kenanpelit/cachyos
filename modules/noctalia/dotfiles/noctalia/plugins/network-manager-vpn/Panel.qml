@@ -10,14 +10,19 @@ Item {
 
     property var pluginApi: null
     property ShellScreen screen
-
-    readonly property var main: pluginApi?.mainInstance ?? null
-    readonly property var vpnList: main?.vpnList ?? []
+    readonly property var main: pluginApi && pluginApi.mainInstance ? pluginApi.mainInstance : null
+    readonly property var vpnList: main ? main.vpnList : []
     readonly property var activeList: vpnList.filter(v => v.connected || v.isLoading)
     readonly property var inactiveList: vpnList.filter(v => !v.connected && !v.isLoading)
-
     property real contentPreferredWidth: Math.round(500 * Style.uiScaleRatio)
     property real contentPreferredHeight: Math.min(500, mainColumn.implicitHeight + Style.marginL * 2)
+
+    function t(key: string, data) : string {
+        if (!pluginApi)
+            return "";
+
+        return pluginApi.tr(key, data);
+    }
 
     Component.onCompleted: {
         if (main) main.refresh()
@@ -48,7 +53,7 @@ Item {
                     }
 
                     NLabel {
-                        label: pluginApi?.tr("common.vpn") || "VPN"
+                        label: t("common.vpn") || "VPN"
                     }
 
                     NBox {
@@ -57,7 +62,7 @@ Item {
 
                     NIconButton {
                         icon: "refresh"
-                        tooltipText: pluginApi?.tr("common.refresh") || "Refresh"
+                        tooltipText: t("common.refresh") || "Refresh"
                         baseSize: Style.baseWidgetSize * 0.8
                         enabled: true
                         onClicked: {
@@ -67,10 +72,9 @@ Item {
                         }
                     }
 
-
                     NIconButton {
                         icon: "close"
-                        tooltipText: pluginApi?.tr("common.close") || "close"
+                        tooltipText: t("common.close") || "Close"
                         baseSize: Style.baseWidgetSize * 0.8
                         onClicked: pluginApi.closePanel(pluginApi.panelOpenScreen)
                     }
@@ -96,7 +100,7 @@ Item {
                     spacing: Style.marginS
 
                     NLabel {
-                        label: pluginApi?.tr("common.connected") || 'Connected'
+                        label: t("common.connected") || "Connected"
                         Layout.fillWidth: true
                     }
                 }
@@ -136,7 +140,7 @@ Item {
                     spacing: Style.marginS
 
                     NLabel {
-                        label: pluginApi?.tr("common.disconnected") || "Disconnected"
+                        label: t("common.disconnected") || "Disconnected"
                         Layout.fillWidth: true
                     }
                 }
@@ -183,21 +187,21 @@ Item {
                 }
 
                 NText {
-                    text: pluginApi?.tr("panel.emptyTitle") || "No VPN found"
+                    text: t("panel.emptyTitle") || "No VPN found"
                     pointSize: Style.fontSizeL
                     color: Color.mOnSurfaceVariant
                     Layout.alignment: Qt.AlignHCenter
                 }
 
                 NText {
-                    text: pluginApi?.tr("panel.emptyDescription") || "Use Network Manager to add a VPN"
+                    text: t("panel.emptyDescription") || "Use Network Manager to add a VPN"
                     pointSize: Style.fontSizeS
                     color: Color.mOnSurfaceVariant
                     Layout.alignment: Qt.AlignHCenter
                 }
 
                 NButton {
-                    text: pluginApi?.tr("common.refresh") ||"Refresh"
+                    text: t("common.refresh") || "Refresh"
                     icon: "refresh"
                     Layout.alignment: Qt.AlignHCenter
                     onClicked: { 
