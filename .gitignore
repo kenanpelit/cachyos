@@ -30,6 +30,8 @@ modules/dms/dotfiles/DankMaterialShell/plugins/sathiAi
 modules/dms/dotfiles/DankMaterialShell/settings.json
 modules/dms/dotfiles/DankMaterialShell/plugin_settings.json
 modules/noctalia/dotfiles/noctalia/plugins/assistant-panel/settings.json
+modules/noctalia/dotfiles/noctalia/plugins/notes-scratchpad/settings.json
+modules/noctalia/dotfiles/noctalia/plugins/simple-notes/settings.json
 modules/noctalia/dotfiles/noctalia/plugins/todo/settings.json
 modules/noctalia/dotfiles/noctalia/settings.json
 modules/dms/dotfiles/DankMaterialShell/plugins/dankBitwarden/
