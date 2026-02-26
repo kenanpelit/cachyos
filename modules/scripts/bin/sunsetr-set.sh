@@ -32,13 +32,14 @@ Usage:
 
 Options:
   --apply                 Apply profile immediately after preset write
-  --lat <value>           Latitude override (default: $DEFAULT_LATITUDE)
-  --lon <value>           Longitude override (default: $DEFAULT_LONGITUDE)
+  --lat <value>           Latitude override (default: preset value)
+  --lon <value>           Longitude override (default: preset value)
   --no-notify             Disable desktop notifications
   -h, --help              Show help
 
 Presets:
-  day, night, warm, dim, focus, best, cinema, dms
+  Values are read dynamically from:
+  $CONFIG_ROOT/presets/*/sunsetr.toml
 
 Examples:
   $SCRIPT_NAME night
@@ -81,24 +82,90 @@ ensure_runtime_dir() {
 }
 
 is_preset() {
-  case "${1,,}" in
-  day | night | warm | dim | focus | best | cinema | dms) return 0 ;;
-  *) return 1 ;;
-  esac
+  local preset="${1,,}"
+  [[ -f "$CONFIG_ROOT/presets/$preset/sunsetr.toml" ]]
+}
+
+toml_get_value() {
+  local cfg_file="$1"
+  local key="$2"
+
+  awk -v wanted="$key" '
+    $0 ~ "^[[:space:]]*" wanted "[[:space:]]*=" {
+      sub(/^[^=]*=[[:space:]]*/, "", $0)
+      sub(/[[:space:]]*#.*/, "", $0)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
+      gsub(/^"|"$/, "", $0)
+      print $0
+      exit
+    }
+  ' "$cfg_file"
+}
+
+print_preset_line() {
+  local preset="$1"
+  local cfg_file="$CONFIG_ROOT/presets/$preset/sunsetr.toml"
+  local day_temp night_temp day_gamma night_gamma
+
+  if [[ ! -f "$cfg_file" ]]; then
+    printf '  %-14s (missing: sunsetr.toml)\n' "$preset"
+    return
+  fi
+
+  day_temp="$(toml_get_value "$cfg_file" day_temp)"
+  night_temp="$(toml_get_value "$cfg_file" night_temp)"
+  day_gamma="$(toml_get_value "$cfg_file" day_gamma)"
+  night_gamma="$(toml_get_value "$cfg_file" night_gamma)"
+
+  if [[ -z "$day_temp" || -z "$night_temp" || -z "$day_gamma" || -z "$night_gamma" ]]; then
+    printf '  %-14s (invalid preset values)\n' "$preset"
+    return
+  fi
+
+  printf '  %-14s (%s/%sK, %s/%s)\n' "$preset" "$day_temp" "$night_temp" "$day_gamma" "$night_gamma"
 }
 
 list_presets() {
-  cat <<'EOF'
-Presetler:
-  day     (5000/4200K, 100/96)
-  night   (3900/3000K, 92/82)
-  warm    (4200/3200K, 97/88)
-  dim     (3400/2800K, 85/72)
-  focus   (5200/4300K, 100/94)
-  best    (3500/3300K, 90/85)
-  cinema  (3900/2600K, 92/78)
-  dms     (3000/2500K, 100/100)
-EOF
+  local preset_root="$CONFIG_ROOT/presets"
+  local preset
+  local -a detected=()
+  local -a preferred=(day night warm dim focus best cinema dms)
+  local -A seen=()
+
+  echo "Presetler:"
+
+  if [[ ! -d "$preset_root" ]]; then
+    echo "  (preset dizini yok: $preset_root)"
+    return 0
+  fi
+
+  while IFS= read -r -d '' dir; do
+    detected+=("$(basename "$dir")")
+  done < <(find "$preset_root" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+
+  if [[ "${#detected[@]}" -eq 0 ]]; then
+    echo "  (preset bulunamadı)"
+    return 0
+  fi
+
+  for preset in "${preferred[@]}"; do
+    local found=0
+    local candidate
+    for candidate in "${detected[@]}"; do
+      if [[ "$candidate" == "$preset" ]]; then
+        print_preset_line "$preset"
+        seen["$preset"]=1
+        found=1
+        break
+      fi
+    done
+    [[ "$found" -eq 1 ]] || true
+  done
+
+  for preset in "${detected[@]}"; do
+    [[ -n "${seen[$preset]:-}" ]] && continue
+    print_preset_line "$preset"
+  done
 }
 
 validate_profile() {
@@ -133,41 +200,35 @@ apply_preset() {
   local latitude="$3"
   local longitude="$4"
   local day_temp night_temp day_gamma night_gamma
+  local preset_cfg_file
   local target="default"
 
   if [[ "$profile" != "$DEFAULT_PROFILE" ]]; then
     target="$profile"
   fi
 
-  case "$preset" in
-  day)
-    day_temp=5000; night_temp=4200; day_gamma=100; night_gamma=96
-    ;;
-  night)
-    day_temp=3900; night_temp=3000; day_gamma=92; night_gamma=82
-    ;;
-  warm)
-    day_temp=4200; night_temp=3200; day_gamma=97; night_gamma=88
-    ;;
-  dim)
-    day_temp=3400; night_temp=2800; day_gamma=85; night_gamma=72
-    ;;
-  focus)
-    day_temp=5200; night_temp=4300; day_gamma=100; night_gamma=94
-    ;;
-  best)
-    day_temp=3500; night_temp=3300; day_gamma=90; night_gamma=85
-    ;;
-  cinema)
-    day_temp=3900; night_temp=2600; day_gamma=92; night_gamma=78
-    ;;
-  dms)
-    day_temp=3000; night_temp=2500; day_gamma=100; night_gamma=100
-    ;;
-  *)
-    die "unknown preset: $preset"
-    ;;
-  esac
+  preset_cfg_file="$CONFIG_ROOT/presets/$preset/sunsetr.toml"
+  [[ -f "$preset_cfg_file" ]] || die "preset not found: $preset ($preset_cfg_file)"
+
+  day_temp="$(toml_get_value "$preset_cfg_file" day_temp)"
+  night_temp="$(toml_get_value "$preset_cfg_file" night_temp)"
+  day_gamma="$(toml_get_value "$preset_cfg_file" day_gamma)"
+  night_gamma="$(toml_get_value "$preset_cfg_file" night_gamma)"
+
+  [[ -n "$day_temp" ]] || die "preset '$preset' missing: day_temp"
+  [[ -n "$night_temp" ]] || die "preset '$preset' missing: night_temp"
+  [[ -n "$day_gamma" ]] || die "preset '$preset' missing: day_gamma"
+  [[ -n "$night_gamma" ]] || die "preset '$preset' missing: night_gamma"
+
+  if [[ -z "$latitude" ]]; then
+    latitude="$(toml_get_value "$preset_cfg_file" latitude)"
+  fi
+  if [[ -z "$longitude" ]]; then
+    longitude="$(toml_get_value "$preset_cfg_file" longitude)"
+  fi
+
+  [[ -n "$latitude" ]] || latitude="$DEFAULT_LATITUDE"
+  [[ -n "$longitude" ]] || longitude="$DEFAULT_LONGITUDE"
 
   # Force explicit target to avoid interactive prompt based on active preset.
   sunsetr --config "$CONFIG_ROOT" set --target "$target" \
@@ -221,8 +282,8 @@ main() {
   require_cmd sunsetr
   ensure_runtime_dir
 
-  local latitude="$DEFAULT_LATITUDE"
-  local longitude="$DEFAULT_LONGITUDE"
+  local latitude=""
+  local longitude=""
   local args=()
 
   while [[ $# -gt 0 ]]; do
