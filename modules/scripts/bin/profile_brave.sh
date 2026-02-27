@@ -370,14 +370,46 @@ resolve_profile_source() {
 	local profile_name="$1"
 	local local_state_path=""
 	local profile_key=""
+	local -a candidates=()
+	local candidate=""
+	local preferred_local_state="${ISOLATED_ROOT}/${profile_name}/Local State"
+	local kenp_local_state="${ISOLATED_ROOT}/Kenp/Local State"
+	local default_local_state="$LOCAL_STATE_PATH"
 
-	while IFS= read -r local_state_path; do
-		[[ -f "$local_state_path" ]] || continue
-		if profile_key=$(profile_key_from_state "$profile_name" "$local_state_path"); then
+	add_candidate_unique() {
+		local path="$1"
+		local existing=""
+		[[ -f "$path" ]] || return 0
+		for existing in "${candidates[@]}"; do
+			[[ "$existing" == "$path" ]] && return 0
+		done
+		candidates+=("$path")
+	}
+
+	# Priority:
+	# 1) same-profile isolated Local State (most deterministic)
+	# 2) default Brave Local State
+	# 3) Kenp isolated Local State as canonical donor
+	# 4) all other isolated Local State files (fallback)
+	add_candidate_unique "$preferred_local_state"
+	add_candidate_unique "$default_local_state"
+	if [[ "${profile_name,,}" != "kenp" ]]; then
+		add_candidate_unique "$kenp_local_state"
+	fi
+
+	if [[ -d "$ISOLATED_ROOT" ]]; then
+		while IFS= read -r local_state_path; do
+			add_candidate_unique "$local_state_path"
+		done < <(find "$ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort)
+	fi
+
+	for candidate in "${candidates[@]}"; do
+		if profile_key=$(profile_key_from_state "$profile_name" "$candidate"); then
+			local_state_path="$candidate"
 			printf '%s\t%s\n' "$local_state_path" "$profile_key"
 			return 0
 		fi
-	done < <(iter_local_state_files)
+	done
 
 	return 1
 }
