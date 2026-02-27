@@ -54,12 +54,13 @@ find_running_pids() {
 dir_bytes() {
   local target="$1"
 
-  # Follow symlinks so reported size matches real storage usage.
-  if du -sbL "$target" >/dev/null 2>&1; then
-    du -sbL "$target" | awk '{print $1}'
+  # BRAVE_HOME is resolved to a real path earlier, so we do not need -L here.
+  # Avoids noisy errors from broken in-tree singleton symlinks.
+  if du -sb -- "$target" >/dev/null 2>&1; then
+    du -sb -- "$target" 2>/dev/null | awk '{print $1}'
   else
     # Fallback for systems where -b is unavailable.
-    du -skL "$target" | awk '{print $1 * 1024}'
+    du -sk -- "$target" 2>/dev/null | awk '{print $1 * 1024}'
   fi
 }
 
