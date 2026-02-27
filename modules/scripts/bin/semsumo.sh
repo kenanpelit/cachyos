@@ -103,6 +103,7 @@ declare -A TERMINALS=(
 # Browser Applications - Brave - UPDATED
 declare -A BRAVE_BROWSERS=(
   ["brave-kenp"]="profile_brave|Kenp --separate --restore-last-session|1|secure|2|false"
+  ["brave-nil"]="profile_brave|Nil --separate --restore-last-session|1|secure|2|false"
   ["brave-ai"]="profile_brave|Ai --separate --restore-last-session|3|secure|2|false"
   ["brave-compecta"]="profile_brave|CompecTA --separate --restore-last-session|4|secure|2|false"
   ["brave-whats"]="profile_brave|Whats --separate --restore-last-session|9|secure|1|false"
@@ -420,6 +421,10 @@ is_app_running() {
         ;;
       brave-kenp)
         jq -e '.[] | select((.class // "") == "Kenp" or (.initialTitle // "") == "Kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      brave-nil)
+        jq -e '.[] | select((.class // "") == "Nil" or (.initialTitle // "") == "Nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       brave-ai)

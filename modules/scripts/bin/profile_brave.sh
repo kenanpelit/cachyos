@@ -552,6 +552,17 @@ validate_profile() {
 		return 1
 	fi
 
+	# Fallback: case-insensitive profile name match (Nil vs nil).
+	if [[ -z "$profile_key" ]]; then
+		if ! profile_key=$(jq -r --arg name "$profile_name" \
+			'.profile.info_cache | to_entries | .[] |
+			select((.value.name | ascii_downcase) == ($name | ascii_downcase)) | .key' \
+			"$local_state_path" 2>/dev/null | head -n1); then
+			log "ERROR" "Profil bilgisi okunamadı"
+			return 1
+		fi
+	fi
+
 	if [[ -z "$profile_key" ]]; then
 		log "ERROR" "Profil bulunamadı: $profile_name"
 		list_profiles
