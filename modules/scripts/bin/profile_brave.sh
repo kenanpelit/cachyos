@@ -76,10 +76,12 @@ log() {
 	local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
 	# Log dizinini oluştur
-	mkdir -p "$(dirname "$LOG_FILE")"
+	mkdir -p "$(dirname "$LOG_FILE")" >/dev/null 2>&1 || true
 
 	# Log dosyasına yaz
-	echo "[$timestamp] [$level] $message" >>"$LOG_FILE"
+	if [[ -w "$LOG_FILE" || ( ! -e "$LOG_FILE" && -w "$(dirname "$LOG_FILE")" ) ]]; then
+		echo "[$timestamp] [$level] $message" >>"$LOG_FILE" || true
+	fi
 
 	# Terminale de yazdır
 	case "$level" in
@@ -325,27 +327,87 @@ check_dependencies() {
 	}
 
 # Profil listesi (geliştirilmiş)
+iter_local_state_files() {
+	if [[ -f "$LOCAL_STATE_PATH" ]]; then
+		printf '%s\n' "$LOCAL_STATE_PATH"
+	fi
+
+	if [[ -d "$ISOLATED_ROOT" ]]; then
+		find "$ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort
+	fi
+}
+
+profile_key_from_state() {
+	local profile_name="$1"
+	local local_state_path="$2"
+	local profile_key=""
+
+	# Exact match
+	if profile_key=$(jq -r --arg name "$profile_name" \
+		'.profile.info_cache | to_entries | .[] |
+		select(.value.name == $name) | .key' "$local_state_path" 2>/dev/null | head -n1); then
+		[[ -n "$profile_key" ]] && {
+			printf '%s\n' "$profile_key"
+			return 0
+		}
+	fi
+
+	# Case-insensitive fallback
+	if profile_key=$(jq -r --arg name "$profile_name" \
+		'.profile.info_cache | to_entries | .[] |
+		select((.value.name | ascii_downcase) == ($name | ascii_downcase)) | .key' \
+		"$local_state_path" 2>/dev/null | head -n1); then
+		[[ -n "$profile_key" ]] && {
+			printf '%s\n' "$profile_key"
+			return 0
+		}
+	fi
+
+	return 1
+}
+
+resolve_profile_source() {
+	local profile_name="$1"
+	local local_state_path=""
+	local profile_key=""
+
+	while IFS= read -r local_state_path; do
+		[[ -f "$local_state_path" ]] || continue
+		if profile_key=$(profile_key_from_state "$profile_name" "$local_state_path"); then
+			printf '%s\t%s\n' "$local_state_path" "$profile_key"
+			return 0
+		fi
+	done < <(iter_local_state_files)
+
+	return 1
+}
+
 list_profiles() {
 	echo -e "${BOLD}Mevcut profiller:${RESET}"
 
-	if [[ ! -f "$LOCAL_STATE_PATH" ]]; then
-		log "ERROR" "Brave profil bilgisi bulunamadı: $LOCAL_STATE_PATH"
+	local local_state_path=""
+	local -a rows=()
+	local row=""
+	local has_any=0
+
+	while IFS= read -r local_state_path; do
+		[[ -f "$local_state_path" ]] || continue
+		has_any=1
+		while IFS= read -r row; do
+			[[ -n "$row" ]] || continue
+			rows+=("$row")
+		done < <(jq -r '.profile.info_cache | to_entries[]? | "  \(.key): \(.value.name)"' "$local_state_path" 2>/dev/null || true)
+	done < <(iter_local_state_files)
+
+	if [[ "$has_any" -eq 0 ]]; then
+		log "ERROR" "Brave profil bilgisi bulunamadı (Local State yok)"
 		return 1
 	fi
 
-	# Profilleri listele ve formatla
-	local profiles
-	if ! profiles=$(jq -r '.profile.info_cache | to_entries | 
-		map("  " + .key + ": " + .value.name) | 
-		.[]' "$LOCAL_STATE_PATH" 2>/dev/null | sort); then
-		log "ERROR" "Brave profil bilgisi okunamadı"
-		return 1
-	fi
-
-	if [[ -z "$profiles" ]]; then
+	if [[ "${#rows[@]}" -eq 0 ]]; then
 		echo -e "${YELLOW}  Henüz profil oluşturulmamış${RESET}"
 	else
-		echo "$profiles"
+		printf '%s\n' "${rows[@]}" | awk '!seen[$0]++' | sort -f
 	fi
 
 	echo
@@ -539,28 +601,14 @@ validate_profile() {
 	local profile_name="$1"
 	local local_state_path="${2:-$LOCAL_STATE_PATH}"
 
-	if [[ ! -f "$local_state_path" ]]; then
+	if [[ -z "$local_state_path" || ! -f "$local_state_path" ]]; then
 		log "ERROR" "Brave profil dosyası bulunamadı: $local_state_path"
 		return 1
 	fi
 
-	local profile_key
-	if ! profile_key=$(jq -r --arg name "$profile_name" \
-		'.profile.info_cache | to_entries | .[] | 
-		select(.value.name == $name) | .key' "$local_state_path" 2>/dev/null); then
-		log "ERROR" "Profil bilgisi okunamadı"
-		return 1
-	fi
-
-	# Fallback: case-insensitive profile name match (Nil vs nil).
-	if [[ -z "$profile_key" ]]; then
-		if ! profile_key=$(jq -r --arg name "$profile_name" \
-			'.profile.info_cache | to_entries | .[] |
-			select((.value.name | ascii_downcase) == ($name | ascii_downcase)) | .key' \
-			"$local_state_path" 2>/dev/null | head -n1); then
-			log "ERROR" "Profil bilgisi okunamadı"
-			return 1
-		fi
+	local profile_key=""
+	if ! profile_key=$(profile_key_from_state "$profile_name" "$local_state_path"); then
+		profile_key=""
 	fi
 
 	if [[ -z "$profile_key" ]]; then
@@ -746,21 +794,19 @@ validate_profile() {
 		log "INFO" "Proxy profili seçildi, proxy otomatik etkinleştirildi"
 	fi
 
-	# Profili doğrula
-	local profile_key
-	# Profil kaynağı: önce profile'ın kendi isolated user-data-dir'ini dene (varsa),
-	# yoksa Brave'in varsayılan user-data-dir'ine düş.
-	local profile_source_dir="$BRAVE_PROFILES_DIR"
-	local profile_local_state="$LOCAL_STATE_PATH"
-	local isolated_profile_dir="${ISOLATED_ROOT}/${profile_name}"
-	if [[ -f "${isolated_profile_dir}/Local State" ]]; then
-		profile_source_dir="$isolated_profile_dir"
-		profile_local_state="${isolated_profile_dir}/Local State"
-	fi
-
-	if ! profile_key=$(validate_profile "$profile_name" "$profile_local_state"); then
+	# Profili doğrula ve kaynağını çöz (default + isolated Local State'lerde ara)
+	local profile_key=""
+	local profile_source_dir=""
+	local profile_local_state=""
+	local resolved=""
+	if ! resolved="$(resolve_profile_source "$profile_name")"; then
+		log "ERROR" "Profil bulunamadı: $profile_name"
+		list_profiles
 		exit 1
 	fi
+	profile_local_state="${resolved%%$'\t'*}"
+	profile_key="${resolved#*$'\t'}"
+	profile_source_dir="$(dirname "$profile_local_state")"
 
 	# Profil örneklerini kapat
 	if $kill_profile; then
