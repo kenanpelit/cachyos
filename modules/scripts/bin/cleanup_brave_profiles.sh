@@ -11,6 +11,7 @@ set -euo pipefail
 # --------------------------------------------------------------------
 
 BRAVE_HOME="${BRAVE_HOME:-$HOME/.brave}"
+BRAVE_HOME_INPUT=""
 AGGRESSIVE=0
 FORCE_CLOSE=0
 ASSUME_YES=0
@@ -50,6 +51,18 @@ find_running_pids() {
   '
 }
 
+dir_bytes() {
+  local target="$1"
+
+  # Follow symlinks so reported size matches real storage usage.
+  if du -sbL "$target" >/dev/null 2>&1; then
+    du -sbL "$target" | awk '{print $1}'
+  else
+    # Fallback for systems where -b is unavailable.
+    du -skL "$target" | awk '{print $1 * 1024}'
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --brave-home)
@@ -81,6 +94,14 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+BRAVE_HOME_INPUT="$BRAVE_HOME"
+if [[ -L "$BRAVE_HOME" ]]; then
+  resolved="$(readlink -f "$BRAVE_HOME" 2>/dev/null || true)"
+  if [[ -n "$resolved" ]]; then
+    BRAVE_HOME="$resolved"
+  fi
+fi
 
 ISOLATED_DIR="$BRAVE_HOME/isolated"
 
@@ -125,7 +146,7 @@ if [[ "$ASSUME_YES" -ne 1 ]]; then
   esac
 fi
 
-BEFORE_BYTES="$(du -sb "$BRAVE_HOME" | awk '{print $1}')"
+BEFORE_BYTES="$(dir_bytes "$BRAVE_HOME")"
 
 # Remove backup profile snapshots.
 find "$ISOLATED_DIR" -maxdepth 2 -mindepth 2 -type d -name '*.bak-*' -exec rm -rf {} +
@@ -142,13 +163,16 @@ if [[ "$AGGRESSIVE" -eq 1 ]]; then
   find "$ISOLATED_DIR" -type d -name 'Service Worker' -exec rm -rf {} +
 fi
 
-AFTER_BYTES="$(du -sb "$BRAVE_HOME" | awk '{print $1}')"
+AFTER_BYTES="$(dir_bytes "$BRAVE_HOME")"
 FREED_BYTES=$((BEFORE_BYTES - AFTER_BYTES))
 if [[ "$FREED_BYTES" -lt 0 ]]; then
   FREED_BYTES=0
 fi
 
 echo "Target: $BRAVE_HOME"
+if [[ "$BRAVE_HOME_INPUT" != "$BRAVE_HOME" ]]; then
+  echo "Resolved from: $BRAVE_HOME_INPUT"
+fi
 echo "Before: $(to_human "$BEFORE_BYTES")"
 echo "After:  $(to_human "$AFTER_BYTES")"
 echo "Freed:  $(to_human "$FREED_BYTES")"
