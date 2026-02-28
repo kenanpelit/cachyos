@@ -74,6 +74,8 @@ RESOLVECTL_CURRENT=''
 RESOLVECTL_STATUS_RAW=''
 RESOLVECTL_DNS_LINKS=''
 RESOLVECTL_LINK_DNS=''
+RESOLVECTL_PROVIDER=''
+RESOLVECTL_LINK_PROVIDER=''
 
 dig_probe() {
 	# Sets globals: DIG_STATUS, DIG_VALUE, DIG_RAW
@@ -173,6 +175,8 @@ collect_resolvectl_state() {
 	RESOLVECTL_STATUS_RAW=''
 	RESOLVECTL_DNS_LINKS=''
 	RESOLVECTL_LINK_DNS=''
+	RESOLVECTL_PROVIDER=''
+	RESOLVECTL_LINK_PROVIDER=''
 
 	have resolvectl || return 0
 
@@ -244,6 +248,9 @@ collect_resolvectl_state() {
 		)"
 	fi
 
+	RESOLVECTL_PROVIDER="$(detect_provider_label "${RESOLVECTL_CURRENT} ${RESOLVECTL_SERVERS}")"
+	RESOLVECTL_LINK_PROVIDER="$(detect_provider_label "$RESOLVECTL_LINK_DNS")"
+
 	RESOLVECTL_OK=1
 }
 
@@ -267,6 +274,66 @@ is_blocked_value() {
 	0.0.0.0 | 127.0.0.1 | :: | ::1) return 0 ;;
 	*) return 1 ;;
 	esac
+}
+
+is_ip_token() {
+	local v="${1:-}"
+	[[ "$v" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ || "$v" =~ ^[0-9A-Fa-f:]+$ ]]
+}
+
+extract_ip_tokens() {
+	local text="${1:-}"
+	[[ -n "$text" ]] || return 0
+
+	local token
+	for token in $text; do
+		token="${token%,}"
+		token="${token#\[}"
+		token="${token%\]}"
+		if ! is_ip_token "$token"; then
+			continue
+		fi
+		if is_loopback_resolver "$token"; then
+			continue
+		fi
+		printf '%s\n' "$token"
+	done | awk '!seen[$0]++'
+}
+
+known_dns_provider() {
+	local joined
+	joined=" $(join_by ' ' "$@") "
+
+	case "$joined" in
+	*" 8.8.8.8 "*|*" 8.8.4.4 "*) echo "Google" ;;
+	*" 1.1.1.1 "*|*" 1.0.0.1 "*) echo "Cloudflare" ;;
+	*" 208.67.222.222 "*|*" 208.67.220.220 "*) echo "OpenDNS" ;;
+	*" 94.140.14.14 "*|*" 94.140.15.15 "*) echo "AdGuard" ;;
+	*" 9.9.9.9 "*|*" 149.112.112.112 "*) echo "Quad9" ;;
+	*) return 1 ;;
+	esac
+}
+
+detect_provider_label() {
+	local text="${1:-}"
+	local ips=()
+	local ip
+
+	while IFS= read -r ip; do
+		[[ -n "$ip" ]] || continue
+		ips+=("$ip")
+	done < <(extract_ip_tokens "$text")
+
+	if [[ ${#ips[@]} -eq 0 ]]; then
+		return 0
+	fi
+
+	local provider=''
+	if provider="$(known_dns_provider "${ips[@]}")"; then
+		printf '%s (%s)\n' "$provider" "$(join_by ', ' "${ips[@]}")"
+	else
+		printf 'Custom (%s)\n' "$(join_by ', ' "${ips[@]}")"
+	fi
 }
 
 classify_blocking() {
@@ -388,6 +455,8 @@ show_dns_status() {
 		[[ -n "$RESOLVECTL_CURRENT" ]] && print_kv "current dns" "$RESOLVECTL_CURRENT"
 		[[ -n "$RESOLVECTL_DNS_LINKS" ]] && print_kv "dns link" "$RESOLVECTL_DNS_LINKS"
 		[[ -n "$RESOLVECTL_LINK_DNS" ]] && print_kv "link dns" "$RESOLVECTL_LINK_DNS"
+		[[ -n "$RESOLVECTL_LINK_PROVIDER" ]] && print_kv "link provider" "$RESOLVECTL_LINK_PROVIDER"
+		[[ -n "$RESOLVECTL_PROVIDER" ]] && print_kv "provider" "$RESOLVECTL_PROVIDER"
 	fi
 
 	if have resolvconf; then
