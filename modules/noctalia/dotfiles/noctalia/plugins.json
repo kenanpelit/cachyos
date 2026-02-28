@@ -16,6 +16,14 @@
             "enabled": true,
             "sourceUrl": "https://github.com/kenanpelit/ndns"
         },
+        "62bf38:notes": {
+            "enabled": true,
+            "sourceUrl": "https://github.com/kenanpelit/ndns"
+        },
+        "62bf38:npodman": {
+            "enabled": true,
+            "sourceUrl": "https://github.com/kenanpelit/ndns"
+        },
         "assistant-panel": {
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
@@ -48,10 +56,6 @@
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
         },
-        "notes-scratchpad": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
         "polkit-agent": {
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
@@ -68,15 +72,7 @@
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
         },
-        "simple-notes": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
         "timer": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "todo": {
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
         },
