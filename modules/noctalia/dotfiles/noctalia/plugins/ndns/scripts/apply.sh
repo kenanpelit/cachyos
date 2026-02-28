@@ -6,9 +6,19 @@ action="${2:-}"
 dns_value="${3:-}"
 
 resolve_osc() {
+  local home_bin=""
+
   if [[ -x "$osc_input" ]]; then
     OSC_BIN="$osc_input"
     return 0
+  fi
+
+  if [[ "$osc_input" != */* && -n "${HOME:-}" ]]; then
+    home_bin="${HOME}/.local/bin/${osc_input}"
+    if [[ -x "$home_bin" ]]; then
+      OSC_BIN="$home_bin"
+      return 0
+    fi
   fi
 
   OSC_BIN="$(command -v "$osc_input" 2>/dev/null || true)"

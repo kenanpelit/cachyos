@@ -194,7 +194,7 @@ _osc_shell_static_methods() {
       reply=(takeScreenshot)
       ;;
     plugin:ndns)
-      reply=(openPanel closePanel togglePanel openSettings toggle mullvad blocky isp defaultDns repair set provider)
+      reply=(openPanel closePanel togglePanel openSettings toggle mullvad blocky isp default defaultDns google cloudflare opendns adguard quad9 repair set provider)
       ;;
     spotlight)
       reply=(toggle openQuery)

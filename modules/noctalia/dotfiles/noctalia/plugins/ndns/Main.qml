@@ -370,6 +370,26 @@ Item {
             root.runAction("default");
         }
 
+        function google() {
+            root.runAction("provider:google");
+        }
+
+        function cloudflare() {
+            root.runAction("provider:cloudflare");
+        }
+
+        function opendns() {
+            root.runAction("provider:opendns");
+        }
+
+        function adguard() {
+            root.runAction("provider:adguard");
+        }
+
+        function quad9() {
+            root.runAction("provider:quad9");
+        }
+
         function repair() {
             root.runAction("repair");
         }

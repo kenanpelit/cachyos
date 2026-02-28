@@ -578,6 +578,9 @@ route_noctalia_ipc() {
   local -a args=("$@")
 
   case "${target}:${method}" in
+    plugin:ndns:default)
+      method="defaultDns"
+      ;;
     dash:toggle)
       if [[ "${args[0]:-}" == "overview" ]]; then
         target="launcher"; method="windows"; args=()
