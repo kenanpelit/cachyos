@@ -31,6 +31,14 @@ get_nameservers() {
 	awk '$1=="nameserver"{print $2}' /etc/resolv.conf 2>/dev/null || true
 }
 
+is_loopback_resolver() {
+	local ns="${1:-}"
+	case "$ns" in
+	127.* | ::1 | localhost) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+
 is_active() {
 	local unit="$1"
 	have systemctl || return 1
@@ -55,6 +63,17 @@ join_by() {
 DIG_STATUS=''
 DIG_VALUE=''
 DIG_RAW=''
+DEFAULT_STATUS=''
+DEFAULT_VALUE=''
+DEFAULT_RAW=''
+RESOLVECTL_OK=0
+RESOLVECTL_ERROR=''
+RESOLVECTL_DNS_RAW=''
+RESOLVECTL_SERVERS=''
+RESOLVECTL_CURRENT=''
+RESOLVECTL_STATUS_RAW=''
+RESOLVECTL_DNS_LINKS=''
+RESOLVECTL_LINK_DNS=''
 
 dig_probe() {
 	# Sets globals: DIG_STATUS, DIG_VALUE, DIG_RAW
@@ -113,10 +132,126 @@ dig_probe() {
 	DIG_STATUS='noanswer'
 }
 
+default_probe() {
+	# Prefer libc resolver path here so local loopback stubs do not hit dig/libuv bugs.
+	DEFAULT_STATUS='error'
+	DEFAULT_VALUE=''
+	DEFAULT_RAW=''
+
+	if have getent; then
+		local raw rc
+		set +e
+		raw="$(getent ahostsv4 example.com 2>&1)"
+		rc=$?
+		set -e
+
+		DEFAULT_RAW="$raw"
+		if [[ "$rc" -eq 0 ]]; then
+			DEFAULT_STATUS='ok'
+			DEFAULT_VALUE="$(printf '%s\n' "$raw" | awk 'NR==1{print $1; exit}')"
+			return 0
+		fi
+
+		if [[ -z "$raw" ]]; then
+			DEFAULT_STATUS='noanswer'
+			return 0
+		fi
+	fi
+
+	dig_probe "" example.com A
+	DEFAULT_STATUS="$DIG_STATUS"
+	DEFAULT_VALUE="$DIG_VALUE"
+	DEFAULT_RAW="$DIG_RAW"
+}
+
+collect_resolvectl_state() {
+	RESOLVECTL_OK=0
+	RESOLVECTL_ERROR=''
+	RESOLVECTL_DNS_RAW=''
+	RESOLVECTL_SERVERS=''
+	RESOLVECTL_CURRENT=''
+	RESOLVECTL_STATUS_RAW=''
+	RESOLVECTL_DNS_LINKS=''
+	RESOLVECTL_LINK_DNS=''
+
+	have resolvectl || return 0
+
+	local dns_raw dns_rc
+	set +e
+	dns_raw="$(resolvectl dns 2>&1)"
+	dns_rc=$?
+	set -e
+
+	if [[ "$dns_rc" -ne 0 ]]; then
+		RESOLVECTL_ERROR="$dns_raw"
+		return 0
+	fi
+
+	RESOLVECTL_DNS_RAW="$dns_raw"
+	RESOLVECTL_SERVERS="$(
+		printf '%s\n' "$dns_raw" |
+			sed -E 's/^Link [0-9]+ \([^)]*\):[[:space:]]*//' |
+			tr '\n' ' ' |
+			sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//'
+	)"
+
+	local status_raw status_rc
+	set +e
+	status_raw="$(resolvectl status 2>&1)"
+	status_rc=$?
+	set -e
+
+	if [[ "$status_rc" -eq 0 ]]; then
+		RESOLVECTL_STATUS_RAW="$status_raw"
+		RESOLVECTL_CURRENT="$(
+			printf '%s\n' "$status_raw" |
+				awk -F': ' '/Current DNS Server:/ {print $2}' |
+				paste -sd', ' -
+		)"
+		RESOLVECTL_DNS_LINKS="$(
+			printf '%s\n' "$status_raw" |
+				awk '
+					match($0, /^Link [0-9]+ \(([^)]+)\)/, m) { cur = m[1]; next }
+					/^[[:space:]]*Current Scopes:/ {
+						if (cur != "" && $0 ~ /DNS/) {
+							if (seen[cur] != 1) {
+								seen[cur] = 1
+								if (out == "") out = cur
+								else out = out ", " cur
+							}
+						}
+					}
+					END { print out }
+				'
+		)"
+		RESOLVECTL_LINK_DNS="$(
+			printf '%s\n' "$status_raw" |
+				awk '
+					match($0, /^Link [0-9]+ \(([^)]+)\)/, m) { cur = m[1]; next }
+					/^[[:space:]]*Current DNS Server:/ {
+						if (cur != "") {
+							val = $0
+							sub(/^[[:space:]]*Current DNS Server:[[:space:]]*/, "", val)
+							if (seen[cur] != 1) {
+								seen[cur] = 1
+								if (out == "") out = cur " -> " val
+								else out = out ", " cur " -> " val
+							}
+						}
+					}
+					END { print out }
+				'
+		)"
+	fi
+
+	RESOLVECTL_OK=1
+}
+
 fmt_state() {
 	local s="$1"
 	case "$s" in
 	ok) echo "${GRN}OK${RST}" ;;
+	localstub) echo "${YLW}LOCAL_STUB${RST}" ;;
 	blocked) echo "${YLW}BLOCKED${RST}" ;;
 	noanswer) echo "${YLW}NOANSWER${RST}" ;;
 	refused) echo "${RED}REFUSED${RST}" ;;
@@ -195,9 +330,11 @@ show_dns_status() {
 	local mullvad_active=0
 	local mullvad_state=''
 	local mullvad_connected=0
+	local resolved_active=0
 
 	if is_active blocky.service; then blocky_active=1; fi
 	if is_active mullvad-daemon.service; then mullvad_active=1; fi
+	if is_active systemd-resolved.service; then resolved_active=1; fi
 	if have mullvad; then
 		mullvad_state="$(mullvad status 2>/dev/null | head -n 1 || true)"
 		if [[ "$mullvad_state" == Connected* ]]; then
@@ -205,13 +342,32 @@ show_dns_status() {
 		fi
 	fi
 
-	local mode='system'
+	local ns_list=()
+	while IFS= read -r ns; do
+		[[ -n "$ns" ]] || continue
+		ns_list+=("$ns")
+	done < <(get_nameservers)
+
+	local has_loopback=0
+	local ns
+	for ns in "${ns_list[@]:-}"; do
+		if is_loopback_resolver "$ns"; then
+			has_loopback=1
+			break
+		fi
+	done
+
+	local mode='default (isp/custom)'
 	if [[ "$blocky_active" -eq 1 && "$mullvad_connected" -eq 1 ]]; then
 		mode='conflict (blocky+mullvad)'
-	elif [[ "$blocky_active" -eq 1 ]]; then
-		mode='blocky'
 	elif [[ "$mullvad_connected" -eq 1 ]]; then
-		mode='mullvad'
+		mode='mullvad vpn'
+	elif [[ "$blocky_active" -eq 1 ]]; then
+		mode='blocky fallback'
+	elif [[ "$has_loopback" -eq 1 && "$resolved_active" -eq 1 ]]; then
+		mode='systemd-resolved (local stub)'
+	elif [[ "$has_loopback" -eq 1 ]]; then
+		mode='local stub'
 	fi
 
 	hr
@@ -222,15 +378,17 @@ show_dns_status() {
 		print_kv "mullvad" "$mullvad_state"
 	fi
 
-	local ns_list=()
-	while IFS= read -r ns; do
-		[[ -n "$ns" ]] || continue
-		ns_list+=("$ns")
-	done < <(get_nameservers)
-
 	local ns_line
 	ns_line="$(join_by ", " "${ns_list[@]:-}")"
 	print_kv "resolv.conf" "${ns_line:-<no nameserver>}"
+
+	collect_resolvectl_state
+	if [[ "$RESOLVECTL_OK" -eq 1 ]]; then
+		[[ -n "$RESOLVECTL_SERVERS" ]] && print_kv "resolvectl dns" "$RESOLVECTL_SERVERS"
+		[[ -n "$RESOLVECTL_CURRENT" ]] && print_kv "current dns" "$RESOLVECTL_CURRENT"
+		[[ -n "$RESOLVECTL_DNS_LINKS" ]] && print_kv "dns link" "$RESOLVECTL_DNS_LINKS"
+		[[ -n "$RESOLVECTL_LINK_DNS" ]] && print_kv "link dns" "$RESOLVECTL_LINK_DNS"
+	fi
 
 	if have resolvconf; then
 		local sources
@@ -239,12 +397,16 @@ show_dns_status() {
 		print_kv "sources" "$sources"
 	fi
 
+	if [[ "$has_loopback" -eq 1 && "$blocky_active" -eq 0 && "$resolved_active" -eq 0 ]]; then
+		print_kv "warning" "loopback resolvers are configured but no known local DNS service is active"
+	fi
+
 	hr
-	dig_probe "" example.com A
-	if [[ "$DIG_STATUS" == "ok" ]]; then
-		print_kv "default" "$(fmt_state ok) example.com → ${DIG_VALUE}"
+	default_probe
+	if [[ "$DEFAULT_STATUS" == "ok" ]]; then
+		print_kv "default" "$(fmt_state ok) example.com → ${DEFAULT_VALUE}"
 	else
-		print_kv "default" "$(fmt_state "$DIG_STATUS") example.com"
+		print_kv "default" "$(fmt_state "$DEFAULT_STATUS") example.com"
 	fi
 
 	hr
@@ -252,8 +414,20 @@ show_dns_status() {
 	if [[ ${#ns_list[@]} -eq 0 ]]; then
 		echo "${DIM}<no nameserver entries found>${RST}"
 	else
-		local ns
 		for ns in "${ns_list[@]}"; do
+			if is_loopback_resolver "$ns"; then
+				local stub_note='upstream unknown'
+				if [[ "$RESOLVECTL_OK" -eq 1 && -n "$RESOLVECTL_SERVERS" ]]; then
+					stub_note="upstream ${RESOLVECTL_SERVERS}"
+				fi
+				if [[ "$DEFAULT_STATUS" == "ok" ]]; then
+					echo "- ${CYN}${ns}${RST}: $(fmt_state localstub) ${stub_note} | example $(fmt_state ok) ${DEFAULT_VALUE}"
+				else
+					echo "- ${CYN}${ns}${RST}: $(fmt_state localstub) ${stub_note}"
+				fi
+				continue
+			fi
+
 			dig_probe "$ns" example.com A
 			local c_status="$DIG_STATUS"
 			local c_value="$DIG_VALUE"
@@ -286,6 +460,16 @@ show_dns_status() {
 			sed -n '1,60p' /etc/resolv.conf
 		else
 			echo "${DIM}<not readable>${RST}"
+		fi
+
+		if [[ -n "$RESOLVECTL_DNS_RAW" ]]; then
+			hr
+			echo "${CYN}resolvectl dns${RST}"
+			printf '%s\n' "$RESOLVECTL_DNS_RAW"
+		elif [[ -n "$RESOLVECTL_ERROR" ]]; then
+			hr
+			echo "${CYN}resolvectl${RST}"
+			echo "${DIM}${RESOLVECTL_ERROR}${RST}"
 		fi
 	fi
 }
