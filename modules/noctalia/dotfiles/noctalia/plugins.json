@@ -12,7 +12,7 @@
         }
     ],
     "states": {
-        "62bf38:ndns": {
+        "ndns": {
             "enabled": true,
             "sourceUrl": "https://github.com/kenanpelit/ndns"
         },

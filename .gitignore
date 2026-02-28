@@ -34,6 +34,7 @@ modules/noctalia/dotfiles/noctalia/plugins/notes-scratchpad/BarWidget.qml
 modules/noctalia/dotfiles/noctalia/plugins/notes-scratchpad/manifest.json
 modules/noctalia/dotfiles/noctalia/plugins/notes-scratchpad/settings.json
 modules/noctalia/dotfiles/noctalia/plugins/simple-notes/settings.json
+modules/noctalia/dotfiles/noctalia/plugins/ndns/settings.json
 modules/noctalia/dotfiles/noctalia/plugins/todo/settings.json
 modules/noctalia/dotfiles/noctalia/settings.json
 modules/noctalia/dotfiles/noctalia/plugin-backups/

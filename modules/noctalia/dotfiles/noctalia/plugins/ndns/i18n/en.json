@@ -1,0 +1,38 @@
+{
+    "plugin": {
+        "title": "DNS / VPN Switcher",
+        "short_title": "Net"
+    },
+    "status": {
+        "checking": "Checking...",
+        "switching": "Switching...",
+        "unknown": "Unknown",
+        "probing": "Probing network state...",
+        "unavailable": "Unable to read state",
+        "empty": "Empty status response",
+        "invalid_response": "Invalid backend response",
+        "command_failed": "Status command failed",
+        "default": "Default (ISP)",
+        "default_detail": "NetworkManager auto DNS is active",
+        "custom": "Custom ({ip})",
+        "custom_detail": "A custom DNS configuration is active",
+        "provider_detail": "Custom DNS preset active",
+        "blocked": "Blocked",
+        "blocked_detail": "Mullvad device is blocked or revoked",
+        "mullvad_detail": "VPN connected, Blocky stopped",
+        "blocky_detail": "Blocky DNS fallback active",
+        "mixed": "Mixed",
+        "mixed_detail": "VPN and Blocky are active together"
+    },
+    "panel": {
+        "toggle": "Toggle",
+        "repair": "Sync / Repair",
+        "command": "Backend",
+        "default_dns": "Default (ISP)",
+        "presets": "DNS Presets"
+    },
+    "error": {
+        "status_failed": "Status check failed",
+        "apply_failed": "Action failed"
+    }
+}

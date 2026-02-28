@@ -1,0 +1,38 @@
+{
+    "plugin": {
+        "title": "DNS / VPN Değiştirici",
+        "short_title": "Ağ"
+    },
+    "status": {
+        "checking": "Kontrol ediliyor...",
+        "switching": "Değiştiriliyor...",
+        "unknown": "Bilinmiyor",
+        "probing": "Ağ durumu okunuyor...",
+        "unavailable": "Durum okunamadı",
+        "empty": "Boş durum çıktısı",
+        "invalid_response": "Geçersiz backend çıktısı",
+        "command_failed": "Durum komutu başarısız",
+        "default": "Varsayılan (ISS)",
+        "default_detail": "NetworkManager otomatik DNS kullanıyor",
+        "custom": "Özel ({ip})",
+        "custom_detail": "Özel DNS yapılandırması etkin",
+        "provider_detail": "DNS preset etkin",
+        "blocked": "Engelli",
+        "blocked_detail": "Mullvad cihazı engelli veya iptal edilmiş",
+        "mullvad_detail": "VPN bağlı, Blocky kapalı",
+        "blocky_detail": "Blocky yedek DNS etkin",
+        "mixed": "Karışık",
+        "mixed_detail": "VPN ve Blocky aynı anda etkin"
+    },
+    "panel": {
+        "toggle": "Geçiş",
+        "repair": "Eşitle / Onar",
+        "command": "Arka Uç",
+        "default_dns": "Varsayılan (ISS)",
+        "presets": "DNS Presetleri"
+    },
+    "error": {
+        "status_failed": "Durum kontrolü başarısız",
+        "apply_failed": "İşlem başarısız"
+    }
+}
