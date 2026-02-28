@@ -1,0 +1,424 @@
+#compdef osc-shell
+
+typeset -g _OSC_SHELL_QS_CACHE_TS=0
+typeset -g _OSC_SHELL_QS_CACHE_RAW=''
+
+_osc_shell_qs_show() {
+  emulate -L zsh
+
+  (( $+commands[qs] )) || return 1
+
+  if (( EPOCHSECONDS - ${_OSC_SHELL_QS_CACHE_TS:-0} < 3 )) && [[ -n ${_OSC_SHELL_QS_CACHE_RAW:-} ]]; then
+    print -r -- "$_OSC_SHELL_QS_CACHE_RAW"
+    return 0
+  fi
+
+  local out
+  out="$(qs -c noctalia-shell ipc show 2>/dev/null)" || return 1
+  [[ -n "$out" ]] || return 1
+
+  _OSC_SHELL_QS_CACHE_TS=$EPOCHSECONDS
+  _OSC_SHELL_QS_CACHE_RAW="$out"
+  print -r -- "$out"
+}
+
+_osc_shell_qs_targets() {
+  emulate -L zsh
+
+  local out line
+  local -a targets
+
+  out="$(_osc_shell_qs_show)" || return 1
+
+  while IFS= read -r line; do
+    [[ "$line" == target\ * ]] || continue
+    targets+=("${line#target }")
+  done <<< "$out"
+
+  reply=(${(u)targets})
+}
+
+_osc_shell_qs_methods() {
+  emulate -L zsh
+
+  local wanted="$1"
+  local out line current_target=""
+  local -a methods
+
+  out="$(_osc_shell_qs_show)" || return 1
+
+  while IFS= read -r line; do
+    if [[ "$line" == target\ * ]]; then
+      current_target="${line#target }"
+      continue
+    fi
+
+    [[ "$current_target" == "$wanted" ]] || continue
+    [[ "$line" == '  function '* ]] || continue
+
+    line="${line#  function }"
+    line="${line%%(*}"
+    [[ -n "$line" ]] && methods+=("$line")
+  done <<< "$out"
+
+  reply=(${(u)methods})
+}
+
+_osc_shell_plugin_ids() {
+  emulate -L zsh
+
+  local dir="${XDG_CONFIG_HOME:-$HOME/.config}/noctalia/plugins"
+  local d
+  local -a ids
+
+  if [[ -d "$dir" ]]; then
+    for d in "$dir"/*(/N); do
+      [[ -f "$d/manifest.json" ]] || continue
+      ids+=("${d:t}")
+    done
+  fi
+
+  reply=(${(u)ids})
+}
+
+_osc_shell_ipc_targets() {
+  emulate -L zsh
+
+  local -a targets plugin_ids qs_targets
+
+  targets=(
+    launcher controlCenter settings notifications systemMonitor
+    sessionMenu lockScreen bar dock wallpaper darkMode nightLight
+    volume brightness media idleInhibitor powerProfile
+    wifi bluetooth network battery calendar plugin
+    plugin:clipper plugin:keybind-cheatsheet plugin:assistant-panel
+    plugin:screenshot plugin:ndns
+    control-center spotlight dash notepad keybinds widget
+    powermenu inhibit dankdash theme night audio clipboard niri
+  )
+
+  _osc_shell_plugin_ids
+  plugin_ids=("${reply[@]}")
+  if (( ${#plugin_ids[@]} )); then
+    targets+=("${(@)^plugin_ids/#/plugin:}")
+  fi
+
+  _osc_shell_qs_targets
+  qs_targets=("${reply[@]}")
+  if (( ${#qs_targets[@]} )); then
+    targets+=("${qs_targets[@]}")
+  fi
+
+  reply=(${(u)targets})
+}
+
+_osc_shell_static_methods() {
+  emulate -L zsh
+
+  local target="$1"
+
+  case "$target" in
+    launcher)
+      reply=(toggle command windows clipboard emoji settings)
+      ;;
+    controlCenter|control-center)
+      reply=(toggle)
+      ;;
+    settings)
+      reply=(toggle open toggleTab openTab)
+      ;;
+    notifications)
+      reply=(toggleHistory toggleDND enableDND disableDND clear dismissAll dismissOldest removeOldestHistory removeFromHistory invokeDefault invokeDefaultAndDismiss invokeAction getHistory getActions)
+      ;;
+    systemMonitor)
+      reply=(toggle)
+      ;;
+    sessionMenu)
+      reply=(toggle lock lockAndSuspend)
+      ;;
+    lockScreen)
+      reply=(lock)
+      ;;
+    bar)
+      reply=(toggle showBar hideBar setDisplayMode setPosition toggleAutoHide)
+      ;;
+    dock)
+      reply=(toggle)
+      ;;
+    wallpaper)
+      reply=(toggle random set next prev toggleAutomation enableAutomation disableAutomation)
+      ;;
+    darkMode|theme)
+      reply=(toggle setDark setLight)
+      ;;
+    nightLight|night)
+      reply=(toggle)
+      ;;
+    volume)
+      reply=(increase decrease muteOutput muteInput togglePanel openPanel closePanel increaseInput decreaseInput)
+      ;;
+    audio)
+      reply=(increment decrement mute micmute)
+      ;;
+    brightness)
+      reply=(increase decrease set increment decrement)
+      ;;
+    media)
+      reply=(playPause play pause stop next previous seekByRatio seekRelative toggle)
+      ;;
+    idleInhibitor|inhibit)
+      reply=(toggle enable disable)
+      ;;
+    powerProfile)
+      reply=(cycle cycleReverse set toggleNoctaliaPerformance enableNoctaliaPerformance disableNoctaliaPerformance)
+      ;;
+    wifi)
+      reply=(toggle enable disable)
+      ;;
+    bluetooth)
+      reply=(toggle enable disable togglePanel)
+      ;;
+    network|battery|calendar)
+      reply=(toggle togglePanel)
+      ;;
+    plugin)
+      reply=(openPanel closePanel togglePanel openSettings)
+      ;;
+    plugin:clipper|plugin:keybind-cheatsheet)
+      reply=(toggle)
+      ;;
+    plugin:assistant-panel)
+      reply=(toggle open close send clear setProvider setModel translateText)
+      ;;
+    plugin:screenshot)
+      reply=(takeScreenshot)
+      ;;
+    plugin:ndns)
+      reply=(openPanel closePanel togglePanel openSettings toggle mullvad blocky isp defaultDns repair set provider)
+      ;;
+    spotlight)
+      reply=(toggle openQuery)
+      ;;
+    dash)
+      reply=(toggle)
+      ;;
+    notepad)
+      reply=(open toggle)
+      ;;
+    keybinds)
+      reply=(toggle)
+      ;;
+    widget)
+      reply=(toggle)
+      ;;
+    powermenu)
+      reply=(toggle)
+      ;;
+    clipboard)
+      reply=(toggle)
+      ;;
+    niri)
+      reply=(screenshot screenshotScreen screenshotWindow)
+      ;;
+    plugin:*)
+      reply=(toggle)
+      ;;
+    *)
+      reply=()
+      ;;
+  esac
+}
+
+_osc_shell_methods_for_target() {
+  emulate -L zsh
+
+  local target="$1"
+  local -a methods dyn
+
+  _osc_shell_static_methods "$target"
+  methods=("${reply[@]}")
+
+  _osc_shell_qs_methods "$target"
+  dyn=("${reply[@]}")
+  if (( ${#dyn[@]} )); then
+    methods+=("${dyn[@]}")
+  fi
+
+  reply=(${(u)methods})
+}
+
+_osc_shell_complete_ipc_args() {
+  emulate -L zsh
+
+  local target="$1"
+  local method="$2"
+
+  case "${target}:${method}" in
+    plugin:openPanel|plugin:closePanel|plugin:togglePanel|plugin:openSettings)
+      _osc_shell_plugin_ids
+      (( ${#reply[@]} )) && compadd -- "${reply[@]}"
+      return
+      ;;
+    plugin:ndns:provider)
+      compadd google cloudflare opendns adguard quad9
+      return
+      ;;
+    plugin:ndns:set)
+      compadd default isp google cloudflare opendns adguard quad9
+      return
+      ;;
+    plugin:screenshot:takeScreenshot)
+      compadd region output window
+      return
+      ;;
+    powerProfile:set)
+      compadd power-saver balanced performance
+      return
+      ;;
+    settings:toggleTab|settings:openTab)
+      compadd general bar dock wallpaper color-scheme user-interface control-center desktop-widgets launcher notifications osd lock-screen session-menu audio display network location system-monitor plugins hooks about keybinds
+      return
+      ;;
+    bar:setDisplayMode)
+      if (( CURRENT == 6 )); then
+        compadd always_visible non_exclusive auto_hide
+      else
+        compadd all
+      fi
+      return
+      ;;
+    bar:setPosition)
+      if (( CURRENT == 6 )); then
+        compadd top bottom left right
+      else
+        compadd all
+      fi
+      return
+      ;;
+    brightness:set)
+      _message 'brightness percent'
+      return
+      ;;
+    media:seekByRatio)
+      compadd 0.25 0.5 0.75 1.0
+      return
+      ;;
+    media:seekRelative)
+      compadd -30 -10 10 30
+      return
+      ;;
+    wallpaper:set)
+      if (( CURRENT == 6 )); then
+        _files
+      else
+        compadd all
+      fi
+      return
+      ;;
+  esac
+
+  _message 'argument'
+}
+
+_osc_shell() {
+  emulate -L zsh
+
+  local curcontext="$curcontext" state
+  local -a commands backends compositors profile_sub ipc_sub
+
+  commands=(
+    'backend:show configured backend for a compositor'
+    'profile:show or update backend profile mapping'
+    'switch:switch backend and persist it'
+    'ensure:ensure the backend service is running'
+    'ipc:route IPC calls to the active backend'
+    'help:show usage'
+    '--help:show usage'
+    '-h:show usage'
+  )
+  backends=(dms noctalia)
+  compositors=(default niri hyprland)
+  profile_sub=(show set use)
+  ipc_sub=(show call)
+
+  if (( CURRENT == 2 )); then
+    _describe -t commands 'osc-shell command' commands
+    return
+  fi
+
+  case "$words[2]" in
+    backend)
+      (( CURRENT == 3 )) && compadd -- "${compositors[@]}"
+      return
+      ;;
+    ensure)
+      (( CURRENT == 3 )) && compadd -- "${backends[@]}"
+      return
+      ;;
+    switch)
+      if (( CURRENT == 3 )); then
+        compadd -- "${backends[@]}"
+      elif (( CURRENT == 4 )); then
+        compadd -- "${compositors[@]}"
+      fi
+      return
+      ;;
+    profile)
+      if (( CURRENT == 3 )); then
+        compadd -- "${profile_sub[@]}"
+        return
+      fi
+
+      case "$words[3]" in
+        set)
+          if (( CURRENT == 4 )); then
+            compadd default niri hyprland
+          elif (( CURRENT == 5 )); then
+            compadd -- "${backends[@]}"
+          fi
+          ;;
+        use)
+          if (( CURRENT == 4 )); then
+            compadd -- "${backends[@]}"
+          elif (( CURRENT == 5 )); then
+            compadd -- "${compositors[@]}"
+          fi
+          ;;
+      esac
+      return
+      ;;
+    ipc)
+      if (( CURRENT == 3 )); then
+        compadd -- "${ipc_sub[@]}"
+        return
+      fi
+
+      case "$words[3]" in
+        call)
+          if (( CURRENT == 4 )); then
+            _osc_shell_ipc_targets
+            (( ${#reply[@]} )) && compadd -- "${reply[@]}"
+            return
+          fi
+
+          if (( CURRENT == 5 )); then
+            _osc_shell_methods_for_target "$words[4]"
+            (( ${#reply[@]} )) && compadd -- "${reply[@]}"
+            return
+          fi
+
+          if (( CURRENT >= 6 )); then
+            _osc_shell_complete_ipc_args "$words[4]" "$words[5]"
+            return
+          fi
+          ;;
+        show)
+          return
+          ;;
+      esac
+      return
+      ;;
+  esac
+}
+
+_osc_shell "$@"

@@ -443,6 +443,8 @@ zstyle ':completion:*' dump-file "$ZSH_COMPDUMP"
 _safe_compinit() {
   local _lock_file="${XDG_CACHE_HOME}/zsh/.compinit-${HOST}-${ZSH_VERSION}.lock"
   local _dump_dir="$(dirname "$ZSH_COMPDUMP")"
+  local _watch_dir _path
+  local -a _watch_paths
 
   # Ensure dump directory exists
   [[ -d "$_dump_dir" ]] || mkdir -p "$_dump_dir"
@@ -453,6 +455,20 @@ _safe_compinit() {
   # Glob qualifier: (#qN.mh+24) = hidden, no error if not exist, modified >24h ago
   if [[ ! -s "$ZSH_COMPDUMP" || -n $ZSH_COMPDUMP(#qN.mh+24) ]]; then
     need_rebuild=1
+  fi
+
+  # Rebuild if user-managed completions/functions changed since the last dump.
+  if (( need_rebuild == 0 )); then
+    for _watch_dir in "${XDG_CONFIG_HOME}/zsh/completions" "${XDG_CONFIG_HOME}/zsh/functions"; do
+      [[ -d "$_watch_dir" ]] || continue
+      _watch_paths=("${_watch_dir}"/**/*(N.))
+      for _path in "${_watch_paths[@]}"; do
+        if [[ "$_path" -nt "$ZSH_COMPDUMP" ]]; then
+          need_rebuild=1
+          break 2
+        fi
+      done
+    done
   fi
 
   # If dump is fresh, use cached version (fast path)
