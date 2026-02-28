@@ -16,6 +16,10 @@
             "enabled": true,
             "sourceUrl": "https://github.com/kenanpelit/ndns"
         },
+        "62bf38:network": {
+            "enabled": true,
+            "sourceUrl": "https://github.com/kenanpelit/ndns"
+        },
         "62bf38:notes": {
             "enabled": true,
             "sourceUrl": "https://github.com/kenanpelit/ndns"
@@ -41,10 +45,6 @@
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
         },
         "mini-docker": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "network-indicator": {
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
         },

@@ -402,7 +402,7 @@ binds {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call systemMonitor toggle"
   }
   Mod+Ctrl+N repeat=false hotkey-overlay-title="Notepad" {
-    spawn-sh "$HOME/.local/bin/osc-shell ipc call notepad toggle"
+    spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:notes togglePanel"
   }
   Mod+Comma repeat=false hotkey-overlay-title="Settings" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call settings toggle"
