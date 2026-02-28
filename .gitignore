@@ -36,6 +36,8 @@ modules/noctalia/dotfiles/noctalia/plugins/notes-scratchpad/settings.json
 modules/noctalia/dotfiles/noctalia/plugins/simple-notes/settings.json
 modules/noctalia/dotfiles/noctalia/plugins/todo/settings.json
 modules/noctalia/dotfiles/noctalia/settings.json
+modules/noctalia/dotfiles/noctalia/plugin-backups/
+modules/noctalia/dotfiles/noctalia/plugins/*:*
 modules/dms/dotfiles/DankMaterialShell/plugins/dankBitwarden/
 modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections
 modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections.meta

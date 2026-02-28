@@ -4,18 +4,23 @@
             "enabled": true,
             "name": "Noctalia Plugins",
             "url": "https://github.com/noctalia-dev/noctalia-plugins"
+        },
+        {
+            "enabled": true,
+            "name": "ndns",
+            "url": "https://github.com/kenanpelit/ndns"
         }
     ],
     "states": {
+        "62bf38:ndns": {
+            "enabled": true,
+            "sourceUrl": "https://github.com/kenanpelit/ndns"
+        },
         "assistant-panel": {
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
         },
         "clipper": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "dns-switcher": {
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
         },
