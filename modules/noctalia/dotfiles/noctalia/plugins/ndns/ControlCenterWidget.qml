@@ -10,14 +10,21 @@ NIconButton {
     property var screen: null
     readonly property var mainInstance: pluginApi?.mainInstance
 
+    readonly property bool protectedMode: Boolean(mainInstance?.vpnConnected || mainInstance?.blockyActive)
+    readonly property bool customMode: Boolean(mainInstance?.isCustomDns && !protectedMode)
+
     icon: mainInstance?.currentIconName || "world"
 
-    property bool isActive: Boolean(mainInstance?.vpnConnected || mainInstance?.blockyActive)
+    colorBg: protectedMode
+             ? Qt.alpha(Color.mPrimary, 0.16)
+             : (customMode ? Qt.alpha(Color.mSurfaceVariant, 0.9) : Color.mSurfaceVariant)
+    colorFg: protectedMode ? Color.mPrimary : Color.mOnSurface
 
-    colorBg: isActive ? Color.mPrimary : Color.mSurfaceVariant
-    colorFg: isActive ? Color.mOnPrimary : Color.mOnSurface
-
-    tooltipText: mainInstance?.currentStatusDetail || pluginApi?.tr("plugin.title") || "DNS / VPN Switcher"
+    tooltipText: mainInstance
+                 ? ((mainInstance.currentDnsName || (pluginApi?.tr("plugin.title") || "DNS / VPN Switcher"))
+                    + "\n"
+                    + (mainInstance.currentStatusDetail || ""))
+                 : (pluginApi?.tr("plugin.title") || "DNS / VPN Switcher")
 
     onClicked: {
         if (pluginApi) {
