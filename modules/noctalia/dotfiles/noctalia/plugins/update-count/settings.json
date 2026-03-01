@@ -1,7 +1,7 @@
 {
-  "updateIntervalMinutes": 30,
+  "updateIntervalMinutes": 180,
   "updateTerminalCommand": "kitty -e",
-  "currentIconName": "world-download",
+  "currentIconName": "pacman",
   "hideOnZero": false,
   "customCmdGetNumUpdates": "",
   "customCmdDoSystemUpdate": ""
