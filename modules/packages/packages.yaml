@@ -15,6 +15,7 @@ packages:
   - fzf
   - gnupg
   - grimblast-git
+  - gpu-screen-recorder
   - libsecret
   - localsend
   - maplemono-nf
