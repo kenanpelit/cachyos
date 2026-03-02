@@ -192,6 +192,22 @@ toggle_noctalia_bar_auto_hide() {
   printf '%s\n' "$next" >"$mode_file"
 }
 
+resolve_noctalia_plugin_id() {
+  local plugin_name="$1"
+  local plugins_dir="${XDG_CONFIG_HOME:-$HOME/.config}/noctalia/plugins"
+  local match
+
+  if [[ -d "$plugins_dir" ]]; then
+    for match in "$plugins_dir"/*:"$plugin_name"; do
+      [[ -d "$match" ]] || continue
+      basename "$match"
+      return 0
+    done
+  fi
+
+  printf '%s\n' "$plugin_name"
+}
+
 normalize_ipc() {
   local target="$1"
   local method="$2"
@@ -578,6 +594,18 @@ route_noctalia_ipc() {
   local -a args=("$@")
 
   case "${target}:${method}" in
+    plugin:npodman:toggle | plugin:npodman:togglePanel | plugin:npodman:openPanel | plugin:npodman:closePanel | plugin:npodman:openSettings | plugin:*:npodman:toggle | plugin:*:npodman:togglePanel | plugin:*:npodman:openPanel | plugin:*:npodman:closePanel | plugin:*:npodman:openSettings)
+      local resolved_npodman_id
+      resolved_npodman_id="$(resolve_noctalia_plugin_id npodman)"
+      target="plugin"
+      case "$method" in
+        toggle | togglePanel) method="togglePanel" ;;
+        openPanel) method="openPanel" ;;
+        closePanel) method="closePanel" ;;
+        openSettings) method="openSettings" ;;
+      esac
+      args=("$resolved_npodman_id")
+      ;;
     plugin:ndns:default)
       method="defaultDns"
       ;;
