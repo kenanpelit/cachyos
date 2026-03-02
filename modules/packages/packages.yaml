@@ -48,6 +48,7 @@ packages:
   - cpupower
   - dmidecode
   - downgrade
+  - detox
   - hwinfo
   - intel-gpu-tools
   - usbutils
