@@ -606,6 +606,18 @@ route_noctalia_ipc() {
       esac
       args=("$resolved_npodman_id")
       ;;
+    plugin:nufw:toggle | plugin:nufw:togglePanel | plugin:nufw:openPanel | plugin:nufw:closePanel | plugin:nufw:openSettings | plugin:*:nufw:toggle | plugin:*:nufw:togglePanel | plugin:*:nufw:openPanel | plugin:*:nufw:closePanel | plugin:*:nufw:openSettings)
+      local resolved_nufw_id
+      resolved_nufw_id="$(resolve_noctalia_plugin_id nufw)"
+      target="plugin"
+      case "$method" in
+        toggle | togglePanel) method="togglePanel" ;;
+        openPanel) method="openPanel" ;;
+        closePanel) method="closePanel" ;;
+        openSettings) method="openSettings" ;;
+      esac
+      args=("$resolved_nufw_id")
+      ;;
     plugin:ndns:default)
       method="defaultDns"
       ;;

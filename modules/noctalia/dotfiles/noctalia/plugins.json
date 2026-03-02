@@ -36,6 +36,10 @@
       "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
+    "6ee06e:nufw": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
     "assistant-panel": {
       "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
@@ -93,5 +97,8 @@
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     }
   },
-  "version": 2
+  "version": 2,
+  "6ee06e:nufw": {
+    "enabled": true
+  }
 }
