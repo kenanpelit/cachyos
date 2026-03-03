@@ -1,7 +1,7 @@
 [Unit]
 Description=DankMaterialShell
 After=hyprland-session.target niri-session.target niri-ready.service
-PartOf=hyprland-session.target niri-session.target
+PartOf=niri-session.target
 
 [Service]
 Type=simple
@@ -31,4 +31,4 @@ PassEnvironment=XDG_SESSION_TYPE
 PassEnvironment=XDG_SESSION_DESKTOP
 
 [Install]
-WantedBy=hyprland-session.target
+WantedBy=niri-session.target
