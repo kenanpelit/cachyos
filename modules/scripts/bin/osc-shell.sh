@@ -628,8 +628,16 @@ route_noctalia_ipc() {
         target="launcher"; method="toggle"; args=()
       fi
       ;;
+    wallpaper:random)
+      if [[ ${#args[@]} -eq 0 ]]; then
+        args=("")
+      fi
+      ;;
     wallpaper:next | wallpaper:prev)
-      target="wallpaper"; method="random"; args=()
+      target="wallpaper"; method="random"
+      if [[ ${#args[@]} -eq 0 ]]; then
+        args=("")
+      fi
       ;;
     bar:toggleAutoHide)
       toggle_noctalia_bar_auto_hide
