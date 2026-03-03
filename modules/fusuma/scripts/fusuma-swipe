@@ -91,9 +91,8 @@ case "$fingers" in
           dir="r"
         fi
 
-        # Prefer hyprscrolling focus (also scrolls layout), fall back to standard focus.
-        if hyprctl dispatch layoutmsg "focus $dir" >/dev/null 2>&1; then
-          exit 0
+        if command -v hypr-scroll >/dev/null 2>&1; then
+          exec hypr-scroll focus "$dir"
         fi
 
         exec hyprctl dispatch movefocus "$dir"

@@ -78,6 +78,40 @@ ensure_hypr_env() {
   fi
 }
 
+hypr_scroll_cmd() {
+  if command -v hypr-scroll >/dev/null 2>&1; then
+    hypr-scroll "$@" >/dev/null 2>&1
+    return $?
+  fi
+
+  command -v hyprctl >/dev/null 2>&1 || return 127
+
+  case "${1:-}" in
+    focus|swapcol|movewindowto|colresize)
+      local subcmd="$1"
+      shift || true
+      hyprctl dispatch layoutmsg "${subcmd}${1:+ }$*" >/dev/null 2>&1
+      ;;
+    togglefit)
+      hyprctl dispatch layoutmsg "togglefit" >/dev/null 2>&1
+      ;;
+    promote)
+      local side="${2:-r}"
+      hyprctl dispatch layoutmsg "promote" >/dev/null 2>&1 || return 0
+      if [[ "$side" == "l" ]]; then
+        hyprctl dispatch layoutmsg "swapcol l" >/dev/null 2>&1 || true
+      fi
+      ;;
+    movecoltoworkspace)
+      shift || true
+      hyprctl dispatch layoutmsg "movecoltoworkspace ${1:-}" >/dev/null 2>&1
+      ;;
+    *)
+      return 2
+      ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -680,16 +714,13 @@ EOF
         )"
 
         [[ -n "${neighbor_x:-}" ]] || exit 0
-        hyprctl dispatch layoutmsg "movewindowto $dir" >/dev/null 2>&1 || true
+        hypr_scroll_cmd movewindowto "$dir" || true
         exit 0
       fi
 
       # Window is inside a column -> expel it out into its own column.
       # hyprscrolling's `promote` creates a new column to the right; swap if we want "left".
-      hyprctl dispatch layoutmsg "promote" >/dev/null 2>&1 || true
-      if [[ "$dir" == "l" ]]; then
-        hyprctl dispatch layoutmsg "swapcol l" >/dev/null 2>&1 || true
-      fi
+      hypr_scroll_cmd promote "$dir" || true
     )
     ;;
 
@@ -810,7 +841,7 @@ EOF
       target_ws="$(jq -r '.activeWorkspace.id // empty' <<<"$target")"
       [[ -n "${target_ws:-}" && "${target_ws}" != "null" ]] || exit 0
 
-      hyprctl dispatch layoutmsg "movecoltoworkspace $target_ws" >/dev/null 2>&1 || true
+      hypr_scroll_cmd movecoltoworkspace "$target_ws" >/dev/null 2>&1 || true
       # Niri-like: follow focus to the target monitor.
       hyprctl dispatch focusmonitor "$dir" >/dev/null 2>&1 || true
     )
@@ -856,10 +887,10 @@ EOF
       state="$(cat "$state_file" 2>/dev/null || true)"
 
       if [[ "$state" == "on" ]]; then
-        hyprctl dispatch layoutmsg "colresize 0.80" >/dev/null 2>&1 || true
+        hypr_scroll_cmd colresize 0.80 >/dev/null 2>&1 || true
         printf '%s\n' "off" >"$state_file" 2>/dev/null || true
       else
-        hyprctl dispatch layoutmsg "colresize 1.0" >/dev/null 2>&1 || true
+        hypr_scroll_cmd colresize 1.0 >/dev/null 2>&1 || true
         printf '%s\n' "on" >"$state_file" 2>/dev/null || true
       fi
     )
