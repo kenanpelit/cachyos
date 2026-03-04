@@ -12,6 +12,7 @@
 set -euo pipefail
 
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+SEMSUMO_DAILY_POWER_PROFILE="${SEMSUMO_DAILY_POWER_PROFILE:-performance}"
 
 detect_session() {
   case "${XDG_CURRENT_DESKTOP:-}" in
@@ -41,6 +42,36 @@ notify_err() {
   fi
 }
 
+notify_info() {
+  local msg="${1:-Done}"
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u low "SemsuMo Daily" "$msg" 2>/dev/null || true
+  fi
+}
+
+prepare_power_profile() {
+  local profile="${SEMSUMO_DAILY_POWER_PROFILE:-performance}"
+  local current=""
+
+  case "${profile,,}" in
+  "" | off | none | skip | disabled)
+    return 0
+    ;;
+  esac
+
+  command -v powerprofilesctl >/dev/null 2>&1 || return 0
+  current="$(powerprofilesctl get 2>/dev/null || true)"
+  [[ "$current" == "$profile" ]] && return 0
+
+  if powerprofilesctl set "$profile" >/dev/null 2>&1; then
+    if [[ "${profile,,}" == "performance" ]]; then
+      notify_info "Power profile switched to Performance"
+    else
+      notify_info "Power profile switched to ${profile}"
+    fi
+  fi
+}
+
 runner=""
 if command -v semsumo >/dev/null 2>&1; then
   runner="$(command -v semsumo)"
@@ -57,6 +88,9 @@ fi
   printf '[%s] session=%s launch start\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$SESSION_NAME"
   printf 'runner=%s\n' "$runner"
 } >>"$LOG_FILE" 2>/dev/null || true
+
+prepare_power_profile
+printf '[%s] power_profile=%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$SEMSUMO_DAILY_POWER_PROFILE" >>"$LOG_FILE" 2>/dev/null || true
 
 if ! "$runner" launch --daily --concurrent >>"$LOG_FILE" 2>&1; then
   notify_err "semsumo launch başarısız. Log: $LOG_FILE"
