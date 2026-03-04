@@ -1,9 +1,21 @@
 description: Hyprland packages
 
 packages:
-  - hyprland
+  - aquamarine-git
+  - egl-gbm
+  - glaze
+  - hyprcursor-git
+  - hyprgraphics-git
+  - hyprland-git
+  - hyprland-guiutils-git
+  - hyprland-protocols-git
+  - hyprlang-git
   - hyprpaper
   - hyprpicker
+  - hyprtoolkit-git
+  - hyprutils-git
+  - hyprwayland-scanner-git
+  - hyprwire-git
   - polkit-gnome
   - pyprland
   - network-manager-applet
