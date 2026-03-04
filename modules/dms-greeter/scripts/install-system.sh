@@ -179,6 +179,41 @@ enable_greetd() {
   fi
 }
 
+patch_pam_keyring_file() {
+  local file="$1"
+  local tmp
+
+  [ -f "${file}" ] || return 0
+  tmp="$(mktemp)"
+
+  awk '
+    BEGIN { auth_added=0; session_added=0 }
+    {
+      print
+      if ($1 == "auth" && $2 == "include" && $3 == "system-local-login" && !auth_added) {
+        print "auth       optional     pam_gnome_keyring.so"
+        auth_added=1
+      }
+      if ($1 == "session" && $2 == "include" && $3 == "system-local-login" && !session_added) {
+        print "session    optional     pam_gnome_keyring.so auto_start"
+        session_added=1
+      }
+    }
+  ' "${file}" > "${tmp}"
+
+  if ! grep -q 'pam_gnome_keyring.so' "${file}"; then
+    backup_if_exists "${file}"
+    run_root install -m 644 "${tmp}" "${file}"
+  fi
+
+  rm -f "${tmp}"
+}
+
+ensure_pam_keyring_unlock() {
+  patch_pam_keyring_file /etc/pam.d/greetd
+  patch_pam_keyring_file /etc/pam.d/login
+}
+
 echo "==> DMS Greeter system setup"
 echo "Target desktop user: ${TARGET_USER} (${TARGET_HOME})"
 echo
@@ -187,6 +222,7 @@ ensure_greeter_user
 install_system_files
 sync_dms_config_links
 apply_acl_sync_permissions
+ensure_pam_keyring_unlock
 enable_greetd
 
 echo "Done."

@@ -194,91 +194,6 @@ check_dependencies() {
 	fi
 }
 
-# User D-Bus oturumunu ve Secret Service'i Brave'den önce hazır hale getir.
-# Bu, ilk launch sırasında gelen keyring unlock prompt'unu Brave yerine
-# daha kontrollü bir warmup adımında tetikler.
-ensure_user_bus() {
-	if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
-		local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-		if [[ -S "${runtime_dir}/bus" ]]; then
-			export DBUS_SESSION_BUS_ADDRESS="unix:path=${runtime_dir}/bus"
-		fi
-	fi
-}
-
-login_prompts_stamp() {
-	local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-	if [[ "${XDG_CURRENT_DESKTOP:-}" == "Hyprland" ]] || [[ "${DESKTOP_SESSION:-}" == "Hyprland" ]]; then
-		printf '%s/osc-login-prompts.hypr.done\n' "$runtime_dir"
-	else
-		printf '%s/osc-login-prompts.done\n' "$runtime_dir"
-	fi
-}
-
-warmup_login_prompts_once() {
-	local stamp
-	stamp="$(login_prompts_stamp)"
-
-	command -v osc-login-prompts >/dev/null 2>&1 || return 1
-	[[ -f "$stamp" ]] && return 0
-
-	OSC_LOGIN_PROMPTS_SESSION="Browser Warmup" \
-		OSC_LOGIN_PROMPTS_NOTIFY=0 \
-		OSC_LOGIN_PROMPTS_LOG=0 \
-		osc-login-prompts --delay 0 --once --stamp "$stamp" >/dev/null 2>&1 || true
-
-	[[ -f "$stamp" ]]
-}
-
-secret_service_owned() {
-	command -v busctl >/dev/null 2>&1 || return 1
-	busctl --user list 2>/dev/null \
-		| grep -E '^org\.freedesktop\.secrets[[:space:]]' \
-		| grep -vq '(activatable)'
-}
-
-ensure_secret_service() {
-	ensure_user_bus
-
-	if secret_service_owned; then
-		return 0
-	fi
-
-	if command -v systemctl >/dev/null 2>&1; then
-		systemctl --user start gnome-keyring-secrets.service >/dev/null 2>&1 || true
-	fi
-
-	if ! secret_service_owned && command -v gnome-keyring-daemon >/dev/null 2>&1; then
-		gnome-keyring-daemon --start --components=secrets >/dev/null 2>&1 || true
-	fi
-
-	local _i=0
-	while (( _i < 10 )); do
-		if secret_service_owned; then
-			return 0
-		fi
-		sleep 0.1
-		(( _i += 1 ))
-	done
-
-	return 1
-}
-
-warmup_secret_prompt() {
-	if warmup_login_prompts_once; then
-		return 0
-	fi
-
-	ensure_secret_service || return 0
-
-	if command -v busctl >/dev/null 2>&1; then
-		busctl --user call \
-			org.freedesktop.secrets \
-			/org/freedesktop/secrets \
-			org.freedesktop.DBus.Peer Ping >/dev/null 2>&1 || true
-	fi
-}
-
 	# Kullanım bilgisi
 	usage() {
 	echo -e "${BOLD}Brave Profil Başlatıcı v${SCRIPT_VERSION}${RESET}"
@@ -1002,10 +917,6 @@ validate_profile() {
 		log "ERROR" "Brave komutu bulunamadı: $BRAVE_CMD"
 		exit 1
 	fi
-
-	# GNOME keyring/libsecret kullanan ilk launch'ta parola prompt'unu Brave'in
-	# içinde değil, kontrollü warmup sırasında tetikle.
-	warmup_secret_prompt
 
 	# Komutu çalıştır ve çıktısını yakala
 	if "${cmd[@]}" >/dev/null 2> >(tail -n 20 >&2) & then
