@@ -16,14 +16,18 @@ readonly STATE_DIR="/run/user/1000/semsumo"
 warmup_login_once() {
     local runtime_dir stamp
     runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-    stamp="${runtime_dir}/osc-login-prompts.done"
+    if [[ "${XDG_CURRENT_DESKTOP:-}" == "Hyprland" ]] || [[ "${DESKTOP_SESSION:-}" == "Hyprland" ]]; then
+        stamp="${runtime_dir}/osc-login-prompts.hypr.done"
+    else
+        stamp="${runtime_dir}/osc-login-prompts.done"
+    fi
 
     command -v osc-login-prompts >/dev/null 2>&1 || return 0
 
     if [[ ! -f "$stamp" ]]; then
         OSC_LOGIN_PROMPTS_SESSION="Browser Warmup" \
             OSC_LOGIN_PROMPTS_NOTIFY=0 \
-            OSC_LOGIN_PROMPTS_LOG=1 \
+            OSC_LOGIN_PROMPTS_LOG=0 \
             osc-login-prompts --delay 0 --once --stamp "$stamp" >/dev/null 2>&1 || true
     fi
 }

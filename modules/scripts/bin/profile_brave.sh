@@ -206,6 +206,30 @@ ensure_user_bus() {
 	fi
 }
 
+login_prompts_stamp() {
+	local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+	if [[ "${XDG_CURRENT_DESKTOP:-}" == "Hyprland" ]] || [[ "${DESKTOP_SESSION:-}" == "Hyprland" ]]; then
+		printf '%s/osc-login-prompts.hypr.done\n' "$runtime_dir"
+	else
+		printf '%s/osc-login-prompts.done\n' "$runtime_dir"
+	fi
+}
+
+warmup_login_prompts_once() {
+	local stamp
+	stamp="$(login_prompts_stamp)"
+
+	command -v osc-login-prompts >/dev/null 2>&1 || return 1
+	[[ -f "$stamp" ]] && return 0
+
+	OSC_LOGIN_PROMPTS_SESSION="Browser Warmup" \
+		OSC_LOGIN_PROMPTS_NOTIFY=0 \
+		OSC_LOGIN_PROMPTS_LOG=0 \
+		osc-login-prompts --delay 0 --once --stamp "$stamp" >/dev/null 2>&1 || true
+
+	[[ -f "$stamp" ]]
+}
+
 secret_service_owned() {
 	command -v busctl >/dev/null 2>&1 || return 1
 	busctl --user list 2>/dev/null \
@@ -241,13 +265,13 @@ ensure_secret_service() {
 }
 
 warmup_secret_prompt() {
+	if warmup_login_prompts_once; then
+		return 0
+	fi
+
 	ensure_secret_service || return 0
 
-	if command -v secret-tool >/dev/null 2>&1; then
-		# Bilinçli olarak var olmayan bir lookup yapıyoruz. Amaç veri bulmak değil,
-		# libsecret çağrısını Brave'den önce tetikleyip unlock prompt'unu önden almak.
-		secret-tool lookup warmup brave launcher profile-brave 2>/dev/null || true
-	elif command -v busctl >/dev/null 2>&1; then
+	if command -v busctl >/dev/null 2>&1; then
 		busctl --user call \
 			org.freedesktop.secrets \
 			/org/freedesktop/secrets \
