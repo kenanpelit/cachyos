@@ -52,7 +52,8 @@ enabled_modules:
 - walker
 - dms
 - noctalia
-- dms-greeter
+# - dms-greeter
+- gdm
 - fusuma
 - bt
 - connect

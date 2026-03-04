@@ -1,0 +1,4 @@
+description: GDM display manager setup
+
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

@@ -62,7 +62,7 @@ Typical module contract:
 - bootstrap/core: `base`, `pacman`, `paru`, `scripts`, `packages`, `flatpak`, `system-packages-hay`
 - system/security: `admin`, `logind`, `tty`, `logs`, `kernel`, `firewall`, `fail2ban`, `blocky`, `tcp`, `oomd`
 - shell/cli: `zsh`, `bash`, `git`, `nvim`, `tmux`, `yazi`, `sesh`, `clipse`, `starship`, `command-not-found`
-- desktop: `niri`, `hyprland`, `sway`, `sessions`, `stasis`, `xdg-portal`, `rofi`, `walker`, `dms`, `noctalia`, `dms-greeter`, `fusuma`
+- desktop: `niri`, `hyprland`, `sway`, `sessions`, `stasis`, `xdg-portal`, `rofi`, `walker`, `dms`, `noctalia`, `gdm`, `fusuma`
 - media/apps: `mpv`, `mpd`, `rmpc`, `transmission`, `cava`, `brave`, `webcord`, `copyq`, `ai`
 - defaults/services: `xdg-mimes`, `user-services`
 
@@ -144,7 +144,7 @@ Before applying on a different machine, review:
 - `modules/firewall/`
 - `modules/blocky/`
 - `modules/sessions/`
-- hardware-specific desktop/service modules (`niri`, `hyprland`, `stasis`, `fusuma`, `dms-greeter`)
+- hardware-specific desktop/service modules (`niri`, `hyprland`, `stasis`, `fusuma`, `gdm` or `dms-greeter`)
 
 ## License
 
