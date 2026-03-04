@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -x "${HOME}/.local/bin/niri-osc" ]; then
+  exec "${HOME}/.local/bin/niri-osc" set tty
+fi
+
+if command -v niri-osc >/dev/null 2>&1; then
+  exec niri-osc set tty
+fi
+
+if command -v niri-session >/dev/null 2>&1; then
+  exec niri-session
+fi
+
+exec niri --session

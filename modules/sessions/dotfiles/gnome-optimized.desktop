@@ -9,4 +9,4 @@ X-Session-Type=wayland
 X-GDM-SessionRegisters=true
 X-GDM-CanRunHeadless=true
 
-Exec=/usr/bin/env sh -lc "$HOME/.local/bin/gnome_tty"
+Exec=/usr/local/bin/gnome-optimized-session

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -x "${HOME}/.local/bin/hypr-osc" ]; then
+  exec "${HOME}/.local/bin/hypr-osc" tty
+fi
+
+if command -v hypr-osc >/dev/null 2>&1; then
+  exec hypr-osc tty
+fi
+
+if command -v start-hyprland >/dev/null 2>&1; then
+  exec start-hyprland
+fi
+
+exec Hyprland

@@ -3,7 +3,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULES_DIR="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+DOTFILES_DIR="$(cd -- "${SCRIPT_DIR}/../dotfiles" && pwd)"
 WAYLAND_SESSIONS_DIR="/usr/share/wayland-sessions"
+LOCAL_BIN_DIR="/usr/local/bin"
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -42,6 +44,19 @@ install_session_file() {
   run_root install -m 644 "${src}" "${WAYLAND_SESSIONS_DIR}/$(basename "${src}")"
 }
 
+install_wrapper() {
+  local src="$1"
+  local dst_name="$2"
+
+  if [ ! -f "${src}" ]; then
+    echo "Warning: wrapper file not found: ${src}" >&2
+    return 0
+  fi
+
+  run_root install -d -m 755 "${LOCAL_BIN_DIR}"
+  run_root install -m 755 "${src}" "${LOCAL_BIN_DIR}/${dst_name}"
+}
+
 echo "==> GDM display manager setup"
 
 # Keep only one display manager enabled.
@@ -56,6 +71,11 @@ if ! run_root systemctl list-unit-files gdm.service >/dev/null 2>&1; then
   exit 1
 fi
 
+# Install single-command wrappers for gdm-wayland-session compatibility.
+install_wrapper "${DOTFILES_DIR}/niri-optimized-session" "niri-optimized-session"
+install_wrapper "${DOTFILES_DIR}/hyprland-optimized-session" "hyprland-optimized-session"
+install_wrapper "${DOTFILES_DIR}/gnome-optimized-session" "gnome-optimized-session"
+
 # Install optimized Wayland sessions for GDM chooser.
 install_session_file "${MODULES_DIR}/sessions/dotfiles/niri-optimized.desktop" "Niri (Optimized)"
 install_session_file "${MODULES_DIR}/sessions/dotfiles/gnome-optimized.desktop" "GNOME (Optimized)"
@@ -68,6 +88,7 @@ run_root systemctl enable gdm.service >/dev/null 2>&1 || run_root systemctl enab
 echo "Done."
 echo "Enabled: gdm.service"
 echo "Disabled (if present): greetd, sddm, lightdm, lxdm, ly"
+echo "Installed wrappers: niri-optimized-session, hyprland-optimized-session, gnome-optimized-session"
 echo "Installed Wayland sessions: niri-optimized, hyprland-optimized, gnome-optimized"
 echo
 echo "Apply now or reboot:"
