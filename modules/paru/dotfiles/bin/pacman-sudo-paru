@@ -1,2 +1,79 @@
 #!/usr/bin/env bash
-exec /usr/bin/sudo /usr/bin/pacman "$@"
+set -euo pipefail
+
+SUDO_BIN="/usr/bin/sudo"
+PACMAN_BIN="/usr/bin/pacman"
+
+is_sync_operation() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+    --)
+      break
+      ;;
+    --sync | -S)
+      return 0
+      ;;
+    -*S*)
+      return 0
+      ;;
+    esac
+  done
+  return 1
+}
+
+cleanup_corrupt_cache() {
+  local log_file="$1"
+  local cache_dir="/var/cache/pacman/pkg"
+  local file
+  local pkg
+
+  while IFS= read -r file; do
+    [[ -n "$file" ]] || continue
+    "$SUDO_BIN" rm -f "${cache_dir}/${file}" "${cache_dir}/${file}.sig" || true
+  done < <(sed -n "s/.*failed retrieving file '\\([^']*\\)'.*/\\1/p" "$log_file" | sort -u)
+
+  while IFS= read -r pkg; do
+    [[ -n "$pkg" ]] || continue
+    "$SUDO_BIN" rm -f "${cache_dir}/${pkg}"-*.pkg.tar.* || true
+  done < <(sed -n "s/^error: \\([^:][^:]*\\): signature from .*/\\1/p" "$log_file" | sort -u)
+}
+
+run_pacman() {
+  local log_file="$1"
+  shift
+
+  set +e
+  "$SUDO_BIN" "$PACMAN_BIN" "$@" 2> >(tee "$log_file" >&2)
+  local rc=$?
+  set -e
+
+  return "$rc"
+}
+
+main() {
+  local log_file
+  log_file="$(mktemp)"
+  trap 'rm -f "$log_file"' EXIT
+
+  if run_pacman "$log_file" "$@"; then
+    exit 0
+  fi
+  local rc=$?
+
+  if ! is_sync_operation "$@"; then
+    exit "$rc"
+  fi
+
+  if ! grep -Eiq "failed retrieving file|requested URL returned error: 404|invalid or corrupted package|signature from .* is invalid" "$log_file"; then
+    exit "$rc"
+  fi
+
+  echo "pacman sync failed due to mirror/cache inconsistency; refreshing databases and retrying once..." >&2
+  cleanup_corrupt_cache "$log_file"
+  "$SUDO_BIN" "$PACMAN_BIN" -Syy >/dev/null 2>&1 || true
+
+  exec "$SUDO_BIN" "$PACMAN_BIN" "$@"
+}
+
+main "$@"
