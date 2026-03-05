@@ -2,8 +2,9 @@
 # cachy-mount.sh
 # ------------------------------------------------------------------------------
 # Dual-disk BTRFS helper:
-# - If booted from nvme1n1p2, mount nvme0n1p2 on /cachy
-# - If booted from nvme0n1p2, mount nvme1n1p2 on /cachy
+# - Detect current root block device
+# - Auto-select the most likely "other OS" btrfs partition on the other disk
+# - Mount it on /cachy
 # ------------------------------------------------------------------------------
 
 set -euo pipefail
@@ -14,8 +15,6 @@ if [[ "$SCRIPT_NAME" == "cachy-mount.sh" ]]; then
 fi
 
 DEFAULT_BASE="/cachy"
-PAIR_A="/dev/nvme1n1p2"
-PAIR_B="/dev/nvme0n1p2"
 
 # Mount top-level BTRFS tree (subvolid=5) so @, @home, ... are visible.
 OPTS_COMMON=("subvolid=5" "noatime" "compress=zstd" "space_cache=v2")
@@ -30,8 +29,7 @@ Usage:
   sudo ${SCRIPT_NAME} help
 
 Defaults:
-  pair A: ${PAIR_A}
-  pair B: ${PAIR_B}
+  auto target: btrfs root-like partition on the other disk
   mount point: ${DEFAULT_BASE}
 EOF
 }
@@ -64,26 +62,6 @@ parent_disk_dev() {
   echo "/dev/$pk"
 }
 
-partition_number() {
-  local dev="$1"
-  local pn
-  pn="$(lsblk -no PARTN "$dev" 2>/dev/null | head -n1 || true)"
-  [[ -n "$pn" ]] || return 1
-  echo "$pn"
-}
-
-device_with_partnum() {
-  local disk="$1"
-  local partn="$2"
-  local base
-  base="$(basename "$disk")"
-  if [[ "$base" =~ [0-9]$ ]]; then
-    echo "${disk}p${partn}"
-  else
-    echo "${disk}${partn}"
-  fi
-}
-
 is_btrfs_device() {
   local dev="$1"
   local fstype
@@ -91,34 +69,34 @@ is_btrfs_device() {
   [[ "$fstype" == "btrfs" ]]
 }
 
-mirror_partition_on_other_pair_disk() {
-  local root_dev="$1"
-  local a="$2"
-  local b="$3"
-  local root_disk a_disk b_disk target_disk partn candidate
+device_size_bytes() {
+  local dev="$1"
+  local size
+  size="$(lsblk -bno SIZE "$dev" 2>/dev/null | head -n1 || true)"
+  [[ "$size" =~ ^[0-9]+$ ]] || return 1
+  echo "$size"
+}
 
-  root_disk="$(parent_disk_dev "$root_dev" 2>/dev/null || true)"
-  a_disk="$(parent_disk_dev "$a" 2>/dev/null || true)"
-  b_disk="$(parent_disk_dev "$b" 2>/dev/null || true)"
-  [[ -n "$root_disk" && -n "$a_disk" && -n "$b_disk" ]] || return 1
+list_btrfs_partitions() {
+  lsblk -pnr -o NAME,TYPE,FSTYPE 2>/dev/null | awk '$2=="part" && $3=="btrfs"{print $1}'
+}
 
-  if [[ "$root_disk" == "$a_disk" ]]; then
-    target_disk="$b_disk"
-  elif [[ "$root_disk" == "$b_disk" ]]; then
-    target_disk="$a_disk"
-  else
-    return 1
+probe_os_tree_device() {
+  local dev="$1"
+  local tmp rc=1
+
+  # Root-only hinting probe; status command can still run as normal user.
+  [[ ${EUID:-0} -eq 0 ]] || return 1
+
+  tmp="$(mktemp -d /tmp/cachy-mount.XXXXXX)"
+  if mount -t btrfs -o ro,subvolid=5 "$dev" "$tmp" >/dev/null 2>&1; then
+    if [[ -f "${tmp}/@/etc/os-release" || -f "${tmp}/root/etc/os-release" || -f "${tmp}/etc/os-release" ]]; then
+      rc=0
+    fi
+    umount "$tmp" >/dev/null 2>&1 || true
   fi
-
-  partn="$(partition_number "$root_dev" 2>/dev/null || true)"
-  [[ -n "$partn" ]] || return 1
-
-  candidate="$(device_with_partnum "$target_disk" "$partn")"
-  candidate="$(normalize_dev "$candidate")"
-  [[ -b "$candidate" ]] || return 1
-  is_btrfs_device "$candidate" || return 1
-
-  echo "$candidate"
+  rmdir "$tmp" >/dev/null 2>&1 || true
+  return "$rc"
 }
 
 current_root_device() {
@@ -131,30 +109,75 @@ current_root_device() {
   normalize_dev "$src"
 }
 
-other_pair_device() {
+auto_target_device() {
   local root_dev="$1"
-  local a b mirror_dev
-  a="$(normalize_dev "$PAIR_A")"
-  b="$(normalize_dev "$PAIR_B")"
+  local root_disk root_size
+  local candidate candidate_disk candidate_size
+  local score best_score best_dev
+  local diff best_diff pct seen
 
-  # If root is one of the explicit pair members, use the opposite.
-  if [[ "$root_dev" == "$a" ]]; then
-    echo "$b"
-    return 0
-  elif [[ "$root_dev" == "$b" ]]; then
-    echo "$a"
-    return 0
-  fi
+  root_dev="$(normalize_dev "$root_dev")"
+  root_disk="$(parent_disk_dev "$root_dev" 2>/dev/null || true)"
+  root_size="$(device_size_bytes "$root_dev" 2>/dev/null || echo 0)"
 
-  # Fallback: if root is on one pair disk, try same partition number on the other disk.
-  # Example: root=/dev/nvme1n1p2 and pair contains /dev/nvme1n1p1 + /dev/nvme0n1p2.
-  mirror_dev="$(mirror_partition_on_other_pair_disk "$root_dev" "$a" "$b" 2>/dev/null || true)"
-  if [[ -n "$mirror_dev" ]]; then
-    echo "$mirror_dev"
-    return 0
-  fi
+  best_score=-1
+  best_diff=9223372036854775807
+  best_dev=""
+  seen=0
 
-  die "Root device '$root_dev' is not in pair ($a <-> $b), and auto-mirror fallback failed. Use --device."
+  while IFS= read -r candidate; do
+    [[ -n "$candidate" ]] || continue
+    candidate="$(normalize_dev "$candidate")"
+    [[ "$candidate" == "$root_dev" ]] && continue
+    [[ -b "$candidate" ]] || continue
+
+    seen=$((seen + 1))
+    score=0
+    diff=9223372036854775807
+
+    candidate_disk="$(parent_disk_dev "$candidate" 2>/dev/null || true)"
+    if [[ -n "$root_disk" && -n "$candidate_disk" && "$candidate_disk" != "$root_disk" ]]; then
+      score=$((score + 100))
+    fi
+
+    candidate_size="$(device_size_bytes "$candidate" 2>/dev/null || echo 0)"
+    if (( root_size > 0 && candidate_size > 0 )); then
+      if (( candidate_size >= root_size )); then
+        diff=$((candidate_size - root_size))
+      else
+        diff=$((root_size - candidate_size))
+      fi
+      pct=$((diff * 100 / root_size))
+      if (( pct <= 5 )); then
+        score=$((score + 30))
+      elif (( pct <= 20 )); then
+        score=$((score + 20))
+      elif (( pct <= 50 )); then
+        score=$((score + 10))
+      fi
+    fi
+
+    if probe_os_tree_device "$candidate"; then
+      score=$((score + 80))
+    fi
+
+    if (( score > best_score )); then
+      best_score="$score"
+      best_diff="$diff"
+      best_dev="$candidate"
+    elif (( score == best_score )); then
+      if (( diff < best_diff )); then
+        best_diff="$diff"
+        best_dev="$candidate"
+      elif (( diff == best_diff )) && [[ -n "$best_dev" && "$candidate" < "$best_dev" ]]; then
+        best_dev="$candidate"
+      fi
+    fi
+  done < <(list_btrfs_partitions)
+
+  (( seen > 0 )) || die "No alternative btrfs partition found (root: $root_dev). Use --device."
+  [[ -n "$best_dev" ]] || die "Cannot auto-select target btrfs device. Use --device."
+  echo "$best_dev"
 }
 
 is_mountpoint_exact() {
@@ -237,7 +260,7 @@ cmd_mount() {
   if [[ -z "$dev" ]]; then
     local root_dev
     root_dev="$(current_root_device)"
-    dev="$(other_pair_device "$root_dev")"
+    dev="$(auto_target_device "$root_dev")"
   fi
 
   dev="$(normalize_dev "$dev")"
@@ -299,10 +322,10 @@ cmd_status() {
   root_dev="$(current_root_device)"
   echo "Current root device: $root_dev"
 
-  if target_dev="$(other_pair_device "$root_dev" 2>/dev/null)"; then
+  if target_dev="$(auto_target_device "$root_dev" 2>/dev/null)"; then
     echo "Auto target device : $target_dev"
   else
-    echo "Auto target device : (unresolved from pair)"
+    echo "Auto target device : (unresolved)"
   fi
 
   if is_mountpoint_exact "$base"; then
