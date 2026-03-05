@@ -1,61 +1,33 @@
 #!/usr/bin/env bash
 # cachy-mount.sh
 # ------------------------------------------------------------------------------
-# On-demand mounting of CachyOS BTRFS subvolumes under a base directory.
-#
-# Why this exists:
-# - `findmnt --target /path` returns the covering mount (often "/") which can
-#   mislead naive "is mounted" checks. We only accept a mount when TARGET == path.
-# - BTRFS installs commonly use subvolumes (@, @home, ...) and we want a clean
-#   mount layout on demand (and an easy chroot).
-#
-# Layout (TARGET -> subvolume):
-#   <base>/root       -> @
-#   <base>/home       -> @home
-#   <base>/cache      -> @cache
-#   <base>/log        -> @log
-#   <base>/root-user  -> @root
-#   <base>/srv        -> @srv
-#   <base>/tmp        -> @tmp
-#
-# Commands:
-#   mount | umount | status | chroot | help
+# Dual-disk BTRFS helper:
+# - If booted from nvme1n1p1, mount nvme0n1p2 on /cachy
+# - If booted from nvme0n1p2, mount nvme1n1p1 on /cachy
 # ------------------------------------------------------------------------------
 
 set -euo pipefail
 
-DEFAULT_UUID="6784b6e4-7e6e-4662-9554-7bb313b427ee"
 DEFAULT_BASE="/cachy"
+PAIR_A="/dev/nvme1n1p1"
+PAIR_B="/dev/nvme0n1p2"
 
-# Common BTRFS mount options.
-# Note: "ssd" and "discard=async" are usually auto-detected; harmless if present.
-OPTS_COMMON=("noatime" "compress=zstd" "space_cache=v2")
-
-# subvolume -> target dir name (under BASE)
-declare -A SUBVOLS=(
-  ["@"]="root"
-  ["@home"]="home"
-  ["@cache"]="cache"
-  ["@log"]="log"
-  ["@root"]="root-user"
-  ["@srv"]="srv"
-  ["@tmp"]="tmp"
-)
+# Mount top-level BTRFS tree (subvolid=5) so @, @home, ... are visible.
+OPTS_COMMON=("subvolid=5" "noatime" "compress=zstd" "space_cache=v2")
 
 usage() {
-  cat <<'EOF'
+  cat <<EOF
 Usage:
-  sudo cachy-mount.sh mount   [--uuid <UUID>] [--base <DIR>]
+  sudo cachy-mount.sh mount   [--base <DIR>] [--device <DEV>]
   sudo cachy-mount.sh umount  [--base <DIR>]
   sudo cachy-mount.sh status  [--base <DIR>]
-  sudo cachy-mount.sh chroot  [--base <DIR>]
+  sudo cachy-mount.sh chroot  [--base <DIR>] [--root <DIR>]
   sudo cachy-mount.sh help
 
-Examples:
-  sudo cachy-mount.sh mount
-  sudo cachy-mount.sh status
-  sudo cachy-mount.sh chroot
-  sudo cachy-mount.sh umount
+Defaults:
+  pair A: ${PAIR_A}
+  pair B: ${PAIR_B}
+  mount point: ${DEFAULT_BASE}
 EOF
 }
 
@@ -68,12 +40,42 @@ need_root() {
   [[ ${EUID:-0} -eq 0 ]] || die "Run as root (use sudo)."
 }
 
-dev_from_uuid() {
-  local uuid="$1"
-  echo "/dev/disk/by-uuid/${uuid}"
+normalize_dev() {
+  local dev="$1"
+  local resolved
+  resolved="$(realpath -e "$dev" 2>/dev/null || true)"
+  if [[ -n "$resolved" ]]; then
+    echo "$resolved"
+  else
+    echo "$dev"
+  fi
 }
 
-# Return 0 only if PATH is an actual mountpoint where TARGET == PATH.
+current_root_device() {
+  local src
+  src="$(findmnt -rn -o SOURCE / 2>/dev/null || true)"
+  [[ -n "$src" ]] || die "Cannot determine root mount source."
+
+  # findmnt output can include BTRFS subvol suffix, e.g. /dev/nvme1n1p1[/@]
+  src="${src%%[*}"
+  normalize_dev "$src"
+}
+
+other_pair_device() {
+  local root_dev="$1"
+  local a b
+  a="$(normalize_dev "$PAIR_A")"
+  b="$(normalize_dev "$PAIR_B")"
+
+  if [[ "$root_dev" == "$a" ]]; then
+    echo "$b"
+  elif [[ "$root_dev" == "$b" ]]; then
+    echo "$a"
+  else
+    die "Root device '$root_dev' is not in pair ($a <-> $b). Use --device."
+  fi
+}
+
 is_mountpoint_exact() {
   local path="$1"
   local tgt
@@ -81,31 +83,6 @@ is_mountpoint_exact() {
   [[ "$tgt" == "$path" ]]
 }
 
-# Mount subvolume if the target isn't already a mountpoint.
-mount_subvol() {
-  local dev="$1" subvol="$2" target="$3"
-  mkdir -p "$target"
-
-  if is_mountpoint_exact "$target"; then
-    return 0
-  fi
-
-  local opts="subvol=${subvol}"
-  for o in "${OPTS_COMMON[@]}"; do
-    opts="${opts},${o}"
-  done
-
-  mount -t btrfs -o "$opts" "$dev" "$target"
-}
-
-umount_target() {
-  local target="$1"
-  if is_mountpoint_exact "$target"; then
-    umount "$target"
-  fi
-}
-
-# Choose an interactive shell inside the chroot.
 pick_shell() {
   local root="$1"
   if [[ -x "${root}/bin/bash" ]]; then
@@ -119,41 +96,84 @@ pick_shell() {
   fi
 }
 
+validate_btrfs_device() {
+  local dev="$1"
+  [[ -b "$dev" ]] || die "Block device not found: $dev"
+  local fstype
+  fstype="$(lsblk -no FSTYPE "$dev" 2>/dev/null | head -n1 || true)"
+  [[ "$fstype" == "btrfs" ]] || die "Device is not btrfs: $dev (found: ${fstype:-unknown})"
+}
+
+join_opts() {
+  local opts=""
+  local o
+  for o in "${OPTS_COMMON[@]}"; do
+    if [[ -z "$opts" ]]; then
+      opts="$o"
+    else
+      opts="${opts},${o}"
+    fi
+  done
+  echo "$opts"
+}
+
+detect_chroot_root() {
+  local base="$1"
+
+  if [[ -d "${base}/@" ]]; then
+    echo "${base}/@"
+    return 0
+  fi
+
+  if [[ -d "${base}/root" ]]; then
+    echo "${base}/root"
+    return 0
+  fi
+
+  return 1
+}
+
 cmd_mount() {
-  local uuid="$DEFAULT_UUID"
   local base="$DEFAULT_BASE"
+  local dev=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    --uuid)
-      uuid="${2:-}"
-      shift 2
-      ;;
     --base)
       base="${2:-}"
       shift 2
       ;;
-    *) die "Unknown option: $1" ;;
+    --device)
+      dev="${2:-}"
+      shift 2
+      ;;
+    *)
+      die "Unknown option: $1"
+      ;;
     esac
   done
 
-  local dev
-  dev="$(dev_from_uuid "$uuid")"
-  [[ -e "$dev" ]] || die "Device not found: $dev"
+  if [[ -z "$dev" ]]; then
+    local root_dev
+    root_dev="$(current_root_device)"
+    dev="$(other_pair_device "$root_dev")"
+  fi
+
+  dev="$(normalize_dev "$dev")"
+  validate_btrfs_device "$dev"
 
   mkdir -p "$base"
 
-  # Mount root first (useful for chroot or inspection).
-  mount_subvol "$dev" "@" "${base}/${SUBVOLS[@]:0:0}" 2>/dev/null || true
-  mount_subvol "$dev" "@" "${base}/${SUBVOLS[@]:0:0}" 2>/dev/null || true
-  mount_subvol "$dev" "@" "${base}/${SUBVOLS[@]:0:0}" 2>/dev/null || true
+  if is_mountpoint_exact "$base"; then
+    echo "$base is already mounted."
+    findmnt -rn --target "$base" -o TARGET,SOURCE,FSTYPE,OPTIONS
+    return 0
+  fi
 
-  mount_subvol "$dev" "@" "${base}/${SUBVOLS["@"]}"
-
-  # Mount the rest.
-  for sv in "@home" "@cache" "@log" "@root" "@srv" "@tmp"; do
-    mount_subvol "$dev" "$sv" "${base}/${SUBVOLS[$sv]}"
-  done
+  local opts
+  opts="$(join_opts)"
+  mount -t btrfs -o "$opts" "$dev" "$base"
+  findmnt -rn --target "$base" -o TARGET,SOURCE,FSTYPE,OPTIONS
 }
 
 cmd_umount() {
@@ -165,18 +185,18 @@ cmd_umount() {
       base="${2:-}"
       shift 2
       ;;
-    *) die "Unknown option: $1" ;;
+    *)
+      die "Unknown option: $1"
+      ;;
     esac
   done
 
-  # Unmount in reverse order.
-  umount_target "${base}/tmp"
-  umount_target "${base}/srv"
-  umount_target "${base}/root-user"
-  umount_target "${base}/log"
-  umount_target "${base}/cache"
-  umount_target "${base}/home"
-  umount_target "${base}/root"
+  if is_mountpoint_exact "$base"; then
+    umount "$base"
+    echo "Unmounted: $base"
+  else
+    echo "Not mounted: $base"
+  fi
 }
 
 cmd_status() {
@@ -188,23 +208,32 @@ cmd_status() {
       base="${2:-}"
       shift 2
       ;;
-    *) die "Unknown option: $1" ;;
+    *)
+      die "Unknown option: $1"
+      ;;
     esac
   done
 
-  echo "Base: $base"
-  for d in root home cache log root-user srv tmp; do
-    local p="${base}/${d}"
-    if is_mountpoint_exact "$p"; then
-      findmnt -rn --target "$p" -o TARGET,SOURCE,FSTYPE,OPTIONS
-    else
-      echo "$p : (not mounted)"
-    fi
-  done
+  local root_dev target_dev
+  root_dev="$(current_root_device)"
+  echo "Current root device: $root_dev"
+
+  if target_dev="$(other_pair_device "$root_dev" 2>/dev/null)"; then
+    echo "Auto target device : $target_dev"
+  else
+    echo "Auto target device : (unresolved from pair)"
+  fi
+
+  if is_mountpoint_exact "$base"; then
+    findmnt -rn --target "$base" -o TARGET,SOURCE,FSTYPE,OPTIONS
+  else
+    echo "$base : (not mounted)"
+  fi
 }
 
 cmd_chroot() {
   local base="$DEFAULT_BASE"
+  local root=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -212,18 +241,27 @@ cmd_chroot() {
       base="${2:-}"
       shift 2
       ;;
-    *) die "Unknown option: $1" ;;
+    --root)
+      root="${2:-}"
+      shift 2
+      ;;
+    *)
+      die "Unknown option: $1"
+      ;;
     esac
   done
 
-  local root="${base}/root"
-  is_mountpoint_exact "$root" || die "Not mounted: $root (run: sudo $0 mount)"
+  is_mountpoint_exact "$base" || die "Not mounted: $base (run: sudo $0 mount)"
+
+  if [[ -z "$root" ]]; then
+    root="$(detect_chroot_root "$base" 2>/dev/null || true)"
+    [[ -n "$root" ]] || die "Cannot detect chroot root under $base (expected @ or root)."
+  fi
 
   local shell
   shell="$(pick_shell "$root" 2>/dev/null || true)"
-  [[ -n "$shell" ]] || die "No shell found inside chroot (no /bin/bash, /usr/bin/bash, or /bin/sh)."
+  [[ -n "$shell" ]] || die "No shell found inside chroot root: $root"
 
-  # Bind-mount runtime FS for a functional chroot.
   mkdir -p "${root}/"{dev,proc,sys,run}
   mount --bind /dev "${root}/dev"
   mount --bind /proc "${root}/proc"
@@ -236,7 +274,6 @@ cmd_chroot() {
   local rc=$?
   set -e
 
-  # Cleanup bind mounts after exiting chroot.
   umount "${root}/run" 2>/dev/null || true
   umount "${root}/sys" 2>/dev/null || true
   umount "${root}/proc" 2>/dev/null || true
@@ -246,17 +283,28 @@ cmd_chroot() {
 }
 
 main() {
-  need_root
-
   local cmd="${1:-help}"
   shift || true
 
   case "$cmd" in
-  mount) cmd_mount "$@" ;;
-  umount | unmount) cmd_umount "$@" ;;
-  status) cmd_status "$@" ;;
-  chroot) cmd_chroot "$@" ;;
-  help | -h | --help) usage ;;
+  mount)
+    need_root
+    cmd_mount "$@"
+    ;;
+  umount | unmount)
+    need_root
+    cmd_umount "$@"
+    ;;
+  status)
+    cmd_status "$@"
+    ;;
+  chroot)
+    need_root
+    cmd_chroot "$@"
+    ;;
+  help | -h | --help)
+    usage
+    ;;
   *)
     usage
     die "Unknown command: $cmd"
