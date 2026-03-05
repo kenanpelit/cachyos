@@ -5,6 +5,7 @@ After=graphical-session.target niri-ready.service niri-bootstrap.service
 
 [Service]
 ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate
+ExecStartPost=/usr/bin/bash -lc 'stamp="%t/noctalia-warm-restart.stamp"; [[ -e "$stamp" ]] && exit 0; : >"$stamp"; nohup sh -c "sleep ${NOCTALIA_WARM_RESTART_DELAY:-3}; systemctl --user is-active --quiet noctalia.service || exit 0; systemctl --user restart noctalia.service >/dev/null 2>&1 || true" >/dev/null 2>&1 &'
 Restart=on-failure
 RestartSec=1
 
