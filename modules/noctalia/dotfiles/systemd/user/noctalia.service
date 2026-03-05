@@ -1,7 +1,7 @@
 [Unit]
 Description=Noctalia Shell
 BindsTo=graphical-session.target
-After=graphical-session.target
+After=graphical-session.target niri-ready.service niri-bootstrap.service
 
 [Service]
 ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate
