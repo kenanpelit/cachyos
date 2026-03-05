@@ -5,6 +5,7 @@ PartOf=niri-session.target
 
 [Service]
 Type=simple
+ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend niri 2>/dev/null || osc-shell backend niri 2>/dev/null || echo noctalia)"; [[ "$backend" == "dms" ]]'
 Environment=DMS_SCREENSHOT_EDITOR=swappy
 Environment=TERMINAL=kitty
 Environment=XDG_RUNTIME_DIR=/run/user/%U
