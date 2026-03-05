@@ -79,7 +79,7 @@ layer-rule {
 // Here we only start the minimal session bootstrap + helpers that must exist early.
 
 spawn-at-startup "sh" "-lc" "$HOME/.local/bin/niri-osc set env"
-spawn-at-startup "sh" "-lc" "$HOME/.local/bin/osc-shell ensure"
+spawn-at-startup "sh" "-lc" "OSC_SHELL_STARTUP=1 $HOME/.local/bin/osc-shell ensure"
 spawn-at-startup "/usr/bin/clipse" "-listen"
 
 // ------------------------------------------------------------------------

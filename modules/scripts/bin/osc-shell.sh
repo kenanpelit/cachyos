@@ -147,6 +147,44 @@ import_session_environment() {
     SWAYSOCK >/dev/null 2>&1 || true
 }
 
+wait_for_niri_startup_settle() {
+  [[ "${OSC_SHELL_STARTUP:-0}" == "1" ]] || return 0
+  [[ "$(detect_compositor)" == "niri" ]] || return 0
+  ensure_systemd_user || return 0
+
+  local i state saw_bootstrap=0
+
+  # Wait for niri IPC readiness on fresh login (best-effort).
+  for i in {1..160}; do
+    if systemctl --user is-active --quiet niri-ready.service; then
+      break
+    fi
+    sleep 0.05
+  done
+
+  # Give niri-bootstrap a short window to enter activation.
+  for i in {1..80}; do
+    state="$(systemctl --user show -p ActiveState --value niri-bootstrap.service 2>/dev/null || true)"
+    if [[ "$state" == "activating" ]]; then
+      saw_bootstrap=1
+      break
+    fi
+    sleep 0.05
+  done
+
+  if [[ "$saw_bootstrap" -eq 1 ]]; then
+    # Wait until bootstrap no longer activating to avoid early shell races.
+    for i in {1..240}; do
+      state="$(systemctl --user show -p ActiveState --value niri-bootstrap.service 2>/dev/null || true)"
+      [[ "$state" == "activating" ]] || break
+      sleep 0.05
+    done
+  else
+    # Fallback buffer when bootstrap state isn't observable yet.
+    sleep 1
+  fi
+}
+
 ensure_backend() {
   local backend="$1"
 
@@ -154,6 +192,7 @@ ensure_backend() {
     noctalia)
       if ensure_systemd_user; then
         import_session_environment
+        wait_for_niri_startup_settle
         systemctl --user stop dms.service >/dev/null 2>&1 || true
         systemctl --user stop dms-plugin-sync.service >/dev/null 2>&1 || true
         systemctl --user stop dms-resume-restart.service >/dev/null 2>&1 || true
