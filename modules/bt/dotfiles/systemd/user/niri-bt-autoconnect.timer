@@ -4,7 +4,7 @@ After=niri-session.target
 PartOf=niri-session.target
 
 [Timer]
-OnActiveSec=10s
+OnActiveSec=30s
 AccuracySec=3s
 Unit=niri-bt-autoconnect.service
 

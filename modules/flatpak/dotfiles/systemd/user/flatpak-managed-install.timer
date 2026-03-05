@@ -2,7 +2,7 @@
 Description=Delayed start timer for Flatpak installation
 
 [Timer]
-OnBootSec=90s
+OnBootSec=1m
 OnUnitActiveSec=6h
 Persistent=true
 
