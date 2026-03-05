@@ -154,3 +154,6 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/niriScreenshot"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/niriScreenshot
 	url = https://github.com/jfchenier/dms-niri-screenshot
+[submodule "modules/noctalia/dotfiles/noctalia/plugins/mpd"]
+	path = modules/noctalia/dotfiles/noctalia/plugins/mpd
+	url = https://github.com/ido50/noctalia-mpd
