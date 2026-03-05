@@ -8,6 +8,11 @@
 
 set -euo pipefail
 
+SCRIPT_NAME="$(basename "$0")"
+if [[ "$SCRIPT_NAME" == "cachy-mount.sh" ]]; then
+  SCRIPT_NAME="cachy-mount"
+fi
+
 DEFAULT_BASE="/cachy"
 PAIR_A="/dev/nvme1n1p1"
 PAIR_B="/dev/nvme0n1p2"
@@ -18,11 +23,11 @@ OPTS_COMMON=("subvolid=5" "noatime" "compress=zstd" "space_cache=v2")
 usage() {
   cat <<EOF
 Usage:
-  sudo cachy-mount.sh mount   [--base <DIR>] [--device <DEV>]
-  sudo cachy-mount.sh umount  [--base <DIR>]
-  sudo cachy-mount.sh status  [--base <DIR>]
-  sudo cachy-mount.sh chroot  [--base <DIR>] [--root <DIR>]
-  sudo cachy-mount.sh help
+  sudo ${SCRIPT_NAME} mount   [--base <DIR>] [--device <DEV>]
+  sudo ${SCRIPT_NAME} umount  [--base <DIR>]
+  sudo ${SCRIPT_NAME} status  [--base <DIR>]
+  sudo ${SCRIPT_NAME} chroot  [--base <DIR>] [--root <DIR>]
+  sudo ${SCRIPT_NAME} help
 
 Defaults:
   pair A: ${PAIR_A}
@@ -251,7 +256,7 @@ cmd_chroot() {
     esac
   done
 
-  is_mountpoint_exact "$base" || die "Not mounted: $base (run: sudo $0 mount)"
+  is_mountpoint_exact "$base" || die "Not mounted: $base (run: sudo ${SCRIPT_NAME} mount)"
 
   if [[ -z "$root" ]]; then
     root="$(detect_chroot_root "$base" 2>/dev/null || true)"
