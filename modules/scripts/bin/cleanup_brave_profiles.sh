@@ -44,9 +44,25 @@ to_human() {
 
 find_running_pids() {
   local isolated_dir="$1"
-  ps -eo pid=,args= | awk -v dir="$isolated_dir" '
-    index($0, "/opt/brave-bin/brave") == 1 && index($0, "--user-data-dir=" dir) {
-      print $1
+  local isolated_dir_input="${2:-}"
+  ps -eo pid=,args= | awk -v dir="$isolated_dir" -v dir_input="$isolated_dir_input" '
+    {
+      pid = $1
+      $1 = ""
+      sub(/^[[:space:]]+/, "", $0)
+      cmd = $0
+
+      if (cmd !~ /(^|[[:space:]])([^[:space:]]*\/)?brave([[:space:]]|$)/) {
+        next
+      }
+
+      matches_dir = index(cmd, "--user-data-dir=" dir) || index(cmd, "--user-data-dir " dir)
+      if (!matches_dir && dir_input != "") {
+        matches_dir = index(cmd, "--user-data-dir=" dir_input) || index(cmd, "--user-data-dir " dir_input)
+      }
+      if (matches_dir) {
+        print pid
+      }
     }
   '
 }
@@ -105,18 +121,19 @@ if [[ -L "$BRAVE_HOME" ]]; then
 fi
 
 ISOLATED_DIR="$BRAVE_HOME/isolated"
+ISOLATED_DIR_INPUT="$BRAVE_HOME_INPUT/isolated"
 
 if [[ ! -d "$ISOLATED_DIR" ]]; then
   echo "isolated directory not found: $ISOLATED_DIR" >&2
   exit 1
 fi
 
-RUNNING_PIDS="$(find_running_pids "$ISOLATED_DIR" || true)"
+RUNNING_PIDS="$(find_running_pids "$ISOLATED_DIR" "$ISOLATED_DIR_INPUT" || true)"
 if [[ -n "$RUNNING_PIDS" ]]; then
   if [[ "$FORCE_CLOSE" -eq 1 ]]; then
     printf '%s\n' "$RUNNING_PIDS" | xargs -r kill -TERM
     sleep 2
-    REMAINING="$(find_running_pids "$ISOLATED_DIR" || true)"
+    REMAINING="$(find_running_pids "$ISOLATED_DIR" "$ISOLATED_DIR_INPUT" || true)"
     if [[ -n "$REMAINING" ]]; then
       printf '%s\n' "$REMAINING" | xargs -r kill -KILL
     fi
