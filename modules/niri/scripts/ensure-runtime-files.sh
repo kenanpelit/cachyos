@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REAL_USER="${SUDO_USER:-$(whoami)}"
-USER_HOME="$(getent passwd "$REAL_USER" | cut -d: -f6 2>/dev/null || true)"
-if [ -z "${USER_HOME:-}" ]; then
-  USER_HOME="$(eval echo "~$REAL_USER")"
-fi
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+repo_root="$(cd "$script_dir/../../.." && pwd)"
+source "$repo_root/modules/base/lib/core.sh"
 
 NIRI_DIR="$USER_HOME/.config/niri"
 DMS_DIR="$NIRI_DIR/dms"

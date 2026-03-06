@@ -3,40 +3,19 @@ set -euo pipefail
 
 # ==============================================================================
 # copy-scripts-to-local-bin
-# ------------------------------------------------------------------------------
-# Copies module scripts (*.sh, *.py) into ~/.local/bin as extensionless executables.
-# Ensures files remain owned by the real user even when run under sudo.
-#
-# Key guarantees:
-#   - foo.sh -> ~/.local/bin/foo   (NEVER keeps .sh)
-#   - bar.py -> ~/.local/bin/bar   (NEVER keeps .py)
-#   - Atomic updates (write to temp, then rename)
-#   - User ownership (prevents `dcli sync` permission issues)
 # ==============================================================================
 
 module_root="$(cd "$(dirname "$0")/.." && pwd)"
+repo_root="$(cd "$module_root/../.." && pwd)"
+source "$repo_root/modules/base/lib/core.sh"
+
 system_bin_dir="/usr/local/bin"
-
-# Resolve target user + home
-if [[ -n "${SUDO_USER:-}" ]]; then
-  TARGET_USER="$SUDO_USER"
-  USER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
-else
-  TARGET_USER="$(id -un)"
-  USER_HOME="$HOME"
-fi
-
 bin_dir="$USER_HOME/.local/bin"
 
-target_uid="$(id -u "$TARGET_USER")"
-target_gid="$(id -g "$TARGET_USER")"
+target_uid="$(id -u "$REAL_USER")"
+target_gid="$(id -g "$REAL_USER")"
 is_root=false
 [[ "$(id -u)" -eq 0 ]] && is_root=true
-
-die() {
-  echo "ERROR: $*" >&2
-  exit 1
-}
 
 should_install() {
   case "$1" in
