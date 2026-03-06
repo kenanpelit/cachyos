@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: nsticky-toggle.sh
+# Description: Smart toggle for nsticky (sticky -> stage -> unstage).
+# Usage: nsticky-toggle.sh
+# ==============================================================================
 set -euo pipefail
 
 # Best-effort environment for compositor-launched scripts.

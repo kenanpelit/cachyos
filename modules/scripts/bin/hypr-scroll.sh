@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: hypr-scroll
+# Description: Wrapper around hyprscrolling layout dispatchers with fallbacks.
+# Usage: hypr-scroll <subcommand> [args...]
+# ==============================================================================
 set -euo pipefail
-
-# hypr-scroll
-# Wrapper around hyprscrolling layout dispatchers with pragmatic fallbacks.
-# The plugin path is used when available; otherwise common operations degrade to
-# standard Hyprland dispatchers where possible.
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/hypr-scroll"
 STATE_FILE="${CACHE_DIR}/state"

@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC PDF Splitter
-#   Version: 2.0.0
-#   Date: 2024-01-23
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: Advanced PDF file management and splitting utility with
-#                interactive TUI interface and batch processing capabilities
-#
-#   Features:
+# ==============================================================================
+# Script: pdfkes.sh
+# Description: Advanced PDF file management and splitting utility (OSC PDF Splitter)
+# Usage: pdfkes.sh [file] [options]
+# ==============================================================================
+# Features:
 #   - Interactive TUI with beautiful styling
 #   - Multiple splitting modes (chunk, range, custom)
 #   - Detailed PDF metadata viewing

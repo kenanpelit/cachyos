@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: svmnixos.sh
+# Description: SVM (Simple VM) profile for NixOS using QEMU/KVM
+# Usage: svmnixos.sh [install|start|stop|status|connect|console|reset] [options]
+# ==============================================================================
 # svmnixos.sh — SVM profile: NixOS (QEMU/KVM)
 
 #===============================================================================

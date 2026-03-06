@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# ==============================================================================
+# Script: cleanup_brave_profiles.sh
+# Description: Cleanup utility for Brave isolated profile disk usage.
+# Usage: cleanup_brave_profiles.sh [options]
+# ==============================================================================
 
-# --------------------------------------------------------------------
-# cleanup_brave_profiles.sh
-# Purpose : Cleanup utility for Brave isolated profile disk usage.
-# Default : Targets "$HOME/.brave" (override with BRAVE_HOME or option).
-# Scope   : Safe mode removes backup/cache folders.
-#           Aggressive mode also removes "Service Worker" folders.
-# Usage   : Can be run from any directory.
-# --------------------------------------------------------------------
+set -euo pipefail
 
 BRAVE_HOME="${BRAVE_HOME:-$HOME/.brave}"
 BRAVE_HOME_INPUT=""

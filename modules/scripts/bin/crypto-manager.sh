@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
-# crypto-manager.sh - SSH ve GPG izin/servis düzeltici
-# Anahtar dizin izinlerini onarır, isteğe bağlı yedek alır ve GPG
-# agent servislerini yeniden başlatır.
-
-# =============================================================================
-# SSH ve GnuPG Yönetim Scripti
-# =============================================================================
-#
-# Bu script aşağıdaki işlemleri gerçekleştirir:
-# 1. SSH ve GnuPG dizinlerindeki izinleri düzeltir
-# 2. İsteğe bağlı olarak yedekleme yapar
-# 3. GPG servislerini yönetir
-#
-# =============================================================================
+# ==============================================================================
+# Script: crypto-manager.sh
+# Description: SSH and GPG permission/service fixer and backup tool.
+# Usage: crypto-manager.sh [options]
+# ==============================================================================
 
 # Renklendirme için ANSI kodları
 GREEN='\033[0;32m'

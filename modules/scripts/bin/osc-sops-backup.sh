@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: osc-sops-backup.sh
+# Description: SOPS age key backup and restore utility (OpenSSL AES-256-CBC)
+# Usage: osc-sops-backup [backup|restore] [options]
+# ==============================================================================
 set -euo pipefail
 
 usage() {

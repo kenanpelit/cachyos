@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# renew_env.sh - Shell env yenileme aracı
-# Env değişkenlerini yeniden yükler, session dosyalarını kaynaştırıp path’i tazeler.
+# ==============================================================================
+# Script: renew_env.sh
+# Description: Shell environment renewal tool for tmux panes
+# Usage: renew_env.sh
+# ==============================================================================
 
 #set -eu
 

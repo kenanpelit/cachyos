@@ -1,19 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# ==============================================================================
+# Script: osc-login-prompts
+# Description: Session login warmup (GPG, Keyring, secrets) for non-interactive use.
+# Usage: osc-login-prompts [options]
+# ==============================================================================
 
-# ==============================================================================
-# osc-login-prompts
-# ------------------------------------------------------------------------------
-# Session login warmup (non-interactive, best-effort):
-# - Reads secrets from pass store (or bootstrap files/env)
-# - Warms up GPG (loopback)
-# - Unlocks GNOME keyring
-# - Writes optional notify + log output
-#
-# Typical use:
-#   osc-login-prompts
-#   osc-login-prompts --delay 0 --no-notify --once
-# ==============================================================================
+set -euo pipefail
 
 delay="${OSC_LOGIN_PROMPTS_DELAY:-${NIRI_BOOT_PROMPT_DELAY:-6}}"
 gpg_pass_entry="${OSC_GPG_PASS_ENTRY:-kenp/gnupg}"

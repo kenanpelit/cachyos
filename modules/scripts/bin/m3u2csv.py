@@ -1,12 +1,8 @@
 #!/usr/bin/env sh
 # ==============================================================================
-# m3u2csv.py - Convert M3U playlists to TSV (name, group, url)
-# ------------------------------------------------------------------------------
-# Usage:
-#   m3u2csv.py INPUT.m3u OUTPUT.csv
-# Notes:
-#   - Outputs tab-separated values (TSV) with 3 columns: name, group, url
-#   - Designed to be installed as an extensionless executable (m3u2csv)
+# Script: m3u2csv.py
+# Description: Convert M3U playlists to TSV (name, group, url).
+# Usage: m3u2csv.py INPUT.m3u OUTPUT.csv
 # ==============================================================================
 if [ "$#" -lt 2 ]; then
   echo "usage: m3u2csv INPUT.m3u OUTPUT.csv" >&2

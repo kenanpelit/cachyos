@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# -----------------------------------------------------------------------------
-# osc-shell
-# -----------------------------------------------------------------------------
+# ==============================================================================
+# Script: osc-shell.sh
+# Description: Shell router for desktop IPC actions (DMS or Noctalia)
+# Usage: osc-shell.sh [action] [options]
+# ==============================================================================
 # Shell router for desktop IPC actions.
 # - Provides a stable command surface for keybinds.
 # - Routes actions to DMS or Noctalia based on profile/compositor.

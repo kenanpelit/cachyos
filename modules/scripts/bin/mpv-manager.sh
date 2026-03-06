@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# mpv-manager.sh - compositor-aware MPV helper
-# - Hyprland: window management via hyprctl (move/stick/wallpaper + IPC controls)
-# - Niri/other: IPC controls (start/playback/play-yt/save-yt), best-effort helpers
+# ==============================================================================
+# Script: mpv-manager.sh
+# Description: Compositor-aware MPV helper for window management and IPC control.
+# Usage: mpv-manager.sh [start|playback|play-yt|save-yt|move|stick|wallpaper]
+# ==============================================================================
 
 set -euo pipefail
 

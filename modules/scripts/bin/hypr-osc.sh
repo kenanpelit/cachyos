@@ -1,38 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# hypr-osc - Hyprland session helper multiplexer (single-file)
-# ==============================================================================
-# This script intentionally embeds all Hyprland helper logic that used to live in
-# separate scripts under `modules/home/scripts/bin/`.
-#
-# Usage:
-#   hypr-osc <subcommand> [args...]
-#
-# Commands:
-#   tty                Start Hyprland from TTY/DM (was: hyprland_tty)
-#   init               Session bootstrap (was: hypr-init)
-#   lock               Lock session via DMS/logind
-#   arrange-windows     Move windows to target workspaces
-#   workspace-monitor  Workspace/monitor helper (was: hypr-workspace-monitor)
-#   env-sync           Sync session env into systemd/dbus
-#   window-move        Move focused window (workspace/monitor)
-#   column-move        Move current column (monitor)
-#   consume-or-expel   Niri-like window in/out of column
-#   maximize-column    Toggle maximize current column
-#   maximize-window-to-edges  Maximize window to screen edges (Niri-like)
-#   focus-float-tile   Toggle focus float/tile
-#   workspace-move-or-focus  Move workspace or focus monitor
-#   switch             Smart monitor/workspace switcher (was: hypr-switch)
-#   doctor             Print Hyprland session diagnostics
-#   toggle-float        Toggle floating for active window (was: toggle_float)
-#   toggle-opacity      Toggle active/inactive opacity (was: toggle_opacity)
-#   toggle-blur         Toggle Hyprland blur (was: toggle_blur)
-#   layout-toggle      Toggle layout preset (was: hypr-layout_toggle)
-#   vlc-toggle         VLC helper (was: hypr-vlc_toggle)
-#   wifi-power-save    WiFi power save helper (was: hypr-wifi-power-save)
-#   airplane-mode      Airplane mode helper (was: hypr-airplane_mode)
-#   colorpicker        Color picker helper (was: hypr-colorpicker)
-#   start-batteryd     Battery daemon helper (was: hypr-start-batteryd)
+# Script: hypr-osc
+# Description: Hyprland session helper multiplexer (single-file logic).
+# Usage: hypr-osc <subcommand> [args...]
 # ==============================================================================
 
 set -euo pipefail

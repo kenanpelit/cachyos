@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC Port Scanner
-#   Version: 1.0.0
-#   Date: 2024-01-23
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: Network discovery and port scanning utility with advanced
-#                vendor detection and comprehensive protocol support
-#
-#   Features:
+# ==============================================================================
+# Script: ports.sh
+# Description: OSC Port Scanner and network discovery utility
+# Usage: ports.sh [options]
+# ==============================================================================
+# Features:
 #   - Network device discovery with vendor identification
 #   - TCP/UDP port scanning capabilities
 #   - Flexible port range and list scanning

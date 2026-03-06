@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# osc-here-hypr.sh - Bring window here OR launch it if it's not running (Hyprland)
-# ==============================================================================
-# Usage: osc-here-hypr.sh <class/app-id>
-#        osc-here-hypr.sh all [comma,separated,apps]
-# Example: osc-here-hypr.sh Kenp
+# Script: osc-here-hypr.sh
+# Description: Bring window to current workspace or launch it (Hyprland).
+# Usage: osc-here-hypr.sh <class/app-id> | all [list]
 # ==============================================================================
 
 set -euo pipefail

@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: Brave Process Killer
-#   Version: 2.0.0
-#   Description: Basit ve etkili Brave process kapatma aracı
-#
-#===============================================================================
+# ==============================================================================
+# Script: brave_killer.sh
+# Description: Simple and effective tool to kill Brave browser processes.
+# Usage: brave_killer.sh [options]
+# ==============================================================================
+# Version: 2.0.0
 
 set -euo pipefail
 

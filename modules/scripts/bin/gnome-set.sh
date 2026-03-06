@@ -1,24 +1,11 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: gnome-set.sh
+# Description: GNOME window management helpers (Niri-like 'here' and 'go').
+# Usage: gnome-set.sh [here|go] [APP_ID|all]
+# ==============================================================================
+
 set -euo pipefail
-
-SCRIPT_NAME="${0##*/}"
-PARITY_UUID="gnome-niri-parity@kenan"
-
-usage() {
-  cat <<'EOF'
-gnome-set - GNOME helpers (Niri-like)
-
-Usage:
-  gnome-set here <APP_ID|all>
-  gnome-set go
-
-Examples:
-  gnome-set here Kenp
-  gnome-set here TmuxKenp
-  gnome-set here all
-  gnome-set go
-EOF
-}
 
 die() {
   echo "${SCRIPT_NAME}: $*" >&2

@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: ter.sh
+# Description: Remote SSH tunnel manager with search and byobu session management
+# Usage: ter.sh [options] [search_pattern]
+# ==============================================================================
 #===============================================================================
 #
 #   Script: OSC Remote Tunnel Manager

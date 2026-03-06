@@ -1,23 +1,10 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# osc-logs-status
-# ------------------------------------------------------------------------------
-# Unified health check for system log management.
-#
-# What it checks:
-#   1) Managed files from logs module
-#   2) Effective journald limits
-#   3) Journal disk usage
-#   4) logrotate timer health
-#   5) logrotate debug errors (duplicate/parse)
-#   6) /var/log footprint
-#   7) logrotate state entries for key logs
-#
-# Usage:
-#   osc-logs-status
-#   osc-logs-status --help
-#   osc-logs-status --plain
+# Script: osc-logs-status
+# Description: Unified health check for system log management (journald, logrotate).
+# Usage: osc-logs-status [options]
 # ==============================================================================
+# Version: 1.0.0
 
 set -Eeuo pipefail
 

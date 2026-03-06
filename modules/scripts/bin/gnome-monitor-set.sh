@@ -1,34 +1,9 @@
 #!/usr/bin/env bash
-# gnome-monitor-set.sh - Harici monitörü GNOME'da birincil yapar
-# Harici ekranı algılayıp primary olarak ayarlar, mevcut çözünürlük
-# ve düzeni koruyarak bildirim/panel yönünü düzeltir.
-
-################################################################################
-# GNOME Harici Monitör Birincil Yapma Script'i
-################################################################################
-#
-# Bu script, GNOME masaüstü ortamında harici monitörü otomatik olarak
-# birincil (primary) ekran olarak ayarlar. Bu sayede GNOME bildirimleri
-# laptop ekranı yerine harici monitörde görünür.
-#
-# Özellikler:
-#   - Harici monitörü otomatik algılar (DP, HDMI, vb.)
-#   - Laptop ekranını otomatik algılar (eDP, LVDS)
-#   - Mevcut monitör düzenini korur (çözünürlük, pozisyon, scale)
-#   - Sadece birincil monitör ayarını değiştirir
-#   - Test bildirimi gönderir
-#
-# Kullanım:
-#   ./gnome-monitor-set.sh
-#
-# Gereksinimler:
-#   - GNOME 40+ (gnome-monitor-config komutu gerekli)
-#   - Wayland oturum önerilir
-#
-# Not: X11 kullanıyorsanız 'xrandr --output MONITOR --primary' komutu
-#      daha basit bir alternatif olabilir.
-#
-################################################################################
+# ==============================================================================
+# Script: gnome-monitor-set.sh
+# Description: Automatically sets external monitor as primary in GNOME.
+# Usage: gnome-monitor-set.sh
+# ==============================================================================
 
 # Tüm monitör bilgisini al
 monitor_list=$(gnome-monitor-config list)

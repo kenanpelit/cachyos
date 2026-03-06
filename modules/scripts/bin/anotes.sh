@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
-# ===========================================================================
-# anotes.sh - Anote.sh için geliştirilmiş başlatıcı
-# ===========================================================================
-#
-# Bu betik, anote.sh terminal not yönetim sistemini çeşitli terminal emülatörlerinde
-# çalıştırmak için bir başlatıcı görevi görür, kullanıcıya daha iyi bir deneyim sunar.
-#
-# Geliştiren: Kenan Pelit
+# ==============================================================================
+# Script: anotes.sh
+# Description: Enhanced launcher for anote.sh supporting various terminal emulators.
+# Usage: anotes.sh [options]
+# ==============================================================================
+# Authorship: Kenan Pelit
 # Repository: github.com/kenanpelit
-# Versiyon: 1.3 (Optimized)
-# Lisans: GPLv3
+# Version: 1.3 (Optimized)
+# License: GPLv3
 
 set -euo pipefail
 

@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-# osc-tmux-plugins-install.sh - tmux plugin kurucu
-# TPM/tmux config’e göre eksik pluginleri indirip kurar, günceller.
-
-#######################################
-#
-# Version: 1.0.0
-# Date: 2024-12-12
-# Author: Kenan Pelit
-# Repository: github.com/kenanpelit/dotfiles
-# Description: TmuxPluginManager - Tmux Plugin Yönetim Aracı
+# ==============================================================================
+# Script: osc-tmux-plugins-install.sh
+# Description: Tmux Plugin Manager - Plugin installation and management tool
+# Usage: osc-tmux-plugins-install.sh [options]
+# ==============================================================================
 #
 # Bu script tmux plugin'lerini yönetmek için tasarlanmış bir araçtır.
 # Temel özellikleri:

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# osc-imagekeeper.sh - Resim arşivleyici/temizleyici
-# Belirli klasörlerdeki görselleri düzenler, eşleşmeyenleri ayıklar, loglar.
+# ==============================================================================
+# Script: osc-imagekeeper.sh
+# Description: Visual file management tool to detect corrupted and duplicate images.
+# Usage: osc-imagekeeper.sh [options]
+# ==============================================================================
 
-# ImageKeeper - Görsel Dosya Yönetim Aracı
-# Bozuk ve duplicate görsel dosyaları tespit eder
-
-# Renk tanımlamaları
+# Renklendirme için ANSI kodları
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'

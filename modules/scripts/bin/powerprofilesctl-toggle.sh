@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: powerprofilesctl-toggle.sh
+# Description: Backward-compatible wrapper for power-profile toggle
+# Usage: powerprofilesctl-toggle.sh
+# ==============================================================================
 set -euo pipefail
 
 # Backward-compatible wrapper.

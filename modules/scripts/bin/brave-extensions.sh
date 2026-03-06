@@ -1,18 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Brave Extensions Manuel Kurulum Script'i - v2.0
-# ==============================================================================
-# Bu script Brave Browser için extension'ları Chrome Web Store'dan manuel
-# olarak kurmanıza yardımcı olur.
-#
-# Özellikler:
-# - Kategorilere göre filtreleme
-# - Yüklü/yüklü değil kontrolü
-# - Otomatik eksik extension bulma
-# - Renklendirme ve progress göstergesi
-# - İnteraktif menü sistemi
-#
-# Kullanım: ./brave-install-extensions.sh
+# Script: brave-extensions.sh
+# Description: Manual extension installer for Brave Browser from Chrome Web Store.
+# Usage: brave-extensions.sh
 # ==============================================================================
 
 set -uo pipefail

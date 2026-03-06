@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# wifi-setup.sh - NetworkManager bağlantılarını oluşturma
-
-# Kullanım: ./wifi-setup.sh Ken_5_Parolası Ken_2_4_Parolası
+# ==============================================================================
+# Script: osc-wifi-home.sh
+# Description: NetworkManager connection setup for home WiFi (Ken_5 and Ken_2_4)
+# Usage: osc-wifi-home.sh <Ken_5_Password> <Ken_2_4_Password>
+# ==============================================================================
 
 # Hata kontrolü
 if [ $# -ne 2 ]; then

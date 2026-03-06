@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# sil_ayni_mp4.sh - Yinelenen mp4 dosya temizleyici
-# Aynı isim/içerik eşleşmelerini bulup siler, işlem öncesi onay alır.
+# ==============================================================================
+# Script: sil_ayni_mp4.sh
+# Description: Duplicate MP4 file cleaner based on MD5 content matching
+# Usage: sil_ayni_mp4.sh [directory]
+# ==============================================================================
 
 # Dosya türünü ve kontrol edilecek dizini belirleyin
 file_extension="mp4"

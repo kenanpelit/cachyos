@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-#######################################
-#
+# ==============================================================================
+# Script: bluetooth_toggle.sh
+# Description: Bluetooth Toggle + Dual-Boot Rekey Fix (BlueZ + PipeWire/PulseAudio).
+# Usage: bluetooth_toggle.sh [options] [MAC] [NAME]
+# ==============================================================================
 # Version: 2.0.1
 # Date: 2026-01-22
-# Original Author: Kenan Pelit
-# Script: Bluetooth Toggle + Dual-Boot Rekey Fix (BlueZ + PipeWire/PulseAudio)
-#
+# Authorship: Kenan Pelit
 # License: MIT
-#
-#######################################
 
 set -euo pipefail
 

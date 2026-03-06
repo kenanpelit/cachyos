@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: sunsetr-set.sh
+# Description: Profile-aware helper for sunsetr to manage display color temperature
+# Usage: sunsetr-set.sh [list|apply|status|<preset>] [profile] [options]
+# ==============================================================================
 set -euo pipefail
 
 # -----------------------------------------------------------------------------

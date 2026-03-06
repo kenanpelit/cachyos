@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: tm.sh
+# Description: Comprehensive Tmux management tool for sessions, layouts, buffers, and plugins
+# Usage: tm.sh <module> [command] [parameters]
+# ==============================================================================
 #######################################
 #
 # tm.sh - Birleşik Tmux Yönetim Aracı

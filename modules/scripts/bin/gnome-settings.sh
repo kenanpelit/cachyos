@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Complete GNOME Configuration Script for Linux with Catppuccin Mocha Theme
-# Tüm DConf ayarlarını manuel olarak uygular
+# Script: gnome-settings.sh
+# Description: Complete GNOME configuration script with Catppuccin Mocha theme.
+# Usage: gnome-settings.sh
 # ==============================================================================
 
 set -euo pipefail

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-#  Script: safe-reboot
-#  Amaç : Brave/Chromium tabanlı tarayıcılar crash uyarısı vermeden reboot
-#  Author: Kenan Pelit
-#===============================================================================
+# ==============================================================================
+# Script: osc-safe-reboot.sh
+# Description: Safe reboot/shutdown for Brave/Chromium browsers without crash warnings
+# Usage: osc-safe-reboot.sh [reboot|poweroff]
+# ==============================================================================
 set -euo pipefail
 
 # When invoked from a systemd --user service (e.g. DMS), the process may not be

@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: osc-wiremix.sh
+# Description: Launch wiremix in kitty with stable class/app-id
+# Usage: osc-wiremix.sh [options]
+# ==============================================================================
 set -euo pipefail
 
 # Launch wiremix in kitty with a stable class/app-id for compositor rules.

@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC Public IP Checker
-#   Version: 1.3.0
-#   Date: 2025-12-19
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: Advanced public IP address checker with VPN detection and
-#                location reporting via desktop notifications
-#
+# ==============================================================================
+# Script: publicip.sh
+# Description: Advanced public IP address checker with VPN detection
+# Usage: publicip.sh [options]
+# ==============================================================================
 #   Features:
 #   - Mullvad VPN status detection
 #   - Country resolution via ipapi.co

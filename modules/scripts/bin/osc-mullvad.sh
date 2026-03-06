@@ -1,35 +1,9 @@
 #!/usr/bin/env bash
-#set -x
-#===============================================================================
-#
-#   Script: Integrated Mullvad VPN Manager
-#   Version: 3.0.0
-#   Date: 2025-04-13
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/nixosc
-#   Description: Comprehensive Mullvad VPN management utility combining basic
-#                connection management with advanced relay selection and control
-#
-#   Features:
-#   - Basic VPN connection controls (connect, disconnect, toggle, status)
-#   - Protocol toggle between OpenVPN and WireGuard
-#   - Random relay selection from global pool
-#   - Country-specific relay selection
-#   - City-specific relay selection
-#   - Smart protocol switching for current location
-#   - Favorites management
-#   - Fastest relay selection with ping tests
-#   - Log tracking for connections
-#   - Auto-retry for failed connections
-#   - Relay filtering (owned vs rented)
-#   - Connection status and testing
-#   - Timer-based automatic relay switching
-#   - System notifications for connection events
-#   - Timeout control for connections
-#
-#   License: MIT
-#
-#===============================================================================
+# ==============================================================================
+# Script: osc-mullvad.sh
+# Description: Integrated Mullvad VPN Manager for connection and relay control.
+# Usage: osc-mullvad.sh [COMMAND] [ARGUMENTS]
+# ==============================================================================
 
 # Set color codes for output
 RED='\033[0;31m'

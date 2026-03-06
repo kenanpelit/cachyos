@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# mpc-control.sh - mpd/mpc kontrol kısayolu
-# Çalma, duraklatma, ileri/geri ve ses ayarlarını hızlı komutlarla yönetir.
+# ==============================================================================
+# Script: mpc-control.sh
+# Description: Quick command-line controller for mpd using mpc.
+# Usage: mpc-control.sh [toggle|play|pause|stop|next|prev|status|vol up|vol down]
+# ==============================================================================
 
 # İkon tanımlamaları (Nerd Font ikonları)
 PLAY_ICON="󰐊"

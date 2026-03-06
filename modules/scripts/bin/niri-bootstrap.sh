@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: niri-bootstrap.sh
+# Description: Bootstrap script for Niri session initialization.
+# Usage: niri-bootstrap.sh
+# ==============================================================================
+
 set -eEuo pipefail
 
 log() { printf "[niri-bootstrap] %s\n" "$*"; }

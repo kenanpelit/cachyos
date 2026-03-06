@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# ==============================================================================
+# Script: brave-kenp-default.sh
+# Description: Default browser entry for Kenp profile with niri window focus.
+# Usage: brave-kenp-default.sh [URL]
+# ==============================================================================
 
-# Default browser entry for Kenp profile.
-# Use shared Brave instance so links open as tabs in the existing window.
+set -euo pipefail
 
 resolve_profile_brave() {
   local script_dir candidate

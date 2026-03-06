@@ -1,20 +1,10 @@
 #!/usr/bin/env bash
-# -----------------------------------------------------------------------------
-# niri-osc
-# -----------------------------------------------------------------------------
-# Unified single-file Niri helper.
-# Scopes:
-# - set
-# - flow
-# - sticky
-# - keybinds
-# - drop
-#
-# Design:
-# - Keep one entrypoint (`niri-osc`) while isolating large scope implementations.
-# - Use lazy loading: scope payload is only materialized/executed when requested.
-# - Cache extracted scope script under XDG cache for faster subsequent startups.
-# -----------------------------------------------------------------------------
+# ==============================================================================
+# Script: niri-osc
+# Description: Unified single-file Niri helper multiplexer (set, flow, sticky, etc.).
+# Usage: niri-osc <scope> [args...]
+# ==============================================================================
+# Version: 2.0.0
 
 set -euo pipefail
 

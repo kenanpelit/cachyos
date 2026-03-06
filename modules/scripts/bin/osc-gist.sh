@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# osc-gist.sh - GitHub Gist yükleyici
-# Seçilen dosyayı veya stdin’i gizli/genel Gist’e yükler, URL çıktısı verir.
+# ==============================================================================
+# Script: osc-gist.sh
+# Description: GitHub Gist uploader and manager (list, upload, delete).
+# Usage: osc-gist.sh [options] [file]
+# ==============================================================================
 
 # Kullanım fonksiyonu
 usage() {

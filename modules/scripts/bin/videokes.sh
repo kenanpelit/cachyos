@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: videokes.sh
+# Description: Video trimming tool using ffmpeg for quick cutting of video files
+# Usage: videokes.sh <video_file>
+# ==============================================================================
 # videokes.sh - Video kesme/trim aracı
 # ffmpeg ile başlangıç/bitiş sürelerine göre videoları hızlıca keser.
 

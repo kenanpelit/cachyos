@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC Subliminal Subtitle Downloader
-#   Version: 1.0.0
-#   Date: 2024-01-23
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: An automated subtitle downloader using Subliminal for video files,
-#                supporting multiple languages and batch processing
-#
-#   Features:
+# ==============================================================================
+# Script: osc-subliminal.sh
+# Description: OSC Subliminal Subtitle Downloader for video files
+# Usage: osc-subliminal.sh <file|directory> [options]
+# ==============================================================================
+# Features:
 #   - Downloads subtitles for individual video files or entire directories
 #   - Supports multiple languages (default: English and Turkish)
 #   - Force download option to update existing subtitles
 #   - Color-coded output for better readability
 #   - Smart video file type detection
 #
-#   License: MIT
+# License: MIT
 #
 #===============================================================================
 

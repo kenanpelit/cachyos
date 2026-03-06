@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
-# screenshot.sh - Wayland ekran görüntüsü aracı
-# grim/slurp ile bölge/ekran yakalar, dosya/clipboard’a kaydeder, notify gönderir.
-
-#######################################
-#
-# Version: 2.4.0
-# Date: 2025-11-27
-# Author: Kenan Pelit
-# Repository: github.com/kenanpelit/dotfiles
-# Description: HyprFlow & GnomeFlow - Gelişmiş Ekran Görüntüsü Aracı
-#
-# License: MIT
-#
-#######################################
+# ==============================================================================
+# Script: screenshot.sh
+# Description: Wayland screenshot tool using grim/slurp
+# Usage: screenshot.sh [options]
+# ==============================================================================
 
 # Yapılandırma Ayarları
 SAVE_DIR="$HOME/Pictures/Screenshots"

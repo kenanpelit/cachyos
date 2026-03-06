@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# dcli-cleanup.sh - Cleans up empty directories and unused structures in ~/.cachy
+# ==============================================================================
+# Script: dcli-cleanup.sh
+# Description: Cleans up empty directories and unused structures in ~/.cachy.
+# Usage: dcli-cleanup.sh [options]
+# ==============================================================================
 
 set -euo pipefail
 

@@ -1,15 +1,9 @@
 #!/usr/bin/env bash
-# semsumo.sh - Uygulama başlatıcı toplu script
-# Sık kullanılan tarayıcı/profil ve yardımcı uygulamaları doğru env ile başlatır.
-
-#===============================================================================
-#
-#   Script: Semsumo Unified - Enhanced Application Launcher & Generator
-#   Version: 8.0.0
-#   Date: 2025-10-05
-#   Description: Unified system for launching applications with automatic
-#                window manager detection (Hyprland/GNOME/Generic)
-#
+# ==============================================================================
+# Script: semsumo.sh
+# Description: Unified Application Launcher & Generator (Hyprland/GNOME/Generic)
+# Usage: semsumo.sh [options]
+# ==============================================================================
 #   Features:
 #   - Automatic window manager detection (Hyprland, GNOME, generic Wayland/X11)
 #   - Application startup verification with timeout (Hyprland)

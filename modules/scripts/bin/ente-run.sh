@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Ente Auth Launcher (Secrets-aware)
-# ------------------------------------------------------------------------------
-#  ✨ Launches Ente Auth with GNOME Keyring Secrets support on Hyprland / Wayland
-#  🧩 Starts only the 'secrets' component to avoid SSH/GPG agent conflicts
-#  💡 Auto-detects running D-Bus session and Secret Service availability
+# Script: ente-run.sh
+# Description: Launches Ente Auth with GNOME Keyring Secrets support.
+# Usage: ente-run.sh
 # ==============================================================================
-# Author : Kenan Pelit
+# Authorship: Kenan Pelit
 # Version: 1.0
-# ==============================================================================
 
 set -euo pipefail
 

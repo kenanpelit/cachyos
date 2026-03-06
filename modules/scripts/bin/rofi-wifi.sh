@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# WiFi Management Script using iwd and rofi
-# Author: Kenan Pelit
+# ==============================================================================
+# Script: rofi-wifi.sh
+# Description: WiFi Management Script using iwd and rofi
+# Usage: rofi-wifi.sh [device] [position] [y_off] [x_off]
+# ==============================================================================
 # Configuration
 DEVICE=${1:-wlan0}
 POSITION=${2:-0}

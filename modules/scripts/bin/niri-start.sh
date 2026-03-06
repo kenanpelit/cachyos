@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# niri-start - Daily startup sequence for Niri session
-# Generated/Managed via dcli
+# ==============================================================================
+# Script: niri-start.sh
+# Description: Daily startup sequence for Niri session via semsumo.
+# Usage: niri-start.sh
+# ==============================================================================
 
 set -euo pipefail
 

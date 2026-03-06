@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: tsm.sh
+# Description: Advanced Transmission CLI manager with Pass integration and search
+# Usage: tsm.sh [command] [parameter]
+# ==============================================================================
 #######################################
 #
 # Version: 2.3.0

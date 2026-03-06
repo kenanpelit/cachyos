@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# cachy-mount.sh
-# ------------------------------------------------------------------------------
-# Dual-disk BTRFS helper:
-# - Detect current root block device
-# - Auto-select the most likely "other OS" btrfs partition on the other disk
-# - Mount it on /cachy
-# ------------------------------------------------------------------------------
+# ==============================================================================
+# Script: cachy-mount.sh
+# Description: Dual-disk BTRFS helper to detect and mount other OS partitions.
+# Usage: cachy-mount.sh [mount|umount|status|chroot] [options]
+# ==============================================================================
 
 set -euo pipefail
 

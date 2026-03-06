@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: power-profile.sh
+# Description: Power profile helper for powerprofilesctl with lock integration
+# Usage: power-profile.sh [toggle|set <profile>]
+# ==============================================================================
 set -euo pipefail
 
 # Power profile helper with optional auto-profile lock integration.

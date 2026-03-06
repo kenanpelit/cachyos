@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC Lesson Playlist Generator
-#   Version: 1.2.0
-#   Date: 2025-03-10
-#   Original Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: M3U playlist generator for lesson audio files with grouping
-#                and formatting support for educational content
-#
-#   Features:
+# ==============================================================================
+# Script: playlist.sh
+# Description: OSC Lesson Playlist Generator (M3U generator for audio files)
+# Usage: playlist.sh [directory] [options]
+# ==============================================================================
+# Features:
 #   - Smart lesson grouping and titling
 #   - Multiple audio format support
 #   - Relative path handling
@@ -18,6 +13,10 @@
 #   - Detailed file counting
 #   - Progress feedback
 #   - Multiple format support
+#
+#   License: MIT
+#
+#===============================================================================
 #
 #   License: MIT
 #

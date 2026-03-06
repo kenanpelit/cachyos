@@ -1,19 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: HyprFlow PipeWire Audio Switcher
-#   Version: 3.3.0
-#   Date: 2025-09-06
-#   Author: Kenan Pelit
-#   Repo: https://github.com/kenanpelit/cachyos
-#
-#   Description:
-#     Hyprland + PipeWire (wpctl) için gelişmiş ses/mikrofon anahtarlayıcı
-#     (harici config YOK). Kalıcı veriler ~/.cache/hyprflow/ altında tutulur.
-#
-#   License: MIT
-#
-#===============================================================================
+# ==============================================================================
+# Script: osc-soundctl.sh
+# Description: HyprFlow PipeWire Audio Switcher for Hyprland/Wayland
+# Usage: osc-soundctl.sh [options]
+# ==============================================================================
 
 # --- Genel ayarlar (env ile override edilebilir) --------------------------------
 DEBUG=${DEBUG:-false}

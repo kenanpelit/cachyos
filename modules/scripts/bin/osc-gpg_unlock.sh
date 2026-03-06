@@ -1,20 +1,9 @@
 #!/usr/bin/env bash
-# =============================================================================
-# osc-gpg_unlock.sh - GPG Agent Unlock Helper
-# =============================================================================
-# Amaç:
-#   GPG agent ortamını yenileyip hızlı bir imzalama testi ile agent/anahtar
-#   erişimini doğrulamak.
-#
-# Ne yapar:
-#   - GPG ortam değişkenlerini ayarlar (TTY, XDG runtime, DBus)
-#   - gpg-agent süreçlerini yeniler
-#   - gizli anahtarları listeler
-#   - clearsign testi ile unlock durumunu kontrol eder
-#
-# Kullanım:
-#   osc-gpg_unlock
-# =============================================================================
+# ==============================================================================
+# Script: osc-gpg_unlock.sh
+# Description: GPG Agent unlock helper with environment refresh and signing test.
+# Usage: osc-gpg_unlock.sh
+# ==============================================================================
 
 set -Eeuo pipefail
 

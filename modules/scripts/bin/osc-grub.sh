@@ -1,15 +1,9 @@
 #!/usr/bin/env bash
-#
-# osc-grub.sh
-# Unified GRUB helper with subcommands:
-#   - menu: list GRUB menu entries with stable index paths
-#   - cleanup: remove GRUB theme directories safely
-#
-# Examples:
-#   osc-grub menu
-#   osc-grub menu --sudo
-#   osc-grub cleanup
-#   osc-grub cleanup --sudo
+# ==============================================================================
+# Script: osc-grub.sh
+# Description: Unified GRUB helper for listing menu entries and theme cleanup.
+# Usage: osc-grub.sh [menu|cleanup] [options]
+# ==============================================================================
 
 set -euo pipefail
 

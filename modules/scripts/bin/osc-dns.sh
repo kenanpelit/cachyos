@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: osc-dns.sh
+# Description: DNS status summary and connectivity testing tool.
+# Usage: osc-dns.sh [status] [--verbose]
+# ==============================================================================
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"

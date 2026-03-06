@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: hypr-expo.sh
+# Description: Lightweight replacement for hyprexpo toggle using shell overview.
+# Usage: hypr-expo.sh [toggle|on|off|select]
+# ==============================================================================
 set -euo pipefail
-
-# Lightweight replacement entrypoint for the old hyprexpo toggle.
-# This does not reproduce the compositor plugin rendering. It routes to the
-# active shell's window overview surface instead.
 
 cmd="${1:-toggle}"
 

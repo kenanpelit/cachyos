@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# lofi.sh - mpv ile YouTube lo-fi radyo akışı başlatıcı
-# mpv + ytdlp kullanarak favori radyo URL’lerini çalıştırır, ses/ayar parametreleriyle.
+# ==============================================================================
+# Script: lofi.sh
+# Description: YouTube lo-fi radio stream launcher using mpv and yt-dlp.
+# Usage: lofi.sh
+# ==============================================================================
 
 if (ps aux | grep mpv | grep -v grep > /dev/null); then
     pkill mpv

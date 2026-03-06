@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: Kompakt Video Dönüştürücü
-#   Version: 2.0.1
-#   Date: 2025-04-24
-#   Description: Basitleştirilmiş video format dönüştürme aracı
-#
-#===============================================================================
+# ==============================================================================
+# Script: osc-video-converter.sh
+# Description: Simplified video format conversion tool (FFmpeg helper)
+# Usage: osc-video-converter.sh [options]
+# ==============================================================================
 
 # Renkler
 RED='\033[0;31m'

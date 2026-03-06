@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: svmubuntu.sh
+# Description: SVM (Simple VM) profile for Ubuntu using QEMU/KVM
+# Usage: svmubuntu.sh [install|start|stop|status|connect|console|reset] [options]
+# ==============================================================================
 # svmubuntu.sh — SVM profile: Ubuntu (QEMU/KVM)
 
 #===============================================================================

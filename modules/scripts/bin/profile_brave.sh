@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: Brave Profile Launcher (İyileştirilmiş)
-#   Description: Brave tarayıcısı için profil bazlı başlatma aracı
-#   Version: 2.0
-#
+# ==============================================================================
+# Script: profile_brave.sh
+# Description: Brave Profile Launcher with window management and proxy support
+# Usage: profile_brave.sh [profile_name] [options]
+# ==============================================================================
 #   Özellikler:
 #   - Profil bazlı Brave başlatma
 #   - Özel pencere sınıfı ve başlık ayarlama

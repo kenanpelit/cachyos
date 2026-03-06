@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: svmarch.sh
+# Description: SVM (Simple VM) profile for Arch Linux using QEMU/KVM
+# Usage: svmarch.sh [install|start|stop|status|connect|console|reset] [options]
+# ==============================================================================
 # svmarch.sh — SVM profile: Arch Linux (QEMU/KVM)
 
 #===============================================================================

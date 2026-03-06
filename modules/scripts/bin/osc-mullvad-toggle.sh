@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: osc-mullvad-toggle.sh
+# Description: Toggles Mullvad VPN connection, optionally with Blocky DNS coupling.
+# Usage: osc-mullvad-toggle.sh [--no-blocky] [--dry-run] [--no-notify]
+# ==============================================================================
+
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"

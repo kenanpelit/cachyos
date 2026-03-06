@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-#
-#   Date: 2025-06-10
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   monitor_brightness.sh - Dell UP2716D harici monitör parlaklık kontrolü (Otomatik Algılama)
-#
+# ==============================================================================
+# Script: monitor_brightness.sh
+# Description: External monitor brightness control using ddcutil (auto-detect).
+# Usage: monitor_brightness.sh [0-100|+N|-N|get|detect|scan|check|info|reset]
+# ==============================================================================
+# Authorship: Kenan Pelit
+# Date: 2025-06-10
 
 # Yapılandırma
 MONITOR_NAME="DELL UP2716D"

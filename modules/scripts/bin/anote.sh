@@ -1,22 +1,13 @@
 #!/usr/bin/env bash
-# anote.sh - Terminal not/snippet yöneticisi (fzf + bat + scratchpad)
-# Hızlı not alma, snippet arama, cheatsheet görüntüleme ve arşivleme için
-# tek duraklı CLI aracı; yapılandırılabilir dizin ve önbelleklerle çalışır.
-
-# =================================================================
-# anote.sh - Terminal Tabanlı Not Alma ve Snippet Yönetim Sistemi
-# =================================================================
-#
-# Bu betik, terminal üzerinden hızlı not alma, kodlama snippet'leri ve
-# cheatsheet'leri organize etmek için geliştirilmiş bir araçtır.
-# fzf ile interaktif arama, bat ile güzel görüntüleme ve çeşitli
-# terminal araçlarıyla zengin bir deneyim sunar.
-#
-# Geliştiren: Kenan Pelit
+# ==============================================================================
+# Script: anote.sh
+# Description: Terminal-based note and snippet management system using fzf and bat.
+# Usage: anote.sh [options]
+# ==============================================================================
+# Authorship: Kenan Pelit
 # Repository: github.com/kenanpelit
-# İlham kaynağı: notekami projesi (https://github.com/gotbletu/fzf-nova)
-# Versiyon: 3.2 (Optimized)
-# Lisans: GPLv3
+# Version: 3.2 (Optimized)
+# License: GPLv3
 
 # Katı mod - hataları daha iyi yakalamak için
 set -eo pipefail

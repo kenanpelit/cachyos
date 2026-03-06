@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-#   Script: Automatic SQM/CAKE Setup (WAN + VPN aware)
-#   Version: 2.0.1
-#   Date: 2025-11-10
-#   Author: Kenan Pelit
-#   Desc : WAN'da ve VPN'de (wg*/tun*) bufferbloat azaltımı.
-#          - VPN KAPALI:  egress+ingress = default fiziksel arayüz
-#          - VPN AÇIK   : egress = tüm wg*/tun*   | ingress = default fiziksel
-#   License: MIT
-#===============================================================================
+# ==============================================================================
+# Script: sqm.sh
+# Description: Automatic SQM/CAKE Setup for bufferbloat reduction (WAN/VPN)
+# Usage: sqm.sh [options]
+# ==============================================================================
 set -euo pipefail
 
 #===============================================================================

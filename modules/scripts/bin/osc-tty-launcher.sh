@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: osc-tty-launcher.sh
+# Description: Interactive TTY launcher for desktop routes and VM profiles
+# Usage: osc-tty-launcher.sh [options]
+# ==============================================================================
 set -euo pipefail
-
-# -----------------------------------------------------------------------------
-# osc-tty-launcher
-# -----------------------------------------------------------------------------
-# Purpose:
-# - Interactive TTY launcher for desktop routes and VM profiles.
-# - VM routes prefer Sway profile configs (qemu_vm*) to avoid GTK init issues
-#   that can happen when launching QEMU GTK directly from a raw TTY context.
-# -----------------------------------------------------------------------------
 
 SCRIPT_NAME="$(basename "$0")"
 

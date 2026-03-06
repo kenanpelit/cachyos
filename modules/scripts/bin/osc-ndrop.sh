@@ -1,29 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# osc-ndrop.sh - Toggle a "drop-down" style window (Niri + Hyprland + GNOME)
-# ==============================================================================
-# Features (ndrop/tdrop-like):
-# - If the program is not running: launch it and bring it to the foreground.
-# - If it is running on another workspace: bring it to the current workspace
-#   and focus it (default), or switch to its workspace and focus it (--focus).
-# - If it is running on the current workspace: hide it (default), or just focus
-#   it (--focus).
-#
-# Matching:
-# - Default match key is the command name (first word).
-# - Can extract app-id/class from the command line:
-#   - foot: -a/--app-id
-#   - others: --class
-# - Override with: -c/--class <CLASS>
-#
-# Backend detection:
-# - Auto-detects Niri (niri msg), Hyprland (hyprctl), or GNOME (gdbus + org.gnome.Shell).
-#
-# Environment:
-# - OSC_NDROP_NIRI_HIDE_WORKSPACE  (default: oscndrop; workspace used to hide windows on Niri)
-# - OSC_NDROP_HYPR_HIDE_SPECIAL    (default: oscndrop)
-# - OSC_NDROP_ONLINE_HOST          (default: github.com)
-# - OSC_NDROP_ONLINE_TIMEOUT       (default: 20 seconds)
+# Script: osc-ndrop.sh
+# Description: Toggle a "drop-down" style window for Niri, Hyprland, and GNOME.
+# Usage: osc-ndrop.sh [OPTIONS] <command...>
 # ==============================================================================
 
 set -euo pipefail

@@ -1,19 +1,11 @@
 #!/usr/bin/env bash
-# gnome-extensions-installer.sh - GNOME uzantı kurucu/güncelleyici
-# Yüklü listeye göre uzantıları indirir, günceller veya yeniden kurar;
-# sürüm ve durum raporu üretir.
-
-#===============================================================================
-#
-#   Script: GNOME Extensions Auto Installer + Updater
-#   Version: 2.3.0
-#   Description: Install, update, and (optionally) reinstall GNOME Shell extensions
-#   Updated: Synced with 28 installed extensions
-#
-#===============================================================================
-
-#set -x
-#set -euo pipefail
+# ==============================================================================
+# Script: gnome-extensions-installer.sh
+# Description: Install, update, and manage GNOME Shell extensions.
+# Usage: gnome-extensions-installer.sh [options]
+# ==============================================================================
+# Authorship: Kenan Pelit
+# Version: 2.3.0
 
 # Colors for output
 readonly RED='\033[0;31m'

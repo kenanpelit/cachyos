@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: ppp-auto-profile.sh
+# Description: Periodic power profile chooser for power-profiles-daemon (AC/Battery)
+# Usage: ppp-auto-profile.sh
+# ==============================================================================
 set -euo pipefail
 
 # ppp-auto-profile

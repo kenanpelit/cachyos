@@ -1,26 +1,13 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC Cluster Git Status Monitor
-#   Version: 1.0.0
-#   Date: 2024-01-23
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: Multi-repository Git status monitoring tool for managing
-#                multiple Git repositories simultaneously with rich reporting
-#
-#   Features:
-#   - Recursive repository scanning
-#   - Branch pattern matching
-#   - Directory exclusion patterns
-#   - Customizable output formatting
-#   - Clean repository filtering
-#   - Detailed status reporting
-#   - Color-coded status output
-#
-#   License: MIT
-#
-#===============================================================================
+# ==============================================================================
+# Script: clustergit.sh
+# Description: Multi-repository Git status monitoring tool with rich reporting.
+# Usage: clustergit.sh [options]
+# ==============================================================================
+# Authorship: Kenan Pelit
+# Version: 1.0.0
+# Date: 2024-01-23
+# License: MIT
 
 # Colors
 OKBLUE='\033[94m'

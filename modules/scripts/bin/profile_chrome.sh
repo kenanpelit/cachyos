@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: Advanced Chrome Profile Launcher
-#   Version: 2.0.0
-#   Date: 2025-06-13
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: Advanced Google Chrome profile launcher with comprehensive
-#                window management, proxy support, and app shortcuts
-#
+# ==============================================================================
+# Script: profile_chrome.sh
+# Description: Advanced Google Chrome profile launcher and manager
+# Usage: profile_chrome.sh [profile_name] [options]
+# ==============================================================================
 #   Features:
 #   - Profile-based Chrome launching
 #   - Custom window class and title setting

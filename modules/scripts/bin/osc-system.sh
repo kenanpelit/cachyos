@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# OSC-SYSTEM: Unified Power Management & Monitoring Utility
+# Script: osc-system.sh
+# Description: Unified Power Management & Monitoring Utility
+# Usage: osc-system <command> [options]
 # ==============================================================================
 # Version: 18.0
 # Author: Kenan

@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC Transmission Blocklist Manager
-#   Version: 1.1.0
-#   Date: 2025-03-04
-#   Original Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: Comprehensive blocklist management utility for Transmission
-#                that aggregates and processes multiple IP blocklists
-#
-#   Features:
-#   - Multiple blocklist sources (Bluetack, FireHol, etc.)
-#   - Smart list processing with deduplication
-#   - Support for both user and system Transmission instances
-#   - Automatic service restart after updates
-#   - Timestamped backups
-#   - Robust error handling
-#
-#   License: MIT
-#
-#===============================================================================
+# ==============================================================================
+# Script: osc-blocklist.sh
+# Description: Transmission blocklist manager that aggregates multiple IP lists.
+# Usage: osc-blocklist.sh
+# ==============================================================================
+# Authorship: Kenan Pelit
+# Version: 1.1.0
+# Date: 2025-03-04
+# License: MIT
+
 set -euo pipefail
 
 # Define blocklist URLs

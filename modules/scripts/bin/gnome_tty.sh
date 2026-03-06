@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
-# =============================================================================
-# GNOME TTY Başlatma Script'i - Production Ready v2.0
-# =============================================================================
-# ThinkPad E14 Gen 6 + Intel Arc Graphics + Linux
-# Dinamik Catppuccin tema desteği ile
-# Hem GDM hem TTY başlatmayı destekler
-# =============================================================================
-# KULLANIM:
-#   gnome_tty              - Normal başlatma
-#   gnome_tty -d           - Debug modu
-#   gnome_tty --dry-run    - Sadece kontroller, başlatma yok
-#   gnome_tty --systemd    - Systemd kullanarak başlat (önerilen)
-# =============================================================================
+# ==============================================================================
+# Script: gnome_tty.sh
+# Description: GNOME TTY/GDM launcher for ThinkPad E14 Gen 6 with Intel Arc.
+# Usage: gnome_tty.sh [options]
+# ==============================================================================
+# Version: 2.1.0-gdm-aware
 
 set -euo pipefail
 

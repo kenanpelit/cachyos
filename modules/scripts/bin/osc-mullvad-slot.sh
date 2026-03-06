@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# osc-mullvad-slot - Shortcut wrapper for Mullvad slot recycle
-# ==============================================================================
-# Runs:
-#   ~/.local/bin/osc-mullvad slot recycle
-#
-# Usage:
-#   osc-mullvad-slot [--dry-run]
+# Script: osc-mullvad-slot.sh
+# Description: Shortcut wrapper for Mullvad slot recycle.
+# Usage: osc-mullvad-slot.sh [--dry-run]
 # ==============================================================================
 
 set -euo pipefail

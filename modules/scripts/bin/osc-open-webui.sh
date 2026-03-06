@@ -1,19 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# ==============================================================================
+# Script: osc-open-webui.sh
+# Description: Podman helper for Open WebUI lifecycle management.
+# Usage: osc-open-webui.sh <command> [options]
+# ==============================================================================
 
-# ==============================================================================
-# osc-open-webui.sh
-# ------------------------------------------------------------------------------
-# Podman helper for Open WebUI lifecycle:
-# - start/stop/restart/remove/status/logs/shell
-# - main / openai / ollama / cuda modes
-# - readiness wait and lightweight diagnostics
-# ------------------------------------------------------------------------------
-# Notes:
-# - Default Open WebUI URL is http://localhost:3000 (bridge mode)
-# - With --network-host, URL becomes http://localhost:8080
-# - Host Ollama endpoint from container defaults to host.containers.internal:11434
-# ==============================================================================
+set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
 

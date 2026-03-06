@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# osc-radio.sh - İnternet radyo oynatıcı
-# mpv ile ön tanımlı istasyonları çalar, arayüzden seçim ve bildirim sağlar.
+# ==============================================================================
+# Script: osc-radio.sh
+# Description: Terminal Based Radio Player (Internet radio player using mpv)
+# Usage: osc-radio.sh [options]
+# ==============================================================================
 
 # tradio - Terminal Based Radio Player
 # ===================================

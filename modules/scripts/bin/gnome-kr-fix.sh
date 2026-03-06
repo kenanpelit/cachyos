@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-# gkr-fix.sh — GNOME keyring lag fixer
+# ==============================================================================
+# Script: gnome-kr-fix.sh
+# Description: GNOME Keyring lag fixer by restarting/replacing the daemon.
+# Usage: gnome-kr-fix.sh
+# ==============================================================================
+
 set -euo pipefail
 log() { printf '[%(%F %T)T] %s\n' -1 "$*"; }
 die() {

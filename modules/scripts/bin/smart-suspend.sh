@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-#######################################
-# Smart Suspend Script for Hyprland
-# Features:
-#   - Pre-suspend state saving
-#   - Post-wake restoration
-#   - Process safety checks
-#   - PipeWire (wpctl) integration
-#######################################
+# ==============================================================================
+# Script: smart-suspend.sh
+# Description: Smart Suspend Script for Hyprland with state saving/restoration
+# Usage: smart-suspend.sh [options]
+# ==============================================================================
 
 LOG_DIR="$HOME/.log"
 LOG_FILE="$LOG_DIR/smart-suspend.log"

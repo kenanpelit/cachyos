@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-# -----------------------------------------------------------------------------
-# semsumo-daily
-# Unified SemsuMo daily launcher for compositor keybinds (Hyprland + Niri).
-#
-# Purpose:
-# - Keep keybind commands identical across compositors.
-# - Resolve `semsumo` reliably even with minimal WM PATH.
-# - Write execution logs and show desktop notifications on failure.
-# -----------------------------------------------------------------------------
-
+# ==============================================================================
+# Script: semsumo-daily.sh
+# Description: Unified SemsuMo daily launcher for compositor keybinds
+# Usage: semsumo-daily.sh
+# ==============================================================================
 set -euo pipefail
 
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"

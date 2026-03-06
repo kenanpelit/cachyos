@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# osc-font-info - Show effective font configuration and defaults.
-# - Uses Fontconfig (fc-match/fc-list) to report actual resolved fonts
-# - Prints common desktop/tool overrides (GTK/Qt/Kitty, env vars)
+# ==============================================================================
+# Script: osc-font-info.sh
+# Description: Shows effective font configuration and resolved Fontconfig defaults.
+# Usage: osc-font-info.sh
+# ==============================================================================
 set -euo pipefail
 
 section() { printf '\n== %s ==\n' "$1"; }

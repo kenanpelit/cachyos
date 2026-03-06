@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: tarchiver.sh
+# Description: Simple tar archive manager for compressing and extracting files
+# Usage: tarchiver.sh [compress|extract] <target>
+# ==============================================================================
 # tarchiver.sh - A simple tar archive manager for compressing and extracting files
 # Usage:
 #   tarchiver.sh compress <directory/file>  - Creates a .tar.gz archive

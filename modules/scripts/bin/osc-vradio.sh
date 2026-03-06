@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# osc-vradio.sh - VRadio istasyon başlatıcı
-# vrun/vradio listeleriyle hızlı seçim yapıp mpv üzerinden çalar.
+# ==============================================================================
+# Script: osc-vradio.sh
+# Description: VRadio station launcher - starts tradio with preset station
+# Usage: osc-vradio.sh
+# ==============================================================================
 
 # Kill existing instances first
 pkill -f "osc-radio" && pkill -f "cvlc" 2>/dev/null

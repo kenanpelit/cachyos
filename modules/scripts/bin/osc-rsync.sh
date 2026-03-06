@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# =============================================================================
-# osc-rsync.sh - Unified RSYNC Operations CLI
-# =============================================================================
+# ==============================================================================
+# Script: osc-rsync.sh
+# Description: Unified RSYNC Operations CLI for backup and transfer workflows
+# Usage: osc-rsync.sh [command] [options]
+# ==============================================================================
 # Purpose:
 #   Single entrypoint for rsync workflows that used to live in:
 #   - osc-rsync.sh
@@ -12,7 +14,7 @@
 # Core capabilities:
 #   - Preset transfer modes: std | net | loc | web
 #   - Retry loop with configurable retry count + delay
-#   - Home backup command (source is always \$HOME)
+#   - Home backup command (source is always $HOME)
 #   - Target health checks (basic network / disk checks)
 #   - Profile management (save/load/list/show)
 #   - Optional desktop notifications

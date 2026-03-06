@@ -1,17 +1,11 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: gnome-column-width.sh
+# Description: Cycle or set window width proportions on GNOME (Wayland-safe).
+# Usage: gnome-column-width.sh [cycle|set|toggle] [options]
+# ==============================================================================
+
 set -euo pipefail
-
-usage() {
-  cat <<'EOF'
-gnome-column-width - Cycle/set window width proportions on GNOME (Wayland-safe)
-
-Usage:
-  gnome-column-width            # cycle preset widths
-  gnome-column-width cycle      # same as above
-  gnome-column-width set 0.8    # set to a specific proportion (0.1..1.0)
-  gnome-column-width toggle     # toggle between 0.8 and 1.0
-EOF
-}
 
 action="${1:-cycle}"
 arg1="${2:-}"

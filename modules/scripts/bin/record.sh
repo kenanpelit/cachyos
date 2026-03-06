@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# record.sh - Ekran kayıt yardımcı scripti
-# wf-recorder/obs vb. için çıktı dosya adlarını ve hedeflerini yönetir.
+# ==============================================================================
+# Script: record.sh
+# Description: Screen recording helper for wf-recorder/ffmpeg
+# Usage: record.sh [options]
+# ==============================================================================
 
 TMP_FILE_UNOPTIMIZED="/tmp/recording_unoptimized.gif"
 TMP_PALETTE_FILE="/tmp/palette.png"

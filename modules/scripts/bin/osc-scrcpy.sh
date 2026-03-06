@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: osc-scrcpy.sh
+# Description: Simple scrcpy helper for Wayland/Hyprland/niri with UHID input
+# Usage: osc-scrcpy.sh [options]
+# ==============================================================================
 set -euo pipefail
 
 # Simple scrcpy helper without zenity.

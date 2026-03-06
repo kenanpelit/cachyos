@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# ==============================================================================
+# Script: dcli-dep.py
+# Description: Dependency manager for dcli modules using topological sort.
+# Usage: dcli-dep.py [options]
+# ==============================================================================
 import yaml
 import os
 import sys

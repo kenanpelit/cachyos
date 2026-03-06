@@ -1,15 +1,9 @@
 #!/usr/bin/env bash
-#######################################
-#
-# Version: 2.3.0
-# Date: 2025-07-19
-# Original Author: Kenan Pelit
-# Repository: github.com/kenanpelit/dotfiles
-# Description: Geliştirilmiş HyprFlow Spotify Controller (Hyprland & Wayland)
-#
-# License: MIT
-#
-#######################################
+# ==============================================================================
+# Script: osc-spotify.sh
+# Description: HyprFlow Spotify Controller for Hyprland & Wayland
+# Usage: osc-spotify.sh [options]
+# ==============================================================================
 
 # Renk tanımlamaları
 GREEN='\033[0;32m'

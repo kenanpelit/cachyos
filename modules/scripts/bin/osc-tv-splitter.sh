@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-#===============================================================================
-# IPTV Channel Splitter and Player
-# This script:
-# 1. Clones/updates the iptv-org/iptv repository to ~/.apps/iptv
-# 2. Processes tr.m3u from the streams directory
-# 3. Splits channels into individual .m3u files in ~/.iptv/channels
-# 4. Creates executable scripts in ~/.iptv/bin
-# Author: Kenan Pelit | https://github.com/kenanpelit/cachyos
-# Version: 1.1
-#===============================================================================
+# ==============================================================================
+# Script: osc-tv-splitter.sh
+# Description: IPTV Channel Splitter and Player for iptv-org streams
+# Usage: osc-tv-splitter.sh [options]
+# ==============================================================================
 
 # Color codes
 RED='\033[0;31m'

@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
-#
-# pm.sh - lightweight package manager wrapper
-# Supports: pacman, paru, yay, apt, dnf
+# ==============================================================================
+# Script: pm.sh
+# Description: Lightweight package manager wrapper (pacman, paru, yay, apt, dnf)
+# Usage: pm.sh [command] [package(s)]
+# ==============================================================================
 # Env:
 #   PM           Force package manager selection
 #   PM_COLOR     "always" | "never" (default: auto by TTY)

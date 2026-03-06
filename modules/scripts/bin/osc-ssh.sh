@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: OSC SSH Master Utility
-#   Version: 1.0.0
-#   Date: 2024-05-05
-#   Author: Kenan Pelit
-#   Repository: https://github.com/kenanpelit/cachyos
-#   Description: Comprehensive SSH management utility combining ASSH management,
-#                session control, hosts backup, and secure connection setup
-#
-#   Features:
+# ==============================================================================
+# Script: osc-ssh.sh
+# Description: OSC SSH Master Utility for ASSH, session control, and backups
+# Usage: osc-ssh.sh [command] [options]
+# ==============================================================================
+# Features:
 #   - Host management and shell completion with ASSH integration
 #   - SSH control socket management (listing, cleaning, monitoring)
 #   - Remote hosts file backup capabilities
@@ -17,7 +12,7 @@
 #   - XDG Base Directory compliance
 #   - Comprehensive logging and error handling
 #
-#   License: MIT
+# License: MIT
 #
 #===============================================================================
 

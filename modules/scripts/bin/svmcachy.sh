@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: svmcachy.sh
+# Description: SVM (Simple VM) profile for CachyOS using QEMU/KVM
+# Usage: svmcachy.sh [install|start|stop|status|connect|console|reset] [options]
+# ==============================================================================
 # svmcachy.sh — SVM profile: CachyOS (QEMU/KVM)
 
 #===============================================================================
