@@ -21,8 +21,6 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
 services=(
   mpd.service
   fusuma.service
-  kdeconnect.service
-  kdeconnect-indicator.service
   hyprland-polkit-agent.service
   hypr-nm-applet.service
   niri-nm-applet.service
@@ -30,12 +28,11 @@ services=(
   niri-snapper-tools-check.service
   hypr-clip-persist.service
   hypr-init.service
-  gnome-keyring-secrets.service
-  ollama.service
   stasis.service
   flatpak-managed-install.timer
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
+  kdeconnect.timer
   niri-bootstrap.service
   niri-sticky.service
   niri-niriswitcher.service
