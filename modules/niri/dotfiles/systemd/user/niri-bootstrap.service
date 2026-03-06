@@ -13,7 +13,7 @@ Type=oneshot
 TimeoutStartSec=60
 Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
 Environment=NIRI_BOOT_DELAY=0
-ExecStart=/usr/bin/bash -lc "%h/.local/bin/niri-bootstrap"
+ExecStart=/usr/bin/bash "%h/.local/bin/niri-bootstrap"
 StandardOutput=journal
 StandardError=journal
 
