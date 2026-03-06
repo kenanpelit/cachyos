@@ -1,6 +1,6 @@
 [Unit]
 Description=Noctalia Shell
-BindsTo=graphical-session.target
+PartOf=graphical-session.target niri-session.target
 After=graphical-session.target niri-ready.service
 
 [Service]

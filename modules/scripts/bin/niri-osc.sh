@@ -1454,7 +1454,7 @@ env)
         return 0
       fi
 
-      systemctl --user start niri-session.target 2>/dev/null || true
+      systemctl --user enable --now niri-session.target 2>/dev/null || true
     }
 
     start_niri_portals() {
