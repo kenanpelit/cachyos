@@ -33,6 +33,7 @@ services=(
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
   kdeconnect.timer
+  noctalia.service
   niri-bootstrap.service
   niri-sticky.service
   niri-niriswitcher.service

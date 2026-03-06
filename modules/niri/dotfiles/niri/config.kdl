@@ -78,7 +78,6 @@ layer-rule {
 // Long-running daemons are preferably started via systemd --user (niri-session.target).
 // Here we only start the minimal session bootstrap + helpers that must exist early.
 
-spawn-at-startup "qs" "-c" "noctalia-shell" "--no-duplicate"
 spawn-at-startup "niri-osc" "set" "env"
 spawn-at-startup "env" "OSC_SHELL_STARTUP=1" "osc-shell" "ensure"
 spawn-at-startup "/usr/bin/clipse" "-listen"

@@ -1,7 +1,6 @@
 [Unit]
 Description=Noctalia Shell
-# Systemd ile değil, Niri config içinden doğrudan başlatılıyor.
-# Bu servis sadece manuel kontrol veya restart senaryoları için duruyor.
+# Hiçbir şeyi bekleme, hemen başla (en hızlı açılış için)
 PartOf=graphical-session.target
 
 [Service]
@@ -9,4 +8,5 @@ ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate
 Restart=on-failure
 RestartSec=1
 
-# [Install] silindi - Otomatik başlama Niri config üzerinden yapılıyor.
+[Install]
+WantedBy=niri-session.target
