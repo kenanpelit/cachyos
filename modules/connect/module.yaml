@@ -5,6 +5,8 @@ description: KDE Connect configuration portable config
 dotfiles:
   - source: dotfiles/systemd/user/kdeconnect.service
     target: ~/.config/systemd/user/kdeconnect.service
+  - source: dotfiles/systemd/user/kdeconnect.timer
+    target: ~/.config/systemd/user/kdeconnect.timer
   - source: dotfiles/systemd/user/kdeconnect-indicator.service
     target: ~/.config/systemd/user/kdeconnect-indicator.service
   - source: dotfiles/bin/kdeconnectd-wrapper

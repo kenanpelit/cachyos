@@ -14,5 +14,5 @@ ExecStart=%h/.local/bin/kdeconnectd-wrapper
 Restart=on-failure
 RestartSec=5
 
-[Install]
-WantedBy=default.target
+#[Install]
+#WantedBy=default.target

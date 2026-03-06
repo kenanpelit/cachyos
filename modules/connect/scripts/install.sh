@@ -6,5 +6,7 @@ if command -v systemctl >/dev/null 2>&1; then
     chmod +x "$HOME/.local/bin/kdeconnectd-wrapper" || true
   fi
   systemctl --user daemon-reload >/dev/null 2>&1 || true
-  systemctl --user enable --now kdeconnect.service kdeconnect-indicator.service >/dev/null 2>&1 || true
+  systemctl --user enable kdeconnect.timer >/dev/null 2>&1 || true
+  systemctl --user disable kdeconnect.service kdeconnect-indicator.service >/dev/null 2>&1 || true
+  systemctl --user start kdeconnect.timer >/dev/null 2>&1 || true
 fi

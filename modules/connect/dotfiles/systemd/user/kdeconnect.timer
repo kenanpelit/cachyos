@@ -1,0 +1,12 @@
+[Unit]
+Description=Delayed KDE Connect daemon
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Timer]
+OnActiveSec=30s
+AccuracySec=1s
+Unit=kdeconnect.service
+
+[Install]
+WantedBy=default.target
