@@ -1,156 +1,126 @@
-<h1 align="center">CachyOS Declarative Configuration</h1>
+<h1 align="center">CachyOS Declarative Infrastructure</h1>
 
 <div align="center">
   <img src="https://img.shields.io/badge/CachyOS-Arch_Linux-blue?style=for-the-badge&logo=archlinux&logoColor=white" alt="CachyOS">
-  <img src="https://img.shields.io/badge/Manager-dcli-green?style=for-the-badge&logo=yaml&logoColor=white" alt="dcli">
+  <img src="https://img.shields.io/badge/Framework-DCLI%20v2-green?style=for-the-badge&logo=yaml&logoColor=white" alt="dcli">
   <img src="https://img.shields.io/badge/Host-hay-orange?style=for-the-badge" alt="hay">
-  <img src="https://img.shields.io/badge/Wayland-Niri%20%2B%20Hyprland-1f6feb?style=for-the-badge" alt="Niri + Hyprland">
+  <img src="https://img.shields.io/badge/Wayland-Niri%20%2B%20Noctalia-1f6feb?style=for-the-badge" alt="Niri + Noctalia">
 </div>
 
 <p align="center">
-  <strong>Declarative, modular, and operations-focused workstation configuration for CachyOS, powered by <a href="https://gitlab.com/theblackdon/dcli">dcli</a>.</strong>
+  <strong>A high-performance, modular, and declarative configuration framework for CachyOS workstations. Powered by <a href="https://gitlab.com/theblackdon/dcli">dcli</a> and engineered for operational excellence.</strong>
 </p>
 
-## Overview
+---
 
-This repository is the source of truth for one production desktop host (`hay`).
-It manages system packages, desktop sessions, user services, shell tooling, MIME/default apps, and day-2 operations through composable modules.
+## 🚀 Overview
 
-Core goals:
+This repository represents the **"Source of Truth"** for a production-grade CachyOS environment. Unlike traditional dotfiles, this is a modular configuration framework designed to eliminate configuration drift, automate day-2 operations, and provide a standardized environment across different sessions (Niri, Hyprland, GNOME).
 
-- reproducibility: minimize configuration drift
-- modularity: small, focused, reusable modules
-- operational discipline: explicit runbooks and service orchestration
+### Core Pillars
+- 🧩 **Strict Modularity**: 85+ implementation units with explicit dependency tracking.
+- 🏗️ **Architectural Integrity**: Shared shell libraries for atomic updates and safe installations.
+- 🩺 **Health Monitoring**: Integrated validation hooks to ensure configuration validity.
+- 📖 **Self-Documenting**: Automatic markdown generation from script headers.
+- ⚡ **Performance Optimized**: Minimized login overhead and parallelized service startup.
 
-## Architecture
+---
 
-The configuration model is intentionally simple:
+## 🏗️ System Architecture
 
-- `config.yaml`: active host pointer
-- `hosts/hay.yaml`: ordered module stack and host-level settings
-- `modules/<name>/`: implementation units
+The framework is built on a layered implementation model:
 
-Typical module contract:
+- **Host Profiles (`hosts/*.yaml`)**: Ordered module stacks defining the personality of a machine.
+- **Shared Library (`modules/base/lib/`)**: Centralized logic for user detection, error handling, and file operations (`core.sh`).
+- **Standardized Environment**: Conflict-free session variables managed via `environment.d`.
+- **Atomic Hooks**: Pre/Post-install scripts ensuring consistent state transitions.
 
-- `module.yaml`: metadata and hook behavior
-- `packages.yaml`: package sources (repo/AUR/flatpak depending on module)
-- `dotfiles/`: managed files
-- `scripts/`: install/post-install logic
-
-## Repository Map
-
-```text
-.
-├── config.yaml
-├── hosts/
-│   └── hay.yaml
-├── modules/
-│   ├── base, pacman, paru, packages, system-packages-hay
-│   ├── admin, logind, tty, logs, kernel, firewall, fail2ban, blocky, tcp, oomd
-│   ├── zsh, bash, git, nvim, tmux, yazi, fzf, fastfetch, btop, lazygit, ...
-│   ├── niri, hyprland, sway, sessions, stasis, xdg-portal, dms, noctalia, ...
-│   ├── mpv, mpd, rmpc, transmission, cava, ytdlp, radio, subliminal
-│   └── xdg-mimes, user-services, scripts, flatpak, copyq, brave, webcord, ai
-└── docs/
-    └── OPERATIONS.md
+### Modern Module Contract
+Each module in `modules/` follows a standardized declarative schema:
+```yaml
+tags: [desktop, wm]          # Operational grouping
+description: "Brief intent"  # Human-readable metadata
+depends_on: [base, scripts]  # Explicit dependency graph
+dotfiles: [...]              # Managed configuration files
+packages: [...]              # Multi-source package lists (AUR, Repo, Flatpak)
 ```
 
-## Active Host Profile (`hay`)
+---
 
-`hosts/hay.yaml` currently enables:
+## 🛠️ Automated Toolset
 
-- bootstrap/core: `base`, `pacman`, `paru`, `scripts`, `packages`, `flatpak`, `system-packages-hay`
-- system/security: `admin`, `logind`, `tty`, `logs`, `kernel`, `firewall`, `fail2ban`, `blocky`, `tcp`, `oomd`
-- shell/cli: `zsh`, `bash`, `git`, `nvim`, `tmux`, `yazi`, `sesh`, `clipse`, `starship`, `command-not-found`
-- desktop: `niri`, `hyprland`, `sway`, `sessions`, `stasis`, `xdg-portal`, `rofi`, `walker`, `dms`, `noctalia`, `gdm`, `fusuma`
-- media/apps: `mpv`, `mpd`, `rmpc`, `transmission`, `cava`, `brave`, `webcord`, `copyq`, `ai`
-- defaults/services: `xdg-mimes`, `user-services`
+The system includes a suite of custom-engineered operational tools:
 
-## Quick Start
+- **`niri-osc` / `hypr-osc`**: Advanced compositor control suites.
+- **`osc-shell`**: Unified router for desktop IPC actions and state management.
+- **`dcli-docgen`**: Automatic documentation engine for local scripts.
+- **`vv`**: Optimized daily journaling and scratchpad manager.
 
-### 1) Clone
+> [!TIP]
+> View the full catalog of 100+ custom scripts in **[docs/SCRIPTS.md](./docs/SCRIPTS.md)**.
 
+---
+
+## 📥 Quick Start
+
+### 1. Bootstrap
 ```bash
 git clone --recurse-submodules https://github.com/kenanpelit/cachyos.git ~/.cachy
-```
-
-### 2) Register as dcli root
-
-```bash
 mkdir -p ~/.config
 ln -sfn ~/.cachy ~/.config/arch-config
 ```
 
-### 3) Apply
-
+### 2. Synchronize State
 ```bash
 cd ~/.cachy
 sudo -E dcli sync
 ```
 
-## Daily Operations
+---
 
-Update + apply:
+## 📑 Repository Structure
 
+| Directory | Purpose |
+| :--- | :--- |
+| `hosts/` | Active host definitions (e.g., `hay.yaml`) |
+| `modules/base/` | Core library and bootstrap logic |
+| `modules/scripts/` | Unified binary management and system helpers |
+| `modules/niri/` | Optimized scrollable-tiling compositor setup |
+| `modules/noctalia/` | High-performance Quickshell-based desktop UI |
+| `docs/` | Operational runbooks and auto-generated manuals |
+
+---
+
+## 🛤️ Session Routing (TTY)
+
+OotB support for multiple optimized environments:
+- **TTY2**: Niri (Optimized Profile)
+- **TTY3**: Hyprland (Production Profile)
+- **TTY4**: GNOME (Fallback/Reference)
+- **TTY6**: Manual / Recovery Launcher
+
+---
+
+## 🔧 Operational Maintenance
+
+**Update and Rebase System:**
 ```bash
-cd ~/.cachy
-git pull --rebase
-git submodule update --init --recursive
-sudo -E dcli sync
+git pull --rebase && git submodule update --init --recursive && sudo -E dcli sync
 ```
 
-Capture unmanaged installs into a host module:
-
+**Validate Configurations:**
 ```bash
-dcli merge
+niri validate -c ~/.config/niri/config.kdl
 ```
 
-Operational checks:
+---
 
-- runbook: `docs/OPERATIONS.md`
-- active host: `config.yaml`
-- host stack: `hosts/hay.yaml`
+## 📜 License & Credits
 
-## TTY and Session Routes
+- **License**: MIT (`LICENSE`)
+- **Engine**: [dcli](https://gitlab.com/theblackdon/dcli)
+- **Distribution**: [CachyOS](https://cachyos.org/)
 
-TTY routes are managed via `zsh/.zprofile` and helper scripts:
-
-- `tty2`: Niri
-- `tty3`: Hyprland
-- `tty4`: GNOME
-- `tty5`: Sway VM profile
-- `tty6`: manual mode + launcher (`exec osc-tty-launcher`)
-
-For VM routes from TTY, Sway `qemu_vm*` profiles are preferred.
-
-## Submodules Policy
-
-This repository uses git submodules for third-party/plugin code (for example under `modules/dms/.../plugins` and tmux plugin paths).
-
-Use:
-
-```bash
-git submodule update --init --recursive
-```
-
-after clone, pull, and branch switches.
-
-## Portability Checklist
-
-Before applying on a different machine, review:
-
-- `hosts/<new-host>.yaml`
-- `modules/kernel/`
-- `modules/firewall/`
-- `modules/blocky/`
-- `modules/sessions/`
-- hardware-specific desktop/service modules (`niri`, `hyprland`, `stasis`, `fusuma`, `gdm` or `dms-greeter`)
-
-## License
-
-MIT (`LICENSE`).
-
-## Credits
-
-- [dcli](https://gitlab.com/theblackdon/dcli)
-- [CachyOS](https://cachyos.org/)
+<div align="right">
+  <em>Last modernized: March 2026</em>
+</div>
