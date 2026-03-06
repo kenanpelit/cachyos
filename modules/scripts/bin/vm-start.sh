@@ -1,4 +1,9 @@
 #!/usr/bin/env zsh
+# ==============================================================================
+# Script: vm-start.sh
+# Description: Basit libvirt VM başlatıcı (win10 VM’ini başlatır)
+# Usage: vm-start.sh
+# ==============================================================================
 # vm-start.sh - Basit libvirt VM başlatıcı
 # win10 VM’ini başlatır, Hyprland workspace 6’ya geçip virsh ile çalıştırır.
 

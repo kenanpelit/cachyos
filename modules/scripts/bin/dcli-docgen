@@ -26,13 +26,14 @@ for script in "$SCRIPTS_DIR"/*; do
         basename="$(basename "$script")"
         cmd_name="${basename%.sh}"
         
-        # Extract fields from the standardized header
-        desc="$(grep -i "^# Description:" "$script" | sed 's/^# Description:[[:space:]]*//' || true)"
-        usage="$(grep -i "^# Usage:" "$script" | sed 's/^# Usage:[[:space:]]*//' || true)"
+        # Extract fields from the standardized header (more flexible regex)
+        desc="$(grep -iE "^#+[[:space:]]*Description:" "$script" | head -n 1 | sed -E 's/^#+[[:space:]]*Description:[[:space:]]*//I' || true)"
+        usage="$(grep -iE "^#+[[:space:]]*Usage:" "$script" | head -n 1 | sed -E 's/^#+[[:space:]]*Usage:[[:space:]]*//I' || true)"
         
-        # Fallback for non-standardized scripts
+        # Fallback for non-standardized scripts: try to find any meaningful comment at the top
         if [[ -z "$desc" ]]; then
-            desc="$(head -n 10 "$script" | grep -v "^#!" | grep "^#" | grep -viE "script:|usage:|author|date|version|license|=" | head -n 1 | sed 's/^#[[:space:]]*//' || true)"
+            # Get the first line after shebang that isn't just decoration or common metadata
+            desc="$(head -n 15 "$script" | grep -v "^#!" | grep "^#" | grep -viE "script:|usage:|author|date|version|license|==|--" | head -n 1 | sed -E 's/^#+[[:space:]]*//' || true)"
         fi
         
         [[ -z "$desc" ]] && desc="No description provided."

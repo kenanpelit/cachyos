@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: vlc-toggle.sh
+# Description: Hyprland + VLC play/pause toggle with robust MPRIS detection, fallbacks, and notifications
+# Usage: vlc-toggle.sh
+# ==============================================================================
 ########################################
 #
 # Name: hypr-vlc-toggle

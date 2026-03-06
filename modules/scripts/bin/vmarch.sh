@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: vmarch.sh
+# Description: Linux VM Manager - Manages QEMU/KVM based Linux virtual machines (Arch focus)
+# Usage: vmarch.sh [OPTIONS]
+# ==============================================================================
 # vmarch.sh - Arch Linux VM başlatıcısı (virt-manager/qemu)
 # Hazır Arch imajını uygun kaynaklarla hızlıca çalıştırır.
 

@@ -166,12 +166,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ### 📂 `hypr-osc`
 **Description:** Hyprland session helper multiplexer (single-file logic).
-Complete Hyprland control suite combining workspace, monitor, and window management
-HyprFlow - VLC Medya Kontrolü
-HyprFlow - WiFi Power Management Toggle
-HyprFlow
-HyprFlow
-HyprFlow
 
 **Usage:** `hypr-osc <subcommand> [args...]`
 
@@ -725,7 +719,6 @@ HyprFlow
 
 ### 📂 `tm`
 **Description:** Comprehensive Tmux management tool for sessions, layouts, buffers, and plugins
-Comprehensive Tmux management, session, layouts, buffers, plugins, and more
 
 **Usage:** `tm.sh <module> [command] [parameters]`
 
@@ -740,7 +733,6 @@ Comprehensive Tmux management, session, layouts, buffers, plugins, and more
 
 ### 📂 `tsm`
 **Description:** Advanced Transmission CLI manager with Pass integration and search
-TransmissionCLI - Transmission Terminal Yönetim Aracı
 
 **Usage:** `tsm.sh [command] [parameter]`
 
@@ -754,58 +746,58 @@ TransmissionCLI - Transmission Terminal Yönetim Aracı
 ---
 
 ### 📂 `vir`
-**Description:** No description provided.
+**Description:** Vim Remote Editor - Edit remote files over SSH using Vim's SCP
 
-**Usage:** `./vir.sh [options] [user@]hostname path/to/file [nvim-options]`
+**Usage:** `vir [options] [user@]hostname path/to/file [nvim-options]`
 
 ---
 
 ### 📂 `vlc-toggle`
 **Description:** Hyprland + VLC play/pause toggle with robust MPRIS detection, fallbacks, and notifications
 
-**Usage:** `vlc-toggle`
+**Usage:** `vlc-toggle.sh`
 
 ---
 
 ### 📂 `vmarch`
-**Description:** vmarch.sh - Arch Linux VM başlatıcısı (virt-manager/qemu)
+**Description:** Linux VM Manager - Manages QEMU/KVM based Linux virtual machines (Arch focus)
 
-**Usage:** `vmarch`
+**Usage:** `vmarch.sh [OPTIONS]`
 
 ---
 
 ### 📂 `vm-start`
-**Description:** vm-start.sh - Basit libvirt VM başlatıcı
+**Description:** Basit libvirt VM başlatıcı (win10 VM’ini başlatır)
 
-**Usage:** `vm-start`
+**Usage:** `vm-start.sh`
 
 ---
 
 ### 📂 `vnc-connect`
-**Description:** vnc-connect.sh - VNC istemci başlatıcı
+**Description:** VNC istemci başlatıcı (VNC sunucularına bağlanmak için hafif wrapper)
 
-**Usage:** `vnc-connect`
+**Usage:** `vnc-connect.sh`
 
 ---
 
 ### 📂 `vncviewer-wl`
-**Description:** vncviewer-wl: Run TigerVNC viewer under Xwayland when DISPLAY is missing (Wayland session)
+**Description:** Run TigerVNC viewer under Xwayland when DISPLAY is missing
 
-**Usage:** `vncviewer-wl`
+**Usage:** `vncviewer-wl [options] [host:display]`
 
 ---
 
 ### 📂 `vv`
-**Description:** No description provided.
+**Description:** Otomatik numaralandırma ile günlük not tutma aracı
 
-**Usage:** `vv`
+**Usage:** `vv [SEÇENEK] [DOSYA]`
 
 ---
 
 ### 📂 `walk`
-**Description:** Walker Launcher (minimal, elegant)
+**Description:** Walker Launcher (minimal, elegant) - Launches Walker with predefined dimensions
 
-**Usage:** `walk`
+**Usage:** `walk.sh`
 
 ---
 

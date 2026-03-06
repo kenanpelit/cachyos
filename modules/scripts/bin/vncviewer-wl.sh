@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: vncviewer-wl.sh
+# Description: Run TigerVNC viewer under Xwayland when DISPLAY is missing
+# Usage: vncviewer-wl [options] [host:display]
+# ==============================================================================
 # vncviewer-wl: Run TigerVNC viewer under Xwayland when DISPLAY is missing (Wayland session)
 
 set -euo pipefail

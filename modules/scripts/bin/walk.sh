@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # ==============================================================================
+# Script: walk.sh
+# Description: Walker Launcher (minimal, elegant) - Launches Walker with predefined dimensions
+# Usage: walk.sh
+# ==============================================================================
+# ==============================================================================
 # Walker Launcher (minimal, elegant)
 # ==============================================================================
 # Launches Walker with predefined dimensions and nice terminal styling.

@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: vnc-connect.sh
+# Description: VNC istemci başlatıcı (VNC sunucularına bağlanmak için hafif wrapper)
+# Usage: vnc-connect.sh
+# ==============================================================================
 # vnc-connect.sh - VNC istemci başlatıcı
 # Belirlenmiş VNC sunucularına bağlanmak için hafif wrapper (host/port parametreli).
 

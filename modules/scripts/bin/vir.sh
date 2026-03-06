@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: vir.sh
+# Description: Vim Remote Editor - Edit remote files over SSH using Vim's SCP
+# Usage: vir [options] [user@]hostname path/to/file [nvim-options]
+# ==============================================================================
 #
 # VIR - Vim Remote Editor
 # ----------------------

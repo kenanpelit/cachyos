@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-#===============================================================================
-#
-#   Script: vv - Günlük Not Alma Aracı
-#   Version: 1.4.0
-#   Date: 2025-06-14
-#   Author: Kenan Pelit
-#   Description: Otomatik numaralandırma ile günlük not tutma aracı
+# ==============================================================================
+# Script: vv
+# Description: Otomatik numaralandırma ile günlük not tutma aracı
+# Usage: vv [SEÇENEK] [DOSYA]
+# ==============================================================================
+# Version: 1.4.0
+# Date: 2025-06-14
+# Author: Kenan Pelit
 #
 #   Features:
 #   - Tarih bazlı otomatik dosya numaralandırma
@@ -19,7 +20,7 @@
 #
 #   License: MIT
 #
-#===============================================================================
+# ==============================================================================
 
 set -euo pipefail # Katı hata kontrolü
 
