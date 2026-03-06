@@ -167,6 +167,12 @@ main() {
   install_from_dir "$module_root/start"
   install_privileged_system_bins
   cleanup_legacy_bins
+  
+  # Auto-generate documentation
+  if [[ -x "$module_root/bin/dcli-docgen" ]]; then
+    echo "Generating script documentation..."
+    "$module_root/bin/dcli-docgen" || true
+  fi
 }
 
 main "$@"

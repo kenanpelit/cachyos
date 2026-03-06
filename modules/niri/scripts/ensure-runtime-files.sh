@@ -32,3 +32,8 @@ for f in outputs.kdl monitor-auto.kdl zen.kdl cursor.kdl alttab.kdl layout.kdl w
   fi
   chmod 0644 "$path" || true
 done
+
+# Run health check validation
+if [[ -x "$script_dir/validate.sh" ]]; then
+  "$script_dir/validate.sh"
+fi
