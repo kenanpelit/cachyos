@@ -1,18 +1,17 @@
 [Unit]
 Description=Niri Bluetooth auto-connect
+# Sadece Niri oturumundaysak çalış
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 Wants=pipewire.service wireplumber.service
-After=niri-session.target pipewire.service wireplumber.service
-PartOf=niri-session.target
+After=pipewire.service wireplumber.service
 
 [Service]
 Type=oneshot
-# Script bittikten sonra "active" gözükmesi için
 RemainAfterExit=yes
-# Arka planda çalışması için Timeout
 TimeoutStartSec=30s
 ExecStart=/usr/bin/bash -lc '%h/.local/bin/bluetooth_toggle --connect'
 Restart=on-failure
 RestartSec=30
 
 [Install]
-WantedBy=niri-session.target
+WantedBy=default.target
