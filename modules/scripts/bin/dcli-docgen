@@ -24,23 +24,26 @@ echo "" >> "$DOCS_FILE"
 for script in "$SCRIPTS_DIR"/*; do
     if [[ -f "$script" && -x "$script" ]]; then
         basename="$(basename "$script")"
-        
-        # Sadece uzantısız hale getir (.sh varsa)
         cmd_name="${basename%.sh}"
         
-        # Description'ı bulmaya çalış (önce Description: veya Amaç:, sonra ilk yorum satırı)
-        desc="$(grep -iE "^#.*(description|amaç|script):" "$script" | head -n 1 | sed -E 's/^#[[:space:]]*([^:]*:)[[:space:]]*//I' || true)"
+        # Extract fields from the standardized header
+        desc="$(grep -i "^# Description:" "$script" | sed 's/^# Description:[[:space:]]*//' || true)"
+        usage="$(grep -i "^# Usage:" "$script" | sed 's/^# Usage:[[:space:]]*//' || true)"
         
+        # Fallback for non-standardized scripts
         if [[ -z "$desc" ]]; then
-            # Alternatif olarak ilk 10 satırdaki anlamlı bir yorumu al
-            desc="$(head -n 10 "$script" | grep -v "^#!" | grep "^#" | grep -viE "author|date|version|license|=" | head -n 1 | sed 's/^#[[:space:]]*//' || true)"
+            desc="$(head -n 10 "$script" | grep -v "^#!" | grep "^#" | grep -viE "script:|usage:|author|date|version|license|=" | head -n 1 | sed 's/^#[[:space:]]*//' || true)"
         fi
         
-        # Eğer hala boşsa
         [[ -z "$desc" ]] && desc="No description provided."
+        [[ -z "$usage" ]] && usage="$cmd_name"
 
-        echo "### \`$cmd_name\`" >> "$DOCS_FILE"
-        echo "> $desc" >> "$DOCS_FILE"
+        echo "### 📂 \`$cmd_name\`" >> "$DOCS_FILE"
+        echo "**Description:** $desc" >> "$DOCS_FILE"
+        echo "" >> "$DOCS_FILE"
+        echo "**Usage:** \`$usage\`" >> "$DOCS_FILE"
+        echo "" >> "$DOCS_FILE"
+        echo "---" >> "$DOCS_FILE"
         echo "" >> "$DOCS_FILE"
     fi
 done
