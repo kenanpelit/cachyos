@@ -97,7 +97,7 @@ run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 for s in "${services[@]}"; do
   # Check if service exists
   if run_as_user systemctl --user list-unit-files "$s" >/dev/null 2>&1; then
-    run_as_user systemctl --user enable --now "$s"
+    run_as_user systemctl --user enable "$s"
     echo "  -> Enabled $s"
   else
     echo "  -> Skipped $s (not found or user bus inaccessible)"
