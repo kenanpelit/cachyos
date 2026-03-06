@@ -17,5 +17,5 @@ ExecStart=/usr/bin/bash -lc "%h/.local/bin/osc-login-prompts --once"
 StandardOutput=journal
 StandardError=journal
 
-[Install]
-WantedBy=niri-session.target
+#[Install]
+#WantedBy=niri-session.target

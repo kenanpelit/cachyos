@@ -1,7 +1,6 @@
 [Unit]
 Description=Niri session (user services)
 Wants=graphical-session.target xdg-desktop-autostart.target
-Wants=niri-login-prompts.service
 After=graphical-session.target dbus.service
 BindsTo=graphical-session.target
 PartOf=graphical-session.target
