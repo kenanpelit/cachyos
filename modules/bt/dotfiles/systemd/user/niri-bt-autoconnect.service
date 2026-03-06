@@ -5,13 +5,14 @@ After=niri-session.target pipewire.service wireplumber.service
 PartOf=niri-session.target
 
 [Service]
-Type=simple
-# Arka planda çalışması için Timeout'u düşürüyoruz
-TimeoutStartSec=10s
+Type=oneshot
+# Script bittikten sonra "active" gözükmesi için
+RemainAfterExit=yes
+# Arka planda çalışması için Timeout
+TimeoutStartSec=30s
 ExecStart=/usr/bin/bash -lc '%h/.local/bin/bluetooth_toggle --connect'
 Restart=on-failure
 RestartSec=30
 
 [Install]
-# Timer zaten bu servisi başlatacağı için burayı boş bırakabiliriz 
-# veya sadece timer'ın düzgün çalıştığından emin oluruz.
+WantedBy=niri-session.target
