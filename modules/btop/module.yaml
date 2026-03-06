@@ -1,6 +1,9 @@
+tags:
+- cli
+- tool
 description: btop config (portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/btop
-    target: ~/.config/btop
+- source: dotfiles/btop
+  target: ~/.config/btop

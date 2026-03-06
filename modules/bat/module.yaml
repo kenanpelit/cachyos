@@ -1,8 +1,11 @@
+tags:
+- cli
+- tool
 description: bat config + themes (portable config)
-
+depends_on:
+- base
 post_install_hook: scripts/build-cache.sh
 post_hook_behavior: always
-
 dotfiles:
-  - source: dotfiles/bat
-    target: ~/.config/bat
+- source: dotfiles/bat
+  target: ~/.config/bat

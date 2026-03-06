@@ -1,6 +1,9 @@
+tags:
+- cli
+- tool
 description: fastfetch config (portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/fastfetch
-    target: ~/.config/fastfetch
+- source: dotfiles/fastfetch
+  target: ~/.config/fastfetch

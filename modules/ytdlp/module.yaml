@@ -1,6 +1,9 @@
+tags:
+- cli
+- tool
 description: yt-dlp config (portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/yt-dlp
-    target: ~/.config/yt-dlp
+- source: dotfiles/yt-dlp
+  target: ~/.config/yt-dlp

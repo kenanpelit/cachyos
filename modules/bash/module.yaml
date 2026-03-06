@@ -1,12 +1,15 @@
+tags:
+- shell
+- tool
 description: Bash config (portable; portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/.bashrc
-    target: ~/.bashrc
-  - source: dotfiles/.bash_profile
-    target: ~/.bash_profile
-  - source: dotfiles/.profile
-    target: ~/.profile
-  - source: dotfiles/bash/.bash_profile
-    target: ~/.config/bash/.bash_profile
+- source: dotfiles/.bashrc
+  target: ~/.bashrc
+- source: dotfiles/.bash_profile
+  target: ~/.bash_profile
+- source: dotfiles/.profile
+  target: ~/.profile
+- source: dotfiles/bash/.bash_profile
+  target: ~/.config/bash/.bash_profile

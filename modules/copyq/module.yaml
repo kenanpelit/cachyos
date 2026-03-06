@@ -1,12 +1,13 @@
+tags:
+- tool
 description: CopyQ config portable config
-
+depends_on:
+- base
 dotfiles_sync: false
-
 dotfiles:
-  - source: dotfiles/copyq/copyq.conf
-    target: ~/.config/copyq/copyq.conf
-  - source: dotfiles/systemd/user/copyq.service
-    target: ~/.config/systemd/user/copyq.service
-
+- source: dotfiles/copyq/copyq.conf
+  target: ~/.config/copyq/copyq.conf
+- source: dotfiles/systemd/user/copyq.service
+  target: ~/.config/systemd/user/copyq.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

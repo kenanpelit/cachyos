@@ -1,8 +1,11 @@
+tags:
+- editor
+- tool
 description: Neovim config (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/nvim/init.lua
-    target: ~/.config/nvim/init.lua
-
+- source: dotfiles/nvim/init.lua
+  target: ~/.config/nvim/init.lua
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

@@ -1,6 +1,9 @@
+tags:
+- cli
+- tool
 description: Yazi config + plugins (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/yazi
-    target: ~/.config/yazi
-
+- source: dotfiles/yazi
+  target: ~/.config/yazi

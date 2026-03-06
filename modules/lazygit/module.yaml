@@ -1,6 +1,9 @@
+tags:
+- git
+- tool
 description: lazygit config (portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/lazygit
-    target: ~/.config/lazygit
+- source: dotfiles/lazygit
+  target: ~/.config/lazygit

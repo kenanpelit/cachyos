@@ -1,14 +1,17 @@
+tags:
+- network
+- tool
 description: Bluetooth auto-connect units (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/systemd/user/hyprland-bt-autoconnect.service
-    target: ~/.config/systemd/user/hyprland-bt-autoconnect.service
-  - source: dotfiles/systemd/user/hyprland-bt-autoconnect.timer
-    target: ~/.config/systemd/user/hyprland-bt-autoconnect.timer
-  - source: dotfiles/systemd/user/niri-bt-autoconnect.service
-    target: ~/.config/systemd/user/niri-bt-autoconnect.service
-  - source: dotfiles/systemd/user/niri-bt-autoconnect.timer
-    target: ~/.config/systemd/user/niri-bt-autoconnect.timer
-
+- source: dotfiles/systemd/user/hyprland-bt-autoconnect.service
+  target: ~/.config/systemd/user/hyprland-bt-autoconnect.service
+- source: dotfiles/systemd/user/hyprland-bt-autoconnect.timer
+  target: ~/.config/systemd/user/hyprland-bt-autoconnect.timer
+- source: dotfiles/systemd/user/niri-bt-autoconnect.service
+  target: ~/.config/systemd/user/niri-bt-autoconnect.service
+- source: dotfiles/systemd/user/niri-bt-autoconnect.timer
+  target: ~/.config/systemd/user/niri-bt-autoconnect.timer
 post_install_hook: scripts/install.sh
 post_hook_behavior: ask

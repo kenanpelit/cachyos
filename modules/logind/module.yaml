@@ -1,4 +1,8 @@
+tags:
+- core
+- system
 description: systemd-logind settings
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: once

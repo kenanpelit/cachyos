@@ -1,8 +1,11 @@
+tags:
+- media
+- tool
 description: mpv (config + scripts) portable config
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/mpv
-    target: ~/.config/mpv
-
+- source: dotfiles/mpv
+  target: ~/.config/mpv
 post_install_hook: scripts/install-yt-dlp-mpv.sh
 post_hook_behavior: always

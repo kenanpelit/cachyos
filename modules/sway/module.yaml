@@ -1,5 +1,9 @@
+tags:
+- wm
+- desktop
 description: Sway config (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/sway
-    target: ~/.config/sway
+- source: dotfiles/sway
+  target: ~/.config/sway

@@ -1,8 +1,10 @@
+tags:
+- tool
 description: Hyprpanel (service stub) portable config
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/systemd/user/hyprpanel.service
-    target: ~/.config/systemd/user/hyprpanel.service
-
+- source: dotfiles/systemd/user/hyprpanel.service
+  target: ~/.config/systemd/user/hyprpanel.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: ask

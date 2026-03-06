@@ -1,3 +1,9 @@
+tags:
+- network
+- security
+- tool
 description: blocky DNS ad-blocking
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

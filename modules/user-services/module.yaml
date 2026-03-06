@@ -1,4 +1,8 @@
+tags:
+- core
+- system
 description: Management of systemd user services
-
+depends_on:
+- base
 post_install_hook: scripts/enable.sh
 post_hook_behavior: always

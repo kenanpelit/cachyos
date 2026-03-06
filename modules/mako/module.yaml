@@ -1,6 +1,8 @@
+tags:
+- tool
 description: mako notification daemon config (portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/mako
-    target: ~/.config/mako
+- source: dotfiles/mako
+  target: ~/.config/mako

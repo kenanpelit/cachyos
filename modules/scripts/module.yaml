@@ -1,6 +1,8 @@
+tags:
+- core
+- system
 description: Custom OSC scripts (portable scripts)
-
-# No packages here; scripts assume base module installed common deps.
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

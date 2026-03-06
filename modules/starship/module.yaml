@@ -1,6 +1,8 @@
+tags:
+- tool
 description: Starship prompt config (portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/starship.toml
-    target: ~/.config/starship.toml
+- source: dotfiles/starship.toml
+  target: ~/.config/starship.toml

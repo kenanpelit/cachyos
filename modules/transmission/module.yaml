@@ -1,12 +1,14 @@
+tags:
+- tool
 description: Transmission (daemon + gui) portable config
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/systemd/user/transmission.service
-    target: ~/.config/systemd/user/transmission.service
-  - source: dotfiles/systemd/user/transmission.timer
-    target: ~/.config/systemd/user/transmission.timer
-  - source: dotfiles/applications/transmission-gtk.desktop
-    target: ~/.local/share/applications/transmission-gtk.desktop
-
+- source: dotfiles/systemd/user/transmission.service
+  target: ~/.config/systemd/user/transmission.service
+- source: dotfiles/systemd/user/transmission.timer
+  target: ~/.config/systemd/user/transmission.timer
+- source: dotfiles/applications/transmission-gtk.desktop
+  target: ~/.local/share/applications/transmission-gtk.desktop
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

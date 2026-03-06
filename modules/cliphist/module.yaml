@@ -1,7 +1,10 @@
+tags:
+- cli
+- tool
 description: Clipboard history (cliphist) portable config
-
+depends_on:
+- base
 dotfiles_sync: true
-
 dotfiles:
-  - source: dotfiles/cliphist
-    target: ~/.config/cliphist
+- source: dotfiles/cliphist
+  target: ~/.config/cliphist

@@ -1,5 +1,9 @@
+tags:
+- terminal
+- tool
 description: alacritty config (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/alacritty
-    target: ~/.config/alacritty
+- source: dotfiles/alacritty
+  target: ~/.config/alacritty

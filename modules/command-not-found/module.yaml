@@ -1,4 +1,6 @@
+tags:
+- tool
 description: command-not-found (pkgfile) for Arch/CachyOS
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
-

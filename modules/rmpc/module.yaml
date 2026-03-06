@@ -1,10 +1,10 @@
+tags:
+- cli
+- tool
 description: rmpc config portable config
-
-
-# Sync dotfiles/rmpc -> ~/.config/rmpc
-
+depends_on:
+- base
 dotfiles_sync: true
-
 dotfiles:
-  - source: dotfiles/rmpc
-    target: ~/.config/rmpc
+- source: dotfiles/rmpc
+  target: ~/.config/rmpc

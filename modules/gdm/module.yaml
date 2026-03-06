@@ -1,4 +1,7 @@
+tags:
+- tool
 description: GDM display manager + optimized session entries
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

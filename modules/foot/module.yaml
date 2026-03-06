@@ -1,7 +1,10 @@
+tags:
+- terminal
+- tool
 description: foot theme snippets (portable config)
-
+depends_on:
+- base
 dotfiles_sync: true
-
 dotfiles:
-  - source: dotfiles/foot
-    target: ~/.config/foot
+- source: dotfiles/foot
+  target: ~/.config/foot

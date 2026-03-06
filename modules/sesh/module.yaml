@@ -1,11 +1,10 @@
+tags:
+- cli
+- tool
 description: sesh config (portable config)
-
-# NOTE: sesh may be installed from AUR.
-# packages:
-#   - sesh
-
+depends_on:
+- base
 dotfiles_sync: true
-
 dotfiles:
-  - source: dotfiles/sesh
-    target: ~/.config/sesh
+- source: dotfiles/sesh
+  target: ~/.config/sesh

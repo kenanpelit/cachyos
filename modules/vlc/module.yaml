@@ -1,7 +1,10 @@
+tags:
+- media
+- tool
 description: VLC config (portable config)
-
+depends_on:
+- base
 dotfiles_sync: true
-
 dotfiles:
-  - source: dotfiles/vlc
-    target: ~/.config/vlc
+- source: dotfiles/vlc
+  target: ~/.config/vlc

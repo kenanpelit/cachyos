@@ -1,4 +1,7 @@
+tags: []
 description: System packages for hay (auto-synced by dcli merge)
+depends_on:
+- base
 conflicts: []
 pre_install_hook: null
 post_install_hook: null
@@ -15,6 +18,5 @@ dotfiles: []
 author: null
 version: null
 category: null
-tags: []
 license: null
 upstream_url: null

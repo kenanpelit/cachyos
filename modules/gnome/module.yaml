@@ -1,11 +1,11 @@
+tags:
+- wm
+- desktop
 description: GNOME Desktop (minimal config) portable config
-
+depends_on:
+- base
 dotfiles:
-  - source: scripts/gnome_tty
-    target: ~/.local/bin/gnome_tty
-
+- source: scripts/gnome_tty
+  target: ~/.local/bin/gnome_tty
 post_install_hook: scripts/setup-gnome.sh
 post_hook_behavior: ask
-
-# NOTE: GNOME module is mostly dconf settings.
-# On Arch/CachyOS, apply those via gsettings/dconf (manual or custom script).

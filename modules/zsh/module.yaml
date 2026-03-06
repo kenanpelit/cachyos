@@ -1,13 +1,16 @@
+tags:
+- shell
+- tool
 description: Zsh config (portable config)
-
-  - zsh-completions
-
+depends_on:
+- base
+- zsh-completions
 dotfiles:
-  - source: dotfiles/.zshenv
-    target: ~/.zshenv
-  - source: dotfiles/zsh/.zshrc
-    target: ~/.zshrc
-  - source: dotfiles/zsh/.zprofile
-    target: ~/.zprofile
-  - source: dotfiles/zsh
-    target: ~/.config/zsh
+- source: dotfiles/.zshenv
+  target: ~/.zshenv
+- source: dotfiles/zsh/.zshrc
+  target: ~/.zshrc
+- source: dotfiles/zsh/.zprofile
+  target: ~/.zprofile
+- source: dotfiles/zsh
+  target: ~/.config/zsh

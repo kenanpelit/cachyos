@@ -1,4 +1,8 @@
+tags:
+- tool
+description: Declarative sops secret management with age
+depends_on:
+- base
 name: sops
-description: "Declarative sops secret management with age"
 post_install_hook: scripts/setup-sops.sh
 post_hook_behavior: always

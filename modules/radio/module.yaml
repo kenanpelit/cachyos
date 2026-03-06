@@ -1,5 +1,9 @@
+tags:
+- media
+- tool
 description: Radio (radiotray-ng) portable config
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/radiotray-ng
-    target: ~/.config/radiotray-ng
+- source: dotfiles/radiotray-ng
+  target: ~/.config/radiotray-ng

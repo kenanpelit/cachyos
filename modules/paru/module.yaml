@@ -1,11 +1,11 @@
+tags:
+- tool
 description: Paru configuration (sudo pacman wrapper + user config)
 depends_on:
-  - pacman
-  - base
-
+- pacman
+- base
 dotfiles:
-  - source: dotfiles/bin/pacman-sudo-paru
-    target: ~/.local/bin/pacman-sudo-paru
-
+- source: dotfiles/bin/pacman-sudo-paru
+  target: ~/.local/bin/pacman-sudo-paru
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

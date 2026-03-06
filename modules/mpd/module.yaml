@@ -1,10 +1,12 @@
+tags:
+- tool
 description: MPD user service + config (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/mpd
-    target: ~/.config/mpd
-  - source: dotfiles/systemd/user/mpd.service
-    target: ~/.config/systemd/user/mpd.service
-
+- source: dotfiles/mpd
+  target: ~/.config/mpd
+- source: dotfiles/systemd/user/mpd.service
+  target: ~/.config/systemd/user/mpd.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: ask

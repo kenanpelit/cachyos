@@ -1,8 +1,10 @@
+tags:
+- tool
 description: GRUB Custom Menu Entries
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/40_custom
-    target: ~/.config/grub/40_custom
-
+- source: dotfiles/40_custom
+  target: ~/.config/grub/40_custom
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

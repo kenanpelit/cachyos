@@ -1,7 +1,10 @@
+tags:
+- media
+- tool
 description: Audacious config portable config
-
+depends_on:
+- base
 dotfiles_sync: true
-
 dotfiles:
-  - source: dotfiles/audacious
-    target: ~/.config/audacious
+- source: dotfiles/audacious
+  target: ~/.config/audacious

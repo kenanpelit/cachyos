@@ -1,7 +1,11 @@
+tags:
+- core
+- system
 description: XDG user-dirs (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/user-dirs.dirs
-    target: ~/.config/user-dirs.dirs
-  - source: dotfiles/user-dirs.conf
-    target: ~/.config/user-dirs.conf
+- source: dotfiles/user-dirs.dirs
+  target: ~/.config/user-dirs.dirs
+- source: dotfiles/user-dirs.conf
+  target: ~/.config/user-dirs.conf

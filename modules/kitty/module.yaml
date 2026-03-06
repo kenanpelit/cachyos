@@ -1,6 +1,9 @@
+tags:
+- terminal
+- tool
 description: kitty config (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/kitty
-    target: ~/.config/kitty
-
+- source: dotfiles/kitty
+  target: ~/.config/kitty

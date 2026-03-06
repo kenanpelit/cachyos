@@ -1,4 +1,8 @@
+tags:
+- security
+- tool
 description: Fail2ban service
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: once

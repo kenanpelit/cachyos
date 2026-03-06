@@ -1,8 +1,10 @@
+tags:
+- tool
 description: Rofi launcher config (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/rofi
-    target: ~/.config/rofi
-
+- source: dotfiles/rofi
+  target: ~/.config/rofi
 post_install_hook: scripts/install.sh
 post_hook_behavior: once

@@ -1,6 +1,9 @@
+tags:
+- media
+- tool
 description: cava config (portable config)
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/cava
-    target: ~/.config/cava
+- source: dotfiles/cava
+  target: ~/.config/cava

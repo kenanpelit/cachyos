@@ -1,7 +1,10 @@
+tags:
+- wm
+- desktop
 description: COSMIC Desktop (base config) portable config
-
+depends_on:
+- base
 dotfiles_sync: true
-
 dotfiles:
-  - source: dotfiles/cosmic
-    target: ~/.config/cosmic
+- source: dotfiles/cosmic
+  target: ~/.config/cosmic

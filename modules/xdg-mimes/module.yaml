@@ -1,10 +1,13 @@
+tags:
+- core
+- system
 description: XDG MIME types and custom desktop entries
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/applications
-    target: ~/.local/share/applications
-  - source: dotfiles/mimeapps.list
-    target: ~/.config/mimeapps.list
-
+- source: dotfiles/applications
+  target: ~/.local/share/applications
+- source: dotfiles/mimeapps.list
+  target: ~/.config/mimeapps.list
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

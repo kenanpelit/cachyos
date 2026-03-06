@@ -1,4 +1,9 @@
+tags:
+- network
+- security
+- tool
 description: Firewall configuration (ufw)
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: once

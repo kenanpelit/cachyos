@@ -1,4 +1,7 @@
+tags:
+- tool
 description: systemd-oomd memory pressure protection
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

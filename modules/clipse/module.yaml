@@ -1,9 +1,11 @@
+tags:
+- cli
+- tool
 description: clipse config (portable config)
-
-# NOTE: `clipse` may be an AUR package on Arch.
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/clipse/custom_theme.json
-    target: ~/.config/clipse/custom_theme.json
-
+- source: dotfiles/clipse/custom_theme.json
+  target: ~/.config/clipse/custom_theme.json
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

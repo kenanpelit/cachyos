@@ -1,5 +1,8 @@
+tags:
+- tool
 description: WebCord/Vencord theme file (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/Vencord/themes/catppuccin-mocha.theme.css
-    target: ~/.config/Vencord/themes/catppuccin-mocha.theme.css
+- source: dotfiles/Vencord/themes/catppuccin-mocha.theme.css
+  target: ~/.config/Vencord/themes/catppuccin-mocha.theme.css

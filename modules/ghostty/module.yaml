@@ -1,5 +1,9 @@
+tags:
+- terminal
+- tool
 description: Ghostty config (portable config)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/ghostty
-    target: ~/.config/ghostty
+- source: dotfiles/ghostty
+  target: ~/.config/ghostty

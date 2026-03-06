@@ -1,6 +1,8 @@
+tags:
+- tool
 description: tmux config portable config
-
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/tmux
-    target: ~/.config/tmux
+- source: dotfiles/tmux
+  target: ~/.config/tmux

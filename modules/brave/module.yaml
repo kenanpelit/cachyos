@@ -1,8 +1,11 @@
+tags:
+- browser
+- tool
 description: Brave (launcher wrapper + config) portable config
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/brave-launcher/config.conf
-    target: ~/.config/brave-launcher/config.conf
-
+- source: dotfiles/brave-launcher/config.conf
+  target: ~/.config/brave-launcher/config.conf
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

@@ -1,12 +1,13 @@
+tags:
+- tool
 description: Stasis idle manager (config + wrappers) portable config
-
-# NOTE: Package name may differ on CachyOS/Arch (might be AUR). Install stasis separately if needed.
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/stasis
-    target: ~/.config/stasis
-  - source: dotfiles/systemd/user/stasis.service
-    target: ~/.config/systemd/user/stasis.service
-
+- source: dotfiles/stasis
+  target: ~/.config/stasis
+- source: dotfiles/systemd/user/stasis.service
+  target: ~/.config/systemd/user/stasis.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
 run_hooks_as_user: true

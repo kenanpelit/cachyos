@@ -1,5 +1,9 @@
+tags:
+- cli
+- tool
 description: FZF config (theme + defaults)
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/fzf
-    target: ~/.config/fzf
+- source: dotfiles/fzf
+  target: ~/.config/fzf

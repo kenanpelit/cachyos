@@ -1,8 +1,10 @@
+tags:
+- tool
 description: Sunsetr profiles + helper management
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/sunsetr
-    target: ~/.config/sunsetr
-
+- source: dotfiles/sunsetr
+  target: ~/.config/sunsetr
 post_install_hook: scripts/install.sh
 post_hook_behavior: ask

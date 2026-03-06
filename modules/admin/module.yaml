@@ -1,4 +1,8 @@
+tags:
+- core
+- system
 description: System administrative tasks
-
+depends_on:
+- base
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

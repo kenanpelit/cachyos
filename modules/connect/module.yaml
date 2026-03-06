@@ -1,16 +1,17 @@
+tags:
+- network
+- tool
 description: KDE Connect configuration portable config
-
-# NOTE: This module does NOT copy ~/.config/kdeconnect (certificates/private keys).
-
+depends_on:
+- base
 dotfiles:
-  - source: dotfiles/systemd/user/kdeconnect.service
-    target: ~/.config/systemd/user/kdeconnect.service
-  - source: dotfiles/systemd/user/kdeconnect.timer
-    target: ~/.config/systemd/user/kdeconnect.timer
-  - source: dotfiles/systemd/user/kdeconnect-indicator.service
-    target: ~/.config/systemd/user/kdeconnect-indicator.service
-  - source: dotfiles/bin/kdeconnectd-wrapper
-    target: ~/.local/bin/kdeconnectd-wrapper
-
+- source: dotfiles/systemd/user/kdeconnect.service
+  target: ~/.config/systemd/user/kdeconnect.service
+- source: dotfiles/systemd/user/kdeconnect.timer
+  target: ~/.config/systemd/user/kdeconnect.timer
+- source: dotfiles/systemd/user/kdeconnect-indicator.service
+  target: ~/.config/systemd/user/kdeconnect-indicator.service
+- source: dotfiles/bin/kdeconnectd-wrapper
+  target: ~/.local/bin/kdeconnectd-wrapper
 post_install_hook: scripts/install.sh
 post_hook_behavior: ask
