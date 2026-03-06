@@ -1515,7 +1515,7 @@ env)
     set_env_in_systemd
     start_niri_portals &
     restart_portals &
-    start_target &
+    start_target
   )
   ;;
 
