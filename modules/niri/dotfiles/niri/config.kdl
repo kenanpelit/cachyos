@@ -78,8 +78,8 @@ layer-rule {
 // Long-running daemons are preferably started via systemd --user (niri-session.target).
 // Here we only start the minimal session bootstrap + helpers that must exist early.
 
-spawn-at-startup "sh" "-lc" "$HOME/.local/bin/niri-osc set env"
-spawn-at-startup "sh" "-lc" "OSC_SHELL_STARTUP=1 $HOME/.local/bin/osc-shell ensure"
+spawn-at-startup "niri-osc" "set" "env"
+spawn-at-startup "env" "OSC_SHELL_STARTUP=1" "osc-shell" "ensure"
 spawn-at-startup "/usr/bin/clipse" "-listen"
 
 // ------------------------------------------------------------------------
@@ -140,7 +140,7 @@ debug {
 switch-events {
   // Lock when the lid is closed (logind integration).
   lid-close {
-    spawn "sh" "-lc" "command -v \"$HOME/.local/bin/niri-osc\" >/dev/null 2>&1 && \"$HOME/.local/bin/niri-osc\" set lock --logind || true"
+    spawn "sh" "-c" "niri-osc set lock --logind || true"
   }
 }
 
@@ -308,9 +308,9 @@ binds {
   Mod+Alt+R   hotkey-overlay-title="Reset Window Height" { reset-window-height; }
 
   // Fixed geometry helpers via niri msg
-  Mod+0 hotkey-overlay-title="Size: 960x540 (Half)" { spawn "sh" "-lc" "niri msg action set-column-width 960 && niri msg action set-window-height 540"; }
-  Mod+Shift+0 hotkey-overlay-title="Size: 1280x720 (HD)" { spawn "sh" "-lc" "niri msg action set-column-width 1280 && niri msg action set-window-height 720"; }
-  Mod+Ctrl+0 hotkey-overlay-title="Size: 1920x1080 (FHD)" { spawn "sh" "-lc" "niri msg action set-column-width 1920 && niri msg action set-window-height 1080"; }
+  Mod+0 hotkey-overlay-title="Size: 960x540 (Half)" { spawn "sh" "-c" "niri msg action set-column-width 960 && niri msg action set-window-height 540"; }
+  Mod+Shift+0 hotkey-overlay-title="Size: 1280x720 (HD)" { spawn "sh" "-c" "niri msg action set-column-width 1280 && niri msg action set-window-height 720"; }
+  Mod+Ctrl+0 hotkey-overlay-title="Size: 1920x1080 (FHD)" { spawn "sh" "-c" "niri msg action set-column-width 1920 && niri msg action set-window-height 1080"; }
 
   // Fine-grained sizing
   Mod+Minus       hotkey-overlay-title="Width -5%"  { set-column-width "-5%"; }
