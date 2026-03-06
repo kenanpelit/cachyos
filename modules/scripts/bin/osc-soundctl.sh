@@ -80,9 +80,9 @@ check_command() {
 		info "${title}: ${msg}"
 		if command -v notify-send >/dev/null 2>&1; then
 			if [ "${ENABLE_ICONS}" = true ] && [ -n "${icon}" ]; then
-				notify-send -t "${NOTIFICATION_TIMEOUT}" -i "${icon}" "${title}" "${msg}" 2>/dev/null || true
+				notify-send -t "${NOTIFICATION_TIMEOUT}" -i "${icon}" "${title}" "${msg}" 2>/dev/null &
 			else
-				notify-send -t "${NOTIFICATION_TIMEOUT}" "${title}" "${msg}" 2>/dev/null || true
+				notify-send -t "${NOTIFICATION_TIMEOUT}" "${title}" "${msg}" 2>/dev/null &
 			fi
 		fi
 	}

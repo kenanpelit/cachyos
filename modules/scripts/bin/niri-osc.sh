@@ -1513,9 +1513,9 @@ env)
     start_clipse_listener
     import_env_to_systemd
     set_env_in_systemd
-    start_niri_portals
-    restart_portals
-    start_target
+    start_niri_portals &
+    restart_portals &
+    start_target &
   )
   ;;
 
@@ -1533,7 +1533,7 @@ init)
       command -v notify-send >/dev/null 2>&1 || return 0
       local body="${1:-}"
       local timeout="${2:-2500}"
-      notify-send -t "$timeout" "Niri Init" "$body" 2>/dev/null || true
+      notify-send -t "$timeout" "Niri Init" "$body" 2>/dev/null &
     }
 
     run_if_present() {
@@ -1793,10 +1793,10 @@ init)
       # We call the subcommand directly to avoid depending on extra binaries.
       if [[ "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
         focus_ws="${NIRI_INIT_FOCUS_WORKSPACE:-2}"
-        "$0" go --focus "ws:${focus_ws}"
+        "$0" go --focus "ws:${focus_ws}" &
         notify "go: ws:${focus_ws}"
       else
-        "$0" go
+        "$0" go &
         notify "go"
       fi
     elif [[ "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
@@ -1865,7 +1865,7 @@ go)
       command -v notify-send >/dev/null 2>&1 || return 0
       local body="${1:-}"
       local timeout="${2:-2500}"
-      notify-send -t "$timeout" "Niri Arranger" "$body" 2>/dev/null || true
+      notify-send -t "$timeout" "Niri Arranger" "$body" 2>/dev/null &
     }
 
     usage() {
