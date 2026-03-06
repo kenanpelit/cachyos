@@ -13,34 +13,11 @@
 // ========================================================================
 
 environment {
-  XDG_CURRENT_DESKTOP "niri"
-  XDG_SESSION_TYPE "wayland"
-  XDG_SESSION_DESKTOP "niri"
-  DESKTOP_SESSION "niri"
-
   // Ensure compositor startup helpers are discoverable even when started from
   // a display manager with a minimal PATH.
   PATH "$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:$PATH"
 
-  GTK_THEME "catppuccin-mocha-mauve-standard+default"
-  GTK_USE_PORTAL "1"
-  XCURSOR_THEME "catppuccin-mocha-dark-cursors"
-  XCURSOR_SIZE "24"
-  XDG_ICON_THEME "kora"
-  QT_ICON_THEME "kora"
-
-  QT_QPA_PLATFORM "wayland;xcb"
-  ELECTRON_OZONE_PLATFORM_HINT "auto"
-  QT_QPA_PLATFORMTHEME "gtk3"
-  QT_QPA_PLATFORMTHEME_QT6 "gtk3"
-  QT_STYLE_OVERRIDE "kvantum"
-  QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
-  MOZ_ENABLE_WAYLAND "1"
   BROWSER "start-brave-kenp"
-
-  // Use a stable SSH agent socket provided by gnome-keyring on Wayland.
-  // This helps prevent late-session passphrase prompts and gcr-prompter popups.
-  SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/keyring/ssh"
 }
 
 cursor {
@@ -815,9 +792,11 @@ window-rule {
 
 window-rule {
   match title=r#"^(Open File|File Upload|Save As|Confirm to replace files|File Operation Progress|Extract archive|Compress\.\.\.)$"#
+  match app-id="xdg-desktop-portal-gnome"
+  match app-id="xdg-desktop-portal-gtk"
   exclude app-id=r#"^Kenp$"#
   open-floating true
-  default-column-width { proportion 0.60; }
+  default-column-width { proportion 0.50; }
   default-window-height { proportion 0.75; }
   open-focused true
 }

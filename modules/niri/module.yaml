@@ -16,6 +16,8 @@ dotfiles:
     target: ~/.config/autostart/org.kde.kdeconnect.daemon.desktop
   - source: dotfiles/autostart/snapper-tools-check.desktop
     target: ~/.config/autostart/snapper-tools-check.desktop
+  - source: dotfiles/environment.d/10-niri-env.conf
+    target: ~/.config/environment.d/10-niri-env.conf
   - source: dotfiles/portals.conf
     target: ~/.config/xdg-desktop-portal/niri-portals.conf
   - source: dotfiles/systemd/user/niri-session.target
