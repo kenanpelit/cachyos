@@ -1,0 +1,13 @@
+[Unit]
+Description=Delayed Geoclue Demo Agent
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/geoclue-2.0/demos/agent
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

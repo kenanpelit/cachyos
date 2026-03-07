@@ -21,6 +21,7 @@ services=(
   hypr-init.service
   stasis.timer
   walker.timer
+  geoclue-agent.timer
   flatpak-managed-install.timer
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
@@ -30,7 +31,7 @@ services=(
   niri-sticky.service
   niri-niriswitcher.service
   niri-polkit-agent.service
-  copyq.service
+  copyq.timer
   ppp-auto-profile.timer
   elephant.service
   transmission.service

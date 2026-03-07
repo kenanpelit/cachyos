@@ -6,9 +6,9 @@ Wants=pipewire.service wireplumber.service
 After=pipewire.service wireplumber.service
 
 [Service]
-Type=oneshot
-RemainAfterExit=yes
-TimeoutStartSec=30s
+# Scripti arka plana atıp anında devam etmesi için simple yapıyoruz
+Type=simple
+TimeoutStartSec=10s
 ExecStart=/usr/bin/bash -lc '%h/.local/bin/bluetooth_toggle --connect'
 Restart=on-failure
 RestartSec=30

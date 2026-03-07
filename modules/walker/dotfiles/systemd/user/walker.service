@@ -7,6 +7,8 @@ Requires=elephant.service
 
 [Service]
 Type=simple
+CPUWeight=20
+IOWeight=20
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
 ExecStartPre=/usr/bin/sleep 2
 ExecStart=walker --gapplication-service
