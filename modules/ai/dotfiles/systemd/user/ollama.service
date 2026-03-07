@@ -8,6 +8,7 @@ ExecStart=/usr/bin/ollama serve
 Restart=on-failure
 RestartSec=5
 Environment="OLLAMA_HOST=127.0.0.1:11434"
+Environment="OLLAMA_MODELS=%h/.ollama/models"
 
 #[Install]
 #WantedBy=default.target
