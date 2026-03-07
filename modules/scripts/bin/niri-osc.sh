@@ -1464,13 +1464,15 @@ env)
     detect_niri_socket
     ensure_session_identity
     
-    # Run these in parallel to avoid blocking the session target
-    start_clipse_listener &
+    # Fast systemd sync (crucial for services)
+    set_env_in_systemd
+    
+    # Heavier D-Bus/Portal sync in parallel
     import_env_to_systemd &
-    set_env_in_systemd &
+    start_clipse_listener &
     start_niri_portals &
     
-    # Trigger the target as soon as basic detection is done
+    # Finally trigger the session target
     start_target
   )
   ;;
