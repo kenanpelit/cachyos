@@ -1,13 +1,11 @@
 [Unit]
 Description=Niri Bluetooth auto-connect (delayed)
-# Session target yerine genel grafik oturumuna bağlıyoruz
+# Grafik oturumu oturduktan sonra başla
 After=graphical-session.target
 
 [Timer]
 # Login olduktan 10 saniye sonra çalış
 OnStartupSec=10s
-# Veya aktif olduktan sonra
-OnActiveSec=10s
 AccuracySec=1s
 Unit=niri-bt-autoconnect.service
 

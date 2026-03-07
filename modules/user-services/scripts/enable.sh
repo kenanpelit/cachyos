@@ -24,7 +24,6 @@ services=(
   flatpak-managed-install.timer
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
-  niri-bt-autoconnect.service
   kdeconnect.timer
   noctalia.service
   niri-bootstrap.service
