@@ -1024,6 +1024,10 @@ window-rule {
   match app-id=r#"^com\.rtosta\.zapzap$"#
   open-on-workspace "9"
 }
+window-rule {
+  match app-id=r#"^(Whats|chrome-web\.whatsapp\.com__-Default)$"#
+  open-on-workspace "9"
+}
 
 // Privacy: exclude sensitive windows/layers from screencast/screenshot capture.
 window-rule {
