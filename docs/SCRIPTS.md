@@ -94,6 +94,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `delayed-portals`
+**Description:** Starts xdg-desktop-portal services after a specific delay.
+
+**Usage:** `delayed-portals [delay_seconds]`
+
+---
+
 ### 📂 `discord-sandbox`
 **Description:** Launches Discord with sandbox disabled to avoid common issues.
 
