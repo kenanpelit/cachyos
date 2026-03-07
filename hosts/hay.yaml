@@ -49,7 +49,7 @@ enabled_modules:
 - stasis
 - xdg-portal
 - rofi
-- walker
+# - walker
 - dms
 - noctalia
 # - dms-greeter
