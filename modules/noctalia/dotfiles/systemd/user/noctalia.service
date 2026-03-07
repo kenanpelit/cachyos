@@ -6,6 +6,11 @@ After=niri-ready.service
 
 [Service]
 Environment=QS_CACHE_DIR=%t/noctalia-qml-cache
+Environment=QT_ICON_THEME=kora
+Environment=XDG_ICON_THEME=kora
+Environment=ICON_THEME=kora
+Environment=QT_QPA_PLATFORMTHEME=kvantum
+Environment=XDG_DATA_DIRS=%h/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
 ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate
 Restart=on-failure
 RestartSec=1
