@@ -1463,11 +1463,14 @@ env)
     detect_wayland_display
     detect_niri_socket
     ensure_session_identity
-    start_clipse_listener
-    import_env_to_systemd
-    set_env_in_systemd
+    
+    # Run these in parallel to avoid blocking the session target
+    start_clipse_listener &
+    import_env_to_systemd &
+    set_env_in_systemd &
     start_niri_portals &
-    restart_portals &
+    
+    # Trigger the target as soon as basic detection is done
     start_target
   )
   ;;
