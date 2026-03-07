@@ -164,6 +164,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `helium-kenp-default`
+**Description:** Default browser entry for Kenp profile with niri window focus.
+
+**Usage:** `helium-kenp-default.sh [URL]`
+
+---
+
 ### 📂 `hypr-expo`
 **Description:** Lightweight replacement for hyprexpo toggle using shell overview.
 
@@ -574,6 +581,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Advanced Google Chrome profile launcher and manager
 
 **Usage:** `profile_chrome.sh [profile_name] [options]`
+
+---
+
+### 📂 `profile_helium`
+**Description:** Helium Profile Launcher with window management and proxy support
+
+**Usage:** `profile_helium.sh [profile_name] [options]`
 
 ---
 
