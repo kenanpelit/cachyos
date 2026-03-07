@@ -1011,7 +1011,7 @@ window-rule {
   open-on-workspace "7"
 }
 window-rule {
-  match app-id=r#"^brave-youtube\.com__-Default$"#
+  match app-id=r#"^(brave-youtube|chrome-youtube)\.com__-Default$"#
   open-on-workspace "7"
 }
 
@@ -1068,7 +1068,7 @@ window-rule {
 
 window-rule {
   match app-id=r#"^(org\.gnome\..*|org\.wezfurlong\.wezterm|zen|com\.mitchellh\.ghostty|kitty|firefox|brave-browser)$"#
-  match app-id=r#"^(Kenp|Ai|CompecTA|Whats|Exclude|brave-youtube\.com__-Default|ferdium|Ferdium)$"#
+  match app-id=r#"^(Kenp|Ai|CompecTA|Whats|Exclude|(brave-youtube|chrome-youtube)\.com__-Default|ferdium|Ferdium)$"#
   draw-border-with-background false
 }
 
@@ -1078,7 +1078,7 @@ window-rule {
   exclude app-id=r#"^(TmuxKenp|Tmux)$"#
   exclude app-id=r#"^mpv$"#
   exclude app-id=r#"^vlc$"#
-  exclude app-id=r#"^brave-youtube\.com__-Default$"#
+  exclude app-id=r#"^(brave-youtube|chrome-youtube)\.com__-Default$"#
   exclude title=r#"^Picture-in-Picture$"#
   exclude app-id=r#"^steam_app_\d+$"#
   exclude app-id=r#"^com\.obsproject\.Studio$"#

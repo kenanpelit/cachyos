@@ -46,6 +46,7 @@ EXTRA_LINKS=(
   "/repo/archive/.anote|$HOME/.anote"
   "/repo/archive/.backups|$HOME/.backups"
   "/repo/archive/.brave|$HOME/.brave"
+  "/repo/archive/.helium|$HOME/.helium"
   "/repo/archive/.mozilla|$HOME/.mozilla"
   "/repo/archive/.kenp|$HOME/.kenp"
   "/repo/archive/.keep|$HOME/.keep"
