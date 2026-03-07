@@ -59,6 +59,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `cleanup_helium_profiles`
+**Description:** Cleanup utility for Helium isolated profile disk usage.
+
+**Usage:** `cleanup_helium_profiles.sh [options]`
+
+---
+
 ### 📂 `clustergit`
 **Description:** Multi-repository Git status monitoring tool with rich reporting.
 
