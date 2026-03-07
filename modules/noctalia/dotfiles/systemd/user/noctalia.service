@@ -2,6 +2,8 @@
 Description=Noctalia Shell
 # Sadece Niri oturumundaysak çalış
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+# Wayland soketi hazır olmadan başlama (crash-restart döngüsünü önler)
+After=niri-ready.service
 PartOf=graphical-session.target
 
 [Service]
