@@ -12,7 +12,8 @@ dotfiles:
   target: ~/.config/systemd/user/elephant.service
 - source: dotfiles/systemd/user/walker.service
   target: ~/.config/systemd/user/walker.service
-- source: dotfiles/dbus-1/services/io.github.abenz1267.walker.service
+- source: dotfiles/systemd/user/walker.timer
+  target: ~/.config/systemd/user/walker.timer- source: dotfiles/dbus-1/services/io.github.abenz1267.walker.service
   target: ~/.local/share/dbus-1/services/io.github.abenz1267.walker.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

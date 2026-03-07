@@ -19,7 +19,8 @@ services=(
   niri-snapper-tools-check.service
   hypr-clip-persist.service
   hypr-init.service
-  stasis.service
+  stasis.timer
+  walker.timer
   flatpak-managed-install.timer
   hyprland-bt-autoconnect.timer
   niri-bt-autoconnect.timer
@@ -33,7 +34,6 @@ services=(
   copyq.service
   ppp-auto-profile.timer
   elephant.service
-  walker.service
   transmission.service
 )
 

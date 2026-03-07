@@ -1448,52 +1448,15 @@ env)
     }
 
     start_niri_portals() {
-      if ! command -v systemctl >/dev/null 2>&1; then
-        return 0
+      # Portals are now managed via delayed-portals script to speed up startup.
+      if command -v delayed-portals >/dev/null 2>&1; then
+        delayed-portals 40 >/dev/null 2>&1 &
       fi
-
-      local timeout_bin=""
-      if command -v timeout >/dev/null 2>&1; then
-        timeout_bin="timeout"
-      fi
-
-      # Niri's primary screencasting path is via xdg-desktop-portal-gnome.
-      # Start portal backends explicitly in case portals were activated before
-      # WAYLAND_DISPLAY existed at login time.
-      local services=(
-        xdg-desktop-portal-gnome.service
-        xdg-desktop-portal-gtk.service
-      )
-
-      local svc
-      for svc in "${services[@]}"; do
-        if [[ -n "$timeout_bin" ]]; then
-          $timeout_bin 2s systemctl --user start "$svc" >/dev/null 2>&1 || true
-        else
-          systemctl --user start "$svc" >/dev/null 2>&1 || true
-        fi
-      done
     }
 
     restart_portals() {
-      if ! command -v systemctl >/dev/null 2>&1; then
-        return 0
-      fi
-
-      local timeout_bin=""
-      if command -v timeout >/dev/null 2>&1; then
-        timeout_bin="timeout"
-      fi
-
-      # xdg-desktop-portal is often started before the compositor exports
-      # XDG_CURRENT_DESKTOP / WAYLAND_DISPLAY into systemd --user. Restarting
-      # it here makes it pick the correct *-portals.conf (and exposes
-      # ScreenCast/Screenshot).
-      if [[ -n "$timeout_bin" ]]; then
-        $timeout_bin 2s systemctl --user restart xdg-desktop-portal.service >/dev/null 2>&1 || true
-      else
-        systemctl --user restart xdg-desktop-portal.service >/dev/null 2>&1 || true
-      fi
+      # Immediate restart is disabled; handled by delayed-portals.
+      return 0
     }
 
     ensure_runtime_dir

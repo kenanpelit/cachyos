@@ -8,6 +8,7 @@ dotfiles:
   target: ~/.config/stasis
 - source: dotfiles/systemd/user/stasis.service
   target: ~/.config/systemd/user/stasis.service
-post_install_hook: scripts/install.sh
+- source: dotfiles/systemd/user/stasis.timer
+  target: ~/.config/systemd/user/stasis.timerpost_install_hook: scripts/install.sh
 post_hook_behavior: always
 run_hooks_as_user: true
