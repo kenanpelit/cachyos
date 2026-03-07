@@ -1,6 +1,7 @@
 tags:
-- tool
-description: Stasis idle manager (config + wrappers) portable config
+- desktop
+- wm
+description: Stasis (Wayland idle manager)
 depends_on:
 - base
 dotfiles:
@@ -9,6 +10,8 @@ dotfiles:
 - source: dotfiles/systemd/user/stasis.service
   target: ~/.config/systemd/user/stasis.service
 - source: dotfiles/systemd/user/stasis.timer
-  target: ~/.config/systemd/user/stasis.timerpost_install_hook: scripts/install.sh
+  target: ~/.config/systemd/user/stasis.timer
+
+post_install_hook: scripts/install.sh
 post_hook_behavior: always
 run_hooks_as_user: true
