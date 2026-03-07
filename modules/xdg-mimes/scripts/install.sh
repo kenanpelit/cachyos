@@ -8,8 +8,8 @@ if command -v update-desktop-database >/dev/null 2>&1; then
 fi
 
 if command -v xdg-settings >/dev/null 2>&1; then
-  if [[ -f "$app_dir/brave-kenp.desktop" ]]; then
-    xdg-settings set default-web-browser brave-kenp.desktop >/dev/null 2>&1 || true
+  if [[ -f "$app_dir/helium-kenp.desktop" ]]; then
+    xdg-settings set default-web-browser helium-kenp.desktop >/dev/null 2>&1 || true
   fi
 fi
 

@@ -428,7 +428,7 @@ dconf write /org/gnome/shell/extensions/spotify-controls/show-album-art "false"
 dconf write /org/gnome/shell/extensions/spotify-controls/compact-mode "true"
 
 # Auto Move Windows (Niri-like workspace rules)
-AUTO_MOVE_LIST="['brave-kenp.desktop:1','brave-browser.desktop:1','kitty.desktop:2','brave-ai.desktop:3','brave-compecta.desktop:4','discord.desktop:5','webcord.desktop:5','audacious.desktop:5','org.telegram.desktop.desktop:6','vlc.desktop:6','remote-viewer.desktop:6','transmission-gtk.desktop:7','org.keepassxc.KeePassXC.desktop:7','brave-youtube.com__-Default.desktop:7','brave-agimnkijcaahngcdmfeangaknmldooml-Default.desktop:7','spotify.desktop:8','ferdium.desktop:9','com.rtosta.zapzap.desktop:9','whatsie.desktop:9']"
+AUTO_MOVE_LIST="['helium-kenp.desktop:1','brave-browser.desktop:1','kitty.desktop:2','brave-ai.desktop:3','brave-compecta.desktop:4','discord.desktop:5','webcord.desktop:5','audacious.desktop:5','org.telegram.desktop.desktop:6','vlc.desktop:6','remote-viewer.desktop:6','transmission-gtk.desktop:7','org.keepassxc.KeePassXC.desktop:7','brave-youtube.com__-Default.desktop:7','brave-agimnkijcaahngcdmfeangaknmldooml-Default.desktop:7','spotify.desktop:8','ferdium.desktop:9','com.rtosta.zapzap.desktop:9','whatsie.desktop:9']"
 dconf write /org/gnome/shell/extensions/auto-move-windows/application-list "$AUTO_MOVE_LIST"
 
 # =============================================================================

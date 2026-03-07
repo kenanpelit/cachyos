@@ -880,7 +880,7 @@ here)
       send_notify "Launching <b>$APP_ID</b>..."
 
       if ! case "$APP_ID" in
-      "Kenp") launch_from_candidates start-brave-kenp ;;
+      "Kenp") launch_from_candidates start-helium-kenp ;;
       "TmuxKenp") launch_from_candidates start-kkenp ;;
       "Ai") launch_from_candidates start-brave-ai ;;
       "CompecTA") launch_from_candidates start-brave-compecta ;;
@@ -2156,8 +2156,8 @@ EOF
 
       if [[ -z "${kenp_id:-}" && -n "${home_out:-}" && -n "${home_idx:-}" ]]; then
         # Try to spawn and wait briefly for window to appear.
-        if command -v start-brave-kenp >/dev/null 2>&1; then
-          start-brave-kenp >/dev/null 2>&1 & disown || true
+        if command -v start-helium-kenp >/dev/null 2>&1; then
+          start-helium-kenp >/dev/null 2>&1 & disown || true
           for _ in {1..50}; do
             kenp_id="$("${NIRI[@]}" -j windows 2>/dev/null | jq -r 'first(.[] | select(.app_id=="Kenp") | .id) // empty' || true)"
             [[ -n "${kenp_id:-}" ]] && break
@@ -2169,7 +2169,7 @@ EOF
       if [[ -z "${kenp_id:-}" ]]; then
         # Best-effort fallback: just try to focus/spawn without moving.
         if command -v niri-osc >/dev/null 2>&1; then
-          niri-osc flow focus-or-spawn --app-id '^Kenp$' start-brave-kenp >/dev/null 2>&1 || true
+          niri-osc flow focus-or-spawn --app-id '^Kenp$' start-helium-kenp >/dev/null 2>&1 || true
         fi
         return 0
       fi

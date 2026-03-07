@@ -17,7 +17,7 @@ environment {
   // a display manager with a minimal PATH.
   PATH "$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:$PATH"
 
-  BROWSER "start-brave-kenp"
+  BROWSER "start-helium-kenp"
 }
 
 cursor {

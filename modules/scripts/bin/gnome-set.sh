@@ -449,7 +449,7 @@ launch_for_app() {
   local app="$1"
 
   case "$app" in
-    Kenp) start-brave-kenp >/dev/null 2>&1 & ;;
+    Kenp) start-helium-kenp >/dev/null 2>&1 & ;;
     TmuxKenp|Tmux) start-kkenp >/dev/null 2>&1 & ;;
     Ai) start-brave-ai >/dev/null 2>&1 & ;;
     CompecTA) start-brave-compecta >/dev/null 2>&1 & ;;

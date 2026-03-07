@@ -193,7 +193,7 @@ case "${cmd}" in
         fi
         
         case "$APP_ID" in
-          "Kenp") run_cmd_bg start-brave-kenp ;;
+          "Kenp") run_cmd_bg start-helium-kenp ;;
           "TmuxKenp") run_cmd_bg start-kkenp ;;
           "Ai") run_cmd_bg start-brave-ai ;;
           "CompecTA") run_cmd_bg start-brave-compecta ;;
@@ -352,7 +352,7 @@ case "${cmd}" in
         # 2. Launch if not found
         notify "Launching $APP_ID..."
         case "$APP_ID" in
-          "Kenp") start-brave-kenp >/dev/null 2>&1 & ;;
+          "Kenp") start-helium-kenp >/dev/null 2>&1 & ;;
           "TmuxKenp") start-kkenp >/dev/null 2>&1 & ;;
           "Ai") start-brave-ai >/dev/null 2>&1 & ;;
           "CompecTA") start-brave-compecta >/dev/null 2>&1 & ;;
@@ -1811,7 +1811,7 @@ setup_environment() {
 	export VISUAL=nvim
 	export TERMINAL=kitty
 	export TERM=xterm-256color
-	export BROWSER=start-brave-kenp
+	export BROWSER=start-helium-kenp
 
 	# -------------------------------------------------------------------------
 	# Font Rendering

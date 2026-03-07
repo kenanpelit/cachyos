@@ -83,7 +83,7 @@ launch_app() {
 
   case "$APP_ID" in
     "Kenp")
-      start-brave-kenp &
+      start-helium-kenp &
       ;;
     "TmuxKenp")
       start-kkenp &

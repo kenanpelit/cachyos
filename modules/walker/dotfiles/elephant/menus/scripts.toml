@@ -29,7 +29,7 @@ icon = "brave-browser"
 [[entries]]
 text = "Brave - Kenp"
 keywords = ["brave", "kenp", "browser"]
-actions = { "run" = "start-brave-kenp" }
+actions = { "run" = "start-helium-kenp" }
 icon = "brave-browser"
 
 [[entries]]
