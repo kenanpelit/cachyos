@@ -583,10 +583,6 @@ binds {
     spawn-sh "$HOME/.local/bin/rofi-launcher"
   }
 
-  Mod+Ctrl+Space repeat=false hotkey-overlay-title="Walk Launcher" {
-    spawn-sh "$HOME/.local/bin/walk"
-  }
-
   Mod+Ctrl+S repeat=false hotkey-overlay-title="Sticky Toggle" {
     spawn-sh "$HOME/.local/bin/niri-osc sticky stage toggle-active"
   }
