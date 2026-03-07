@@ -1,6 +1,6 @@
 [Unit]
 Description=Niri ready (IPC/socket)
-After=graphical-session.target niri-session.target
+After=niri-session.target
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET

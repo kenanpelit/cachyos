@@ -1,8 +1,7 @@
 [Unit]
 Description=Noctalia Shell
-# Sadece Niri oturumundaysak çalış
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-# Niri soketi hazır olmadan başlama (Döngüden kaçınmak için target'lara bağlanmıyoruz)
+# Sadece Niri hazır olduğunda başla, başka hiçbir target hiyerarşisine girme
 After=niri-ready.service
 
 [Service]
@@ -12,5 +11,4 @@ Restart=on-failure
 RestartSec=1
 
 [Install]
-# Niri'ye özel target yerine genel kullanıcı hedefine bağlıyoruz
 WantedBy=default.target
