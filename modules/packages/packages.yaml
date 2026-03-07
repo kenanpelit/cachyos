@@ -9,7 +9,6 @@ packages:
   - hyprsunset
   - efibootmgr
   - ente-auth-bin
-  - ente-desktop-bin
   # - ferdium # Duplicate
   - ferdium-bin
   - firefox
