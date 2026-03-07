@@ -53,6 +53,8 @@ readonly LOG_FILE="${HOME}/.config/helium-launcher/helium-launcher.log"
 	# Niri/Hyprland'da farklı profilleri ayrı process + ayrı app-id ile açabilmek için
 	# profile bazlı ayrı user-data-dir kullanırız; profil dizinini symlink'leyerek veri çoğaltmayız.
 	ISOLATED_ROOT="${HOME}/.helium/isolated"
+	# Widevine CDM yolu (gerekirse env ile override edilebilir)
+	WIDEVINE_CDM_PATH="${WIDEVINE_CDM_PATH:-/usr/lib/chromium/WidevineCdm}"
 
 # Wayland ve dokunmatik yüzey için varsayılan bayraklar
 	DEFAULT_FLAGS=(
@@ -274,6 +276,20 @@ check_dependencies() {
 		if [[ -f "${src_userdata_dir}/Last Version" && ! -f "${isolated_dir}/Last Version" ]]; then
 			cp -f "${src_userdata_dir}/Last Version" "${isolated_dir}/Last Version" 2>/dev/null || true
 		fi
+
+		# Widevine marker dosyasını isolated user-data-dir içine yaz.
+		ensure_widevine_marker "$isolated_dir"
+	}
+
+	ensure_widevine_marker() {
+		local userdata_dir="$1"
+		[[ -d "$userdata_dir" ]] || return 0
+		[[ -d "$WIDEVINE_CDM_PATH" ]] || return 0
+
+		local marker_dir="${userdata_dir}/WidevineCdm"
+		local marker_file="${marker_dir}/latest-component-updated-widevine-cdm"
+		mkdir -p "$marker_dir" 2>/dev/null || true
+		printf '{"Path":"%s"}' "$WIDEVINE_CDM_PATH" >"$marker_file" 2>/dev/null || true
 	}
 
 	ensure_isolated_profile_dir() {
@@ -885,6 +901,9 @@ validate_profile() {
 				ensure_isolated_profile_dir "$isolated_dir" "$profile_key" "$profile_source_dir"
 
 				cmd+=("--user-data-dir=$isolated_dir")
+			else
+				# Default user-data-dir ile çalışırken de marker dosyasını güncel tut.
+				ensure_widevine_marker "$profile_source_dir"
 			fi
 			cmd+=("--profile-directory=$profile_key")
 

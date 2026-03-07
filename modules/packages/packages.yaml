@@ -4,6 +4,7 @@ packages:
   - kora-icon-theme
   - kimageformats
   - clight
+  - chromium-widevine
   - gammastep
   - hyprsunset
   - efibootmgr
