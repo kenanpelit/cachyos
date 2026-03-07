@@ -8,7 +8,7 @@
 #   - Automatic window manager detection (Hyprland, GNOME, generic Wayland/X11)
 #   - Application startup verification with timeout (Hyprland)
 #   - Startup script generation for all profiles
-#   - Multi-browser support (Brave, Chrome)
+#   - Multi-browser support (Helium, Brave, Chrome)
 #   - VPN bypass/secure mode support
 #   - Terminal session management
 #   - Config-free operation (no external config files needed)
@@ -58,7 +58,7 @@ DEBUG_MODE=false
 DRY_RUN=false
 WAIT_TIME=$DEFAULT_WAIT_TIME
 FINAL_WORKSPACE=$DEFAULT_FINAL_WORKSPACE
-BROWSER_TYPE="brave"
+BROWSER_TYPE="helium"
 LAUNCH_ALL=false
 LAUNCH_TYPE=""
 BROWSER_ONLY=false
@@ -74,14 +74,14 @@ WM_TYPE=""
 
 # Daily/Essential profiles list - UPDATED
 declare -A DAILY_PROFILES=(
-  ["kkenp"]="TERMINALS"               # Workspace 2
-  ["brave-kenp"]="BRAVE_BROWSERS"     # Workspace 1
-  ["brave-ai"]="BRAVE_BROWSERS"       # Workspace 3
-  ["brave-compecta"]="BRAVE_BROWSERS" # Workspace 4
-  ["webcord"]="APPS"                  # Workspace 5
-  ["brave-youtube"]="BRAVE_BROWSERS"  # Workspace 7
-  ["spotify"]="APPS"                  # Workspace 8
-  ["ferdium"]="APPS"                  # Workspace 9
+  ["kkenp"]="TERMINALS"                 # Workspace 2
+  ["helium-kenp"]="HELIUM_BROWSERS"     # Workspace 1
+  ["helium-ai"]="HELIUM_BROWSERS"       # Workspace 3
+  ["helium-compecta"]="HELIUM_BROWSERS" # Workspace 4
+  ["webcord"]="APPS"                    # Workspace 5
+  ["helium-youtube"]="HELIUM_BROWSERS"  # Workspace 7
+  ["spotify"]="APPS"                    # Workspace 8
+  ["ferdium"]="APPS"                    # Workspace 9
 )
 
 # Terminal Applications - UPDATED
@@ -92,6 +92,21 @@ declare -A TERMINALS=(
   ["wezterm"]="wezterm|start --class wezterm|2|secure|1|false"
   ["kitty-single"]="kitty|--class kitty -T kitty --single-instance|2|secure|1|false"
   ["wezterm-rmpc"]="wezterm|start --class rmpc -e rmpc|0|secure|1|false"
+)
+
+# Browser Applications - Helium
+declare -A HELIUM_BROWSERS=(
+  ["helium-kenp"]="profile_helium|Kenp --separate --restore-last-session|1|secure|2|false"
+  ["helium-nil"]="profile_helium|Nil --separate --restore-last-session|1|secure|2|false"
+  ["helium-ai"]="profile_helium|Ai --separate --restore-last-session|3|secure|2|false"
+  ["helium-compecta"]="profile_helium|CompecTA --separate --restore-last-session|4|secure|2|false"
+  ["helium-whats"]="profile_helium|Whats --separate --restore-last-session|9|secure|1|false"
+  ["helium-exclude"]="profile_helium|Exclude --separate --restore-last-session|6|bypass|1|false"
+  ["helium-youtube"]="profile_helium|--youtube --separate --class helium-youtube.com__-Default|7|secure|1|false"
+  ["helium-tiktok"]="profile_helium|--tiktok --separate --class tiktok --title tiktok|6|secure|1|true"
+  ["helium-spotify"]="profile_helium|--spotify --separate --class spotify --title spotify|8|secure|1|true"
+  ["helium-discord"]="profile_helium|--discord --separate --class discord --title discord|5|secure|1|true"
+  ["helium-whatsapp"]="profile_helium|--whatsapp --separate --class whatsapp --title whatsapp|9|secure|1|true"
 )
 
 # Browser Applications - Brave - UPDATED
@@ -413,6 +428,50 @@ is_app_running() {
         jq -e '.[] | select((.class // "") == "rmpc")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
+      helium-kenp)
+        jq -e '.[] | select((.class // "") == "Kenp" or (.initialTitle // "") == "Kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-nil)
+        jq -e '.[] | select((.class // "") == "Nil" or (.initialTitle // "") == "Nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-ai)
+        jq -e '.[] | select((.class // "") == "Ai" or (.initialTitle // "") == "Ai Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-compecta)
+        jq -e '.[] | select((.class // "") == "CompecTA" or (.initialTitle // "") == "CompecTA Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-whats)
+        jq -e '.[] | select((.class // "") == "Whats" or (.initialTitle // "") == "Whats Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-exclude)
+        jq -e '.[] | select((.class // "") == "Exclude" or (.initialTitle // "") == "Exclude Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-youtube)
+        jq -e '.[] | select((.class // "") | test("helium-youtube|youtube"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-tiktok)
+        jq -e '.[] | select((.class // "") | test("helium-tiktok|tiktok"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-spotify)
+        jq -e '.[] | select((.class // "") | test("helium-spotify|spotify"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-discord)
+        jq -e '.[] | select((.class // "") | test("helium-discord|discord"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
+      helium-whatsapp)
+        jq -e '.[] | select((.class // "") | test("helium-whatsapp|whatsapp"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        return 1
+        ;;
       brave-kenp)
         jq -e '.[] | select((.class // "") == "Kenp" or (.initialTitle // "") == "Kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
@@ -546,6 +605,15 @@ get_class_pattern() {
   fi
 
   case "$profile" in
+  helium-*)
+    # If a profile name (first arg) is provided and not a flag, use it as class
+    local first_arg="${args%% *}"
+    if [[ -n "$first_arg" && "$first_arg" != -* ]]; then
+      echo "$first_arg"
+    else
+      echo "helium|helium-browser"
+    fi
+    ;;
   brave-*)
     # If a profile name (first arg) is provided and not a flag, use it as class
     local first_arg="${args%% *}"
@@ -623,6 +691,7 @@ parse_config() {
 
 get_browser_profiles() {
   case "$BROWSER_TYPE" in
+  "helium") echo "HELIUM_BROWSERS" ;;
   "brave") echo "BRAVE_BROWSERS" ;;
   "chrome") echo "CHROME_BROWSERS" ;;
   "firefox") echo "FIREFOX_BROWSERS" ;;
@@ -847,6 +916,11 @@ generate_all_scripts() {
     ((count++))
   done
 
+  for profile in "${!HELIUM_BROWSERS[@]}"; do
+    generate_script "$profile" "${HELIUM_BROWSERS[$profile]}"
+    ((count++))
+  done
+
   for profile in "${!BRAVE_BROWSERS[@]}"; do
     generate_script "$profile" "${BRAVE_BROWSERS[$profile]}"
     ((count++))
@@ -880,6 +954,7 @@ generate_daily_scripts() {
 
     case "$profile_type" in
     "TERMINALS") config="${TERMINALS[$profile]}" ;;
+    "HELIUM_BROWSERS") config="${HELIUM_BROWSERS[$profile]}" ;;
     "BRAVE_BROWSERS") config="${BRAVE_BROWSERS[$profile]}" ;;
     "APPS") config="${APPS[$profile]}" ;;
     esac
@@ -927,7 +1002,7 @@ ensure_windows_on_correct_workspace() {
     ["TmuxKenp"]="2"                    # Terminal
     ["Kenp"]="1"                        # Main browser (multiple windows possible)
     ["discord|Discord|WebCord"]="5"     # Discord/WebCord
-    ["brave-youtube.com__-Default"]="7" # YouTube
+    ["helium-youtube.com__-Default|brave-youtube.com__-Default"]="7" # YouTube
     ["spotify|Spotify"]="8"             # Spotify
     ["ferdium|Ferdium"]="9"             # Ferdium
   )
@@ -1050,6 +1125,8 @@ launch_profile() {
 
   if [[ -v TERMINALS["$profile"] ]]; then
     launch_application "$profile" "${TERMINALS[$profile]}" "terminal"
+  elif [[ -v HELIUM_BROWSERS["$profile"] && "$BROWSER_TYPE" == "helium" ]]; then
+    launch_application "$profile" "${HELIUM_BROWSERS[$profile]}" "helium"
   elif [[ -v BRAVE_BROWSERS["$profile"] && "$BROWSER_TYPE" == "brave" ]]; then
     launch_application "$profile" "${BRAVE_BROWSERS[$profile]}" "brave"
   elif [[ -v FIREFOX_BROWSERS["$profile"] && "$BROWSER_TYPE" == "firefox" ]]; then
@@ -1081,11 +1158,11 @@ launch_daily_profiles() {
 
   local daily_order=(
     "kkenp"          # WS 2: Terminal
-    "brave-kenp"     # WS 1: Main browser
-    "brave-ai"       # WS 3: AI workspace
-    "brave-compecta" # WS 4: Work
+    "helium-kenp"    # WS 1: Main browser
+    "helium-ai"      # WS 3: AI workspace
+    "helium-compecta" # WS 4: Work
     "webcord"        # WS 5: WebCord
-    "brave-youtube"  # WS 7: YouTube
+    "helium-youtube" # WS 7: YouTube
     "spotify"        # WS 8: Spotify
     "ferdium"        # WS 9: WhatsApp/Ferdium
   )
@@ -1101,6 +1178,7 @@ launch_daily_profiles() {
 
         case "$profile_type" in
         "TERMINALS") config="${TERMINALS[$profile]}" ;;
+        "HELIUM_BROWSERS") config="${HELIUM_BROWSERS[$profile]}" ;;
         "BRAVE_BROWSERS") config="${BRAVE_BROWSERS[$profile]}" ;;
         "APPS") config="${APPS[$profile]}" ;;
         esac
@@ -1108,6 +1186,7 @@ launch_daily_profiles() {
         if [[ -n "$config" ]]; then
           case "$profile_type" in
           "TERMINALS") launch_application_background "$profile" "$config" "terminal" ;;
+          "HELIUM_BROWSERS") launch_application_background "$profile" "$config" "helium" ;;
           "BRAVE_BROWSERS") launch_application_background "$profile" "$config" "brave" ;;
           "APPS") launch_application_background "$profile" "$config" "app" ;;
           esac
@@ -1138,6 +1217,10 @@ launch_daily_profiles() {
       "TERMINALS")
         config="${TERMINALS[$profile]}"
         launch_application "$profile" "$config" "terminal"
+        ;;
+      "HELIUM_BROWSERS")
+        config="${HELIUM_BROWSERS[$profile]}"
+        launch_application "$profile" "$config" "helium"
         ;;
       "BRAVE_BROWSERS")
         config="${BRAVE_BROWSERS[$profile]}"
@@ -1370,7 +1453,8 @@ show_help() {
   echo "    $0 [BROWSER] <command> [options]"
   echo
   echo -e "${BOLD}Browser Types:${NC}"
-  echo "    brave                 Use Brave Browser profiles (default)"
+  echo "    helium                Use Helium Browser profiles (default)"
+  echo "    brave                 Use Brave Browser profiles"
   echo "    firefox               Use Firefox profiles"
   echo "    chrome                Use Chrome Browser profiles"
   echo
@@ -1410,7 +1494,7 @@ show_help() {
   echo "    $0 generate --all                   # Generate ALL scripts"
   echo "    $0 generate --daily                 # Generate daily scripts only"
   echo "    $0 launch --daily                   # Launch daily profiles"
-  echo "    $0 brave launch brave-kenp          # Launch specific profile"
+  echo "    $0 helium launch helium-kenp        # Launch specific profile"
   echo "    $0 list                             # List all profiles"
   echo "    $0 status                           # Check running apps"
   echo
@@ -1425,7 +1509,7 @@ show_help() {
 #-------------------------------------------------------------------------------
 
 parse_args() {
-  if [[ $# -gt 0 && ("$1" == "brave" || "$1" == "chrome" || "$1" == "firefox") ]]; then
+  if [[ $# -gt 0 && ("$1" == "helium" || "$1" == "brave" || "$1" == "chrome" || "$1" == "firefox") ]]; then
     BROWSER_TYPE="$1"
     shift
   fi
@@ -1606,6 +1690,7 @@ check_dependencies() {
   local missing_deps=()
 
   case "$BROWSER_TYPE" in
+  helium) command -v profile_helium >/dev/null 2>&1 || missing_deps+=("profile_helium") ;;
   brave) command -v profile_brave >/dev/null 2>&1 || missing_deps+=("profile_brave") ;;
   chrome) command -v profile_chrome >/dev/null 2>&1 || missing_deps+=("profile_chrome") ;;
   firefox) command -v firefox >/dev/null 2>&1 || missing_deps+=("firefox") ;;
