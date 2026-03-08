@@ -55,6 +55,12 @@ if command -v gsettings >/dev/null 2>&1; then
 fi
 
 if command -v niri-osc >/dev/null 2>&1; then
+  # Ensure systemd/dbus environment + delayed portal refresh are always applied.
+  # This is kept explicit here because startup spawn-at-startup can race on PATH/env.
+  if ! niri-osc set env; then
+    warn "niri-osc set env failed (continuing)"
+  fi
+
   if ! niri-osc set init; then
     warn "niri-osc set init failed"
     exit 1

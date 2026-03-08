@@ -7,7 +7,6 @@ packages:
   - xdg-desktop-portal
   - xdg-desktop-portal-gnome
   - xdg-desktop-portal-gtk
-  - xdg-desktop-portal-wlr
   - wl-clipboard
   - cliphist
   - grim

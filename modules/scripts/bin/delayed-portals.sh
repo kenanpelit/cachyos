@@ -190,6 +190,19 @@ if command -v systemctl >/dev/null 2>&1; then
         systemctl --user restart "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
     done <<< "$backends_stream"
 
+    # Keep compositor backend selection strict:
+    # - selected backends are unmasked + restarted
+    # - non-selected backends are stopped + masked
+    # This avoids stale backends (e.g. wlr) shadowing expected behavior/logging.
+    for backend in gnome wlr hyprland kde; do
+        if [[ -n "${restarted_backends[$backend]:-}" ]]; then
+            systemctl --user unmask "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
+            continue
+        fi
+        systemctl --user stop "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
+        systemctl --user mask "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
+    done
+
     # Restart portal frontend after backend refresh.
     systemctl --user restart xdg-desktop-portal.service 2>/dev/null || true
 fi

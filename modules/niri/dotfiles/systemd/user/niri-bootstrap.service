@@ -4,8 +4,6 @@ Requires=niri-ready.service
 Wants=pipewire.service wireplumber.service
 After=graphical-session.target niri-session.target niri-ready.service pipewire.service wireplumber.service
 PartOf=niri-session.target
-ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 
 [Service]
