@@ -1,0 +1,11 @@
+[Unit]
+Description=Delayed XDG Desktop Portal Timer (40s)
+After=graphical-session.target
+
+[Timer]
+OnStartupSec=40s
+AccuracySec=1s
+Unit=xdg-desktop-portal-delayed.service
+
+[Install]
+WantedBy=default.target

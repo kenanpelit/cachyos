@@ -6,7 +6,7 @@ PartOf=niri-daemons.target hyprland-session.target
 
 [Service]
 Environment=QS_CACHE_DIR=%t/noctalia-qml-cache
-ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend 2>/dev/null || osc-shell backend 2>/dev/null || echo noctalia)"; [[ "$backend" == "noctalia" ]]'
+ExecCondition=/usr/bin/sh -c 'backend="$(osc-shell backend 2>/dev/null || echo noctalia)"; [ "$backend" = "noctalia" ]'
 ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate
 Restart=on-failure
 RestartSec=1

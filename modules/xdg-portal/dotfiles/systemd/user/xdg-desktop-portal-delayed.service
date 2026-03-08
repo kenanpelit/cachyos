@@ -1,0 +1,14 @@
+[Unit]
+Description=Delayed XDG Desktop Portal Orchestration
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=oneshot
+# Mevcut scripti delay olmadan (timer zaten bekleyecek) çağırıyoruz
+ExecStart=/usr/bin/bash -lc 'delayed-portals 0'
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
