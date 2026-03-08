@@ -4,9 +4,18 @@ description: Noctalia shell config (Quickshell)
 depends_on:
 - base
 dotfiles:
-- source: dotfiles/noctalia
-  target: ~/.config/noctalia
+# Klasörü toplu bağlamak yerine kritik alt klasörleri bağlıyoruz
+- source: dotfiles/noctalia/colorschemes
+  target: ~/.config/noctalia/colorschemes
+- source: dotfiles/noctalia/plugins
+  target: ~/.config/noctalia/plugins
+- source: dotfiles/noctalia/colors.json
+  target: ~/.config/noctalia/colors.json
+- source: dotfiles/noctalia/plugins.json
+  target: ~/.config/noctalia/plugins.json
+# settings.json kasıtlı olarak buraya eklenmedi (Noctalia tarafından yönetilmeli)
 - source: dotfiles/systemd/user/noctalia.service
   target: ~/.config/systemd/user/noctalia.service
+
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
