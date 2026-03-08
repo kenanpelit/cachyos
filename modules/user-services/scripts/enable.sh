@@ -8,8 +8,8 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
 # Source the core DCLI library
 source "$REPO_ROOT/modules/base/lib/core.sh"
 
-# Auto-discovered service:module map from modules/*/module.yaml dotfiles
-# entries that target ~/.config/systemd/user/*.service|*.timer.
+# Auto-discovered unit:module map from modules/*/module.yaml dotfiles
+# entries that target ~/.config/systemd/user/*.service|*.timer|*.target.
 service_specs=()
 
 active_host_from_config() {
@@ -89,14 +89,21 @@ module_enabled() {
 
 service_exists() {
   local unit="$1"
-  run_as_user systemctl --user list-unit-files "$unit" >/dev/null 2>&1
+  local listed
+  listed="$(
+    run_as_user systemctl --user list-unit-files --no-legend --no-pager "$unit" 2>/dev/null \
+      | awk '{print $1}'
+  )"
+  grep -Fxq "$unit" <<<"$listed"
 }
 
 enable_service_if_present() {
   local unit="$1"
   if service_exists "$unit"; then
-    # Use reenable to purge stale WantedBy symlinks when unit install targets change.
+    # Prefer reenable to purge stale WantedBy symlinks when install targets change.
     if run_as_user systemctl --user reenable "$unit" >/dev/null 2>&1; then
+      echo "  -> Enabled $unit"
+    elif run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
       echo "  -> Enabled $unit"
     else
       echo "  -> Skipped $unit (enable failed or not installable)"
@@ -127,7 +134,7 @@ discover_module_units() {
       sub(/[[:space:]]*#.*/, "", line)
       gsub(/["'"'"']/, "", line)
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
-      if (line ~ /\.(service|timer)$/) print line
+      if (line ~ /\.(service|timer|target)$/) print line
     }
   ' "$module_file"
 }
