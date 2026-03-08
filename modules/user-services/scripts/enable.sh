@@ -131,6 +131,16 @@ discover_module_units() {
   ' "$module_file"
 }
 
+seed_unit_file_from_repo() {
+  local module="$1"
+  local unit="$2"
+  local src="$REPO_ROOT/modules/${module}/dotfiles/systemd/user/${unit}"
+  local dst="$USER_HOME/.config/systemd/user/${unit}"
+
+  [[ -f "$src" ]] || return 0
+  safe_install "$src" "$dst"
+}
+
 build_service_specs() {
   local module_dir module unit spec
   declare -A seen_specs=()
@@ -177,6 +187,17 @@ if module_enabled "niri"; then
     "$REPO_ROOT/modules/niri/dotfiles/systemd/user/ppp-auto-profile.timer" \
     "$USER_HOME/.config/systemd/user/ppp-auto-profile.timer"
 fi
+
+# Seed service/timer unit files before enable pass.
+# user-services post-install currently runs before the global dotfile sync phase,
+# so units may not exist under ~/.config/systemd/user yet.
+for spec in $(printf '%s\n' "${service_specs[@]}" | sort); do
+  service="${spec%%:*}"
+  module="${spec#*:}"
+  if module_enabled "$module"; then
+    seed_unit_file_from_repo "$module" "$service"
+  fi
+done
 
 run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
