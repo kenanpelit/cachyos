@@ -5,3 +5,6 @@ After=graphical-session.target
 [Service]
 Type=oneshot
 ExecStart=%h/.local/bin/ppp-auto-profile
+
+[Install]
+WantedBy=default.target

@@ -224,7 +224,6 @@ done
 
 # Migration cleanup: stale links
 legacy_niri_session_links=(
-  "ppp-auto-profile.service"
   "niri-blueman-applet.service"
   "niri-nm-applet.service"
   "niri-polkit-agent.service"

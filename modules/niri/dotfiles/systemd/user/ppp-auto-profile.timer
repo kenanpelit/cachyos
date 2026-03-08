@@ -1,11 +1,12 @@
 [Unit]
-Description=Delayed Auto-switch power profile (40s delay)
+Description=Periodic power profile chooser
 After=graphical-session.target
 
 [Timer]
-# Login olduktan 40 saniye sonra çalış
+# İlk çalışma: Login olduktan 40 saniye sonra
 OnStartupSec=40s
-OnActiveSec=40s
+# Sonraki çalışmalar: Her 20 saniyede bir
+OnUnitActiveSec=20s
 AccuracySec=1s
 Unit=ppp-auto-profile.service
 
