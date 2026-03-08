@@ -154,10 +154,11 @@ wait_for_niri_startup_settle() {
   [[ "$(detect_compositor)" == "niri" ]] || return 0
   ensure_systemd_user || return 0
 
-  # Wait for niri IPC readiness on fresh login (best-effort).
+  # Wait for Niri bootstrap/daemon stage on fresh login (best-effort).
   local i
   for i in {1..160}; do
-    if systemctl --user is-active --quiet niri-ready.service; then
+    if systemctl --user is-active --quiet niri-bootstrap.service ||
+      systemctl --user is-active --quiet niri-daemons.target; then
       break
     fi
     sleep 0.05

@@ -1,7 +1,6 @@
 [Unit]
 Description=Stasis (Wayland idle manager)
-After=graphical-session.target niri-session.target niri-ready.service hyprland-session.target
-Wants=niri-ready.service
+After=graphical-session.target niri-session.target niri-bootstrap.service hyprland-session.target
 PartOf=graphical-session.target niri-session.target hyprland-session.target
 
 [Service]

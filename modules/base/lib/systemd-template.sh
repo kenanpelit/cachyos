@@ -22,7 +22,7 @@ EOF
   if [[ "$wm_guard" == "niri" ]]; then
     cat >> "$out_file" <<EOF
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-After=niri-ready.service
+After=niri-session.target niri-bootstrap.service
 EOF
   elif [[ "$wm_guard" == "hyprland" ]]; then
     cat >> "$out_file" <<EOF
