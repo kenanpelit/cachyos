@@ -89,21 +89,14 @@ module_enabled() {
 
 service_exists() {
   local unit="$1"
-  local listed
-  listed="$(
-    run_as_user systemctl --user list-unit-files --no-legend --no-pager "$unit" 2>/dev/null \
-      | awk '{print $1}'
-  )"
-  grep -Fxq "$unit" <<<"$listed"
+  [[ -e "$USER_HOME/.config/systemd/user/$unit" ]]
 }
 
 enable_service_if_present() {
   local unit="$1"
   if service_exists "$unit"; then
-    # Prefer reenable to purge stale WantedBy symlinks when install targets change.
-    if run_as_user systemctl --user reenable "$unit" >/dev/null 2>&1; then
-      echo "  -> Enabled $unit"
-    elif run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
+    # Do not use reenable for linked unit files; it can remove the link itself.
+    if run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
       echo "  -> Enabled $unit"
     else
       echo "  -> Skipped $unit (enable failed or not installable)"
