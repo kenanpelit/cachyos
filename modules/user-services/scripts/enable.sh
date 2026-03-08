@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: enable.sh (Robust & Fully Dynamic)
-# Description: Synchronizes Systemd user units based on enabled modules.
-#              Uses direct repo paths to ensure enabling works before dotfile sync.
+# Script: enable.sh (Ultimate Dynamic Orchestrator)
+# Description: Synchronizes Systemd user units based on enabled modules in host config.
+#              Directly scans repository directories for maximum reliability.
 # ==============================================================================
 
 set -euo pipefail
@@ -20,19 +20,13 @@ active_host_from_config() {
   local host=""
   local config_file="$REPO_ROOT/config.yaml"
 
-  # 1. Check environment variables
   for key in DCLI_HOST DCLI_ACTIVE_HOST DCLI_TARGET_HOST; do
-    if [[ -n "${!key:-}" ]]; then
-      host="${!key}"
-      break
-    fi
+    if [[ -n "${!key:-}" ]]; then host="${!key}"; break; fi
   done
 
-  # 2. Fallback to config.yaml
   if [[ -z "$host" && -f "$config_file" ]]; then
     host="$(awk -F':[[:space:]]*' '/^[[:space:]]*host:[[:space:]]*/ {gsub(/["'\'']/, "", $2); print $2; exit}' "$config_file")"
   fi
-
   printf '%s\n' "${host:-hay}"
 }
 
@@ -43,100 +37,90 @@ load_enabled_modules() {
   local host_file="$REPO_ROOT/hosts/${host}.yaml"
 
   if [[ ! -f "$host_file" ]]; then
-    log_warn "Host configuration '$host_file' not found. Enabling all modules."
+    log_warn "Host configuration '$host_file' not found."
     return 1
   fi
 
-  log_info "Loading enabled modules from $host.yaml"
+  log_info "Parsing enabled modules from $host.yaml..."
   
-  # More robust YAML list parsing using sed/grep
-  # Matches lines like "  - module_name" within the enabled_modules block
-  local modules
-  modules=$(sed -n '/^enabled_modules:/,/^[^ -]/p' "$host_file" | grep -E "^[[:space:]]*- " | sed -E 's/^[[:space:]]*- //;s/[[:space:]]*#.*$//')
-  
-  for m in $modules; do
-    enabled_modules["$m"]=1
-  done
+  # Read the list between 'enabled_modules:' and the next top-level key
+  local in_list=false
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ ^enabled_modules: ]]; then
+      in_list=true
+      continue
+    elif [[ "$line" =~ ^[a-zA-Z] && "$in_list" == true ]]; then
+      in_list=false
+    fi
+
+    if [[ "$in_list" == true && "$line" =~ ^[[:space:]]*-[[:space:]]+ ]]; then
+      local m
+      m=$(echo "$line" | sed -E 's/^[[:space:]]*- //;s/[[:space:]]*#.*$//' | xargs)
+      [[ -n "$m" ]] && enabled_modules["$m"]=1
+    fi
+  done < "$host_file"
 }
 
 is_module_enabled() {
   local module="$1"
-  [[ ${#enabled_modules[@]} -eq 0 ]] && return 0
   [[ -n "${enabled_modules[$module]:-}" ]]
 }
 
-# --- Unit Discovery & Management ---
-
-# Get source path and target name for systemd units in a module
-discover_unit_mappings() {
-  local module_file="$1"
-  local module_dir
-  module_dir="$(dirname "$module_file")"
-  
-  # Find source/target pairs for systemd user units
-  # Format: source_path|unit_name
-  awk -v dir="$module_dir" '
-    /source:.*systemd\/user\// { src=$2; gsub(/["'\'']/, "", src) }
-    /target:.*systemd\/user\// { 
-      dst=$2; gsub(/["'\'']/, "", dst);
-      sub(/.*\//, "", dst);
-      if (src != "") {
-        # Construct absolute source path (relative to module dir)
-        abs_src = dir "/" src;
-        print abs_src "|" dst;
-        src = "";
-      }
-    }
-  ' "$module_file"
-}
+# --- Service Synchronization ---
 
 sync_user_units() {
-  log_info "Synchronizing Systemd user units..."
+  log_info "Starting Systemd unit synchronization..."
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
   local module_path module_name
   for module_path in "$REPO_ROOT/modules"/*; do
     [[ -d "$module_path" ]] || continue
     module_name="$(basename "$module_path")"
-    local yaml="$module_path/module.yaml"
     
-    [[ -f "$yaml" ]] || continue
-    
-    # Process each unit mapping
-    while IFS='|' read -r src_path unit_name; do
-      [[ -n "$unit_name" ]] || continue
+    local systemd_dir="$module_path/dotfiles/systemd/user"
+    [[ -d "$systemd_dir" ]] || continue
+
+    # Find all unit files in this module's repo directory
+    while IFS= read -r -d '' unit_file; do
+      local unit_name
+      unit_name="$(basename "$unit_file")"
       
       if is_module_enabled "$module_name"; then
-        # Check if already enabled to reduce noise
+        # Check if already enabled to minimize noise
         if ! run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
-          # Use absolute path to enable, ensuring it works even if not yet linked
-          if run_as_user systemctl --user enable "$src_path" >/dev/null 2>&1; then
+          # Enable using the ABSOLUTE path in the repository
+          # This ensures Systemd can find it even before dcli links it.
+          if run_as_user systemctl --user enable "$unit_file" >/dev/null 2>&1; then
             echo "  -> Enabled $unit_name ($module_name)"
+          else
+            log_warn "Failed to enable $unit_name"
           fi
         fi
       else
-        # Disable units from inactive modules
+        # Automatically disable and stop units from inactive modules
         if run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
           run_as_user systemctl --user disable --now "$unit_name" >/dev/null 2>&1 || true
           log_warn "Disabled $unit_name (module '$module_name' is inactive)"
         fi
       fi
-    done < <(discover_unit_mappings "$yaml")
+    done < <(find "$systemd_dir" -maxdepth 2 -type f \( -name "*.service" -o -name "*.timer" -o -name "*.target" \) -print0)
   done
 }
 
-# --- Main Execution ---
+# --- Main ---
 
 main() {
-  log_info "Starting service synchronization for: $REAL_USER"
-  
   local host
   host=$(active_host_from_config)
-  load_enabled_modules "$host" || true
+  load_enabled_modules "$host"
   
+  if [[ ${#enabled_modules[@]} -eq 0 ]]; then
+    die "No enabled modules found for host '$host'. Check your YAML format."
+  fi
+
   sync_user_units
   
-  log_success "Service synchronization complete."
+  log_success "All user services are now in sync with $host.yaml"
 }
 
 main "$@"
