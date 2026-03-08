@@ -240,8 +240,15 @@ for unit in "${legacy_niri_session_links[@]}"; do
   run_as_user rm -f "$USER_HOME/.config/systemd/user/niri-session.target.wants/$unit" >/dev/null 2>&1 || true
 done
 
-# Migration cleanup: noctalia.service moved from default.target to niri-daemons.target.
+# Migration cleanup: noctalia.service moved from legacy targets.
 run_as_user rm -f "$USER_HOME/.config/systemd/user/default.target.wants/noctalia.service" >/dev/null 2>&1 || true
+run_as_user rm -f "$USER_HOME/.config/systemd/user/niri-daemons.target.wants/noctalia.service" >/dev/null 2>&1 || true
+
+# Explicitly ensure noctalia is enabled for graphical-session.target if the module is enabled.
+if module_enabled "noctalia"; then
+  run_as_user mkdir -p "$USER_HOME/.config/systemd/user/graphical-session.target.wants"
+  run_as_user ln -sfn "../noctalia.service" "$USER_HOME/.config/systemd/user/graphical-session.target.wants/noctalia.service"
+fi
 
 # PipeWire stacks often pull compatibility references to legacy user units.
 # Mask them to avoid not-found noise in `systemctl --user list-units --all`.
