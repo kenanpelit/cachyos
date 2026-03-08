@@ -1,11 +1,12 @@
 [Unit]
-Description=Periodic load check for automatic power profile switching
+Description=Delayed Auto-switch power profile
+After=graphical-session.target
 
 [Timer]
-OnBootSec=1m
-OnUnitActiveSec=20s
-AccuracySec=5s
+OnStartupSec=60s
+OnActiveSec=60s
+AccuracySec=1s
 Unit=ppp-auto-profile.service
 
 [Install]
-WantedBy=timers.target
+WantedBy=default.target

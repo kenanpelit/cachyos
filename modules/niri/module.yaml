@@ -26,6 +26,8 @@ dotfiles:
   target: ~/.config/systemd/user/geoclue-agent.timer
 - source: dotfiles/autostart/geoclue-demo-agent.desktop
   target: ~/.config/autostart/geoclue-demo-agent.desktop
+- source: dotfiles/autostart/gnome-keyring-secrets.desktop
+  target: ~/.config/autostart/gnome-keyring-secrets.desktop
 - source: dotfiles/systemd/user/niri-session.target
   target: ~/.config/systemd/user/niri-session.target
 - source: dotfiles/systemd/user/niri-daemons.target
