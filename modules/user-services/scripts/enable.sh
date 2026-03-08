@@ -8,35 +8,9 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
 # Source the core DCLI library
 source "$REPO_ROOT/modules/base/lib/core.sh"
 
-# service:module map
-service_specs=(
-  "mpd.service:mpd"
-  "fusuma.service:fusuma"
-  "hyprland-polkit-agent.service:hyprland"
-  "hypr-nm-applet.service:hyprland"
-  "niri-nm-applet.service:niri"
-  "niri-blueman-applet.service:niri"
-  "niri-snapper-tools-check.service:niri"
-  "hypr-clip-persist.service:hyprland"
-  "hypr-init.service:hyprland"
-  "stasis.timer:stasis"
-  "walker.service:walker"
-  "walker.timer:walker"
-  "elephant.service:walker"
-  "geoclue-agent.timer:niri"
-  "flatpak-managed-install.timer:flatpak"
-  "hyprland-bt-autoconnect.timer:bt"
-  "niri-bt-autoconnect.timer:bt"
-  "kdeconnect.timer:connect"
-  "noctalia.service:noctalia"
-  "niri-bootstrap.service:niri"
-  "niri-sticky.service:niri"
-  "niri-niriswitcher.service:niri"
-  "niri-polkit-agent.service:niri"
-  "copyq.timer:copyq"
-  "ppp-auto-profile.timer:niri"
-  "transmission.service:transmission"
-)
+# Auto-discovered service:module map from modules/*/module.yaml dotfiles
+# entries that target ~/.config/systemd/user/*.service|*.timer.
+service_specs=()
 
 active_host_from_config() {
   local host=""
@@ -121,8 +95,11 @@ service_exists() {
 enable_service_if_present() {
   local unit="$1"
   if service_exists "$unit"; then
-    run_as_user systemctl --user enable "$unit" >/dev/null 2>&1 || true
-    echo "  -> Enabled $unit"
+    if run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
+      echo "  -> Enabled $unit"
+    else
+      echo "  -> Skipped $unit (enable failed or not installable)"
+    fi
   else
     echo "  -> Skipped $unit (not found or user bus inaccessible)"
   fi
@@ -131,9 +108,46 @@ enable_service_if_present() {
 disable_service_if_present() {
   local unit="$1"
   if service_exists "$unit"; then
-    run_as_user systemctl --user disable --now "$unit" >/dev/null 2>&1 || true
-    echo "  -> Disabled $unit (module disabled)"
+    if run_as_user systemctl --user disable --now "$unit" >/dev/null 2>&1; then
+      echo "  -> Disabled $unit (module disabled)"
+    fi
   fi
+}
+
+discover_module_units() {
+  local module="$1"
+  local module_file="$REPO_ROOT/modules/${module}/module.yaml"
+  [[ -f "$module_file" ]] || return 0
+
+  awk '
+    /^[[:space:]]*target:[[:space:]]*~\/\.config\/systemd\/user\// {
+      line = $0
+      sub(/^[[:space:]]*target:[[:space:]]*~\/\.config\/systemd\/user\//, "", line)
+      sub(/[[:space:]]*#.*/, "", line)
+      gsub(/["'"'"']/, "", line)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
+      if (line ~ /\.(service|timer)$/) print line
+    }
+  ' "$module_file"
+}
+
+build_service_specs() {
+  local module_dir module unit spec
+  declare -A seen_specs=()
+  service_specs=()
+
+  for module_dir in "$REPO_ROOT"/modules/*; do
+    [[ -d "$module_dir" ]] || continue
+    module="$(basename "$module_dir")"
+
+    while IFS= read -r unit; do
+      [[ -n "$unit" ]] || continue
+      spec="${unit}:${module}"
+      [[ -n "${seen_specs[$spec]:-}" ]] && continue
+      seen_specs["$spec"]=1
+      service_specs+=("$spec")
+    done < <(discover_module_units "$module")
+  done
 }
 
 echo "Enabling user services for user: $REAL_USER..."
@@ -141,6 +155,7 @@ echo "Enabling user services for user: $REAL_USER..."
 # Resolve host/module state once; allows disabling stale units if module is not enabled.
 ACTIVE_HOST="$(active_host_from_config)"
 load_enabled_modules "$ACTIVE_HOST" || true
+build_service_specs
 
 # Ensure MPD uses user-scoped config, not /etc/mpd.conf (/var/lib/mpd),
 # only when mpd module is enabled.
@@ -165,7 +180,7 @@ fi
 
 run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
-for spec in "${service_specs[@]}"; do
+for spec in $(printf '%s\n' "${service_specs[@]}" | sort); do
   service="${spec%%:*}"
   module="${spec#*:}"
 
