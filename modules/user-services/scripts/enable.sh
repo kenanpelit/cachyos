@@ -235,6 +235,9 @@ for unit in "${legacy_niri_session_links[@]}"; do
   run_as_user rm -f "$USER_HOME/.config/systemd/user/niri-session.target.wants/$unit" >/dev/null 2>&1 || true
 done
 
+# Migration cleanup: noctalia.service moved from default.target to niri-daemons.target.
+run_as_user rm -f "$USER_HOME/.config/systemd/user/default.target.wants/noctalia.service" >/dev/null 2>&1 || true
+
 # PipeWire stacks often pull compatibility references to legacy user units.
 # Mask them to avoid not-found noise in `systemctl --user list-units --all`.
 if run_as_user systemctl --user list-unit-files pipewire-pulse.service >/dev/null 2>&1; then

@@ -1,0 +1,18 @@
+[Unit]
+Description=Niri post-bootstrap polish
+After=niri-bootstrap.service niri-daemons.target
+PartOf=niri-daemons.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+ConditionPathExists=%h/.local/bin/niri-post-bootstrap
+
+[Service]
+Type=oneshot
+TimeoutStartSec=20
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=/usr/bin/bash "%h/.local/bin/niri-post-bootstrap"
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-daemons.target

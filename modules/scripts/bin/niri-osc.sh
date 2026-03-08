@@ -2949,8 +2949,10 @@ doctor)
           graphical-session.target \
           xdg-desktop-autostart.target \
           niri-bootstrap.service \
+          niri-post-bootstrap.service \
           niri-login-prompts.service \
           niri-polkit-agent.service \
+          noctalia.service \
           dms.service \
           dms-plugin-sync.service \
           dms-resume-restart.service \

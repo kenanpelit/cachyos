@@ -6,7 +6,7 @@ ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 
 [Service]
-ExecCondition=/usr/bin/bash -lc 'pgrep -u "$(id -u)" -f "polkit-gnome-authentication-agent-1" >/dev/null && exit 1 || exit 0'
+ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend niri 2>/dev/null || osc-shell backend niri 2>/dev/null || echo noctalia)"; [[ "$backend" == "noctalia" ]] && exit 1; pgrep -u "$(id -u)" -f "polkit-gnome-authentication-agent-1" >/dev/null && exit 1 || exit 0'
 ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 Restart=on-failure
 RestartSec=1
