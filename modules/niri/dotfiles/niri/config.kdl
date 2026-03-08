@@ -372,9 +372,6 @@ binds {
   Mod+V repeat=false hotkey-overlay-title="CopyQ Toggle" {
     spawn "copyq" "toggle"
   }
-  Mod+Shift+V repeat=false hotkey-overlay-title="Clipboard Preview" {
-    spawn "osc-clipview"
-  }
   Mod+Shift+D repeat=false hotkey-overlay-title="Dash Overview" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call launcher windows"
   }
