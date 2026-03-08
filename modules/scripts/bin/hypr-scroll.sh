@@ -13,10 +13,12 @@ CONF_RATIOS=(0.30 0.45 0.60 0.75 1.0)
 usage() {
   cat <<'EOF'
 usage:
+  hypr-scroll move <+col|-col|+px|-px>
   hypr-scroll focus <l|r|u|d>
   hypr-scroll swapcol <l|r>
   hypr-scroll movewindowto <l|r|u|d>
   hypr-scroll colresize <value|+conf|-conf>
+  hypr-scroll fit <active|visible|all|toend|tobeg>
   hypr-scroll togglefit
   hypr-scroll promote [l|r]
   hypr-scroll movecoltoworkspace <workspace>
@@ -98,12 +100,59 @@ fallback_colresize() {
   esac
 }
 
+fallback_move() {
+  local arg="$1"
+  local dir=""
+
+  case "$arg" in
+    +col) dir="r" ;;
+    -col) dir="l" ;;
+    +*|[0-9]*)
+      dir="r"
+      ;;
+    -*)
+      dir="l"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  dispatch movefocus "$dir" || true
+}
+
+fallback_fit() {
+  local mode="${1:-active}"
+  case "$mode" in
+    toend)
+      dispatch movefocus r || true
+      ;;
+    tobeg)
+      dispatch movefocus l || true
+      ;;
+    active|visible|all)
+      # No native equivalent in non-scrolling layouts; no-op.
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
 cmd="${1:-}"
 shift || true
 
 ensure_hypr_env
 
 case "$cmd" in
+  move)
+    delta="${1:-}"
+    [[ -n "$delta" ]] || { usage >&2; exit 2; }
+    if have_hyprscrolling && layoutmsg "move $delta"; then
+      exit 0
+    fi
+    fallback_move "$delta"
+    ;;
   focus)
     dir="${1:-}"
     [[ -n "$dir" ]] || { usage >&2; exit 2; }
@@ -136,6 +185,13 @@ case "$cmd" in
     fi
     fallback_colresize "$value"
     ;;
+  fit)
+    mode="${1:-active}"
+    if have_hyprscrolling && layoutmsg "fit $mode"; then
+      exit 0
+    fi
+    fallback_fit "$mode"
+    ;;
   togglefit)
     if have_hyprscrolling && layoutmsg "togglefit"; then
       exit 0
@@ -149,7 +205,10 @@ case "$cmd" in
       if [[ "$side" == "l" ]]; then
         layoutmsg "swapcol l" || true
       fi
+      exit 0
     fi
+    dispatch movewindow "$side" || true
+    dispatch movefocus "$side" || true
     ;;
   movecoltoworkspace)
     target="${1:-}"

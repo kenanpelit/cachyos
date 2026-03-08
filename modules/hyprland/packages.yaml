@@ -15,5 +15,6 @@ packages:
   - wlogout
   - wob
   - uwsm
-  - hyprland-plugin-hyprscrolling
+  # - hyprland-plugin-hyprscrolling
+  # Replaced by ~/.local/bin/hypr-scroll script fallback (no ABI pinning).
   - gnome-keyring

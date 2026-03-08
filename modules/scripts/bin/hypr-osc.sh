@@ -1405,7 +1405,11 @@ EOF
         if hyprctl plugin list 2>/dev/null | grep -qi "hyprscrolling"; then
           printf '%s\n' "- hyprscrolling: loaded"
         else
-          printf '%s\n' "- hyprscrolling: not loaded (check plugin build / HM reload)"
+          if command -v hypr-scroll >/dev/null 2>&1; then
+            printf '%s\n' "- hyprscrolling: not loaded (using hypr-scroll script fallback)"
+          else
+            printf '%s\n' "- hyprscrolling: not loaded and hypr-scroll missing"
+          fi
         fi
       fi
     )
