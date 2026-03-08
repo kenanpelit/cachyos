@@ -120,5 +120,6 @@ text/x-readme=kitty-nvim.desktop
 x-scheme-handler/terminal=kitty.desktop
 x-scheme-handler/ferdium=ferdium.desktop
 x-scheme-handler/magnet=transmission-gtk.desktop
+x-scheme-handler/mailto=helium.desktop
 
 [Removed Associations]
