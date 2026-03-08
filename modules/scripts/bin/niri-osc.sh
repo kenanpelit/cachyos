@@ -1124,6 +1124,16 @@ tty)
       export XDG_SESSION_DESKTOP="niri"
       export XDG_CURRENT_DESKTOP="niri"
       export DESKTOP_SESSION="niri"
+      export BROWSER="${BROWSER:-start-helium-kenp}"
+
+      case ":${PATH:-}:" in
+      *":${HOME}/.local/bin:"*) ;;
+      *) export PATH="${HOME}/.local/bin:${PATH:-}" ;;
+      esac
+      case ":${PATH:-}:" in
+      *":${HOME}/bin:"*) ;;
+      *) export PATH="${HOME}/bin:${PATH:-}" ;;
+      esac
 
       info "Environment setup tamamlandı"
     }
@@ -1140,15 +1150,33 @@ tty)
         timeout_bin="timeout"
       fi
 
-      # Import environment to systemd user session
-      local vars="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP GTK_THEME XCURSOR_THEME BROWSER SYSTEMD_OFFLINE NIXOS_OZONE_WL"
+      # Keep a deterministic env set for user services started by systemd/dbus.
+      local vars=(
+        WAYLAND_DISPLAY
+        DISPLAY
+        NIRI_SOCKET
+        XDG_CURRENT_DESKTOP
+        XDG_SESSION_TYPE
+        XDG_SESSION_DESKTOP
+        DESKTOP_SESSION
+        XDG_DATA_DIRS
+        XDG_CONFIG_DIRS
+        GTK_THEME
+        GTK_USE_PORTAL
+        XCURSOR_THEME
+        XCURSOR_SIZE
+        BROWSER
+        PATH
+        SYSTEMD_OFFLINE
+        NIXOS_OZONE_WL
+      )
 
       local rc=0
       if [[ -n "$timeout_bin" ]]; then
-        $timeout_bin 2s systemctl --user import-environment $vars 2>/dev/null
+        $timeout_bin 2s systemctl --user import-environment "${vars[@]}" 2>/dev/null
         rc=$?
       else
-        systemctl --user import-environment $vars 2>/dev/null
+        systemctl --user import-environment "${vars[@]}" 2>/dev/null
         rc=$?
       fi
       if [[ "$rc" -eq 0 ]]; then
@@ -1158,17 +1186,22 @@ tty)
       fi
 
       rc=0
-      if [[ -n "$timeout_bin" ]]; then
-        $timeout_bin 2s dbus-update-activation-environment --systemd --all 2>/dev/null
-        rc=$?
-      else
-        dbus-update-activation-environment --systemd --all 2>/dev/null
-        rc=$?
-      fi
-      if [[ "$rc" -eq 0 ]]; then
-        debug_log "DBus activation environment güncellendi"
-      else
-        warn "DBus update başarısız"
+      if command -v dbus-update-activation-environment >/dev/null 2>&1; then
+        if [[ -n "$timeout_bin" ]]; then
+          $timeout_bin 2s dbus-update-activation-environment --systemd "${vars[@]}" 2>/dev/null
+          rc=$?
+        else
+          dbus-update-activation-environment --systemd "${vars[@]}" 2>/dev/null
+          rc=$?
+        fi
+
+        if [[ "$rc" -eq 0 ]]; then
+          debug_log "DBus activation environment güncellendi"
+        else
+          # Fall back to --all for edge cases (e.g. partial variable sets).
+          dbus-update-activation-environment --systemd --all 2>/dev/null || true
+          warn "DBus update kısmen başarısız; fallback --all denendi"
+        fi
       fi
 
       # Restart critical user services for correct environment
@@ -1254,10 +1287,9 @@ tty)
       rotate_logs
       check_system
       setup_environment
-      # Avoid early systemctl/dbus calls on TTY; Niri will export env after startup.
-      if [[ "$GDM_MODE" == "true" ]]; then
-        setup_systemd_integration
-      fi
+      # Do an initial sync for both GDM and TTY paths. niri --session will
+      # perform a second sync once WAYLAND_DISPLAY/NIRI_SOCKET are known.
+      setup_systemd_integration
       cleanup_old_processes
       start_niri
     }
@@ -1450,7 +1482,9 @@ env)
     start_niri_portals() {
       # Portals are now managed via delayed-portals script to speed up startup.
       if command -v delayed-portals >/dev/null 2>&1; then
-        delayed-portals 40 >/dev/null 2>&1 &
+        local delay="${NIRI_PORTALS_DELAY:-8}"
+        [[ "$delay" =~ ^[0-9]+$ ]] || delay=8
+        delayed-portals "$delay" >/dev/null 2>&1 &
       fi
     }
 
@@ -1466,14 +1500,17 @@ env)
     
     # Fast systemd sync (crucial for services)
     set_env_in_systemd
-    
-    # Heavier D-Bus/Portal sync in parallel
-    import_env_to_systemd &
+
+    # Keep import synchronous to avoid race with units started by
+    # niri-session.target (and xdg-autostart dependencies).
+    import_env_to_systemd
+
+    # Trigger the session target only after env sync.
+    start_target
+
+    # Non-critical helpers can run in background.
     start_clipse_listener &
     start_niri_portals &
-    
-    # Finally trigger the session target
-    start_target
   )
   ;;
 

@@ -13,6 +13,9 @@
 // ========================================================================
 
 environment {
+  // For systemd/dbus activated apps, keep matching values in
+  // ~/.config/environment.d/10-niri-env.conf as well.
+
   // Ensure compositor startup helpers are discoverable even when started from
   // a display manager with a minimal PATH.
   PATH "$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:$PATH"
