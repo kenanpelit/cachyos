@@ -1,6 +1,6 @@
 [Unit]
 Description=DankMaterialShell
-After=hyprland-session.target niri-session.target niri-bootstrap.service
+After=hyprland-session.target niri-bootstrap.service
 PartOf=niri-session.target
 
 [Service]

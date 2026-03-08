@@ -95,7 +95,8 @@ service_exists() {
 enable_service_if_present() {
   local unit="$1"
   if service_exists "$unit"; then
-    if run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
+    # Use reenable to purge stale WantedBy symlinks when unit install targets change.
+    if run_as_user systemctl --user reenable "$unit" >/dev/null 2>&1; then
       echo "  -> Enabled $unit"
     else
       echo "  -> Skipped $unit (enable failed or not installable)"
