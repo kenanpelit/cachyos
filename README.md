@@ -113,6 +113,17 @@ git pull --rebase && git submodule update --init --recursive && sudo -E dcli syn
 niri validate -c ~/.config/niri/config.kdl
 ```
 
+## 🔒 Commit Safety
+
+Enable local repo hooks once:
+```bash
+git config --local core.hooksPath .githooks
+```
+
+- `.githooks/pre-commit` scans staged files and changed submodules for common secret/token patterns.
+- If a line is intentionally safe, append `secret-scan: allow` on that same line.
+- `sathiAi` is a submodule; keep API keys in runtime settings (ignored/local), never in tracked source.
+
 ---
 
 ## 📜 License & Credits

@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ALLOW_MARKER="secret-scan: allow"
+
+SECRET_REGEX='AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|sk-[A-Za-z0-9_-]{20,}|(authorization:[[:space:]]*bearer[[:space:]]+[A-Za-z0-9._-]{20,})|((api[_-]?key|token|secret|password|passwd|client[_-]?secret)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9._~+/=-]{16,})'
+
+filter_allowed_matches() {
+  local raw_matches="$1"
+  local filtered=""
+  local line content
+
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    content="${line#*:*:}"
+    if [[ "$content" == *"$ALLOW_MARKER"* ]]; then
+      continue
+    fi
+    filtered+="$line"$'\n'
+  done <<<"$raw_matches"
+
+  printf '%s' "$filtered"
+}
+
+scan_staged_index() {
+  local staged_files=()
+  local matches filtered
+
+  while IFS= read -r file; do
+    [[ -n "$file" ]] && staged_files+=("$file")
+  done < <(git diff --cached --name-only --diff-filter=ACMR)
+
+  (( ${#staged_files[@]} == 0 )) && return 0
+
+  matches="$(git grep --cached -n -I -E "$SECRET_REGEX" -- "${staged_files[@]}" || true)"
+  filtered="$(filter_allowed_matches "$matches")"
+
+  if [[ -n "$filtered" ]]; then
+    printf '\n[secret-guard] Possible secret detected in staged content:\n%s\n' "$filtered" >&2
+    return 1
+  fi
+}
+
+scan_changed_submodules() {
+  local path matches filtered
+  local changed_submodules=()
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] && changed_submodules+=("$path")
+  done < <(git diff --cached --raw | awk -F'\t' '($1 ~ /^:160000 160000 / || $1 ~ /^:000000 160000 /) {print $2}')
+
+  (( ${#changed_submodules[@]} == 0 )) && return 0
+
+  for path in "${changed_submodules[@]}"; do
+    [[ -d "$path" ]] || continue
+    git -C "$path" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
+
+    matches="$(git -C "$path" grep -n -I -E "$SECRET_REGEX" -- . || true)"
+    filtered="$(filter_allowed_matches "$matches")"
+
+    if [[ -n "$filtered" ]]; then
+      printf '\n[secret-guard] Possible secret detected in changed submodule %s:\n%s\n' "$path" "$filtered" >&2
+      return 1
+    fi
+  done
+}
+
+if ! scan_staged_index; then
+  cat >&2 <<'EOF'
+[secret-guard] Commit blocked.
+If this is a false positive, add 'secret-scan: allow' on that exact line.
+EOF
+  exit 1
+fi
+
+if ! scan_changed_submodules; then
+  cat >&2 <<'EOF'
+[secret-guard] Commit blocked due to risky content in a submodule.
+Clean/redact the submodule content before committing the gitlink update.
+EOF
+  exit 1
+fi
+
+exit 0
