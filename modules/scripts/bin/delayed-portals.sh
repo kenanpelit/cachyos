@@ -116,6 +116,58 @@ sync_env() {
     fi
 }
 
+portal_config_path() {
+    local config_home desktop desktop_name desktop_cfg default_cfg
+    config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    desktop="${XDG_CURRENT_DESKTOP:-niri}"
+    desktop_name="${desktop%%:*}"
+    desktop_name="$(printf '%s' "$desktop_name" | tr '[:upper:]' '[:lower:]')"
+
+    desktop_cfg="${config_home}/xdg-desktop-portal/${desktop_name}-portals.conf"
+    default_cfg="${config_home}/xdg-desktop-portal/portals.conf"
+
+    if [[ -f "$desktop_cfg" ]]; then
+        printf '%s\n' "$desktop_cfg"
+        return 0
+    fi
+
+    if [[ -f "$default_cfg" ]]; then
+        printf '%s\n' "$default_cfg"
+        return 0
+    fi
+
+    return 1
+}
+
+collect_portal_backends() {
+    local config_path="$1"
+
+    # Keep GTK portal available for file chooser / URI / settings dialogs.
+    printf '%s\n' "gtk"
+
+    awk -F'=' '
+      /^[[:space:]]*org\.freedesktop\.impl\.portal\.(ScreenCast|Screenshot|RemoteDesktop|FileChooser|OpenURI|Settings)[[:space:]]*=/ {
+        value = $2
+        sub(/[[:space:]]*#.*/, "", value)
+        gsub(/[[:space:]]/, "", value)
+        count = split(value, backends, /;/)
+        for (i = 1; i <= count; i++) {
+          if (backends[i] != "") {
+            print tolower(backends[i])
+          }
+        }
+      }
+    ' "$config_path"
+
+    if ! awk -F'=' '
+      /^[[:space:]]*org\.freedesktop\.impl\.portal\.(ScreenCast|Screenshot|RemoteDesktop)[[:space:]]*=/ { found = 1 }
+      END { exit(found ? 0 : 1) }
+    ' "$config_path"; then
+        # Safe fallback for Niri/wlroots-like sessions.
+        printf '%s\n' "wlr"
+    fi
+}
+
 if command -v systemctl >/dev/null 2>&1; then
     ensure_runtime_dir
     if ! wait_for_session_ready; then
@@ -125,8 +177,19 @@ if command -v systemctl >/dev/null 2>&1; then
     fi
     sync_env
 
-    # Restart portals to ensure they pick up the fresh environment
-    systemctl --user restart xdg-desktop-portal-gnome.service 2>/dev/null || true
-    systemctl --user restart xdg-desktop-portal-gtk.service 2>/dev/null || true
+    backends_stream=$'gtk\nwlr'
+    if cfg_path="$(portal_config_path)"; then
+        backends_stream="$(collect_portal_backends "$cfg_path")"
+    fi
+
+    declare -A restarted_backends=()
+    while IFS= read -r backend; do
+        [[ -n "$backend" ]] || continue
+        [[ -n "${restarted_backends[$backend]:-}" ]] && continue
+        restarted_backends["$backend"]=1
+        systemctl --user restart "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
+    done <<< "$backends_stream"
+
+    # Restart portal frontend after backend refresh.
     systemctl --user restart xdg-desktop-portal.service 2>/dev/null || true
 fi

@@ -2995,6 +2995,7 @@ doctor)
           stasis.service \
           xdg-desktop-portal.service \
           xdg-desktop-portal-gnome.service \
+          xdg-desktop-portal-wlr.service \
           xdg-desktop-portal-gtk.service
 
         wants_raw="$(systemctl_user_quick show -p Wants --value niri-session.target)"
