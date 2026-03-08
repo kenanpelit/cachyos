@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: enable.sh (Modernized & Fully Dynamic)
+# Script: enable.sh (Robust & Fully Dynamic)
 # Description: Synchronizes Systemd user units based on enabled modules.
-#              Automatically discovers units from module.yaml files.
+#              Uses direct repo paths to ensure enabling works before dotfile sync.
 # ==============================================================================
 
 set -euo pipefail
@@ -33,7 +33,7 @@ active_host_from_config() {
     host="$(awk -F':[[:space:]]*' '/^[[:space:]]*host:[[:space:]]*/ {gsub(/["'\'']/, "", $2); print $2; exit}' "$config_file")"
   fi
 
-  printf '%s\n' "${host:-hay}" # Default to 'hay' if completely unknown
+  printf '%s\n' "${host:-hay}"
 }
 
 declare -A enabled_modules=()
@@ -47,53 +47,51 @@ load_enabled_modules() {
     return 1
   fi
 
-  log_info "Loading enabled modules for host: $host"
+  log_info "Loading enabled modules from $host.yaml"
   
-  # Extract modules from YAML list format (- module_name)
-  while IFS= read -r module; do
-    [[ -n "$module" ]] && enabled_modules["$module"]=1
-  done < <(awk '
-    BEGIN { in_list=0 }
-    /^[[:space:]]*enabled_modules:[[:space:]]*$/ { in_list=1; next }
-    in_list && /^[[:space:]]*- / {
-      sub(/^[[:space:]]*- /, "");
-      sub(/[[:space:]]*#.*/, "");
-      if ($1 != "") print $1;
-      next
-    }
-    in_list && /^[[:space:]]*[^ -]/ { in_list=0 }
-  ' "$host_file")
+  # More robust YAML list parsing using sed/grep
+  # Matches lines like "  - module_name" within the enabled_modules block
+  local modules
+  modules=$(sed -n '/^enabled_modules:/,/^[^ -]/p' "$host_file" | grep -E "^[[:space:]]*- " | sed -E 's/^[[:space:]]*- //;s/[[:space:]]*#.*$//')
+  
+  for m in $modules; do
+    enabled_modules["$m"]=1
+  done
 }
 
 is_module_enabled() {
   local module="$1"
-  [[ ${#enabled_modules[@]} -eq 0 ]] && return 0 # If no host file, treat all as enabled
+  [[ ${#enabled_modules[@]} -eq 0 ]] && return 0
   [[ -n "${enabled_modules[$module]:-}" ]]
 }
 
 # --- Unit Discovery & Management ---
 
-# Extract systemd units from module.yaml dotfiles section
-discover_units_in_module() {
+# Get source path and target name for systemd units in a module
+discover_unit_mappings() {
   local module_file="$1"
-  [[ -f "$module_file" ]] || return 0
+  local module_dir
+  module_dir="$(dirname "$module_file")"
   
-  # Find target paths that point to systemd user directory
-  awk '/target:[[:space:]]*~\/\.config\/systemd\/user\// {
-    line = $0
-    sub(/.*\/user\//, "", line)
-    sub(/[[:space:]]*#.*/, "", line)
-    gsub(/["'\'']/, "", line)
-    if (line ~ /\.(service|timer|target)$/) print line
-  }' "$module_file"
+  # Find source/target pairs for systemd user units
+  # Format: source_path|unit_name
+  awk -v dir="$module_dir" '
+    /source:.*systemd\/user\// { src=$2; gsub(/["'\'']/, "", src) }
+    /target:.*systemd\/user\// { 
+      dst=$2; gsub(/["'\'']/, "", dst);
+      sub(/.*\//, "", dst);
+      if (src != "") {
+        # Construct absolute source path (relative to module dir)
+        abs_src = dir "/" src;
+        print abs_src "|" dst;
+        src = "";
+      }
+    }
+  ' "$module_file"
 }
 
 sync_user_units() {
   log_info "Synchronizing Systemd user units..."
-  
-  # Ensure the target directory exists
-  run_as_user mkdir -p "$USER_HOME/.config/systemd/user"
-  
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
   local module_path module_name
@@ -104,35 +102,33 @@ sync_user_units() {
     
     [[ -f "$yaml" ]] || continue
     
-    # Get units defined in this module
-    local units
-    units=$(discover_units_in_module "$yaml")
-    
-    for unit in $units; do
+    # Process each unit mapping
+    while IFS='|' read -r src_path unit_name; do
+      [[ -n "$unit_name" ]] || continue
+      
       if is_module_enabled "$module_name"; then
-        # Force enable (this will work even if dcli hasn't symlinked the file yet, 
-        # as long as the file exists in the repo, but systemctl needs the file in ~/.config/systemd/user)
-        # So we check if the file is there, if not, we wait or warn
-        if [[ -f "$USER_HOME/.config/systemd/user/$unit" ]]; then
-          if run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
-            echo "  -> Enabled $unit ($module_name)"
+        # Check if already enabled to reduce noise
+        if ! run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
+          # Use absolute path to enable, ensuring it works even if not yet linked
+          if run_as_user systemctl --user enable "$src_path" >/dev/null 2>&1; then
+            echo "  -> Enabled $unit_name ($module_name)"
           fi
-        else
-          # Fallback: Try to enable by full path if dcli is late
-          log_warn "Unit $unit ($module_name) not yet in ~/.config/systemd/user. dcli sync will link it later."
         fi
       else
-        # Automatically disable and stop units from inactive modules
-        run_as_user systemctl --user disable --now "$unit" >/dev/null 2>&1 || true
+        # Disable units from inactive modules
+        if run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
+          run_as_user systemctl --user disable --now "$unit_name" >/dev/null 2>&1 || true
+          log_warn "Disabled $unit_name (module '$module_name' is inactive)"
+        fi
       fi
-    done
+    done < <(discover_unit_mappings "$yaml")
   done
 }
 
 # --- Main Execution ---
 
 main() {
-  log_info "Starting declarative service synchronization for: $REAL_USER"
+  log_info "Starting service synchronization for: $REAL_USER"
   
   local host
   host=$(active_host_from_config)
