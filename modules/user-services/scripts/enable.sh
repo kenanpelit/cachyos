@@ -90,6 +90,10 @@ discover_units_in_module() {
 
 sync_user_units() {
   log_info "Synchronizing Systemd user units..."
+  
+  # Ensure the target directory exists
+  run_as_user mkdir -p "$USER_HOME/.config/systemd/user"
+  
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
   local module_path module_name
@@ -106,15 +110,20 @@ sync_user_units() {
     
     for unit in $units; do
       if is_module_enabled "$module_name"; then
-        if run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
-          echo "  -> Enabled $unit ($module_name)"
+        # Force enable (this will work even if dcli hasn't symlinked the file yet, 
+        # as long as the file exists in the repo, but systemctl needs the file in ~/.config/systemd/user)
+        # So we check if the file is there, if not, we wait or warn
+        if [[ -f "$USER_HOME/.config/systemd/user/$unit" ]]; then
+          if run_as_user systemctl --user enable "$unit" >/dev/null 2>&1; then
+            echo "  -> Enabled $unit ($module_name)"
+          fi
+        else
+          # Fallback: Try to enable by full path if dcli is late
+          log_warn "Unit $unit ($module_name) not yet in ~/.config/systemd/user. dcli sync will link it later."
         fi
       else
         # Automatically disable and stop units from inactive modules
-        if run_as_user systemctl --user is-enabled "$unit" >/dev/null 2>&1; then
-          run_as_user systemctl --user disable --now "$unit" >/dev/null 2>&1 || true
-          log_warn "Disabled $unit (module '$module_name' is inactive)"
-        fi
+        run_as_user systemctl --user disable --now "$unit" >/dev/null 2>&1 || true
       fi
     done
   done
