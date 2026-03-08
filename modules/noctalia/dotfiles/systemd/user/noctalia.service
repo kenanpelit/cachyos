@@ -1,23 +1,15 @@
 [Unit]
 Description=Noctalia Shell
-ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-# Niri env ve bootstrap'den sonra başla (ayarların okunabilmesi için)
-After=niri-bootstrap.service
-PartOf=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+After=graphical-session.target niri-bootstrap.service niri-daemons.target hyprland-session.target
+PartOf=niri-daemons.target hyprland-session.target
 
 [Service]
 Environment=QS_CACHE_DIR=%t/noctalia-qml-cache
-# Geçersiz olan StartupCPUShares kaldırıldı, CPUWeight yeterli.
-CPUWeight=200
-TimeoutStartSec=120
-
-# Ayar dosyasının varlığını kontrol et, yoksa 1 saniye bekle (Fresh install sanmasın)
-ExecStartPre=/usr/bin/sh -c 'for i in {1..10}; do [ -f %h/.config/noctalia/settings.json ] && exit 0; sleep 0.5; done; exit 0'
-
-ExecCondition=/usr/bin/sh -c 'backend="$(osc-shell backend 2>/dev/null || echo noctalia)"; [ "$backend" = "noctalia" ]'
+ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend 2>/dev/null || osc-shell backend 2>/dev/null || echo noctalia)"; [[ "$backend" == "noctalia" ]]'
 ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate
 Restart=on-failure
-RestartSec=3
+RestartSec=1
 
 [Install]
-WantedBy=default.target
+WantedBy=niri-daemons.target hyprland-session.target

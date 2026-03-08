@@ -22,7 +22,7 @@
         "showCategories": true,
         "showIconBackground": false,
         "sortByMostUsed": true,
-        "terminalCommand": "kitty -e",
+        "terminalCommand": "alacritty -e",
         "useApp2Unit": false,
         "viewMode": "list"
     },
@@ -115,6 +115,57 @@
                     "unfocusedIconsOpacity": 1
                 },
                 {
+                    "defaultSettings": {
+                        "currentIconName": "world-download",
+                        "hideOnZero": false,
+                        "updateIntervalMinutes": 30,
+                        "updateTerminalCommand": "foot -e"
+                    },
+                    "id": "plugin:update-count"
+                },
+                {
+                    "defaultSettings": {
+                        "activeTodoCount": 0,
+                        "autosaveDelay": 700,
+                        "count": 0,
+                        "notes": [
+                        ],
+                        "scratchpadContent": "",
+                        "showCountsInBar": true,
+                        "todoCount": 0,
+                        "todos": [
+                        ]
+                    },
+                    "id": "plugin:6ee06e:notes"
+                },
+                {
+                    "defaultSettings": {
+                        "refreshInterval": 60000
+                    },
+                    "id": "plugin:6ee06e:npodman"
+                },
+                {
+                    "defaultSettings": {
+                    },
+                    "id": "plugin:kde-connect"
+                },
+                {
+                    "defaultSettings": {
+                        "mode": "region"
+                    },
+                    "id": "plugin:screenshot"
+                },
+                {
+                    "defaultSettings": {
+                        "customColor": "none",
+                        "showConditionIcon": true,
+                        "showTempUnit": true,
+                        "showTempValue": true,
+                        "tooltipOption": "everything"
+                    },
+                    "id": "plugin:weather-indicator"
+                },
+                {
                     "compactMode": false,
                     "hideMode": "hidden",
                     "hideWhenIdle": false,
@@ -143,6 +194,14 @@
             ],
             "right": [
                 {
+                    "defaultSettings": {
+                        "maxVisibleNetworks": 6,
+                        "showLabelInBar": true,
+                        "watchdogInterval": 30000
+                    },
+                    "id": "plugin:6ee06e:network"
+                },
+                {
                     "compactMode": false,
                     "diskPath": "/",
                     "iconColor": "none",
@@ -163,6 +222,12 @@
                     "textColor": "none",
                     "useMonospaceFont": true,
                     "usePadding": false
+                },
+                {
+                    "defaultSettings": {
+                        "watchdogInterval": 15000
+                    },
+                    "id": "plugin:6ee06e:npower"
                 },
                 {
                     "displayMode": "onhover",
@@ -192,6 +257,18 @@
                     "textColor": "none"
                 },
                 {
+                    "defaultSettings": {
+                        "oscCommand": "osc-mullvad"
+                    },
+                    "id": "plugin:6ee06e:ndns"
+                },
+                {
+                    "defaultSettings": {
+                        "watchdogInterval": 12000
+                    },
+                    "id": "plugin:6ee06e:nufw"
+                },
+                {
                     "blacklist": [
                     ],
                     "chevronColor": "none",
@@ -201,6 +278,16 @@
                     "id": "Tray",
                     "pinned": [
                     ]
+                },
+                {
+                    "defaultSettings": {
+                        "errorIcon": "alert-circle",
+                        "iconColor": "primary",
+                        "loadingIcon": "loader",
+                        "refreshInterval": 300,
+                        "successIcon": "network"
+                    },
+                    "id": "plugin:6ee06e:nip"
                 }
             ]
         }
