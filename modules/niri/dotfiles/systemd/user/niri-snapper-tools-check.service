@@ -1,7 +1,7 @@
 [Unit]
 Description=Snapper tools check (Niri)
-After=niri-session.target niri-ready.service
-PartOf=niri-session.target
+After=niri-daemons.target
+PartOf=niri-daemons.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 ConditionPathExists=/usr/bin/snapper-tools
@@ -15,4 +15,4 @@ StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=niri-session.target
+WantedBy=niri-daemons.target

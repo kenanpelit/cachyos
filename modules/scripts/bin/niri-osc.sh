@@ -223,24 +223,6 @@ niri_osc_payload_set() {
 
 set -euo pipefail
 
-start_clipse_listener() {
-  command -v clipse >/dev/null 2>&1 || return 0
-
-  if command -v pgrep >/dev/null 2>&1; then
-    if pgrep -af 'clipse.*-listen' >/dev/null 2>&1; then
-      return 0
-    fi
-    # Newer clipse versions spawn wl-paste watchers and exit (no long-running
-    # `clipse -listen` process). Detect them to avoid starting duplicates.
-    if pgrep -af 'wl-paste.*--watch clipse' >/dev/null 2>&1; then
-      return 0
-    fi
-  fi
-
-  # `-listen` starts the monitor in the background and exits quickly.
-  clipse -listen >/dev/null 2>&1 || true
-}
-
 usage() {
   cat <<'EOF'
 Usage:
@@ -1479,20 +1461,6 @@ env)
       systemctl --user start niri-session.target 2>/dev/null || true
     }
 
-    start_niri_portals() {
-      # Portals are now managed via delayed-portals script to speed up startup.
-      if command -v delayed-portals >/dev/null 2>&1; then
-        local delay="${NIRI_PORTALS_DELAY:-8}"
-        [[ "$delay" =~ ^[0-9]+$ ]] || delay=8
-        delayed-portals "$delay" >/dev/null 2>&1 &
-      fi
-    }
-
-    restart_portals() {
-      # Immediate restart is disabled; handled by delayed-portals.
-      return 0
-    }
-
     ensure_runtime_dir
     detect_wayland_display
     detect_niri_socket
@@ -1508,9 +1476,8 @@ env)
     # Trigger the session target only after env sync.
     start_target
 
-    # Non-critical helpers can run in background.
-    start_clipse_listener &
-    start_niri_portals &
+    # Keep this command strictly as environment sync + session target trigger.
+    # Core init and portal orchestration are handled by niri-bootstrap.service.
   )
   ;;
 
@@ -2978,9 +2945,9 @@ doctor)
         echo "Units (key)"
         print_units_status \
           niri-session.target \
+          niri-daemons.target \
           graphical-session.target \
           xdg-desktop-autostart.target \
-          niri-ready.service \
           niri-bootstrap.service \
           niri-login-prompts.service \
           niri-polkit-agent.service \

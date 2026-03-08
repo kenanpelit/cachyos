@@ -1,7 +1,7 @@
 [Unit]
 Description=Niri login prompts warmup
-After=graphical-session.target niri-session.target niri-ready.service niri-bootstrap.service
-PartOf=niri-session.target
+After=graphical-session.target niri-daemons.target niri-bootstrap.service
+PartOf=niri-daemons.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
@@ -18,4 +18,4 @@ StandardOutput=journal
 StandardError=journal
 
 #[Install]
-#WantedBy=niri-session.target
+#WantedBy=niri-daemons.target

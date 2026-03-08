@@ -1,8 +1,8 @@
 [Unit]
 Description=Noctalia Shell
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-# Sadece Niri hazır olduğunda başla, başka hiçbir target hiyerarşisine girme
-After=niri-ready.service
+# Start after Niri core bootstrap stage.
+After=niri-bootstrap.service niri-session.target
 
 [Service]
 Environment=QS_CACHE_DIR=%t/noctalia-qml-cache

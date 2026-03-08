@@ -30,6 +30,8 @@ dotfiles:
   target: ~/.config/autostart/geoclue-demo-agent.desktop
 - source: dotfiles/systemd/user/niri-session.target
   target: ~/.config/systemd/user/niri-session.target
+- source: dotfiles/systemd/user/niri-daemons.target
+  target: ~/.config/systemd/user/niri-daemons.target
 - source: dotfiles/systemd/user/niri-polkit-agent.service
   target: ~/.config/systemd/user/niri-polkit-agent.service
 - source: dotfiles/systemd/user/niri-nm-applet.service
@@ -38,8 +40,6 @@ dotfiles:
   target: ~/.config/systemd/user/niri-blueman-applet.service
 - source: dotfiles/systemd/user/niri-snapper-tools-check.service
   target: ~/.config/systemd/user/niri-snapper-tools-check.service
-- source: dotfiles/systemd/user/niri-ready.service
-  target: ~/.config/systemd/user/niri-ready.service
 - source: dotfiles/systemd/user/niri-bootstrap.service
   target: ~/.config/systemd/user/niri-bootstrap.service
 - source: dotfiles/systemd/user/niri-login-prompts.service

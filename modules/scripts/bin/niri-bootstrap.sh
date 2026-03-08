@@ -43,6 +43,21 @@ if [[ -z "${NIRI_SOCKET:-}" && -n "${XDG_RUNTIME_DIR:-}" && -n "${WAYLAND_DISPLA
   done
 fi
 
+wait_for_niri_ready() {
+  local i
+  for i in $(seq 1 300); do
+    if command -v niri >/dev/null 2>&1; then
+      if [[ -n "${NIRI_SOCKET:-}" ]]; then
+        NIRI_SOCKET="${NIRI_SOCKET}" niri msg version >/dev/null 2>&1 && return 0
+      else
+        niri msg version >/dev/null 2>&1 && return 0
+      fi
+    fi
+    sleep 0.05
+  done
+  return 1
+}
+
 # Force GTK/GNOME theme settings (batched for performance)
 if command -v gsettings >/dev/null 2>&1; then
     (
@@ -55,15 +70,19 @@ if command -v gsettings >/dev/null 2>&1; then
 fi
 
 if command -v niri-osc >/dev/null 2>&1; then
-  # Ensure systemd/dbus environment + delayed portal refresh are always applied.
-  # This is kept explicit here because startup spawn-at-startup can race on PATH/env.
-  if ! niri-osc set env; then
-    warn "niri-osc set env failed (continuing)"
+  if ! wait_for_niri_ready; then
+    warn "niri IPC readiness timeout"
+    exit 1
   fi
 
   if ! niri-osc set init; then
     warn "niri-osc set init failed"
     exit 1
+  fi
+
+  # Apply portal backend policy after the compositor and env are fully ready.
+  if command -v delayed-portals >/dev/null 2>&1; then
+    delayed-portals 0 || warn "delayed-portals failed"
   fi
 else
   warn "niri-osc not found"

@@ -192,6 +192,28 @@ for spec in $(printf '%s\n' "${service_specs[@]}" | sort); do
   fi
 done
 
+# Legacy cleanup: units retired from the startup graph but possibly still enabled.
+legacy_disable_units=(
+  "niri-ready.service"
+)
+for unit in "${legacy_disable_units[@]}"; do
+  disable_service_if_present "$unit"
+done
+
+# Migration cleanup: these units moved from niri-session.target.wants to
+# niri-daemons.target.wants. Remove stale links so ordering stays deterministic.
+legacy_niri_session_links=(
+  "niri-blueman-applet.service"
+  "niri-nm-applet.service"
+  "niri-polkit-agent.service"
+  "niri-niriswitcher.service"
+  "niri-sticky.service"
+  "niri-snapper-tools-check.service"
+)
+for unit in "${legacy_niri_session_links[@]}"; do
+  run_as_user rm -f "$USER_HOME/.config/systemd/user/niri-session.target.wants/$unit" >/dev/null 2>&1 || true
+done
+
 # PipeWire stacks often pull compatibility references to legacy user units.
 # Mask them to avoid not-found noise in `systemctl --user list-units --all`.
 if run_as_user systemctl --user list-unit-files pipewire-pulse.service >/dev/null 2>&1; then
