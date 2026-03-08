@@ -11,7 +11,7 @@ Type=oneshot
 TimeoutStartSec=60
 Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
 Environment=HYPR_BOOT_DELAY=5
-ExecStart=/usr/bin/bash -lc 'sleep "${HYPR_BOOT_DELAY:-5}" && %h/.local/bin/hypr-osc init'
+ExecStart=/usr/bin/bash -lc 'sleep "${HYPR_BOOT_DELAY:-5}"; if [[ -x "%h/.local/bin/hypr-osc" ]]; then "%h/.local/bin/hypr-osc" init; elif command -v hypr-osc >/dev/null 2>&1; then hypr-osc init; else echo "[hypr-init] hypr-osc not found; skipping"; fi'
 StandardOutput=journal
 StandardError=journal
 

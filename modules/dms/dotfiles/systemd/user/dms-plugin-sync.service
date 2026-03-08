@@ -1,13 +1,14 @@
 [Unit]
 Description=DMS plugin sync (best-effort)
-After=hyprland-session.target niri-session.target dms.service
-PartOf=niri-session.target
+After=hyprland-session.target niri-daemons.target dms.service
+PartOf=niri-daemons.target hyprland-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
 Type=oneshot
-ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend niri 2>/dev/null || osc-shell backend niri 2>/dev/null || echo noctalia)"; [[ "$backend" == "dms" ]]'
+ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend 2>/dev/null || osc-shell backend 2>/dev/null || echo noctalia)"; [[ "$backend" == "dms" ]]'
 TimeoutStartSec=60
 ExecStart=%h/.local/bin/dms-plugin-sync
 
 [Install]
-WantedBy=niri-session.target
+WantedBy=niri-daemons.target hyprland-session.target

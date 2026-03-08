@@ -1,11 +1,12 @@
 [Unit]
 Description=DankMaterialShell
-After=hyprland-session.target niri-bootstrap.service
-PartOf=niri-session.target
+After=hyprland-session.target niri-bootstrap.service niri-daemons.target
+PartOf=niri-daemons.target hyprland-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
 Type=simple
-ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend niri 2>/dev/null || osc-shell backend niri 2>/dev/null || echo noctalia)"; [[ "$backend" == "dms" ]]'
+ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend 2>/dev/null || osc-shell backend 2>/dev/null || echo noctalia)"; [[ "$backend" == "dms" ]]'
 Environment=DMS_SCREENSHOT_EDITOR=swappy
 Environment=TERMINAL=kitty
 Environment=XDG_RUNTIME_DIR=/run/user/%U
@@ -32,4 +33,4 @@ PassEnvironment=XDG_SESSION_TYPE
 PassEnvironment=XDG_SESSION_DESKTOP
 
 [Install]
-WantedBy=niri-session.target
+WantedBy=niri-daemons.target hyprland-session.target

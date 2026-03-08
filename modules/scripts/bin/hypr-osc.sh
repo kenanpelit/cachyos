@@ -2251,7 +2251,11 @@ warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
 run_if_present() {
   local cmd="$1"; shift
   if command -v "$cmd" >/dev/null 2>&1; then
-    "$cmd" "$@" && log "$cmd $*"
+    if "$cmd" "$@"; then
+      log "$cmd $*"
+    else
+      warn "$cmd $* failed; continuing"
+    fi
   else
     warn "$cmd not found; skipping"
   fi

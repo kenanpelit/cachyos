@@ -231,6 +231,10 @@ legacy_niri_session_links=(
   "niri-niriswitcher.service"
   "niri-sticky.service"
   "niri-snapper-tools-check.service"
+  "dms.service"
+  "dms-plugin-sync.service"
+  "dms-resume-restart.service"
+  "noctalia.service"
 )
 for unit in "${legacy_niri_session_links[@]}"; do
   run_as_user rm -f "$USER_HOME/.config/systemd/user/niri-session.target.wants/$unit" >/dev/null 2>&1 || true
