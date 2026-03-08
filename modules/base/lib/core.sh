@@ -41,8 +41,14 @@ run_as_user() {
   
   if [[ "$real_user" != "$(whoami)" ]]; then
     local uid
+    local user_home
     uid="$(id -u "$real_user")"
+    user_home="$(get_user_home "$real_user")"
     sudo -E -u "$real_user" \
+      HOME="$user_home" \
+      XDG_CONFIG_HOME="$user_home/.config" \
+      XDG_DATA_HOME="$user_home/.local/share" \
+      XDG_CACHE_HOME="$user_home/.cache" \
       XDG_RUNTIME_DIR="/run/user/$uid" \
       DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
       "$@"
