@@ -1,8 +1,8 @@
 [Unit]
 Description=Noctalia Shell
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-# Niri'nin tam oturması için niri-ready'den sonra 1-2 saniye daha pay bırakıyoruz
-After=niri-ready.service
+# Niri'nin tam oturması için bootstrap'den sonra başlıyoruz
+After=niri-bootstrap.service
 PartOf=graphical-session.target
 
 [Service]
