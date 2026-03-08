@@ -255,6 +255,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-post-bootstrap`
+**Description:** Lightweight post-bootstrap tasks for Niri session.
+
+**Usage:** `niri-post-bootstrap`
+
+---
+
 ### 📂 `niri-start`
 **Description:** Daily startup sequence for Niri session via semsumo.
 
