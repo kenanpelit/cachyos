@@ -1458,7 +1458,7 @@ env)
         return 0
       fi
 
-      systemctl --user start niri-session.target 2>/dev/null || true
+      systemctl --user start --no-block niri-session.target 2>/dev/null || true
     }
 
     ensure_runtime_dir
