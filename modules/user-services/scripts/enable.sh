@@ -222,9 +222,9 @@ for unit in "${legacy_disable_units[@]}"; do
   disable_service_if_present "$unit"
 done
 
-# Migration cleanup: these units moved from niri-session.target.wants to
-# niri-daemons.target.wants. Remove stale links so ordering stays deterministic.
+# Migration cleanup: stale links
 legacy_niri_session_links=(
+  "ppp-auto-profile.service"
   "niri-blueman-applet.service"
   "niri-nm-applet.service"
   "niri-polkit-agent.service"
