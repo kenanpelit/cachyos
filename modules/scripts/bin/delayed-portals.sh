@@ -51,16 +51,26 @@ detect_niri_socket() {
     shopt -u nullglob
 }
 
-wait_for_wayland() {
+wait_for_session_ready() {
     local i
-    for i in $(seq 1 50); do
+    for i in $(seq 1 600); do
         detect_wayland_display
+        detect_niri_socket
+
         if [[ -n "${WAYLAND_DISPLAY:-}" ]] && [[ -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]]; then
-            return 0
+            if [[ -n "${NIRI_SOCKET:-}" ]] && [[ -S "${NIRI_SOCKET}" ]]; then
+                if command -v niri >/dev/null 2>&1; then
+                    if NIRI_SOCKET="${NIRI_SOCKET}" niri msg version >/dev/null 2>&1; then
+                        return 0
+                    fi
+                else
+                    return 0
+                fi
+            fi
         fi
         sleep 0.1
     done
-    return 0
+    return 1
 }
 
 sync_env() {
@@ -108,8 +118,11 @@ sync_env() {
 
 if command -v systemctl >/dev/null 2>&1; then
     ensure_runtime_dir
-    wait_for_wayland
-    detect_niri_socket
+    if ! wait_for_session_ready; then
+        # Session wasn't fully ready in time; avoid restarting portals with
+        # incomplete environment (this can leave gnome backend in settings-only mode).
+        exit 0
+    fi
     sync_env
 
     # Restart portals to ensure they pick up the fresh environment
