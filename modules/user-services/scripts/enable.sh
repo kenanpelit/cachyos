@@ -52,7 +52,17 @@ load_enabled_modules() {
   # Extract modules from YAML list format (- module_name)
   while IFS= read -r module; do
     [[ -n "$module" ]] && enabled_modules["$module"]=1
-  done < <(awk '/^[[:space:]]*enabled_modules:[[:space:]]*$/ {in_list=1; next} /^[[:space:]]*[^ -]/ {in_list=0} in_list && /^[[:space:]]*- / {sub(/^[[:space:]]*- /, ""); sub(/[[:space:]]*#.*/, ""); print $1}' "$host_file")
+  done < <(awk '
+    BEGIN { in_list=0 }
+    /^[[:space:]]*enabled_modules:[[:space:]]*$/ { in_list=1; next }
+    in_list && /^[[:space:]]*- / {
+      sub(/^[[:space:]]*- /, "");
+      sub(/[[:space:]]*#.*/, "");
+      if ($1 != "") print $1;
+      next
+    }
+    in_list && /^[[:space:]]*[^ -]/ { in_list=0 }
+  ' "$host_file")
 }
 
 is_module_enabled() {
