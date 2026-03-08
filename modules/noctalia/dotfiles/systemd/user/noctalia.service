@@ -6,7 +6,15 @@ PartOf=niri-daemons.target hyprland-session.target
 
 [Service]
 Environment=QS_CACHE_DIR=%t/noctalia-qml-cache
-ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend 2>/dev/null || osc-shell backend 2>/dev/null || echo noctalia)"; [[ "$backend" == "noctalia" ]]'
+# Noctalia'nın açılışta ölmemesi için zaman aşımını artırıyoruz
+TimeoutStartSec=120
+# CPU önceliğini artırarak eklentilerin yüklenmesini hızlandırıyoruz
+CPUWeight=200
+
+# Ayar dosyasının varlığını kontrol et, yoksa 1 saniye bekle (Fresh install sanmasın)
+ExecStartPre=/usr/bin/sh -c 'for i in {1..10}; do [ -f %h/.config/noctalia/settings.json ] && exit 0; sleep 0.5; done; exit 0'
+
+ExecCondition=/usr/bin/sh -c 'backend="$(osc-shell backend 2>/dev/null || echo noctalia)"; [ "$backend" = "noctalia" ]'
 ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate
 Restart=on-failure
 RestartSec=1
