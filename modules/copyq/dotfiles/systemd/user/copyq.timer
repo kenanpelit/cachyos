@@ -3,8 +3,8 @@ Description=Delayed CopyQ Clipboard Manager
 After=graphical-session.target
 
 [Timer]
-OnStartupSec=7s
-OnActiveSec=7s
+OnStartupSec=10s
+OnActiveSec=10s
 AccuracySec=1s
 Unit=copyq.service
 

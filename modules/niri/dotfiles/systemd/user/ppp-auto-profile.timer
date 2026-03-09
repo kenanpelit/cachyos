@@ -3,8 +3,8 @@ Description=Periodic power profile chooser
 After=graphical-session.target
 
 [Timer]
-# İlk çalışma: Login olduktan 40 saniye sonra
-OnStartupSec=40s
+# İlk çalışma: Login olduktan 30 saniye sonra
+OnStartupSec=30s
 # Sonraki çalışmalar: Her 20 saniyede bir
 OnUnitActiveSec=20s
 AccuracySec=1s
