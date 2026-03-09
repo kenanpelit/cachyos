@@ -2,26 +2,29 @@
 # ==============================================================================
 # Script: niri-optimized-session
 # Description: High-performance session launcher for GDM. 
-#              Combines early env injection with native niri-session speed.
+#              Fixes the 10s portal timeout by aligning session names.
 # ==============================================================================
 set -euo pipefail
 
-# 1. Pre-warm: Inject basic session identity into systemd immediately.
-# This ensures services like Noctalia see these variables on their very first breath.
+# 1. Identity Alignment: Force session name to 'niri' so portals find configs instantly.
+# This eliminates the 10-second wait for 'niri-optimized-portals.conf'.
+export DESKTOP_SESSION="niri"
+export XDG_SESSION_DESKTOP="niri"
+export XDG_CURRENT_DESKTOP="niri"
+
+# 2. Pre-warm: Inject variables into systemd before niri even starts.
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user set-environment \
     XDG_CURRENT_DESKTOP=niri \
     XDG_SESSION_DESKTOP=niri \
-    XDG_SESSION_TYPE=wayland \
     DESKTOP_SESSION=niri \
+    GTK_USE_PORTAL=1 \
     NOCTALIA_STARTUP_HINT=1 >/dev/null 2>&1 || true
 fi
 
-# 2. Fast-track: Bypass niri-osc TTY logic when running under a Display Manager.
-# We go straight to niri-session for the 1-2 second startup experience.
+# 3. Fast-track to niri-session
 if command -v niri-session >/dev/null 2>&1; then
   exec niri-session
 fi
 
-# Fallback to direct binary if niri-session is missing
 exec niri --session
