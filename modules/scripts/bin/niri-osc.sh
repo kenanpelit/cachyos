@@ -1124,9 +1124,14 @@ tty)
     # Systemd Integration
     # =============================================================================
     setup_systemd_integration() {
-      # NOTE:
-      # systemctl/dbus çağrıları bazı TTY login senaryolarında bloklayıcı olabiliyor.
-      # Bu yüzden hepsi best-effort + kısa timeout ile.
+      # GDM usually sets up the basic environment. We skip heavy sync here
+      # to avoid blocking the session start. Niri will perform a more 
+      # complete sync via 'niri-osc set env' once the compositor is up.
+      if [[ "$GDM_MODE" == "true" ]]; then
+        debug_log "GDM mode detected: skipping heavy systemd/dbus sync"
+        return 0
+      fi
+
       local timeout_bin=""
       if command -v timeout >/dev/null 2>&1; then
         timeout_bin="timeout"
