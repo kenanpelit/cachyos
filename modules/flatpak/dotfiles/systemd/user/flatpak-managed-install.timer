@@ -1,10 +1,13 @@
 [Unit]
-Description=Delayed start timer for Flatpak installation
+Description=Delayed Flatpak managed installation
+After=graphical-session.target
 
 [Timer]
-OnBootSec=1m
-OnUnitActiveSec=6h
-Persistent=true
+# Açılışın ilk anlarını yormamak için 5 dakika sonra çalıştır
+OnStartupSec=5min
+OnActiveSec=5min
+AccuracySec=1min
+Unit=flatpak-managed-install.service
 
 [Install]
-WantedBy=timers.target
+WantedBy=default.target
