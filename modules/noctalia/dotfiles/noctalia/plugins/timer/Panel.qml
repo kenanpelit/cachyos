@@ -45,25 +45,12 @@ Item {
   
   function setTimerStopwatchMode(mode) { 
     if (mainInstance) {
-        if (mainInstance.timerStopwatchMode !== mode) {
-            if (mainInstance.timerRunning) mainInstance.timerPause();
-            SoundService.stopSound("alarm-beep.wav");
-            mainInstance.timerSoundPlaying = false;
-            mainInstance.timerStopwatchMode = mode;
-            if (mode) {
-                mainInstance.timerElapsedSeconds = 0;
-            } else {
-                // When switching to timer mode, maybe also reset to 0? 
-                // Or should we pre-fill? User said "when reset it shows 20:00... ONLY display time when running"
-                // Safer to show 0.
-                mainInstance.timerRemainingSeconds = 0;
-            }
-        }
+      mainInstance.timerStopwatchMode = mode;
     } 
   }
   
   function setTimerRemainingSeconds(seconds) {
-      if (mainInstance) mainInstance.timerRemainingSeconds = seconds;
+      if (mainInstance) mainInstance.cdRemainingSeconds = seconds;
   }
 
   function formatTime(seconds, totalTimeSeconds) {
@@ -203,10 +190,10 @@ Item {
             }
             const step = 5;
             if (event.angleDelta.y > 0) {
-              mainInstance.timerRemainingSeconds = Math.max(0, mainInstance.timerRemainingSeconds + step);
+              mainInstance.cdRemainingSeconds = Math.max(0, mainInstance.cdRemainingSeconds + step);
               event.accepted = true;
             } else if (event.angleDelta.y < 0) {
-              mainInstance.timerRemainingSeconds = Math.max(0, mainInstance.timerRemainingSeconds - step);
+              mainInstance.cdRemainingSeconds = Math.max(0, mainInstance.cdRemainingSeconds - step);
               event.accepted = true;
             }
           }
@@ -472,7 +459,12 @@ Item {
           NButton {
             id: startButton
             anchors.fill: parent
-            text: isRunning ? (pluginApi?.tr("panel.pause") || "Pause") : (totalSeconds > 0 ? (pluginApi?.tr("panel.resume") || "Resume") : (pluginApi?.tr("panel.start") || "Start"))
+            text: {
+              if (isRunning) return pluginApi?.tr("panel.pause") || "Pause";
+              if (isStopwatchMode && elapsedSeconds > 0) return pluginApi?.tr("panel.resume") || "Resume";
+              if (!isStopwatchMode && totalSeconds > 0) return pluginApi?.tr("panel.resume") || "Resume";
+              return pluginApi?.tr("panel.start") || "Start";
+            }
             icon: isRunning ? "player-pause" : "player-play"
             enabled: isStopwatchMode || remainingSeconds > 0
             onClicked: {
