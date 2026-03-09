@@ -1130,7 +1130,7 @@ if mkdir -p "$ENV_DIR" 2>/dev/null; then
 CATPPUCCIN_THEME=mocha
 CATPPUCCIN_ACCENT=mauve
 GTK_THEME=catppuccin-mocha-mauve-standard+default
-XCURSOR_THEME=catppuccin-mocha-dark-cursors
+XCURSOR_THEME=capitaine-cursors
 XCURSOR_SIZE=24
 EOF
   echo "✅ Catppuccin ortam değişkenleri $ENV_FILE içine yazıldı"
