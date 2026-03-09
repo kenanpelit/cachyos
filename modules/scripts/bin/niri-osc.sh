@@ -1737,7 +1737,7 @@ init)
       fi
     fi
 
-    write_monitor_auto_profile
+    write_monitor_auto_profile &
     if [[ "${NIRI_INIT_ENFORCE_WORKSPACE_BOUNDS:-0}" == "1" ]]; then
       normalize_workspace_range
       compact_out_of_range_empty_workspaces
@@ -1749,7 +1749,7 @@ init)
       notify "focused monitor: $target"
     fi
 
-    run_if_present osc-soundctl init
+    run_if_present osc-soundctl init &
 
     if [[ "${NIRI_INIT_SKIP_ARRANGE:-0}" != "1" ]]; then
       # We call the subcommand directly to avoid depending on extra binaries.
