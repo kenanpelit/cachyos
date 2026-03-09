@@ -598,13 +598,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `profile_helium`
-**Description:** Helium Profile Launcher with window management and proxy support
-
-**Usage:** `profile_helium.sh [profile_name] [options]`
-
----
-
 ### 📂 `publicip`
 **Description:** Advanced public IP address checker with VPN detection
 
