@@ -117,15 +117,6 @@
                 },
                 {
                     "defaultSettings": {
-                        "currentIconName": "world-download",
-                        "hideOnZero": false,
-                        "updateIntervalMinutes": 30,
-                        "updateTerminalCommand": "foot -e"
-                    },
-                    "id": "plugin:update-count"
-                },
-                {
-                    "defaultSettings": {
                         "activeTodoCount": 0,
                         "autosaveDelay": 700,
                         "count": 0,

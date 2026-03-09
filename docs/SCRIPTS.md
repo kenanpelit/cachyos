@@ -242,7 +242,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-bootstrap`
-**Description:** Bootstrap script for Niri session initialization.
+**Description:** Standardized bootstrap for Niri session.
 
 **Usage:** `niri-bootstrap.sh`
 
