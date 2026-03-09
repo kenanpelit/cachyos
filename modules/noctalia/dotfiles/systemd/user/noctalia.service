@@ -1,18 +1,19 @@
 [Unit]
 Description=Noctalia Shell
-ConditionEnvironment=WAYLAND_DISPLAY
-After=graphical-session.target niri-bootstrap.service niri-daemons.target hyprland-session.target
-PartOf=niri-daemons.target hyprland-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+# Zero-Wait: Bootstrap beklemeden anında başla
+After=graphical-session.target
+PartOf=graphical-session.target
 
 [Service]
 Environment=QS_CACHE_DIR=%t/noctalia-qml-cache
-# Noctalia'nın açılışta ölmemesi için zaman aşımını artırıyoruz
+# High-Priority: Ensure the shell gets CPU time immediately
+Nice=-15
+CPUWeight=500
 TimeoutStartSec=120
-# CPU önceliğini artırarak eklentilerin yüklenmesini hızlandırıyoruz
-CPUWeight=200
 
-# Ayar dosyasının varlığını kontrol et, yoksa 1 saniye bekle (Fresh install sanmasın)
-ExecStartPre=/usr/bin/sh -c 'for i in {1..10}; do [ -f %h/.config/noctalia/settings.json ] && exit 0; sleep 0.5; done; exit 0'
+# Fast-Precheck: Reduced sleep to 100ms for minimum delay
+ExecStartPre=/usr/bin/sh -c 'for i in {1..20}; do [ -f %h/.config/noctalia/settings.json ] && exit 0; sleep 0.1; done; exit 0'
 
 ExecCondition=/usr/bin/sh -c 'backend="$(osc-shell backend 2>/dev/null || echo noctalia)"; [ "$backend" = "noctalia" ]'
 ExecStart=/usr/bin/qs -c noctalia-shell --no-duplicate

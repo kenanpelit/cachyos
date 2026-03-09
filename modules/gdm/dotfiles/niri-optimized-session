@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Pre-warm: Inject basic session identity into systemd early
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user set-environment \
+    XDG_CURRENT_DESKTOP=niri \
+    XDG_SESSION_DESKTOP=niri \
+    XDG_SESSION_TYPE=wayland \
+    DESKTOP_SESSION=niri \
+    NOCTALIA_STARTUP_HINT=1 >/dev/null 2>&1 || true
+fi
+
 if [ -x "${HOME}/.local/bin/niri-osc" ]; then
   exec "${HOME}/.local/bin/niri-osc" set tty
 fi
