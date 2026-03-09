@@ -68,6 +68,7 @@ enabled_modules:
 - subliminal
 - transmission
 - brave
+- helium
 - webcord
 - user-services
 - ai

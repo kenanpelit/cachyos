@@ -1,0 +1,9 @@
+tags:
+- browser
+- tool
+description: Helium browser and launcher packages
+depends_on:
+- base
+packages:
+- helium-browser-bin
+- jq

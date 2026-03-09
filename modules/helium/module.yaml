@@ -1,0 +1,11 @@
+tags:
+- browser
+- tool
+description: Helium browser configuration and profile launcher
+depends_on:
+- base
+dotfiles:
+- source: dotfiles/helium-launcher/config.conf
+  target: ~/.config/helium-launcher/config.conf
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
