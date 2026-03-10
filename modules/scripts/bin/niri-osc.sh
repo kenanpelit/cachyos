@@ -861,14 +861,20 @@ here)
 
       send_notify "Launching <b>$APP_ID</b>..."
 
+      # Determine preferred browser prefix
+      local browser_prefix="brave"
+      if [[ "${BROWSER:-}" == *"helium"* ]]; then
+        browser_prefix="helium"
+      fi
+
       if ! case "$APP_ID" in
-      "Kenp") launch_from_candidates start-helium-kenp ;;
+      "Kenp") launch_from_candidates start-${browser_prefix}-kenp start-helium-kenp start-brave-kenp ;;
+      "Ai") launch_from_candidates start-${browser_prefix}-ai start-brave-ai start-helium-ai ;;
+      "CompecTA") launch_from_candidates start-${browser_prefix}-compecta start-brave-compecta start-helium-compecta ;;
       "TmuxKenp") launch_from_candidates start-kkenp ;;
-      "Ai") launch_from_candidates start-brave-ai ;;
-      "CompecTA") launch_from_candidates start-brave-compecta ;;
       "WebCord") launch_from_candidates start-webcord ;;
       "org.telegram.desktop") launch_from_candidates telegram-desktop Telegram telegram ;;
-      "brave-youtube.com__-Default") launch_from_candidates start-brave-youtube ;;
+      "brave-youtube.com__-Default") launch_from_candidates start-${browser_prefix}-youtube start-brave-youtube start-helium-youtube ;;
       "spotify") launch_from_candidates start-spotify ;;
       "ferdium") launch_from_candidates start-ferdium ;;
       "discord") launch_from_candidates start-discord ;;
