@@ -16,33 +16,30 @@ if [[ -z "$PROFILE" ]]; then
     exit 1
 fi
 
-# Determine Helium root paths
+# Determine Helium User Data Directory (UDD)
 ISOLATED_BASE="${HOME}/.helium/isolated/${PROFILE}"
-STANDART_BASE="${HOME}/.config/net.imput.helium/${PROFILE}"
+STANDART_BASE="${HOME}/.config/net.imput.helium"
 
-# Search for valid profile directories (those containing a Preferences file)
-VALID_PROFILES=()
-
+# Determine which UDD to use
 if [[ -d "$ISOLATED_BASE" ]]; then
-    while IFS= read -r pref_file; do
-        VALID_PROFILES+=("$(dirname "$pref_file")")
-    done < <(find "$ISOLATED_BASE" -maxdepth 3 -name "Preferences" 2>/dev/null)
+    UDD_ROOT="$ISOLATED_BASE"
+elif [[ "$PROFILE" == "Default" && -d "$STANDART_BASE" ]]; then
+    UDD_ROOT="$STANDART_BASE"
+else
+    # Fallback: Check if the provided name is a standard profile but not isolated
+    if [[ -d "$STANDART_BASE/$PROFILE" ]]; then
+        UDD_ROOT="$STANDART_BASE"
+    else
+        echo "Error: Could not find User Data Directory for profile '$PROFILE'."
+        echo "Checked: $ISOLATED_BASE"
+        exit 1
+    fi
 fi
 
-if [[ -d "$STANDART_BASE" ]]; then
-    while IFS= read -r pref_file; do
-        VALID_PROFILES+=("$(dirname "$pref_file")")
-    done < <(find "$STANDART_BASE" -maxdepth 3 -name "Preferences" 2>/dev/null)
-fi
-
-if [[ ${#VALID_PROFILES[@]} -eq 0 ]]; then
-    echo "Error: Profile '$PROFILE' not found or contains no valid Chromium profile data."
-    echo "Checked in: $ISOLATED_BASE and $STANDART_BASE"
-    exit 1
-fi
+# IMPORTANT: External Extensions must be in the ROOT of the User Data Directory
+EXT_DIR="${UDD_ROOT}/External Extensions"
 
 # --- Extension List (ID: Name) ---
-# Extracted from Kenp profile on 2026-03-10
 declare -A EXTENSIONS=(
     ["oeopbcgkkoapgobdbedcemjljbihmemj"]="Checker Plus for Gmail"
     ["mbcjcnomlakhkechnbhmfjhnnllpbmlh"]="Copy Link Address"
@@ -59,26 +56,24 @@ declare -A EXTENSIONS=(
 )
 
 # --- Logic ---
-for HELIUM_ROOT in "${VALID_PROFILES[@]}"; do
-    EXT_DIR="${HELIUM_ROOT}/External Extensions"
-    echo "=========================================================="
-    echo "Installing extensions to: ${HELIUM_ROOT}"
-    echo "=========================================================="
+echo "=========================================================="
+echo "Installing extensions to User Data Dir: ${UDD_ROOT}"
+echo "=========================================================="
 
-    mkdir -p "$EXT_DIR"
+mkdir -p "$EXT_DIR"
 
-    for id in "${!EXTENSIONS[@]}"; do
-        name="${EXTENSIONS[$id]}"
-        echo "  -> Adding $name ($id)..."
-        
-        # Create the JSON file that tells Helium to download the extension
-        echo '{
-            "external_update_url": "https://clients2.google.com/service/update2/crx"
-        }' > "${EXT_DIR}/${id}.json"
-    done
+for id in "${!EXTENSIONS[@]}"; do
+    name="${EXTENSIONS[$id]}"
+    echo "  -> Adding $name ($id)..."
+    
+    # Create the JSON file that tells Helium to download the extension
+    echo '{
+        "external_update_url": "https://clients2.google.com/service/update2/crx"
+    }' > "${EXT_DIR}/${id,,}.json"
 done
 
 echo "=========================================================="
-echo "SUCCESS: Extensions registered."
-echo "Please restart Helium profile '${PROFILE}' to complete installation."
+echo "SUCCESS: Extensions registered in $EXT_DIR"
+echo "Please restart Helium profile '${PROFILE}'."
+echo "Note: You may need to manually 'Enable' them in the browser menu."
 echo "=========================================================="
