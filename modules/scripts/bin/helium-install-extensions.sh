@@ -17,20 +17,29 @@ if [[ -z "$PROFILE" ]]; then
 fi
 
 # Determine Helium root paths
-ISOLATED_PATH="${HOME}/.helium/isolated/${PROFILE}/Default"
-STANDART_PATH="${HOME}/.config/net.imput.helium/${PROFILE}"
+ISOLATED_BASE="${HOME}/.helium/isolated/${PROFILE}"
+STANDART_BASE="${HOME}/.config/net.imput.helium/${PROFILE}"
 
-# Find which one exists
-if [[ -d "$ISOLATED_PATH" ]]; then
-    HELIUM_ROOT="$ISOLATED_PATH"
-elif [[ -d "$STANDART_PATH" ]]; then
-    HELIUM_ROOT="$STANDART_PATH"
-else
-    echo "Error: Profile '$PROFILE' not found in isolated or standard paths."
-    exit 1
+# Search for valid profile directories (those containing a Preferences file)
+VALID_PROFILES=()
+
+if [[ -d "$ISOLATED_BASE" ]]; then
+    while IFS= read -r pref_file; do
+        VALID_PROFILES+=("$(dirname "$pref_file")")
+    done < <(find "$ISOLATED_BASE" -maxdepth 3 -name "Preferences" 2>/dev/null)
 fi
 
-EXT_DIR="${HELIUM_ROOT}/External Extensions"
+if [[ -d "$STANDART_BASE" ]]; then
+    while IFS= read -r pref_file; do
+        VALID_PROFILES+=("$(dirname "$pref_file")")
+    done < <(find "$STANDART_BASE" -maxdepth 3 -name "Preferences" 2>/dev/null)
+fi
+
+if [[ ${#VALID_PROFILES[@]} -eq 0 ]]; then
+    echo "Error: Profile '$PROFILE' not found or contains no valid Chromium profile data."
+    echo "Checked in: $ISOLATED_BASE and $STANDART_BASE"
+    exit 1
+fi
 
 # --- Extension List (ID: Name) ---
 # Extracted from Kenp profile on 2026-03-10
@@ -50,21 +59,23 @@ declare -A EXTENSIONS=(
 )
 
 # --- Logic ---
-echo "=========================================================="
-echo "Installing extensions to Helium profile: ${PROFILE}"
-echo "Path: ${HELIUM_ROOT}"
-echo "=========================================================="
+for HELIUM_ROOT in "${VALID_PROFILES[@]}"; do
+    EXT_DIR="${HELIUM_ROOT}/External Extensions"
+    echo "=========================================================="
+    echo "Installing extensions to: ${HELIUM_ROOT}"
+    echo "=========================================================="
 
-mkdir -p "$EXT_DIR"
+    mkdir -p "$EXT_DIR"
 
-for id in "${!EXTENSIONS[@]}"; do
-    name="${EXTENSIONS[$id]}"
-    echo "  -> Adding $name ($id)..."
-    
-    # Create the JSON file that tells Helium to download the extension
-    echo '{
-        "external_update_url": "https://clients2.google.com/service/update2/crx"
-    }' > "${EXT_DIR}/${id}.json"
+    for id in "${!EXTENSIONS[@]}"; do
+        name="${EXTENSIONS[$id]}"
+        echo "  -> Adding $name ($id)..."
+        
+        # Create the JSON file that tells Helium to download the extension
+        echo '{
+            "external_update_url": "https://clients2.google.com/service/update2/crx"
+        }' > "${EXT_DIR}/${id}.json"
+    done
 done
 
 echo "=========================================================="
