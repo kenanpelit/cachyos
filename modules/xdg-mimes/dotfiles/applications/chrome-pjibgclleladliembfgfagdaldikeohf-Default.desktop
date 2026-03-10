@@ -1,9 +1,0 @@
-#!/usr/bin/env xdg-open
-[Desktop Entry]
-Version=1.0
-Terminal=false
-Type=Application
-Name=Spotify
-Exec=/opt/helium-browser-bin/helium-wrapper --user-data-dir=/repo/archive/.helium/isolated/Kenp --profile-directory=Default --app-id=pjibgclleladliembfgfagdaldikeohf
-Icon=chrome-pjibgclleladliembfgfagdaldikeohf-Default
-StartupWMClass=crx_pjibgclleladliembfgfagdaldikeohf

@@ -1,9 +1,0 @@
-#!/usr/bin/env xdg-open
-[Desktop Entry]
-Version=1.0
-Terminal=false
-Type=Application
-Name=TikTok
-Exec=/opt/helium-browser-bin/helium-wrapper --user-data-dir=/home/kenan/.helium/isolated/Kenp --profile-directory=Default --app-id=nlalbmkafgmoifbeooblidblkmlhhpnc
-Icon=chrome-nlalbmkafgmoifbeooblidblkmlhhpnc-Default
-StartupWMClass=crx_nlalbmkafgmoifbeooblidblkmlhhpnc

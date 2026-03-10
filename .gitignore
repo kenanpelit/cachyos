@@ -43,5 +43,12 @@ modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections
 modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections.meta
 modules/ytdlp/dotfiles/yt-dlp/cookies-youtube.txt
 mimeinfo.cache
-brave-*.desktop
+
+# Chromium/Chrome auto-generated PWA and profile shortcuts
+modules/xdg-mimes/dotfiles/applications/chrome-*.desktop
+modules/xdg-mimes/dotfiles/applications/brave-*.desktop
+modules/xdg-mimes/dotfiles/applications/helium-*.desktop
+
+# Exception for hand-crafted shortcuts if any
 !modules/xdg-mimes/dotfiles/applications/brave-kenp.desktop
+!modules/xdg-mimes/dotfiles/applications/helium-kenp.desktop
