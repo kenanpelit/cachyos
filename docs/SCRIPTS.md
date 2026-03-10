@@ -171,13 +171,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `helium-install-extensions`
-**Description:** Installs a standard set of extensions to a specific Helium profile.
-
-**Usage:** `helium-install-extensions [profile_name]`
-
----
-
 ### 📂 `helium-kenp-default`
 **Description:** Default browser entry for Kenp profile with niri window focus.
 
