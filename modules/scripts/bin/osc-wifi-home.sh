@@ -45,7 +45,7 @@ nmcli connection add \
 	ipv6.method disabled \
 	wifi-sec.key-mgmt wpa-psk \
 	wifi-sec.psk "$KEN_5_PASSWORD" \
-	connection.autoconnect-priority 20
+	connection.autoconnect-priority 100
 
 # Ken_2_4 bağlantısını oluştur
 echo "Ken_2_4 bağlantısı oluşturuluyor..."
@@ -66,5 +66,5 @@ nmcli connection add \
 	connection.autoconnect-priority 10
 
 echo "NetworkManager bağlantıları başarıyla yapılandırıldı!"
-echo "Ken_5: 192.168.0.100/24 (Öncelik: 20)"
+echo "Ken_5: 192.168.0.100/24 (Öncelik: 100)"
 echo "Ken_2_4: 192.168.0.101/24 (Öncelik: 10)"
