@@ -1,4 +1,5 @@
 state/
+modules/scripts/bin/svmni*
 modules/zsh/dotfiles/zsh/history
 modules/zsh/dotfiles/zsh/.zcompdump
 modules/tmux/dotfiles/tmux/fzf

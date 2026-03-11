@@ -18,6 +18,7 @@
     "other-devices": "Andere Geräte",
     "send-file-picker": "Datei zum Senden an Gerät auswählen",
     "send-file": "Datei senden",
+    "browse-device": "Gerätedateien durchsuchen",
     "find-device": "Mein Gerät suchen",
     "pair": "Mit Gerät koppeln",
     "unpair": "Gerät entkoppeln",
@@ -26,6 +27,10 @@
       "unavailable-title": "kdeconnectd scheint nicht zu laufen!",
       "unavailable-desc": "Sicherstellen, dass die KDE Connect-Anwendung auf Ihrem System installiert ist und dass der kdeconnectd-Daemon gestartet wurde",
       "device-unavailable": "Das Gerät ist derzeit nicht verfügbar."
+    },
+    "qdbus-error": {
+      "unavailable-title": "qdbus kann nicht gefunden werden!",
+      "unavailable-desc": "Stelle sicher, dass qdbus (oder qdbus6 auf einigen Systemen) auf deinem System installiert ist"
     }
   },
   "bar": {

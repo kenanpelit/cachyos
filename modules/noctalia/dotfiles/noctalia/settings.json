@@ -47,6 +47,7 @@
         "contentPadding": 2,
         "density": "compact",
         "displayMode": "always_visible",
+        "enableExclusionZoneInset": true,
         "floating": false,
         "fontScale": 1,
         "frameRadius": 12,
@@ -255,12 +256,6 @@
                     "id": "plugin:6ee06e:ndns"
                 },
                 {
-                    "defaultSettings": {
-                        "watchdogInterval": 12000
-                    },
-                    "id": "plugin:6ee06e:nufw"
-                },
-                {
                     "blacklist": [
                     ],
                     "chevronColor": "none",
@@ -280,6 +275,13 @@
                         "successIcon": "network"
                     },
                     "id": "plugin:6ee06e:nip"
+                },
+                {
+                    "defaultSettings": {
+                        "allowPrivilegedReads": true,
+                        "watchdogInterval": 120000
+                    },
+                    "id": "plugin:6ee06e:nufw"
                 }
             ]
         }
@@ -700,7 +702,8 @@
         "scrollbarAlwaysVisible": true,
         "settingsPanelMode": "attached",
         "settingsPanelSideBarCardStyle": false,
-        "tooltipsEnabled": true
+        "tooltipsEnabled": true,
+        "translucentWidgets": false
     },
     "wallpaper": {
         "automationEnabled": false,

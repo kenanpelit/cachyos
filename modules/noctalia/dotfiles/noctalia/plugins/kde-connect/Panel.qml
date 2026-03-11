@@ -117,6 +117,7 @@ Item {
       spacing: Style.marginL
 
       NBox {
+        id: headerBox
         Layout.fillWidth: true
         implicitHeight: headerRow.implicitHeight + (Style.marginXL)
 
@@ -178,7 +179,7 @@ Item {
                           (KDEConnect.mainDevice !== null &&  KDEConnect.mainDevice.paired)    ? deviceConnectedCard              :
                           (KDEConnect.mainDevice !== null && !KDEConnect.mainDevice.paired)    ? noDevicePairedCard               :
                           (KDEConnect.devices.length === 0)                                    ? noDevicesAvailableCard           :
-                          ""
+                          null
       }
 
       Component {
@@ -186,11 +187,19 @@ Item {
 
         Rectangle {
           Layout.fillWidth: true
-          Layout.fillHeight: true
           color: Color.mSurfaceVariant
           radius: Style.radiusM
 
+          Component.onCompleted: {
+            root.contentPreferredHeight = headerBox.height + contentLayout.implicitHeight + (Style.marginL * 8)
+          }
+
+          Component.onDestruction: {
+            root.contentPreferredHeight = 360 * Style.uiScaleRatio * Settings.data.ui.fontDefaultScale
+          }
+
           ColumnLayout {
+            id: contentLayout
             anchors {
               fill: parent
               margins: Style.marginL
@@ -218,6 +227,14 @@ Item {
                       KDEConnect.shareFile(KDEConnect.mainDevice.id, path)
                     }
                   }
+                }
+              }
+
+              NIconButton {
+                icon: "device-mobile-search"
+                tooltipText: pluginApi?.tr("panel.browse-device")
+                onClicked: {
+                  KDEConnect.browseFiles(KDEConnect.mainDevice.id)
                 }
               }
 
@@ -723,7 +740,7 @@ Item {
                   required property var modelData
                   text: modelData.name
                   Layout.fillWidth: true
-                  backgroundColor: modelData.id === KDEConnect.mainDeviceId ? Color.mSecondary : Color.mPrimary
+                  backgroundColor: modelData.id === KDEConnect.mainDevice.id ? Color.mSecondary : Color.mPrimary
 
                   onClicked: {
                     KDEConnect.setMainDevice(modelData.id);
