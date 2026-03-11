@@ -717,6 +717,20 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `svmnil2`
+**Description:** Simple QEMU/KVM VM manager for CachyOS
+
+**Usage:** `svmnil2.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `svmnil`
+**Description:** SVM (Simple VM) profile for CachyOS using QEMU/KVM
+
+**Usage:** `svmcachy.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
 ### 📂 `svmnixos`
 **Description:** SVM (Simple VM) profile for NixOS using QEMU/KVM
 
