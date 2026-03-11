@@ -36,6 +36,7 @@ enabled_modules:
 - tmux
 - sesh
 - clipse
+- cliphist
 - kitty
 - wezterm
 - alacritty

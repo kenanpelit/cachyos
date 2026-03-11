@@ -8,3 +8,7 @@ dotfiles_sync: true
 dotfiles:
 - source: dotfiles/cliphist
   target: ~/.config/cliphist
+- source: dotfiles/systemd/user/cliphist.service
+  target: ~/.config/systemd/user/cliphist.service
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

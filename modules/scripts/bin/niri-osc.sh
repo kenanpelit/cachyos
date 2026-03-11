@@ -2970,8 +2970,7 @@ doctor)
           kdeconnectd.service \
           kdeconnect-indicator.service \
           fusuma.service \
-          cliphist-watch-text.service \
-          cliphist-watch-image.service \
+          cliphist.service \
           stasis.service \
           xdg-desktop-portal.service \
           xdg-desktop-portal-gnome.service \
