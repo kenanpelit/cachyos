@@ -4,7 +4,7 @@ tags:
 description: Clipboard history (cliphist) portable config
 depends_on:
 - base
-dotfiles_sync: true
+dotfiles_sync: false
 dotfiles:
 - source: dotfiles/cliphist
   target: ~/.config/cliphist
