@@ -33,6 +33,7 @@ packages:
 - capitaine-cursors
 - chwd
 - cryptsetup
+- dcli-arch-git
 - decibels
 - device-mapper
 - dhclient
@@ -40,6 +41,7 @@ packages:
 - direnv
 - distro-grub-themes-arch
 - dmraid
+- dms-shell-git
 - dnsmasq
 - dolphin
 - dosfstools
@@ -57,6 +59,7 @@ packages:
 - gdm
 - gedit
 - gist
+- globalprotect-openconnect
 - gnome-backgrounds
 - gnome-calculator
 - gnome-calendar
@@ -91,6 +94,7 @@ packages:
 - gnome-user-docs
 - gnome-user-share
 - gnome-weather
+- greetd
 - grilo-plugins
 - grub-btrfs-support
 - grub-hook
@@ -157,6 +161,7 @@ packages:
 - nss-mdns
 - ntp
 - octopi
+- openbsd-netcat
 - opencl-mesa
 - orca
 - name: org.ferdium.Ferdium
@@ -197,6 +202,7 @@ packages:
 - snapper-gui-git
 - snapper-tools
 - snapshot
+- socat
 - sof-firmware
 - stasis-git
 - statis
@@ -231,6 +237,7 @@ packages:
 - xorg-xinput
 - yelp
 - zathura
+- zip
 - zsh-history-substring-search
 exclude: []
 conflicts: []
