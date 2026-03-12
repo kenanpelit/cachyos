@@ -15,6 +15,8 @@ bin_dir="$USER_HOME/.local/bin"
 target_uid="$(id -u "$REAL_USER")"
 target_gid="$(id -g "$REAL_USER")"
 is_root=false
+installed_count=0
+skipped_count=0
 [[ "$(id -u)" -eq 0 ]] && is_root=true
 
 should_install() {
@@ -58,11 +60,29 @@ ensure_bin_dir() {
   fi
 }
 
+is_unchanged_install() {
+  local src="$1"
+  local dst="$2"
+
+  [[ -f "$dst" ]] || return 1
+  cmp -s "$src" "$dst" || return 1
+  [[ "$(stat -c '%a' "$dst" 2>/dev/null || echo "")" == "755" ]] || return 1
+  return 0
+}
+
 # Atomic copy: write to a temp file in the same dir, then rename over destination.
 atomic_install() {
   local src="$1"
   local dst="$2"
   local tmp
+
+  if is_unchanged_install "$src" "$dst"; then
+    ((skipped_count += 1))
+    if $is_root; then
+      chown "$target_uid:$target_gid" "$dst" || true
+    fi
+    return 0
+  fi
 
   # Use a temp file in the same directory for atomic rename.
   tmp="$bin_dir/.${dst##*/}.tmp.$$"
@@ -91,6 +111,8 @@ atomic_install() {
   if $is_root; then
     chown "$target_uid:$target_gid" "$dst" || true
   fi
+
+  ((installed_count += 1))
 }
 
 install_from_dir() {
@@ -167,6 +189,8 @@ main() {
   install_from_dir "$module_root/start"
   install_privileged_system_bins
   cleanup_legacy_bins
+
+  echo "Scripts install summary: $installed_count updated, $skipped_count unchanged"
   
   # Auto-generate documentation
   if [[ -x "$module_root/bin/dcli-docgen" ]]; then

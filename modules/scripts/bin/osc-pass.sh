@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-#
-# osc-pass.sh
-#
-# Multi-store wrapper for pass(1) with built-in stores,
-# interactive selection, audit, migration, and git backup helpers.
-#
+# ==============================================================================
+# Script: osc-pass.sh
+# Description: Multi-store `pass(1)` wrapper with built-in stores, interactive selection, audit, migrate, and git backup helpers.
+# Usage: osc-pass.sh [stores|current|path|mkdir|init|env|audit|migrate|select] [args]
+# ==============================================================================
 
 set -euo pipefail
 
