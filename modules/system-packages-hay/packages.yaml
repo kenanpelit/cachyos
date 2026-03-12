@@ -11,6 +11,7 @@ packages:
 - bemenu-wayland
 - bluez-hid2hci
 - bluez-libs
+- browserpass-chromium
 - btrfs-progs
 - cachyos-alacritty-config
 - cachyos-fish-config
