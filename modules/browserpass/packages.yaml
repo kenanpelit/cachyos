@@ -1,2 +1,4 @@
 description: Browserpass module packages
-packages: []
+packages:
+- browserpass-chromium
+- socat
