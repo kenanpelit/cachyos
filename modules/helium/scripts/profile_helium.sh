@@ -44,6 +44,8 @@ readonly INFO="ℹ"
 # Konfigürasyon dosyası
 readonly CONFIG_FILE="${HOME}/.config/helium-launcher/config.conf"
 readonly LOG_FILE="${HOME}/.config/helium-launcher/helium-launcher.log"
+readonly BROWSERPASS_NATIVE_HOST_PATH="${HOME}/.local/bin/browserpass-native-host"
+readonly BROWSERPASS_NATIVE_HOST_NAME="com.github.browserpass.native.json"
 
 	# Varsayılan konfigürasyon
 	HELIUM_CMD="helium-browser"
@@ -279,6 +281,7 @@ check_dependencies() {
 
 		# Widevine marker dosyasını isolated user-data-dir içine yaz.
 		ensure_widevine_marker "$isolated_dir"
+		ensure_browserpass_native_host "$isolated_dir"
 	}
 
 	ensure_widevine_marker() {
@@ -290,6 +293,30 @@ check_dependencies() {
 		local marker_file="${marker_dir}/latest-component-updated-widevine-cdm"
 		mkdir -p "$marker_dir" 2>/dev/null || true
 		printf '{"Path":"%s"}' "$WIDEVINE_CDM_PATH" >"$marker_file" 2>/dev/null || true
+	}
+
+	ensure_browserpass_native_host() {
+		local userdata_dir="$1"
+		local host_dir="${userdata_dir}/NativeMessagingHosts"
+		local host_file="${host_dir}/${BROWSERPASS_NATIVE_HOST_NAME}"
+
+		[[ -d "$userdata_dir" ]] || return 0
+		[[ -x "$BROWSERPASS_NATIVE_HOST_PATH" ]] || return 0
+
+		mkdir -p "$host_dir" 2>/dev/null || true
+		cat >"$host_file" <<EOF
+{
+  "name": "com.github.browserpass.native",
+  "description": "Browserpass native component via systemd user socket",
+  "path": "$BROWSERPASS_NATIVE_HOST_PATH",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://naepdomgkenhinolocfifgehidddafch/",
+    "chrome-extension://pjmbgaakjkbhpopmakjoedenlfdmcdgm/",
+    "chrome-extension://klfoddkbhleoaabpmiigbmpbjfljimgb/"
+  ]
+}
+EOF
 	}
 
 	ensure_isolated_profile_dir() {
@@ -903,7 +930,8 @@ validate_profile() {
 				cmd+=("--user-data-dir=$isolated_dir")
 			else
 				# Default user-data-dir ile çalışırken de marker dosyasını güncel tut.
-				ensure_widevine_marker "$profile_source_dir"
+				ensure_widevine_marker "$HELIUM_PROFILES_DIR"
+				ensure_browserpass_native_host "$HELIUM_PROFILES_DIR"
 			fi
 			cmd+=("--profile-directory=$profile_key")
 

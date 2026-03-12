@@ -1,0 +1,16 @@
+tags:
+- browser
+- security
+description: Browserpass native host wrapper and systemd user socket integration
+depends_on:
+- base
+- helium
+dotfiles:
+- source: scripts/browserpass-native-host
+  target: ~/.local/bin/browserpass-native-host
+- source: dotfiles/systemd/user/browserpass.socket
+  target: ~/.config/systemd/user/browserpass.socket
+- source: dotfiles/systemd/user/browserpass@.service
+  target: ~/.config/systemd/user/browserpass@.service
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

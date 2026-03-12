@@ -69,6 +69,7 @@ enabled_modules:
 - subliminal
 - transmission
 - brave
+- browserpass
 - helium
 - webcord
 - user-services

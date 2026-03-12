@@ -1,0 +1,13 @@
+[Unit]
+Description=Browserpass native host connection handler
+PartOf=graphical-session.target niri-session.target hyprland-session.target
+After=graphical-session.target niri-session.target hyprland-session.target
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/bin:%h/bin:/usr/local/bin:/usr/bin:/etc/profiles/per-user/%u/bin:/run/current-system/sw/bin
+PassEnvironment=PASSWORD_STORE_DIR GNUPGHOME GPG_TTY SSH_AUTH_SOCK DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR
+ExecStart=/usr/bin/browserpass
+StandardInput=socket
+StandardOutput=socket
+StandardError=journal

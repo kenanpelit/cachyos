@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+socket_path="${runtime_dir}/browserpass.sock"
+
+if ! command -v socat >/dev/null 2>&1; then
+  printf 'browserpass-native-host requires socat\n' >&2
+  exit 127
+fi
+
+exec socat STDIO "UNIX-CONNECT:${socket_path}"
