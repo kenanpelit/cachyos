@@ -1133,6 +1133,7 @@ alias -- nowtime='date +'\''%d-%m-%Y %T'\'''
 alias -- open=xdg-open
 alias -- osc='cd ~/.cachy'
 alias -- p=pass
+alias -- passh='PASSWORD_STORE_DIR=$HOME/.passh pass'
 alias -- paste='xclip -selection clipboard -o'
 alias -- path='echo -e ${PATH//:/\\n}'
 alias -- paudit='pass audit'

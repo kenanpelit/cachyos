@@ -388,6 +388,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-pass`
+**Description:** Multi-store `pass(1)` wrapper with built-in stores, interactive selection, audit, migrate, and git backup helpers.
+
+**Usage:** `osc-pass.sh [stores|current|path|mkdir|init|env|audit|migrate|select] [args]`
+
+---
+
 ### 📂 `osc-pass-tool`
 **Description:** Import and export passwords for the pass password manager.
 
@@ -849,4 +856,3 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Usage:** `wm-workspace`
 
 ---
-
