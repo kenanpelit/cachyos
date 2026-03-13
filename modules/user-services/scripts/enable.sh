@@ -80,7 +80,7 @@ sync_user_units() {
     local systemd_dir="$module_path/dotfiles/systemd/user"
     [[ -d "$systemd_dir" ]] || continue
 
-    # Find all unit files in this module's repo directory
+    # Find all user units in this module's repo directory, including sockets.
     while IFS= read -r -d '' unit_file; do
       local unit_name
       unit_name="$(basename "$unit_file")"
@@ -103,7 +103,7 @@ sync_user_units() {
           log_warn "Disabled $unit_name (module '$module_name' is inactive)"
         fi
       fi
-    done < <(find "$systemd_dir" -maxdepth 2 -type f \( -name "*.service" -o -name "*.timer" -o -name "*.target" \) -print0)
+    done < <(find "$systemd_dir" -maxdepth 2 -type f \( -name "*.service" -o -name "*.timer" -o -name "*.target" -o -name "*.socket" \) -print0)
   done
 }
 
