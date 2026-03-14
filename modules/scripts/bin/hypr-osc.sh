@@ -1081,8 +1081,8 @@ EOF
 	        monitor)
 	          action="${1:-}"
 	          case "$action" in
-	            other) ;;
-	            *) echo "Usage: hypr-osc window-move monitor other" >&2; exit 1 ;;
+	            other|left|right|up|down|l|r|u|d) ;;
+	            *) echo "Usage: hypr-osc window-move monitor other|left|right|up|down" >&2; exit 1 ;;
 	          esac
 
 	          active="$(hyprctl activewindow -j 2>/dev/null || echo '{}')"
@@ -1093,21 +1093,91 @@ EOF
 	          [[ "${cur_mon}" =~ ^-?[0-9]+$ ]] || exit 0
 
 	          monitors="$(hyprctl monitors -j 2>/dev/null || echo '[]')"
-	          target_ws="$(
-	            jq -r --argjson cur "$cur_mon" '
-	              [ .[]
-	                | select((.id // -1) != $cur)
-	                | .activeWorkspace.id // empty
-	              ][0] // empty
-	            ' <<<"$monitors"
-	          )"
+
+	          if [[ "$action" == "other" ]]; then
+	            target="$(
+	              jq -c --argjson cur "$cur_mon" '
+	                [ .[]
+	                  | select((.id // -1) != $cur)
+	                ][0] // empty
+	              ' <<<"$monitors"
+	            )"
+	            focus_dir=""
+	          else
+	            case "$action" in
+	              l|left) focus_dir="l" ;;
+	              r|right) focus_dir="r" ;;
+	              u|up) focus_dir="u" ;;
+	              d|down) focus_dir="d" ;;
+	            esac
+
+	            cur="$(
+	              jq -c --argjson cur "$cur_mon" '
+	                .[] | select((.id // -1) == $cur) | {x,y,width,height} | . + {x2:(.x+.width), y2:(.y+.height)}
+	              ' <<<"$monitors" | head -n1 || true
+	            )"
+	            [[ -n "${cur:-}" ]] || exit 0
+
+	            cur_x="$(jq -r '.x' <<<"$cur")"
+	            cur_y="$(jq -r '.y' <<<"$cur")"
+	            cur_x2="$(jq -r '.x2' <<<"$cur")"
+	            cur_y2="$(jq -r '.y2' <<<"$cur")"
+
+	            target="$(
+	              case "$focus_dir" in
+	                l)
+	                  jq -c --argjson cx "$cur_x" --argjson cy "$cur_y" --argjson cy2 "$cur_y2" '
+	                    [ .[]
+	                      | select((.id // -1) != '"$cur_mon"')
+	                      | select(.x < $cx)
+	                      | select(.y < $cy2 and (.y + .height) > $cy)
+	                    ] | sort_by(.x) | .[-1] // empty
+	                  ' <<<"$monitors"
+	                  ;;
+	                r)
+	                  jq -c --argjson cx "$cur_x" --argjson cy "$cur_y" --argjson cy2 "$cur_y2" '
+	                    [ .[]
+	                      | select((.id // -1) != '"$cur_mon"')
+	                      | select(.x > $cx)
+	                      | select(.y < $cy2 and (.y + .height) > $cy)
+	                    ] | sort_by(.x) | .[0] // empty
+	                  ' <<<"$monitors"
+	                  ;;
+	                u)
+	                  jq -c --argjson cy "$cur_y" --argjson cx "$cur_x" --argjson cx2 "$cur_x2" '
+	                    [ .[]
+	                      | select((.id // -1) != '"$cur_mon"')
+	                      | select(.y < $cy)
+	                      | select(.x < $cx2 and (.x + .width) > $cx)
+	                    ] | sort_by(.y) | .[-1] // empty
+	                  ' <<<"$monitors"
+	                  ;;
+	                d)
+	                  jq -c --argjson cy "$cur_y" --argjson cx "$cur_x" --argjson cx2 "$cur_x2" '
+	                    [ .[]
+	                      | select((.id // -1) != '"$cur_mon"')
+	                      | select(.y > $cy)
+	                      | select(.x < $cx2 and (.x + .width) > $cx)
+	                    ] | sort_by(.y) | .[0] // empty
+	                  ' <<<"$monitors"
+	                  ;;
+	              esac
+	            )"
+	          fi
+
+	          [[ -n "${target:-}" && "${target}" != "null" ]] || exit 0
+	          target_ws="$(jq -r '.activeWorkspace.id // empty' <<<"$target")"
 
 	          [[ -z "${target_ws}" || "${target_ws}" == "null" ]] && exit 0
 	          hyprctl dispatch movetoworkspacesilent "$target_ws,address:$addr" >/dev/null 2>&1 || true
+	          if [[ -n "${focus_dir:-}" ]]; then
+	            hyprctl dispatch focusmonitor "$focus_dir" >/dev/null 2>&1 || true
+	            hyprctl dispatch focuswindow "address:$addr" >/dev/null 2>&1 || true
+	          fi
 	          ;;
 
 	        *)
-	          echo "Usage: hypr-osc window-move workspace prev|next | monitor other" >&2
+	          echo "Usage: hypr-osc window-move workspace prev|next | monitor other|left|right|up|down" >&2
 	          exit 1
 	          ;;
 	      esac

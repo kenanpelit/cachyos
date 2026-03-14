@@ -61,6 +61,15 @@ esac
 compositor="$(detect_compositor || true)"
 case "$fingers" in
   4)
+    if [[ "$compositor" == "hyprland" ]]; then
+      case "$direction" in
+        up) exec hypr-osc window-move monitor up ;;
+        down) exec hypr-osc window-move monitor down ;;
+        left) exec fusuma-workspace-monitor --fusuma -mp ;;
+        right) exec fusuma-workspace-monitor --fusuma -mn ;;
+      esac
+    fi
+
     case "$direction" in
       left) exec fusuma-workspace-monitor --fusuma -mp ;;
       right) exec fusuma-workspace-monitor --fusuma -mn ;;
