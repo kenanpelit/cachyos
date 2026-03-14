@@ -35,6 +35,19 @@ detect_wayland_display() {
     done
 }
 
+detect_hyprland_instance_signature() {
+    [[ -n "${XDG_RUNTIME_DIR:-}" ]] || return 0
+    [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && return 0
+    [[ -d "${XDG_RUNTIME_DIR}/hypr" ]] || return 0
+
+    local sig
+    sig="$(ls "${XDG_RUNTIME_DIR}/hypr" 2>/dev/null | head -n1 || true)"
+    if [[ -n "${sig:-}" ]]; then
+        HYPRLAND_INSTANCE_SIGNATURE="$sig"
+        export HYPRLAND_INSTANCE_SIGNATURE
+    fi
+}
+
 detect_niri_socket() {
     [[ -n "${XDG_RUNTIME_DIR:-}" ]] || return 0
     [[ -n "${WAYLAND_DISPLAY:-}" ]] || return 0
@@ -51,37 +64,89 @@ detect_niri_socket() {
     shopt -u nullglob
 }
 
+detect_desktop_name() {
+    local desktop=""
+
+    desktop="${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}"
+    desktop="${desktop%%:*}"
+
+    if [[ -z "${desktop:-}" ]]; then
+        if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] || [[ -d "${XDG_RUNTIME_DIR:-}/hypr" ]]; then
+            desktop="Hyprland"
+        elif [[ -n "${NIRI_SOCKET:-}" ]]; then
+            desktop="niri"
+        fi
+    fi
+
+    if [[ -z "${desktop:-}" ]]; then
+        desktop="wayland"
+    fi
+
+    printf '%s\n' "$desktop"
+}
+
 wait_for_session_ready() {
+    local desktop_name=""
+    local desktop_name_lc=""
     local i
+
     for i in $(seq 1 600); do
         detect_wayland_display
+        detect_hyprland_instance_signature
         detect_niri_socket
 
-        if [[ -n "${WAYLAND_DISPLAY:-}" ]] && [[ -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]]; then
-            if [[ -n "${NIRI_SOCKET:-}" ]] && [[ -S "${NIRI_SOCKET}" ]]; then
-                if command -v niri >/dev/null 2>&1; then
-                    if NIRI_SOCKET="${NIRI_SOCKET}" niri msg version >/dev/null 2>&1; then
+        if [[ -z "${WAYLAND_DISPLAY:-}" ]] || [[ ! -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]]; then
+            sleep 0.1
+            continue
+        fi
+
+        desktop_name="$(detect_desktop_name)"
+        desktop_name_lc="$(printf '%s' "$desktop_name" | tr '[:upper:]' '[:lower:]')"
+
+        case "$desktop_name_lc" in
+            hyprland)
+                if command -v hyprctl >/dev/null 2>&1; then
+                    if hyprctl version >/dev/null 2>&1; then
                         return 0
                     fi
-                else
+                elif [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
                     return 0
                 fi
-            fi
-        fi
+                ;;
+            niri)
+                if [[ -n "${NIRI_SOCKET:-}" ]] && [[ -S "${NIRI_SOCKET}" ]]; then
+                    if command -v niri >/dev/null 2>&1; then
+                        if NIRI_SOCKET="${NIRI_SOCKET}" niri msg version >/dev/null 2>&1; then
+                            return 0
+                        fi
+                    else
+                        return 0
+                    fi
+                fi
+                ;;
+            *)
+                return 0
+                ;;
+        esac
+
         sleep 0.1
     done
     return 1
 }
 
 sync_env() {
-    export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-niri}"
+    local desktop_name=""
+    desktop_name="$(detect_desktop_name)"
+
+    export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-$desktop_name}"
     export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
-    export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-niri}"
-    export DESKTOP_SESSION="${DESKTOP_SESSION:-niri}"
+    export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-$desktop_name}"
+    export DESKTOP_SESSION="${DESKTOP_SESSION:-$desktop_name}"
 
     local vars=(
         WAYLAND_DISPLAY
         DISPLAY
+        HYPRLAND_INSTANCE_SIGNATURE
         NIRI_SOCKET
         XDG_CURRENT_DESKTOP
         XDG_SESSION_TYPE
@@ -105,6 +170,7 @@ sync_env() {
         )
         [[ -n "${WAYLAND_DISPLAY:-}" ]] && set_args+=("WAYLAND_DISPLAY=${WAYLAND_DISPLAY}")
         [[ -n "${DISPLAY:-}" ]] && set_args+=("DISPLAY=${DISPLAY}")
+        [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && set_args+=("HYPRLAND_INSTANCE_SIGNATURE=${HYPRLAND_INSTANCE_SIGNATURE}")
         [[ -n "${NIRI_SOCKET:-}" ]] && set_args+=("NIRI_SOCKET=${NIRI_SOCKET}")
         systemctl --user set-environment "${set_args[@]}" 2>/dev/null || true
     fi
@@ -119,7 +185,7 @@ sync_env() {
 portal_config_path() {
     local config_home desktop desktop_name desktop_cfg default_cfg
     config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
-    desktop="${XDG_CURRENT_DESKTOP:-niri}"
+    desktop="${XDG_CURRENT_DESKTOP:-$(detect_desktop_name)}"
     desktop_name="${desktop%%:*}"
     desktop_name="$(printf '%s' "$desktop_name" | tr '[:upper:]' '[:lower:]')"
 
@@ -141,12 +207,14 @@ portal_config_path() {
 
 collect_portal_backends() {
     local config_path="$1"
+    local desktop_name_lc
+    desktop_name_lc="$(printf '%s' "${XDG_CURRENT_DESKTOP:-$(detect_desktop_name)}" | tr '[:upper:]' '[:lower:]')"
 
-    # Keep GTK portal available for file chooser / URI / settings dialogs.
+    # GTK should always remain available for common dialogs.
     printf '%s\n' "gtk"
 
     awk -F'=' '
-      /^[[:space:]]*org\.freedesktop\.impl\.portal\.(ScreenCast|Screenshot|RemoteDesktop|FileChooser|OpenURI|Settings)[[:space:]]*=/ {
+      /^[[:space:]]*(default|org\.freedesktop\.impl\.portal\.(ScreenCast|Screenshot|RemoteDesktop|FileChooser|OpenURI|Settings|AppChooser|Notification|GlobalShortcuts))[[:space:]]*=/ {
         value = $2
         sub(/[[:space:]]*#.*/, "", value)
         gsub(/[[:space:]]/, "", value)
@@ -163,8 +231,11 @@ collect_portal_backends() {
       /^[[:space:]]*org\.freedesktop\.impl\.portal\.(ScreenCast|Screenshot|RemoteDesktop)[[:space:]]*=/ { found = 1 }
       END { exit(found ? 0 : 1) }
     ' "$config_path"; then
-        # Safe fallback for Niri/wlroots-like sessions.
-        printf '%s\n' "wlr"
+        if [[ "$desktop_name_lc" == "hyprland" ]]; then
+            printf '%s\n' "hyprland"
+        else
+            printf '%s\n' "wlr"
+        fi
     fi
 }
 
@@ -177,7 +248,11 @@ if command -v systemctl >/dev/null 2>&1; then
     fi
     sync_env
 
-    backends_stream=$'gtk\nwlr'
+    if [[ "$(printf '%s' "${XDG_CURRENT_DESKTOP:-$(detect_desktop_name)}" | tr '[:upper:]' '[:lower:]')" == "hyprland" ]]; then
+        backends_stream=$'gtk\nhyprland'
+    else
+        backends_stream=$'gtk\nwlr'
+    fi
     if cfg_path="$(portal_config_path)"; then
         backends_stream="$(collect_portal_backends "$cfg_path")"
     fi
@@ -187,16 +262,16 @@ if command -v systemctl >/dev/null 2>&1; then
         [[ -n "$backend" ]] || continue
         [[ -n "${restarted_backends[$backend]:-}" ]] && continue
         restarted_backends["$backend"]=1
+        systemctl --user unmask "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
         systemctl --user restart "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
     done <<< "$backends_stream"
 
     # Keep compositor backend selection strict:
     # - selected backends are unmasked + restarted
     # - non-selected backends are stopped + masked
-    # This avoids stale backends (e.g. wlr) shadowing expected behavior/logging.
+    # This avoids stale backends shadowing expected behavior/logging.
     for backend in gnome wlr hyprland kde; do
         if [[ -n "${restarted_backends[$backend]:-}" ]]; then
-            systemctl --user unmask "xdg-desktop-portal-${backend}.service" 2>/dev/null || true
             continue
         fi
         systemctl --user stop "xdg-desktop-portal-${backend}.service" 2>/dev/null || true

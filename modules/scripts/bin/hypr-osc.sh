@@ -1385,18 +1385,22 @@ EOF
       if command -v systemctl >/dev/null 2>&1; then
         units=(
           hyprland-session.target
+          hypr-init.service
           hyprland-polkit-agent.service
           hypr-nm-applet.service
-          hypr-login-prompts.service
           gnome-keyring-secrets.service
           hypr-clip-persist.service
+          xdg-desktop-portal-delayed.timer
+          xdg-desktop-portal-delayed.service
           xdg-desktop-portal.service
+          xdg-desktop-portal-gnome.service
           xdg-desktop-portal-hyprland.service
           xdg-desktop-portal-gtk.service
           dms.service
         )
         for u in "${units[@]}"; do
-          state="$(systemctl --user is-active "$u" 2>/dev/null || echo "unknown")"
+          state="$(systemctl --user is-active "$u" 2>/dev/null || true)"
+          [[ -n "${state:-}" ]] || state="unknown"
           printf '%-34s %s\n' "${u}:" "$state"
         done
       else
@@ -2282,7 +2286,7 @@ set -euo pipefail
 #   1) Sync Hyprland env into systemd/dbus
 #   2) Normalize monitor/workspace focus
 #   3) Initialize PipeWire defaults via osc-soundctl init
-#   4) Reconcile XDG portal backend selection for screen share
+#   4) Ask delayed XDG portal orchestration to reconcile backend selection
 # Safe to run multiple times; each step is optional if the tool is missing.
 # ==============================================================================
 
@@ -2307,28 +2311,19 @@ run_if_present() {
   fi
 }
 
-portal_start_if_present() {
+start_user_service_if_present() {
   local svc="$1"
-  if ! command -v systemctl >/dev/null 2>&1; then
+  command -v systemctl >/dev/null 2>&1 || return 0
+
+  if ! systemctl --user show -p LoadState "$svc" >/dev/null 2>&1; then
+    warn "$svc is not installed; skipping"
     return 0
   fi
 
   if command -v timeout >/dev/null 2>&1; then
-    timeout 2s systemctl --user start "$svc" >/dev/null 2>&1 || true
+    timeout 3s systemctl --user start "$svc" >/dev/null 2>&1 || true
   else
     systemctl --user start "$svc" >/dev/null 2>&1 || true
-  fi
-}
-
-portal_restart_frontend() {
-  if ! command -v systemctl >/dev/null 2>&1; then
-    return 0
-  fi
-
-  if command -v timeout >/dev/null 2>&1; then
-    timeout 2s systemctl --user restart xdg-desktop-portal.service >/dev/null 2>&1 || true
-  else
-    systemctl --user restart xdg-desktop-portal.service >/dev/null 2>&1 || true
   fi
 }
 
@@ -2350,11 +2345,9 @@ run_if_present hypr-osc switch
 # Step 3: audio defaults (volume + last sink/source)
 run_if_present osc-soundctl init
 
-# Step 4: make sure portal backends are up, then restart desktop portal so it
-# re-reads Hyprland-specific backend preferences.
-portal_start_if_present xdg-desktop-portal-hyprland.service
-portal_start_if_present xdg-desktop-portal-gtk.service
-portal_restart_frontend
+# Step 4: ask the delayed portal orchestrator to pick GNOME/GTK/Hyprland
+# backends with a complete Hyprland environment.
+start_user_service_if_present xdg-desktop-portal-delayed.service
 
 log "hypr-init completed."
     )
