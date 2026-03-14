@@ -82,6 +82,102 @@ hypr_scroll_cmd() {
   esac
 }
 
+run_detached_cmd() {
+  local cmd="$1"
+  shift || true
+  local bin=""
+  local launch_path=""
+
+  if bin="$(command -v "$cmd" 2>/dev/null)"; then
+    :
+  elif [[ -x "$HOME/.local/bin/$cmd" ]]; then
+    bin="$HOME/.local/bin/$cmd"
+  else
+    return 1
+  fi
+
+  launch_path="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:${PATH:-}"
+  PATH="$launch_path" "$bin" "$@" >/dev/null 2>&1 &
+  disown || true
+  return 0
+}
+
+launch_from_candidates() {
+  local candidate=""
+  for candidate in "$@"; do
+    run_detached_cmd "$candidate" && return 0
+  done
+  return 1
+}
+
+preferred_browser_prefix() {
+  if [[ "${BROWSER:-start-helium-kenp}" == *"helium"* ]]; then
+    printf '%s\n' "helium"
+  else
+    printf '%s\n' "brave"
+  fi
+}
+
+launch_here_app() {
+  local app_id="$1"
+  local browser_prefix="${2:-$(preferred_browser_prefix)}"
+
+  case "$app_id" in
+    "Kenp")
+      if [[ "$browser_prefix" == "helium" ]]; then
+        launch_from_candidates start-helium-kenp start-brave-kenp
+      else
+        launch_from_candidates start-brave-kenp start-helium-kenp
+      fi
+      ;;
+    "TmuxKenp")
+      launch_from_candidates start-kkenp
+      ;;
+    "Ai")
+      if [[ "$browser_prefix" == "helium" ]]; then
+        launch_from_candidates start-helium-ai start-brave-ai
+      else
+        launch_from_candidates start-brave-ai start-helium-ai
+      fi
+      ;;
+    "CompecTA")
+      if [[ "$browser_prefix" == "helium" ]]; then
+        launch_from_candidates start-helium-compecta start-brave-compecta
+      else
+        launch_from_candidates start-brave-compecta start-helium-compecta
+      fi
+      ;;
+    "WebCord")
+      launch_from_candidates start-webcord webcord
+      ;;
+    "org.telegram.desktop")
+      launch_from_candidates telegram-desktop Telegram telegram
+      ;;
+    "brave-youtube.com__-Default")
+      if [[ "$browser_prefix" == "helium" ]]; then
+        launch_from_candidates start-helium-youtube start-brave-youtube
+      else
+        launch_from_candidates start-brave-youtube start-helium-youtube
+      fi
+      ;;
+    "spotify")
+      launch_from_candidates start-spotify spotify
+      ;;
+    "ferdium")
+      launch_from_candidates start-ferdium ferdium
+      ;;
+    "discord")
+      launch_from_candidates start-discord discord
+      ;;
+    "kitty")
+      launch_from_candidates kitty
+      ;;
+    *)
+      launch_from_candidates "$app_id"
+      ;;
+  esac
+}
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -157,64 +253,19 @@ case "${cmd}" in
       command -v hyprctl >/dev/null 2>&1 || exit 0
       command -v jq >/dev/null 2>&1 || exit 0
 
-      resolve_cmd() {
-        local name="$1"
-        shift || true
-        local c
-        for c in "$name" "$HOME/.local/bin/$name" "$HOME/bin/$name"; do
-          if [[ -n "$c" ]] && command -v "$c" >/dev/null 2>&1; then
-            command -v "$c"
-            return 0
-          fi
-          if [[ -n "$c" && -x "$c" ]]; then
-            printf '%s\n' "$c"
-            return 0
-          fi
-        done
-        return 1
-      }
-
-      run_cmd_bg() {
-        local name="$1"
-        shift || true
-        local cmd
-        if ! cmd="$(resolve_cmd "$name")"; then
-          if command -v notify-send >/dev/null 2>&1; then
-            notify-send "Error" "No command found for ${name}" "critical" 2>/dev/null || true
-          fi
-          exit 1
-        fi
-        "$cmd" "$@" &
-      }
-
       launch_app() {
+        local browser_prefix=""
         if command -v notify-send >/dev/null 2>&1; then
             notify-send -t 1000 "Hyprland" "Launching ${APP_ID}..." 2>/dev/null || true
         fi
-        
-        case "$APP_ID" in
-          "Kenp") run_cmd_bg start-helium-kenp ;;
-          "TmuxKenp") run_cmd_bg start-kkenp ;;
-          "Ai") run_cmd_bg start-brave-ai ;;
-          "CompecTA") run_cmd_bg start-brave-compecta ;;
-          "WebCord") run_cmd_bg webcord ;;
-          "org.telegram.desktop") run_cmd_bg telegram-desktop ;;
-          "brave-youtube.com__-Default") run_cmd_bg start-brave-youtube ;;
-          "spotify") run_cmd_bg spotify ;;
-          "ferdium") run_cmd_bg ferdium ;;
-          "discord") run_cmd_bg discord ;;
-          "kitty") run_cmd_bg kitty ;;
-          *)
-            if command -v "$APP_ID" >/dev/null 2>&1; then
-              "$APP_ID" &
-            else
-              if command -v notify-send >/dev/null 2>&1; then
-                  notify-send "Error" "No command found for ${APP_ID}" "critical"
-              fi
-              exit 1
-            fi
-            ;;
-        esac
+
+        browser_prefix="$(preferred_browser_prefix)"
+        if ! launch_here_app "$APP_ID" "$browser_prefix"; then
+          if command -v notify-send >/dev/null 2>&1; then
+            notify-send "Error" "No command found for ${APP_ID}" "critical" 2>/dev/null || true
+          fi
+          exit 1
+        fi
       }
 
       current_ws="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id // empty' || true)"
@@ -351,25 +402,9 @@ case "${cmd}" in
 
         # 2. Launch if not found
         notify "Launching $APP_ID..."
-        case "$APP_ID" in
-          "Kenp") start-helium-kenp >/dev/null 2>&1 & ;;
-          "TmuxKenp") start-kkenp >/dev/null 2>&1 & ;;
-          "Ai") start-brave-ai >/dev/null 2>&1 & ;;
-          "CompecTA") start-brave-compecta >/dev/null 2>&1 & ;;
-          "WebCord") start-webcord >/dev/null 2>&1 & ;;
-          "brave-youtube.com__-Default") start-brave-youtube >/dev/null 2>&1 & ;;
-          "spotify") start-spotify >/dev/null 2>&1 & ;;
-          "ferdium") start-ferdium >/dev/null 2>&1 & ;;
-          "discord") start-discord >/dev/null 2>&1 & ;;
-          "kitty") kitty >/dev/null 2>&1 & ;;
-          *)
-            if command -v "$APP_ID" >/dev/null 2>&1; then
-              "$APP_ID" >/dev/null 2>&1 &
-            else
-              notify "Error: No start command found for $APP_ID"
-            fi
-            ;;
-        esac
+        if ! launch_here_app "$APP_ID"; then
+          notify "Error: No start command found for $APP_ID"
+        fi
       }
 
       APP_ID="${1:-}"
