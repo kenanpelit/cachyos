@@ -193,7 +193,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-scroll`
-**Description:** Wrapper around hyprscrolling layout dispatchers with fallbacks.
+**Description:** Wrapper around core Hyprland scrolling layout dispatchers with fallbacks.
 
 **Usage:** `hypr-scroll <subcommand> [args...]`
 

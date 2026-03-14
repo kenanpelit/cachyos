@@ -689,7 +689,7 @@ EOF
       fi
 
       # Window is inside a column -> expel it out into its own column.
-      # hyprscrolling's `promote` creates a new column to the right; swap if we want "left".
+      # The core scrolling layout creates a new column to the right; swap if we want "left".
       hypr_scroll_cmd promote "$dir" || true
     )
     ;;
@@ -1402,14 +1402,21 @@ EOF
 
       printf '\n%s\n' "[hints]"
       if command -v hyprctl >/dev/null 2>&1 && hyprctl getoption general:layout >/dev/null 2>&1; then
-        if hyprctl plugin list 2>/dev/null | grep -qi "hyprscrolling"; then
-          printf '%s\n' "- hyprscrolling: loaded"
+        layout_json="$(hyprctl getoption general:layout -j 2>/dev/null || hyprctl getoption general:layout 2>/dev/null || true)"
+        if grep -Eq '"str"[[:space:]]*:[[:space:]]*"scrolling"|str:[[:space:]]*"scrolling"' <<<"$layout_json"; then
+          printf '%s\n' "- scrolling layout: core (active)"
         else
-          if command -v hypr-scroll >/dev/null 2>&1; then
-            printf '%s\n' "- hyprscrolling: not loaded (using hypr-scroll script fallback)"
-          else
-            printf '%s\n' "- hyprscrolling: not loaded and hypr-scroll missing"
-          fi
+          printf '%s\n' "- general:layout is not set to scrolling"
+        fi
+
+        if hyprctl plugin list 2>/dev/null | grep -qi "hyprscrolling"; then
+          printf '%s\n' "- hyprscrolling plugin: loaded unnecessarily on Hyprland >= 0.54"
+        fi
+
+        if command -v hypr-scroll >/dev/null 2>&1; then
+          printf '%s\n' "- hypr-scroll helper: available"
+        else
+          printf '%s\n' "- hypr-scroll helper: missing"
         fi
       fi
     )

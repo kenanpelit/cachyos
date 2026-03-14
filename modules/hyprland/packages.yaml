@@ -15,6 +15,5 @@ packages:
   - wlogout
   - wob
   - uwsm
-  # - hyprland-plugin-hyprscrolling
-  # Replaced by ~/.local/bin/hypr-scroll script fallback (no ABI pinning).
+  # Scrolling layout is built into Hyprland v0.54+.
   - gnome-keyring

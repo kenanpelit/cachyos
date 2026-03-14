@@ -23,7 +23,6 @@
         "showIconBackground": false,
         "sortByMostUsed": true,
         "terminalCommand": "alacritty -e",
-        "useApp2Unit": false,
         "viewMode": "list"
     },
     "audio": {
@@ -663,7 +662,7 @@
         "showHeader": true,
         "showKeybinds": true
     },
-    "settingsVersion": 57,
+    "settingsVersion": 58,
     "systemMonitor": {
         "batteryCriticalThreshold": 5,
         "batteryWarningThreshold": 20,

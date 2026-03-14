@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: hypr-scroll
-# Description: Wrapper around hyprscrolling layout dispatchers with fallbacks.
+# Description: Wrapper around core Hyprland scrolling layout dispatchers with fallbacks.
 # Usage: hypr-scroll <subcommand> [args...]
 # ==============================================================================
 set -euo pipefail
@@ -43,9 +43,17 @@ ensure_hypr_env() {
   fi
 }
 
-have_hyprscrolling() {
+using_scrolling_layout() {
   command -v hyprctl >/dev/null 2>&1 || return 1
-  hyprctl plugin list 2>/dev/null | grep -qi "hyprscrolling"
+
+  local option
+  option="$(
+    hyprctl getoption general:layout -j 2>/dev/null \
+      || hyprctl getoption general:layout 2>/dev/null \
+      || true
+  )"
+
+  grep -Eq '"str"[[:space:]]*:[[:space:]]*"scrolling"|str:[[:space:]]*"scrolling"' <<<"$option"
 }
 
 layoutmsg() {
@@ -148,7 +156,7 @@ case "$cmd" in
   move)
     delta="${1:-}"
     [[ -n "$delta" ]] || { usage >&2; exit 2; }
-    if have_hyprscrolling && layoutmsg "move $delta"; then
+    if using_scrolling_layout && layoutmsg "move $delta"; then
       exit 0
     fi
     fallback_move "$delta"
@@ -156,7 +164,7 @@ case "$cmd" in
   focus)
     dir="${1:-}"
     [[ -n "$dir" ]] || { usage >&2; exit 2; }
-    if have_hyprscrolling && layoutmsg "focus $dir"; then
+    if using_scrolling_layout && layoutmsg "focus $dir"; then
       exit 0
     fi
     exec hyprctl dispatch movefocus "$dir"
@@ -164,7 +172,7 @@ case "$cmd" in
   swapcol)
     dir="${1:-}"
     [[ -n "$dir" ]] || { usage >&2; exit 2; }
-    if have_hyprscrolling && layoutmsg "swapcol $dir"; then
+    if using_scrolling_layout && layoutmsg "swapcol $dir"; then
       exit 0
     fi
     dispatch swapwindow "$dir" || dispatch movewindow "$dir"
@@ -172,7 +180,7 @@ case "$cmd" in
   movewindowto)
     dir="${1:-}"
     [[ -n "$dir" ]] || { usage >&2; exit 2; }
-    if have_hyprscrolling && layoutmsg "movewindowto $dir"; then
+    if using_scrolling_layout && layoutmsg "movewindowto $dir"; then
       exit 0
     fi
     dispatch movewindow "$dir"
@@ -180,28 +188,27 @@ case "$cmd" in
   colresize)
     value="${1:-}"
     [[ -n "$value" ]] || { usage >&2; exit 2; }
-    if have_hyprscrolling && layoutmsg "colresize $value"; then
+    if using_scrolling_layout && layoutmsg "colresize $value"; then
       exit 0
     fi
     fallback_colresize "$value"
     ;;
   fit)
     mode="${1:-active}"
-    if have_hyprscrolling && layoutmsg "fit $mode"; then
+    if using_scrolling_layout && layoutmsg "fit $mode"; then
       exit 0
     fi
     fallback_fit "$mode"
     ;;
   togglefit)
-    if have_hyprscrolling && layoutmsg "togglefit"; then
+    if using_scrolling_layout && layoutmsg "togglefit"; then
       exit 0
     fi
     exit 0
     ;;
   promote)
     side="${1:-r}"
-    if have_hyprscrolling; then
-      layoutmsg "promote" || true
+    if using_scrolling_layout && layoutmsg "promote"; then
       if [[ "$side" == "l" ]]; then
         layoutmsg "swapcol l" || true
       fi
@@ -213,7 +220,7 @@ case "$cmd" in
   movecoltoworkspace)
     target="${1:-}"
     [[ -n "$target" ]] || { usage >&2; exit 2; }
-    if have_hyprscrolling && layoutmsg "movecoltoworkspace $target"; then
+    if using_scrolling_layout && layoutmsg "movecoltoworkspace $target"; then
       exit 0
     fi
     dispatch movetoworkspace "$target"
