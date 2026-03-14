@@ -673,7 +673,7 @@ here)
       local app_id="$1"
       case "$app_id" in
       "Kenp") echo '^Kenp$' ;;
-      "TmuxKenp") echo '^(TmuxKenp|Tmux)$' ;;
+      "TmuxKenp") echo '^TmuxKenp$' ;;
       "Ai") echo '^Ai$' ;;
       "CompecTA") echo '^CompecTA$' ;;
       "WebCord") echo '^WebCord$' ;;
@@ -1988,9 +1988,9 @@ EOF
     if load_rules "$rules_file"; then
       :
     else
-      RULE_PATTERNS+=("^(TmuxKenp|Tmux)$")
+      RULE_PATTERNS+=("^TmuxKenp$")
       RULE_WORKSPACES+=("2")
-      RULE_TITLE_PATTERNS+=("")
+      RULE_TITLE_PATTERNS+=("^Tmux$")
       RULE_PATTERNS+=("^(kitty|org\\.wezfurlong\\.wezterm)$")
       RULE_WORKSPACES+=("2")
       RULE_TITLE_PATTERNS+=("^Tmux$")

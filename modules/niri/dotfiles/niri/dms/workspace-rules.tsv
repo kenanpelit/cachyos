@@ -1,4 +1,4 @@
-^(TmuxKenp|Tmux)$	2	
+^TmuxKenp$	2	^Tmux$
 ^(kitty|org\.wezfurlong\.wezterm)$	2	^Tmux$
 ^Kenp$	1	
 ^Ai$	3	

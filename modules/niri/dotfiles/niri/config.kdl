@@ -944,7 +944,7 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^(TmuxKenp|Tmux)$"#
+  match app-id=r#"^TmuxKenp$"# title=r#"^Tmux$"#
   open-on-workspace "2"
   open-maximized true
   open-maximized-to-edges true
@@ -1074,7 +1074,7 @@ window-rule {
 window-rule {
   match is-active=false
   exclude is-window-cast-target=true
-  exclude app-id=r#"^(TmuxKenp|Tmux)$"#
+  exclude app-id=r#"^TmuxKenp$"#
   exclude app-id=r#"^mpv$"#
   exclude app-id=r#"^vlc$"#
   exclude app-id=r#"^(brave-youtube|chrome-youtube)\.com__-Default$"#
