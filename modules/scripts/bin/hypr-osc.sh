@@ -1893,21 +1893,25 @@ check_system() {
 		warn "XDG_VTNR varsayılan değere ayarlandı: 1"
 	fi
 
-	# Intel Arc Graphics kontrolü ve optimizasyonları
-	if lspci 2>/dev/null | grep -qi "arc\|meteor\|alchemist"; then
-		info "Intel Arc Graphics tespit edildi"
-
+	# Renderer strategy:
+	# - Default to Vulkan for best performance on modern Intel graphics.
+	# - Keep the older gles2/no-atomic workaround only as an explicit opt-in.
+	if [[ "${HYPRLAND_INTEL_COMPAT:-0}" == "1" ]]; then
+		warn "Hyprland Intel compatibility mode forced via HYPRLAND_INTEL_COMPAT=1"
 		export WLR_DRM_NO_ATOMIC=1
 		export WLR_RENDERER=gles2
 		export INTEL_DEBUG=norbc
 		export LIBVA_DRIVER_NAME=iHD
 		export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
-
-		info "Intel Arc optimizasyonları aktif"
+		info "Intel compatibility renderer path aktif"
 	else
 		unset WLR_DRM_NO_ATOMIC INTEL_DEBUG VK_ICD_FILENAMES 2>/dev/null || true
 		export WLR_RENDERER=vulkan
-		debug_log "Varsayılan renderer: $WLR_RENDERER"
+		if lspci 2>/dev/null | grep -qi "intel corporation .*arc graphics"; then
+			info "Intel graphics detected; using Vulkan fast path"
+		else
+			debug_log "Varsayılan renderer: $WLR_RENDERER"
+		fi
 	fi
 
 	# Hyprland binary kontrolü (yeni launcher)
