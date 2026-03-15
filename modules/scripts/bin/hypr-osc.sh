@@ -54,6 +54,27 @@ hypr_session_env_files() {
     "${HYPR_SESSION_ENV_FILE:-$HOME/.config/hypr/conf.d/00-env.conf}"
 }
 
+normalize_colon_list() {
+  local value="$1"
+  local expanded part
+  local -a parts cleaned=()
+  local -A seen=()
+
+  expanded="${value//\$\{HOME\}/$HOME}"
+  expanded="${expanded//\$HOME/$HOME}"
+  IFS=':' read -r -a parts <<<"$expanded"
+
+  for part in "${parts[@]}"; do
+    [[ -n "$part" ]] || continue
+    [[ -n "${seen[$part]:-}" ]] && continue
+    seen["$part"]=1
+    cleaned+=("$part")
+  done
+
+  IFS=':'
+  printf '%s\n' "${cleaned[*]}"
+}
+
 parse_hypr_session_env_file() {
   local env_file="$1"
   local line payload key value
@@ -91,6 +112,18 @@ apply_hypr_session_env() {
       export "$key=$value"
     done < <(parse_hypr_session_env_file "$env_file")
   done < <(hypr_session_env_files)
+}
+
+normalize_session_paths() {
+  local default_path default_data_dirs
+
+  default_path="${HOME}/.local/share/zinit/polaris/bin:${HOME}/.local/bin:${HOME}/bin:${HOME}/.iptv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:${HOME}/.local/share/go/bin"
+  PATH="$(normalize_colon_list "$default_path")"
+  export PATH
+
+  default_data_dirs="${HOME}/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+  XDG_DATA_DIRS="$(normalize_colon_list "$default_data_dirs")"
+  export XDG_DATA_DIRS
 }
 
 collect_hypr_session_env_vars() {
@@ -1538,6 +1571,7 @@ EOF
       ensure_hypr_env || true
 
       apply_hypr_session_env
+      normalize_session_paths
       queue_dconf_sync
       sync_session_environment
     )
@@ -2010,6 +2044,7 @@ setup_environment() {
 		debug_log "Klavye: Türkçe F"
 	fi
 
+	normalize_session_paths
 	queue_dconf_sync
 
 	info "Environment setup tamamlandı"

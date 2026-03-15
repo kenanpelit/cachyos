@@ -5,8 +5,8 @@ ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
 Type=oneshot
-# Mevcut scripti delay olmadan (timer zaten bekleyecek) çağırıyoruz
-ExecStart=/usr/bin/bash -lc 'delayed-portals 0'
+# Use the installed user-local helper directly; systemd user PATH is not reliable.
+ExecStart=%h/.local/bin/delayed-portals 0
 StandardOutput=journal
 StandardError=journal
 
