@@ -151,6 +151,11 @@
                     "id": "plugin:screenshot"
                 },
                 {
+                    "defaultSettings": {
+                        "enableCross": true,
+                        "enableWindowsSelection": true,
+                        "screenshotEditor": "swappy"
+                    },
                     "id": "plugin:screen-shot-and-record"
                 },
                 {
