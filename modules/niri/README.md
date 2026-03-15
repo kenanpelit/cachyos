@@ -76,9 +76,6 @@ session target chain:
   Starts `geoclue-agent.service` 15 seconds after startup and keeps retrying.
 - `ppp-auto-profile.timer`
   Starts `ppp-auto-profile.service` after login and then every 20 seconds.
-- `niri-login-prompts.service`
-  Warmup helper for `osc-login-prompts`. It is shipped with the module, but it
-  is not pulled in by `niri-daemons.target`; start semantics are host-specific.
 
 ## Conditions and notes
 
