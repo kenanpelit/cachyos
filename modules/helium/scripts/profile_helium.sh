@@ -61,6 +61,7 @@ readonly BROWSERPASS_NATIVE_HOST_NAME="com.github.browserpass.native.json"
 # Wayland ve dokunmatik yüzey için varsayılan bayraklar
 	DEFAULT_FLAGS=(
 		"--restore-last-session"
+		"--hide-crash-restore-bubble"
 		"--enable-features=TouchpadOverscrollHistoryNavigation,UseOzonePlatform,VaapiVideoDecoder"
 		"--ozone-platform=wayland"
 	)
@@ -317,6 +318,62 @@ check_dependencies() {
   ]
 }
 EOF
+	}
+
+	json_edit_in_place() {
+		local file="$1"
+		local filter="$2"
+		local tmp=""
+
+		[[ -f "$file" ]] || return 0
+		command -v jq >/dev/null 2>&1 || return 0
+
+		tmp="$(mktemp "$(dirname "$file")/.${file##*/}.tmp.XXXXXX")"
+		if jq "$filter" "$file" >"$tmp" 2>/dev/null; then
+			mv -f "$tmp" "$file"
+		else
+			rm -f "$tmp" 2>/dev/null || true
+			return 1
+		fi
+	}
+
+	sanitize_chromium_userdata() {
+		local userdata_dir="$1"
+		local profile_key="${2:-}"
+		local pref_file=""
+
+		[[ -d "$userdata_dir" ]] || return 0
+
+		# Chromium marks crashes in Local State and profile Preferences. If we want
+		# restore-last-session to work after an abrupt compositor exit, we need to
+		# acknowledge the previous unclean exit before launch.
+		json_edit_in_place "${userdata_dir}/Local State" '
+			(.user_experience_metrics //= {}) |
+			(.user_experience_metrics.stability //= {}) |
+			.user_experience_metrics.stability.exited_cleanly = true |
+			(.was //= {}) |
+			.was.restarted = false
+		' || true
+
+		if [[ -n "$profile_key" ]]; then
+			json_edit_in_place "${userdata_dir}/${profile_key}/Preferences" '
+				(.profile //= {}) |
+				.profile.exit_type = "Normal"
+			' || true
+			return 0
+		fi
+
+		for pref_file in \
+			"${userdata_dir}/Default/Preferences" \
+			"${userdata_dir}/System Profile/Preferences" \
+			"${userdata_dir}/Guest Profile/Preferences" \
+			"${userdata_dir}"/Profile*/Preferences; do
+			[[ -f "$pref_file" ]] || continue
+			json_edit_in_place "$pref_file" '
+				(.profile //= {}) |
+				.profile.exit_type = "Normal"
+			' || true
+		done
 	}
 
 	ensure_isolated_profile_dir() {
@@ -926,12 +983,14 @@ validate_profile() {
 				local isolated_dir="${ISOLATED_ROOT}/${window_class}"
 				ensure_isolated_userdata "$isolated_dir" "$profile_source_dir"
 				ensure_isolated_profile_dir "$isolated_dir" "$profile_key" "$profile_source_dir"
+				sanitize_chromium_userdata "$isolated_dir" "$profile_key"
 
 				cmd+=("--user-data-dir=$isolated_dir")
 			else
 				# Default user-data-dir ile çalışırken de marker dosyasını güncel tut.
 				ensure_widevine_marker "$HELIUM_PROFILES_DIR"
 				ensure_browserpass_native_host "$HELIUM_PROFILES_DIR"
+				sanitize_chromium_userdata "$HELIUM_PROFILES_DIR" "$profile_key"
 			fi
 			cmd+=("--profile-directory=$profile_key")
 
