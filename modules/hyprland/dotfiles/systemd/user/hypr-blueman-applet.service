@@ -1,0 +1,18 @@
+[Unit]
+Description=Blueman applet (Hyprland)
+After=hypr-bootstrap.service dbus.service
+PartOf=hypr-daemons.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+
+[Service]
+Type=simple
+Environment=GDK_BACKEND=wayland,x11
+ExecStart=/usr/bin/blueman-applet
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=hypr-daemons.target

@@ -1462,6 +1462,7 @@ EOF
           hypr-post-bootstrap.service
           hyprland-polkit-agent.service
           hypr-nm-applet.service
+          hypr-blueman-applet.service
           gnome-keyring-secrets.service
           hypr-clip-persist.service
           xdg-desktop-portal-delayed.timer

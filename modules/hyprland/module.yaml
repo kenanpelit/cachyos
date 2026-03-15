@@ -21,6 +21,8 @@ dotfiles:
   target: ~/.config/systemd/user/hyprland-polkit-agent.service
 - source: dotfiles/systemd/user/hypr-nm-applet.service
   target: ~/.config/systemd/user/hypr-nm-applet.service
+- source: dotfiles/systemd/user/hypr-blueman-applet.service
+  target: ~/.config/systemd/user/hypr-blueman-applet.service
 - source: dotfiles/systemd/user/hypr-clip-persist.service
   target: ~/.config/systemd/user/hypr-clip-persist.service
 - source: dotfiles/systemd/user/hypr-bootstrap.service
