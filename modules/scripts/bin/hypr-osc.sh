@@ -1610,7 +1610,6 @@ EOF
 	          hypr-bootstrap.service
 	          hypr-daemons.target
 	          hypr-post-bootstrap.service
-	          pyprland.service
 	          hyprland-polkit-agent.service
 	          hypr-nm-applet.service
 	          hypr-blueman-applet.service
@@ -2403,7 +2402,7 @@ set -euo pipefail
 # Requirements:
 #   - hyprctl: Hyprland control tool
 #   - jq: JSON processing tool
-#   - Optional: pypr, rofi/wofi/fuzzel, wtype/ydotool, notify-send
+#   - Optional: rofi/wofi/fuzzel, wtype/ydotool, notify-send
 #
 # Note:
 #   - Script uses $HOME/.cache/hypr/toggle directory
@@ -2557,7 +2556,7 @@ validate_workspace() {
 
 validate_dependencies() {
 	local required_deps=("hyprctl" "jq")
-	local optional_deps=("pypr" "rofi" "wofi" "fuzzel" "wtype" "ydotool" "notify-send")
+	local optional_deps=("rofi" "wofi" "fuzzel" "wtype" "ydotool" "notify-send")
 	local missing_required=()
 	local missing_optional=()
 
@@ -3015,8 +3014,6 @@ show_help() {
   $0 -am -i 9      ← Interactively select app to move from workspace 9
 
 🖥️  MONITOR OPERATIONS:
-  -ms              Shift monitors without focus
-  -msf             Shift monitors with focus  
   -mt              Toggle monitor focus (up/down)
   -ml              Switch to left monitor
   -mr              Switch to right monitor
@@ -3071,7 +3068,6 @@ show_help() {
   $0 -am -f 9                 # Move app from workspace 9 and focus it
   
   # Monitor Operations
-  $0 -ms                      # Shift monitors
   $0 -mt                      # Toggle monitor focus
   
   # Debug & Maintenance
@@ -3088,7 +3084,7 @@ show_help() {
 
 🔧 REQUIREMENTS:
   Required:  hyprctl, jq
-  Optional:  pypr, rofi/wofi/fuzzel, wtype/ydotool, notify-send
+  Optional:  rofi/wofi/fuzzel, wtype/ydotool, notify-send
 
 📚 KEYBINDING EXAMPLES (add to hyprland.conf):
   # Quick workspace switching
@@ -3174,27 +3170,6 @@ main() {
 			exit 0
 			;;
 		# Monitor operations
-		-ms)
-			if command -v pypr &>/dev/null; then
-				log_debug "Shifting monitors without focus"
-				pypr shift_monitors "+1"
-			else
-				log_error "pypr not found - cannot shift monitors"
-				exit 1
-			fi
-			shift
-			;;
-		-msf)
-			if command -v pypr &>/dev/null; then
-				log_debug "Shifting monitors with focus"
-				pypr shift_monitors "+1"
-				hyprctl dispatch focusmonitor "+1"
-			else
-				log_error "pypr not found - cannot shift monitors"
-				exit 1
-			fi
-			shift
-			;;
 		-mt)
 			log_debug "Toggling monitor focus"
 			toggle_monitor_focus

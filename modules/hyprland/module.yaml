@@ -27,8 +27,6 @@ dotfiles:
   target: ~/.config/hypr/conf.d/50-workspaces.conf
 - source: dotfiles/hypr/conf.d/60-submaps.conf
   target: ~/.config/hypr/conf.d/60-submaps.conf
-- source: dotfiles/pypr/config.toml
-  target: ~/.config/pypr/config.toml
 - source: dotfiles/portals.conf
   target: ~/.config/xdg-desktop-portal/hyprland-portals.conf
 - source: dotfiles/portals.conf
@@ -53,7 +51,5 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-post-bootstrap.service
 - source: dotfiles/systemd/user/gnome-keyring-secrets.service
   target: ~/.config/systemd/user/gnome-keyring-secrets.service
-- source: dotfiles/systemd/user/pyprland.service
-  target: ~/.config/systemd/user/pyprland.service
 post_install_hook: scripts/ensure-runtime-files.sh
 post_hook_behavior: always

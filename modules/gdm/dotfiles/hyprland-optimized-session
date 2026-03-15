@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ -x "${HOME}/.local/bin/hypr-osc" ]; then
-  exec "${HOME}/.local/bin/hypr-osc" tty
-fi
+export DESKTOP_SESSION="Hyprland"
+export XDG_SESSION_DESKTOP="Hyprland"
+export XDG_CURRENT_DESKTOP="Hyprland"
+export XDG_SESSION_TYPE="wayland"
+export GTK_USE_PORTAL=1
+export SYSTEMD_OFFLINE=0
 
-if command -v hypr-osc >/dev/null 2>&1; then
-  exec hypr-osc tty
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user set-environment \
+    DESKTOP_SESSION=Hyprland \
+    XDG_SESSION_DESKTOP=Hyprland \
+    XDG_CURRENT_DESKTOP=Hyprland \
+    XDG_SESSION_TYPE=wayland \
+    GTK_USE_PORTAL=1 \
+    SYSTEMD_OFFLINE=0 >/dev/null 2>&1 || true
 fi
 
 if command -v start-hyprland >/dev/null 2>&1; then

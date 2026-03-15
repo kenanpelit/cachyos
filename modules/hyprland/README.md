@@ -1,57 +1,74 @@
 # Hyprland Module
 
-This module owns the Hyprland session config, its user-level systemd units, and
-the compositor-specific helpers that turn a raw Wayland login into a fully
-initialized desktop session.
+This module owns the Hyprland compositor config, the Hyprland-specific
+`systemd --user` startup graph, and the host-local runtime overlays under
+`~/.config/hypr/conf.d/9*-local.conf`.
+
+## Responsibilities
+
+- install the Hyprland config split under `~/.config/hypr`
+- install the canonical Hypr session environment file
+- define the Hyprland session targets and services under `~/.config/systemd/user`
+- generate empty host-local runtime overlay files when they do not exist
+
+This module does not install the system-wide display-manager session entry
+anymore. That belongs to the `gdm` and `sessions` modules.
 
 ## Entry points
 
 - GDM launches `modules/gdm/dotfiles/hyprland-optimized-session`.
-- The wrapper prefers `hypr-osc tty`, then falls back to `start-hyprland`, then
-  finally `Hyprland`.
-- Hyprland itself loads `dotfiles/hypr/hyprland.conf`, which immediately runs:
+- The wrapper only pre-warms `systemd --user` with the static Hyprland session
+  identity and then executes `start-hyprland` or `Hyprland`.
+- Once Hyprland is up, `dotfiles/hypr/hyprland.conf` runs:
   `exec-once = ~/.local/bin/hypr-session-init`.
-- Every unit shipped under `dotfiles/systemd/user/` is linked/enabled by the
-  `user-services` module when `hyprland` is enabled in `hosts/*.yaml`.
+- `hypr-session-init` is now the compositor-side entrypoint that imports the
+  live Wayland/session variables and starts `hyprland-session.target`.
 
 ## Startup flow
 
 1. GDM starts `hyprland-optimized-session`.
-2. The wrapper enters the `hypr-osc tty` path, which eventually launches the
-   Hyprland compositor.
-3. Hyprland reads `~/.config/hypr/hyprland.conf` and runs
+2. The wrapper exports `DESKTOP_SESSION=Hyprland`,
+   `XDG_SESSION_DESKTOP=Hyprland`, `XDG_CURRENT_DESKTOP=Hyprland`,
+   `XDG_SESSION_TYPE=wayland`, `GTK_USE_PORTAL=1`, and `SYSTEMD_OFFLINE=0`.
+3. The wrapper preloads those values into `systemd --user` with
+   `systemctl --user set-environment`.
+4. The wrapper executes `start-hyprland` or falls back to `Hyprland`.
+5. Hyprland reads `~/.config/hypr/hyprland.conf` and runs
    `~/.local/bin/hypr-session-init`.
-4. `hypr-session-init` loads `~/.config/environment.d/10-hyprland.conf`,
-   normalizes `PATH`/XDG variables, imports the session environment into
-   `systemd --user` and DBus, then starts `hyprland-session.target`.
-5. `hyprland-session.target` pulls in:
+6. `hypr-session-init` loads `~/.config/environment.d/10-hyprland.conf`,
+   normalizes `PATH` and XDG paths, detects `WAYLAND_DISPLAY` and
+   `HYPRLAND_INSTANCE_SIGNATURE`, imports the live environment into
+   `systemd --user` and DBus, and starts `hyprland-session.target`.
+7. `hyprland-session.target` pulls in:
    `graphical-session.target`, `graphical-session-pre.target`,
-   `xdg-desktop-autostart.target`, `hypr-bootstrap.service`,
-   `hypr-daemons.target`, and `hypr-post-bootstrap.service`.
-6. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
+   `xdg-desktop-autostart.target`, `hypr-bootstrap.service`, and
+   `hypr-daemons.target`.
+8. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
    oneshot stage.
-7. `hypr-daemons.target` becomes the daemon stage for long-running session
-   helpers.
-8. `hypr-post-bootstrap.service` runs `~/.local/bin/hypr-post-bootstrap` for
-   late polish such as cursor sync and delayed portal startup.
+9. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
+   long-running Hypr helpers.
+10. `hypr-post-bootstrap.service` is started by `hyprland-session.target` and
+    runs after the daemon services it depends on, performing the final cursor,
+    shell, and portal polish.
 
-## What starts during session startup
+## Session graph
 
-These units are the core Hyprland startup chain:
+Core session units:
 
 - `hyprland-session.target`
-  Session umbrella target. It is the unit `hypr-session-init` starts.
+  Session umbrella target started by `hypr-session-init`.
 - `hypr-bootstrap.service`
-  Early oneshot bootstrap. Runs `hypr-osc switch` and `osc-soundctl init`.
+  Early oneshot bootstrap. Runs `hypr-osc switch --no-notify` and
+  `osc-soundctl init`.
 - `hypr-daemons.target`
-  Logical daemon stage between bootstrap and post-bootstrap.
+  Explicit daemon stage. It now declares the core Hyprland services it wants.
 - `hypr-post-bootstrap.service`
-  Late oneshot polish. Runs `osc-shell ensure`, syncs cursor state with
-  `hyprctl setcursor`, and starts `xdg-desktop-portal-delayed.service` when
-  present.
+  Late oneshot polish. Runs `osc-shell ensure`, applies cursor sync with
+  `hyprctl setcursor`, and starts `xdg-desktop-portal-delayed.service` when the
+  unit exists. It is ordered after the daemon services rather than after the
+  target itself to avoid systemd ordering cycles.
 
-These long-running services belong to `hypr-daemons.target` and normally start
-as part of the session:
+Daemon-stage units started by `hypr-daemons.target`:
 
 - `hyprland-polkit-agent.service`
   Runs `polkit-gnome-authentication-agent-1`.
@@ -63,16 +80,24 @@ as part of the session:
   Runs `wl-clip-persist --clipboard both`.
 - `gnome-keyring-secrets.service`
   Runs `gnome-keyring-daemon --components=secrets,pkcs11`.
-- `pyprland.service`
-  Runs `pypr --config ~/.config/pypr/config.toml`.
+
+## Config layout
+
+- `dotfiles/hypr/hyprland.conf`
+  Minimal root config that sources the split files and starts
+  `hypr-session-init`.
+- `dotfiles/environment.d/10-hyprland.conf`
+  Shared source of truth for session environment values.
+- `scripts/ensure-runtime-files.sh`
+  Creates host-local overlays only:
+  `90-outputs-local.conf`, `91-cursor-local.conf`, and `92-monitors-local.conf`.
 
 ## Conditions and notes
 
 - Most Hyprland units require `WAYLAND_DISPLAY` and
   `XDG_CURRENT_DESKTOP=Hyprland`.
-- `pyprland.service` also requires `HYPRLAND_INSTANCE_SIGNATURE` and the config
-  file at `~/.config/pypr/config.toml`.
-- `hyprland-session.target` also pulls `xdg-desktop-autostart.target`; duplicate
-  applet autostarts are masked centrally by the `wayland-autostart` module.
-- Runtime monitor/cursor overlays are generated by
-  `scripts/ensure-runtime-files.sh` and loaded from `conf.d/90-92-*.conf`.
+- Shared XDG autostart masks for `nm-applet`, `blueman`, and keyring desktop
+  entries live in the `wayland-autostart` module.
+- The systemd graph is intentionally split into `bootstrap -> daemons ->
+  post-bootstrap` so ordering remains visible in unit files rather than hidden
+  in shell scripts.

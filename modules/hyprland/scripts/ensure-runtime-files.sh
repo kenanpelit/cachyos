@@ -64,16 +64,3 @@ EOF
     chown "$REAL_USER:$USER_GROUP" "$path" 2>/dev/null || true
   fi
 done
-
-# --- System-wide Session Entry ---
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
-# Desktop entry still needs to be in /usr/share/wayland-sessions to be seen by the greeter.
-echo "Checking system-wide Hyprland session entry..."
-if [ -w "/usr/share/wayland-sessions" ] || [ -n "${SUDO_USER:-}" ]; then
-    mkdir -p "/usr/share/wayland-sessions"
-    cp "$DOTFILES_DIR/hyprland-optimized.desktop" "/usr/share/wayland-sessions/hyprland-optimized.desktop"
-    chmod 644 "/usr/share/wayland-sessions/hyprland-optimized.desktop"
-else
-    echo "  ! Skipping desktop entry install: No write access to /usr/share/wayland-sessions (run 'dcli sync' with sudo)"
-fi

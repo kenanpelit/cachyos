@@ -1,6 +1,6 @@
 [Unit]
 Description=Hyprland post-bootstrap polish
-After=hypr-daemons.target dbus.service
+After=hypr-bootstrap.service dbus.service hyprland-polkit-agent.service hypr-nm-applet.service hypr-blueman-applet.service hypr-clip-persist.service gnome-keyring-secrets.service
 PartOf=hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland

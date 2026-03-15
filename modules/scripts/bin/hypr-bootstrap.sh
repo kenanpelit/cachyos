@@ -66,7 +66,7 @@ main() {
     warn "HYPRLAND_INSTANCE_SIGNATURE is unset; continuing anyway"
   fi
 
-  run_if_present hypr-osc switch
+  run_if_present hypr-osc switch --no-notify
   run_if_present osc-soundctl init
 
   log "hypr-bootstrap completed."

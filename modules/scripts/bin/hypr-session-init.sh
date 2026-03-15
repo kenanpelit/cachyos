@@ -22,24 +22,6 @@ case "${1:-}" in
     ;;
 esac
 
-load_dconf() {
-  command -v gsettings >/dev/null 2>&1 || return 0
-
-  gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' >/dev/null 2>&1 || true
-  gsettings set org.gnome.desktop.interface gtk-theme "${GTK_THEME:-catppuccin-mocha-mauve-standard+default}" >/dev/null 2>&1 || true
-  gsettings set org.gnome.desktop.interface icon-theme "${XDG_ICON_THEME:-${ICON_THEME:-kora}}" >/dev/null 2>&1 || true
-  gsettings set org.gnome.desktop.interface cursor-theme "${XCURSOR_THEME:-capitaine-cursors}" >/dev/null 2>&1 || true
-  gsettings set org.gnome.desktop.interface font-name 'Maple Mono NF 12' >/dev/null 2>&1 || true
-  gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu' >/dev/null 2>&1 || true
-  gsettings set org.gnome.desktop.interface gtk-key-theme "Default" >/dev/null 2>&1 || true
-}
-
-queue_dconf_sync() {
-  command -v gsettings >/dev/null 2>&1 || return 0
-  (load_dconf >/dev/null 2>&1 || true) &
-  disown || true
-}
-
 ensure_runtime_dir() {
   if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
     export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -222,7 +204,6 @@ main() {
   normalize_session_paths
   detect_wayland_display
   detect_hyprland_instance_signature
-  queue_dconf_sync
   sync_session_environment
 
   if [[ "$start_target" == "true" ]]; then

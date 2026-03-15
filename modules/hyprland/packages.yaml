@@ -5,7 +5,6 @@ packages:
   - hyprpaper
   - hyprpicker
   - polkit-gnome
-  - pyprland
   - network-manager-applet
   - xdg-desktop-portal
   - xdg-desktop-portal-gnome
