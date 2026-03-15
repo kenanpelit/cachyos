@@ -657,7 +657,7 @@
             },
             {
                 "action": "reboot",
-                "command": "",
+                "command": "~/.local/bin/osc-safe-reboot",
                 "countdownEnabled": true,
                 "enabled": true,
                 "keybind": "3"
