@@ -1,21 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export XDG_SESSION_TYPE="wayland"
-export DESKTOP_SESSION="Hyprland"
-export XDG_SESSION_DESKTOP="Hyprland"
-export XDG_CURRENT_DESKTOP="Hyprland"
-
-if command -v systemctl >/dev/null 2>&1; then
-  systemctl --user set-environment \
-    XDG_SESSION_TYPE=wayland \
-    XDG_CURRENT_DESKTOP=Hyprland \
-    XDG_SESSION_DESKTOP=Hyprland \
-    DESKTOP_SESSION=Hyprland \
-    GTK_USE_PORTAL=1 \
-    BROWSER=start-helium-kenp >/dev/null 2>&1 || true
-fi
-
 if [ -x "${HOME}/.local/bin/hypr-osc" ]; then
   exec "${HOME}/.local/bin/hypr-osc" tty
 fi

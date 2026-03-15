@@ -48,6 +48,109 @@ ensure_hypr_env() {
   fi
 }
 
+hypr_session_env_file() {
+  printf '%s\n' "${HYPR_SESSION_ENV_FILE:-$HOME/.config/hypr/conf.d/00-env.conf}"
+}
+
+apply_hypr_session_env() {
+  local env_file line payload key value
+  env_file="$(hypr_session_env_file)"
+
+  [[ -r "$env_file" ]] || return 0
+
+  while IFS= read -r line; do
+    [[ "$line" == env=* ]] || continue
+    payload="${line#env=}"
+    key="${payload%%,*}"
+    value="${payload#*,}"
+    [[ -n "$key" ]] || continue
+    export "$key=$value"
+  done <"$env_file"
+}
+
+collect_hypr_session_env_vars() {
+  local env_file line payload key
+  env_file="$(hypr_session_env_file)"
+
+  if [[ ! -r "$env_file" ]]; then
+    printf '%s\n' \
+      XDG_SESSION_TYPE \
+      XDG_SESSION_DESKTOP \
+      XDG_CURRENT_DESKTOP \
+      DESKTOP_SESSION \
+      GTK_THEME \
+      GTK_USE_PORTAL \
+      GTK_APPLICATION_PREFER_DARK_THEME \
+      XCURSOR_THEME \
+      XCURSOR_SIZE \
+      QT_QPA_PLATFORM \
+      QT_QPA_PLATFORMTHEME \
+      QT_QPA_PLATFORMTHEME_QT6 \
+      MOZ_ENABLE_WAYLAND \
+      _JAVA_AWT_WM_NONREPARENTING \
+      LIBVA_DRIVER_NAME \
+      FONTCONFIG_FILE \
+      BROWSER \
+      CATPPUCCIN_FLAVOR \
+      CATPPUCCIN_ACCENT
+    return 0
+  fi
+
+  while IFS= read -r line; do
+    [[ "$line" == env=* ]] || continue
+    payload="${line#env=}"
+    key="${payload%%,*}"
+    [[ -n "$key" ]] && printf '%s\n' "$key"
+  done <"$env_file"
+}
+
+sync_session_environment() {
+  local -a requested_vars=()
+  local -a extra_vars=(
+    DISPLAY
+    WAYLAND_DISPLAY
+    HYPRLAND_INSTANCE_SIGNATURE
+    PATH
+    XDG_DATA_DIRS
+    SSH_AUTH_SOCK
+    SYSTEMD_OFFLINE
+    WLR_LOG
+    WLR_RENDERER
+    WLR_DRM_NO_ATOMIC
+    VK_ICD_FILENAMES
+    INTEL_DEBUG
+  )
+  local -a env_vars=()
+  local var
+  local -A seen=()
+
+  while IFS= read -r var; do
+    [[ -n "$var" ]] && requested_vars+=("$var")
+  done < <(collect_hypr_session_env_vars)
+
+  requested_vars+=("${extra_vars[@]}")
+
+  for var in "${requested_vars[@]}"; do
+    [[ -n "$var" ]] || continue
+    [[ -n "${!var-}" ]] || continue
+    [[ -n "${seen[$var]:-}" ]] && continue
+    seen["$var"]=1
+    env_vars+=("$var")
+  done
+
+  if [[ ${#env_vars[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl --user import-environment "${env_vars[@]}" >/dev/null 2>&1 || true
+  fi
+
+  if command -v dbus-update-activation-environment >/dev/null 2>&1; then
+    dbus-update-activation-environment --systemd "${env_vars[@]}" >/dev/null 2>&1 || true
+  fi
+}
+
 hypr_scroll_cmd() {
   if command -v hypr-scroll >/dev/null 2>&1; then
     hypr-scroll "$@" >/dev/null 2>&1
@@ -1386,37 +1489,10 @@ EOF
     (
       set -euo pipefail
       ensure_hypr_env || true
-      
+
+      apply_hypr_session_env
       load_dconf
-
-      env_vars=(
-        DISPLAY
-        WAYLAND_DISPLAY
-        HYPRLAND_INSTANCE_SIGNATURE
-        XDG_CURRENT_DESKTOP
-        XDG_SESSION_TYPE
-        XDG_SESSION_DESKTOP
-        QT_QPA_PLATFORMTHEME
-        QT_QPA_PLATFORMTHEME_QT6
-        QT_QPA_PLATFORM
-        XCURSOR_THEME
-        XCURSOR_SIZE
-        XDG_ICON_THEME
-        GTK_THEME
-        GTK_USE_PORTAL
-        GTK_APPLICATION_PREFER_DARK_THEME
-        PATH
-        XDG_DATA_DIRS
-        SSH_AUTH_SOCK
-      )
-
-      if command -v systemctl >/dev/null 2>&1; then
-        systemctl --user import-environment "${env_vars[@]}" >/dev/null 2>&1 || true
-      fi
-
-      if command -v dbus-update-activation-environment >/dev/null 2>&1; then
-        dbus-update-activation-environment --systemd "${env_vars[@]}" >/dev/null 2>&1 || true
-      fi
+      sync_session_environment
     )
     ;;
 
@@ -1828,6 +1904,10 @@ check_system() {
 		export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
 
 		info "Intel Arc optimizasyonları aktif"
+	else
+		unset WLR_DRM_NO_ATOMIC INTEL_DEBUG VK_ICD_FILENAMES 2>/dev/null || true
+		export WLR_RENDERER=vulkan
+		debug_log "Varsayılan renderer: $WLR_RENDERER"
 	fi
 
 	# Hyprland binary kontrolü (yeni launcher)
@@ -1862,54 +1942,12 @@ setup_environment() {
 	export SYSTEMD_OFFLINE=0
 	debug_log "✓ SYSTEMD_OFFLINE=0 set - systemd user services enabled"
 
-	# -------------------------------------------------------------------------
-	# Temel Wayland Ayarları
-	# -------------------------------------------------------------------------
-	# GDM modunda bazıları zaten set edilmiş olabilir, ama override et
-	export XDG_SESSION_TYPE="wayland"
-	export XDG_SESSION_DESKTOP="Hyprland"
-	export XDG_CURRENT_DESKTOP="Hyprland"
-	export DESKTOP_SESSION="Hyprland"
-	debug_log "Wayland session: $XDG_CURRENT_DESKTOP"
-
-	# -------------------------------------------------------------------------
-	# Wayland Backend Tercihleri (Her iki modda da gerekli)
-	# -------------------------------------------------------------------------
-	export MOZ_ENABLE_WAYLAND=1
-	export QT_QPA_PLATFORM="wayland;xcb"
-	export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-	export GDK_BACKEND=wayland
-	export SDL_VIDEODRIVER=wayland
-	export CLUTTER_BACKEND=wayland
-	export _JAVA_AWT_WM_NONREPARENTING=1
-
-	# -------------------------------------------------------------------------
-	# Catppuccin Tema
-	# -------------------------------------------------------------------------
-	local gtk_theme="catppuccin-${CATPPUCCIN_FLAVOR}-${CATPPUCCIN_ACCENT}-standard+default"
-	export GTK_THEME="$gtk_theme"
-	export GTK_USE_PORTAL=1
-
-	if [[ "$CATPPUCCIN_FLAVOR" == "latte" ]]; then
-		export GTK_APPLICATION_PREFER_DARK_THEME=0
-	else
-		export GTK_APPLICATION_PREFER_DARK_THEME=1
-	fi
-
-	info "GTK Theme: $gtk_theme"
-
-	local cursor_theme="capitaine-cursors"
-	local cursor_size="${XCURSOR_SIZE:-24}"
-	export XCURSOR_THEME="$cursor_theme"
-	export XCURSOR_SIZE="$cursor_size"
-	info "Cursor Theme: $cursor_theme (size=$cursor_size)"
-
-	# -------------------------------------------------------------------------
-	# Qt Tema
-	# -------------------------------------------------------------------------
-	export QT_QPA_PLATFORMTHEME=gtk3
-	export QT_STYLE_OVERRIDE=kvantum
-	export QT_AUTO_SCREEN_SCALE_FACTOR=1
+	# Static session environment now lives in ~/.config/hypr/conf.d/00-env.conf.
+	apply_hypr_session_env
+	export WLR_LOG=INFO
+	debug_log "Wayland session: ${XDG_CURRENT_DESKTOP:-Hyprland}"
+	info "GTK Theme: ${GTK_THEME:-unset}"
+	info "Cursor Theme: ${XCURSOR_THEME:-unset} (size=${XCURSOR_SIZE:-unset})"
 
 	# -------------------------------------------------------------------------
 	# Klavye (Sadece TTY modunda - GDM zaten ayarladı)
@@ -1920,36 +1958,6 @@ setup_environment() {
 		export XKB_DEFAULT_OPTIONS=ctrl:nocaps
 		debug_log "Klavye: Türkçe F"
 	fi
-
-	# -------------------------------------------------------------------------
-	# Hyprland Daemon Ayarları
-	# -------------------------------------------------------------------------
-	export HYPRLAND_LOG_WLR=1
-	export HYPRLAND_NO_RT=1
-	export HYPRLAND_NO_SD_NOTIFY=1
-	export WLR_LOG=INFO
-
-	# -------------------------------------------------------------------------
-	# Varsayılan Uygulamalar
-	# -------------------------------------------------------------------------
-	export EDITOR=nvim
-	export VISUAL=nvim
-	export TERMINAL=kitty
-	export TERM=xterm-256color
-	export BROWSER=start-helium-kenp
-
-	# -------------------------------------------------------------------------
-	# Font Rendering
-	# -------------------------------------------------------------------------
-	if [[ -f /etc/fonts/fonts.conf ]]; then
-		export FONTCONFIG_FILE=/etc/fonts/fonts.conf
-	fi
-
-	# -------------------------------------------------------------------------
-	# Catppuccin Metadata
-	# -------------------------------------------------------------------------
-	export CATPPUCCIN_FLAVOR="$CATPPUCCIN_FLAVOR"
-	export CATPPUCCIN_ACCENT="$CATPPUCCIN_ACCENT"
 
 	load_dconf
 
@@ -2025,72 +2033,9 @@ setup_systemd_integration() {
 		debug_log "Systemd user session zaten çalışıyor"
 	fi
 
-	# -------------------------------------------------------------------------
-	# GDM MODE: Aggressive Environment Sync
-	# -------------------------------------------------------------------------
-	# GDM session'ında user services zaten başlamış durumda
-	# ANCAK yanlış environment ile başlamış olabilirler!
-	# Bu yüzden hedefli import gerekli
-
-	if [[ "$GDM_MODE" == "true" ]]; then
-		info "GDM Mode: Targeted environment sync başlatılıyor..."
-
-		# FULL environment import
-		local full_vars=(
-			"WAYLAND_DISPLAY"
-			"XDG_CURRENT_DESKTOP"
-			"XDG_SESSION_TYPE"
-			"XDG_SESSION_DESKTOP"
-			"GTK_THEME"
-			"XCURSOR_THEME"
-			"XCURSOR_SIZE"
-			"CATPPUCCIN_FLAVOR"
-			"CATPPUCCIN_ACCENT"
-			"QT_QPA_PLATFORM"
-			"MOZ_ENABLE_WAYLAND"
-			"LIBVA_DRIVER_NAME"
-			"VK_ICD_FILENAMES"
-		)
-
-		if systemctl --user import-environment "${full_vars[@]}" 2>/dev/null; then
-			info "✓ Systemd user environment güncellendi (${#full_vars[@]} variables)"
-		else
-			warn "Systemd import kısmen başarısız"
-		fi
-
-		# D-Bus activation environment - targeted sync
-		if dbus-update-activation-environment --systemd "${full_vars[@]}" 2>/dev/null; then
-			info "✓ D-Bus activation environment güncellendi"
-		else
-			warn "D-Bus update başarısız"
-		fi
-
-		info "✓ GDM targeted sync tamamlandı"
-
-	# -------------------------------------------------------------------------
-	# TTY MODE: Standard Sync
-	# -------------------------------------------------------------------------
-	else
-		info "TTY Mode: Standard environment sync..."
-
-		local std_vars="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP QT_QPA_PLATFORM"
-
-		if systemctl --user import-environment $std_vars 2>/dev/null; then
-			debug_log "Systemd environment import başarılı"
-		else
-			warn "Systemd import başarısız (systemd user session yok olabilir)"
-		fi
-
-		local dbus_vars="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE QT_QPA_PLATFORM"
-
-		if dbus-update-activation-environment --systemd $dbus_vars 2>/dev/null; then
-			debug_log "DBus activation environment güncellendi"
-		else
-			warn "DBus update başarısız"
-		fi
-
-		info "✓ TTY standard sync tamamlandı"
-	fi
+	apply_hypr_session_env
+	sync_session_environment
+	info "✓ Session environment sync tamamlandı"
 }
 
 # =============================================================================

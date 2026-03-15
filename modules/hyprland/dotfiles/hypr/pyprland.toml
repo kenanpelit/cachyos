@@ -7,7 +7,6 @@ plugins = [
   "lost_windows",
   "shift_monitors",
   "toggle_dpms",
-  "expose",
   "workspaces_follow_focus",
   "magnify",              # New: Window magnification
   "layout_center",        # New: Center layout
@@ -38,11 +37,6 @@ focus_follows_mouse = true # Follow mouse focus
 # ---------------------------------------------------------------------------
 # Feature Configurations - Enhanced
 # ---------------------------------------------------------------------------
-[expose]
-include_special = false
-include_floating = true    # Include floating windows
-show_titles = true         # Show window titles
-
 [lost_windows]
 include_special = false
 auto_recover = true        # Auto recover lost windows

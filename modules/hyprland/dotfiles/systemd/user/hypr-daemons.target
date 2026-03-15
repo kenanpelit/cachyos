@@ -1,5 +1,5 @@
 [Unit]
 Description=Hyprland session daemons stage
-Wants=hypr-bootstrap.service
 After=hypr-bootstrap.service
+Before=hypr-post-bootstrap.service
 PartOf=hyprland-session.target

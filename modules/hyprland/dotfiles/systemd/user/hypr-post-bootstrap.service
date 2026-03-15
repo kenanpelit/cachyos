@@ -1,6 +1,6 @@
 [Unit]
 Description=Hyprland post-bootstrap polish
-After=hypr-bootstrap.service dbus.service
+After=hypr-daemons.target dbus.service
 PartOf=hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland

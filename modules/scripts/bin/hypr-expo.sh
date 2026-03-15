@@ -2,19 +2,16 @@
 # ==============================================================================
 # Script: hypr-expo.sh
 # Description: Lightweight replacement for hyprexpo toggle using shell overview.
-# Usage: hypr-expo.sh [toggle|on|off|select]
+# Usage: hypr-expo.sh [toggle]
 # ==============================================================================
 set -euo pipefail
 
 cmd="${1:-toggle}"
 
-case "$cmd" in
-  toggle|on|enable|off|disable|select) ;;
-  *)
-    printf '%s\n' "usage: hypr-expo [toggle|on|off|select]" >&2
-    exit 2
-    ;;
-esac
+if [[ "$cmd" != "toggle" ]]; then
+  printf '%s\n' "usage: hypr-expo [toggle]" >&2
+  exit 2
+fi
 
 if command -v osc-shell >/dev/null 2>&1; then
   exec osc-shell ipc call dash toggle overview
