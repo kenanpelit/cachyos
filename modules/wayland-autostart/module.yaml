@@ -1,0 +1,13 @@
+tags:
+- wm
+- desktop
+description: Shared Wayland autostart masks for systemd-managed applets
+depends_on:
+- base
+dotfiles:
+- source: dotfiles/autostart/nm-applet.desktop
+  target: ~/.config/autostart/nm-applet.desktop
+- source: dotfiles/autostart/blueman.desktop
+  target: ~/.config/autostart/blueman.desktop
+- source: dotfiles/autostart/gnome-keyring-secrets.desktop
+  target: ~/.config/autostart/gnome-keyring-secrets.desktop

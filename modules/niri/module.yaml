@@ -7,13 +7,10 @@ depends_on:
 - xdg-dirs
 - scripts
 - fonts
+- wayland-autostart
 dotfiles:
 - source: dotfiles/niri/config.kdl
   target: ~/.config/niri/config.kdl
-- source: dotfiles/autostart/nm-applet.desktop
-  target: ~/.config/autostart/nm-applet.desktop
-- source: dotfiles/autostart/blueman.desktop
-  target: ~/.config/autostart/blueman.desktop
 - source: dotfiles/autostart/org.kde.kdeconnect.daemon.desktop
   target: ~/.config/autostart/org.kde.kdeconnect.daemon.desktop
 - source: dotfiles/autostart/snapper-tools-check.desktop
@@ -26,8 +23,6 @@ dotfiles:
   target: ~/.config/systemd/user/geoclue-agent.timer
 - source: dotfiles/autostart/geoclue-demo-agent.desktop
   target: ~/.config/autostart/geoclue-demo-agent.desktop
-- source: dotfiles/autostart/gnome-keyring-secrets.desktop
-  target: ~/.config/autostart/gnome-keyring-secrets.desktop
 - source: dotfiles/systemd/user/niri-session.target
   target: ~/.config/systemd/user/niri-session.target
 - source: dotfiles/systemd/user/niri-daemons.target

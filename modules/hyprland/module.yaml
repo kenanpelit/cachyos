@@ -5,6 +5,7 @@ description: Hyprland config (portable config)
 depends_on:
 - base
 - scripts
+- wayland-autostart
 dotfiles:
 - source: dotfiles/hypr/hyprland.conf
   target: ~/.config/hypr/hyprland.conf
@@ -12,12 +13,6 @@ dotfiles:
   target: ~/.config/hypr/conf.d/00-env.conf
 - source: dotfiles/environment.d/10-hyprland.conf
   target: ~/.config/environment.d/10-hyprland.conf
-- source: dotfiles/autostart/nm-applet.desktop
-  target: ~/.config/autostart/nm-applet.desktop
-- source: dotfiles/autostart/blueman.desktop
-  target: ~/.config/autostart/blueman.desktop
-- source: dotfiles/autostart/gnome-keyring-secrets.desktop
-  target: ~/.config/autostart/gnome-keyring-secrets.desktop
 - source: dotfiles/autostart/gnome-keyring-pkcs11.desktop
   target: ~/.config/autostart/gnome-keyring-pkcs11.desktop
 - source: dotfiles/hypr/conf.d/10-core.conf
