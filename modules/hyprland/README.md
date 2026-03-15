@@ -1,15 +1,15 @@
 # Hyprland Module
 
 This module owns the Hyprland compositor config, the Hyprland-specific
-`systemd --user` startup graph, and the host-local runtime overlays under
-`~/.config/hypr/conf.d/9*-local.conf`.
+`systemd --user` startup graph, and the managed monitor/workspace routing under
+`~/.config/hypr/conf.d/92-monitors.conf`.
 
 ## Responsibilities
 
 - install the Hyprland config split under `~/.config/hypr`
 - install the canonical Hypr session environment file
+- install the managed monitor/workspace mapping for this host
 - define the Hyprland session targets and services under `~/.config/systemd/user`
-- generate empty host-local runtime overlay files when they do not exist
 
 This module does not install the system-wide display-manager session entry
 anymore. That belongs to the `gdm` and `sessions` modules.
@@ -88,9 +88,8 @@ Daemon-stage units started by `hypr-daemons.target`:
   `hypr-session-init`.
 - `dotfiles/environment.d/10-hyprland.conf`
   Shared source of truth for session environment values.
-- `scripts/ensure-runtime-files.sh`
-  Creates host-local overlays only:
-  `90-outputs-local.conf`, `91-cursor-local.conf`, and `92-monitors-local.conf`.
+- `dotfiles/hypr/conf.d/92-monitors.conf`
+  Repo-managed monitor layout and workspace routing for the current setup.
 
 ## Conditions and notes
 
