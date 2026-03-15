@@ -1,7 +1,6 @@
 [Unit]
 Description=Browserpass native host socket
-PartOf=graphical-session.target niri-session.target hyprland-session.target
-After=graphical-session.target niri-session.target hyprland-session.target
+PartOf=graphical-session.target
 
 [Socket]
 ListenStream=%t/browserpass.sock
@@ -12,5 +11,3 @@ FlushPending=true
 
 [Install]
 WantedBy=graphical-session.target
-WantedBy=niri-session.target
-WantedBy=hyprland-session.target

@@ -23,8 +23,12 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-nm-applet.service
 - source: dotfiles/systemd/user/hypr-clip-persist.service
   target: ~/.config/systemd/user/hypr-clip-persist.service
-- source: dotfiles/systemd/user/hypr-init.service
-  target: ~/.config/systemd/user/hypr-init.service
+- source: dotfiles/systemd/user/hypr-bootstrap.service
+  target: ~/.config/systemd/user/hypr-bootstrap.service
+- source: dotfiles/systemd/user/hypr-daemons.target
+  target: ~/.config/systemd/user/hypr-daemons.target
+- source: dotfiles/systemd/user/hypr-post-bootstrap.service
+  target: ~/.config/systemd/user/hypr-post-bootstrap.service
 - source: dotfiles/systemd/user/gnome-keyring-secrets.service
   target: ~/.config/systemd/user/gnome-keyring-secrets.service
 post_install_hook: scripts/ensure-runtime-files.sh

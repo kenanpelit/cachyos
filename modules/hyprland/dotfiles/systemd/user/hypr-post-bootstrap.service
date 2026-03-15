@@ -1,0 +1,18 @@
+[Unit]
+Description=Hyprland post-bootstrap polish
+After=hypr-bootstrap.service dbus.service
+PartOf=hyprland-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+
+[Service]
+Type=oneshot
+TimeoutStartSec=30
+RemainAfterExit=yes
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
+ExecStart=/usr/bin/bash -lc 'if [[ -x "%h/.local/bin/hypr-osc" ]]; then "%h/.local/bin/hypr-osc" post-bootstrap; elif command -v hypr-osc >/dev/null 2>&1; then hypr-osc post-bootstrap; else echo "[hypr-post-bootstrap] hypr-osc not found; skipping"; fi'
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=hyprland-session.target

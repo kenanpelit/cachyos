@@ -1,0 +1,20 @@
+[Unit]
+Description=Hyprland bootstrap (init)
+Wants=pipewire.service wireplumber.service
+After=graphical-session.target pipewire.service wireplumber.service
+Before=hypr-daemons.target
+PartOf=hyprland-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+
+[Service]
+Type=oneshot
+TimeoutStartSec=60
+RemainAfterExit=yes
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
+ExecStart=/usr/bin/bash -lc 'for i in $(seq 1 120); do if command -v hyprctl >/dev/null 2>&1 && hyprctl version >/dev/null 2>&1; then break; fi; sleep 0.1; done; if [[ -x "%h/.local/bin/hypr-osc" ]]; then "%h/.local/bin/hypr-osc" bootstrap; elif command -v hypr-osc >/dev/null 2>&1; then hypr-osc bootstrap; else echo "[hypr-bootstrap] hypr-osc not found; skipping"; fi'
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=hyprland-session.target

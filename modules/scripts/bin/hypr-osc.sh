@@ -13,7 +13,7 @@ load_dconf() {
     gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-mauve-standard+default' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface icon-theme 'kora' 2>/dev/null || true
-    gsettings set org.gnome.desktop.interface cursor-theme 'catppuccin-mocha-mauve-cursors' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface cursor-theme 'capitaine-cursors' 2>/dev/null || true
     gsettings set org.gnome.desktop.interface font-name 'Maple Mono NF 12' 2>/dev/null || true
     gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu' 2>/dev/null || true
     
@@ -187,6 +187,8 @@ Commands:
   tty                Start Hyprland from TTY/DM
   clipse             Start clipse clipboard listener (background)
   init               Session bootstrap
+  bootstrap          Session bootstrap stage (internal)
+  post-bootstrap     Session post-bootstrap stage (internal)
   lock               Lock session via DMS/logind
   here               Move specific window to current workspace (smart match)
   arrange-windows     Move windows to target workspaces
@@ -1455,7 +1457,9 @@ EOF
       if command -v systemctl >/dev/null 2>&1; then
         units=(
           hyprland-session.target
-          hypr-init.service
+          hypr-bootstrap.service
+          hypr-daemons.target
+          hypr-post-bootstrap.service
           hyprland-polkit-agent.service
           hypr-nm-applet.service
           gnome-keyring-secrets.service
@@ -1893,7 +1897,7 @@ setup_environment() {
 
 	info "GTK Theme: $gtk_theme"
 
-	local cursor_theme="catppuccin-${CATPPUCCIN_FLAVOR}-${CATPPUCCIN_ACCENT}-cursors"
+	local cursor_theme="capitaine-cursors"
 	local cursor_size="${XCURSOR_SIZE:-24}"
 	export XCURSOR_THEME="$cursor_theme"
 	export XCURSOR_SIZE="$cursor_size"
@@ -2025,10 +2029,10 @@ setup_systemd_integration() {
 	# -------------------------------------------------------------------------
 	# GDM session'ında user services zaten başlamış durumda
 	# ANCAK yanlış environment ile başlamış olabilirler!
-	# Bu yüzden AGGRESSIVE sync + service restart gerekli
+	# Bu yüzden hedefli import gerekli
 
 	if [[ "$GDM_MODE" == "true" ]]; then
-		info "GDM Mode: Aggressive environment sync başlatılıyor..."
+		info "GDM Mode: Targeted environment sync başlatılıyor..."
 
 		# FULL environment import
 		local full_vars=(
@@ -2053,31 +2057,14 @@ setup_systemd_integration() {
 			warn "Systemd import kısmen başarısız"
 		fi
 
-		# D-Bus activation environment - FULL sync
-		if dbus-update-activation-environment --systemd --all 2>/dev/null; then
-			info "✓ D-Bus activation environment güncellendi (--all)"
+		# D-Bus activation environment - targeted sync
+		if dbus-update-activation-environment --systemd "${full_vars[@]}" 2>/dev/null; then
+			info "✓ D-Bus activation environment güncellendi"
 		else
 			warn "D-Bus update başarısız"
 		fi
 
-		# CRITICAL: User services'i restart et (yeni environment ile başlasın)
-		info "User services restart ediliyor (yeni environment için)..."
-
-		local services_to_restart=(
-			"mako.service"
-			"hypridle.service"
-		)
-
-		sleep 2
-
-		for svc in "${services_to_restart[@]}"; do
-			if systemctl --user is-active "$svc" &>/dev/null; then
-				debug_log "Restarting: $svc"
-				systemctl --user restart "$svc" 2>/dev/null || true
-			fi
-		done
-
-		info "✓ GDM aggressive sync tamamlandı"
+		info "✓ GDM targeted sync tamamlandı"
 
 	# -------------------------------------------------------------------------
 	# TTY MODE: Standard Sync
@@ -2341,22 +2328,20 @@ main() {
 main "$@"
     )
     ;;
-  init)
+  init|bootstrap)
     (
 set -euo pipefail
 
 # ------------------------------------------------------------------------------
-# Embedded: hypr-init.sh
+# Embedded: hypr-bootstrap.sh
 # ------------------------------------------------------------------------------
 
 # ==============================================================================
-# hypr-init - Session bootstrap for Hyprland (monitors + audio)
+# hypr-bootstrap - Session bootstrap for Hyprland (monitors + audio)
 # ------------------------------------------------------------------------------
 # Runs early in the Hyprland session to:
-#   1) Sync Hyprland env into systemd/dbus
-#   2) Normalize monitor/workspace focus
-#   3) Initialize PipeWire defaults via osc-soundctl init
-#   4) Ask delayed XDG portal orchestration to reconcile backend selection
+#   1) Normalize monitor/workspace focus
+#   2) Initialize PipeWire defaults via osc-soundctl init
 # Safe to run multiple times; each step is optional if the tool is missing.
 # ==============================================================================
 
@@ -2364,7 +2349,54 @@ set -euo pipefail
 
 load_dconf
 
-LOG_TAG="hypr-init"
+LOG_TAG="hypr-bootstrap"
+log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
+warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
+
+run_if_present() {
+  local cmd="$1"; shift
+  if command -v "$cmd" >/dev/null 2>&1; then
+    if "$cmd" "$@"; then
+      log "$cmd $*"
+    else
+      warn "$cmd $* failed; continuing"
+    fi
+  else
+    warn "$cmd not found; skipping"
+  fi
+}
+
+# Populate HYPRLAND_INSTANCE_SIGNATURE in service contexts where only
+# XDG_RUNTIME_DIR is available.
+ensure_hypr_env || true
+
+# Ensure we are in a Hyprland session (best-effort)
+if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+  warn "HYPRLAND_INSTANCE_SIGNATURE is unset; continuing anyway"
+fi
+
+# Step 1: monitor/workspace normalization
+run_if_present hypr-osc switch
+
+# Step 2: audio defaults (volume + last sink/source)
+run_if_present osc-soundctl init
+
+log "hypr-bootstrap completed."
+    )
+    ;;
+  post-bootstrap)
+    (
+set -euo pipefail
+
+# ------------------------------------------------------------------------------
+# Embedded: hypr-post-bootstrap.sh
+# ------------------------------------------------------------------------------
+
+set -euo pipefail
+
+load_dconf
+
+LOG_TAG="hypr-post-bootstrap"
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
 warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
 
@@ -2397,29 +2429,23 @@ start_user_service_if_present() {
   fi
 }
 
-# Populate HYPRLAND_INSTANCE_SIGNATURE in service contexts where only
-# XDG_RUNTIME_DIR is available.
 ensure_hypr_env || true
 
-# Ensure we are in a Hyprland session (best-effort)
-if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
-  warn "HYPRLAND_INSTANCE_SIGNATURE is unset; continuing anyway"
+run_if_present osc-shell ensure
+
+if command -v hyprctl >/dev/null 2>&1; then
+  if hyprctl setcursor "${XCURSOR_THEME:-capitaine-cursors}" "${XCURSOR_SIZE:-24}" >/dev/null 2>&1; then
+    log "hyprctl setcursor ${XCURSOR_THEME:-capitaine-cursors} ${XCURSOR_SIZE:-24}"
+  else
+    warn "hyprctl setcursor failed; continuing"
+  fi
+else
+  warn "hyprctl not found; skipping cursor sync"
 fi
 
-# Step 1: sync desktop env into systemd --user / dbus activation
-run_if_present hypr-osc env-sync
-
-# Step 2: monitor/workspace normalization
-run_if_present hypr-osc switch
-
-# Step 3: audio defaults (volume + last sink/source)
-run_if_present osc-soundctl init
-
-# Step 4: ask the delayed portal orchestrator to pick GNOME/GTK/Hyprland
-# backends with a complete Hyprland environment.
 start_user_service_if_present xdg-desktop-portal-delayed.service
 
-log "hypr-init completed."
+log "hypr-post-bootstrap completed."
     )
     ;;
   workspace-monitor)

@@ -1,7 +1,7 @@
 [Unit]
-Description=Hyprland compositor session
+Description=Hyprland session (user services)
 Documentation=man:systemd.special(7)
-Wants=graphical-session.target graphical-session-pre.target xdg-desktop-autostart.target
+Wants=graphical-session.target graphical-session-pre.target xdg-desktop-autostart.target hypr-bootstrap.service hypr-daemons.target hypr-post-bootstrap.service
 After=graphical-session.target graphical-session-pre.target dbus.service
 BindsTo=graphical-session.target
 PartOf=graphical-session.target
