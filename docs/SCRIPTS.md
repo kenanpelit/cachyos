@@ -178,6 +178,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `hypr-bootstrap`
+**Description:** Early Hyprland bootstrap for monitor/workspace normalization and
+
+**Usage:** `hypr-bootstrap`
+
+---
+
 ### 📂 `hypr-expo`
 **Description:** Lightweight replacement for hyprexpo toggle using shell overview.
 
@@ -192,10 +199,24 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `hypr-post-bootstrap`
+**Description:** Late Hyprland session polish for shell startup, cursor sync and
+
+**Usage:** `hypr-post-bootstrap`
+
+---
+
 ### 📂 `hypr-scroll`
 **Description:** Wrapper around core Hyprland scrolling layout dispatchers with fallbacks.
 
 **Usage:** `hypr-scroll <subcommand> [args...]`
+
+---
+
+### 📂 `hypr-session-init`
+**Description:** Sync Hyprland session env into systemd/dbus and optionally start
+
+**Usage:** `hypr-session-init [--no-start-target]`
 
 ---
 
