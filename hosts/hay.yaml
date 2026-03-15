@@ -45,6 +45,7 @@ enabled_modules:
 - qt
 - niri
 - hyprland
+- hyprsunset
 - sessions
 - sway
 - stasis

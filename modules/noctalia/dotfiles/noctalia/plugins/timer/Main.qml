@@ -226,7 +226,14 @@ Item {
     ToastService.showNotice(
       pluginApi?.tr("toast.title") || "Timer",
       pluginApi?.tr("toast.finished") || "Timer finished!",
-      "hourglass"
+      "hourglass",
+      {
+        onDismissed: () => {
+          if (root.cdSoundPlaying) {
+             root.countdownPause();
+          }
+        }
+      }
     );
   }
 }

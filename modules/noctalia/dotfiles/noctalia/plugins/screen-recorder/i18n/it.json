@@ -12,7 +12,16 @@
     "start-recording": "P錄影 (開始錄影)",
     "started": "Aufnahme gestartet.",
     "stop-recording": "Skjáupptökutæki (hætta upptöku)",
-    "stopping": "Nagpapatigil ng pagrekord..."
+    "stopping": "Nagpapatigil ng pagrekord...",
+    "monitor-not-found": "Impossibile rilevare il monitor sotto il cursore.",
+    "replay-saved": "Replay salvato.",
+    "replay-started": "Buffer di replay avviato.",
+    "replay-stopped": "Buffer di replay interrotto.",
+    "replay-failed": "Impossibile avviare il buffer di replay.",
+    "replay-active": "Registratore schermo (replay attivo)",
+    "save-replay": "Salva buffer di replay",
+    "start-replay": "Avvia buffer di replay",
+    "stop-replay": "Interrompi buffer di replay"
   },
   "name": "Registratore Schermo",
   "settings": {
@@ -40,6 +49,18 @@
       "show-cursor-description": "Registra il cursore del mouse nel video",
       "title": "Generale"
     },
+    "replay": {
+      "enable": "Abilita buffer di replay",
+      "enable-desc": "Mantiene un buffer ciclico dell'attività recente dello schermo che può essere salvato a richiesta",
+      "duration": "Durata replay",
+      "duration-desc": "Lunghezza del buffer di replay in secondi",
+      "custom-duration": "Durata replay personalizzata",
+      "custom-duration-desc": "Inserisci una durata personalizzata del buffer di replay in secondi",
+      "storage": "Archiviazione replay",
+      "storage-desc": "Dove archiviare il buffer di replay",
+      "storage-ram": "RAM (consigliato)",
+      "storage-disk": "Disco"
+    },
     "title": "Impostazioni Registratore Schermo",
     "video": {
       "codec": "Codec video",
@@ -66,7 +87,8 @@
       "source-desc": "Portal è consigliato, se si ottengono artefatti prova Schermo",
       "sources-portal": "Portale",
       "sources-screen": "Skjerm",
-      "title": "Impostazioni Video"
+      "title": "Impostazioni Video",
+      "sources-focused-monitor": "Focused monitor (Hyprland)"
     }
   }
 }

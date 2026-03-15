@@ -12,7 +12,16 @@
     "start-recording": "Qeydkerê ekranê (dest bi qeydkirinê bike)",
     "started": "Qeydkirin dest pê kir.",
     "stop-recording": "Tomarkera dîmenderê (tomarkirinê bide sekinandin)",
-    "stopping": "Qeydkirin radiweste…"
+    "stopping": "Qeydkirin radiweste…",
+    "monitor-not-found": "نەتوانرا مۆنیتۆری ژێر نیشاندەر دیاریبکرێت.",
+    "replay-saved": "دووبارەکردنەوە پاشکەوت کرا.",
+    "replay-started": "بافەری دووبارەکردنەوە دەستی پێکرد.",
+    "replay-stopped": "بافەری دووبارەکردنەوە وەستا.",
+    "replay-failed": "دەستپێکردنی بافەری دووبارەکردنەوە سەرکەوتوو نەبوو.",
+    "replay-active": "تۆمارکەری شاشە (دووبارەکردنەوە چالاکە)",
+    "save-replay": "پاشکەوتکردنی بافەری دووبارەکردنەوە",
+    "start-replay": "دەستپێکردنی بافەری دووبارەکردنەوە",
+    "stop-replay": "وەستاندنی بافەری دووبارەکردنەوە"
   },
   "name": "Qeydkerê Ekranê",
   "settings": {
@@ -40,6 +49,18 @@
       "show-cursor-description": "Qeydê nîşankerê mişkê di vîdeoyê de",
       "title": "Giştî"
     },
+    "replay": {
+      "enable": "چالاککردنی بافەری دووبارەکردنەوە",
+      "enable-desc": "هێشتنەوەی بافەرێکی خولاوەی چالاکییەکانی شاشە کە دەتوانرێت بەپێی داwaکاری پاشکەوت بکرێت",
+      "duration": "ماوەی دووبارەکردنەوە",
+      "duration-desc": "درێژی بافەری دووبارەکردنەوە بە چرکە",
+      "custom-duration": "ماوەی دووبارەکردنی دەستکاریکراو",
+      "custom-duration-desc": "ماوەیەکی دەستکاریکراوی بافەری دووبارەکردنەوە بە چرکە بنووسە",
+      "storage": "کۆگای دووبارەکردنەوە",
+      "storage-desc": "لە کوێ بافەری دووبارەکردنەوە کۆگا بکرێت",
+      "storage-ram": "RAM (پێشنیار کراوە)",
+      "storage-disk": "دیسک"
+    },
     "title": "Mîhengên Qeydkerê Dîmenderê",
     "video": {
       "codec": "Kodêka vîdyoyî",
@@ -66,7 +87,8 @@
       "source-desc": "Portal tê pêşniyarkirin, eger tu artefaktan bibînî Screen biceribîne",
       "sources-portal": "Portal",
       "sources-screen": "Dîmende",
-      "title": "Mîhengên Vîdeoyê"
+      "title": "Mîhengên Vîdeoyê",
+      "sources-focused-monitor": "Focused monitor (Hyprland)"
     }
   }
 }

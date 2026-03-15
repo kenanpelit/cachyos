@@ -129,6 +129,14 @@ Item {
     }
   }
 
+  onVisibleChanged: {
+    if (visible) {
+      if (!isRunning && !isStopwatchMode && totalSeconds === 0) {
+        timerInput.forceActiveFocus();
+      }
+    }
+  }
+
   Rectangle {
     id: panelContainer
     anchors.fill: parent
@@ -357,11 +365,17 @@ Item {
 
             Keys.onPressed: event => {
               if (isRunning || isStopwatchMode || totalSeconds > 0) {
+                if (event.key === Qt.Key_Space) {
+                  if (isRunning) mainInstance.timerPause();
+                  else mainInstance.timerStart();
+                  event.accepted = true;
+                  return;
+                }
                 event.accepted = true;
                 return;
               }
               
-              const keyText = event.text;
+              const keyText = event.text.toLowerCase();
 
               if (event.key === Qt.Key_Backspace) {
                 if (timerDisplayItem.isEditing && timerDisplayItem.inputBuffer.length > 0) {
@@ -385,10 +399,13 @@ Item {
                 return;
               }
 
-              if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+              if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
                 applyTimeFromBuffer();
                 timerDisplayItem.isEditing = false;
                 timerInput.focus = false;
+                if (remainingSeconds > 0) {
+                  mainInstance.timerStart();
+                }
                 event.accepted = true;
                 return;
               }
@@ -398,6 +415,23 @@ Item {
                 setTimerRemainingSeconds(0);
                 timerDisplayItem.isEditing = false;
                 timerInput.focus = false;
+                event.accepted = true;
+                return;
+              }
+
+              if (keyText === 'h' || keyText === 'm' || keyText === 's') {
+                if (timerDisplayItem.inputBuffer.length > 0) {
+                  let val = parseInt(timerDisplayItem.inputBuffer) || 0;
+                  let secs = 0;
+                  if (keyText === 'h') secs = val * 3600;
+                  else if (keyText === 'm') secs = val * 60;
+                  else if (keyText === 's') secs = val;
+                  
+                  setTimerRemainingSeconds(Math.min(99 * 3600 + 59 * 60 + 59, secs));
+                  timerDisplayItem.inputBuffer = "";
+                  timerDisplayItem.isEditing = false;
+                  timerInput.focus = false;
+                }
                 event.accepted = true;
                 return;
               }
@@ -542,6 +576,16 @@ Item {
         }
       }
         }
+      }
+    }
+  }
+
+  Shortcut {
+    sequence: "Space"
+    onActivated: {
+      if (!timerInput.activeFocus) {
+        if (isRunning) mainInstance.timerPause();
+        else if (isStopwatchMode || remainingSeconds > 0) mainInstance.timerStart();
       }
     }
   }
