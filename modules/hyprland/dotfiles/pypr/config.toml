@@ -27,7 +27,7 @@ max_workspaces = 9
 follow_mouse = true        # Follow mouse workspace
 
 # ---------------------------------------------------------------------------
-# Monitor Management - Enhanced  
+# Monitor Management - Enhanced
 # ---------------------------------------------------------------------------
 
 [shift_monitors]
@@ -53,7 +53,7 @@ factor = 1.5              # Magnification factor
 duration = 200            # Animation duration (ms)
 
 # ---------------------------------------------------------------------------
-# New: Layout Center Plugin  
+# New: Layout Center Plugin
 # ---------------------------------------------------------------------------
 [layout_center]
 margin = 60               # Margin
