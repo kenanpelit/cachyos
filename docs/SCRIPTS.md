@@ -655,9 +655,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `screenshot`
-**Description:** Wayland screenshot tool using grim/slurp
+**Description:** Screenshot helper for Hyprland, Niri, Sway, and GNOME
 
-**Usage:** `screenshot.sh [options]`
+**Usage:** `screenshot.sh [action]`
 
 ---
 
