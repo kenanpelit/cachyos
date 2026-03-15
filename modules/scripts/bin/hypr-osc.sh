@@ -48,31 +48,64 @@ ensure_hypr_env() {
   fi
 }
 
-hypr_session_env_file() {
-  printf '%s\n' "${HYPR_SESSION_ENV_FILE:-$HOME/.config/hypr/conf.d/00-env.conf}"
+hypr_session_env_files() {
+  printf '%s\n' \
+    "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-hyprland.conf}" \
+    "${HYPR_SESSION_ENV_FILE:-$HOME/.config/hypr/conf.d/00-env.conf}"
 }
 
-apply_hypr_session_env() {
-  local env_file line payload key value
-  env_file="$(hypr_session_env_file)"
+parse_hypr_session_env_file() {
+  local env_file="$1"
+  local line payload key value
 
   [[ -r "$env_file" ]] || return 0
 
   while IFS= read -r line; do
-    [[ "$line" == env=* ]] || continue
-    payload="${line#env=}"
-    key="${payload%%,*}"
-    value="${payload#*,}"
+    [[ -n "$line" ]] || continue
+    [[ "${line#\#}" == "$line" ]] || continue
+
+    if [[ "$line" == env=* ]]; then
+      payload="${line#env=}"
+      key="${payload%%,*}"
+      value="${payload#*,}"
+    elif [[ "$line" == *=* ]]; then
+      key="${line%%=*}"
+      value="${line#*=}"
+    else
+      continue
+    fi
+
     [[ -n "$key" ]] || continue
-    export "$key=$value"
+    printf '%s=%s\n' "$key" "$value"
   done <"$env_file"
 }
 
-collect_hypr_session_env_vars() {
-  local env_file line payload key
-  env_file="$(hypr_session_env_file)"
+apply_hypr_session_env() {
+  local env_file kv key value
 
-  if [[ ! -r "$env_file" ]]; then
+  while IFS= read -r env_file; do
+    while IFS= read -r kv; do
+      key="${kv%%=*}"
+      value="${kv#*=}"
+      [[ -n "$key" ]] || continue
+      export "$key=$value"
+    done < <(parse_hypr_session_env_file "$env_file")
+  done < <(hypr_session_env_files)
+}
+
+collect_hypr_session_env_vars() {
+  local env_file kv key
+  local emitted=0
+
+  while IFS= read -r env_file; do
+    while IFS= read -r kv; do
+      key="${kv%%=*}"
+      [[ -n "$key" ]] && printf '%s\n' "$key"
+      emitted=1
+    done < <(parse_hypr_session_env_file "$env_file")
+  done < <(hypr_session_env_files)
+
+  if [[ "$emitted" -eq 0 ]]; then
     printf '%s\n' \
       XDG_SESSION_TYPE \
       XDG_SESSION_DESKTOP \
@@ -81,27 +114,41 @@ collect_hypr_session_env_vars() {
       GTK_THEME \
       GTK_USE_PORTAL \
       GTK_APPLICATION_PREFER_DARK_THEME \
+      GDK_SCALE \
       XCURSOR_THEME \
       XCURSOR_SIZE \
+      HYPRCURSOR_THEME \
+      HYPRCURSOR_SIZE \
+      XDG_ICON_THEME \
       QT_QPA_PLATFORM \
       QT_QPA_PLATFORMTHEME \
       QT_QPA_PLATFORMTHEME_QT6 \
+      QT_STYLE_OVERRIDE \
+      QT_AUTO_SCREEN_SCALE_FACTOR \
+      QT_WAYLAND_DISABLE_WINDOWDECORATION \
+      QT_WAYLAND_FORCE_DPI \
+      QT_FONT_DPI \
+      QT_ENABLE_HIGHDPI_SCALING \
+      QT_QPA_SYSTEMTRAY_DARK_MODE \
       MOZ_ENABLE_WAYLAND \
+      ELECTRON_OZONE_PLATFORM_HINT \
       _JAVA_AWT_WM_NONREPARENTING \
       LIBVA_DRIVER_NAME \
       FONTCONFIG_FILE \
       BROWSER \
+      EDITOR \
+      VISUAL \
+      TERMINAL \
       CATPPUCCIN_FLAVOR \
       CATPPUCCIN_ACCENT
-    return 0
   fi
+}
 
-  while IFS= read -r line; do
-    [[ "$line" == env=* ]] || continue
-    payload="${line#env=}"
-    key="${payload%%,*}"
-    [[ -n "$key" ]] && printf '%s\n' "$key"
-  done <"$env_file"
+queue_dconf_sync() {
+  if command -v gsettings >/dev/null 2>&1; then
+    (load_dconf >/dev/null 2>&1 || true) &
+    disown || true
+  fi
 }
 
 sync_session_environment() {
@@ -1491,7 +1538,7 @@ EOF
       ensure_hypr_env || true
 
       apply_hypr_session_env
-      load_dconf
+      queue_dconf_sync
       sync_session_environment
     )
     ;;
@@ -1963,7 +2010,7 @@ setup_environment() {
 		debug_log "Klavye: Türkçe F"
 	fi
 
-	load_dconf
+	queue_dconf_sync
 
 	info "Environment setup tamamlandı"
 }
@@ -2297,8 +2344,6 @@ set -euo pipefail
 
 set -euo pipefail
 
-load_dconf
-
 LOG_TAG="hypr-bootstrap"
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
 warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
@@ -2344,7 +2389,7 @@ set -euo pipefail
 
 set -euo pipefail
 
-load_dconf
+queue_dconf_sync
 
 LOG_TAG="hypr-post-bootstrap"
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }

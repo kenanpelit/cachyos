@@ -9,6 +9,8 @@ dotfiles:
   target: ~/.config/hypr/hyprland.conf
 - source: dotfiles/hypr/conf.d/00-env.conf
   target: ~/.config/hypr/conf.d/00-env.conf
+- source: dotfiles/environment.d/10-hyprland.conf
+  target: ~/.config/environment.d/10-hyprland.conf
 - source: dotfiles/hypr/conf.d/10-core.conf
   target: ~/.config/hypr/conf.d/10-core.conf
 - source: dotfiles/hypr/conf.d/20-input.conf
