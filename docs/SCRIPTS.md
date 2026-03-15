@@ -181,7 +181,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ### 📂 `hypr-expo`
 **Description:** Lightweight replacement for hyprexpo toggle using shell overview.
 
-**Usage:** `hypr-expo.sh [toggle|on|off|select]`
+**Usage:** `hypr-expo.sh [toggle]`
 
 ---
 
