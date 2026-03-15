@@ -35,21 +35,23 @@ for f in 90-outputs-local.conf 91-cursor-local.conf 92-monitors-local.conf; do
     rm -f "$path"
   fi
   if [ ! -e "$path" ]; then
-    if [ "$f" = "92-monitors-local.conf" ]; then
+    if [ "$f" = "91-cursor-local.conf" ]; then
+      cat >"$path" <<'EOF'
+# Host-local cursor overrides for Hyprland.
+# Uncomment only if this machine needs software cursors or cursor quirks.
+#
+# cursor {
+#   no_hardware_cursors=1
+# }
+EOF
+    elif [ "$f" = "92-monitors-local.conf" ]; then
       cat >"$path" <<'EOF'
 # Host-local monitor and workspace routing.
-monitor=desc:Dell Inc. DELL UP2716D KRXTR88N909L,2560x1440@59,0x0,1
-monitor=desc:Chimei Innolux Corporation 0x143F,1920x1200@60,320x1440,1
+# Add machine-specific monitor descriptors here when needed.
+# Example:
+# monitor=desc:Vendor Model Serial,2560x1440@60,0x0,1
+# workspace=1, monitor:desc:Vendor Model Serial, default:true
 monitor=,preferred,auto,1
-workspace=1, monitor:desc:Dell Inc. DELL UP2716D KRXTR88N909L, default:true
-workspace=2, monitor:desc:Dell Inc. DELL UP2716D KRXTR88N909L
-workspace=3, monitor:desc:Dell Inc. DELL UP2716D KRXTR88N909L
-workspace=4, monitor:desc:Dell Inc. DELL UP2716D KRXTR88N909L
-workspace=5, monitor:desc:Dell Inc. DELL UP2716D KRXTR88N909L
-workspace=6, monitor:desc:Dell Inc. DELL UP2716D KRXTR88N909L
-workspace=7, monitor:desc:Chimei Innolux Corporation 0x143F, default:true
-workspace=8, monitor:desc:Chimei Innolux Corporation 0x143F
-workspace=9, monitor:desc:Chimei Innolux Corporation 0x143F
 EOF
     elif [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
       install -m0644 -o "$REAL_USER" -g "$USER_GROUP" /dev/null "$path"

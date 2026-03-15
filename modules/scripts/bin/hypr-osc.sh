@@ -49,9 +49,7 @@ ensure_hypr_env() {
 }
 
 hypr_session_env_files() {
-  printf '%s\n' \
-    "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-hyprland.conf}" \
-    "${HYPR_SESSION_ENV_FILE:-$HOME/.config/hypr/conf.d/00-env.conf}"
+  printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-hyprland.conf}"
 }
 
 normalize_colon_list() {
@@ -118,11 +116,11 @@ normalize_session_paths() {
   local default_path default_data_dirs
 
   default_path="${HOME}/.local/share/zinit/polaris/bin:${HOME}/.local/bin:${HOME}/bin:${HOME}/.iptv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:${HOME}/.local/share/go/bin"
-  PATH="$(normalize_colon_list "$default_path")"
+  PATH="$(normalize_colon_list "${PATH:-$default_path}")"
   export PATH
 
   default_data_dirs="${HOME}/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
-  XDG_DATA_DIRS="$(normalize_colon_list "$default_data_dirs")"
+  XDG_DATA_DIRS="$(normalize_colon_list "${XDG_DATA_DIRS:-$default_data_dirs}")"
   export XDG_DATA_DIRS
 }
 
@@ -1565,17 +1563,12 @@ EOF
     )
     ;;
 
-  env-sync)
-    (
-      set -euo pipefail
-      ensure_hypr_env || true
-
-      apply_hypr_session_env
-      normalize_session_paths
-      queue_dconf_sync
-      sync_session_environment
-    )
-    ;;
+	  env-sync)
+	    if [[ -x "$HOME/.local/bin/hypr-session-init" ]]; then
+	      exec "$HOME/.local/bin/hypr-session-init" --no-start-target
+	    fi
+	    exec hypr-session-init --no-start-target
+	    ;;
 
   doctor|diag)
     (
@@ -1612,14 +1605,15 @@ EOF
 
       printf '\n%s\n' "[systemd --user]"
       if command -v systemctl >/dev/null 2>&1; then
-        units=(
-          hyprland-session.target
-          hypr-bootstrap.service
-          hypr-daemons.target
-          hypr-post-bootstrap.service
-          hyprland-polkit-agent.service
-          hypr-nm-applet.service
-          hypr-blueman-applet.service
+	        units=(
+	          hyprland-session.target
+	          hypr-bootstrap.service
+	          hypr-daemons.target
+	          hypr-post-bootstrap.service
+	          pyprland.service
+	          hyprland-polkit-agent.service
+	          hypr-nm-applet.service
+	          hypr-blueman-applet.service
           gnome-keyring-secrets.service
           hypr-clip-persist.service
           xdg-desktop-portal-delayed.timer
@@ -2027,8 +2021,8 @@ setup_environment() {
 	export SYSTEMD_OFFLINE=0
 	debug_log "✓ SYSTEMD_OFFLINE=0 set - systemd user services enabled"
 
-	# Static session environment now lives in ~/.config/hypr/conf.d/00-env.conf.
-	apply_hypr_session_env
+		# Shared session environment now lives in ~/.config/environment.d/10-hyprland.conf.
+		apply_hypr_session_env
 	export WLR_LOG=INFO
 	debug_log "Wayland session: ${XDG_CURRENT_DESKTOP:-Hyprland}"
 	info "GTK Theme: ${GTK_THEME:-unset}"
@@ -2360,124 +2354,18 @@ main() {
 main "$@"
     )
     ;;
-  init|bootstrap)
-    (
-set -euo pipefail
-
-# ------------------------------------------------------------------------------
-# Embedded: hypr-bootstrap.sh
-# ------------------------------------------------------------------------------
-
-# ==============================================================================
-# hypr-bootstrap - Session bootstrap for Hyprland (monitors + audio)
-# ------------------------------------------------------------------------------
-# Runs early in the Hyprland session to:
-#   1) Normalize monitor/workspace focus
-#   2) Initialize PipeWire defaults via osc-soundctl init
-# Safe to run multiple times; each step is optional if the tool is missing.
-# ==============================================================================
-
-set -euo pipefail
-
-LOG_TAG="hypr-bootstrap"
-log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
-warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
-
-run_if_present() {
-  local cmd="$1"; shift
-  if command -v "$cmd" >/dev/null 2>&1; then
-    if "$cmd" "$@"; then
-      log "$cmd $*"
-    else
-      warn "$cmd $* failed; continuing"
-    fi
-  else
-    warn "$cmd not found; skipping"
-  fi
-}
-
-# Populate HYPRLAND_INSTANCE_SIGNATURE in service contexts where only
-# XDG_RUNTIME_DIR is available.
-ensure_hypr_env || true
-
-# Ensure we are in a Hyprland session (best-effort)
-if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
-  warn "HYPRLAND_INSTANCE_SIGNATURE is unset; continuing anyway"
-fi
-
-# Step 1: monitor/workspace normalization
-run_if_present hypr-osc switch
-
-# Step 2: audio defaults (volume + last sink/source)
-run_if_present osc-soundctl init
-
-log "hypr-bootstrap completed."
-    )
-    ;;
-  post-bootstrap)
-    (
-set -euo pipefail
-
-# ------------------------------------------------------------------------------
-# Embedded: hypr-post-bootstrap.sh
-# ------------------------------------------------------------------------------
-
-set -euo pipefail
-
-queue_dconf_sync
-
-LOG_TAG="hypr-post-bootstrap"
-log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
-warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
-
-run_if_present() {
-  local cmd="$1"; shift
-  if command -v "$cmd" >/dev/null 2>&1; then
-    if "$cmd" "$@"; then
-      log "$cmd $*"
-    else
-      warn "$cmd $* failed; continuing"
-    fi
-  else
-    warn "$cmd not found; skipping"
-  fi
-}
-
-start_user_service_if_present() {
-  local svc="$1"
-  command -v systemctl >/dev/null 2>&1 || return 0
-
-  if ! systemctl --user show -p LoadState "$svc" >/dev/null 2>&1; then
-    warn "$svc is not installed; skipping"
-    return 0
-  fi
-
-  if command -v timeout >/dev/null 2>&1; then
-    timeout 3s systemctl --user start "$svc" >/dev/null 2>&1 || true
-  else
-    systemctl --user start "$svc" >/dev/null 2>&1 || true
-  fi
-}
-
-ensure_hypr_env || true
-
-run_if_present osc-shell ensure
-
-if command -v hyprctl >/dev/null 2>&1; then
-  if hyprctl setcursor "${XCURSOR_THEME:-capitaine-cursors}" "${XCURSOR_SIZE:-24}" >/dev/null 2>&1; then
-    log "hyprctl setcursor ${XCURSOR_THEME:-capitaine-cursors} ${XCURSOR_SIZE:-24}"
-  else
-    warn "hyprctl setcursor failed; continuing"
-  fi
-else
-  warn "hyprctl not found; skipping cursor sync"
-fi
-
-start_user_service_if_present xdg-desktop-portal-delayed.service
-
-log "hypr-post-bootstrap completed."
-    )
-    ;;
+	  init|bootstrap)
+	    if [[ -x "$HOME/.local/bin/hypr-bootstrap" ]]; then
+	      exec "$HOME/.local/bin/hypr-bootstrap"
+	    fi
+	    exec hypr-bootstrap
+	    ;;
+	  post-bootstrap)
+	    if [[ -x "$HOME/.local/bin/hypr-post-bootstrap" ]]; then
+	      exec "$HOME/.local/bin/hypr-post-bootstrap"
+	    fi
+	    exec hypr-post-bootstrap
+	    ;;
   workspace-monitor)
     (
 set -euo pipefail
