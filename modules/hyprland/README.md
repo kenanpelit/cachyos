@@ -87,8 +87,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   Minimal root config that sources the split files and starts
   `hypr-session-init`.
 - `dotfiles/hypr/conf.d/15-theme.conf`
-  Theme palette and visual color assignments for borders, groupbars, and the
-  compositor background.
+  Theme palette plus the visual assignments for borders, blur, shadow, opacity,
+  groupbars, compositor background, workspace chrome exceptions, and Hyprland
+  theme string values used by binds.
 - `dotfiles/environment.d/10-hyprland.conf`
   Shared source of truth for session environment values.
 - `dotfiles/hypr/conf.d/92-monitors.conf`

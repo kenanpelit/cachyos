@@ -23,8 +23,6 @@ dotfiles:
   target: ~/.config/hypr/conf.d/30-rules.conf
 - source: dotfiles/hypr/conf.d/40-binds.conf
   target: ~/.config/hypr/conf.d/40-binds.conf
-- source: dotfiles/hypr/conf.d/50-workspaces.conf
-  target: ~/.config/hypr/conf.d/50-workspaces.conf
 - source: dotfiles/hypr/conf.d/60-submaps.conf
   target: ~/.config/hypr/conf.d/60-submaps.conf
 - source: dotfiles/hypr/conf.d/92-monitors.conf
