@@ -2,7 +2,7 @@
 # ==============================================================================
 # Script: ppp-auto-profile.sh
 # Description: Periodic power profile chooser using live CPU usage samples
-# Usage: ppp-auto-profile.sh
+# Usage: ppp-auto-profile.sh [--help|--status]
 # ==============================================================================
 set -euo pipefail
 
@@ -28,6 +28,34 @@ SWITCH_COOLDOWN_SEC="${PPP_SWITCH_COOLDOWN_SEC:-60}"
 NOTIFY="${PPP_NOTIFY:-1}"
 
 need() { command -v "$1" >/dev/null 2>&1; }
+
+print_help() {
+  cat <<EOF
+ppp-auto-profile
+
+Periodic power profile chooser for power-profiles-daemon.
+
+Usage:
+  ppp-auto-profile           Run one sampling/control pass
+  ppp-auto-profile --status  Print current state and thresholds
+  ppp-auto-profile --help    Show this help
+
+Behavior:
+  - Forces balanced on battery.
+  - On AC, uses live CPU busy samples from /proc/stat.
+  - Switches to performance after ${HIGH_STREAK_REQUIRED} consecutive samples >= ${HIGH_BUSY_PERCENT}%.
+  - Switches to balanced after ${LOW_STREAK_REQUIRED} consecutive samples <= ${LOW_BUSY_PERCENT}%.
+  - Uses a ${SWITCH_COOLDOWN_SEC}s cooldown after profile changes.
+
+Environment overrides:
+  PPP_HIGH_BUSY_PERCENT
+  PPP_LOW_BUSY_PERCENT
+  PPP_HIGH_STREAK_REQUIRED
+  PPP_LOW_STREAK_REQUIRED
+  PPP_SWITCH_COOLDOWN_SEC
+  PPP_NOTIFY
+EOF
+}
 
 read_cpu_sample() {
   local user nice system idle iowait irq softirq steal total idle_total
@@ -65,6 +93,60 @@ prev_idle=$prev_idle
 high_streak=$high_streak
 low_streak=$low_streak
 last_switch_epoch=$last_switch_epoch
+EOF
+}
+
+print_status() {
+  local current source power busy_pct="unknown" total idle delta_total delta_idle
+  local prev_total prev_idle high_streak low_streak last_switch_epoch
+  local last_switch_human="never"
+
+  load_state
+
+  if [[ -f "$LOCK_FILE" ]]; then
+    source="locked"
+  elif is_on_ac; then
+    source="ac"
+  else
+    source="battery"
+  fi
+
+  if need powerprofilesctl; then
+    current="$(powerprofilesctl get 2>/dev/null || true)"
+  else
+    current="unavailable"
+  fi
+
+  if [[ -n "${last_switch_epoch:-}" && "$last_switch_epoch" -gt 0 ]] && need date; then
+    last_switch_human="$(date -d "@$last_switch_epoch" '+%F %T' 2>/dev/null || printf '%s' "$last_switch_epoch")"
+  fi
+
+  if [[ -r "$STATE_FILE" ]]; then
+    read -r total idle < <(read_cpu_sample)
+    if [[ -n "${prev_total:-}" && -n "${prev_idle:-}" ]]; then
+      delta_total=$((total - prev_total))
+      delta_idle=$((idle - prev_idle))
+      if (( delta_total > 0 && delta_idle >= 0 )); then
+        busy_pct="$(awk -v total="$delta_total" -v idle="$delta_idle" 'BEGIN {
+          printf "%.2f", ((total - idle) / total) * 100
+        }')"
+      fi
+    fi
+  fi
+
+  cat <<EOF
+ppp-auto-profile status
+  Power source:        $source
+  Current profile:     ${current:-unknown}
+  CPU busy now:        $busy_pct%
+  High threshold:      ${HIGH_BUSY_PERCENT}% (${HIGH_STREAK_REQUIRED} samples)
+  Low threshold:       ${LOW_BUSY_PERCENT}% (${LOW_STREAK_REQUIRED} samples)
+  Cooldown:            ${SWITCH_COOLDOWN_SEC}s
+  High streak:         ${high_streak:-0}
+  Low streak:          ${low_streak:-0}
+  Last switch:         $last_switch_human
+  State file:          $STATE_FILE
+  Lock file:           $LOCK_FILE
 EOF
 }
 
@@ -202,4 +284,19 @@ main() {
   save_state
 }
 
-main "$@"
+case "${1:-}" in
+  "" )
+    main
+    ;;
+  -h|--help|help )
+    print_help
+    ;;
+  -s|--status|status )
+    print_status
+    ;;
+  * )
+    printf 'Unknown option: %s\n\n' "$1" >&2
+    print_help >&2
+    exit 1
+    ;;
+esac
