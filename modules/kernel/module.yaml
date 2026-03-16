@@ -5,4 +5,4 @@ description: Kernel modules and boot parameters (ThinkPad/Intel)
 depends_on:
 - base
 post_install_hook: scripts/install.sh
-post_hook_behavior: once
+post_hook_behavior: always
