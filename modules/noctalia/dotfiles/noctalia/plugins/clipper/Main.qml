@@ -11,6 +11,7 @@ Item {
 
     // Panel settings control
     property bool showCloseButton: false
+    property bool closeOnBackgroundClick: true
 
     // Watch for pluginApi changes and initialize settings
     onPluginApiChanged: {
@@ -1127,20 +1128,10 @@ Item {
     }
     // Initialize pinned.json and notecards.json if they don't exist
     Component.onCompleted: {
-        console.log("Main.qml Component.onCompleted - pluginApi:", pluginApi);
         if (pluginApi) {
-            console.log("Main.qml: pluginSettings in onCompleted:", pluginApi.pluginSettings);
             closeOnBackgroundClick = pluginApi.pluginSettings?.closeOnBackgroundClick ?? true;
             showCloseButton = pluginApi.pluginSettings?.showCloseButton ?? false;
-            console.log("Main.qml: Set closeOnBg:", closeOnBackgroundClick, "showClose:", showCloseButton);
         }
-
-        // Create empty pinned.json if it doesn't exist
-        const pinnedPath = Quickshell.env("HOME") + "/.config/noctalia/plugins/clipper/pinned.json";
-        Quickshell.execDetached([
-            "sh", "-c",
-            `[ -f "${pinnedPath}" ] || echo '{"items":[]}' > "${pinnedPath}"`
-        ]);
 
         // Create notecards directory if it doesn't exist
         Quickshell.execDetached([

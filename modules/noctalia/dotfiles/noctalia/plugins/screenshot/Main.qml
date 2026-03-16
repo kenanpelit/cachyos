@@ -7,6 +7,8 @@ import qs.Services.Noctalia
 import qs.Services.Compositor
 
 Item {
+    property var pluginApi: null
+
     IpcHandler {
         target: "plugin:screenshot"
 

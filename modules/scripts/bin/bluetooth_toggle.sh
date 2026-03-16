@@ -37,6 +37,7 @@ MAX_RETRY_COUNT=10         # audio routing retries
 SCAN_WAIT_SECONDS=45       # wait for device visibility during scan (dual-boot needs longer)
 CONNECT_WAIT_SECONDS=12    # wait to see Connected: yes after connect
 WPCTL_NODE_WAIT_SECONDS=20 # wait for bluez nodes in wpctl Settings
+BT_FORCE_A2DP_PROFILE=false
 
 # ==============================================================================
 # Colors & logging
@@ -225,6 +226,14 @@ detect_backend() {
 _strip_box_chars() { sed 's/[│├─└]//g'; }
 _mac_upper() { echo "$1" | tr '[:lower:]' '[:upper:]'; }
 _mac_underscore() { _mac_upper "$1" | tr ':' '_'; }
+_wpctl_audio_status() {
+  wpctl status | _strip_box_chars | awk '
+    /^Audio$/ { keep=1 }
+    /^Video$/ { keep=0 }
+    /^Settings$/ { keep=1 }
+    keep { print }
+  '
+}
 
 _extract_id_from_line() {
   local line="$1"
@@ -236,7 +245,7 @@ _extract_id_from_line() {
 
 _wpctl_block() {
   local start="$1" end="$2"
-  wpctl status | sed -n "/^ *$start:/,/^ *$end:/p" | _strip_box_chars
+  _wpctl_audio_status | sed -n "/^ *$start:/,/^ *$end:/p"
 }
 
 _find_id_in_block_by_name() {
@@ -247,6 +256,34 @@ _find_id_in_block_by_name() {
       _extract_id_from_line "$line"
       return 0
     fi
+  done <<<"$block"
+  return 1
+}
+
+_find_id_by_mac_in_block() {
+  local block="$1" mac_upper="$2" mac_und="$3" line id
+  while IFS= read -r line; do
+    [[ "$line" =~ ^[[:space:]]*\*?[[:space:]]*[0-9]+\.[[:space:]] ]] || continue
+    id="$(_extract_id_from_line "$line")"
+    wpctl inspect "$id" 2>/dev/null | grep -qE "($mac_upper|$mac_und)" && {
+      echo "$id"
+      return 0
+    }
+  done <<<"$block"
+  return 1
+}
+
+_find_id_by_mac_and_media_class_in_block() {
+  local block="$1" mac_upper="$2" mac_und="$3" media_class="$4" line id inspect
+  while IFS= read -r line; do
+    [[ "$line" =~ ^[[:space:]]*\*?[[:space:]]*[0-9]+\.[[:space:]] ]] || continue
+    id="$(_extract_id_from_line "$line")"
+    inspect="$(wpctl inspect "$id" 2>/dev/null || true)"
+    echo "$inspect" | grep -qE "($mac_upper|$mac_und)" || continue
+    echo "$inspect" | grep -q "media.class = \"$media_class\"" && {
+      echo "$id"
+      return 0
+    }
   done <<<"$block"
   return 1
 }
@@ -268,8 +305,9 @@ _find_id_by_mac_in_section() {
 _find_default_serial_from_settings() {
   local kind="$1" macU="$2" macUnd="$3"
   local what
+  local serial
   [ "$kind" = "sink" ] && what="Audio/Sink" || what="Audio/Source"
-  wpctl status | sed -n "/^ *Settings:/,\$p" | awk -v w="$what" -v m="$macU" -v mu="$macUnd" '
+  serial="$(_wpctl_audio_status | sed -n "/^ *Settings:/,\$p" | awk -v w="$what" -v m="$macU" -v mu="$macUnd" '
     BEGIN{IGNORECASE=1}
     /Default Configured Devices:/,0 {
       if ($0 ~ w) {
@@ -280,7 +318,10 @@ _find_default_serial_from_settings() {
           print line; exit
         }
       }
-    }'
+    }')"
+
+  [ -n "$serial" ] || return 1
+  printf '%s\n' "$serial"
 }
 
 _resolve_node_name_from_id() {
@@ -291,7 +332,7 @@ _resolve_node_name_from_id() {
 _switch_bt_profile_a2dp() {
   local macU="$(_mac_upper "$DEVICE_ADDRESS")" macUnd="$(_mac_underscore "$DEVICE_ADDRESS")"
   local card_id
-  card_id="$(wpctl status | _strip_box_chars | awk -v m="$macU" -v mu="$macUnd" '
+  card_id="$(_wpctl_audio_status | awk -v m="$macU" -v mu="$macUnd" '
     BEGIN{IGNORECASE=1}
     /^[[:space:]]*\*?[[:space:]]*[0-9]+\./ && /bluez_card/ {
       if (index($0,m)>0 || index($0,mu)>0) {
@@ -302,13 +343,12 @@ _switch_bt_profile_a2dp() {
 }
 
 _wait_for_wpctl_bt_nodes() {
-  local macU="$(_mac_upper "$DEVICE_ADDRESS")" macUnd="$(_mac_underscore "$DEVICE_ADDRESS")"
   local t=0
   while [ $t -lt "$WPCTL_NODE_WAIT_SECONDS" ]; do
-    local s_serial i_serial
-    s_serial="$(_find_default_serial_from_settings sink "$macU" "$macUnd")" || true
-    i_serial="$(_find_default_serial_from_settings source "$macU" "$macUnd")" || true
-    if [ -n "${s_serial:-}" ] || [ -n "${i_serial:-}" ]; then
+    local bt_sink bt_src
+    bt_sink="$(audio_find_bt_sink)" || true
+    bt_src="$(audio_find_bt_source)" || true
+    if [ -n "${bt_sink:-}" ] || [ -n "${bt_src:-}" ]; then
       return 0
     fi
     sleep 1
@@ -322,7 +362,7 @@ _set_default_wpctl() {
   local serial=""
 
   if [[ "$target" =~ ^[0-9]+$ ]]; then
-    serial="$(_resolve_node_name_from_id "$target")"
+    wpctl set-default "$target" >/dev/null 2>&1 && return 0
   else
     serial="$target"
   fi
@@ -342,11 +382,11 @@ audio_find_bt_sink() {
     pactl list short sinks | awk '/bluez/i {print $2; exit}'
     ;;
   wpctl)
-    local macU="$(_mac_upper "$DEVICE_ADDRESS")" macUnd="$(_mac_underscore "$DEVICE_ADDRESS")" block
-    block="$(_wpctl_block "Sinks" "Sources")"
-    _find_id_in_block_by_name "$block" "bluez|Bluetooth|A2DP|Headset|Headphones|Earbuds|${DEFAULT_DEVICE_NAME}|${ALTERNATIVE_DEVICE_NAME}|S4|SLP4" && return 0
-    _find_id_by_mac_in_section "Sinks" "Sources" "$macU" "$macUnd" && return 0
+    local macU="$(_mac_upper "$DEVICE_ADDRESS")" macUnd="$(_mac_underscore "$DEVICE_ADDRESS")" filter_block
+    filter_block="$(_wpctl_block "Filters" "Streams")"
     _find_default_serial_from_settings sink "$macU" "$macUnd" && return 0
+    _find_id_in_block_by_name "$filter_block" "bluez_output|Audio/Sink|${DEFAULT_DEVICE_NAME}|${ALTERNATIVE_DEVICE_NAME}|S4|SLP4|Liberty|soundcore" && return 0
+    _find_id_by_mac_and_media_class_in_block "$filter_block" "$macU" "$macUnd" "Audio/Sink" && return 0
     return 1
     ;;
   esac
@@ -358,11 +398,11 @@ audio_find_bt_source() {
     pactl list short sources | awk '/bluez.*input/i {print $2; exit}'
     ;;
   wpctl)
-    local macU="$(_mac_upper "$DEVICE_ADDRESS")" macUnd="$(_mac_underscore "$DEVICE_ADDRESS")" block
-    block="$(_wpctl_block "Sources" "Clients")"
-    _find_id_in_block_by_name "$block" "bluez|Bluetooth|HSP|HFP|Headset|Mic|${DEFAULT_DEVICE_NAME}|${ALTERNATIVE_DEVICE_NAME}|S4|SLP4" && return 0
-    _find_id_by_mac_in_section "Sources" "Clients" "$macU" "$macUnd" && return 0
+    local macU="$(_mac_upper "$DEVICE_ADDRESS")" macUnd="$(_mac_underscore "$DEVICE_ADDRESS")" filter_block
+    filter_block="$(_wpctl_block "Filters" "Streams")"
     _find_default_serial_from_settings source "$macU" "$macUnd" && return 0
+    _find_id_in_block_by_name "$filter_block" "bluez_input|Audio/Source|${DEFAULT_DEVICE_NAME}|${ALTERNATIVE_DEVICE_NAME}|S4|SLP4|Liberty|soundcore" && return 0
+    _find_id_by_mac_and_media_class_in_block "$filter_block" "$macU" "$macUnd" "Audio/Source" && return 0
     return 1
     ;;
   esac
@@ -422,7 +462,9 @@ configure_audio_bluetooth() {
   sleep "$AUDIO_WAIT_TIME"
 
   if [ "$AUDIO_BACKEND" = "wpctl" ]; then
-    _switch_bt_profile_a2dp
+    if [ "${BT_FORCE_A2DP_PROFILE}" = true ]; then
+      _switch_bt_profile_a2dp
+    fi
     _wait_for_wpctl_bt_nodes || log "wpctl BT nodes are late; continuing anyway." "WARNING"
   fi
 
@@ -923,4 +965,6 @@ main() {
   fi
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
