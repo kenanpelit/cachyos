@@ -1,5 +1,5 @@
 [Unit]
-Description=Auto-switch power profile based on system load
+Description=Auto-switch power profile based on live CPU usage
 After=graphical-session.target
 
 [Service]

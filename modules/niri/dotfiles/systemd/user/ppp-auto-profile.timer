@@ -5,8 +5,8 @@ After=graphical-session.target
 [Timer]
 # İlk çalışma: Login olduktan 30 saniye sonra
 OnStartupSec=30s
-# Sonraki çalışmalar: Her 20 saniyede bir
-OnUnitActiveSec=20s
+# Sonraki çalışmalar: Her 15 saniyede bir
+OnUnitActiveSec=15s
 AccuracySec=1s
 Unit=ppp-auto-profile.service
 
