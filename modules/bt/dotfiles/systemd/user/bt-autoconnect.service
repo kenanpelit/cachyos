@@ -1,6 +1,5 @@
 [Unit]
-Description=Hyprland Bluetooth auto-connect
-ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+Description=Bluetooth auto-connect
 Wants=pipewire.service wireplumber.service
 After=pipewire.service wireplumber.service
 

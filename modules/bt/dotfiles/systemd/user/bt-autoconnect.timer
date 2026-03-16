@@ -1,0 +1,10 @@
+[Unit]
+Description=Bluetooth auto-connect (delayed)
+
+[Timer]
+OnStartupSec=20s
+AccuracySec=1s
+Unit=bt-autoconnect.service
+
+[Install]
+WantedBy=default.target
