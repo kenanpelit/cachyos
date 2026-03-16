@@ -72,9 +72,10 @@ Core session units:
   Explicit daemon stage. It now declares the core Hyprland services it wants.
 - `hypr-post-bootstrap.service`
   Late oneshot polish. Runs `osc-shell ensure`, applies cursor sync with
-  `hyprctl setcursor`, and starts `xdg-desktop-portal-delayed.service` when the
-  unit exists. It is ordered after the daemon services rather than after the
-  target itself to avoid systemd ordering cycles.
+  `hyprctl setcursor`, and starts `hyprsunset.service`, `noctalia.service`,
+  and `xdg-desktop-portal-delayed.service` when those units exist. It is
+  ordered after the daemon services rather than after the target itself to
+  avoid systemd ordering cycles.
 
 Daemon-stage units started by `hypr-daemons.target`:
 

@@ -9,8 +9,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMMON_HELPER="${SCRIPT_DIR}/hypr-session-common.sh"
+[[ -r "${COMMON_HELPER}" ]] || COMMON_HELPER="${SCRIPT_DIR}/hypr-session-common"
 # shellcheck source=hypr-session-common.sh
-source "${SCRIPT_DIR}/hypr-session-common.sh"
+source "${COMMON_HELPER}"
 
 LOG_TAG="hypr-post-bootstrap"
 
@@ -89,6 +91,8 @@ main() {
     warn "hyprctl not found; skipping cursor sync"
   fi
 
+  start_user_service_if_present hyprsunset.service
+  start_user_service_if_present noctalia.service
   start_user_service_if_present xdg-desktop-portal-delayed.service
 
   log "hypr-post-bootstrap completed."
