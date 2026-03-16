@@ -178,6 +178,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `hypr-blueman-applet`
+**Description:** Blueman imports some X11-only plugins before honoring plugin-list, which
+
+**Usage:** `hypr-blueman-applet`
+
+---
+
 ### 📂 `hypr-bootstrap`
 **Description:** Early Hyprland bootstrap for monitor/workspace normalization and
 

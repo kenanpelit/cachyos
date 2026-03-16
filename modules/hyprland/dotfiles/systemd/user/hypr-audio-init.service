@@ -12,6 +12,7 @@ Type=oneshot
 TimeoutStartSec=30
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+Environment=TERM=dumb
 ExecStart=%h/.local/bin/osc-soundctl init
 StandardOutput=journal
 StandardError=journal

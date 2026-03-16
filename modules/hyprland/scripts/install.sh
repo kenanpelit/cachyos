@@ -7,6 +7,7 @@ MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 "${MODULE_DIR}/scripts/render-theme.sh"
 
 if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user daemon-reload >/dev/null 2>&1 || true
   systemctl --user disable --now gnome-keyring-secrets.service >/dev/null 2>&1 || true
   systemctl --user unmask gnome-keyring-daemon.socket gnome-keyring-daemon.service >/dev/null 2>&1 || true
   systemctl --user enable gnome-keyring-daemon.service >/dev/null 2>&1 || true

@@ -12,7 +12,8 @@ This module owns the Hyprland compositor config, the Hyprland-specific
 - define the Hyprland session targets and services under `~/.config/systemd/user`
 - run a post-install hook that renders theme files, removes the
   Hyprland-only keyring override, re-enables the stock GDM/PAM-managed
-  `gnome-keyring-daemon` units, and persists the Blueman plugin mask
+  `gnome-keyring-daemon` units, reloads user units, and persists the Blueman
+  plugin mask
 
 This module does not install the system-wide display-manager session entry
 anymore. That belongs to the `gdm` and `sessions` modules.
@@ -108,7 +109,8 @@ Daemon-stage units started by `hypr-daemons.target`:
   and Hyprland visual sizing.
 - `scripts/render-theme.sh`
   Renderer that regenerates `10-hyprland.conf` and `20-theme.conf` from
-  `theme/theme.env`.
+  `theme/theme.env`. `render-theme.sh --check` verifies that the generated
+  files are still in sync with the manifest.
 - `scripts/install.sh`
   Post-install hook that renders the theme files, removes the Hyprland-only
   keyring override, re-enables the stock `gnome-keyring-daemon` units, and
@@ -116,6 +118,10 @@ Daemon-stage units started by `hypr-daemons.target`:
 - `dotfiles/hypr/conf.d/70-monitors.conf`
   Repo-managed, host-specific monitor layout and workspace routing for the
   current setup.
+- `dotfiles/systemd/user/xdg-desktop-portal-gnome.service.d/10-hyprland.conf`
+  and `dotfiles/systemd/user/xdg-desktop-portal-gtk.service.d/10-hyprland.conf`
+  Unset `GDK_BACKEND` for the GTK/GNOME portal services so the Hyprland
+  session-wide override does not leak into portal processes.
 
 ## Conditions and notes
 
@@ -123,6 +129,8 @@ Daemon-stage units started by `hypr-daemons.target`:
   `XDG_CURRENT_DESKTOP=Hyprland`.
 - Shared XDG autostart masks for `nm-applet`, `blueman`, and keyring desktop
   entries live in the `wayland-autostart` module.
+- The Hyprland session owns the polkit agent. Keep Noctalia's `polkit-agent`
+  plugin disabled to avoid duplicate authentication agents.
 - The systemd graph is intentionally split into `bootstrap -> daemons ->
   post-bootstrap` so ordering remains visible in unit files rather than hidden
   in shell scripts.

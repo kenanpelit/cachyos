@@ -7,8 +7,43 @@ MANIFEST="${MODULE_DIR}/theme/theme.env"
 ENV_OUT="${MODULE_DIR}/dotfiles/environment.d/10-hyprland.conf"
 THEME_OUT="${MODULE_DIR}/dotfiles/hypr/conf.d/20-theme.conf"
 
+usage() {
+  cat <<'EOF'
+Usage: render-theme.sh [--check]
+
+Without arguments, regenerates the derived Hyprland theme files.
+With --check, verifies that generated files match theme/theme.env.
+EOF
+}
+
+mode="write"
+case "${1:-}" in
+  ""|--write)
+    ;;
+  --check)
+    mode="check"
+    ;;
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
 # shellcheck source=/dev/null
 source "${MANIFEST}"
+
+manifest_checksum="$(sha256sum "${MANIFEST}" | awk '{print $1}')"
+tmp_env="$(mktemp)"
+tmp_theme="$(mktemp)"
+
+cleanup() {
+  rm -f "${tmp_env}" "${tmp_theme}"
+}
+trap cleanup EXIT
 
 : "${CATPPUCCIN_FLAVOR:=mocha}"
 : "${CATPPUCCIN_ACCENT:=mauve}"
@@ -65,9 +100,10 @@ if [[ -z "${accent_hex}" ]]; then
   exit 1
 fi
 
-cat >"${ENV_OUT}" <<EOF
+cat >"${tmp_env}" <<EOF
 # Generated from modules/hyprland/theme/theme.env.
 # Update the manifest and rerun modules/hyprland/scripts/render-theme.sh.
+# Source checksum: ${manifest_checksum}
 
 # Canonical Hyprland session environment.
 # systemd --user, dbus activation, Hyprland startup helpers and portals should
@@ -131,9 +167,10 @@ CATPPUCCIN_FLAVOR=${CATPPUCCIN_FLAVOR}
 CATPPUCCIN_ACCENT=${CATPPUCCIN_ACCENT}
 EOF
 
-cat >"${THEME_OUT}" <<EOF
+cat >"${tmp_theme}" <<EOF
 # Generated from modules/hyprland/theme/theme.env.
 # Update the manifest and rerun modules/hyprland/scripts/render-theme.sh.
+# Source checksum: ${manifest_checksum}
 
 # Theme palette and visual assignments
 
@@ -291,3 +328,39 @@ workspace=f[1], gapsout:0, gapsin:0, rounding:0, shadow:0
 workspace=special:dropdown, gapsout:0, gapsin:0, bordersize:0, rounding:0, shadow:0
 workspace=special:scratchpad, gapsout:0, gapsin:0, bordersize:0, rounding:0, shadow:0
 EOF
+
+verify_output() {
+  local generated="$1"
+  local current="$2"
+  local label="$3"
+
+  if [[ ! -f "$current" ]]; then
+    printf 'Missing generated file: %s\n' "$label" >&2
+    return 1
+  fi
+
+  if ! cmp -s "$generated" "$current"; then
+    printf 'Stale generated file detected: %s\n' "$label" >&2
+    return 1
+  fi
+}
+
+write_if_changed() {
+  local generated="$1"
+  local current="$2"
+
+  if cmp -s "$generated" "$current" 2>/dev/null; then
+    return 0
+  fi
+
+  install -m 644 "$generated" "$current"
+}
+
+if [[ "$mode" == "check" ]]; then
+  verify_output "$tmp_env" "$ENV_OUT" "$ENV_OUT"
+  verify_output "$tmp_theme" "$THEME_OUT" "$THEME_OUT"
+  exit 0
+fi
+
+write_if_changed "$tmp_env" "$ENV_OUT"
+write_if_changed "$tmp_theme" "$THEME_OUT"

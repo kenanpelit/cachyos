@@ -51,3 +51,7 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-daemons.target
 - source: dotfiles/systemd/user/hypr-post-bootstrap.service
   target: ~/.config/systemd/user/hypr-post-bootstrap.service
+- source: dotfiles/systemd/user/xdg-desktop-portal-gnome.service.d/10-hyprland.conf
+  target: ~/.config/systemd/user/xdg-desktop-portal-gnome.service.d/10-hyprland.conf
+- source: dotfiles/systemd/user/xdg-desktop-portal-gtk.service.d/10-hyprland.conf
+  target: ~/.config/systemd/user/xdg-desktop-portal-gtk.service.d/10-hyprland.conf

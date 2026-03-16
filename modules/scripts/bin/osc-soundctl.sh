@@ -25,14 +25,25 @@ PROFILES_DIR="${CACHE_DIR}/profiles"
 mkdir -p "${CACHE_DIR}" "${PROFILES_DIR}"
 
 # --- Renkler & ikonlar ----------------------------------------------------------
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-YELLOW=$(tput setaf 3)
-BLUE=$(tput setaf 4)
-CYAN=$(tput setaf 6)
-MAGENTA=$(tput setaf 5)
-BOLD=$(tput bold)
-RESET=$(tput sgr0)
+if [[ -t 1 ]] && [[ -n "${TERM:-}" ]] && command -v tput >/dev/null 2>&1; then
+	RED=$(tput setaf 1)
+	GREEN=$(tput setaf 2)
+	YELLOW=$(tput setaf 3)
+	BLUE=$(tput setaf 4)
+	CYAN=$(tput setaf 6)
+	MAGENTA=$(tput setaf 5)
+	BOLD=$(tput bold)
+	RESET=$(tput sgr0)
+else
+	RED=""
+	GREEN=""
+	YELLOW=""
+	BLUE=""
+	CYAN=""
+	MAGENTA=""
+	BOLD=""
+	RESET=""
+fi
 ICON_SPEAKER="🔊"
 ICON_HEADPHONES="🎧"
 ICON_MICROPHONE="🎤"

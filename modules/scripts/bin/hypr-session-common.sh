@@ -92,7 +92,8 @@ hypr_detect_wayland_display() {
 }
 
 hypr_pick_instance_signature() {
-  local hypr_root candidate dir newest_mtime=-1 mtime
+  local hypr_root candidate candidate_score=-1 dir newest_mtime=-1 mtime
+  local lock_file lock_pid lock_display score comm
 
   hypr_root="${XDG_RUNTIME_DIR}/hypr"
   [[ -d "$hypr_root" ]] || return 0
@@ -100,8 +101,36 @@ hypr_pick_instance_signature() {
   for dir in "$hypr_root"/*; do
     [[ -d "$dir" ]] || continue
     [[ -S "$dir/.socket.sock" || -S "$dir/.socket2.sock" ]] || continue
+
+    lock_file="$dir/hyprland.lock"
+    lock_pid=""
+    lock_display=""
+    score=0
+
+    if [[ -r "$lock_file" ]]; then
+      IFS= read -r lock_pid <"$lock_file" || true
+      lock_display="$(sed -n '2p' "$lock_file" 2>/dev/null || true)"
+    fi
+
+    if [[ -n "${WAYLAND_DISPLAY:-}" && -n "$lock_display" && "$lock_display" == "$WAYLAND_DISPLAY" ]]; then
+      score=3
+    fi
+
+    if [[ -n "$lock_pid" && "$lock_pid" =~ ^[0-9]+$ ]] && kill -0 "$lock_pid" 2>/dev/null; then
+      comm="$(ps -p "$lock_pid" -o comm= 2>/dev/null | tr -d '[:space:]')"
+      if [[ "$comm" == "Hyprland" ]]; then
+        (( score < 2 )) && score=2
+        if [[ -n "${WAYLAND_DISPLAY:-}" && -n "$lock_display" && "$lock_display" == "$WAYLAND_DISPLAY" ]]; then
+          score=4
+        fi
+      else
+        (( score < 1 )) && score=1
+      fi
+    fi
+
     mtime="$(stat -c '%Y' "$dir" 2>/dev/null || printf '0')"
-    if (( mtime > newest_mtime )); then
+    if (( score > candidate_score || (score == candidate_score && mtime > newest_mtime) )); then
+      candidate_score="$score"
       newest_mtime="$mtime"
       candidate="$(basename "$dir")"
     fi
