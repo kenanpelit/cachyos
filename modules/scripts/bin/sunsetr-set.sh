@@ -347,13 +347,17 @@ systemd_user_ready() {
   systemctl --user show-environment >/dev/null 2>&1
 }
 
+sunsetr_service_installed() {
+  systemd_user_ready || return 1
+  systemctl --user cat sunsetr.service >/dev/null 2>&1
+}
+
 activate_profile() {
   local profile="$1"
   local cfg_dir="$2"
 
-  if [[ "$profile" == "$DEFAULT_PROFILE" ]] && systemd_user_ready; then
-    if systemctl --user status sunsetr.service >/dev/null 2>&1; then
-      systemctl --user restart sunsetr.service >/dev/null 2>&1 || true
+  if [[ "$profile" == "$DEFAULT_PROFILE" ]] && sunsetr_service_installed; then
+    if systemctl --user restart sunsetr.service >/dev/null 2>&1; then
       log "profile applied via sunsetr.service restart: $profile"
       notify "sunsetr" "Profil uygulandı: $profile"
       return 0
