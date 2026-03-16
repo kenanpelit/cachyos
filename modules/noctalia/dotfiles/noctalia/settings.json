@@ -188,6 +188,10 @@
                     "id": "plugin:assistant-panel"
                 },
                 {
+                    "iconColor": "none",
+                    "id": "NightLight"
+                },
+                {
                     "defaultSettings": {
                         "customColor": "none",
                         "showConditionIcon": true,
