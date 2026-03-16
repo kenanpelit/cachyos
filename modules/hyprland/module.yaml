@@ -51,5 +51,3 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-daemons.target
 - source: dotfiles/systemd/user/hypr-post-bootstrap.service
   target: ~/.config/systemd/user/hypr-post-bootstrap.service
-- source: dotfiles/systemd/user/gnome-keyring-secrets.service
-  target: ~/.config/systemd/user/gnome-keyring-secrets.service

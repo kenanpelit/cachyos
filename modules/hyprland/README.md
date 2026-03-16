@@ -10,8 +10,9 @@ This module owns the Hyprland compositor config, the Hyprland-specific
 - install the canonical Hypr session environment file
 - install the managed monitor/workspace mapping for this host
 - define the Hyprland session targets and services under `~/.config/systemd/user`
-- run a post-install hook that renders theme files, disables the stock
-  `gnome-keyring-daemon` user units, and persists the Blueman plugin mask
+- run a post-install hook that renders theme files, removes the
+  Hyprland-only keyring override, re-enables the stock GDM/PAM-managed
+  `gnome-keyring-daemon` units, and persists the Blueman plugin mask
 
 This module does not install the system-wide display-manager session entry
 anymore. That belongs to the `gdm` and `sessions` modules.
@@ -88,8 +89,6 @@ Daemon-stage units started by `hypr-daemons.target`:
   agent ownership.
 - `hypr-clip-persist.service`
   Runs `wl-clip-persist --clipboard both`.
-- `gnome-keyring-secrets.service`
-  Runs `gnome-keyring-daemon --replace --components=secrets,pkcs11`.
 
 ## Config layout
 
@@ -111,8 +110,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   Renderer that regenerates `10-hyprland.conf` and `20-theme.conf` from
   `theme/theme.env`.
 - `scripts/install.sh`
-  Post-install hook that renders the theme files, disables the stock
-  `gnome-keyring-daemon` user units, and persists the Blueman plugin mask.
+  Post-install hook that renders the theme files, removes the Hyprland-only
+  keyring override, re-enables the stock `gnome-keyring-daemon` units, and
+  persists the Blueman plugin mask.
 - `dotfiles/hypr/conf.d/70-monitors.conf`
   Repo-managed, host-specific monitor layout and workspace routing for the
   current setup.
