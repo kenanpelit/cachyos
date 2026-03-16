@@ -1,0 +1,29 @@
+#[Backend]
+backend = "hyprsunset"
+transition_mode = "static"
+
+#[Smoothing]
+smoothing = true
+startup_duration = 0.3
+shutdown_duration = 0.3
+adaptive_interval = 1
+
+#[Time-based config]
+night_temp = 2500
+day_temp = 2500
+night_gamma = 95
+day_gamma = 95
+update_interval = 60
+
+#[Static config]
+static_temp = 2500
+static_gamma = 95
+
+#[Manual transitions]
+sunset = "07:30:00"
+sunrise = "07:30:00"
+transition_duration = 5
+
+#[Geolocation]
+latitude = 41.008200
+longitude = 28.978400

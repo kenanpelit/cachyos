@@ -47,10 +47,10 @@ Presets:
   $CONFIG_ROOT/presets/*/sunsetr.toml
 
 Examples:
-  $SCRIPT_NAME night
-  $SCRIPT_NAME warm work
-  $SCRIPT_NAME best --apply
-  $SCRIPT_NAME apply night
+  $SCRIPT_NAME 2030-dusk
+  $SCRIPT_NAME dusk work
+  $SCRIPT_NAME 2330-night --apply
+  $SCRIPT_NAME apply work
   $SCRIPT_NAME status
 EOF
 }
@@ -87,8 +87,59 @@ ensure_runtime_dir() {
 }
 
 is_preset() {
-  local preset="${1,,}"
+  local preset
+  preset="$(canonical_preset_name "$1")"
   [[ -f "$CONFIG_ROOT/presets/$preset/sunsetr.toml" ]]
+}
+
+preset_alias() {
+  case "${1,,}" in
+    0730 | 07:30 | morning)
+      printf '0730-morning\n'
+      ;;
+    1830 | 18:30 | sunset)
+      printf '1830-sunset\n'
+      ;;
+    2030 | 20:30 | dusk)
+      printf '2030-dusk\n'
+      ;;
+    2200 | 22:00 | evening)
+      printf '2200-evening\n'
+      ;;
+    2330 | 23:30 | night)
+      printf '2330-night\n'
+      ;;
+    0130 | 01:30 | late-night | latenight)
+      printf '0130-late-night\n'
+      ;;
+    0330 | 03:30 | deep-night | deepnight)
+      printf '0330-deep-night\n'
+      ;;
+  esac
+}
+
+canonical_preset_name() {
+  local preset="${1,,}"
+  local mapped=""
+
+  mapped="$(preset_alias "$preset")"
+  if [[ -n "$mapped" ]]; then
+    printf '%s\n' "$mapped"
+  else
+    printf '%s\n' "$preset"
+  fi
+}
+
+format_preset_label() {
+  local preset="$1"
+  if [[ "$preset" =~ ^([0-9]{2})([0-9]{2})-(.+)$ ]]; then
+    local hh="${BASH_REMATCH[1]}"
+    local mm="${BASH_REMATCH[2]}"
+    local name="${BASH_REMATCH[3]}"
+    printf '%s %s\n' "${hh}:${mm}" "$name"
+  else
+    printf '%s\n' "$preset"
+  fi
 }
 
 toml_get_value() {
@@ -110,7 +161,7 @@ toml_get_value() {
 print_preset_line() {
   local preset="$1"
   local cfg_file="$CONFIG_ROOT/presets/$preset/sunsetr.toml"
-  local day_temp night_temp day_gamma night_gamma
+  local day_temp night_temp day_gamma night_gamma label
 
   if [[ ! -f "$cfg_file" ]]; then
     printf '  %-14s (missing: sunsetr.toml)\n' "$preset"
@@ -121,20 +172,33 @@ print_preset_line() {
   night_temp="$(toml_get_value "$cfg_file" night_temp)"
   day_gamma="$(toml_get_value "$cfg_file" day_gamma)"
   night_gamma="$(toml_get_value "$cfg_file" night_gamma)"
+  label="$(format_preset_label "$preset")"
 
   if [[ -z "$day_temp" || -z "$night_temp" || -z "$day_gamma" || -z "$night_gamma" ]]; then
-    printf '  %-14s (invalid preset values)\n' "$preset"
+    printf '  %-20s (invalid preset values)\n' "$label"
     return
   fi
 
-  printf '  %-14s (%s/%sK, %s/%s)\n' "$preset" "$day_temp" "$night_temp" "$day_gamma" "$night_gamma"
+  if [[ "$day_temp" == "$night_temp" && "$day_gamma" == "$night_gamma" ]]; then
+    printf '  %-20s (%sK, %s%%)\n' "$label" "$day_temp" "$day_gamma"
+  else
+    printf '  %-20s (%s/%sK, %s/%s)\n' "$label" "$day_temp" "$night_temp" "$day_gamma" "$night_gamma"
+  fi
 }
 
 list_presets() {
   local preset_root="$CONFIG_ROOT/presets"
   local preset
   local -a detected=()
-  local -a preferred=(day night warm dim focus best cinema dms)
+  local -a preferred=(
+    0730-morning
+    1830-sunset
+    2030-dusk
+    2200-evening
+    2330-night
+    0130-late-night
+    0330-deep-night
+  )
   local -A seen=()
 
   echo "Presetler:"
@@ -145,7 +209,9 @@ list_presets() {
   fi
 
   while IFS= read -r -d '' dir; do
-    detected+=("$(basename "$dir")")
+    if [[ -f "$dir/sunsetr.toml" ]]; then
+      detected+=("$(basename "$dir")")
+    fi
   done < <(find "$preset_root" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
   if [[ "${#detected[@]}" -eq 0 ]]; then
@@ -200,13 +266,35 @@ ensure_config_dir() {
 }
 
 apply_preset() {
-  local preset="${1,,}"
+  local preset
+  preset="$(canonical_preset_name "$1")"
   local profile="$2"
   local latitude="$3"
   local longitude="$4"
-  local day_temp night_temp day_gamma night_gamma
-  local preset_cfg_file
   local target="default"
+  local -a keys=(
+    backend
+    transition_mode
+    smoothing
+    startup_duration
+    shutdown_duration
+    adaptive_interval
+    day_temp
+    night_temp
+    day_gamma
+    night_gamma
+    update_interval
+    static_temp
+    static_gamma
+    sunset
+    sunrise
+    transition_duration
+    latitude
+    longitude
+  )
+  local -a set_args=()
+  local key value
+  local preset_cfg_file
 
   if [[ "$profile" != "$DEFAULT_PROFILE" ]]; then
     target="$profile"
@@ -215,34 +303,27 @@ apply_preset() {
   preset_cfg_file="$CONFIG_ROOT/presets/$preset/sunsetr.toml"
   [[ -f "$preset_cfg_file" ]] || die "preset not found: $preset ($preset_cfg_file)"
 
-  day_temp="$(toml_get_value "$preset_cfg_file" day_temp)"
-  night_temp="$(toml_get_value "$preset_cfg_file" night_temp)"
-  day_gamma="$(toml_get_value "$preset_cfg_file" day_gamma)"
-  night_gamma="$(toml_get_value "$preset_cfg_file" night_gamma)"
+  for key in "${keys[@]}"; do
+    value="$(toml_get_value "$preset_cfg_file" "$key")"
+    if [[ -n "$value" ]]; then
+      set_args+=("${key}=${value}")
+    fi
+  done
 
-  [[ -n "$day_temp" ]] || die "preset '$preset' missing: day_temp"
-  [[ -n "$night_temp" ]] || die "preset '$preset' missing: night_temp"
-  [[ -n "$day_gamma" ]] || die "preset '$preset' missing: day_gamma"
-  [[ -n "$night_gamma" ]] || die "preset '$preset' missing: night_gamma"
-
-  if [[ -z "$latitude" ]]; then
-    latitude="$(toml_get_value "$preset_cfg_file" latitude)"
-  fi
-  if [[ -z "$longitude" ]]; then
-    longitude="$(toml_get_value "$preset_cfg_file" longitude)"
+  if [[ -n "$latitude" ]]; then
+    set_args+=("latitude=${latitude}")
+  elif ! printf '%s\n' "${set_args[@]}" | grep -q '^latitude='; then
+    set_args+=("latitude=${DEFAULT_LATITUDE}")
   fi
 
-  [[ -n "$latitude" ]] || latitude="$DEFAULT_LATITUDE"
-  [[ -n "$longitude" ]] || longitude="$DEFAULT_LONGITUDE"
+  if [[ -n "$longitude" ]]; then
+    set_args+=("longitude=${longitude}")
+  elif ! printf '%s\n' "${set_args[@]}" | grep -q '^longitude='; then
+    set_args+=("longitude=${DEFAULT_LONGITUDE}")
+  fi
 
   # Force explicit target to avoid interactive prompt based on active preset.
-  sunsetr --config "$CONFIG_ROOT" set --target "$target" \
-    day_temp="$day_temp" \
-    night_temp="$night_temp" \
-    day_gamma="$day_gamma" \
-    night_gamma="$night_gamma" \
-    latitude="$latitude" \
-    longitude="$longitude"
+  sunsetr --config "$CONFIG_ROOT" set --target "$target" "${set_args[@]}"
 }
 
 systemd_user_ready() {
@@ -280,7 +361,7 @@ show_status() {
 
   log "profile: $profile"
   log "config: $cfg_dir/sunsetr.toml"
-  sunsetr --config "$cfg_dir" get day_temp night_temp day_gamma night_gamma latitude longitude
+  sunsetr --config "$cfg_dir" get backend transition_mode day_temp night_temp day_gamma night_gamma static_temp static_gamma sunset sunrise transition_duration latitude longitude
 }
 
 main() {
@@ -328,6 +409,7 @@ main() {
   }
 
   local action="${args[0],,}"
+  action="$(canonical_preset_name "$action")"
   local profile="$DEFAULT_PROFILE"
   local cfg_dir
 
