@@ -7,7 +7,8 @@ ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Service]
 ExecStart=/usr/bin/wl-clip-persist --clipboard both
-Restart=on-failure
+SuccessExitStatus=1
+Restart=on-abnormal
 RestartSec=1
 StandardOutput=journal
 StandardError=journal

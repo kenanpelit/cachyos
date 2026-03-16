@@ -1,11 +1,13 @@
 tags:
 - wm
 - desktop
-description: Hyprland config (portable config)
+description: Hyprland config
 depends_on:
 - base
 - scripts
 - wayland-autostart
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
 dotfiles:
 - source: dotfiles/hypr/hyprland.conf
   target: ~/.config/hypr/hyprland.conf
@@ -43,6 +45,8 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-clip-persist.service
 - source: dotfiles/systemd/user/hypr-bootstrap.service
   target: ~/.config/systemd/user/hypr-bootstrap.service
+- source: dotfiles/systemd/user/hypr-audio-init.service
+  target: ~/.config/systemd/user/hypr-audio-init.service
 - source: dotfiles/systemd/user/hypr-daemons.target
   target: ~/.config/systemd/user/hypr-daemons.target
 - source: dotfiles/systemd/user/hypr-post-bootstrap.service

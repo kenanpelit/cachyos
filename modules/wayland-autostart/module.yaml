@@ -4,6 +4,8 @@ tags:
 description: Shared Wayland autostart masks for systemd-managed applets
 depends_on:
 - base
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
 dotfiles:
 - source: dotfiles/autostart/nm-applet.desktop
   target: ~/.config/autostart/nm-applet.desktop

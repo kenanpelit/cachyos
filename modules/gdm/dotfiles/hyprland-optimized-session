@@ -1,21 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export DESKTOP_SESSION="Hyprland"
-export XDG_SESSION_DESKTOP="Hyprland"
-export XDG_CURRENT_DESKTOP="Hyprland"
-export XDG_SESSION_TYPE="wayland"
-export GTK_USE_PORTAL=1
-export SYSTEMD_OFFLINE=0
+helper_path="${HOME}/.local/bin/hypr-session-common"
+
+if [[ -r "${helper_path}" ]]; then
+  # shellcheck source=/dev/null
+  source "${helper_path}"
+  hypr_ensure_runtime_dir
+  hypr_load_session_env
+  hypr_normalize_session_paths
+fi
+
+export DESKTOP_SESSION="${DESKTOP_SESSION:-Hyprland}"
+export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
+export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
+export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
 
 if command -v systemctl >/dev/null 2>&1; then
-  systemctl --user set-environment \
-    DESKTOP_SESSION=Hyprland \
-    XDG_SESSION_DESKTOP=Hyprland \
-    XDG_CURRENT_DESKTOP=Hyprland \
-    XDG_SESSION_TYPE=wayland \
-    GTK_USE_PORTAL=1 \
-    SYSTEMD_OFFLINE=0 >/dev/null 2>&1 || true
+  if [[ -r "${helper_path}" ]]; then
+    hypr_sync_session_environment
+  else
+    systemctl --user set-environment \
+      DESKTOP_SESSION="${DESKTOP_SESSION}" \
+      XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP}" \
+      XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP}" \
+      XDG_SESSION_TYPE="${XDG_SESSION_TYPE}" \
+      GTK_USE_PORTAL="${GTK_USE_PORTAL}" \
+      SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE}" >/dev/null 2>&1 || true
+  fi
 fi
 
 if command -v start-hyprland >/dev/null 2>&1; then

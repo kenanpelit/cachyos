@@ -8,6 +8,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=hypr-session-common.sh
+source "${SCRIPT_DIR}/hypr-session-common.sh"
+
 LOG_TAG="hypr-bootstrap"
 
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
@@ -16,17 +20,8 @@ warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
 ensure_hypr_env() {
-  : "${XDG_RUNTIME_DIR:="/run/user/$(id -u)"}"
-
-  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
-    return 0
-  fi
-
-  local sig
-  sig="$(ls "$XDG_RUNTIME_DIR"/hypr 2>/dev/null | head -n1 || true)"
-  if [[ -n "${sig:-}" ]]; then
-    export HYPRLAND_INSTANCE_SIGNATURE="$sig"
-  fi
+  hypr_ensure_runtime_dir
+  hypr_detect_instance_signature
 }
 
 wait_for_hyprctl() {
@@ -67,7 +62,6 @@ main() {
   fi
 
   run_if_present hypr-osc switch --no-notify
-  run_if_present osc-soundctl init
 
   log "hypr-bootstrap completed."
 }

@@ -8,31 +8,16 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=hypr-session-common.sh
+source "${SCRIPT_DIR}/hypr-session-common.sh"
+
 LOG_TAG="hypr-post-bootstrap"
 
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
 warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
 
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
-
-load_session_env() {
-  local env_file line key value
-  env_file="${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-hyprland.conf}"
-
-  [[ -r "$env_file" ]] || return 0
-
-  while IFS= read -r line; do
-    [[ -n "$line" ]] || continue
-    [[ "${line#\#}" == "$line" ]] || continue
-    [[ "$line" == *=* ]] || continue
-
-    key="${line%%=*}"
-    value="${line#*=}"
-    value="${value//\$\{HOME\}/$HOME}"
-    value="${value//\$HOME/$HOME}"
-    export "$key=$value"
-  done <"$env_file"
-}
 
 queue_dconf_sync() {
   command -v gsettings >/dev/null 2>&1 || return 0
@@ -42,22 +27,17 @@ queue_dconf_sync() {
     gsettings set org.gnome.desktop.interface gtk-theme "${GTK_THEME:-catppuccin-mocha-mauve-standard+default}" >/dev/null 2>&1 || true
     gsettings set org.gnome.desktop.interface icon-theme "${XDG_ICON_THEME:-${ICON_THEME:-kora}}" >/dev/null 2>&1 || true
     gsettings set org.gnome.desktop.interface cursor-theme "${XCURSOR_THEME:-capitaine-cursors}" >/dev/null 2>&1 || true
+    if command -v dconf >/dev/null 2>&1; then
+      dconf write /org/blueman/general/plugin-list \
+        "['!TransferService', '!GameControllerWakelock', '!PPPSupport', '!DhcpClient']" >/dev/null 2>&1 || true
+    fi
   ) &
   disown || true
 }
 
 ensure_hypr_env() {
-  : "${XDG_RUNTIME_DIR:="/run/user/$(id -u)"}"
-
-  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
-    return 0
-  fi
-
-  local sig
-  sig="$(ls "$XDG_RUNTIME_DIR"/hypr 2>/dev/null | head -n1 || true)"
-  if [[ -n "${sig:-}" ]]; then
-    export HYPRLAND_INSTANCE_SIGNATURE="$sig"
-  fi
+  hypr_ensure_runtime_dir
+  hypr_detect_instance_signature
 }
 
 run_if_present() {
@@ -93,7 +73,7 @@ start_user_service_if_present() {
 }
 
 main() {
-  load_session_env
+  hypr_load_session_env
   ensure_hypr_env || true
   queue_dconf_sync
 

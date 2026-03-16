@@ -213,6 +213,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `hypr-session-common`
+**Description:** Shared helpers for Hyprland session bootstrap scripts.
+
+**Usage:** `hypr-session-common`
+
+---
+
 ### 📂 `hypr-session-init`
 **Description:** Sync Hyprland session env into systemd/dbus and optionally start
 
@@ -608,7 +615,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ### 📂 `ppp-auto-profile`
 **Description:** Periodic power profile chooser using live CPU usage samples
 
-**Usage:** `ppp-auto-profile.sh`
+**Usage:** `ppp-auto-profile.sh [--help|--status]`
 
 ---
 

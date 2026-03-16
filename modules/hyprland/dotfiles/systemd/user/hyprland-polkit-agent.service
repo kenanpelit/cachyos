@@ -7,7 +7,8 @@ ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Service]
 ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-Restart=on-failure
+SuccessExitStatus=1
+Restart=on-abnormal
 RestartSec=1
 StandardOutput=journal
 StandardError=journal

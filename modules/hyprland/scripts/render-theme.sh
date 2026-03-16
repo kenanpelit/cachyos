@@ -1,0 +1,293 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+MANIFEST="${MODULE_DIR}/theme/theme.env"
+ENV_OUT="${MODULE_DIR}/dotfiles/environment.d/10-hyprland.conf"
+THEME_OUT="${MODULE_DIR}/dotfiles/hypr/conf.d/20-theme.conf"
+
+# shellcheck source=/dev/null
+source "${MANIFEST}"
+
+: "${CATPPUCCIN_FLAVOR:=mocha}"
+: "${CATPPUCCIN_ACCENT:=mauve}"
+: "${GTK_THEME:=catppuccin-mocha-mauve-standard+default}"
+: "${XCURSOR_THEME:=capitaine-cursors}"
+: "${XCURSOR_SIZE:=24}"
+: "${HYPRCURSOR_THEME:=${XCURSOR_THEME}}"
+: "${HYPRCURSOR_SIZE:=${XCURSOR_SIZE}}"
+: "${XDG_ICON_THEME:=kora}"
+: "${ICON_THEME:=${XDG_ICON_THEME}}"
+: "${QT_ICON_THEME:=${XDG_ICON_THEME}}"
+: "${THEME_HIGHLIGHT_HEX:=00bcd4}"
+: "${THEME_BORDER_SIZE:=2}"
+: "${THEME_ROUNDING:=8}"
+: "${THEME_FLOATING_ROUNDING:=10}"
+
+if [[ "${CATPPUCCIN_FLAVOR}" != "mocha" ]]; then
+  printf 'Unsupported CATPPUCCIN_FLAVOR: %s\n' "${CATPPUCCIN_FLAVOR}" >&2
+  exit 1
+fi
+
+declare -A palette=(
+  [rosewater]=f5e0dc
+  [flamingo]=f2cdcd
+  [pink]=f5c2e7
+  [mauve]=cba6f7
+  [red]=f38ba8
+  [maroon]=eba0ac
+  [peach]=fab387
+  [yellow]=f9e2af
+  [green]=a6e3a1
+  [teal]=94e2d5
+  [sky]=89dceb
+  [sapphire]=74c7ec
+  [blue]=89b4fa
+  [lavender]=b4befe
+  [text]=cdd6f4
+  [subtext1]=bac2de
+  [subtext0]=a6adc8
+  [overlay2]=9399b2
+  [overlay1]=7f849c
+  [overlay0]=6c7086
+  [surface2]=585b70
+  [surface1]=45475a
+  [surface0]=313244
+  [base]=1e1e2e
+  [mantle]=181825
+  [crust]=11111b
+)
+
+accent_hex="${palette[${CATPPUCCIN_ACCENT}]:-}"
+if [[ -z "${accent_hex}" ]]; then
+  printf 'Unsupported CATPPUCCIN_ACCENT: %s\n' "${CATPPUCCIN_ACCENT}" >&2
+  exit 1
+fi
+
+cat >"${ENV_OUT}" <<EOF
+# Generated from modules/hyprland/theme/theme.env.
+# Update the manifest and rerun modules/hyprland/scripts/render-theme.sh.
+
+# Canonical Hyprland session environment.
+# systemd --user, dbus activation, Hyprland startup helpers and portals should
+# all consume this file as the shared source of truth.
+
+XDG_CURRENT_DESKTOP=Hyprland
+XDG_SESSION_TYPE=wayland
+XDG_SESSION_DESKTOP=Hyprland
+DESKTOP_SESSION=Hyprland
+PATH=\${HOME}/.local/share/zinit/polaris/bin:\${HOME}/.local/bin:\${HOME}/bin:\${HOME}/.iptv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:\${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:\${HOME}/.local/share/go/bin
+XDG_DATA_DIRS=\${HOME}/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+
+BROWSER=start-helium-kenp
+EDITOR=nvim
+VISUAL=nvim
+TERMINAL=kitty
+
+HYPRLAND_LOG_WLR=1
+HYPRLAND_NO_RT=1
+HYPRLAND_NO_SD_NOTIFY=1
+HYPRLAND_NO_WATCHDOG_WARNING=1
+
+GDK_BACKEND=wayland,x11
+GDK_SCALE=1
+GTK_THEME=${GTK_THEME}
+GTK_USE_PORTAL=1
+GTK_APPLICATION_PREFER_DARK_THEME=1
+SDL_VIDEODRIVER=wayland
+CLUTTER_BACKEND=wayland
+OZONE_PLATFORM=wayland
+ELECTRON_OZONE_PLATFORM_HINT=auto
+
+MOZ_ENABLE_WAYLAND=1
+MOZ_WEBRENDER=1
+MOZ_USE_XINPUT2=1
+MOZ_CRASHREPORTER_DISABLE=1
+_JAVA_AWT_WM_NONREPARENTING=1
+
+XCURSOR_THEME=${XCURSOR_THEME}
+XCURSOR_SIZE=${XCURSOR_SIZE}
+HYPRCURSOR_THEME=${HYPRCURSOR_THEME}
+HYPRCURSOR_SIZE=${HYPRCURSOR_SIZE}
+XDG_ICON_THEME=${XDG_ICON_THEME}
+ICON_THEME=${ICON_THEME}
+FONTCONFIG_FILE=/etc/fonts/fonts.conf
+LIBVA_DRIVER_NAME=iHD
+
+QT_QPA_PLATFORM=wayland;xcb
+QT_QPA_PLATFORMTHEME=gtk3
+QT_QPA_PLATFORMTHEME_QT6=gtk3
+QT_STYLE_OVERRIDE=kvantum
+QT_AUTO_SCREEN_SCALE_FACTOR=1
+QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+QT_WAYLAND_FORCE_DPI=96
+QT_FONT_DPI=96
+QT_ENABLE_HIGHDPI_SCALING=1
+QT_QPA_SYSTEMTRAY_DARK_MODE=1
+QT_ICON_THEME=${QT_ICON_THEME}
+
+CATPPUCCIN_FLAVOR=${CATPPUCCIN_FLAVOR}
+CATPPUCCIN_ACCENT=${CATPPUCCIN_ACCENT}
+EOF
+
+cat >"${THEME_OUT}" <<EOF
+# Generated from modules/hyprland/theme/theme.env.
+# Update the manifest and rerun modules/hyprland/scripts/render-theme.sh.
+
+# Theme palette and visual assignments
+
+\$gtkTheme = ${GTK_THEME}
+\$catppuccinFlavor = ${CATPPUCCIN_FLAVOR}
+\$catppuccinAccent = ${CATPPUCCIN_ACCENT}
+
+\$rosewater = rgb(${palette[rosewater]})
+\$rosewaterAlpha = ${palette[rosewater]}
+
+\$flamingo = rgb(${palette[flamingo]})
+\$flamingoAlpha = ${palette[flamingo]}
+
+\$pink = rgb(${palette[pink]})
+\$pinkAlpha = ${palette[pink]}
+
+\$mauve = rgb(${palette[mauve]})
+\$mauveAlpha = ${palette[mauve]}
+
+\$red = rgb(${palette[red]})
+\$redAlpha = ${palette[red]}
+
+\$maroon = rgb(${palette[maroon]})
+\$maroonAlpha = ${palette[maroon]}
+
+\$peach = rgb(${palette[peach]})
+\$peachAlpha = ${palette[peach]}
+
+\$yellow = rgb(${palette[yellow]})
+\$yellowAlpha = ${palette[yellow]}
+
+\$green = rgb(${palette[green]})
+\$greenAlpha = ${palette[green]}
+
+\$teal = rgb(${palette[teal]})
+\$tealAlpha = ${palette[teal]}
+
+\$sky = rgb(${palette[sky]})
+\$skyAlpha = ${palette[sky]}
+
+\$sapphire = rgb(${palette[sapphire]})
+\$sapphireAlpha = ${palette[sapphire]}
+
+\$blue = rgb(${palette[blue]})
+\$blueAlpha = ${palette[blue]}
+
+\$lavender = rgb(${palette[lavender]})
+\$lavenderAlpha = ${palette[lavender]}
+
+\$text = rgb(${palette[text]})
+\$textAlpha = ${palette[text]}
+
+\$subtext1 = rgb(${palette[subtext1]})
+\$subtext1Alpha = ${palette[subtext1]}
+
+\$subtext0 = rgb(${palette[subtext0]})
+\$subtext0Alpha = ${palette[subtext0]}
+
+\$overlay2 = rgb(${palette[overlay2]})
+\$overlay2Alpha = ${palette[overlay2]}
+
+\$overlay1 = rgb(${palette[overlay1]})
+\$overlay1Alpha = ${palette[overlay1]}
+
+\$overlay0 = rgb(${palette[overlay0]})
+\$overlay0Alpha = ${palette[overlay0]}
+
+\$surface2 = rgb(${palette[surface2]})
+\$surface2Alpha = ${palette[surface2]}
+
+\$surface1 = rgb(${palette[surface1]})
+\$surface1Alpha = ${palette[surface1]}
+
+\$surface0 = rgb(${palette[surface0]})
+\$surface0Alpha = ${palette[surface0]}
+
+\$base = rgb(${palette[base]})
+\$baseAlpha = ${palette[base]}
+
+\$mantle = rgb(${palette[mantle]})
+\$mantleAlpha = ${palette[mantle]}
+
+\$crust = rgb(${palette[crust]})
+\$crustAlpha = ${palette[crust]}
+
+\$accent = rgb(${accent_hex})
+\$accentAlpha = ${accent_hex}
+\$highlight = rgb(${THEME_HIGHLIGHT_HEX})
+\$highlightAlpha = ${THEME_HIGHLIGHT_HEX}
+\$themeBorderSize = ${THEME_BORDER_SIZE}
+\$themeRounding = ${THEME_ROUNDING}
+\$themeFloatingRounding = ${THEME_FLOATING_ROUNDING}
+
+general {
+  border_size=\$themeBorderSize
+  col.active_border=rgba(\$highlightAlphaff) rgba(\$accentAlphaff) 45deg
+  col.inactive_border=rgba(\$surface1Alphaff)
+}
+
+decoration {
+  blur {
+    enabled=true
+    ignore_opacity=true
+    new_optimizations=true
+    passes=2
+    popups=true
+    popups_ignorealpha=0.2
+    size=9
+    special=false
+    vibrancy=0.155
+    vibrancy_darkness=0.0
+    xray=true
+  }
+
+  shadow {
+    color=0x66000000
+    enabled=true
+    ignore_window=true
+    offset=0 4
+    range=27
+    render_power=4
+    scale=0.975
+  }
+
+  active_opacity=1.0
+  dim_inactive=true
+  dim_strength=0.12
+  fullscreen_opacity=1.0
+  inactive_opacity=0.88
+  rounding=\$themeRounding
+}
+
+group {
+  groupbar {
+    col.active=rgba(\$blueAlphaed)
+    col.inactive=rgba(\$overlay0Alphaa8)
+    col.locked_active=rgba(\$accentAlphaed)
+    col.locked_inactive=rgba(\$surface1Alphaa8)
+    font_size=10
+    gradients=false
+    render_titles=false
+  }
+  col.border_active=rgba(\$highlightAlphaff) rgba(\$accentAlphaff) 45deg
+  col.border_inactive=rgba(\$surface1Alphaa8) rgba(\$overlay0Alphaa8) 45deg
+  col.border_locked_active=rgba(\$highlightAlphaff) rgba(\$accentAlphaff) 45deg
+  col.border_locked_inactive=rgba(\$surface1Alphaa8) rgba(\$overlay0Alphaa8) 45deg
+}
+
+misc {
+  background_color=rgba(\$baseAlphaff)
+}
+
+# Workspace chrome exceptions
+workspace=f[1], gapsout:0, gapsin:0, rounding:0, shadow:0
+workspace=special:dropdown, gapsout:0, gapsin:0, bordersize:0, rounding:0, shadow:0
+workspace=special:scratchpad, gapsout:0, gapsin:0, bordersize:0, rounding:0, shadow:0
+EOF

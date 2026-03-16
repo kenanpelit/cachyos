@@ -1,7 +1,6 @@
 [Unit]
 Description=Hyprland bootstrap (init)
-Wants=pipewire.service wireplumber.service
-After=graphical-session.target pipewire.service wireplumber.service
+After=graphical-session.target
 Before=hypr-daemons.target
 PartOf=hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
