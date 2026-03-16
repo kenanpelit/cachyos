@@ -1,5 +1,5 @@
 #[Backend]
-backend = "hyprsunset"   # Keep sunsetr aligned with the Hyprland-native backend
+backend = "auto"         # Let sunsetr pick Hyprland/Niri-compatible backend automatically
 transition_mode = "start_at" # Mirror the first/last Hyprsunset anchors as an envelope
 
 #[Smoothing]

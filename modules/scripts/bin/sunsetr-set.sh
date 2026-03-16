@@ -265,6 +265,22 @@ ensure_config_dir() {
   fi
 }
 
+require_existing_config() {
+  local profile="$1"
+  local cfg_dir="$2"
+  local cfg_file="$cfg_dir/sunsetr.toml"
+
+  if [[ -f "$cfg_file" ]]; then
+    return 0
+  fi
+
+  if is_preset "$profile"; then
+    die "apply/status expects a profile, not preset: $profile (use: $SCRIPT_NAME $profile --apply)"
+  fi
+
+  die "profile not found: $profile ($cfg_file)"
+}
+
 apply_preset() {
   local preset
   preset="$(canonical_preset_name "$1")"
@@ -422,14 +438,14 @@ main() {
     profile="${args[1]:-$DEFAULT_PROFILE}"
     validate_profile "$profile"
     cfg_dir="$(profile_to_dir "$profile")"
-    ensure_config_dir "$cfg_dir"
+    require_existing_config "$profile" "$cfg_dir"
     activate_profile "$profile" "$cfg_dir"
     ;;
   status | show)
     profile="${args[1]:-$DEFAULT_PROFILE}"
     validate_profile "$profile"
     cfg_dir="$(profile_to_dir "$profile")"
-    ensure_config_dir "$cfg_dir"
+    require_existing_config "$profile" "$cfg_dir"
     show_status "$profile" "$cfg_dir"
     ;;
   *)

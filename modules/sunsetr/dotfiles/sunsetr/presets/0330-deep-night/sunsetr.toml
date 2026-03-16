@@ -1,5 +1,5 @@
 #[Backend]
-backend = "hyprsunset"
+backend = "auto"
 transition_mode = "static"
 
 #[Smoothing]
