@@ -15,8 +15,8 @@ set -euo pipefail
 # - On AC: switch to performance on high load, back to balanced on low load.
 
 LOCK_FILE="${HOME}/.local/state/ppd-auto-profile/lock"
-HIGH_LOAD_PERCENT="${PPP_HIGH_LOAD_PERCENT:-70}"
-LOW_LOAD_PERCENT="${PPP_LOW_LOAD_PERCENT:-35}"
+HIGH_LOAD_PERCENT="${PPP_HIGH_LOAD_PERCENT:-50}"
+LOW_LOAD_PERCENT="${PPP_LOW_LOAD_PERCENT:-30}"
 NOTIFY="${PPP_NOTIFY:-1}"
 
 need() { command -v "$1" >/dev/null 2>&1; }
