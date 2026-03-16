@@ -62,6 +62,20 @@ upsert_kernel_param() {
   printf '%s\n' "${filtered[*]}"
 }
 
+remove_kernel_param() {
+  local current="$1" key="$2"
+  local token filtered=()
+
+  for token in ${current}; do
+    if [[ "${token}" == "${key}" || "${token}" == "${key}="* ]]; then
+      continue
+    fi
+    filtered+=("${token}")
+  done
+
+  printf '%s\n' "${filtered[*]}"
+}
+
 apply_grub_cmdline() {
   local grub_default="/etc/default/grub"
   [ -f "${grub_default}" ] || return 0
@@ -74,11 +88,21 @@ apply_grub_cmdline() {
     "i915.enable_fbc 1"
     "i915.enable_dc 0"
     "i915.enable_psr 0"
-    "i915.fastboot 1"
     "mem_sleep_default s2idle"
   )
+  local managed_keys=(
+    "intel_pstate"
+    "intel_idle.max_cstate"
+    "processor.ignore_ppc"
+    "i915.enable_guc"
+    "i915.enable_fbc"
+    "i915.enable_dc"
+    "i915.enable_psr"
+    "i915.fastboot"
+    "mem_sleep_default"
+  )
 
-  local current line changed=0 param key value
+  local current original line changed=0 param key value managed_key
   line="$(${SUDO} awk -F= '/^GRUB_CMDLINE_LINUX_DEFAULT=/{print $0}' "${grub_default}" || true)"
   if [ -z "${line}" ]; then
     current=""
@@ -86,17 +110,23 @@ apply_grub_cmdline() {
     current="${line#GRUB_CMDLINE_LINUX_DEFAULT=}"
     current="$(strip_shell_quotes "${current}")"
   fi
+  original="${current}"
+
+  for managed_key in "${managed_keys[@]}"; do
+    current="$(remove_kernel_param "${current}" "${managed_key}")"
+  done
 
   for param in "${params[@]}"; do
     key="${param%% *}"
     value="${param#* }"
-    if ! grep -Eq "(^|[[:space:]])${key}=${value}([[:space:]]|$)" <<<"${current}"; then
-      current="$(upsert_kernel_param "${current}" "${key}" "${value}")"
-      changed=1
-    fi
+    current="$(upsert_kernel_param "${current}" "${key}" "${value}")"
   done
 
   current="$(echo "${current}" | xargs)"
+
+  if [[ "${current}" != "${original}" ]]; then
+    changed=1
+  fi
 
   if [ "${changed}" -eq 1 ]; then
     if [ -z "${line}" ]; then
