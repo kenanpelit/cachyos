@@ -15,18 +15,18 @@ dotfiles:
   target: ~/.config/autostart/gnome-keyring-pkcs11.desktop
 - source: dotfiles/hypr/conf.d/10-core.conf
   target: ~/.config/hypr/conf.d/10-core.conf
-- source: dotfiles/hypr/conf.d/15-theme.conf
-  target: ~/.config/hypr/conf.d/15-theme.conf
-- source: dotfiles/hypr/conf.d/20-input.conf
-  target: ~/.config/hypr/conf.d/20-input.conf
-- source: dotfiles/hypr/conf.d/30-rules.conf
-  target: ~/.config/hypr/conf.d/30-rules.conf
-- source: dotfiles/hypr/conf.d/40-binds.conf
-  target: ~/.config/hypr/conf.d/40-binds.conf
+- source: dotfiles/hypr/conf.d/20-theme.conf
+  target: ~/.config/hypr/conf.d/20-theme.conf
+- source: dotfiles/hypr/conf.d/30-input.conf
+  target: ~/.config/hypr/conf.d/30-input.conf
+- source: dotfiles/hypr/conf.d/40-rules.conf
+  target: ~/.config/hypr/conf.d/40-rules.conf
+- source: dotfiles/hypr/conf.d/50-binds.conf
+  target: ~/.config/hypr/conf.d/50-binds.conf
 - source: dotfiles/hypr/conf.d/60-submaps.conf
   target: ~/.config/hypr/conf.d/60-submaps.conf
-- source: dotfiles/hypr/conf.d/92-monitors.conf
-  target: ~/.config/hypr/conf.d/92-monitors.conf
+- source: dotfiles/hypr/conf.d/70-monitors.conf
+  target: ~/.config/hypr/conf.d/70-monitors.conf
 - source: dotfiles/portals.conf
   target: ~/.config/xdg-desktop-portal/hyprland-portals.conf
 - source: dotfiles/portals.conf

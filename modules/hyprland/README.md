@@ -2,7 +2,7 @@
 
 This module owns the Hyprland compositor config, the Hyprland-specific
 `systemd --user` startup graph, and the managed monitor/workspace routing under
-`~/.config/hypr/conf.d/92-monitors.conf`.
+`~/.config/hypr/conf.d/70-monitors.conf`.
 
 ## Responsibilities
 
@@ -86,13 +86,13 @@ Daemon-stage units started by `hypr-daemons.target`:
 - `dotfiles/hypr/hyprland.conf`
   Minimal root config that sources the split files and starts
   `hypr-session-init`.
-- `dotfiles/hypr/conf.d/15-theme.conf`
+- `dotfiles/hypr/conf.d/20-theme.conf`
   Theme palette plus the visual assignments for borders, blur, shadow, opacity,
   groupbars, compositor background, workspace chrome exceptions, and Hyprland
   theme string values used by binds.
 - `dotfiles/environment.d/10-hyprland.conf`
   Shared source of truth for session environment values.
-- `dotfiles/hypr/conf.d/92-monitors.conf`
+- `dotfiles/hypr/conf.d/70-monitors.conf`
   Repo-managed monitor layout and workspace routing for the current setup.
 
 ## Conditions and notes
