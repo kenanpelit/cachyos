@@ -99,6 +99,7 @@ Item {
     readonly property string audioSource: pluginApi?.pluginSettings?.audioSource || "default_output"
     readonly property string videoSource: pluginApi?.pluginSettings?.videoSource || "portal"
     readonly property string resolution: pluginApi?.pluginSettings?.resolution || "original"
+    readonly property bool restorePortalSession: pluginApi?.pluginSettings?.restorePortalSession ?? false
 
     // Replay settings shortcuts
     readonly property bool replayEnabled: pluginApi?.pluginSettings?.replayEnabled ?? false
@@ -279,7 +280,8 @@ Item {
 
         var actualFrameRate = (frameRate === "custom") ? customFrameRate : frameRate;
         var resolutionFlag = (resolution !== "original") ? `-s ${resolution}` : "";
-        var flags = `-w ${source} -f ${actualFrameRate} -k ${videoCodec} ${audioFlags} -q ${quality} -cursor ${showCursor ? "yes" : "no"} -cr ${colorRange} ${resolutionFlag} -restore-portal-session yes -o "${outputPath}"`;
+        var restoreFlag = restorePortalSession ? "-restore-portal-session yes" : "";
+        var flags = `-w ${source} -f ${actualFrameRate} -k ${videoCodec} ${audioFlags} -q ${quality} -cursor ${showCursor ? "yes" : "no"} -cr ${colorRange} ${resolutionFlag} ${restoreFlag} -o "${outputPath}"`;
         var primePrefix = primeRun ? "prime-run " : "";
         var command = `
     _gpuscreenrecorder_flatpak_installed() {
@@ -554,7 +556,8 @@ Item {
                 return `-ac ${audioCodec} -a ${audioSource}`;
             })();
 
-        var flags = `-w ${source} -c mp4 -f ${actualFrameRate} -k ${videoCodec} ${audioFlags} -q ${quality} -cursor ${showCursor ? "yes" : "no"} -cr ${colorRange} ${resolutionFlag} -r ${actualDuration} -replay-storage ${replayStorage} -restore-portal-session yes -o "${videoDir}"`;
+        var restoreFlag = restorePortalSession ? "-restore-portal-session yes" : "";
+        var flags = `-w ${source} -c mp4 -f ${actualFrameRate} -k ${videoCodec} ${audioFlags} -q ${quality} -cursor ${showCursor ? "yes" : "no"} -cr ${colorRange} ${resolutionFlag} -r ${actualDuration} -replay-storage ${replayStorage} ${restoreFlag} -o "${videoDir}"`;
         var primePrefix = primeRun ? "prime-run " : "";
         var command = `
     _gpuscreenrecorder_flatpak_installed() {
