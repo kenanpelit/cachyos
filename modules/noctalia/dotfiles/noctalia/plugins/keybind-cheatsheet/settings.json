@@ -2,7 +2,7 @@
   "cheatsheetData": [],
   "detectedCompositor": "hyprland",
   "niriConfigPath": "~/.config/niri/config.kdl",
-  "hyprlandConfigPath": "~/.config/hypr/hyprland.conf",
+  "hyprlandConfigPath": "~/.config/hypr/conf.d/40-binds.conf",
   "modKeyVariable": "$mod",
   "windowHeight": 850,
   "windowWidth": 1400

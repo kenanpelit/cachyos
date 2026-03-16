@@ -15,6 +15,8 @@ dotfiles:
   target: ~/.config/autostart/gnome-keyring-pkcs11.desktop
 - source: dotfiles/hypr/conf.d/10-core.conf
   target: ~/.config/hypr/conf.d/10-core.conf
+- source: dotfiles/hypr/conf.d/15-theme.conf
+  target: ~/.config/hypr/conf.d/15-theme.conf
 - source: dotfiles/hypr/conf.d/20-input.conf
   target: ~/.config/hypr/conf.d/20-input.conf
 - source: dotfiles/hypr/conf.d/30-rules.conf
@@ -31,8 +33,6 @@ dotfiles:
   target: ~/.config/xdg-desktop-portal/hyprland-portals.conf
 - source: dotfiles/portals.conf
   target: ~/.config/xdg-desktop-portal/Hyprland-portals.conf
-- source: dotfiles/hypr/themes
-  target: ~/.config/hypr/themes
 - source: dotfiles/systemd/user/hyprland-session.target
   target: ~/.config/systemd/user/hyprland-session.target
 - source: dotfiles/systemd/user/hyprland-polkit-agent.service
