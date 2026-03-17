@@ -45,4 +45,7 @@ if command -v gsettings >/dev/null 2>&1; then
   gsettings set org.gnome.desktop.interface icon-theme "$XDG_ICON_THEME" >/dev/null 2>&1 || true
 fi
 
+export XDG_DATA_DIRS="/usr/share:/usr/local/share:${HOME}/.local/share:${XDG_DATA_DIRS:-}"
+export QT_QPA_PLATFORMTHEME="gtk3"
+
 exec /usr/bin/qs -c noctalia-shell --no-duplicate

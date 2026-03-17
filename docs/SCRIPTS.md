@@ -318,6 +318,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `noctalia-launch`
+**Description:** Bootstrap Noctalia with the compositor session environment already loaded.
+
+**Usage:** `noctalia-launch`
+
+---
+
 ### 📂 `nsticky-toggle`
 **Description:** Smart toggle for nsticky (sticky -> stage -> unstage).
 
