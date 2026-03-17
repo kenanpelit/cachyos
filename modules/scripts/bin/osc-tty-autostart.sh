@@ -68,7 +68,7 @@ main() {
   tty_vtnr="$(detect_tty_vtnr 2>/dev/null || true)"
   [[ "${tty_vtnr:-}" =~ ^[1-6]$ ]] || exit 0
 
-  if pgrep -x gnome-shell >/dev/null 2>&1 \
+  if pgrep -u "$(id -u)" -x gnome-shell >/dev/null 2>&1 \
     || [[ -n "${GNOME_DESKTOP_SESSION_ID:-}" ]] \
     || [[ -n "${GNOME_SHELL_SESSION_MODE:-}" ]]; then
     log_tty_autostart "skip due to active gnome-shell tty=${tty_vtnr}"

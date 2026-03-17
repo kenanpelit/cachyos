@@ -549,6 +549,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-tty-autostart`
+**Description:** Shared TTY autostart entry used by zsh login/interactive shells.
+
+**Usage:** `osc-tty-autostart`
+
+---
+
 ### 📂 `osc-tty-launcher`
 **Description:** UWSM-aware interactive TTY launcher for desktop routes and VM profiles
 

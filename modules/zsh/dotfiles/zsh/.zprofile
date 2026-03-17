@@ -3,8 +3,8 @@
 # Multi-TTY desktop autostart router (login shell only)
 # =============================================================================
 # TTY1: display manager / manual launch info
-# TTY2: Niri (UWSM)
-# TTY3: Hyprland (UWSM)
+# TTY2: Hyprland (UWSM)
+# TTY3: Niri (UWSM)
 # TTY4: GNOME (gnome_tty)
 # TTY5: VM route (svmubuntu via Sway profile)
 # TTY6: manual

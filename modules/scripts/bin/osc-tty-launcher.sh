@@ -156,8 +156,8 @@ show_tty_hints() {
   Current TTY: ${tty}
 
   Quick routes:
-    tty2 -> Niri (UWSM)
-    tty3 -> Hyprland (UWSM)
+    tty2 -> Hyprland (UWSM)
+    tty3 -> Niri (UWSM)
     tty4 -> GNOME
     tty5 -> Ubuntu VM via Sway
     tty6 -> manual launcher
@@ -190,12 +190,12 @@ handle_auto_tty() {
       show_tty_hints "${tty}"
       ;;
     2)
-      echo "TTY2: launching Niri via UWSM"
-      launch_niri
+      echo "TTY2: launching Hyprland via UWSM"
+      launch_hyprland
       ;;
     3)
-      echo "TTY3: launching Hyprland via UWSM"
-      launch_hyprland
+      echo "TTY3: launching Niri via UWSM"
+      launch_niri
       ;;
     4)
       echo "TTY4: launching GNOME"
