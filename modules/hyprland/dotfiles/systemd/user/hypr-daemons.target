@@ -1,5 +1,6 @@
 [Unit]
 Description=Hyprland session daemons stage
 Wants=hyprland-polkit-agent.service hypr-nm-applet.service hypr-blueman-applet.service hypr-clip-persist.service
-After=hypr-bootstrap.service
-PartOf=hyprland-session.target
+After=graphical-session.target hypr-bootstrap.service
+BindsTo=graphical-session.target
+PartOf=hyprland-session.target graphical-session.target

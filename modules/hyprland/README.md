@@ -35,9 +35,11 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 - Once Hyprland is up, `dotfiles/hypr/hyprland.conf` runs:
   `exec-once = ~/.local/bin/hypr-session-init`.
 - `hypr-session-init` is now the compositor-side entrypoint that starts
-  `hyprland-session.target`. Under UWSM it only syncs live runtime variables
-  like `WAYLAND_DISPLAY` and `HYPRLAND_INSTANCE_SIGNATURE`; outside UWSM it
-  retains the older full env-sync path as a compatibility fallback.
+  `hyprland-session.target`. Under UWSM it trusts the pre-finalized session
+  environment and only falls back to runtime detection/sync if
+  `WAYLAND_DISPLAY` or `HYPRLAND_INSTANCE_SIGNATURE` are unexpectedly missing.
+  Outside UWSM it retains the older full env-sync path as a compatibility
+  fallback.
 
 ## Startup flow
 
@@ -49,11 +51,12 @@ anymore. That belongs to the `gdm` and `sessions` modules.
    finalizes the session environment for the user manager.
 4. Hyprland reads `~/.config/hypr/hyprland.conf` and runs
    `~/.local/bin/hypr-session-init`.
-5. If the session is UWSM-managed, `hypr-session-init` only detects
-   `WAYLAND_DISPLAY` and `HYPRLAND_INSTANCE_SIGNATURE`, syncs those runtime
-   variables into `systemd --user`/DBus, and starts `hyprland-session.target`.
-   If UWSM is not present, the script falls back to the older full
-   `environment.d` import path.
+5. If the session is UWSM-managed, `hypr-session-init` starts
+   `hyprland-session.target` immediately and only performs runtime
+   detection/sync as a fallback when UWSM did not finalize
+   `WAYLAND_DISPLAY` or `HYPRLAND_INSTANCE_SIGNATURE`. If UWSM is not
+   present, the script falls back to the older full `environment.d` import
+   path.
 6. `hyprland-session.target` pulls in:
    `graphical-session.target`, `graphical-session-pre.target`,
    `xdg-desktop-autostart.target`, `hypr-bootstrap.service`,
@@ -151,7 +154,11 @@ Daemon-stage units started by `hypr-daemons.target`:
   a curated Hyprland-specific allowlist so Niri-only or ad-hoc user overrides
   do not leak into the Hyprland session wrapper. `hypr-session-init` avoids
   re-importing that full static environment when UWSM is already managing the
-  session.
+  session and only backfills missing compositor runtime variables as a safety
+  net.
+- Logout flows should prefer `uwsm stop` over `hyprctl dispatch exit` so the
+  compositor, session targets, and UWSM-managed user services shut down
+  together.
 - Shared XDG autostart masks for `nm-applet`, `blueman`, and keyring desktop
   entries live in the `wayland-autostart` module.
 - The Hyprland session owns the polkit agent. Keep Noctalia's `polkit-agent`

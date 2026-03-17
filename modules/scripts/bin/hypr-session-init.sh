@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: hypr-session-init
-# Description: Detect live Hyprland session variables and optionally start
-#              hyprland-session.target. Under UWSM, avoid re-importing the full
-#              static environment and only sync runtime-critical variables.
+# Description: Start hyprland-session.target from inside the compositor.
+#              Under UWSM, trust the pre-finalized session environment and only
+#              fall back to runtime detection if critical compositor variables
+#              are unexpectedly missing.
 # Usage: hypr-session-init [--no-start-target]
 # ==============================================================================
 
@@ -51,6 +52,18 @@ sync_session_environment() {
   hypr_sync_session_environment
 }
 
+ensure_uwsm_runtime_environment() {
+  local runtime_missing=false
+
+  [[ -n "${WAYLAND_DISPLAY:-}" ]] || runtime_missing=true
+  [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] || runtime_missing=true
+  [[ "$runtime_missing" == "true" ]] || return 0
+
+  hypr_detect_wayland_display
+  hypr_detect_instance_signature
+  hypr_sync_runtime_environment
+}
+
 start_session_target() {
   command -v systemctl >/dev/null 2>&1 || return 0
   systemctl --user start --no-block hyprland-session.target >/dev/null 2>&1 || true
@@ -65,10 +78,7 @@ main() {
     export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
     export DESKTOP_SESSION="${DESKTOP_SESSION:-hyprland-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
-    normalize_session_paths
-    hypr_detect_wayland_display
-    hypr_detect_instance_signature
-    hypr_sync_runtime_environment
+    ensure_uwsm_runtime_environment
   else
     apply_session_env
     normalize_session_paths

@@ -1,7 +1,7 @@
 [Unit]
 Description=Polkit authentication agent (polkit-gnome)
 After=graphical-session.target hypr-bootstrap.service
-PartOf=hypr-daemons.target
+PartOf=hypr-daemons.target graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 

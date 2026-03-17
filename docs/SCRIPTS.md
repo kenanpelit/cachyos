@@ -228,7 +228,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-session-init`
-**Description:** Detect live Hyprland session variables and optionally start
+**Description:** Start hyprland-session.target from inside the compositor.
 
 **Usage:** `hypr-session-init [--no-start-target]`
 

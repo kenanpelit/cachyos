@@ -672,7 +672,7 @@
             },
             {
                 "action": "logout",
-                "command": "",
+                "command": "uwsm stop",
                 "countdownEnabled": true,
                 "enabled": true,
                 "keybind": "4"

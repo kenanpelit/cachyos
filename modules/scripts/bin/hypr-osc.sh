@@ -1613,7 +1613,7 @@ EOF
 	          hyprland-polkit-agent.service
 	          hypr-nm-applet.service
 	          hypr-blueman-applet.service
-          gnome-keyring-secrets.service
+          gnome-keyring-daemon.service
           hypr-clip-persist.service
           xdg-desktop-portal-delayed.timer
           xdg-desktop-portal-delayed.service

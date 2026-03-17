@@ -1,7 +1,7 @@
 [Unit]
 Description=Blueman applet (Hyprland)
-After=hypr-bootstrap.service dbus.service
-PartOf=hypr-daemons.target
+After=graphical-session.target hypr-bootstrap.service dbus.service
+PartOf=hypr-daemons.target graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 

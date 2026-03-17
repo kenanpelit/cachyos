@@ -88,7 +88,7 @@ POWER_CMD[lockscreen]="dms ipc call lock lock || hyprlock || loginctl lock-sessi
 POWER_TEXT[logout]="Sign Out"
 POWER_ICON[logout]="󰗼"
 POWER_COLOR[logout]="#bb9af7"
-POWER_CMD[logout]="hyprctl dispatch exit || swaymsg exit || loginctl terminate-session \${XDG_SESSION_ID:-}"
+POWER_CMD[logout]="uwsm stop || hyprctl dispatch exit || niri msg action quit || swaymsg exit || loginctl terminate-session \${XDG_SESSION_ID:-}"
 
 POWER_TEXT[suspend]="Sleep"
 POWER_ICON[suspend]="󰒲"
