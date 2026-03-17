@@ -138,8 +138,16 @@ show_menu() {
 EOF
 }
 
+clear_if_interactive_tty() {
+  if [[ -t 1 ]]; then
+    command -v clear >/dev/null 2>&1 && clear || printf '\033c'
+  fi
+}
+
 show_tty_hints() {
   local tty="${1:-${XDG_VTNR:-?}}"
+
+  clear_if_interactive_tty
 
   cat <<EOF
 =========================================
@@ -159,6 +167,18 @@ show_tty_hints() {
     exec osc-tty-launcher niri
     exec osc-tty-launcher hyprland
     exec osc-tty-launcher gnome
+
+  Route menu:
+    1) Niri (UWSM)
+    2) Hyprland (UWSM)
+    3) GNOME
+    4) Ubuntu VM
+    5) Arch VM
+    6) Cachy VM
+    7) NixOS VM
+
+  Next step:
+    Type: exec osc-tty-launcher
 EOF
 }
 
