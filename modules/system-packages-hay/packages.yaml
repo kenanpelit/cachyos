@@ -222,6 +222,7 @@ packages:
 - unrar
 - upower
 - usb_modeswitch
+- vlc
 - vlc-plugins-all
 - vpl-gpu-rt
 - vulkan-intel

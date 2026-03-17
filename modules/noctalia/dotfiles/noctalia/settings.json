@@ -753,7 +753,7 @@
         "translucentWidgets": false
     },
     "wallpaper": {
-        "automationEnabled": false,
+        "automationEnabled": true,
         "directory": "/home/kenan/Pictures/wallpapers/others",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
