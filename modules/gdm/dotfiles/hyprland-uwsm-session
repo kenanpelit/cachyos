@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Hyprland session wrapper for UWSM with start-hyprland
+set -euo pipefail
+
+if command -v uwsm >/dev/null 2>&1; then
+    if command -v start-hyprland >/dev/null 2>&1; then
+        exec uwsm start -- start-hyprland
+    else
+        exec uwsm start -- Hyprland
+    fi
+else
+    if command -v start-hyprland >/dev/null 2>&1; then
+        exec start-hyprland
+    else
+        exec Hyprland
+    fi
+fi

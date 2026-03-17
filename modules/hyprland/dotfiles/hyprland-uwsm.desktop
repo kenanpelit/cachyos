@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Hyprland (UWSM)
+Comment=Hyprland managed by Universal Wayland Session Manager
+Type=Application
+DesktopNames=Hyprland
+X-GDM-SessionType=wayland
+X-Session-Type=wayland
+Exec=/usr/local/bin/hyprland-uwsm-session
+Keywords=wayland;wm;tiling;hyprland;compositor;uwsm;

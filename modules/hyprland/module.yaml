@@ -9,6 +9,10 @@ depends_on:
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
 dotfiles:
+- source: dotfiles/hyprland-optimized.desktop
+  target: ~/.config/hyprland-optimized.desktop
+- source: dotfiles/hyprland-uwsm.desktop
+  target: ~/.config/hyprland-uwsm.desktop
 - source: dotfiles/hypr/hyprland.conf
   target: ~/.config/hypr/hyprland.conf
 - source: dotfiles/environment.d/10-hyprland.conf
