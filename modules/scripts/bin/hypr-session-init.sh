@@ -53,12 +53,6 @@ sync_session_environment() {
 }
 
 ensure_uwsm_runtime_environment() {
-  local runtime_missing=false
-
-  [[ -n "${WAYLAND_DISPLAY:-}" ]] || runtime_missing=true
-  [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] || runtime_missing=true
-  [[ "$runtime_missing" == "true" ]] || return 0
-
   hypr_detect_wayland_display
   hypr_detect_instance_signature
   hypr_sync_runtime_environment

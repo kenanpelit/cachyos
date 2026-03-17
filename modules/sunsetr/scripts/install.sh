@@ -41,6 +41,11 @@ run_as_user() {
   fi
 }
 
+niri_session_active() {
+  run_as_user systemctl --user is-active --quiet niri-session.target \
+    || run_as_user systemctl --user is-active --quiet 'wayland-wm@niri\x2dsession.service'
+}
+
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
@@ -48,20 +53,26 @@ if command -v systemctl >/dev/null 2>&1; then
   wants_dir="$user_systemd_dir/niri-session.target.wants"
   graphical_wants="$user_systemd_dir/graphical-session.target.wants/sunsetr.service"
   target_link="$wants_dir/sunsetr.service"
+  timer_link="$wants_dir/sunsetr-auto-profile.timer"
   unit_path="/usr/lib/systemd/user/sunsetr.service"
+  timer_path="$user_systemd_dir/sunsetr-auto-profile.timer"
 
   mkdir -p "$wants_dir"
   rm -f "$graphical_wants"
   ln -sf "$unit_path" "$target_link"
+  ln -sf "$timer_path" "$timer_link"
 
   if [[ "$(id -u)" -eq 0 ]]; then
     user_group="$(id -gn "$real_user" 2>/dev/null || true)"
     chown -h "$real_user:${user_group:-$real_user}" "$target_link" || true
+    chown -h "$real_user:${user_group:-$real_user}" "$timer_link" || true
   fi
 
-  if [[ "${XDG_CURRENT_DESKTOP:-}" == "niri" || "${DESKTOP_SESSION:-}" == "niri-uwsm" ]]; then
+  if niri_session_active; then
     run_as_user systemctl --user restart sunsetr.service >/dev/null 2>&1 || true
+    run_as_user systemctl --user restart sunsetr-auto-profile.timer >/dev/null 2>&1 || true
   else
+    run_as_user systemctl --user stop sunsetr-auto-profile.timer >/dev/null 2>&1 || true
     run_as_user systemctl --user stop sunsetr.service >/dev/null 2>&1 || true
   fi
 fi

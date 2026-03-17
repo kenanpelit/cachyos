@@ -45,12 +45,6 @@ sync_session_environment() {
 }
 
 ensure_uwsm_runtime_environment() {
-  local runtime_missing=false
-
-  [[ -n "${WAYLAND_DISPLAY:-}" ]] || runtime_missing=true
-  [[ -n "${NIRI_SOCKET:-}" ]] || runtime_missing=true
-  [[ "$runtime_missing" == "true" ]] || return 0
-
   niri_detect_wayland_display
   niri_detect_socket
   niri_sync_runtime_environment

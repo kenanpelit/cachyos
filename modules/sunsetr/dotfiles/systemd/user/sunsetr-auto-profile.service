@@ -1,0 +1,8 @@
+[Unit]
+Description=Apply the scheduled sunsetr preset for the current time
+After=niri-session.target sunsetr.service
+PartOf=niri-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/sunsetr-set auto --apply --no-notify

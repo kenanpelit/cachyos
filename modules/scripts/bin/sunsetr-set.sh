@@ -31,6 +31,7 @@ $SCRIPT_NAME - Sunsetr profile helper
 
 Usage:
   $SCRIPT_NAME list
+  $SCRIPT_NAME auto [profile]
   $SCRIPT_NAME <preset> [profile]
   $SCRIPT_NAME apply [profile]
   $SCRIPT_NAME status [profile]
@@ -47,6 +48,7 @@ Presets:
   $CONFIG_ROOT/presets/*/sunsetr.toml
 
 Examples:
+  $SCRIPT_NAME auto --apply
   $SCRIPT_NAME 2030-dusk
   $SCRIPT_NAME dusk work
   $SCRIPT_NAME 2330-night --apply
@@ -90,6 +92,42 @@ is_preset() {
   local preset
   preset="$(canonical_preset_name "$1")"
   [[ -f "$CONFIG_ROOT/presets/$preset/sunsetr.toml" ]]
+}
+
+scheduled_presets() {
+  local preset_root="$CONFIG_ROOT/presets"
+  local dir preset
+
+  [[ -d "$preset_root" ]] || return 0
+
+  while IFS= read -r -d '' dir; do
+    preset="$(basename "$dir")"
+    [[ "$preset" =~ ^[0-9]{4}- ]] || continue
+    [[ -f "$dir/sunsetr.toml" ]] || continue
+    printf '%s\n' "$preset"
+  done < <(find "$preset_root" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+}
+
+select_auto_preset() {
+  local now_hhmm="${1:-$(date +%H%M)}"
+  local preset anchor selected="" last=""
+
+  while IFS= read -r preset; do
+    [[ "$preset" =~ ^([0-9]{4})- ]] || continue
+    anchor="${BASH_REMATCH[1]}"
+    last="$preset"
+    if [[ "$anchor" -le "$now_hhmm" ]]; then
+      selected="$preset"
+    fi
+  done < <(scheduled_presets)
+
+  if [[ -n "$selected" ]]; then
+    printf '%s\n' "$selected"
+    return 0
+  fi
+
+  [[ -n "$last" ]] || die "no scheduled presets found in $CONFIG_ROOT/presets"
+  printf '%s\n' "$last"
 }
 
 preset_alias() {
@@ -437,6 +475,22 @@ main() {
   list | -l | --list)
     list_presets
     exit 0
+    ;;
+  auto)
+    profile="${args[1]:-$DEFAULT_PROFILE}"
+    validate_profile "$profile"
+    cfg_dir="$(profile_to_dir "$profile")"
+
+    action="$(select_auto_preset)"
+    ensure_config_dir "$cfg_dir"
+    apply_preset "$action" "$profile" "$latitude" "$longitude"
+
+    log "auto preset selected: $action -> $profile"
+    notify "sunsetr" "Otomatik preset: $action -> $profile"
+
+    if [[ "$APPLY_AFTER_SET" -eq 1 ]]; then
+      activate_profile "$profile" "$cfg_dir"
+    fi
     ;;
   apply)
     profile="${args[1]:-$DEFAULT_PROFILE}"

@@ -1,0 +1,20 @@
+[Unit]
+Description=Track sunsetr presets by time while running Niri
+After=niri-session.target
+PartOf=niri-session.target
+
+[Timer]
+Unit=sunsetr-auto-profile.service
+OnStartupSec=45s
+OnCalendar=*-*-* 01:30:00
+OnCalendar=*-*-* 03:30:00
+OnCalendar=*-*-* 07:30:00
+OnCalendar=*-*-* 18:30:00
+OnCalendar=*-*-* 20:30:00
+OnCalendar=*-*-* 22:00:00
+OnCalendar=*-*-* 23:30:00
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=niri-session.target
