@@ -430,6 +430,7 @@
         ],
         "overviewEnabled": true
     },
+    "iconTheme": "kora",
     "dock": {
         "animationSpeed": 1,
         "backgroundOpacity": 1,
