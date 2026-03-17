@@ -1,17 +1,35 @@
 #!/usr/bin/env bash
-# Hyprland session wrapper for UWSM with start-hyprland
+# Hyprland session wrapper for UWSM-first startup.
 set -euo pipefail
 
-if command -v uwsm >/dev/null 2>&1; then
-    if command -v start-hyprland >/dev/null 2>&1; then
-        exec uwsm start -- start-hyprland
-    else
-        exec uwsm start -- Hyprland
-    fi
-else
-    if command -v start-hyprland >/dev/null 2>&1; then
-        exec start-hyprland
-    else
-        exec Hyprland
-    fi
+helper_path="${HOME}/.local/bin/hypr-session-common"
+[[ -r "${helper_path}.sh" ]] && helper_path="${helper_path}.sh"
+
+if [[ -r "${helper_path}" ]]; then
+  # shellcheck source=/dev/null
+  source "${helper_path}"
+  hypr_ensure_runtime_dir
+  hypr_load_session_env
+  hypr_normalize_session_paths
 fi
+
+export XDG_CURRENT_DESKTOP=Hyprland
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=Hyprland
+export DESKTOP_SESSION=hyprland-uwsm
+export GDMSESSION="${GDMSESSION:-hyprland-uwsm}"
+export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
+export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+
+if command -v uwsm >/dev/null 2>&1; then
+  if command -v start-hyprland >/dev/null 2>&1; then
+    exec uwsm start -- start-hyprland
+  fi
+  exec uwsm start -- Hyprland
+fi
+
+if command -v start-hyprland >/dev/null 2>&1; then
+  exec start-hyprland
+fi
+
+exec Hyprland

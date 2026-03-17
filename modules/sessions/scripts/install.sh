@@ -23,13 +23,24 @@ install_session() {
     fi
 }
 
+remove_session() {
+    local name="$1"
+    local target="$DEST_DIR/$name"
+    if [ -e "$target" ] || [ -L "$target" ]; then
+        echo "Removing legacy session $target..."
+        sudo rm -f "$target"
+    fi
+}
+
 # Install Niri
 install_session "$DOTFILES_DIR/niri-optimized.desktop" "Niri (Optimized)"
 
 # Install GNOME
 install_session "$DOTFILES_DIR/gnome-optimized.desktop" "GNOME (Optimized)"
 
-# Install Hyprland (from its module)
-install_session "$HYPR_DOTFILES_DIR/hyprland-optimized.desktop" "Hyprland (Optimized)"
+# Keep Hyprland on the single UWSM-backed session entry.
+remove_session "hyprland.desktop"
+remove_session "hyprland-optimized.desktop"
+install_session "$HYPR_DOTFILES_DIR/hyprland-uwsm.desktop" "Hyprland (UWSM)"
 
 echo "Session installation complete."

@@ -228,7 +228,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-session-init`
-**Description:** Sync Hyprland session env into systemd/dbus and optionally start
+**Description:** Detect live Hyprland session variables and optionally start
 
 **Usage:** `hypr-session-init [--no-start-target]`
 

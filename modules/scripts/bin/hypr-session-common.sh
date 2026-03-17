@@ -5,6 +5,10 @@ hypr_session_env_file() {
   printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-hyprland.conf}"
 }
 
+hypr_session_env_dir() {
+  printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_DIR:-$HOME/.config/environment.d}"
+}
+
 hypr_ensure_runtime_dir() {
   if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
     export XDG_RUNTIME_DIR="/run/user/$(id -u)"
@@ -25,22 +29,45 @@ hypr_parse_env_file() {
     key="${line%%=*}"
     value="${line#*=}"
     [[ -n "$key" ]] || continue
+    if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+      value="${value:1:${#value}-2}"
+    elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+      value="${value:1:${#value}-2}"
+    fi
     value="${value//\$\{HOME\}/$HOME}"
     value="${value//\$HOME/$HOME}"
     printf '%s=%s\n' "$key" "$value"
   done <"$env_file"
 }
 
+hypr_parse_env_dir() {
+  local env_dir file
+  local -a env_files=()
+
+  env_dir="$(hypr_session_env_dir)"
+  env_files=(
+    "${env_dir}/10-gtk.conf"
+    "$(hypr_session_env_file)"
+    "${env_dir}/20-qt.conf"
+    "${env_dir}/30-ollama.conf"
+    "${env_dir}/99-dms-icons.conf"
+  )
+
+  for file in "${env_files[@]}"; do
+    [[ -r "$file" ]] || continue
+    hypr_parse_env_file "$file"
+  done
+}
+
 hypr_load_session_env() {
-  local env_file kv key value
-  env_file="$(hypr_session_env_file)"
+  local kv key value
 
   while IFS= read -r kv; do
     key="${kv%%=*}"
     value="${kv#*=}"
     [[ -n "$key" ]] || continue
     export "$key=$value"
-  done < <(hypr_parse_env_file "$env_file")
+  done < <(hypr_parse_env_dir)
 }
 
 hypr_normalize_colon_list() {
@@ -152,8 +179,16 @@ hypr_detect_instance_signature() {
   fi
 }
 
+hypr_session_under_uwsm() {
+  [[ -n "${UWSM_ID:-}" ]] \
+    || [[ -n "${UWSM_FINALIZE_VARNAMES:-}" ]] \
+    || [[ -n "${UWSM_WAIT_VARNAMES:-}" ]] \
+    || [[ "${DESKTOP_SESSION:-}" == *-uwsm* ]] \
+    || [[ "${GDMSESSION:-}" == *-uwsm* ]]
+}
+
 hypr_collect_env_vars() {
-  local env_file kv key
+  local kv key
   local -a extra_vars=(
     WAYLAND_DISPLAY
     DISPLAY
@@ -171,14 +206,13 @@ hypr_collect_env_vars() {
   local var
   local -A seen=()
 
-  env_file="$(hypr_session_env_file)"
   while IFS= read -r kv; do
     key="${kv%%=*}"
     [[ -n "$key" ]] || continue
     [[ -n "${seen[$key]:-}" ]] && continue
     seen["$key"]=1
     printf '%s\n' "$key"
-  done < <(hypr_parse_env_file "$env_file")
+  done < <(hypr_parse_env_dir)
 
   for var in "${extra_vars[@]}"; do
     [[ -n "${seen[$var]:-}" ]] && continue
@@ -187,7 +221,26 @@ hypr_collect_env_vars() {
   done
 }
 
-hypr_sync_session_environment() {
+hypr_collect_runtime_env_vars() {
+  cat <<'EOF'
+WAYLAND_DISPLAY
+DISPLAY
+HYPRLAND_INSTANCE_SIGNATURE
+PATH
+XDG_DATA_DIRS
+XDG_CONFIG_DIRS
+SSH_AUTH_SOCK
+SYSTEMD_OFFLINE
+XDG_CURRENT_DESKTOP
+XDG_SESSION_TYPE
+XDG_SESSION_DESKTOP
+DESKTOP_SESSION
+GDMSESSION
+EOF
+}
+
+hypr_sync_environment_vars() {
+  local collector="$1"
   local -a env_vars=()
   local -a set_args=()
   local var value
@@ -198,7 +251,7 @@ hypr_sync_session_environment() {
     [[ -n "$value" ]] || continue
     env_vars+=("$var")
     set_args+=("${var}=${value}")
-  done < <(hypr_collect_env_vars)
+  done < <("$collector")
 
   [[ ${#env_vars[@]} -gt 0 ]] || return 0
 
@@ -212,4 +265,12 @@ hypr_sync_session_environment() {
       || dbus-update-activation-environment --systemd --all >/dev/null 2>&1 \
       || true
   fi
+}
+
+hypr_sync_session_environment() {
+  hypr_sync_environment_vars hypr_collect_env_vars
+}
+
+hypr_sync_runtime_environment() {
+  hypr_sync_environment_vars hypr_collect_runtime_env_vars
 }

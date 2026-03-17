@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: hypr-session-init
-# Description: Sync Hyprland session env into systemd/dbus and optionally start
-#              hyprland-session.target.
+# Description: Detect live Hyprland session variables and optionally start
+#              hyprland-session.target. Under UWSM, avoid re-importing the full
+#              static environment and only sync runtime-critical variables.
 # Usage: hypr-session-init [--no-start-target]
 # ==============================================================================
 
@@ -57,11 +58,24 @@ start_session_target() {
 
 main() {
   hypr_ensure_runtime_dir
-  apply_session_env
-  normalize_session_paths
-  hypr_detect_wayland_display
-  hypr_detect_instance_signature
-  sync_session_environment
+
+  if hypr_session_under_uwsm; then
+    export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
+    export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+    export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
+    export DESKTOP_SESSION="${DESKTOP_SESSION:-hyprland-uwsm}"
+    export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+    normalize_session_paths
+    hypr_detect_wayland_display
+    hypr_detect_instance_signature
+    hypr_sync_runtime_environment
+  else
+    apply_session_env
+    normalize_session_paths
+    hypr_detect_wayland_display
+    hypr_detect_instance_signature
+    sync_session_environment
+  fi
 
   if [[ "$start_target" == "true" ]]; then
     start_session_target
