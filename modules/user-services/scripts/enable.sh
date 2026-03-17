@@ -66,6 +66,22 @@ is_module_enabled() {
   [[ -n "${enabled_modules[$module]:-}" ]]
 }
 
+skip_automanaged_unit() {
+  local module="$1"
+  local unit="$2"
+
+  case "${module}:${unit}" in
+    connect:kdeconnect.service|connect:kdeconnect.timer|connect:kdeconnect-indicator.service)
+      # KDE Connect has compositor/session-aware enablement handled by the
+      # connect module's own install hook. Enabling it blindly here can pull
+      # graphical-session.target too early and break UWSM compositor startup.
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
 # --- Service Synchronization ---
 
 sync_user_units() {
@@ -84,6 +100,10 @@ sync_user_units() {
     while IFS= read -r -d '' unit_file; do
       local unit_name
       unit_name="$(basename "$unit_file")"
+
+      if skip_automanaged_unit "$module_name" "$unit_name"; then
+        continue
+      fi
       
       if is_module_enabled "$module_name"; then
         # Check if already enabled to minimize noise

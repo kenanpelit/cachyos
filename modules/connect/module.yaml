@@ -14,4 +14,4 @@ dotfiles:
 - source: dotfiles/bin/kdeconnectd-wrapper
   target: ~/.local/bin/kdeconnectd-wrapper
 post_install_hook: scripts/install.sh
-post_hook_behavior: ask
+post_hook_behavior: always

@@ -9,4 +9,4 @@ AccuracySec=1s
 Unit=kdeconnect.service
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
