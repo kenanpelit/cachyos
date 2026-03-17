@@ -40,26 +40,26 @@ ensure_runtime_environment() {
 }
 
 run_uwsm_route() {
-  local desktop_id="$1"
   local wrapper_cmd="$2"
+  local uwsm_cmd="$1"
   shift 2
   local -a fallback_cmd=("$@")
 
   ensure_runtime_environment
 
-  if command -v uwsm >/dev/null 2>&1; then
-    exec uwsm start -- "${desktop_id}"
-  fi
-
   if [[ -n "${wrapper_cmd}" ]]; then
     exec "${wrapper_cmd}"
+  fi
+
+  if command -v uwsm >/dev/null 2>&1; then
+    exec uwsm start -- "${uwsm_cmd}"
   fi
 
   if [[ ${#fallback_cmd[@]} -gt 0 ]]; then
     exec "${fallback_cmd[@]}"
   fi
 
-  echo "[${SCRIPT_NAME}] route unavailable: ${desktop_id}" >&2
+  echo "[${SCRIPT_NAME}] route unavailable: ${uwsm_cmd}" >&2
   exit 1
 }
 
@@ -68,10 +68,10 @@ launch_niri() {
   wrapper_cmd="$(resolve_cmd "${HOME}/.local/bin/niri-uwsm-session" "niri-uwsm-session" 2>/dev/null || true)"
 
   if command -v niri-session >/dev/null 2>&1; then
-    run_uwsm_route "niri-uwsm.desktop" "${wrapper_cmd}" niri-session
+    run_uwsm_route "niri-session" "${wrapper_cmd}" niri-session
   fi
 
-  run_uwsm_route "niri-uwsm.desktop" "${wrapper_cmd}" niri --session
+  run_uwsm_route "niri" "${wrapper_cmd}" niri --session
 }
 
 launch_hyprland() {
@@ -79,10 +79,10 @@ launch_hyprland() {
   wrapper_cmd="$(resolve_cmd "${HOME}/.local/bin/hyprland-uwsm-session" "hyprland-uwsm-session" 2>/dev/null || true)"
 
   if command -v start-hyprland >/dev/null 2>&1; then
-    run_uwsm_route "hyprland-uwsm.desktop" "${wrapper_cmd}" start-hyprland
+    run_uwsm_route "start-hyprland" "${wrapper_cmd}" start-hyprland
   fi
 
-  run_uwsm_route "hyprland-uwsm.desktop" "${wrapper_cmd}" Hyprland
+  run_uwsm_route "Hyprland" "${wrapper_cmd}" Hyprland
 }
 
 launch_gnome() {

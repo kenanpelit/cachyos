@@ -550,9 +550,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-tty-launcher`
-**Description:** Interactive TTY launcher for desktop routes and VM profiles
+**Description:** UWSM-aware interactive TTY launcher for desktop routes and VM profiles
 
-**Usage:** `osc-tty-launcher.sh [options]`
+**Usage:** `osc-tty-launcher [auto-tty [VT]] | [niri|hyprland|gnome|vmubuntu|vmarch|vmcachy|vmnixos]`
 
 ---
 
