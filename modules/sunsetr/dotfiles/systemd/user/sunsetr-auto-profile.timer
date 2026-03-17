@@ -6,13 +6,16 @@ PartOf=niri-session.target
 [Timer]
 Unit=sunsetr-auto-profile.service
 OnStartupSec=45s
-OnCalendar=*-*-* 01:30:00
-OnCalendar=*-*-* 03:30:00
+OnCalendar=*-*-* 00:00:00
+OnCalendar=*-*-* 02:00:00
+OnCalendar=*-*-* 04:00:00
 OnCalendar=*-*-* 07:30:00
-OnCalendar=*-*-* 18:30:00
-OnCalendar=*-*-* 20:30:00
-OnCalendar=*-*-* 22:00:00
-OnCalendar=*-*-* 23:30:00
+OnCalendar=*-*-* 10:00:00
+OnCalendar=*-*-* 13:00:00
+OnCalendar=*-*-* 17:00:00
+OnCalendar=*-*-* 19:00:00
+OnCalendar=*-*-* 21:00:00
+OnCalendar=*-*-* 22:30:00
 Persistent=true
 AccuracySec=1min
 

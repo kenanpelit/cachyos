@@ -20,8 +20,8 @@ static_temp = 2300
 static_gamma = 90
 
 #[Manual transitions]
-sunset = "20:30:00"
-sunrise = "20:30:00"
+sunset = "21:00:00"
+sunrise = "21:00:00"
 transition_duration = 5
 
 #[Geolocation]

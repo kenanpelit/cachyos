@@ -49,9 +49,9 @@ Presets:
 
 Examples:
   $SCRIPT_NAME auto --apply
-  $SCRIPT_NAME 2030-dusk
+  $SCRIPT_NAME 2100-dusk
   $SCRIPT_NAME dusk work
-  $SCRIPT_NAME 2330-night --apply
+  $SCRIPT_NAME 0000-night --apply
   $SCRIPT_NAME apply work
   $SCRIPT_NAME status
 EOF
@@ -135,23 +135,32 @@ preset_alias() {
     0730 | 07:30 | morning)
       printf '0730-morning\n'
       ;;
-    1830 | 18:30 | sunset)
-      printf '1830-sunset\n'
+    1000 | 10:00 | late-morning | latemorning)
+      printf '1000-late-morning\n'
       ;;
-    2030 | 20:30 | dusk)
-      printf '2030-dusk\n'
+    1300 | 13:00 | noon | midday | day)
+      printf '1300-noon\n'
       ;;
-    2200 | 22:00 | evening)
-      printf '2200-evening\n'
+    1700 | 17:00 | afternoon)
+      printf '1700-afternoon\n'
       ;;
-    2330 | 23:30 | night)
-      printf '2330-night\n'
+    1830 | 18:30 | 1900 | 19:00 | sunset)
+      printf '1900-sunset\n'
       ;;
-    0130 | 01:30 | late-night | latenight)
-      printf '0130-late-night\n'
+    2030 | 20:30 | 2100 | 21:00 | dusk)
+      printf '2100-dusk\n'
       ;;
-    0330 | 03:30 | deep-night | deepnight)
-      printf '0330-deep-night\n'
+    2200 | 22:00 | 2230 | 22:30 | evening)
+      printf '2230-evening\n'
+      ;;
+    2330 | 23:30 | 0000 | 00:00 | night | midnight)
+      printf '0000-night\n'
+      ;;
+    0130 | 01:30 | 0200 | 02:00 | late-night | latenight)
+      printf '0200-late-night\n'
+      ;;
+    0330 | 03:30 | 0400 | 04:00 | deep-night | deepnight)
+      printf '0400-deep-night\n'
       ;;
   esac
 }
@@ -230,12 +239,15 @@ list_presets() {
   local -a detected=()
   local -a preferred=(
     0730-morning
-    1830-sunset
-    2030-dusk
-    2200-evening
-    2330-night
-    0130-late-night
-    0330-deep-night
+    1000-late-morning
+    1300-noon
+    1700-afternoon
+    1900-sunset
+    2100-dusk
+    2230-evening
+    0000-night
+    0200-late-night
+    0400-deep-night
   )
   local -A seen=()
 
