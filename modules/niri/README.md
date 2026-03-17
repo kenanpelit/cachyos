@@ -9,6 +9,9 @@ UWSM-first session wrapper.
 - GDM and the `sessions` module now install a single Niri session entry:
   `modules/sessions/dotfiles/niri-uwsm.desktop`.
 - That desktop entry launches `modules/gdm/dotfiles/niri-uwsm-session`.
+- TTY login now reuses the same UWSM session path via
+  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY2 and GDM both enter
+  Niri through the same wrapper/session identity.
 - The wrapper loads the curated Niri environment stack through
   `niri-session-common` (`10-gtk.conf`, `10-niri-env.conf`, `20-qt.conf`,
   `30-ollama.conf`, and `99-dms-icons.conf` when present), normalizes path

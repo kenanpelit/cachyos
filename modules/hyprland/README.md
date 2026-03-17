@@ -26,6 +26,9 @@ anymore. That belongs to the `gdm` and `sessions` modules.
   `modules/hyprland/dotfiles/hyprland-uwsm.desktop`.
 - That desktop entry launches
   `modules/gdm/dotfiles/hyprland-uwsm-session`.
+- TTY login now reuses the same UWSM session path via
+  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY3 and GDM both enter
+  Hyprland through the same wrapper/session identity.
 - The wrapper loads the curated Hyprland environment stack through
   `hypr-session-common` (`10-gtk.conf`, `10-hyprland.conf`, `20-qt.conf`,
   `30-ollama.conf`, and `99-dms-icons.conf` when present), normalizes path

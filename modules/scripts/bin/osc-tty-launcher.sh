@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-tty-launcher.sh
-# Description: Interactive TTY launcher for desktop routes and VM profiles
-# Usage: osc-tty-launcher.sh [options]
+# Description: UWSM-aware interactive TTY launcher for desktop routes and VM profiles
+# Usage: osc-tty-launcher [auto-tty [VT]] | [niri|hyprland|gnome|vmubuntu|vmarch|vmcachy|vmnixos]
 # ==============================================================================
 set -euo pipefail
 
@@ -22,12 +22,6 @@ resolve_cmd() {
   return 1
 }
 
-NIRI_TTY_CMD="niri --session"
-if command -v niri-session >/dev/null 2>&1; then
-  NIRI_TTY_CMD="niri-session"
-fi
-
-HYPR_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/hypr-osc" "hypr-osc" 2>/dev/null || true)"
 GNOME_TTY_CMD="$(resolve_cmd "${HOME}/.local/bin/gnome_tty" "gnome_tty" 2>/dev/null || true)"
 
 SVM_UBUNTU_CMD="$(resolve_cmd "${HOME}/.local/bin/svmubuntu" "svmubuntu" 2>/dev/null || true)"
@@ -35,11 +29,81 @@ SVM_ARCH_CMD="$(resolve_cmd "${HOME}/.local/bin/svmarch" "svmarch" 2>/dev/null |
 SVM_CACHY_CMD="$(resolve_cmd "${HOME}/.local/bin/svmcachy" "svmcachy" 2>/dev/null || true)"
 SVM_NIXOS_CMD="$(resolve_cmd "${HOME}/.local/bin/svmnixos" "svmnixos" 2>/dev/null || true)"
 
+ensure_runtime_environment() {
+  local uid
+  uid="$(id -u)"
+
+  export OSC_TTY_LAUNCHER_GUARD=1
+  export SYSTEMD_OFFLINE=0
+  export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/${uid}}"
+  export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+}
+
+run_uwsm_route() {
+  local desktop_id="$1"
+  local wrapper_cmd="$2"
+  shift 2
+  local -a fallback_cmd=("$@")
+
+  ensure_runtime_environment
+
+  if command -v uwsm >/dev/null 2>&1; then
+    exec uwsm start -- "${desktop_id}"
+  fi
+
+  if [[ -n "${wrapper_cmd}" ]]; then
+    exec "${wrapper_cmd}"
+  fi
+
+  if [[ ${#fallback_cmd[@]} -gt 0 ]]; then
+    exec "${fallback_cmd[@]}"
+  fi
+
+  echo "[${SCRIPT_NAME}] route unavailable: ${desktop_id}" >&2
+  exit 1
+}
+
+launch_niri() {
+  local wrapper_cmd
+  wrapper_cmd="$(resolve_cmd "${HOME}/.local/bin/niri-uwsm-session" "niri-uwsm-session" 2>/dev/null || true)"
+
+  if command -v niri-session >/dev/null 2>&1; then
+    run_uwsm_route "niri-uwsm.desktop" "${wrapper_cmd}" niri-session
+  fi
+
+  run_uwsm_route "niri-uwsm.desktop" "${wrapper_cmd}" niri --session
+}
+
+launch_hyprland() {
+  local wrapper_cmd
+  wrapper_cmd="$(resolve_cmd "${HOME}/.local/bin/hyprland-uwsm-session" "hyprland-uwsm-session" 2>/dev/null || true)"
+
+  if command -v start-hyprland >/dev/null 2>&1; then
+    run_uwsm_route "hyprland-uwsm.desktop" "${wrapper_cmd}" start-hyprland
+  fi
+
+  run_uwsm_route "hyprland-uwsm.desktop" "${wrapper_cmd}" Hyprland
+}
+
+launch_gnome() {
+  ensure_runtime_environment
+
+  export GNOME_TTY_GUARD=1
+  export GNOME_TTY_GUARD_FILE="${XDG_RUNTIME_DIR}/gnome-tty.guard"
+
+  if [[ -n "${GNOME_TTY_CMD}" ]]; then
+    exec "${GNOME_TTY_CMD}"
+  fi
+
+  exec gnome-session --session=gnome --no-reexec
+}
+
 run_vm_via_sway_profile() {
   local profile="$1"
   local fallback_cmd="$2"
   local cfg="${HOME}/.config/sway/${profile}"
 
+  ensure_runtime_environment
   unset XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP DESKTOP_SESSION
   export XDG_SESSION_TYPE=wayland
   export XDG_SESSION_DESKTOP=sway
@@ -61,10 +125,10 @@ run_vm_via_sway_profile() {
 show_menu() {
   cat <<'EOF'
 =========================================
-  TTY Launcher
+  TTY Launcher (UWSM-aware)
 =========================================
-  1) Niri
-  2) Hyprland
+  1) Niri (UWSM)
+  2) Hyprland (UWSM)
   3) GNOME
   4) Ubuntu VM (Sway qemu_vmubuntu)
   5) Arch VM   (Sway qemu_vmarch)
@@ -74,7 +138,97 @@ show_menu() {
 EOF
 }
 
+show_tty_hints() {
+  local tty="${1:-${XDG_VTNR:-?}}"
+
+  cat <<EOF
+=========================================
+  TTY Launcher
+=========================================
+  Current TTY: ${tty}
+
+  Quick routes:
+    tty2 -> Niri (UWSM)
+    tty3 -> Hyprland (UWSM)
+    tty4 -> GNOME
+    tty5 -> Ubuntu VM via Sway
+    tty6 -> manual launcher
+
+  Manual commands:
+    exec osc-tty-launcher
+    exec osc-tty-launcher niri
+    exec osc-tty-launcher hyprland
+    exec osc-tty-launcher gnome
+EOF
+}
+
+handle_auto_tty() {
+  local tty="${1:-${XDG_VTNR:-}}"
+
+  case "${tty}" in
+    1)
+      show_tty_hints "${tty}"
+      ;;
+    2)
+      echo "TTY2: launching Niri via UWSM"
+      launch_niri
+      ;;
+    3)
+      echo "TTY3: launching Hyprland via UWSM"
+      launch_hyprland
+      ;;
+    4)
+      echo "TTY4: launching GNOME"
+      launch_gnome
+      ;;
+    5)
+      echo "TTY5: launching Ubuntu VM profile in Sway"
+      run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
+      ;;
+    6)
+      show_tty_hints "${tty}"
+      ;;
+    *)
+      echo "[${SCRIPT_NAME}] no autostart route configured for tty ${tty}" >&2
+      return 1
+      ;;
+  esac
+}
+
 main() {
+  case "${1:-}" in
+    auto-tty)
+      shift
+      handle_auto_tty "${1:-}"
+      exit 0
+      ;;
+    niri)
+      launch_niri
+      ;;
+    hyprland)
+      launch_hyprland
+      ;;
+    gnome)
+      launch_gnome
+      ;;
+    vmubuntu)
+      run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
+      ;;
+    vmarch)
+      run_vm_via_sway_profile "qemu_vmarch" "${SVM_ARCH_CMD}"
+      ;;
+    vmcachy)
+      run_vm_via_sway_profile "qemu_vmcachy" "${SVM_CACHY_CMD}"
+      ;;
+    vmnixos)
+      run_vm_via_sway_profile "qemu_vmnixos" "${SVM_NIXOS_CMD}"
+      ;;
+    -h|--help|help)
+      show_tty_hints "${XDG_VTNR:-?}"
+      exit 0
+      ;;
+  esac
+
   while true; do
     show_menu
     printf 'Select route: '
@@ -82,19 +236,13 @@ main() {
 
     case "$choice" in
     1)
-      exec ${NIRI_TTY_CMD}
+      launch_niri
       ;;
     2)
-      if [[ -n "${HYPR_OSC_CMD}" ]]; then
-        exec "${HYPR_OSC_CMD}" tty
-      fi
-      exec Hyprland
+      launch_hyprland
       ;;
     3)
-      if [[ -n "${GNOME_TTY_CMD}" ]]; then
-        exec "${GNOME_TTY_CMD}"
-      fi
-      exec gnome-session --session=gnome --no-reexec
+      launch_gnome
       ;;
     4)
       run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"

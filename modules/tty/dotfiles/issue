@@ -3,8 +3,7 @@
   Host: \n  |  TTY: \l  |  Kernel: \r
 ==============================================================
   Quick routes:
-    tty2 -> Niri
-    tty3 -> Hyprland
+    tty2 -> Niri (UWSM)
+    tty3 -> Hyprland (UWSM)
     tty4 -> GNOME
     tty5 -> Sway VM
-

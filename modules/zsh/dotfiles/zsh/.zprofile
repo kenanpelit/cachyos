@@ -3,8 +3,8 @@
 # Multi-TTY desktop autostart router (login shell only)
 # =============================================================================
 # TTY1: display manager / manual launch info
-# TTY2: Niri (niri-osc set tty)
-# TTY3: Hyprland (hypr-osc tty)
+# TTY2: Niri (UWSM)
+# TTY3: Hyprland (UWSM)
 # TTY4: GNOME (gnome_tty)
 # TTY5: VM route (svmubuntu via Sway profile)
 # TTY6: manual
@@ -34,6 +34,7 @@ if $is_login_shell \
   && [[ -z "${WAYLAND_DISPLAY:-}" ]] \
   && [[ -z "${DISPLAY:-}" ]] \
   && [[ "${XDG_VTNR:-}" =~ ^[1-6]$ ]] \
+  && [[ -z "${OSC_TTY_LAUNCHER_GUARD:-}" ]] \
   && [[ -z "${NIRI_TTY_GUARD:-}" ]] \
   && [[ -z "${GNOME_TTY_GUARD:-}" ]]; then
 
@@ -51,114 +52,38 @@ if $is_login_shell \
 
   uid="$(id -u)"
   export XDG_RUNTIME_DIR="/run/user/${uid}"
+  export SYSTEMD_OFFLINE=0
 
-  NIRI_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/niri-osc" "niri-osc" 2>/dev/null || true)"
-  HYPR_OSC_CMD="$(resolve_cmd "${HOME}/.local/bin/hypr-osc" "hypr-osc" 2>/dev/null || true)"
-  GNOME_TTY_CMD="$(resolve_cmd "${HOME}/.local/bin/gnome_tty" "gnome_tty" 2>/dev/null || true)"
   TTY_LAUNCHER_CMD="$(resolve_cmd "${HOME}/.local/bin/osc-tty-launcher" "osc-tty-launcher" 2>/dev/null || true)"
-  SVM_UBUNTU_CMD="$(resolve_cmd "${HOME}/.local/bin/svmubuntu" "svmubuntu" 2>/dev/null || true)"
-  SVM_ARCH_CMD="$(resolve_cmd "${HOME}/.local/bin/svmarch" "svmarch" 2>/dev/null || true)"
-  SVM_CACHY_CMD="$(resolve_cmd "${HOME}/.local/bin/svmcachy" "svmcachy" 2>/dev/null || true)"
-  SVM_NIXOS_CMD="$(resolve_cmd "${HOME}/.local/bin/svmnixos" "svmnixos" 2>/dev/null || true)"
 
-  if command -v niri-session >/dev/null 2>&1; then
-    NIRI_TTY_CMD="niri-session"
-  else
-    NIRI_TTY_CMD="niri --session"
+  if [[ -z "${TTY_LAUNCHER_CMD}" ]]; then
+    echo "TTY launcher not found: osc-tty-launcher" >&2
+    return
   fi
 
   case "${XDG_VTNR}" in
     1)
-      echo "TTY1: display manager / manual launch helper"
-      echo "  Niri:     exec ${NIRI_TTY_CMD}"
-      echo "  Hyprland: exec ${HYPR_OSC_CMD:-hypr-osc} tty"
-      echo "  GNOME:    exec ${GNOME_TTY_CMD:-gnome_tty}"
+      "${TTY_LAUNCHER_CMD}" auto-tty "${XDG_VTNR}"
       ;;
 
     2)
-      echo "TTY2: launching Niri via niri-osc set tty"
-      export XDG_SESSION_TYPE=wayland
-      export NIRI_TTY_GUARD=1
-
-      if [[ -n "${NIRI_OSC_CMD}" ]]; then
-        exec "${NIRI_OSC_CMD}" set tty
-      fi
-
-      echo "ERROR: niri-osc not found, falling back to direct niri"
-      sleep 2
-      exec niri --session 2>&1 | tee /tmp/niri-tty2.log
+      exec "${TTY_LAUNCHER_CMD}" auto-tty "${XDG_VTNR}"
       ;;
 
     3)
-      echo "TTY3: launching Hyprland via hypr-osc tty"
-      export XDG_SESSION_TYPE=wayland
-
-      if [[ -n "${HYPR_OSC_CMD}" ]]; then
-        exec "${HYPR_OSC_CMD}" tty
-      fi
-
-      echo "ERROR: hypr-osc not found, falling back to direct Hyprland"
-      sleep 2
-      exec Hyprland 2>&1 | tee /tmp/hyprland-tty3.log
+      exec "${TTY_LAUNCHER_CMD}" auto-tty "${XDG_VTNR}"
       ;;
 
     4)
-      echo "TTY4: launching GNOME via gnome_tty"
-      export GNOME_TTY_GUARD=1
-      export GNOME_TTY_GUARD_FILE="${XDG_RUNTIME_DIR}/gnome-tty4.guard"
-
-      if [[ -e "${GNOME_TTY_GUARD_FILE}" ]]; then
-        echo "GNOME guard active, skip duplicate launch."
-        return
-      fi
-
-      if [[ -n "${GNOME_TTY_CMD}" ]]; then
-        exec "${GNOME_TTY_CMD}"
-      fi
-
-      echo "ERROR: gnome_tty not found, falling back to gnome-session"
-      sleep 2
-      export XDG_SESSION_TYPE=wayland
-      exec gnome-session --session=gnome --no-reexec 2>&1 | tee /tmp/gnome-session-tty4.log
+      exec "${TTY_LAUNCHER_CMD}" auto-tty "${XDG_VTNR}"
       ;;
 
     5)
-      echo "TTY5: launching Ubuntu VM profile in Sway"
-      unset XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP DESKTOP_SESSION
-      export XDG_SESSION_TYPE=wayland
-      export XDG_SESSION_DESKTOP=sway
-      export XDG_CURRENT_DESKTOP=sway
-      export DESKTOP_SESSION=sway
-
-      if [[ -f "${HOME}/.config/sway/qemu_vmubuntu" ]]; then
-        exec sway -c "${HOME}/.config/sway/qemu_vmubuntu" 2>&1 | tee /tmp/sway-tty5.log
-      fi
-
-      echo "ERROR: missing sway config: ${HOME}/.config/sway/qemu_vmubuntu"
-      sleep 3
+      exec "${TTY_LAUNCHER_CMD}" auto-tty "${XDG_VTNR}"
       ;;
 
     6)
-      echo "TTY6: manual mode (no autostart)"
-      echo "Launcher:"
-      echo "  exec ${TTY_LAUNCHER_CMD:-osc-tty-launcher}"
-      echo
-      echo "Available routes:"
-      echo "  TTY2 -> Niri      (${NIRI_TTY_CMD})"
-      echo "  TTY3 -> Hyprland  (${HYPR_OSC_CMD:-hypr-osc} tty)"
-      echo "  TTY4 -> GNOME     (${GNOME_TTY_CMD:-gnome_tty})"
-      echo "  VM via Sway cfgs  (qemu_vmubuntu / qemu_vmarch / qemu_vmcachy / qemu_vmnixos)"
-      echo
-      echo "Manual start commands:"
-      echo "  exec ${TTY_LAUNCHER_CMD:-osc-tty-launcher}"
-      echo "  exec ${NIRI_TTY_CMD}"
-      echo "  exec ${HYPR_OSC_CMD:-hypr-osc} tty"
-      echo "  exec ${GNOME_TTY_CMD:-gnome_tty}"
-      echo "  exec sway -c ~/.config/sway/qemu_vmubuntu"
-      echo "  exec sway -c ~/.config/sway/qemu_vmarch"
-      echo "  exec sway -c ~/.config/sway/qemu_vmcachy"
-      echo "  exec sway -c ~/.config/sway/qemu_vmnixos"
-      echo "  (${SVM_UBUNTU_CMD:-svmubuntu} start --gtk-gl off)"
+      "${TTY_LAUNCHER_CMD}" auto-tty "${XDG_VTNR}"
       ;;
 
     *)
