@@ -9,19 +9,19 @@ shutdown_duration = 0.3  # Duration of smooth shutdown in seconds (0.1-60 | 0 = 
 adaptive_interval = 1    # Adaptive interval base for smooth transitions (1-1000)ms
 
 #[Time-based config]
-night_temp = 2300        # Deepest Hyprsunset stage
-day_temp = 2300          # Lightest Hyprsunset stage
-night_gamma = 90         # Deepest Hyprsunset stage gamma
-day_gamma = 90           # Lightest Hyprsunset stage gamma
+night_temp = 2200        # Deepest Hyprsunset stage
+day_temp = 2200          # Lightest Hyprsunset stage
+night_gamma = 88         # Deepest Hyprsunset stage gamma
+day_gamma = 88           # Lightest Hyprsunset stage gamma
 update_interval = 60     # Update frequency during transitions in seconds (10-300)
 
 #[Static config]
-static_temp = 2300       # Default manual fallback matches the 07:30 Hyprsunset stage
-static_gamma = 90        # Default manual fallback matches the 07:30 Hyprsunset stage
+static_temp = 2200       # Default manual fallback matches the 07:30 Hyprsunset stage
+static_gamma = 88        # Default manual fallback matches the 07:30 Hyprsunset stage
 
 #[Manual transitions]
-sunset = "20:30:00"      # First evening Hyprsunset step
-sunrise = "20:30:00"     # First morning Hyprsunset step
+sunset = "22:00:00"      # First evening Hyprsunset step
+sunrise = "22:00:00"     # First morning Hyprsunset step
 transition_duration = 5 # Best-effort envelope, Hyprsunset itself handles the finer ladder
 
 #[Geolocation]
