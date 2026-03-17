@@ -79,6 +79,79 @@ hypr_find_mpv_window() {
   hyprctl clients -j | jq -c 'map(select(.initialClass == "mpv" or .class == "mpv")) | .[0] // empty'
 }
 
+hypr_abs() {
+  local n="$1"
+  if [[ "$n" -lt 0 ]]; then
+    echo $(( -n ))
+  else
+    echo "$n"
+  fi
+}
+
+hypr_clamp() {
+  local n="$1"
+  local min="$2"
+  local max="$3"
+  if [[ "$max" -lt "$min" ]]; then
+    max="$min"
+  fi
+  if [[ "$n" -lt "$min" ]]; then
+    echo "$min"
+  elif [[ "$n" -gt "$max" ]]; then
+    echo "$max"
+  else
+    echo "$n"
+  fi
+}
+
+hypr_find_monitor_for_window() {
+  local window_info="$1"
+  local monitor_id monitor_name
+
+  monitor_id="$(jq -r '.monitor // empty' <<<"$window_info")"
+  monitor_name="$(jq -r '.monitorName // empty' <<<"$window_info")"
+
+  if [[ -n "$monitor_id" && "$monitor_id" != "null" ]]; then
+    hyprctl monitors -j | jq -c --argjson id "$monitor_id" '.[] | select(.id == $id)' | head -n1
+    return 0
+  fi
+
+  if [[ -n "$monitor_name" && "$monitor_name" != "null" ]]; then
+    hyprctl monitors -j | jq -c --arg name "$monitor_name" '.[] | select(.name == $name)' | head -n1
+    return 0
+  fi
+
+  hyprctl monitors -j | jq -c '.[] | select(.focused == true)' | head -n1
+}
+
+hypr_move_window_legacy() {
+  local x_pos="$1"
+  local y_pos="$2"
+  local size="$3"
+
+  if [[ "$size" -gt 300 ]]; then
+    if [[ "$x_pos" -lt 500 && "$y_pos" -lt 500 ]]; then
+      hyprctl dispatch moveactive exact 80% 7% >/dev/null
+    elif [[ "$x_pos" -gt 1000 && "$y_pos" -lt 500 ]]; then
+      hyprctl dispatch moveactive exact 80% 77% >/dev/null
+    elif [[ "$x_pos" -gt 1000 && "$y_pos" -gt 500 ]]; then
+      hyprctl dispatch moveactive exact 1% 77% >/dev/null
+    else
+      hyprctl dispatch moveactive exact 1% 7% >/dev/null
+    fi
+  else
+    if [[ "$x_pos" -lt 500 && "$y_pos" -lt 500 ]]; then
+      hyprctl dispatch moveactive exact 84% 7% >/dev/null
+    elif [[ "$x_pos" -gt 1000 && "$y_pos" -lt 500 ]]; then
+      hyprctl dispatch moveactive exact 84% 80% >/dev/null
+    elif [[ "$x_pos" -gt 1000 && "$y_pos" -gt 500 ]]; then
+      hyprctl dispatch moveactive exact 3% 80% >/dev/null
+    else
+      hyprctl dispatch moveactive exact 3% 7% >/dev/null
+    fi
+  fi
+}
+
 hypr_focus_mpv() {
   local window_info address
   window_info="$(hypr_find_mpv_window)"
@@ -106,7 +179,7 @@ hypr_start_mpv() {
 hypr_move_window() {
   require_hypr
 
-  local window_info address x_pos y_pos size
+  local window_info address x_pos y_pos win_w win_h
   window_info="$(hypr_find_mpv_window)"
   address="$(echo "$window_info" | jq -r '.address // empty')"
   [[ -n "$address" ]] || die "MPV penceresi bulunamadı"
@@ -116,37 +189,105 @@ hypr_move_window() {
 
   x_pos="$(echo "$window_info" | jq -r '.at[0] // 0')"
   y_pos="$(echo "$window_info" | jq -r '.at[1] // 0')"
-  size="$(echo "$window_info" | jq -r '.size[0] // 0')"
+  win_w="$(echo "$window_info" | jq -r '.size[0] // 0')"
+  win_h="$(echo "$window_info" | jq -r '.size[1] // 0')"
 
-  if [[ "$size" -gt 300 ]]; then
-    if [[ "$x_pos" -lt 500 && "$y_pos" -lt 500 ]]; then
-      hyprctl dispatch moveactive exact 80% 7% >/dev/null
-    elif [[ "$x_pos" -gt 1000 && "$y_pos" -lt 500 ]]; then
-      hyprctl dispatch moveactive exact 80% 77% >/dev/null
-    elif [[ "$x_pos" -gt 1000 && "$y_pos" -gt 500 ]]; then
-      hyprctl dispatch moveactive exact 1% 77% >/dev/null
-    else
-      hyprctl dispatch moveactive exact 1% 7% >/dev/null
-    fi
-  else
-    if [[ "$x_pos" -lt 500 && "$y_pos" -lt 500 ]]; then
-      hyprctl dispatch moveactive exact 84% 7% >/dev/null
-    elif [[ "$x_pos" -gt 1000 && "$y_pos" -lt 500 ]]; then
-      hyprctl dispatch moveactive exact 84% 80% >/dev/null
-    elif [[ "$x_pos" -gt 1000 && "$y_pos" -gt 500 ]]; then
-      hyprctl dispatch moveactive exact 3% 80% >/dev/null
-    else
-      hyprctl dispatch moveactive exact 3% 7% >/dev/null
-    fi
+  local monitor_info=""
+  monitor_info="$(hypr_find_monitor_for_window "$window_info" 2>/dev/null || true)"
+  if [[ -z "$monitor_info" ]]; then
+    hypr_move_window_legacy "$x_pos" "$y_pos" "$win_w"
+    notify "mpv-manager" "Pencere konumu güncellendi"
+    return 0
   fi
 
-  notify "mpv-manager" "Pencere konumu güncellendi"
+  local mon_x mon_y mon_w mon_h
+  local reserved_top reserved_right reserved_bottom reserved_left
+  local usable_left usable_top usable_right usable_bottom
+  local margin_x margin_y max_x max_y
+  local tl_x tl_y tr_x tr_y br_x br_y bl_x bl_y
+  local d_tl d_tr d_br d_bl current next tx ty
+
+  mon_x="$(jq -r '.x // 0' <<<"$monitor_info")"
+  mon_y="$(jq -r '.y // 0' <<<"$monitor_info")"
+  mon_w="$(jq -r '.width // 0' <<<"$monitor_info")"
+  mon_h="$(jq -r '.height // 0' <<<"$monitor_info")"
+  reserved_top="$(jq -r '.reserved[0] // 0' <<<"$monitor_info")"
+  reserved_right="$(jq -r '.reserved[1] // 0' <<<"$monitor_info")"
+  reserved_bottom="$(jq -r '.reserved[2] // 0' <<<"$monitor_info")"
+  reserved_left="$(jq -r '.reserved[3] // 0' <<<"$monitor_info")"
+
+  margin_x="${MPV_HYPR_MARGIN_X:-32}"
+  margin_y="${MPV_HYPR_MARGIN_Y:-96}"
+
+  usable_left=$((mon_x + reserved_left))
+  usable_top=$((mon_y + reserved_top))
+  usable_right=$((mon_x + mon_w - reserved_right))
+  usable_bottom=$((mon_y + mon_h - reserved_bottom))
+
+  max_x=$((usable_right - win_w))
+  max_y=$((usable_bottom - win_h))
+
+  tl_x=$((usable_left + margin_x))
+  tl_y=$((usable_top + margin_y))
+  tr_x=$((usable_right - win_w - margin_x))
+  tr_y=$tl_y
+  br_x=$tr_x
+  br_y=$((usable_bottom - win_h - margin_y))
+  bl_x=$tl_x
+  bl_y=$br_y
+
+  tl_x="$(hypr_clamp "$tl_x" "$usable_left" "$max_x")"
+  tr_x="$(hypr_clamp "$tr_x" "$usable_left" "$max_x")"
+  br_x="$(hypr_clamp "$br_x" "$usable_left" "$max_x")"
+  bl_x="$(hypr_clamp "$bl_x" "$usable_left" "$max_x")"
+  tl_y="$(hypr_clamp "$tl_y" "$usable_top" "$max_y")"
+  tr_y="$(hypr_clamp "$tr_y" "$usable_top" "$max_y")"
+  br_y="$(hypr_clamp "$br_y" "$usable_top" "$max_y")"
+  bl_y="$(hypr_clamp "$bl_y" "$usable_top" "$max_y")"
+
+  d_tl=$(( $(hypr_abs $((x_pos - tl_x))) + $(hypr_abs $((y_pos - tl_y))) ))
+  d_tr=$(( $(hypr_abs $((x_pos - tr_x))) + $(hypr_abs $((y_pos - tr_y))) ))
+  d_br=$(( $(hypr_abs $((x_pos - br_x))) + $(hypr_abs $((y_pos - br_y))) ))
+  d_bl=$(( $(hypr_abs $((x_pos - bl_x))) + $(hypr_abs $((y_pos - bl_y))) ))
+
+  current="tl"
+  if [[ "$d_tr" -le "$d_tl" && "$d_tr" -le "$d_br" && "$d_tr" -le "$d_bl" ]]; then
+    current="tr"
+  elif [[ "$d_br" -le "$d_tl" && "$d_br" -le "$d_tr" && "$d_br" -le "$d_bl" ]]; then
+    current="br"
+  elif [[ "$d_bl" -le "$d_tl" && "$d_bl" -le "$d_tr" && "$d_bl" -le "$d_br" ]]; then
+    current="bl"
+  fi
+
+  case "$current" in
+    tr) next="br"; tx="$br_x"; ty="$br_y" ;;
+    br) next="bl"; tx="$bl_x"; ty="$bl_y" ;;
+    bl) next="tl"; tx="$tl_x"; ty="$tl_y" ;;
+    *)  next="tr"; tx="$tr_x"; ty="$tr_y" ;;
+  esac
+
+  hyprctl dispatch moveactive exact "$tx" "$ty" >/dev/null
+
+  notify "mpv-manager" "Pencere konumu güncellendi (${current} -> ${next})"
 }
 
 hypr_toggle_stick() {
   require_hypr
-  hyprctl dispatch pin mpv >/dev/null
-  notify "mpv-manager" "Pencere durumu değiştirildi"
+  local window_info address pinned
+  window_info="$(hypr_find_mpv_window)"
+  address="$(echo "$window_info" | jq -r '.address // empty')"
+  [[ -n "$address" ]] || die "MPV penceresi bulunamadı"
+
+  pinned="$(echo "$window_info" | jq -r '.pinned // 0')"
+
+  hyprctl dispatch focuswindow "address:$address" >/dev/null
+  hyprctl dispatch pin "address:$address" >/dev/null
+
+  if [[ "$pinned" == "1" ]]; then
+    notify "mpv-manager" "Pencere sabitlemesi kapatıldı"
+  else
+    notify "mpv-manager" "Pencere sabitlendi"
+  fi
 }
 
 hypr_wallpaper() {
