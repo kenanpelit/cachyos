@@ -1,6 +1,7 @@
 # ~/.profile (portable)
 
-export BROWSER=brave-kenp-default
+# UWSM loads the shell profile before Hyprland session startup.
+# Keep session-critical variables out of this file so the compositor's managed
+# environment.d stack remains the single source of truth.
 export TERM=kitty
-export QT_QPA_PLATFORMTHEME="qt5ct"
 export GTK_THEME=catppuccin-mocha-mauve-standard+default

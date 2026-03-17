@@ -22,8 +22,9 @@ set -g default-terminal "screen-256color"
 set -ag terminal-overrides ",xterm-256color:RGB,screen-256color:RGB,xterm-kitty:RGB,xterm-kitty:Tc,alacritty:RGB,*:E3=@"
 set -as terminal-features ",*:RGB"                               # Tüm terminaller için RGB renk özelliği etkinleştir
 # tmux attach sırasında client ortam değişkenlerini server tarafına güncelle.
-# URL opener'lar için BROWSER/DBUS/WAYLAND kritik.
-set -g update-environment "DISPLAY WAYLAND_DISPLAY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS SSH_AUTH_SOCK BROWSER XDG_CURRENT_DESKTOP SWAYSOCK I3SOCK"
+# URL opener ve Wayland/Qt session drift'ini önlemek için compositor/theme
+# değişkenlerini de özellikle taşı.
+set -g update-environment "DISPLAY WAYLAND_DISPLAY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS SSH_AUTH_SOCK BROWSER DESKTOP_SESSION XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP QT_QPA_PLATFORMTHEME QT_QPA_PLATFORMTHEME_QT6 QT_STYLE_OVERRIDE XCURSOR_THEME HYPRCURSOR_THEME SWAYSOCK I3SOCK"
 
 
 # Window settings - Pencere davranışları ve görünüm ayarları
