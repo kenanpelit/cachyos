@@ -44,6 +44,24 @@ run_as_user() {
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
-  # Keep sunsetr manual-only: do not auto-start at login.
-  run_as_user systemctl --user disable --now sunsetr.service >/dev/null 2>&1 || true
+  user_systemd_dir="$user_home/.config/systemd/user"
+  wants_dir="$user_systemd_dir/niri-session.target.wants"
+  graphical_wants="$user_systemd_dir/graphical-session.target.wants/sunsetr.service"
+  target_link="$wants_dir/sunsetr.service"
+  unit_path="/usr/lib/systemd/user/sunsetr.service"
+
+  mkdir -p "$wants_dir"
+  rm -f "$graphical_wants"
+  ln -sf "$unit_path" "$target_link"
+
+  if [[ "$(id -u)" -eq 0 ]]; then
+    user_group="$(id -gn "$real_user" 2>/dev/null || true)"
+    chown -h "$real_user:${user_group:-$real_user}" "$target_link" || true
+  fi
+
+  if [[ "${XDG_CURRENT_DESKTOP:-}" == "niri" || "${DESKTOP_SESSION:-}" == "niri-uwsm" ]]; then
+    run_as_user systemctl --user restart sunsetr.service >/dev/null 2>&1 || true
+  else
+    run_as_user systemctl --user stop sunsetr.service >/dev/null 2>&1 || true
+  fi
 fi

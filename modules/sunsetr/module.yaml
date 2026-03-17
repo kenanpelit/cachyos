@@ -9,4 +9,4 @@ dotfiles:
 - source: dotfiles/systemd/user/sunsetr.service.d/10-cachy.conf
   target: ~/.config/systemd/user/sunsetr.service.d/10-cachy.conf
 post_install_hook: scripts/install.sh
-post_hook_behavior: ask
+post_hook_behavior: always
