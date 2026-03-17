@@ -1,7 +1,7 @@
 [Unit]
 Description=Polkit authentication agent (polkit-gnome)
-After=graphical-session.target niri-daemons.target
-PartOf=niri-daemons.target
+After=graphical-session.target niri-bootstrap.service
+PartOf=niri-daemons.target graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 

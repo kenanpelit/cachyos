@@ -1,7 +1,7 @@
 tags:
 - wm
 - desktop
-description: Niri compositor config (portable config)
+description: Niri compositor config (UWSM-first)
 depends_on:
 - base
 - xdg-dirs

@@ -1,7 +1,7 @@
 [Unit]
 Description=Niri post-bootstrap polish
-After=niri-bootstrap.service niri-daemons.target
-PartOf=niri-daemons.target
+After=niri-bootstrap.service niri-polkit-agent.service niri-nm-applet.service niri-blueman-applet.service niri-snapper-tools-check.service niri-sticky.service niri-niriswitcher.service
+PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 ConditionPathExists=%h/.local/bin/niri-post-bootstrap
@@ -15,4 +15,4 @@ StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=niri-daemons.target
+WantedBy=niri-session.target

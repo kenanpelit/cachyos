@@ -297,6 +297,20 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-session-common`
+**Description:** Shared helpers for Niri session bootstrap scripts.
+
+**Usage:** `niri-session-common`
+
+---
+
+### 📂 `niri-session-init`
+**Description:** Start niri-session.target from inside the compositor. Under
+
+**Usage:** `niri-session-init [--no-start-target]`
+
+---
+
 ### 📂 `niri-start`
 **Description:** Daily startup sequence for Niri session via semsumo.
 

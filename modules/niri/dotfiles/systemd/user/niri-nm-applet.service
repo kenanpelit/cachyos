@@ -1,7 +1,7 @@
 [Unit]
 Description=NetworkManager applet (Niri)
-After=niri-daemons.target dbus.service
-PartOf=niri-daemons.target
+After=graphical-session.target niri-bootstrap.service dbus.service
+PartOf=niri-daemons.target graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 

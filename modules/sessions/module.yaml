@@ -4,8 +4,8 @@ description: Optimized desktop sessions for Wayland compositors
 depends_on:
 - base
 dotfiles:
-- source: dotfiles/niri-optimized.desktop
-  target: ~/.local/share/wayland-sessions/niri-optimized.desktop
+- source: dotfiles/niri-uwsm.desktop
+  target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
 - source: dotfiles/gnome-optimized.desktop
   target: ~/.local/share/wayland-sessions/gnome-optimized.desktop
 post_install_hook: scripts/install.sh

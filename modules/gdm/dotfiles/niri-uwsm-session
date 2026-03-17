@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Niri session wrapper for UWSM-first startup.
+set -euo pipefail
+
+helper_path="${HOME}/.local/bin/niri-session-common"
+[[ -r "${helper_path}.sh" ]] && helper_path="${helper_path}.sh"
+
+if [[ -r "${helper_path}" ]]; then
+  # shellcheck source=/dev/null
+  source "${helper_path}"
+  niri_ensure_runtime_dir
+  niri_load_session_env
+  niri_normalize_session_paths
+fi
+
+export XDG_CURRENT_DESKTOP=niri
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=niri
+export DESKTOP_SESSION=niri-uwsm
+export GDMSESSION="${GDMSESSION:-niri-uwsm}"
+export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
+export NOCTALIA_STARTUP_HINT="${NOCTALIA_STARTUP_HINT:-1}"
+export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+
+if command -v uwsm >/dev/null 2>&1; then
+  if command -v niri-session >/dev/null 2>&1; then
+    exec uwsm start -- niri-session
+  fi
+  exec uwsm start -- niri
+fi
+
+if command -v niri-session >/dev/null 2>&1; then
+  exec niri-session
+fi
+
+exec niri --session

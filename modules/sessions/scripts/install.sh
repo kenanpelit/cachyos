@@ -32,8 +32,10 @@ remove_session() {
     fi
 }
 
-# Install Niri
-install_session "$DOTFILES_DIR/niri-optimized.desktop" "Niri (Optimized)"
+# Keep Niri on a single UWSM-owned session entry.
+remove_session "niri.desktop"
+remove_session "niri-optimized.desktop"
+install_session "$DOTFILES_DIR/niri-uwsm.desktop" "Niri (UWSM)"
 
 # Install GNOME
 install_session "$DOTFILES_DIR/gnome-optimized.desktop" "GNOME (Optimized)"
