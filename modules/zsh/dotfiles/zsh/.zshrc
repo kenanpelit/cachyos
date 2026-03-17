@@ -3,6 +3,16 @@
 # ----------------------------------------------------------------------
 [[ $- != *i* ]] && return
 
+# Fallback TTY autostart entry. Some TTY login paths do not end up running
+# .zprofile reliably, so interactive zsh shells also offer the same hand-off.
+if [[ -z "${WAYLAND_DISPLAY:-}" ]] && [[ -z "${DISPLAY:-}" ]]; then
+  if command -v "${HOME}/.local/bin/osc-tty-autostart" >/dev/null 2>&1; then
+    "${HOME}/.local/bin/osc-tty-autostart" || true
+  elif command -v osc-tty-autostart >/dev/null 2>&1; then
+    osc-tty-autostart || true
+  fi
+fi
+
 # ----------------------------------------------------------------------
 # PWD Sanity Check
 # 
