@@ -859,7 +859,7 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^(clipse|wiremix|org\.pulseaudio\.pavucontrol|io\.ente\.auth|com\.github\.hluk\.copyq|copyq)$"#
+  match app-id=r#"^(clipse|clipse-gui|wiremix|org\.pulseaudio\.pavucontrol|io\.ente\.auth|com\.github\.hluk\.copyq|copyq)$"#
   open-floating true
   default-column-width { proportion 0.250000; }
   default-window-height { proportion 0.800000; }
