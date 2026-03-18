@@ -54,9 +54,8 @@ trap cleanup EXIT
 : "${HYPRCURSOR_SIZE:=${XCURSOR_SIZE}}"
 : "${XDG_ICON_THEME:=kora}"
 : "${ICON_THEME:=${XDG_ICON_THEME}}"
-: "${QT_ICON_THEME:=${XDG_ICON_THEME}}"
 : "${THEME_HIGHLIGHT_HEX:=00bcd4}"
-: "${THEME_BORDER_SIZE:=2}"
+: "${THEME_BORDER_SIZE:=3}"
 : "${THEME_ROUNDING:=8}"
 : "${THEME_FLOATING_ROUNDING:=10}"
 
@@ -151,16 +150,12 @@ FONTCONFIG_FILE=/etc/fonts/fonts.conf
 LIBVA_DRIVER_NAME=iHD
 
 QT_QPA_PLATFORM=wayland;xcb
-QT_QPA_PLATFORMTHEME=gtk3
-QT_QPA_PLATFORMTHEME_QT6=gtk3
-QT_STYLE_OVERRIDE=kvantum
 QT_AUTO_SCREEN_SCALE_FACTOR=1
 QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 QT_WAYLAND_FORCE_DPI=96
 QT_FONT_DPI=96
 QT_ENABLE_HIGHDPI_SCALING=1
 QT_QPA_SYSTEMTRAY_DARK_MODE=1
-QT_ICON_THEME=${QT_ICON_THEME}
 
 CATPPUCCIN_FLAVOR=${CATPPUCCIN_FLAVOR}
 CATPPUCCIN_ACCENT=${CATPPUCCIN_ACCENT}
@@ -265,8 +260,8 @@ cat >"${tmp_theme}" <<EOF
 
 general {
   border_size=\$themeBorderSize
-  col.active_border=rgba(\$highlightAlphaff) rgba(\$accentAlphaff) 45deg
-  col.inactive_border=rgba(\$surface1Alphaff)
+  col.active_border=rgba(\$accentAlphaff)
+  col.inactive_border=rgba(\$baseAlphaff)
 }
 
 decoration {
@@ -312,10 +307,10 @@ group {
     gradients=false
     render_titles=false
   }
-  col.border_active=rgba(\$highlightAlphaff) rgba(\$accentAlphaff) 45deg
-  col.border_inactive=rgba(\$surface1Alphaa8) rgba(\$overlay0Alphaa8) 45deg
-  col.border_locked_active=rgba(\$highlightAlphaff) rgba(\$accentAlphaff) 45deg
-  col.border_locked_inactive=rgba(\$surface1Alphaa8) rgba(\$overlay0Alphaa8) 45deg
+  col.border_active=rgba(\$accentAlphaff)
+  col.border_inactive=rgba(\$baseAlphaff)
+  col.border_locked_active=rgba(\$accentAlphaff)
+  col.border_locked_inactive=rgba(\$baseAlphaff)
 }
 
 misc {

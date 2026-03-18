@@ -1,7 +1,7 @@
 [Unit]
 Description=NetworkManager applet (Hyprland)
-After=graphical-session.target hypr-bootstrap.service dbus.service
-PartOf=hypr-daemons.target graphical-session.target
+After=graphical-session.target wayland-wm@start-hyprland.service hypr-bootstrap.service dbus.service
+PartOf=hypr-daemons.target graphical-session.target wayland-wm@start-hyprland.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 

@@ -155,6 +155,11 @@ Daemon-stage units started by `hypr-daemons.target`:
   session and only backfills missing compositor runtime variables as a safety
   net. When that fallback path is used, it emits a warning to the journal so
   session drift is visible.
+- Qt theming authority is intentionally split: `modules/qt/dotfiles/environment.d/20-qt.conf`
+  owns `QT_QPA_PLATFORMTHEME`, `QT_QPA_PLATFORMTHEME_QT6`, and
+  `QT_STYLE_OVERRIDE`, while the Hyprland session layer only keeps generic Qt
+  Wayland/scaling hints. `99-dms-icons.conf` now only reinforces icon-theme
+  variables and no longer overrides the Qt platform theme.
 - Logout flows should prefer `uwsm stop` over `hyprctl dispatch exit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.
