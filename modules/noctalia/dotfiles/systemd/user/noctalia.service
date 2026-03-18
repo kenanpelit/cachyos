@@ -1,8 +1,8 @@
 [Unit]
 Description=Noctalia Shell
-# Zero-Wait: Bootstrap beklemeden anında başla
-After=graphical-session.target
-PartOf=graphical-session.target
+After=graphical-session.target hypr-bootstrap.service niri-bootstrap.service
+PartOf=graphical-session.target hyprland-session.target niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
 Environment=QS_CACHE_DIR=%t/noctalia-qml-cache
@@ -24,4 +24,5 @@ Restart=on-failure
 RestartSec=1
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=hyprland-session.target
+WantedBy=niri-session.target

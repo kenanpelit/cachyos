@@ -1,6 +1,8 @@
 [Unit]
 Description=Delayed XDG Desktop Portal Orchestration
-After=graphical-session.target
+After=graphical-session.target hyprland-session.target niri-session.target
+PartOf=graphical-session.target hyprland-session.target niri-session.target
+Requisite=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
@@ -9,6 +11,3 @@ Type=oneshot
 ExecStart=%h/.local/bin/delayed-portals 0
 StandardOutput=journal
 StandardError=journal
-
-[Install]
-WantedBy=default.target

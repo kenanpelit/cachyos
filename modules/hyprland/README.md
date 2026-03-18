@@ -73,8 +73,7 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 9. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
    long-running Hypr helpers.
 10. `hypr-post-bootstrap.service` is started by `hyprland-session.target` and
-    runs after the daemon services it depends on, performing the final cursor,
-    shell, and portal polish.
+    runs after the daemon stage, performing final cursor and session polish.
 
 ## Session graph
 
@@ -90,11 +89,10 @@ Core session units:
 - `hypr-daemons.target`
   Explicit daemon stage. It now declares the core Hyprland services it wants.
 - `hypr-post-bootstrap.service`
-  Late oneshot polish. Runs `osc-shell ensure`, applies cursor sync with
-  `hyprctl setcursor`, and starts `hyprsunset.service`, `noctalia.service`,
-  and `xdg-desktop-portal-delayed.service` when those units exist. It is
-  ordered after the daemon services rather than after the target itself to
-  avoid systemd ordering cycles.
+  Late oneshot polish. Applies cursor sync with `hyprctl setcursor` and keeps
+  post-start session tweaks separate from the daemon stage. Long-running shell,
+  night-light, and delayed portal units are started by systemd directly rather
+  than manually from this script.
 
 Daemon-stage units started by `hypr-daemons.target`:
 

@@ -72,7 +72,9 @@ main() {
     export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
     export DESKTOP_SESSION="${DESKTOP_SESSION:-hyprland-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
-    ensure_uwsm_runtime_environment
+    if [[ -z "${WAYLAND_DISPLAY:-}" || -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+      ensure_uwsm_runtime_environment
+    fi
   else
     apply_session_env
     normalize_session_paths

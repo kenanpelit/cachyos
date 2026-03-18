@@ -53,29 +53,9 @@ run_if_present() {
   fi
 }
 
-start_user_service_if_present() {
-  local svc="$1"
-
-  command -v systemctl >/dev/null 2>&1 || return 0
-
-  if ! systemctl --user show -p LoadState "$svc" >/dev/null 2>&1; then
-    warn "$svc is not installed; skipping"
-    return 0
-  fi
-
-  if command -v timeout >/dev/null 2>&1; then
-    timeout 3s systemctl --user start "$svc" >/dev/null 2>&1 || true
-  else
-    systemctl --user start "$svc" >/dev/null 2>&1 || true
-  fi
-}
-
 main() {
-  hypr_load_session_env
   ensure_hypr_env || true
   queue_dconf_sync
-
-  run_if_present osc-shell ensure
 
   if command -v hyprctl >/dev/null 2>&1; then
     if hyprctl setcursor "${XCURSOR_THEME:-capitaine-cursors}" "${XCURSOR_SIZE:-24}" >/dev/null 2>&1; then
@@ -86,10 +66,6 @@ main() {
   else
     warn "hyprctl not found; skipping cursor sync"
   fi
-
-  start_user_service_if_present hyprsunset.service
-  start_user_service_if_present noctalia.service
-  start_user_service_if_present xdg-desktop-portal-delayed.service
 
   log "hypr-post-bootstrap completed."
 }

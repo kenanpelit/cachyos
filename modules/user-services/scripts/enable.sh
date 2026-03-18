@@ -77,6 +77,17 @@ skip_automanaged_unit() {
       # graphical-session.target too early and break UWSM compositor startup.
       return 0
       ;;
+    cliphist:cliphist.service)
+      # Noctalia owns the live cliphist ingestion watchers. The cliphist module
+      # only ships config and a legacy unit, so keep user-services from
+      # re-enabling the duplicate watcher.
+      return 0
+      ;;
+    xdg-portal:xdg-desktop-portal-delayed.service|xdg-portal:xdg-desktop-portal-delayed.timer)
+      # The xdg-portal module manages delayed portal orchestration itself so it
+      # can stay bound to compositor session targets instead of default.target.
+      return 0
+      ;;
   esac
 
   return 1
