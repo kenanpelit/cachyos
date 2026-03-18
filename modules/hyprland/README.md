@@ -80,8 +80,7 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 Core session units:
 
 - `hyprland-session.target`
-  Session umbrella target started by `hypr-session-init`. It is bound to the
-  active UWSM Hyprland compositor unit so Hypr-only helpers stop with the WM.
+  Session umbrella target started by `hypr-session-init`.
 - `hypr-bootstrap.service`
   Early oneshot bootstrap. Runs `hypr-osc switch --no-notify`.
 - `hypr-audio-init.service`

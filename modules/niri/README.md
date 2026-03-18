@@ -54,8 +54,7 @@ UWSM-first session wrapper.
 These units make up the core Niri session chain:
 
 - `niri-session.target`
-  Session umbrella target started by `niri-session-init`. It is bound to the
-  active UWSM Niri compositor unit so Niri-only helpers stop with the WM.
+  Session umbrella target started by `niri-session-init`.
 - `niri-bootstrap.service`
   Early oneshot bootstrap. Runs `niri-osc set init`.
 - `niri-daemons.target`
