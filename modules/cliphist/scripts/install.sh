@@ -19,3 +19,5 @@ run_as_user systemctl --user stop cliphist.service >/dev/null 2>&1 || true
 run_as_user systemctl --user reset-failed cliphist.service >/dev/null 2>&1 || true
 run_as_user rm -f "$USER_HOME/.config/systemd/user/default.target.wants/cliphist.service" || true
 run_as_user rm -f "$USER_HOME/.config/systemd/user/graphical-session.target.wants/cliphist.service" || true
+run_as_user rm -f "$USER_HOME/.config/systemd/user/cliphist.service" || true
+run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true

@@ -6,10 +6,6 @@ depends_on:
 dotfiles:
 - source: dotfiles/xdg-desktop-portal/portals.conf
   target: ~/.config/xdg-desktop-portal/niri-portals.conf
-- source: dotfiles/systemd/user/xdg-desktop-portal-delayed.service
-  target: ~/.config/systemd/user/xdg-desktop-portal-delayed.service
-- source: dotfiles/systemd/user/xdg-desktop-portal-delayed.timer
-  target: ~/.config/systemd/user/xdg-desktop-portal-delayed.timer
 
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

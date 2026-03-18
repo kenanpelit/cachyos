@@ -13,9 +13,20 @@ user_systemd_dir="$USER_HOME/.config/systemd/user"
 timer_unit="$REPO_ROOT/modules/xdg-portal/dotfiles/systemd/user/xdg-desktop-portal-delayed.timer"
 service_unit="$REPO_ROOT/modules/xdg-portal/dotfiles/systemd/user/xdg-desktop-portal-delayed.service"
 
+ensure_user_link() {
+  local src="$1"
+  local dst="$2"
+  local current=""
+
+  current="$(run_as_user readlink "$dst" 2>/dev/null || true)"
+  if [[ "$current" != "$src" ]]; then
+    run_as_user ln -sfn "$src" "$dst"
+  fi
+}
+
 run_as_user mkdir -p "$user_systemd_dir"
-run_as_user ln -sfn "$timer_unit" "$user_systemd_dir/xdg-desktop-portal-delayed.timer"
-run_as_user ln -sfn "$service_unit" "$user_systemd_dir/xdg-desktop-portal-delayed.service"
+ensure_user_link "$timer_unit" "$user_systemd_dir/xdg-desktop-portal-delayed.timer"
+ensure_user_link "$service_unit" "$user_systemd_dir/xdg-desktop-portal-delayed.service"
 run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
 # Refresh the timer links so delayed portal orchestration follows compositor
