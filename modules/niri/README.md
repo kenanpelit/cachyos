@@ -39,7 +39,8 @@ UWSM-first session wrapper.
    `niri-session.target` immediately and only performs runtime detection/sync as
    a fallback when UWSM did not finalize `WAYLAND_DISPLAY` or `NIRI_SOCKET`.
    If UWSM is not present, the script falls back to the older full
-   `environment.d` import path.
+   `environment.d` import path and emits a notice to the journal so the slower
+   compatibility path is visible.
 6. `niri-session.target` pulls in `graphical-session.target`,
    `xdg-desktop-autostart.target`, `niri-bootstrap.service`,
    `niri-daemons.target`, and `niri-post-bootstrap.service`.
@@ -107,6 +108,9 @@ session target chain:
   backfills missing compositor runtime variables as a safety net. When that
   fallback path is used, it emits a warning to the journal so session drift is
   visible.
+- Selected long-lived GUI launch keybinds now use `uwsm app --` so terminals,
+  launchers, file managers, and similar apps land in dedicated app scopes
+  instead of inheriting the compositor process tree directly.
 - Logout flows should prefer `uwsm stop` over `niri msg action quit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.

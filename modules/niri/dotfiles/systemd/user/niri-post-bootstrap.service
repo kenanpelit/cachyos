@@ -9,6 +9,7 @@ ConditionPathExists=%h/.local/bin/niri-post-bootstrap
 [Service]
 Type=oneshot
 TimeoutStartSec=20
+RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
 ExecStart=/usr/bin/bash "%h/.local/bin/niri-post-bootstrap"
 StandardOutput=journal

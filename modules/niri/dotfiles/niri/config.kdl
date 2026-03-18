@@ -507,7 +507,7 @@ binds {
 
   // Clipse in a floating kitty window
   Mod+Alt+V repeat=false hotkey-overlay-title="Clipse (Floating)" {
-    spawn "/usr/bin/kitty" "--class" "clipse" "-e" "clipse"
+    spawn "uwsm" "app" "--" "/usr/bin/kitty" "--class" "clipse" "-e" "clipse"
   }
 
   F10 repeat=false hotkey-overlay-title="Bluetooth Toggle" {
@@ -542,7 +542,7 @@ binds {
   }
 
   Mod+Ctrl+Alt+D repeat=false hotkey-overlay-title="Session Doctor" {
-    spawn "/usr/bin/kitty" "--class" "niri-doctor" "-e" "bash" "-lc" "$HOME/.local/bin/niri-osc set doctor; echo; read -n 1 -s -r -p 'Press any key to close'"
+    spawn "uwsm" "app" "--" "/usr/bin/kitty" "--class" "niri-doctor" "-e" "bash" "-lc" "$HOME/.local/bin/niri-osc set doctor; echo; read -n 1 -s -r -p 'Press any key to close'"
   }
 
   // Toggle Wayland shortcut inhibition. Use with care.
@@ -554,10 +554,10 @@ binds {
   // Custom apps
   // ----------------------------------------------------------------------
   Alt+T allow-inhibiting=false repeat=false hotkey-overlay-title="KKENP Start" {
-    spawn-sh "$HOME/.local/bin/start-kkenp >>$HOME/.cache/niri-hotkeys.log 2>&1"
+    spawn "/usr/bin/sh" "-lc" "uwsm app -- \"$HOME/.local/bin/start-kkenp\" >>\"$HOME/.cache/niri-hotkeys.log\" 2>&1"
   }
   Alt+N allow-inhibiting=false repeat=false hotkey-overlay-title="Notes (Anotes)" {
-    spawn-sh "$HOME/.local/bin/anotes"
+    spawn "/usr/bin/sh" "-lc" "exec uwsm app -- \"$HOME/.local/bin/anotes\""
   }
 
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" {
@@ -569,7 +569,7 @@ binds {
   }
 
   Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" {
-    spawn-sh "$HOME/.local/bin/rofi-launcher"
+    spawn "/usr/bin/sh" "-lc" "exec uwsm app -- \"$HOME/.local/bin/rofi-launcher\""
   }
 
   Mod+Ctrl+S repeat=false hotkey-overlay-title="Sticky Toggle" {
@@ -577,14 +577,14 @@ binds {
   }
 
   Mod+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Nemo)" {
-    spawn "nemo"
+    spawn "uwsm" "app" "--" "nemo"
   }
   Alt+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Yazi)" {
-    spawn "kitty" "-e" "yazi"
+    spawn "uwsm" "app" "--" "kitty" "-e" "yazi"
   }
 
   Mod+T repeat=false hotkey-overlay-title="Terminal" {
-    spawn "kitty"
+    spawn "uwsm" "app" "--" "kitty"
   }
 
   // MPV manager helpers (your scripts live in ~/.local/bin)
