@@ -31,12 +31,12 @@ anymore. That belongs to the `gdm` and `sessions` modules.
   Hyprland through the same wrapper/session identity.
 - The wrapper loads the curated Hyprland environment stack through
   `hypr-session-common` (`10-gtk.conf`, `10-hyprland.conf`, `20-qt.conf`,
-  `30-ollama.conf`, and `99-dms-icons.conf` when present), normalizes path
-  variables, applies the Hyprland session identity
+  `30-ollama.conf`, and `99-dms-icons.conf` when present), applies the
+  Hyprland session identity
   (`DESKTOP_SESSION=hyprland-uwsm`, `XDG_CURRENT_DESKTOP=Hyprland`), and then
   hands off to `uwsm start`.
 - Once Hyprland is up, `dotfiles/hypr/hyprland.conf` runs:
-  `exec-once = ~/.local/bin/hypr-session-init`.
+  `exec-once = uwsm app -- hypr-session-init`.
 - `hypr-session-init` is now the compositor-side entrypoint that starts
   `hyprland-session.target`. Under UWSM it trusts the pre-finalized session
   environment and only falls back to runtime detection/sync if
@@ -47,13 +47,13 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 ## Startup flow
 
 1. GDM starts `hyprland-uwsm-session`.
-2. The wrapper loads the curated Hyprland environment stack, normalizes paths,
-   applies the Hyprland UWSM session identity, and executes `uwsm start -- start-hyprland`
+2. The wrapper loads the curated Hyprland environment stack, applies the
+   Hyprland UWSM session identity, and executes `uwsm start -- start-hyprland`
    (or `Hyprland` if `start-hyprland` is unavailable).
 3. UWSM creates the compositor service, waits for readiness variables, and
    finalizes the session environment for the user manager.
 4. Hyprland reads `~/.config/hypr/hyprland.conf` and runs
-   `~/.local/bin/hypr-session-init`.
+   `uwsm app -- hypr-session-init`.
 5. If the session is UWSM-managed, `hypr-session-init` starts
    `hyprland-session.target` immediately and only performs runtime
    detection/sync as a fallback when UWSM did not finalize
@@ -80,7 +80,8 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 Core session units:
 
 - `hyprland-session.target`
-  Session umbrella target started by `hypr-session-init`.
+  Session umbrella target started by `hypr-session-init`. It is bound to the
+  active UWSM Hyprland compositor unit so Hypr-only helpers stop with the WM.
 - `hypr-bootstrap.service`
   Early oneshot bootstrap. Runs `hypr-osc switch --no-notify`.
 - `hypr-audio-init.service`
@@ -153,7 +154,8 @@ Daemon-stage units started by `hypr-daemons.target`:
   do not leak into the Hyprland session wrapper. `hypr-session-init` avoids
   re-importing that full static environment when UWSM is already managing the
   session and only backfills missing compositor runtime variables as a safety
-  net.
+  net. When that fallback path is used, it emits a warning to the journal so
+  session drift is visible.
 - Logout flows should prefer `uwsm stop` over `hyprctl dispatch exit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.

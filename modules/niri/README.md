@@ -89,7 +89,9 @@ session target chain:
 - `geoclue-agent.timer`
   Starts `geoclue-agent.service` 15 seconds after startup and keeps retrying.
 - `ppp-auto-profile.timer`
-  Starts `ppp-auto-profile.service` after login and then every 15 seconds.
+  Starts `ppp-auto-profile.service` from `graphical-session.target` 30 seconds
+  after login and then every 15 seconds. The service itself is now kept
+  session-scoped and bounded with a short startup timeout.
 
 ## Conditions and notes
 

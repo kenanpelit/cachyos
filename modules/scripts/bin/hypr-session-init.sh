@@ -18,6 +18,14 @@ source "${COMMON_HELPER}"
 
 start_target=true
 
+log_warn() {
+  local message="$1"
+  printf '[hypr-session-init] WARN: %s\n' "$message" >&2
+  if command -v logger >/dev/null 2>&1; then
+    logger -t hypr-session-init -- "WARN: $message" >/dev/null 2>&1 || true
+  fi
+}
+
 case "${1:-}" in
   ""|--start-target)
     ;;
@@ -73,6 +81,7 @@ main() {
     export DESKTOP_SESSION="${DESKTOP_SESSION:-hyprland-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
     if [[ -z "${WAYLAND_DISPLAY:-}" || -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+      log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
       ensure_uwsm_runtime_environment
     fi
   else

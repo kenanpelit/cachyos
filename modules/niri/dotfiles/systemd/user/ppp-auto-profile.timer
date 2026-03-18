@@ -1,6 +1,7 @@
 [Unit]
 Description=Periodic power profile chooser
 After=graphical-session.target
+PartOf=graphical-session.target
 
 [Timer]
 # İlk çalışma: Login olduktan 30 saniye sonra
@@ -11,4 +12,4 @@ AccuracySec=1s
 Unit=ppp-auto-profile.service
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target

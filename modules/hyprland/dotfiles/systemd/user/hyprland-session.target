@@ -2,6 +2,6 @@
 Description=Hyprland session (user services)
 Documentation=man:systemd.special(7)
 Wants=graphical-session.target graphical-session-pre.target xdg-desktop-autostart.target hypr-bootstrap.service hypr-audio-init.service hypr-daemons.target hypr-post-bootstrap.service
-After=graphical-session.target graphical-session-pre.target dbus.service
-BindsTo=graphical-session.target
+After=graphical-session.target graphical-session-pre.target dbus.service wayland-wm@start-hyprland.service
+BindsTo=graphical-session.target wayland-wm@start-hyprland.service
 PartOf=graphical-session.target

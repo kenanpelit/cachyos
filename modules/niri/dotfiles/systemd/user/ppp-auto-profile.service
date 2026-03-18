@@ -1,10 +1,13 @@
 [Unit]
 Description=Auto-switch power profile based on live CPU usage
 After=graphical-session.target
+PartOf=graphical-session.target
+Requisite=graphical-session.target
 
 [Service]
 Type=oneshot
+TimeoutStartSec=5
 ExecStart=%h/.local/bin/ppp-auto-profile
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
