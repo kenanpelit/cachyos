@@ -9,19 +9,19 @@ shutdown_duration = 0.3
 adaptive_interval = 1
 
 #[Time-based config]
-night_temp = 2200          # Deepest Hyprsunset stage (04:00)
-day_temp = 2200            # Lightest Hyprsunset stage (07:30)
-night_gamma = 88           # Deepest Hyprsunset stage gamma
-day_gamma = 88             # Lightest Hyprsunset stage gamma
+night_temp = 2300          # Deepest Hyprsunset stage (04:00)
+day_temp = 2300            # Lightest Hyprsunset stage (07:30)
+night_gamma = 90           # Deepest Hyprsunset stage gamma
+day_gamma = 90             # Lightest Hyprsunset stage gamma
 update_interval = 60
 
 #[Static config]
-static_temp = 2200         # Default fallback; service rewrites this to the current preset at startup
-static_gamma = 88
+static_temp = 2300         # Default fallback; service rewrites this to the current preset at startup
+static_gamma = 90
 
 #[Manual transitions]
-sunset = "22:30:00"        # First evening-oriented Hyprsunset anchor
-sunrise = "22:30:00"       # First morning Hyprsunset anchor
+sunset = "21:00:00"        # First evening-oriented Hyprsunset anchor
+sunrise = "21:00:00"       # First morning Hyprsunset anchor
 transition_duration = 5
 
 #[Geolocation]

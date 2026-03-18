@@ -27,7 +27,7 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 - That desktop entry launches
   `modules/gdm/dotfiles/hyprland-uwsm-session`.
 - TTY login now reuses the same UWSM session path via
-  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY3 and GDM both enter
+  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY2 and GDM both enter
   Hyprland through the same wrapper/session identity.
 - The wrapper loads the curated Hyprland environment stack through
   `hypr-session-common` (`10-gtk.conf`, `10-hyprland.conf`, `20-qt.conf`,
@@ -36,7 +36,7 @@ anymore. That belongs to the `gdm` and `sessions` modules.
   (`DESKTOP_SESSION=hyprland-uwsm`, `XDG_CURRENT_DESKTOP=Hyprland`), and then
   hands off to `uwsm start`.
 - Once Hyprland is up, `dotfiles/hypr/hyprland.conf` runs:
-  `exec-once = uwsm app -- hypr-session-init`.
+  `exec-once = ~/.local/bin/hypr-session-init`.
 - `hypr-session-init` is now the compositor-side entrypoint that starts
   `hyprland-session.target`. Under UWSM it trusts the pre-finalized session
   environment and only falls back to runtime detection/sync if
@@ -53,7 +53,7 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 3. UWSM creates the compositor service, waits for readiness variables, and
    finalizes the session environment for the user manager.
 4. Hyprland reads `~/.config/hypr/hyprland.conf` and runs
-   `uwsm app -- hypr-session-init`.
+   `~/.local/bin/hypr-session-init`.
 5. If the session is UWSM-managed, `hypr-session-init` starts
    `hyprland-session.target` immediately and only performs runtime
    detection/sync as a fallback when UWSM did not finalize
