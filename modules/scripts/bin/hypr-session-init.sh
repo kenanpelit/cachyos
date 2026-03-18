@@ -26,6 +26,14 @@ log_warn() {
   fi
 }
 
+log_notice() {
+  local message="$1"
+  printf '[hypr-session-init] NOTICE: %s\n' "$message" >&2
+  if command -v logger >/dev/null 2>&1; then
+    logger -t hypr-session-init -- "NOTICE: $message" >/dev/null 2>&1 || true
+  fi
+}
+
 case "${1:-}" in
   ""|--start-target)
     ;;
@@ -85,6 +93,7 @@ main() {
       ensure_uwsm_runtime_environment
     fi
   else
+    log_notice "UWSM not detected; using manual environment sync fallback"
     apply_session_env
     normalize_session_paths
     hypr_detect_wayland_display
