@@ -42,7 +42,6 @@ install_session "$DOTFILES_DIR/gnome-optimized.desktop" "GNOME (Optimized)"
 
 # Keep Hyprland on the single UWSM-backed session entry.
 remove_session "hyprland.desktop"
-remove_session "hyprland-optimized.desktop"
 install_session "$HYPR_DOTFILES_DIR/hyprland-uwsm.desktop" "Hyprland (UWSM)"
 
 echo "Session installation complete."

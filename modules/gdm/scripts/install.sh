@@ -80,7 +80,6 @@ fi
 # Install single-command wrappers for gdm-wayland-session compatibility.
 install_wrapper "${DOTFILES_DIR}/niri-optimized-session" "niri-optimized-session"
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
-install_wrapper "${DOTFILES_DIR}/hyprland-optimized-session" "hyprland-optimized-session"
 install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/gnome-optimized-session" "gnome-optimized-session"
 
@@ -89,7 +88,6 @@ remove_path_if_exists "${WAYLAND_SESSIONS_DIR}/niri.desktop"
 remove_path_if_exists "${WAYLAND_SESSIONS_DIR}/niri-optimized.desktop"
 # Keep Hyprland on a single UWSM-owned session entry.
 remove_path_if_exists "${WAYLAND_SESSIONS_DIR}/hyprland.desktop"
-remove_path_if_exists "${WAYLAND_SESSIONS_DIR}/hyprland-optimized.desktop"
 
 # Install Wayland sessions for the GDM chooser.
 install_session_file "${MODULES_DIR}/sessions/dotfiles/niri-uwsm.desktop" "Niri (UWSM)"
@@ -103,7 +101,7 @@ run_root systemctl enable gdm.service >/dev/null 2>&1 || run_root systemctl enab
 echo "Done."
 echo "Enabled: gdm.service"
 echo "Disabled (if present): greetd, sddm, lightdm, lxdm, ly"
-echo "Installed wrappers: niri-optimized-session (shim), niri-uwsm-session, hyprland-optimized-session (shim), hyprland-uwsm-session, gnome-optimized-session"
+echo "Installed wrappers: niri-optimized-session (shim), niri-uwsm-session, hyprland-uwsm-session, gnome-optimized-session"
 echo "Installed Wayland sessions: niri-uwsm, hyprland-uwsm, gnome-optimized"
 echo
 echo "Apply now or reboot:"

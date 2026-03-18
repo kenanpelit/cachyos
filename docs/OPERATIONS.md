@@ -36,7 +36,6 @@ Expected after fallback:
 Session launchers are user-home agnostic and call scripts via `$HOME/.local/bin`:
 
 - `modules/sessions/dotfiles/niri-optimized.desktop`
-- `modules/hyprland/dotfiles/hyprland-optimized.desktop`
 - `modules/sessions/dotfiles/gnome-optimized.desktop`
 
 Operational checks:

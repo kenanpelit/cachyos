@@ -133,9 +133,6 @@ Daemon-stage units started by `hypr-daemons.target`:
 - `modules/gdm/dotfiles/hyprland-uwsm-session`
   UWSM-first wrapper. Loads the repo-managed `environment.d` stack and then
   enters `uwsm start`.
-- `modules/gdm/dotfiles/hyprland-optimized-session`
-  Compatibility shim that forwards stale legacy session entries to
-  `hyprland-uwsm-session`.
 - `scripts/install.sh`
   Post-install hook that renders the theme files, removes the Hyprland-only
   keyring override, re-enables the stock `gnome-keyring-daemon` units, and
