@@ -18,6 +18,14 @@ source "${COMMON_HELPER}"
 
 start_target=true
 
+log_warn() {
+  local message="$1"
+  printf '[niri-session-init] WARN: %s\n' "$message" >&2
+  if command -v logger >/dev/null 2>&1; then
+    logger -t niri-session-init -- "WARN: $message" >/dev/null 2>&1 || true
+  fi
+}
+
 case "${1:-}" in
   ""|--start-target)
     ;;
@@ -65,7 +73,10 @@ main() {
     export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
     export GDMSESSION="${GDMSESSION:-niri-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
-    ensure_uwsm_runtime_environment
+    if [[ -z "${WAYLAND_DISPLAY:-}" || -z "${NIRI_SOCKET:-}" ]]; then
+      log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
+      ensure_uwsm_runtime_environment
+    fi
   else
     apply_session_env
     normalize_session_paths

@@ -1,6 +1,6 @@
 [Unit]
 Description=Niri session (user services)
 Wants=graphical-session.target xdg-desktop-autostart.target niri-bootstrap.service niri-daemons.target niri-post-bootstrap.service
-After=graphical-session.target dbus.service
-BindsTo=graphical-session.target
+After=graphical-session.target dbus.service wayland-wm@niri-session.service
+BindsTo=graphical-session.target wayland-wm@niri-session.service
 PartOf=graphical-session.target

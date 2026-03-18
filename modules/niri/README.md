@@ -10,7 +10,7 @@ UWSM-first session wrapper.
   `modules/sessions/dotfiles/niri-uwsm.desktop`.
 - That desktop entry launches `modules/gdm/dotfiles/niri-uwsm-session`.
 - TTY login now reuses the same UWSM session path via
-  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY2 and GDM both enter
+  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY3 and GDM both enter
   Niri through the same wrapper/session identity.
 - The wrapper loads the curated Niri environment stack through
   `niri-session-common` (`10-gtk.conf`, `10-niri-env.conf`, `20-qt.conf`,
@@ -33,8 +33,8 @@ UWSM-first session wrapper.
    (or `niri` if `niri-session` is unavailable).
 3. UWSM creates the compositor service, waits for `NIRI_SOCKET`, and finalizes
    the session environment for the user manager.
-4. Niri reads `~/.config/niri/config.kdl` and runs
-   `spawn-at-startup "niri-session-init"`.
+4. Niri reads `~/.config/niri/config.kdl` and runs the repo-managed startup
+   shim for `~/.local/bin/niri-session-init`.
 5. If the session is UWSM-managed, `niri-session-init` starts
    `niri-session.target` immediately and only performs runtime detection/sync as
    a fallback when UWSM did not finalize `WAYLAND_DISPLAY` or `NIRI_SOCKET`.
@@ -54,7 +54,8 @@ UWSM-first session wrapper.
 These units make up the core Niri session chain:
 
 - `niri-session.target`
-  Session umbrella target started by `niri-session-init`.
+  Session umbrella target started by `niri-session-init`. It is bound to the
+  active UWSM Niri compositor unit so Niri-only helpers stop with the WM.
 - `niri-bootstrap.service`
   Early oneshot bootstrap. Runs `niri-osc set init`.
 - `niri-daemons.target`
@@ -104,7 +105,9 @@ session target chain:
   curated Niri-specific allowlist so ad-hoc user overrides do not leak into the
   Niri session wrapper. `niri-session-init` avoids re-importing that full
   static environment when UWSM is already managing the session and only
-  backfills missing compositor runtime variables as a safety net.
+  backfills missing compositor runtime variables as a safety net. When that
+  fallback path is used, it emits a warning to the journal so session drift is
+  visible.
 - Logout flows should prefer `uwsm stop` over `niri msg action quit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.
