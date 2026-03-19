@@ -1,6 +1,6 @@
 [Unit]
 Description=Delayed Geoclue Demo Agent (15s delay)
-After=graphical-session.target
+PartOf=graphical-session.target
 
 [Timer]
 OnStartupSec=15s
@@ -9,4 +9,4 @@ AccuracySec=1s
 Unit=geoclue-agent.service
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target

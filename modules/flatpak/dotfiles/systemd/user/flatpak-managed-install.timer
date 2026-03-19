@@ -1,6 +1,6 @@
 [Unit]
 Description=Delayed Flatpak managed installation
-After=graphical-session.target
+PartOf=graphical-session.target
 
 [Timer]
 # Açılışın ilk anlarını yormamak için 5 dakika sonra çalıştır
@@ -10,4 +10,4 @@ AccuracySec=1min
 Unit=flatpak-managed-install.service
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target

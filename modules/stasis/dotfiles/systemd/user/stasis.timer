@@ -1,6 +1,6 @@
 [Unit]
 Description=Delayed Stasis (Idle Manager)
-After=graphical-session.target
+PartOf=graphical-session.target
 
 [Timer]
 OnStartupSec=5s
@@ -9,4 +9,4 @@ AccuracySec=1s
 Unit=stasis.service
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target

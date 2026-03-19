@@ -3,6 +3,7 @@ set -euo pipefail
 
 module_root="$(cd "$(dirname "$0")/.." && pwd)"
 bin_dir="$HOME/.local/bin"
+systemd_user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 flathub_url="https://flathub.org/repo/flathub.flatpakrepo"
 retries="${FLATPAK_REMOTE_ADD_RETRIES:-3}"
 retry_delay="${FLATPAK_REMOTE_ADD_DELAY_SEC:-5}"
@@ -38,6 +39,12 @@ fi
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload >/dev/null 2>&1 || true
   systemctl --user stop flatpak-managed-install.service >/dev/null 2>&1 || true
+  systemctl --user stop flatpak-managed-install.timer >/dev/null 2>&1 || true
+  systemctl --user disable flatpak-managed-install.service >/dev/null 2>&1 || true
   systemctl --user reset-failed flatpak-managed-install.service >/dev/null 2>&1 || true
+  systemctl --user disable flatpak-managed-install.timer >/dev/null 2>&1 || true
+  rm -f \
+    "$systemd_user_dir/timers.target.wants/flatpak-managed-install.timer" \
+    "$systemd_user_dir/graphical-session.target.wants/flatpak-managed-install.timer"
   systemctl --user enable --now flatpak-managed-install.timer >/dev/null 2>&1 || true
 fi

@@ -88,6 +88,20 @@ skip_automanaged_unit() {
       # can stay bound to compositor session targets instead of default.target.
       return 0
       ;;
+    stasis:stasis.service)
+      # Stasis is intentionally timer-driven; do not enable the service unit
+      # directly from the generic synchronizer.
+      return 0
+      ;;
+    flatpak:flatpak-managed-install.service)
+      # Flatpak managed installs are intentionally timer-driven; only the timer
+      # should be enabled.
+      return 0
+      ;;
+    niri:geoclue-agent.service)
+      # Geoclue is started by its delayed timer, not directly by the service.
+      return 0
+      ;;
   esac
 
   return 1
