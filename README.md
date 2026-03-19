@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/CachyOS-Arch_Linux-blue?style=for-the-badge&logo=archlinux&logoColor=white" alt="CachyOS">
   <img src="https://img.shields.io/badge/Framework-DCLI%20v2-green?style=for-the-badge&logo=yaml&logoColor=white" alt="dcli">
   <img src="https://img.shields.io/badge/Host-hay-orange?style=for-the-badge" alt="hay">
-  <img src="https://img.shields.io/badge/Wayland-Niri%20%2B%20Noctalia-1f6feb?style=for-the-badge" alt="Niri + Noctalia">
+  <img src="https://img.shields.io/badge/Desktop-Hyprland%20%2B%20Niri%20%2B%20GNOME-1f6feb?style=for-the-badge" alt="Hyprland + Niri + GNOME">
 </div>
 
 <p align="center">
@@ -15,7 +15,7 @@
 
 ## 🚀 Overview
 
-This repository represents the **"Source of Truth"** for a production-grade CachyOS environment. Unlike traditional dotfiles, this is a modular configuration framework designed to eliminate configuration drift, automate day-2 operations, and provide a standardized environment across different sessions (Niri, Hyprland, GNOME).
+This repository represents the **"Source of Truth"** for a production-grade CachyOS environment. Unlike traditional dotfiles, this is a modular configuration framework designed to eliminate configuration drift, automate day-2 operations, and provide a standardized environment across display-manager sessions, TTY launch paths, and multiple desktop stacks (Niri, Hyprland, GNOME).
 
 ### Core Pillars
 - 🧩 **Strict Modularity**: 85+ implementation units with explicit dependency tracking.
@@ -91,13 +91,22 @@ sudo -E dcli sync
 
 ---
 
-## 🛤️ Session Routing (TTY)
+## 🛤️ Session Entry Points
 
-OotB support for multiple optimized environments:
-- **TTY2**: Niri (Optimized Profile)
-- **TTY3**: Hyprland (Production Profile)
-- **TTY4**: GNOME (Fallback/Reference)
-- **TTY6**: Manual / Recovery Launcher
+Primary login path:
+- **GDM session chooser**: `Hyprland (UWSM)`, `Niri (UWSM)`, `GNOME (Optimized)`
+
+Secondary TTY routing via `osc-tty-launcher auto-tty`:
+- **TTY2**: Hyprland (UWSM)
+- **TTY3**: Niri (UWSM)
+- **TTY4**: GNOME
+- **TTY5**: Ubuntu VM via Sway profile
+- **TTY6**: Manual launcher / recovery
+
+Notes:
+- The display-manager path is the canonical entrypoint for daily use.
+- Hyprland and Niri sessions both enter through UWSM-managed wrappers installed by the `sessions` module.
+- TTY routing exists as an operational fallback and recovery path, not as the primary session orchestration layer.
 
 ---
 
