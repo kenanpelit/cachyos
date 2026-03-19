@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Legacy shim: keep stale desktop entries working, but always route through the
-# UWSM-first Niri session wrapper.
-exec /usr/local/bin/niri-uwsm-session "$@"

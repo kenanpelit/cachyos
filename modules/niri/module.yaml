@@ -23,8 +23,6 @@ dotfiles:
   target: ~/.config/systemd/user/niri-session.target
 - source: dotfiles/systemd/user/niri-daemons.target
   target: ~/.config/systemd/user/niri-daemons.target
-- source: dotfiles/systemd/user/niri.service.d/10-session-bootstrap.conf
-  target: ~/.config/systemd/user/niri.service.d/10-session-bootstrap.conf
 - source: dotfiles/systemd/user/niri.service.d/10-priority.conf
   target: ~/.config/systemd/user/niri.service.d/10-priority.conf
 - source: dotfiles/systemd/user/niri-polkit-agent.service

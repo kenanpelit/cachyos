@@ -67,15 +67,17 @@ install_session "${DOTFILES_DIR}/niri-uwsm.desktop" "Niri (UWSM)"
 install_session "${DOTFILES_DIR}/gnome-optimized.desktop" "GNOME (Optimized)"
 install_session "${DOTFILES_DIR}/hyprland-uwsm.desktop" "Hyprland (UWSM)"
 
-install_wrapper "${DOTFILES_DIR}/niri-optimized-session" "niri-optimized-session"
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/gnome-optimized-session" "gnome-optimized-session"
+
+run_root rm -f "${LOCAL_BIN_DIR}/niri-optimized-session"
 
 if command -v systemctl >/dev/null 2>&1; then
   user_systemd_dir="$USER_HOME/.config/systemd/user"
 
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
+  run_as_user rm -f "$user_systemd_dir/niri.service.d/10-session-bootstrap.conf" || true
   run_as_user systemctl --user stop \
     geoclue-agent.service geoclue-agent.timer \
     ppp-auto-profile.service ppp-auto-profile.timer >/dev/null 2>&1 || true

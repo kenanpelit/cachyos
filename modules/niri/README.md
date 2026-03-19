@@ -19,10 +19,6 @@ UWSM-first session wrapper.
   variables, applies the Niri session identity
   (`DESKTOP_SESSION=niri-uwsm`, `XDG_CURRENT_DESKTOP=niri`), and then hands
   off to `uwsm start -- niri-session`.
-- The packaged `niri.service` is still extended via
-  `dotfiles/systemd/user/niri.service.d/10-session-bootstrap.conf`, but only as
-  a compatibility fallback for non-UWSM paths such as a direct `niri-session`
-  launch from a TTY.
 - Every unit shipped under `dotfiles/systemd/user/` is linked/enabled by the
   `user-services` module when `niri` is enabled in `hosts/*.yaml`.
 
@@ -113,6 +109,10 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   backfills missing compositor runtime variables as a safety net. When that
   fallback path is used, it emits a warning to the journal so session drift is
   visible.
+- The supported entry path is now the UWSM wrapper installed by the `sessions`
+  module. Legacy `niri-optimized-session` and the old `niri.service`
+  bootstrap drop-in are intentionally removed to keep session ownership in one
+  place.
 - Selected long-lived GUI launch keybinds now use `uwsm app --` so terminals,
   launchers, file managers, and similar apps land in dedicated app scopes
   instead of inheriting the compositor process tree directly.
