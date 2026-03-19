@@ -44,7 +44,12 @@ if [[ ! -r "${PROFILE_FILE}" ]]; then
   exit 1
 fi
 
-manifest_checksum="$(sha256sum "${PROFILE_MANIFEST}" "${PROFILE_FILE}" | sha256sum | awk '{print $1}')"
+manifest_checksum="$(
+  sha256sum "${PROFILE_MANIFEST}" "${PROFILE_FILE}" |
+    awk '{print $1}' |
+    sha256sum |
+    awk '{print $1}'
+)"
 tmp_out="$(mktemp)"
 
 cleanup() {
