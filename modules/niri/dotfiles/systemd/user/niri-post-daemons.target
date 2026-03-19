@@ -1,0 +1,5 @@
+[Unit]
+Description=Niri session post-daemons stage
+After=graphical-session.target niri-daemons.target
+BindsTo=graphical-session.target
+PartOf=niri-session.target graphical-session.target

@@ -14,9 +14,9 @@ UWSM-first session wrapper.
   manager session entry both enter
   Niri through the same wrapper/session identity.
 - The wrapper loads the curated Niri environment stack through
-  `niri-session-common` (`10-gtk.conf`, `10-niri-env.conf`, `20-qt.conf`,
-  `30-ollama.conf`, and `99-dms-icons.conf` when present), normalizes path
-  variables, applies the Niri session identity
+  `niri-session-common` and the manifest
+  `~/.config/environment.d/niri-session.envlist`, normalizes path variables,
+  applies the Niri session identity
   (`DESKTOP_SESSION=niri-uwsm`, `XDG_CURRENT_DESKTOP=niri`), and then hands
   off to `uwsm start -- niri-session`.
 - Every unit shipped under `dotfiles/systemd/user/` is linked/enabled by the
@@ -41,12 +41,16 @@ UWSM-first session wrapper.
    compatibility path is visible.
 6. `niri-session.target` pulls in `graphical-session.target`,
    `xdg-desktop-autostart.target`, `niri-bootstrap.service`,
-   `niri-daemons.target`, and `niri-post-bootstrap.service`.
+   `niri-daemons.target`, `niri-post-daemons.target`, and the shared
+   compositor-session units enabled by other modules.
 7. `niri-bootstrap.service` runs `~/.local/bin/niri-bootstrap`, which calls
    `niri-osc set init`.
 8. `niri-daemons.target` becomes the daemon stage for long-running helpers.
-9. `niri-post-bootstrap.service` runs `~/.local/bin/niri-post-bootstrap` after
-   the daemon services it depends on.
+9. `niri-post-daemons.target` becomes the ordered late stage after
+   `niri-daemons.target`.
+10. `niri-desktop-settings.service` syncs GNOME interface settings.
+11. `niri-post-bootstrap.service` runs `~/.local/bin/niri-post-bootstrap` after
+    the daemon services it depends on.
 
 ## What starts during session startup
 
@@ -58,10 +62,16 @@ These units make up the core Niri session chain:
   Early oneshot bootstrap. Runs `niri-osc set init`.
 - `niri-daemons.target`
   Explicit daemon stage. It now declares the core Niri services it wants.
+- `niri-post-daemons.target`
+  Ordered late stage for session polish and optional post-daemon services.
+- `niri-desktop-settings.service`
+  Tracked desktop theme/icon/cursor sync.
 - `niri-post-bootstrap.service`
-  Late oneshot polish. Applies GNOME interface settings and sends a best-effort
-  "Session ready" notification. It is ordered after the daemon services rather
-  than after the target itself to avoid systemd ordering cycles.
+  Late oneshot polish. Sends a best-effort "Session ready" notification after
+  the daemon and desktop-settings stages complete.
+- `niri-status-notifier-ready.service`
+  Waits for a session `StatusNotifierWatcher` before tray applets such as
+  Blueman start.
 
 These services belong to `niri-daemons.target` and normally come up with the
 session once the environment conditions are satisfied:
@@ -72,7 +82,14 @@ session once the environment conditions are satisfied:
 - `niri-nm-applet.service`
   Runs `nm-applet --indicator`.
 - `niri-blueman-applet.service`
-  Runs `blueman-applet`.
+  Runs `blueman-applet` after the explicit status-notifier readiness gate.
+- `niri-clipse.service`
+  Runs `clipse -listen` under `systemd --user` instead of the compositor
+  process tree.
+- `niri-sunsetr.service`
+  Starts `sunsetr.service` and `sunsetr-auto-profile.timer` on demand from the
+  Niri post-daemons stage instead of binding those units directly into the
+  compositor target graph.
 - `niri-snapper-tools-check.service`
   Runs the snapshot boot check for `snapper-tools`.
 - `niri-sticky.service`
@@ -103,8 +120,9 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   `NIRI_SOCKET`.
 - The repo-managed `~/.config/environment.d/*.conf` stack is the canonical
   source for Niri session variables under UWSM, but it is consumed through a
-  curated Niri-specific allowlist so ad-hoc user overrides do not leak into the
-  Niri session wrapper. `niri-session-init` avoids re-importing that full
+  curated Niri-specific allowlist manifest so ad-hoc user overrides do not
+  leak into the Niri session wrapper. `niri-session-init` avoids re-importing
+  that full
   static environment when UWSM is already managing the session and only
   backfills missing compositor runtime variables as a safety net. When that
   fallback path is used, it emits a warning to the journal so session drift is
@@ -128,6 +146,6 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
 - Niri-specific desktop entries such as KDE Connect, Geoclue demo agent, and the
   snapper helper remain in this module because they are compositor-session
   choices rather than shared Wayland masks.
-- The UWSM session fallback path intentionally keeps a minimal default `PATH`;
-  personal helper directories such as `.iptv/bin`, zinit shims, and GOPATH
-  bins are no longer injected into the desktop session bootstrap.
+- The Niri environment layer now exposes `PATH_CORE`, `PATH_USER`, and the
+  combined `PATH` explicitly so session path composition is inspectable instead
+  of being implicit in the wrapper.

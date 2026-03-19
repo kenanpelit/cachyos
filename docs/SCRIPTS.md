@@ -304,6 +304,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-desktop-settings`
+**Description:** Apply desktop theme settings after the shell/tray stage is up.
+
+**Usage:** `niri-desktop-settings`
+
+---
+
 ### 📂 `niri-osc`
 **Description:** Unified single-file Niri helper multiplexer (set, flow, sticky, etc.).
 
@@ -332,10 +339,24 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-session-route`
+**Description:** Render the runtime Niri monitor profile from live outputs.
+
+**Usage:** `niri-session-route`
+
+---
+
 ### 📂 `niri-start`
 **Description:** Daily startup sequence for Niri session via semsumo.
 
 **Usage:** `niri-start.sh`
+
+---
+
+### 📂 `niri-status-notifier-ready`
+**Description:** Wait for a session StatusNotifierWatcher before tray applets start.
+
+**Usage:** `niri-status-notifier-ready`
 
 ---
 

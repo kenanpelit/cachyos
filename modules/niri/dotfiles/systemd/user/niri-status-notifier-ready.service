@@ -1,0 +1,19 @@
+[Unit]
+Description=Niri status notifier watcher readiness gate
+After=graphical-session.target niri-bootstrap.service dbus.service
+PartOf=niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+ConditionPathExists=%h/.local/bin/niri-status-notifier-ready
+
+[Service]
+Type=oneshot
+TimeoutStartSec=25
+RemainAfterExit=yes
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=%h/.local/bin/niri-status-notifier-ready
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target

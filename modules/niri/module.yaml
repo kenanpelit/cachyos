@@ -17,12 +17,16 @@ dotfiles:
   target: ~/.config/autostart/snapper-tools-check.desktop
 - source: dotfiles/environment.d/10-niri-env.conf
   target: ~/.config/environment.d/10-niri-env.conf
+- source: dotfiles/environment.d/niri-session.envlist
+  target: ~/.config/environment.d/niri-session.envlist
 - source: dotfiles/autostart/geoclue-demo-agent.desktop
   target: ~/.config/autostart/geoclue-demo-agent.desktop
 - source: dotfiles/systemd/user/niri-session.target
   target: ~/.config/systemd/user/niri-session.target
 - source: dotfiles/systemd/user/niri-daemons.target
   target: ~/.config/systemd/user/niri-daemons.target
+- source: dotfiles/systemd/user/niri-post-daemons.target
+  target: ~/.config/systemd/user/niri-post-daemons.target
 - source: dotfiles/systemd/user/niri.service.d/10-priority.conf
   target: ~/.config/systemd/user/niri.service.d/10-priority.conf
 - source: dotfiles/systemd/user/niri-polkit-agent.service
@@ -31,10 +35,16 @@ dotfiles:
   target: ~/.config/systemd/user/niri-nm-applet.service
 - source: dotfiles/systemd/user/niri-blueman-applet.service
   target: ~/.config/systemd/user/niri-blueman-applet.service
+- source: dotfiles/systemd/user/niri-clipse.service
+  target: ~/.config/systemd/user/niri-clipse.service
+- source: dotfiles/systemd/user/niri-status-notifier-ready.service
+  target: ~/.config/systemd/user/niri-status-notifier-ready.service
 - source: dotfiles/systemd/user/niri-snapper-tools-check.service
   target: ~/.config/systemd/user/niri-snapper-tools-check.service
 - source: dotfiles/systemd/user/niri-bootstrap.service
   target: ~/.config/systemd/user/niri-bootstrap.service
+- source: dotfiles/systemd/user/niri-desktop-settings.service
+  target: ~/.config/systemd/user/niri-desktop-settings.service
 - source: dotfiles/systemd/user/niri-post-bootstrap.service
   target: ~/.config/systemd/user/niri-post-bootstrap.service
 - source: dotfiles/systemd/user/niri-sticky.service

@@ -1,0 +1,19 @@
+[Unit]
+Description=Niri desktop settings sync
+After=niri-daemons.target niri-status-notifier-ready.service dbus.service
+PartOf=niri-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+ConditionPathExists=%h/.local/bin/niri-desktop-settings
+
+[Service]
+Type=oneshot
+TimeoutStartSec=30
+RemainAfterExit=yes
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=%h/.local/bin/niri-desktop-settings
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-post-daemons.target

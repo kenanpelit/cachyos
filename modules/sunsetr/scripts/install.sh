@@ -50,28 +50,25 @@ if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
   user_systemd_dir="$user_home/.config/systemd/user"
-  wants_dir="$user_systemd_dir/niri-session.target.wants"
-  graphical_wants="$user_systemd_dir/graphical-session.target.wants/sunsetr.service"
-  target_link="$wants_dir/sunsetr.service"
-  timer_link="$wants_dir/sunsetr-auto-profile.timer"
-  unit_path="/usr/lib/systemd/user/sunsetr.service"
-  timer_path="$user_systemd_dir/sunsetr-auto-profile.timer"
+  wrapper_path="$user_systemd_dir/niri-sunsetr.service"
+  legacy_session_wants="$user_systemd_dir/niri-session.target.wants"
+  legacy_graphical_wants="$user_systemd_dir/graphical-session.target.wants"
 
-  mkdir -p "$wants_dir"
-  rm -f "$graphical_wants"
-  ln -sf "$unit_path" "$target_link"
-  ln -sf "$timer_path" "$timer_link"
+  rm -f \
+    "$legacy_session_wants/sunsetr.service" \
+    "$legacy_session_wants/sunsetr-auto-profile.timer" \
+    "$legacy_graphical_wants/sunsetr.service" \
+    "$legacy_graphical_wants/sunsetr-auto-profile.timer"
 
-  if [[ "$(id -u)" -eq 0 ]]; then
-    user_group="$(id -gn "$real_user" 2>/dev/null || true)"
-    chown -h "$real_user:${user_group:-$real_user}" "$target_link" || true
-    chown -h "$real_user:${user_group:-$real_user}" "$timer_link" || true
+  run_as_user systemctl --user disable sunsetr.service sunsetr-auto-profile.timer >/dev/null 2>&1 || true
+  if [[ -f "$wrapper_path" ]]; then
+    run_as_user systemctl --user enable "$wrapper_path" >/dev/null 2>&1 || true
   fi
 
   if niri_session_active; then
-    run_as_user systemctl --user restart sunsetr.service >/dev/null 2>&1 || true
-    run_as_user systemctl --user restart sunsetr-auto-profile.timer >/dev/null 2>&1 || true
+    run_as_user systemctl --user restart niri-sunsetr.service >/dev/null 2>&1 || true
   else
+    run_as_user systemctl --user stop niri-sunsetr.service >/dev/null 2>&1 || true
     run_as_user systemctl --user stop sunsetr-auto-profile.timer >/dev/null 2>&1 || true
     run_as_user systemctl --user stop sunsetr.service >/dev/null 2>&1 || true
   fi

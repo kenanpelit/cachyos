@@ -107,7 +107,95 @@ skip_automanaged_unit() {
       # enabled by the generic synchronizer.
       return 0
       ;;
+    sunsetr:sunsetr-auto-profile.service|sunsetr:sunsetr-auto-profile.timer)
+      # Sunsetr is session-bound through the niri-sunsetr wrapper service to
+      # avoid graphical-session/timer ordering cycles.
+      return 0
+      ;;
   esac
+
+  return 1
+}
+
+unit_install_entries() {
+  local unit_file="$1"
+  local key="$2"
+  local line value in_install=false
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      "[Install]")
+        in_install=true
+        continue
+        ;;
+      \[*\])
+        $in_install && break
+        ;;
+    esac
+
+    $in_install || continue
+    [[ "${line#\#}" == "$line" ]] || continue
+
+    case "$line" in
+      "${key}"=*)
+        value="${line#${key}=}"
+        for value in $value; do
+          printf '%s\n' "$value"
+        done
+        ;;
+    esac
+  done < "$unit_file"
+}
+
+unit_links_need_resync() {
+  local unit_file="$1"
+  local unit_name="$2"
+  local systemd_user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+  local entry rel target
+  local -A wanted=()
+  local -A required=()
+  local -A existing_wanted=()
+  local -A existing_required=()
+
+  while IFS= read -r entry; do
+    [[ -n "$entry" ]] || continue
+    wanted["$entry"]=1
+  done < <(unit_install_entries "$unit_file" "WantedBy")
+
+  while IFS= read -r entry; do
+    [[ -n "$entry" ]] || continue
+    required["$entry"]=1
+  done < <(unit_install_entries "$unit_file" "RequiredBy")
+
+  while IFS= read -r rel; do
+    [[ -n "$rel" ]] || continue
+    case "$rel" in
+      *.wants/"$unit_name")
+        target="${rel%%.wants/*}"
+        existing_wanted["$target"]=1
+        ;;
+      *.requires/"$unit_name")
+        target="${rel%%.requires/*}"
+        existing_required["$target"]=1
+        ;;
+    esac
+  done < <(find "$systemd_user_dir" -maxdepth 2 -type l \( -path "*/*.wants/$unit_name" -o -path "*/*.requires/$unit_name" \) -printf '%P\n' 2>/dev/null || true)
+
+  for target in "${!wanted[@]}"; do
+    [[ -n "${existing_wanted[$target]:-}" ]] || return 0
+  done
+
+  for target in "${!required[@]}"; do
+    [[ -n "${existing_required[$target]:-}" ]] || return 0
+  done
+
+  for target in "${!existing_wanted[@]}"; do
+    [[ -n "${wanted[$target]:-}" ]] || return 0
+  done
+
+  for target in "${!existing_required[@]}"; do
+    [[ -n "${required[$target]:-}" ]] || return 0
+  done
 
   return 1
 }
@@ -136,8 +224,17 @@ sync_user_units() {
       fi
       
       if is_module_enabled "$module_name"; then
-        # Check if already enabled to minimize noise
-        if ! run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
+        # Check if already enabled to minimize noise while still re-syncing
+        # stale target.wants links after [Install] metadata changes.
+        if run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
+          if unit_links_need_resync "$unit_file" "$unit_name"; then
+            if run_as_user systemctl --user reenable "$unit_file" >/dev/null 2>&1; then
+              echo "  -> Re-enabled $unit_name ($module_name)"
+            else
+              log_warn "Failed to re-enable $unit_name"
+            fi
+          fi
+        else
           # Enable using the ABSOLUTE path in the repository
           # This ensures Systemd can find it even before dcli links it.
           if run_as_user systemctl --user enable "$unit_file" >/dev/null 2>&1; then

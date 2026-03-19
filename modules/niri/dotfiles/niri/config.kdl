@@ -49,7 +49,6 @@ layer-rule {
 
 spawn-at-startup "/usr/bin/sh" "-lc" "test -x \"$HOME/.local/bin/niri-session-init\" && exec \"$HOME/.local/bin/niri-session-init\" || exit 0"
 spawn-at-startup "/usr/bin/env" "OSC_SHELL_STARTUP=1" "osc-shell" "ensure"
-spawn-at-startup "/usr/bin/clipse" "-listen"
 
 // ------------------------------------------------------------------------
 // Input

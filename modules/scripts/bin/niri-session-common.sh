@@ -15,6 +15,10 @@ niri_session_env_dir() {
   printf '%s\n' "${NIRI_SESSION_ENVIRONMENT_DIR:-$HOME/.config/environment.d}"
 }
 
+niri_session_env_manifest() {
+  printf '%s\n' "${NIRI_SESSION_ENVIRONMENT_MANIFEST:-$(niri_session_env_dir)/niri-session.envlist}"
+}
+
 niri_ensure_runtime_dir() {
   session_common_ensure_runtime_dir
 }
@@ -24,17 +28,33 @@ niri_parse_env_file() {
 }
 
 niri_parse_env_dir() {
-  local env_dir file
+  local env_dir manifest entry
   local -a env_files=()
 
   env_dir="$(niri_session_env_dir)"
-  env_files=(
-    "${env_dir}/10-gtk.conf"
-    "$(niri_session_env_file)"
-    "${env_dir}/20-qt.conf"
-    "${env_dir}/30-ollama.conf"
-    "${env_dir}/99-dms-icons.conf"
-  )
+  manifest="$(niri_session_env_manifest)"
+
+  if [[ -r "${manifest}" ]]; then
+    while IFS= read -r entry; do
+      [[ -n "${entry}" ]] || continue
+      [[ "${entry#\#}" == "${entry}" ]] || continue
+      if [[ "${entry}" == /* ]]; then
+        env_files+=("${entry}")
+      else
+        env_files+=("${env_dir}/${entry}")
+      fi
+    done <"${manifest}"
+  fi
+
+  if [[ ${#env_files[@]} -eq 0 ]]; then
+    env_files=(
+      "${env_dir}/10-gtk.conf"
+      "$(niri_session_env_file)"
+      "${env_dir}/20-qt.conf"
+      "${env_dir}/30-ollama.conf"
+      "${env_dir}/99-dms-icons.conf"
+    )
+  fi
 
   session_common_parse_env_dir "${env_files[@]}"
 }
