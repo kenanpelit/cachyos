@@ -207,7 +207,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-post-bootstrap`
-**Description:** Late Hyprland session polish for shell startup, cursor sync and
+**Description:** Late Hyprland session polish for desktop settings and cursor sync.
 
 **Usage:** `hypr-post-bootstrap`
 
@@ -910,6 +910,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Walker Launcher (minimal, elegant) - Launches Walker with predefined dimensions
 
 **Usage:** `walk.sh`
+
+---
+
+### 📂 `wayland-session-common`
+**Description:** Shared helpers for Wayland session bootstrap scripts.
+
+**Usage:** `wayland-session-common`
 
 ---
 
