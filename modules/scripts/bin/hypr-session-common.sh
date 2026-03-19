@@ -94,7 +94,7 @@ hypr_normalize_colon_list() {
 hypr_normalize_session_paths() {
   local default_path default_data_dirs
 
-  default_path="${HOME}/.local/share/zinit/polaris/bin:${HOME}/.local/bin:${HOME}/bin:${HOME}/.iptv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:${HOME}/.local/share/go/bin"
+  default_path="${HOME}/.local/bin:${HOME}/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
   PATH="$(hypr_normalize_colon_list "${PATH:-$default_path}")"
   export PATH
 

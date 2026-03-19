@@ -1,5 +1,6 @@
 [Unit]
 Description=Polkit authentication agent (polkit-gnome)
+BindsTo=wayland-wm@start\x2dhyprland.service
 After=graphical-session.target wayland-wm@start\x2dhyprland.service hypr-bootstrap.service
 PartOf=hypr-daemons.target graphical-session.target wayland-wm@start\x2dhyprland.service
 ConditionEnvironment=WAYLAND_DISPLAY
