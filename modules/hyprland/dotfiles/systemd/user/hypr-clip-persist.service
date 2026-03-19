@@ -7,6 +7,9 @@ ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Service]
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
 ExecStart=/usr/bin/wl-clip-persist --clipboard both
 SuccessExitStatus=1
 Restart=on-abnormal

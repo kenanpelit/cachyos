@@ -7,6 +7,9 @@ ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 
 [Service]
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
 ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 SuccessExitStatus=1
 Restart=on-abnormal

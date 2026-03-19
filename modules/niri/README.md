@@ -83,6 +83,9 @@ session once the environment conditions are satisfied:
   Runs `niri-osc sticky`.
 - `niri-niriswitcher.service`
   Runs `niriswitcher`.
+- Niri-only daemon-stage services are now lifecycle-bound directly to
+  `wayland-wm@niri\x2dsession.service` via `BindsTo=`/`After=` so they stop
+  immediately if the compositor dies unexpectedly.
 
 ## Shared session timers
 
@@ -113,11 +116,18 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
 - Selected long-lived GUI launch keybinds now use `uwsm app --` so terminals,
   launchers, file managers, and similar apps land in dedicated app scopes
   instead of inheriting the compositor process tree directly.
+- Those `uwsm app` launches now also set explicit app names (`-a ...`) so
+  scopes and journal output stay stable and easy to grep.
 - Logout flows should prefer `uwsm stop` over `niri msg action quit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.
+- `Ctrl+Alt+BackSpace` is reserved as an emergency exit key and runs
+  `uwsm stop` directly.
 - `niri-session.target` also pulls `xdg-desktop-autostart.target`; shared
   applet autostart masks live in the `wayland-autostart` module.
 - Niri-specific desktop entries such as KDE Connect, Geoclue demo agent, and the
   snapper helper remain in this module because they are compositor-session
   choices rather than shared Wayland masks.
+- The UWSM session fallback path intentionally keeps a minimal default `PATH`;
+  personal helper directories such as `.iptv/bin`, zinit shims, and GOPATH
+  bins are no longer injected into the desktop session bootstrap.

@@ -400,6 +400,9 @@ binds {
   Alt+L repeat=false hotkey-overlay-title="Lock Screen" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call lockScreen lock"
   }
+  Ctrl+Alt+BackSpace repeat=false hotkey-overlay-title="Emergency Exit" {
+    spawn "uwsm" "stop"
+  }
   Mod+Shift+Delete repeat=false hotkey-overlay-title="Inhibit Idle" {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call idleInhibitor toggle"
   }

@@ -1,7 +1,8 @@
 [Unit]
 Description=Niri niriswitcher daemon
-After=graphical-session.target niri-bootstrap.service
-PartOf=niri-daemons.target graphical-session.target
+BindsTo=wayland-wm@niri\x2dsession.service
+After=graphical-session.target wayland-wm@niri\x2dsession.service niri-bootstrap.service
+PartOf=niri-daemons.target graphical-session.target wayland-wm@niri\x2dsession.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
@@ -9,6 +10,9 @@ ConditionPathExists=/usr/bin/niriswitcher
 
 [Service]
 Type=simple
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
 ExecStart=/usr/bin/niriswitcher
 Restart=on-failure
 RestartSec=2

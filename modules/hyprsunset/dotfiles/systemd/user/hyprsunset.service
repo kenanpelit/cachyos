@@ -9,6 +9,9 @@ ConditionPathExists=%h/.config/hypr/hyprsunset.conf
 
 [Service]
 Type=simple
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
 ExecStart=/usr/bin/hyprsunset
 Restart=on-failure
 RestartSec=2

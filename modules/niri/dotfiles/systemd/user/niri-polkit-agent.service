@@ -1,11 +1,15 @@
 [Unit]
 Description=Polkit authentication agent (polkit-gnome)
-After=graphical-session.target niri-bootstrap.service dbus.service
-PartOf=niri-daemons.target graphical-session.target
+BindsTo=wayland-wm@niri\x2dsession.service
+After=graphical-session.target wayland-wm@niri\x2dsession.service niri-bootstrap.service dbus.service
+PartOf=niri-daemons.target graphical-session.target wayland-wm@niri\x2dsession.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 
 [Service]
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
 ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 SuccessExitStatus=1
 Restart=on-abnormal

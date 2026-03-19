@@ -108,6 +108,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   agent ownership.
 - `hypr-clip-persist.service`
   Runs `wl-clip-persist --clipboard both`.
+- Hypr-only daemon-stage services are now lifecycle-bound directly to
+  `wayland-wm@start\x2dhyprland.service` via `BindsTo=`/`After=` so they are
+  torn down immediately if the compositor dies unexpectedly.
 
 ## Config layout
 
@@ -166,10 +169,18 @@ Daemon-stage units started by `hypr-daemons.target`:
 - Logout flows should prefer `uwsm stop` over `hyprctl dispatch exit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.
+- `Ctrl+Alt+BackSpace` is reserved as an emergency exit key and runs
+  `uwsm stop` directly.
 - Shared XDG autostart masks for `nm-applet`, `blueman`, and keyring desktop
   entries live in the `wayland-autostart` module.
 - The Hyprland session owns the polkit agent. Keep Noctalia's `polkit-agent`
   plugin disabled to avoid duplicate authentication agents.
+- Selected long-lived GUI launch keybinds use `uwsm app -a ... --` so app
+  scopes and journal entries carry stable names instead of anonymous
+  compositor-child processes.
+- The UWSM session fallback path intentionally keeps a minimal default `PATH`;
+  personal helper directories such as `.iptv/bin`, zinit shims, and GOPATH
+  bins are no longer injected into the desktop session bootstrap.
 - The systemd graph is intentionally split into `bootstrap -> daemons ->
   post-bootstrap` so ordering remains visible in unit files rather than hidden
   in shell scripts.

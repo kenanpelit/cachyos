@@ -1,12 +1,16 @@
 [Unit]
 Description=Blueman applet (Niri)
-After=graphical-session.target niri-bootstrap.service dbus.service
-PartOf=niri-daemons.target graphical-session.target
+BindsTo=wayland-wm@niri\x2dsession.service
+After=graphical-session.target wayland-wm@niri\x2dsession.service niri-bootstrap.service dbus.service
+PartOf=niri-daemons.target graphical-session.target wayland-wm@niri\x2dsession.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 
 [Service]
 Type=simple
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
 Environment=GDK_BACKEND=wayland,x11
 ExecStart=/usr/bin/blueman-applet
 Restart=on-failure
