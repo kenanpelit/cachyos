@@ -1,14 +1,14 @@
 [Unit]
 Description=Polkit authentication agent (polkit-gnome)
-After=graphical-session.target niri-bootstrap.service
+After=graphical-session.target niri-bootstrap.service dbus.service
 PartOf=niri-daemons.target graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 
 [Service]
-ExecCondition=/usr/bin/bash -lc 'backend="$("%h/.local/bin/osc-shell" backend niri 2>/dev/null || osc-shell backend niri 2>/dev/null || echo noctalia)"; [[ "$backend" == "noctalia" ]] && exit 1; pgrep -u "$(id -u)" -f "polkit-gnome-authentication-agent-1" >/dev/null && exit 1 || exit 0'
 ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-Restart=on-failure
+SuccessExitStatus=1
+Restart=on-abnormal
 RestartSec=1
 StandardOutput=journal
 StandardError=journal

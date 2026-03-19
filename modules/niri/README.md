@@ -71,8 +71,8 @@ These services belong to `niri-daemons.target` and normally come up with the
 session once the environment conditions are satisfied:
 
 - `niri-polkit-agent.service`
-  Runs `polkit-gnome-authentication-agent-1` when the selected shell backend is
-  not `noctalia`.
+  Runs `polkit-gnome-authentication-agent-1`. The Niri session now owns the
+  polkit agent directly, independent of the selected shell backend.
 - `niri-nm-applet.service`
   Runs `nm-applet --indicator`.
 - `niri-blueman-applet.service`
