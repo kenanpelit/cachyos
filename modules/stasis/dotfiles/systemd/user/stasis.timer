@@ -3,7 +3,7 @@ Description=Delayed Stasis (Idle Manager)
 PartOf=graphical-session.target
 
 [Timer]
-OnStartupSec=5s
+# Delay relative to the graphical session becoming active, not user-manager start.
 OnActiveSec=5s
 AccuracySec=1s
 Unit=stasis.service

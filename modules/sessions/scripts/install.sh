@@ -2,10 +2,14 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 DOTFILES_DIR="${SCRIPT_DIR}/../dotfiles"
 HYPR_DOTFILES_DIR="${SCRIPT_DIR}/../../hyprland/dotfiles"
 WAYLAND_SESSIONS_DIR="/usr/share/wayland-sessions"
 LOCAL_BIN_DIR="/usr/local/bin"
+
+# shellcheck source=/dev/null
+source "$REPO_ROOT/modules/base/lib/core.sh"
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -68,5 +72,26 @@ install_wrapper "${DOTFILES_DIR}/niri-optimized-session" "niri-optimized-session
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/gnome-optimized-session" "gnome-optimized-session"
+
+if command -v systemctl >/dev/null 2>&1; then
+  user_systemd_dir="$USER_HOME/.config/systemd/user"
+
+  run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
+  run_as_user systemctl --user stop \
+    geoclue-agent.service geoclue-agent.timer \
+    ppp-auto-profile.service ppp-auto-profile.timer >/dev/null 2>&1 || true
+  run_as_user systemctl --user disable \
+    geoclue-agent.service geoclue-agent.timer \
+    ppp-auto-profile.service ppp-auto-profile.timer >/dev/null 2>&1 || true
+  run_as_user rm -f \
+    "$user_systemd_dir/default.target.wants/geoclue-agent.timer" \
+    "$user_systemd_dir/default.target.wants/ppp-auto-profile.service" \
+    "$user_systemd_dir/default.target.wants/ppp-auto-profile.timer" \
+    "$user_systemd_dir/graphical-session.target.wants/geoclue-agent.service" \
+    "$user_systemd_dir/graphical-session.target.wants/geoclue-agent.timer" \
+    "$user_systemd_dir/graphical-session.target.wants/ppp-auto-profile.service" \
+    "$user_systemd_dir/graphical-session.target.wants/ppp-auto-profile.timer" || true
+  run_as_user systemctl --user enable --now geoclue-agent.timer ppp-auto-profile.timer >/dev/null 2>&1 || true
+fi
 
 echo "Session installation complete."

@@ -3,8 +3,7 @@ Description=Delayed Flatpak managed installation
 PartOf=graphical-session.target
 
 [Timer]
-# Açılışın ilk anlarını yormamak için 5 dakika sonra çalıştır
-OnStartupSec=5min
+# Grafik oturum gerçekten açıldıktan 5 dakika sonra tek seferlik başlat.
 OnActiveSec=5min
 AccuracySec=1min
 Unit=flatpak-managed-install.service

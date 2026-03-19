@@ -40,19 +40,4 @@ fi
 
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload >/dev/null 2>&1 || true
-  systemctl --user stop geoclue-agent.service geoclue-agent.timer >/dev/null 2>&1 || true
-  systemctl --user disable geoclue-agent.timer >/dev/null 2>&1 || true
-  rm -f \
-    "$USER_HOME/.config/systemd/user/default.target.wants/geoclue-agent.timer" \
-    "$USER_HOME/.config/systemd/user/graphical-session.target.wants/geoclue-agent.timer"
-  systemctl --user enable --now geoclue-agent.timer >/dev/null 2>&1 || true
-
-  systemctl --user stop ppp-auto-profile.service ppp-auto-profile.timer >/dev/null 2>&1 || true
-  systemctl --user disable ppp-auto-profile.service ppp-auto-profile.timer >/dev/null 2>&1 || true
-  rm -f \
-    "$USER_HOME/.config/systemd/user/default.target.wants/ppp-auto-profile.service" \
-    "$USER_HOME/.config/systemd/user/default.target.wants/ppp-auto-profile.timer" \
-    "$USER_HOME/.config/systemd/user/graphical-session.target.wants/ppp-auto-profile.service" \
-    "$USER_HOME/.config/systemd/user/graphical-session.target.wants/ppp-auto-profile.timer"
-  systemctl --user enable --now ppp-auto-profile.timer >/dev/null 2>&1 || true
 fi

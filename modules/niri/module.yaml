@@ -17,10 +17,6 @@ dotfiles:
   target: ~/.config/autostart/snapper-tools-check.desktop
 - source: dotfiles/environment.d/10-niri-env.conf
   target: ~/.config/environment.d/10-niri-env.conf
-- source: dotfiles/systemd/user/geoclue-agent.service
-  target: ~/.config/systemd/user/geoclue-agent.service
-- source: dotfiles/systemd/user/geoclue-agent.timer
-  target: ~/.config/systemd/user/geoclue-agent.timer
 - source: dotfiles/autostart/geoclue-demo-agent.desktop
   target: ~/.config/autostart/geoclue-demo-agent.desktop
 - source: dotfiles/systemd/user/niri-session.target
@@ -47,9 +43,5 @@ dotfiles:
   target: ~/.config/systemd/user/niri-sticky.service
 - source: dotfiles/systemd/user/niri-niriswitcher.service
   target: ~/.config/systemd/user/niri-niriswitcher.service
-- source: dotfiles/systemd/user/ppp-auto-profile.service
-  target: ~/.config/systemd/user/ppp-auto-profile.service
-- source: dotfiles/systemd/user/ppp-auto-profile.timer
-  target: ~/.config/systemd/user/ppp-auto-profile.timer
 post_install_hook: scripts/ensure-runtime-files.sh
 post_hook_behavior: always

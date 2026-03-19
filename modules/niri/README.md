@@ -84,17 +84,17 @@ session once the environment conditions are satisfied:
 - `niri-niriswitcher.service`
   Runs `niriswitcher`.
 
-## Additional shipped units
+## Shared session timers
 
-The module also ships user units that are enabled independently from the core
-session target chain:
+These delayed timers are now owned by the `sessions` module because they are
+graphical-session-scoped helpers rather than Niri-specific daemons:
 
 - `geoclue-agent.timer`
-  Starts `geoclue-agent.service` 15 seconds after startup and keeps retrying.
+  Starts `geoclue-agent.service` 15 seconds after the graphical session
+  becomes active.
 - `ppp-auto-profile.timer`
-  Starts `ppp-auto-profile.service` from `graphical-session.target` 30 seconds
-  after login and then every 15 seconds. The service itself is now kept
-  session-scoped and bounded with a short startup timeout.
+  Starts `ppp-auto-profile.service` 30 seconds after the graphical session
+  becomes active and then reruns every 15 seconds.
 
 ## Conditions and notes
 

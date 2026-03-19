@@ -98,11 +98,11 @@ skip_automanaged_unit() {
       # should be enabled.
       return 0
       ;;
-    niri:geoclue-agent.service)
+    sessions:geoclue-agent.service)
       # Geoclue is started by its delayed timer, not directly by the service.
       return 0
       ;;
-    niri:ppp-auto-profile.service)
+    sessions:ppp-auto-profile.service)
       # PPP auto-profile is intentionally timer-driven; only the timer should be
       # enabled by the generic synchronizer.
       return 0
