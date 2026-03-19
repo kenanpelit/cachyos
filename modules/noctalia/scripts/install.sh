@@ -7,9 +7,9 @@ source "$REPO_ROOT/modules/base/lib/core.sh"
 
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
-  run_as_user systemctl --user disable noctalia.service >/dev/null 2>&1 || true
-  run_as_user systemctl --user enable noctalia.service >/dev/null 2>&1 || true
-  run_as_user systemctl --user try-restart noctalia.service >/dev/null 2>&1 || true
+  if run_as_user systemctl --user is-active noctalia.service >/dev/null 2>&1; then
+    run_as_user systemctl --user try-restart noctalia.service >/dev/null 2>&1 || true
+  fi
 fi
 
 # Noctalia ships a polkit plugin upstream, but Hyprland/Niri sessions already

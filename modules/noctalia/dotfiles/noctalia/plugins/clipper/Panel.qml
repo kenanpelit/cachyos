@@ -41,7 +41,17 @@ Item {
     readonly property bool allowAttach: true
 
     // Panel dimensions - fullscreen transparent container
-    property real contentPreferredWidth: 1450 * Style.uiScaleRatio
+    property real contentPreferredWidth: (pluginApi?.pluginSettings?.fullscreenMode ?? false)
+        ? (screen?.width ?? 1920)
+        : 1450 * Style.uiScaleRatio
+    property var contentPreferredHeight: (pluginApi?.pluginSettings?.fullscreenMode ?? false)
+        ? (screen?.height ?? 900)
+        : undefined
+
+    // SmartPanel background color - transparent when hidePanelBackground is enabled
+    property color panelBackgroundColor: (pluginApi?.pluginSettings?.hidePanelBackground ?? false)
+        ? "transparent"
+        : ((typeof Color !== "undefined") ? Color.mSurface : "#222222")
 
     // Keyboard navigation
     property int selectedIndex: 0
@@ -132,6 +142,17 @@ Item {
     Item {
         id: mainContainer
         anchors.fill: parent
+
+        // Click-to-close backdrop — only active when panel background is hidden
+        MouseArea {
+            anchors.fill: parent
+            z: -1
+            enabled: pluginApi?.pluginSettings?.hidePanelBackground ?? false
+            onClicked: {
+                if (root.pluginApi)
+                    root.pluginApi.closePanel(screen);
+            }
+        }
 
         NIconButton {
             visible: pluginApi?.mainInstance?.showCloseButton ?? false
@@ -1170,6 +1191,24 @@ Item {
                             root.pluginApi?.mainInstance?.copyToClipboard(clipboardId);
                             if (root.pluginApi) {
                                 root.pluginApi.closePanel(screen);
+                                const autoPaste = root.pluginApi.pluginSettings?.autoPaste ?? false;
+                                const rmbOnly = root.pluginApi.pluginSettings?.autoPasteOnRightClick ?? false;
+                                if (autoPaste && !rmbOnly) {
+                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                }
+                            }
+                        }
+
+                        onRightClicked: {
+                            root.selectedIndex = index;
+                            const autoPaste = root.pluginApi?.pluginSettings?.autoPaste ?? false;
+                            const rmbOnly = root.pluginApi?.pluginSettings?.autoPasteOnRightClick ?? false;
+                            if (autoPaste && rmbOnly) {
+                                root.pluginApi?.mainInstance?.copyToClipboard(clipboardId);
+                                if (root.pluginApi) {
+                                    root.pluginApi.closePanel(screen);
+                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                }
                             }
                         }
 
@@ -1277,6 +1316,23 @@ Item {
                             root.pluginApi?.mainInstance?.copyPinnedToClipboard(modelData.id);
                             if (root.pluginApi) {
                                 root.pluginApi.closePanel(screen);
+                                const autoPaste = root.pluginApi.pluginSettings?.autoPaste ?? false;
+                                const rmbOnly = root.pluginApi.pluginSettings?.autoPasteOnRightClick ?? false;
+                                if (autoPaste && !rmbOnly) {
+                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                }
+                            }
+                        }
+
+                        onRightClicked: {
+                            const autoPaste = root.pluginApi?.pluginSettings?.autoPaste ?? false;
+                            const rmbOnly = root.pluginApi?.pluginSettings?.autoPasteOnRightClick ?? false;
+                            if (autoPaste && rmbOnly) {
+                                root.pluginApi?.mainInstance?.copyPinnedToClipboard(modelData.id);
+                                if (root.pluginApi) {
+                                    root.pluginApi.closePanel(screen);
+                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                }
                             }
                         }
 

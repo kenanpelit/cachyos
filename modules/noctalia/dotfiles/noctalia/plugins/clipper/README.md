@@ -1,6 +1,6 @@
 # Clipper - Advanced Clipboard Manager for Noctalia Shell
 
-**Version 2.0.0** - A powerful clipboard history manager with persistent pinned items, NoteCards sticky notes, and seamless ToDo integration.
+**Version 2.3.0** - A powerful clipboard history manager with persistent pinned items, NoteCards sticky notes, seamless ToDo integration and auto-paste.
 
 ![Clipboard Preview](Assets/clipboard-preview.png)
 
@@ -45,6 +45,12 @@ Seamless integration with Noctalia ToDo plugin:
 - **Three Color Properties**: Background, Separator, Foreground (text/icons)
 - **Live Preview**: See changes instantly in settings panel
 - **Reset to Defaults**: One-click restore to default theme
+
+- ### ⚡ Auto-Paste
+- **Toggle in Settings → Auto-Paste**: After selecting a clipboard item, content is automatically pasted into the focused window
+- **Right-Click Only mode**: Left-click copies normally; right-click copies and pastes
+- **Paste Delay slider**: Tune the delay (100–1000 ms) for compositor focus timing
+- Requires `wtype` (`sudo pacman -S wtype`); settings show a warning when not installed
 
 ## 🎬 Video Demonstrations
 

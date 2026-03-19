@@ -60,7 +60,6 @@ if command -v systemctl >/dev/null 2>&1; then
     "$legacy_graphical_wants/sunsetr.service" \
     "$legacy_graphical_wants/sunsetr-auto-profile.timer"
 
-  run_as_user systemctl --user disable sunsetr.service sunsetr-auto-profile.timer >/dev/null 2>&1 || true
   if [[ -f "$wrapper_path" ]]; then
     run_as_user systemctl --user enable "$wrapper_path" >/dev/null 2>&1 || true
   fi

@@ -12,6 +12,9 @@ Item {
   // Panel settings control
   property bool showCloseButton: false
 
+  // Auto-paste support
+  property bool wtypeAvailable: false
+
   // Watch for pluginApi changes and initialize settings
   onPluginApiChanged: {
     if (pluginApi) {
@@ -1176,11 +1179,53 @@ Item {
                 }
               }
   }
+  // Check if wtype is available
+  Process {
+    id: wtypeCheckProc
+    command: ["which", "wtype"]
+    running: true
+    stdout: StdioCollector {}
+    stderr: StdioCollector {}
+    onExited: exitCode => {
+      root.wtypeAvailable = (exitCode === 0);
+    }
+  }
+
+  // Timer for auto-paste delay
+  Timer {
+    id: autoPasteTimer
+    interval: pluginApi?.pluginSettings?.autoPasteDelay ?? 300
+    repeat: false
+    onTriggered: {
+      if (root.wtypeAvailable) {
+        autoPasteProc.running = true;
+      } else {
+        Logger.w("Clipper", "Auto-paste failed: wtype not found. Install with: sudo pacman -S wtype");
+      }
+    }
+  }
+
+  // Process to trigger auto-paste via wtype Ctrl+V
+  Process {
+    id: autoPasteProc
+    command: ["wtype", "-M", "ctrl", "-M", "shift", "v"]
+    running: false
+    onExited: exitCode => {
+      if (exitCode !== 0) {
+        Logger.w("Clipper", "wtype auto-paste exited with code: " + exitCode);
+      }
+    }
+  }
+
+  // Public function called from Panel.qml
+  function triggerAutoPaste() {
+    autoPasteTimer.restart();
+  }
+
   // Initialize pinned.json and notecards.json if they don't exist
   Component.onCompleted: {
-    console.log("Main.qml Component.onCompleted - pluginApi:", pluginApi);
+    Logger.d("Clipper", "Component.onCompleted - pluginApi initialized");
     if (pluginApi) {
-      console.log("Main.qml: pluginSettings in onCompleted:", pluginApi.pluginSettings);
       showCloseButton = pluginApi.pluginSettings?.showCloseButton ?? false;
     }
 
@@ -1226,6 +1271,10 @@ Item {
       wipeProc.terminate();
     if (loadNoteCardsProc.running)
       loadNoteCardsProc.terminate();
+
+    autoPasteTimer.stop();
+    if (autoPasteProc.running) autoPasteProc.terminate();
+    if (wtypeCheckProc.running) wtypeCheckProc.terminate();
 
     // Clear data structures
     pinnedItems = [];

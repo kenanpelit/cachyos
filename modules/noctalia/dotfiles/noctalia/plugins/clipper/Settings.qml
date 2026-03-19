@@ -15,6 +15,11 @@ ColumnLayout {
   property bool valuePincardsEnabled: pluginApi?.pluginSettings?.pincardsEnabled ?? true
   property bool valueNotecardsEnabled: pluginApi?.pluginSettings?.notecardsEnabled ?? true
   property bool valueShowCloseButton: pluginApi?.pluginSettings?.showCloseButton ?? false
+  property bool valueFullscreenMode: pluginApi?.pluginSettings?.fullscreenMode ?? false
+  property bool valueHidePanelBackground: pluginApi?.pluginSettings?.hidePanelBackground ?? false
+  property bool valueAutoPaste: pluginApi?.pluginSettings?.autoPaste ?? false
+  property bool valueAutoPasteOnRightClick: pluginApi?.pluginSettings?.autoPasteOnRightClick ?? false
+  property int valueAutoPasteDelay: pluginApi?.pluginSettings?.autoPasteDelay ?? 300
   property var pendingCardColors: JSON.parse(JSON.stringify(defaultCardColors))
   property var pendingCustomColors: {
     "Text": {
@@ -375,6 +380,21 @@ ColumnLayout {
         font.pointSize: Style.fontSizeL
       }
 
+      // Fullscreen Mode Toggle
+      NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.fullscreen-mode") || "Fullscreen Mode"
+          description: pluginApi?.tr("settings.fullscreen-mode-desc") || "Expand the clipboard panel to fill the entire screen"
+          checked: root.valueFullscreenMode
+          onToggled: checked => {
+              root.valueFullscreenMode = checked;
+          }
+      }
+
+      NDivider {
+          Layout.fillWidth: true
+      }
+
       // PinCards Enable Toggle
       NToggle {
         Layout.fillWidth: true
@@ -484,6 +504,95 @@ ColumnLayout {
           if (pluginApi?.mainInstance) {
             pluginApi.mainInstance.clearAllNoteCards();
           }
+        }
+      }
+
+      NDivider {
+        Layout.fillWidth: true
+      }
+
+      // Hide Panel Background Toggle
+      NToggle {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.hide-panel-background") || "Hide Panel Background"
+        description: pluginApi?.tr("settings.hide-panel-background-desc") || "Remove background from panel containers. Note: Pin Cards and Note Cards work best with background enabled."
+        checked: root.valueHidePanelBackground
+        onToggled: checked => {
+            root.valueHidePanelBackground = checked;
+        }
+      }
+
+      NDivider {
+        Layout.fillWidth: true
+      }
+
+      // ===== AUTO-PASTE SECTION =====
+      NText {
+        text: pluginApi?.tr("settings.auto-paste-section") || "Auto-Paste"
+        font.bold: true
+        font.pointSize: Style.fontSizeL
+      }
+
+      // Auto-Paste Toggle
+      NToggle {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.auto-paste") || "Auto-Paste on Click"
+        description: pluginApi?.tr("settings.auto-paste-desc") || "Automatically paste clipboard item into focused window after selecting"
+        checked: root.valueAutoPaste
+        onToggled: checked => {
+          root.valueAutoPaste = checked;
+        }
+      }
+
+      // Warning: wtype not installed (visible only when autoPaste=true and wtype unavailable)
+      Rectangle {
+        visible: root.valueAutoPaste && !(pluginApi?.mainInstance?.wtypeAvailable ?? false)
+        Layout.fillWidth: true
+        Layout.preferredHeight: warningText.implicitHeight + Style.marginM * 2
+        color: (typeof Color !== "undefined") ? Qt.rgba(Color.mError.r, Color.mError.g, Color.mError.b, 0.15) : "#33CC0000"
+        radius: Style.radiusS
+        border.width: 1
+        border.color: (typeof Color !== "undefined") ? Color.mError : "#CC0000"
+
+        NText {
+          id: warningText
+          anchors.fill: parent
+          anchors.margins: Style.marginM
+          text: pluginApi?.tr("settings.auto-paste-warning") || "wtype is required for auto-paste.\nInstall with: sudo pacman -S wtype"
+          wrapMode: Text.Wrap
+          color: (typeof Color !== "undefined") ? Color.mError : "#CC0000"
+          font.pointSize: Style.fontSizeS
+        }
+      }
+
+      // RMB Only Toggle (visible only when autoPaste=true)
+      NToggle {
+        visible: root.valueAutoPaste
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.auto-paste-rmb") || "Right-Click Only"
+        description: pluginApi?.tr("settings.auto-paste-rmb-desc") || "Use right-click for auto-paste; left-click copies to clipboard without pasting"
+        checked: root.valueAutoPasteOnRightClick
+        onToggled: checked => {
+          root.valueAutoPasteOnRightClick = checked;
+        }
+      }
+
+      // Paste Delay Row (visible only when autoPaste=true)
+      ColumnLayout {
+        visible: root.valueAutoPaste
+        Layout.fillWidth: true
+        spacing: Style.marginS
+
+        NValueSlider {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.auto-paste-delay") || "Paste Delay (ms)"
+          description: pluginApi?.tr("settings.auto-paste-delay-desc") || "Delay before pasting (ms). Increase if focus follows cursor is enabled in your compositor."
+          from: 100
+          to: 1000
+          stepSize: 50
+          value: root.valueAutoPasteDelay
+          text: root.valueAutoPasteDelay + " ms"
+          onMoved: value => { root.valueAutoPasteDelay = Math.round(value); }
         }
       }
 
@@ -772,6 +881,11 @@ ColumnLayout {
     pluginApi.pluginSettings.pincardsEnabled = root.valuePincardsEnabled;
     pluginApi.pluginSettings.notecardsEnabled = root.valueNotecardsEnabled;
     pluginApi.pluginSettings.showCloseButton = root.valueShowCloseButton;
+    pluginApi.pluginSettings.fullscreenMode = root.valueFullscreenMode;
+    pluginApi.pluginSettings.hidePanelBackground = root.valueHidePanelBackground;
+    pluginApi.pluginSettings.autoPaste = root.valueAutoPaste;
+    pluginApi.pluginSettings.autoPasteOnRightClick = root.valueAutoPasteOnRightClick;
+    pluginApi.pluginSettings.autoPasteDelay = root.valueAutoPasteDelay;
     pluginApi.pluginSettings.cardColors = JSON.parse(JSON.stringify(root.pendingCardColors));
     pluginApi.pluginSettings.customColors = JSON.parse(JSON.stringify(root.pendingCustomColors));
 

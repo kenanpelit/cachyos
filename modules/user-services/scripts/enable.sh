@@ -147,10 +147,48 @@ unit_install_entries() {
   done < "$unit_file"
 }
 
+unit_has_install_directives() {
+  local unit_file="$1"
+  local line in_install=false
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      "[Install]")
+        in_install=true
+        continue
+        ;;
+      \[*\])
+        $in_install && break
+        ;;
+    esac
+
+    $in_install || continue
+    [[ -n "${line//[[:space:]]/}" ]] || continue
+    [[ "${line#\#}" == "$line" ]] || continue
+    return 0
+  done < "$unit_file"
+
+  return 1
+}
+
+unit_file_is_linked() {
+  local unit_file="$1"
+  local unit_name="$2"
+  local user_home="${USER_HOME:-$HOME}"
+  local linked_path="${user_home}/.config/systemd/user/${unit_name}"
+  local linked_target unit_target
+
+  [[ -L "$linked_path" ]] || return 1
+  linked_target="$(readlink -f "$linked_path" 2>/dev/null || true)"
+  unit_target="$(readlink -f "$unit_file" 2>/dev/null || true)"
+  [[ -n "$linked_target" && -n "$unit_target" && "$linked_target" == "$unit_target" ]]
+}
+
 unit_links_need_resync() {
   local unit_file="$1"
   local unit_name="$2"
-  local systemd_user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+  local user_home="${USER_HOME:-$HOME}"
+  local systemd_user_dir="${user_home}/.config/systemd/user"
   local entry rel target
   local -A wanted=()
   local -A required=()
@@ -224,28 +262,38 @@ sync_user_units() {
       fi
       
       if is_module_enabled "$module_name"; then
-        # Check if already enabled to minimize noise while still re-syncing
-        # stale target.wants links after [Install] metadata changes.
-        if run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
-          if unit_links_need_resync "$unit_file" "$unit_name"; then
-            if run_as_user systemctl --user reenable "$unit_file" >/dev/null 2>&1; then
-              echo "  -> Re-enabled $unit_name ($module_name)"
+        if unit_has_install_directives "$unit_file"; then
+          # Check if already enabled to minimize noise while still re-syncing
+          # stale target.wants links after [Install] metadata changes.
+          if run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
+            if unit_links_need_resync "$unit_file" "$unit_name"; then
+              if run_as_user systemctl --user reenable "$unit_file" >/dev/null 2>&1; then
+                echo "  -> Re-enabled $unit_name ($module_name)"
+              else
+                log_warn "Failed to re-enable $unit_name"
+              fi
+            fi
+          else
+            # Enable using the ABSOLUTE path in the repository
+            # This ensures Systemd can find it even before dcli links it.
+            if run_as_user systemctl --user enable "$unit_file" >/dev/null 2>&1; then
+              echo "  -> Enabled $unit_name ($module_name)"
             else
-              log_warn "Failed to re-enable $unit_name"
+              log_warn "Failed to enable $unit_name"
             fi
           fi
-        else
-          # Enable using the ABSOLUTE path in the repository
-          # This ensures Systemd can find it even before dcli links it.
-          if run_as_user systemctl --user enable "$unit_file" >/dev/null 2>&1; then
-            echo "  -> Enabled $unit_name ($module_name)"
+        elif ! unit_file_is_linked "$unit_file" "$unit_name"; then
+          # Units without [Install] only need a stable link so systemd can
+          # load them before the dotfiles pass runs.
+          if run_as_user systemctl --user link "$unit_file" >/dev/null 2>&1; then
+            echo "  -> Linked $unit_name ($module_name)"
           else
-            log_warn "Failed to enable $unit_name"
+            log_warn "Failed to link $unit_name"
           fi
         fi
       else
         # Automatically disable and stop units from inactive modules
-        if run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
+        if unit_has_install_directives "$unit_file" && run_as_user systemctl --user is-enabled "$unit_name" >/dev/null 2>&1; then
           run_as_user systemctl --user disable --now "$unit_name" >/dev/null 2>&1 || true
           log_warn "Disabled $unit_name (module '$module_name' is inactive)"
         fi

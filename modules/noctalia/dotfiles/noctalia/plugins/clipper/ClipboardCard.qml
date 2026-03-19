@@ -127,6 +127,7 @@ Rectangle {
     signal deleteClicked
     signal addToTodoClicked
     signal pinClicked
+    signal rightClicked
     property bool selected: false
     property bool enableTodoIntegration: false
     property bool isPinned: false
@@ -316,7 +317,14 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 z: -1
-                onClicked: root.clicked()
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: mouse => {
+                    if (mouse.button === Qt.RightButton) {
+                        root.rightClicked()
+                    } else {
+                        root.clicked()
+                    }
+                }
             }
         }
 
@@ -350,7 +358,14 @@ Rectangle {
                 id: mouseArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: root.clicked()
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: mouse => {
+                    if (mouse.button === Qt.RightButton) {
+                        root.rightClicked()
+                    } else {
+                        root.clicked()
+                    }
+                }
             }
 
             Rectangle {
