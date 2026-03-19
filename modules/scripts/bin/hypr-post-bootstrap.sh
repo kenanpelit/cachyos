@@ -53,6 +53,10 @@ main() {
     warn "hyprctl not found; skipping cursor sync"
   fi
 
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -t 1800 "Hyprland" "Session ready" >/dev/null 2>&1 || true
+  fi
+
   log "hypr-post-bootstrap completed."
 }
 
