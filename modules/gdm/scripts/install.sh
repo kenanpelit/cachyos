@@ -28,11 +28,13 @@ disable_unit_if_exists() {
 echo "==> GDM display manager setup"
 
 # Keep only one display manager enabled.
+disable_unit_if_exists lidm.service
 disable_unit_if_exists greetd.service
 disable_unit_if_exists sddm.service
 disable_unit_if_exists lightdm.service
 disable_unit_if_exists lxdm.service
 disable_unit_if_exists ly.service
+disable_unit_if_exists emptty.service
 
 if ! run_root systemctl list-unit-files gdm.service >/dev/null 2>&1; then
   echo "gdm.service not found. Install package 'gdm' first." >&2
@@ -45,7 +47,7 @@ run_root systemctl enable gdm.service >/dev/null 2>&1 || run_root systemctl enab
 
 echo "Done."
 echo "Enabled: gdm.service"
-echo "Disabled (if present): greetd, sddm, lightdm, lxdm, ly"
+echo "Disabled (if present): lidm, greetd, sddm, lightdm, lxdm, ly, emptty"
 echo "Wayland session entries and wrappers are owned by the sessions module."
 echo
 echo "Apply now or reboot:"

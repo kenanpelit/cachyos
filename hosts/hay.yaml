@@ -55,7 +55,7 @@ enabled_modules:
 - dms
 - noctalia
 # - dms-greeter
-- lidm
+- gdm
 - fusuma
 - bt
 - connect
