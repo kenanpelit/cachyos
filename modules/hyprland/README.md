@@ -122,6 +122,12 @@ Daemon-stage units started by `hypr-daemons.target`:
   palette plus the visual assignments for borders, blur, shadow, opacity,
   groupbars, compositor background, workspace chrome exceptions, and Hyprland
   theme string values used by binds.
+- `dotfiles/hypr/conf.d/40-rules.conf`
+  Window behavior and app-placement policy. Pure numbered workspace placement
+  rules are now centralized in a dedicated anonymous `windowrule = ...`
+  section using the current Hyprland syntax, while mixed float/size/dialog
+  rules remain named blocks so they can still be inspected and toggled
+  individually.
 - `dotfiles/environment.d/10-hyprland.conf`
   Generated session environment file derived from `theme/theme.env` plus the
   Hyprland-specific session defaults. Session identity such as
@@ -186,3 +192,8 @@ Daemon-stage units started by `hypr-daemons.target`:
   in shell scripts.
 - The monitor routing file is intentionally host-specific; this module no
   longer claims to be a portable multi-host monitor profile.
+- Persistent workspace ownership stays in `70-monitors.conf`; `40-rules.conf`
+  only handles per-application placement. The module intentionally does not
+  translate app placement into `workspace = ..., on-created-empty:...` rules,
+  because that would couple app launch behavior to persistent workspace
+  creation and can auto-spawn apps during session startup.
