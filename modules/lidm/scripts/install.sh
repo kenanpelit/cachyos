@@ -25,28 +25,29 @@ disable_unit_if_exists() {
   fi
 }
 
-echo "==> GDM display manager setup"
+echo "==> LiDM display manager setup"
 
-# Keep only one display manager enabled.
+disable_unit_if_exists gdm.service
 disable_unit_if_exists greetd.service
 disable_unit_if_exists sddm.service
 disable_unit_if_exists lightdm.service
 disable_unit_if_exists lxdm.service
 disable_unit_if_exists ly.service
+disable_unit_if_exists emptty.service
 
-if ! run_root systemctl list-unit-files gdm.service >/dev/null 2>&1; then
-  echo "gdm.service not found. Install package 'gdm' first." >&2
+if ! run_root systemctl list-unit-files lidm.service >/dev/null 2>&1; then
+  echo "lidm.service not found. Install LiDM and its systemd service package first." >&2
   exit 1
 fi
 
 run_root systemctl daemon-reload
-run_root systemctl unmask gdm.service >/dev/null 2>&1 || true
-run_root systemctl enable gdm.service >/dev/null 2>&1 || run_root systemctl enable --force gdm.service >/dev/null 2>&1
+run_root systemctl unmask lidm.service >/dev/null 2>&1 || true
+run_root systemctl enable lidm.service >/dev/null 2>&1 || run_root systemctl enable --force lidm.service >/dev/null 2>&1
 
 echo "Done."
-echo "Enabled: gdm.service"
-echo "Disabled (if present): greetd, sddm, lightdm, lxdm, ly"
-echo "Wayland session entries and wrappers are owned by the sessions module."
+echo "Enabled: lidm.service"
+echo "Disabled (if present): gdm, greetd, sddm, lightdm, lxdm, ly, emptty"
+echo "Session wrappers and desktop entries are provided by the sessions module."
 echo
 echo "Apply now or reboot:"
-echo "  sudo systemctl start gdm"
+echo "  sudo systemctl start lidm"

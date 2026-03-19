@@ -1,6 +1,6 @@
 tags:
 - tool
-description: GDM display manager + optimized session entries
+description: LiDM display manager for TTY-based UWSM session launch
 depends_on:
 - base
 - sessions

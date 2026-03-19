@@ -1,47 +1,72 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-# This script installs the optimized .desktop files to /usr/share/wayland-sessions/
-# It requires root privileges.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="${SCRIPT_DIR}/../dotfiles"
+HYPR_DOTFILES_DIR="${SCRIPT_DIR}/../../hyprland/dotfiles"
+WAYLAND_SESSIONS_DIR="/usr/share/wayland-sessions"
+LOCAL_BIN_DIR="/usr/local/bin"
 
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
-HYPR_DOTFILES_DIR="$SCRIPT_DIR/../../hyprland/dotfiles"
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+  if ! command -v sudo >/dev/null 2>&1; then
+    echo "sudo is required" >&2
+    exit 1
+  fi
+  SUDO="sudo"
+fi
 
-DEST_DIR="/usr/share/wayland-sessions"
+run_root() {
+  if [ -n "${SUDO}" ]; then
+    "${SUDO}" "$@"
+  else
+    "$@"
+  fi
+}
 
 install_session() {
-    local src="$1"
-    local name="$2"
-    if [ -f "$src" ]; then
-        echo "Installing $name to $DEST_DIR..."
-        sudo mkdir -p "$DEST_DIR"
-        sudo cp "$src" "$DEST_DIR/"
-        sudo chmod 644 "$DEST_DIR/$(basename "$src")"
-    else
-        echo "Warning: $src not found, skipping $name."
-    fi
+  local src="$1"
+  local label="$2"
+  if [ -f "$src" ]; then
+    echo "Installing ${label} to ${WAYLAND_SESSIONS_DIR}..."
+    run_root install -d -m 755 "${WAYLAND_SESSIONS_DIR}"
+    run_root install -m 644 "$src" "${WAYLAND_SESSIONS_DIR}/$(basename "$src")"
+  else
+    echo "Warning: $src not found, skipping ${label}." >&2
+  fi
+}
+
+install_wrapper() {
+  local src="$1"
+  local dst_name="$2"
+  if [ -f "$src" ]; then
+    run_root install -d -m 755 "${LOCAL_BIN_DIR}"
+    run_root install -m 755 "$src" "${LOCAL_BIN_DIR}/${dst_name}"
+  else
+    echo "Warning: wrapper not found: $src" >&2
+  fi
 }
 
 remove_session() {
-    local name="$1"
-    local target="$DEST_DIR/$name"
-    if [ -e "$target" ] || [ -L "$target" ]; then
-        echo "Removing legacy session $target..."
-        sudo rm -f "$target"
-    fi
+  local name="$1"
+  local target="${WAYLAND_SESSIONS_DIR}/${name}"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    echo "Removing legacy session ${target}..."
+    run_root rm -f "$target"
+  fi
 }
 
-# Keep Niri on a single UWSM-owned session entry.
 remove_session "niri.desktop"
 remove_session "niri-optimized.desktop"
-install_session "$DOTFILES_DIR/niri-uwsm.desktop" "Niri (UWSM)"
-
-# Install GNOME
-install_session "$DOTFILES_DIR/gnome-optimized.desktop" "GNOME (Optimized)"
-
-# Keep Hyprland on the single UWSM-backed session entry.
 remove_session "hyprland.desktop"
-install_session "$HYPR_DOTFILES_DIR/hyprland-uwsm.desktop" "Hyprland (UWSM)"
+
+install_session "${DOTFILES_DIR}/niri-uwsm.desktop" "Niri (UWSM)"
+install_session "${DOTFILES_DIR}/gnome-optimized.desktop" "GNOME (Optimized)"
+install_session "${HYPR_DOTFILES_DIR}/hyprland-uwsm.desktop" "Hyprland (UWSM)"
+
+install_wrapper "${DOTFILES_DIR}/niri-optimized-session" "niri-optimized-session"
+install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
+install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
+install_wrapper "${DOTFILES_DIR}/gnome-optimized-session" "gnome-optimized-session"
 
 echo "Session installation complete."

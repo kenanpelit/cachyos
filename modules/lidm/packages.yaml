@@ -1,0 +1,4 @@
+description: LiDM display manager packages
+packages:
+  - lidm-git
+  - lidm-systemd-git

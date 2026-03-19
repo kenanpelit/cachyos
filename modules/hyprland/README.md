@@ -18,16 +18,18 @@ This module owns the Hyprland compositor config, the Hyprland-specific
   plugin mask
 
 This module does not install the system-wide display-manager session entry
-anymore. That belongs to the `gdm` and `sessions` modules.
+anymore. That belongs to the `sessions` module and the selected display-manager
+module.
 
 ## Entry points
 
-- GDM and the `sessions` module now install a single Hyprland session entry:
+- The `sessions` module now installs a single Hyprland session entry:
   `modules/hyprland/dotfiles/hyprland-uwsm.desktop`.
 - That desktop entry launches
-  `modules/gdm/dotfiles/hyprland-uwsm-session`.
+  `modules/sessions/dotfiles/hyprland-uwsm-session`.
 - TTY login now reuses the same UWSM session path via
-  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY2 and GDM both enter
+  `osc-tty-launcher auto-tty` from `~/.zprofile`, so TTY2 and any display
+  manager session entry both enter
   Hyprland through the same wrapper/session identity.
 - The wrapper loads the curated Hyprland environment stack through
   `hypr-session-common` (`10-gtk.conf`, `10-hyprland.conf`, `20-qt.conf`,
@@ -46,7 +48,8 @@ anymore. That belongs to the `gdm` and `sessions` modules.
 
 ## Startup flow
 
-1. GDM starts `hyprland-uwsm-session`.
+1. A display manager session entry or the TTY launcher starts
+   `hyprland-uwsm-session`.
 2. The wrapper loads the curated Hyprland environment stack, applies the
    Hyprland UWSM session identity, and executes `uwsm start -- start-hyprland`
    (or `Hyprland` if `start-hyprland` is unavailable).
@@ -128,7 +131,7 @@ Daemon-stage units started by `hypr-daemons.target`:
   Renderer that regenerates `10-hyprland.conf` and `20-theme.conf` from
   `theme/theme.env`. `render-theme.sh --check` verifies that the generated
   files are still in sync with the manifest.
-- `modules/gdm/dotfiles/hyprland-uwsm-session`
+- `modules/sessions/dotfiles/hyprland-uwsm-session`
   UWSM-first wrapper. Loads the repo-managed `environment.d` stack and then
   enters `uwsm start`.
 - `scripts/install.sh`
