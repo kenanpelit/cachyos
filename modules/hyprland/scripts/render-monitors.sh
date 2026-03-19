@@ -52,6 +52,24 @@ cleanup() {
 }
 trap cleanup EXIT
 
+write_if_changed() {
+  local generated="$1"
+  local current="$2"
+  local current_mode=''
+
+  if [[ -e "$current" ]]; then
+    current_mode="$(stat -c '%a' "$current")"
+  fi
+
+  if cmp -s "$generated" "$current" 2>/dev/null &&
+    [[ -O "$current" ]] &&
+    [[ "$current_mode" == "644" ]]; then
+    return 0
+  fi
+
+  install -m 644 "$generated" "$current"
+}
+
 {
   printf '# Generated from modules/hyprland/monitors/profile.env and monitors/profiles/%s.conf.\n' "${HYPR_MONITOR_PROFILE}"
   printf '# Update the manifest/profile and rerun modules/hyprland/scripts/render-monitors.sh.\n'
@@ -65,4 +83,4 @@ if [[ "${mode}" == "check" ]]; then
   exit 0
 fi
 
-mv "${tmp_out}" "${MONITORS_OUT}"
+write_if_changed "${tmp_out}" "${MONITORS_OUT}"

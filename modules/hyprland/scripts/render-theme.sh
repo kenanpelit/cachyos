@@ -348,8 +348,15 @@ verify_output() {
 write_if_changed() {
   local generated="$1"
   local current="$2"
+  local current_mode=''
 
-  if cmp -s "$generated" "$current" 2>/dev/null; then
+  if [[ -e "$current" ]]; then
+    current_mode="$(stat -c '%a' "$current")"
+  fi
+
+  if cmp -s "$generated" "$current" 2>/dev/null &&
+    [[ -O "$current" ]] &&
+    [[ "$current_mode" == "644" ]]; then
     return 0
   fi
 
