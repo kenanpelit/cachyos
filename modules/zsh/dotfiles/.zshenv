@@ -1,5 +1,6 @@
-# Keep zsh config under XDG.
-export ZDOTDIR="$HOME/.config/zsh"
+# Canonical Zsh environment file.
+# This file is used for both ~/.zshenv and ~/.config/zsh/.zshenv so there is a
+# single source of truth for shell environment setup.
 
 # XDG fallbacks (some systems do not set these)
 : ${XDG_CONFIG_HOME:=$HOME/.config}
@@ -8,8 +9,48 @@ export ZDOTDIR="$HOME/.config/zsh"
 : ${XDG_STATE_HOME:=$HOME/.local/state}
 export XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME XDG_STATE_HOME
 
-# Load the real env config if present
-if [ -f "$ZDOTDIR/.zshenv" ]; then
-  . "$ZDOTDIR/.zshenv"
-fi
+# Keep zsh config under XDG.
+export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
 export DCLI_SOPS_KEY_PATH="$HOME/.config/sops/age/keys.txt"
+
+# Environment variables
+# Only source this once
+if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
+  export __HM_ZSH_SESS_VARS_SOURCED=1
+  case "${BROWSER:-}" in
+    ""|brave|start-brave-kenp|brave-kenp-default)
+      if command -v start-helium-kenp >/dev/null 2>&1; then
+        export BROWSER="start-helium-kenp"
+      elif command -v helium-kenp-default >/dev/null 2>&1; then
+        export BROWSER="helium-kenp-default"
+      elif command -v start-brave-kenp >/dev/null 2>&1; then
+        export BROWSER="start-brave-kenp"
+      elif command -v brave-kenp-default >/dev/null 2>&1; then
+        export BROWSER="brave-kenp-default"
+      else
+        export BROWSER="brave"
+      fi
+      ;;
+  esac
+  export COMPLETION_WAITING_DOTS="true"
+  export EDITOR="nvim"
+  export HISTFILE="${HOME}/.config/zsh/history"
+  export HISTSIZE="200000"
+  export LANG="en_US.UTF-8"
+  export LC_ALL="en_US.UTF-8"
+  export LESS="-R --use-color -Dd+r -Du+b -DS+y -DP+k"
+  export LESSCHARSET="utf-8"
+  export LESSHISTFILE="-"
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  export MANWIDTH="100"
+  export PAGER="less"
+  export SAVEHIST="150000"
+  export TERMINAL="kitty"
+  export VISUAL="nvim"
+  export ZINIT_HOME="${HOME}/.local/share/zsh/zinit/zinit.git"
+  export ZSH_CACHE_DIR="${HOME}/.cache/zsh"
+  export ZSH_COMPDUMP="${HOME}/.cache/zsh/zcompdump-$HOST-$ZSH_VERSION"
+  export ZSH_DATA_DIR="${HOME}/.local/share/zsh"
+  export ZSH_DISABLE_COMPFIX="true"
+  export ZSH_STATE_DIR="${HOME}/.local/state/zsh"
+fi
