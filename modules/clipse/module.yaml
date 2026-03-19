@@ -7,5 +7,7 @@ depends_on:
 dotfiles:
 - source: dotfiles/clipse/custom_theme.json
   target: ~/.config/clipse/custom_theme.json
+- source: dotfiles/systemd/user/clipse.service
+  target: ~/.config/systemd/user/clipse.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

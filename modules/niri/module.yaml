@@ -35,8 +35,6 @@ dotfiles:
   target: ~/.config/systemd/user/niri-nm-applet.service
 - source: dotfiles/systemd/user/niri-blueman-applet.service
   target: ~/.config/systemd/user/niri-blueman-applet.service
-- source: dotfiles/systemd/user/niri-clipse.service
-  target: ~/.config/systemd/user/niri-clipse.service
 - source: dotfiles/systemd/user/niri-status-notifier-ready.service
   target: ~/.config/systemd/user/niri-status-notifier-ready.service
 - source: dotfiles/systemd/user/niri-snapper-tools-check.service

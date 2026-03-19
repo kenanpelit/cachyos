@@ -83,9 +83,6 @@ session once the environment conditions are satisfied:
   Runs `nm-applet --indicator`.
 - `niri-blueman-applet.service`
   Runs `blueman-applet` after the explicit status-notifier readiness gate.
-- `niri-clipse.service`
-  Runs `clipse -listen` under `systemd --user` instead of the compositor
-  process tree.
 - `niri-sunsetr.service`
   Starts `sunsetr.service` and `sunsetr-auto-profile.timer` on demand from the
   Niri post-daemons stage instead of binding those units directly into the
@@ -99,6 +96,10 @@ session once the environment conditions are satisfied:
 - Niri-only daemon-stage services are now lifecycle-bound directly to
   `wayland-wm@niri\x2dsession.service` via `BindsTo=`/`After=` so they stop
   immediately if the compositor dies unexpectedly.
+
+The shared `clipse.service` now belongs to the standalone `clipse` module and
+is bound to `graphical-session.target`, so both Niri and Hyprland reuse the
+same clipboard listener unit.
 
 ## Shared session timers
 

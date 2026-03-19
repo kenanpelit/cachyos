@@ -1,0 +1,22 @@
+[Unit]
+Description=Clipse clipboard listener
+After=graphical-session.target dbus.service
+BindsTo=graphical-session.target
+PartOf=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionPathExists=/usr/bin/clipse
+ConditionPathExists=/usr/bin/wl-paste
+
+[Service]
+Type=simple
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+ExecStart=/usr/bin/wl-paste --watch /usr/bin/clipse -wl-store
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical-session.target
