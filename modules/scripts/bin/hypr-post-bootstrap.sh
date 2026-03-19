@@ -20,18 +20,6 @@ warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
 
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
-queue_dconf_sync() {
-  command -v gsettings >/dev/null 2>&1 || return 0
-
-  (
-    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' >/dev/null 2>&1 || true
-    gsettings set org.gnome.desktop.interface gtk-theme "${GTK_THEME:-catppuccin-mocha-mauve-standard+default}" >/dev/null 2>&1 || true
-    gsettings set org.gnome.desktop.interface icon-theme "${XDG_ICON_THEME:-${ICON_THEME:-kora}}" >/dev/null 2>&1 || true
-    gsettings set org.gnome.desktop.interface cursor-theme "${XCURSOR_THEME:-capitaine-cursors}" >/dev/null 2>&1 || true
-  ) &
-  disown || true
-}
-
 ensure_hypr_env() {
   hypr_ensure_runtime_dir
   hypr_detect_instance_signature
@@ -54,7 +42,6 @@ run_if_present() {
 
 main() {
   ensure_hypr_env || true
-  queue_dconf_sync
 
   if command -v hyprctl >/dev/null 2>&1; then
     if hyprctl setcursor "${XCURSOR_THEME:-capitaine-cursors}" "${XCURSOR_SIZE:-24}" >/dev/null 2>&1; then

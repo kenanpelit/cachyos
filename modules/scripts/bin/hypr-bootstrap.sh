@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: hypr-bootstrap
-# Description: Early Hyprland bootstrap for monitor/workspace normalization and
-#              audio defaults.
+# Description: Early Hyprland bootstrap for monitor/workspace normalization.
 # Usage: hypr-bootstrap
 # ==============================================================================
 
@@ -63,7 +62,7 @@ main() {
     warn "HYPRLAND_INSTANCE_SIGNATURE is unset; continuing anyway"
   fi
 
-  run_if_present hypr-osc switch --no-notify
+  run_if_present hypr-session-route --no-notify
 
   log "hypr-bootstrap completed."
 }

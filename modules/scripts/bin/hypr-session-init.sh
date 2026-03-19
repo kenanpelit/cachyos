@@ -76,7 +76,10 @@ ensure_uwsm_runtime_environment() {
 
 start_session_target() {
   command -v systemctl >/dev/null 2>&1 || return 0
-  systemctl --user start --no-block hyprland-session.target >/dev/null 2>&1 || true
+  if ! systemctl --user start --no-block hyprland-session.target >/dev/null 2>&1; then
+    log_warn "failed to start hyprland-session.target"
+    return 1
+  fi
 }
 
 main() {
@@ -102,7 +105,7 @@ main() {
   fi
 
   if [[ "$start_target" == "true" ]]; then
-    start_session_target
+    start_session_target || true
   fi
 }
 

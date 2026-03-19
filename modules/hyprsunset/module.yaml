@@ -5,6 +5,8 @@ description: Hyprsunset blue-light and gamma filter
 depends_on:
 - base
 - hyprland
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
 dotfiles:
 - source: dotfiles/hypr/hyprsunset.conf
   target: ~/.config/hypr/hyprsunset.conf

@@ -179,16 +179,23 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-blueman-applet`
-**Description:** No description provided.
+**Description:** Blueman imports some X11-only plugins before honoring plugin-list, which
 
 **Usage:** `hypr-blueman-applet`
 
 ---
 
 ### 📂 `hypr-bootstrap`
-**Description:** Early Hyprland bootstrap for monitor/workspace normalization and
+**Description:** Early Hyprland bootstrap for monitor/workspace normalization.
 
 **Usage:** `hypr-bootstrap`
+
+---
+
+### 📂 `hypr-desktop-settings`
+**Description:** Apply desktop theme settings after the shell/tray stage is up.
+
+**Usage:** `hypr-desktop-settings`
 
 ---
 
@@ -231,6 +238,20 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Start hyprland-session.target from inside the compositor.
 
 **Usage:** `hypr-session-init [--no-start-target]`
+
+---
+
+### 📂 `hypr-session-route`
+**Description:** Dedicated monitor/workspace routing helper for Hyprland session bootstrap.
+
+**Usage:** `hypr-session-route`
+
+---
+
+### 📂 `hypr-status-notifier-ready`
+**Description:** Wait for a session StatusNotifierWatcher before tray applets start.
+
+**Usage:** `hypr-status-notifier-ready`
 
 ---
 
@@ -409,13 +430,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `osc-mullvad`
-**Description:** Integrated Mullvad VPN Manager for connection and relay control.
-
-**Usage:** `osc-mullvad.sh [COMMAND] [ARGUMENTS]`
-
----
-
 ### 📂 `osc-mullvad-slot`
 **Description:** Shortcut wrapper for Mullvad slot recycle.
 
@@ -427,6 +441,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Toggles Mullvad VPN connection, optionally with Blocky DNS coupling.
 
 **Usage:** `osc-mullvad-toggle.sh [--no-blocky] [--dry-run] [--no-notify]`
+
+---
+
+### 📂 `osc-mullvad`
+**Description:** Integrated Mullvad VPN Manager for connection and relay control.
+
+**Usage:** `osc-mullvad.sh [COMMAND] [ARGUMENTS]`
 
 ---
 
@@ -444,17 +465,17 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `osc-pass`
-**Description:** Multi-store `pass(1)` wrapper with built-in stores, interactive selection, audit, migrate, and git backup helpers.
-
-**Usage:** `osc-pass.sh [stores|current|path|mkdir|init|env|audit|migrate|select] [args]`
-
----
-
 ### 📂 `osc-pass-tool`
 **Description:** Import and export passwords for the pass password manager.
 
 **Usage:** `osc-pass-tool.sh [import|export] [filename]`
+
+---
+
+### 📂 `osc-pass`
+**Description:** Multi-store `pass(1)` wrapper with built-in stores, interactive selection, audit, migrate, and git backup helpers.
+
+**Usage:** `osc-pass.sh [stores|current|path|mkdir|init|env|audit|migrate|select] [args]`
 
 ---
 
@@ -633,17 +654,17 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `powerprofilesctl-toggle`
-**Description:** Backward-compatible wrapper for power-profile toggle
-
-**Usage:** `powerprofilesctl-toggle.sh`
-
----
-
 ### 📂 `power-profile`
 **Description:** Power profile helper for powerprofilesctl with lock integration
 
 **Usage:** `power-profile.sh [toggle|set <profile>]`
+
+---
+
+### 📂 `powerprofilesctl-toggle`
+**Description:** Backward-compatible wrapper for power-profile toggle
+
+**Usage:** `powerprofilesctl-toggle.sh`
 
 ---
 
@@ -787,17 +808,17 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `svmnil2`
-**Description:** Simple QEMU/KVM VM manager for CachyOS
-
-**Usage:** `svmnil2.sh [install|start|stop|status|connect|console|reset] [options]`
-
----
-
 ### 📂 `svmnil`
 **Description:** SVM (Simple VM) profile for CachyOS using QEMU/KVM
 
 **Usage:** `svmcachy.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `svmnil2`
+**Description:** Simple QEMU/KVM VM manager for CachyOS
+
+**Usage:** `svmnil2.sh [install|start|stop|status|connect|console|reset] [options]`
 
 ---
 
@@ -871,17 +892,17 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `vmarch`
-**Description:** Linux VM Manager - Manages QEMU/KVM based Linux virtual machines (Arch focus)
-
-**Usage:** `vmarch.sh [OPTIONS]`
-
----
-
 ### 📂 `vm-start`
 **Description:** Basit libvirt VM başlatıcı (win10 VM’ini başlatır)
 
 **Usage:** `vm-start.sh`
+
+---
+
+### 📂 `vmarch`
+**Description:** Linux VM Manager - Manages QEMU/KVM based Linux virtual machines (Arch focus)
+
+**Usage:** `vmarch.sh [OPTIONS]`
 
 ---
 

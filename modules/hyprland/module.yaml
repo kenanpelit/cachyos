@@ -13,6 +13,8 @@ dotfiles:
   target: ~/.config/hypr/hyprland.conf
 - source: dotfiles/environment.d/10-hyprland.conf
   target: ~/.config/environment.d/10-hyprland.conf
+- source: dotfiles/environment.d/hyprland-session.envlist
+  target: ~/.config/environment.d/hyprland-session.envlist
 - source: dotfiles/autostart/gnome-keyring-pkcs11.desktop
   target: ~/.config/autostart/gnome-keyring-pkcs11.desktop
 - source: dotfiles/hypr/conf.d/10-core.conf
@@ -25,6 +27,10 @@ dotfiles:
   target: ~/.config/hypr/conf.d/40-rules.conf
 - source: dotfiles/hypr/conf.d/50-binds.conf
   target: ~/.config/hypr/conf.d/50-binds.conf
+- source: dotfiles/hypr/conf.d/rules
+  target: ~/.config/hypr/conf.d/rules
+- source: dotfiles/hypr/conf.d/binds
+  target: ~/.config/hypr/conf.d/binds
 - source: dotfiles/hypr/conf.d/60-submaps.conf
   target: ~/.config/hypr/conf.d/60-submaps.conf
 - source: dotfiles/hypr/conf.d/70-monitors.conf
@@ -49,8 +55,12 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-audio-init.service
 - source: dotfiles/systemd/user/hypr-daemons.target
   target: ~/.config/systemd/user/hypr-daemons.target
+- source: dotfiles/systemd/user/hypr-desktop-settings.service
+  target: ~/.config/systemd/user/hypr-desktop-settings.service
 - source: dotfiles/systemd/user/hypr-post-bootstrap.service
   target: ~/.config/systemd/user/hypr-post-bootstrap.service
+- source: dotfiles/systemd/user/hypr-status-notifier-ready.service
+  target: ~/.config/systemd/user/hypr-status-notifier-ready.service
 - source: dotfiles/systemd/user/xdg-desktop-portal-gnome.service.d/10-hyprland.conf
   target: ~/.config/systemd/user/xdg-desktop-portal-gnome.service.d/10-hyprland.conf
 - source: dotfiles/systemd/user/xdg-desktop-portal-gtk.service.d/10-hyprland.conf

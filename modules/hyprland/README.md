@@ -8,9 +8,10 @@ This module owns the Hyprland compositor config, the Hyprland-specific
 
 - install the Hyprland config split under `~/.config/hypr`
 - install the canonical Hypr session environment file
+- install the ordered Hypr session env allowlist manifest
 - make the Hyprland UWSM wrapper consume the curated repo-managed
   environment stack before the compositor starts
-- install the managed monitor/workspace mapping for this host
+- render the managed monitor/workspace mapping from a selected monitor profile
 - define the Hyprland session targets and services under `~/.config/systemd/user`
 - run a post-install hook that renders theme files, removes the
   Hyprland-only keyring override, re-enables the stock GDM/PAM-managed
@@ -32,8 +33,8 @@ module.
   manager session entry both enter
   Hyprland through the same wrapper/session identity.
 - The wrapper loads the curated Hyprland environment stack through
-  `hypr-session-common` (`10-gtk.conf`, `10-hyprland.conf`, `20-qt.conf`,
-  `30-ollama.conf`, and `99-dms-icons.conf` when present), normalizes path
+  `hypr-session-common` plus the ordered allowlist manifest at
+  `~/.config/environment.d/hyprland-session.envlist`, normalizes path
   variables, applies the Hyprland session identity
   (`DESKTOP_SESSION=hyprland-uwsm`, `XDG_CURRENT_DESKTOP=Hyprland`), and then
   hands off to `uwsm start`.
@@ -66,8 +67,9 @@ module.
    path.
 6. `hyprland-session.target` pulls in:
    `graphical-session.target`, `xdg-desktop-autostart.target`,
-   `hypr-bootstrap.service`, `hypr-audio-init.service`, and
-   `hypr-daemons.target`.
+   `hypr-bootstrap.service`, `hypr-audio-init.service`,
+   `hypr-daemons.target`, `hypr-desktop-settings.service`, and
+   `hypr-post-bootstrap.service`.
 7. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
    oneshot stage.
 8. `hypr-audio-init.service` runs `osc-soundctl init` as a separate
@@ -75,8 +77,10 @@ module.
    audio setup.
 9. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
    long-running Hypr helpers.
-10. `hypr-post-bootstrap.service` is started by `hyprland-session.target` and
-    runs after the daemon stage, performing final cursor and session polish.
+10. `hypr-desktop-settings.service` runs after the daemon stage and applies the
+    dconf/GSettings desktop theme sync as a tracked oneshot.
+11. `hypr-post-bootstrap.service` then runs after the daemon and desktop
+    settings stages, performing final cursor polish.
 
 ## Session graph
 
@@ -85,17 +89,23 @@ Core session units:
 - `hyprland-session.target`
   Session umbrella target started by `hypr-session-init`.
 - `hypr-bootstrap.service`
-  Early oneshot bootstrap. Runs `hypr-osc switch --no-notify`.
+  Early oneshot bootstrap. Runs `hypr-session-route --no-notify`.
 - `hypr-audio-init.service`
   Separate oneshot audio initialization. Runs `osc-soundctl init` after the
   bootstrap stage.
 - `hypr-daemons.target`
   Explicit daemon stage. It now declares the core Hyprland services it wants.
+- `hypr-status-notifier-ready.service`
+  Shell-neutral readiness gate that waits for `org.kde.StatusNotifierWatcher`
+  before tray applets such as Blueman start.
+- `hypr-desktop-settings.service`
+  Tracked oneshot desktop settings sync. Applies GTK/icon/cursor preferences
+  after the daemon stage instead of backgrounding a detached shell job.
 - `hypr-post-bootstrap.service`
   Late oneshot polish. Applies cursor sync with `hyprctl setcursor` and keeps
-  post-start session tweaks separate from the daemon stage. Long-running shell,
-  night-light, and delayed portal units are started by systemd directly rather
-  than manually from this script.
+  final compositor tweaks separate from the daemon and desktop-settings stages.
+  Long-running shell, night-light, and delayed portal units are started by
+  systemd directly rather than manually from this script.
 
 Daemon-stage units started by `hypr-daemons.target`:
 
@@ -105,7 +115,7 @@ Daemon-stage units started by `hypr-daemons.target`:
   Runs `nm-applet --indicator`.
 - `hypr-blueman-applet.service`
   Runs `blueman-applet` after disabling Blueman plugins that race on OBEX
-  agent ownership.
+  agent ownership and after the explicit status-notifier readiness gate.
 - `hypr-clip-persist.service`
   Runs `wl-clip-persist --clipboard both`.
 - Hypr-only daemon-stage services are now lifecycle-bound directly to
@@ -122,17 +132,22 @@ Daemon-stage units started by `hypr-daemons.target`:
   palette plus the visual assignments for borders, blur, shadow, opacity,
   groupbars, compositor background, workspace chrome exceptions, and Hyprland
   theme string values used by binds.
+- `dotfiles/hypr/conf.d/rules/*.conf`
+  Window rules are split by concern (`core`, `workspace-routing`, `floating`,
+  `dialogs`, `theme-overrides`) and indexed by `40-rules.conf`.
+- `dotfiles/hypr/conf.d/binds/*.conf`
+  Keybinds are split by concern (`navigation`, `shell-session`, `apps`,
+  `workspaces`, `monitors-hardware`) and indexed by `50-binds.conf`.
 - `dotfiles/hypr/conf.d/40-rules.conf`
-  Window behavior and app-placement policy. Pure numbered workspace placement
-  rules are now centralized in a dedicated anonymous `windowrule = ...`
-  section using the current Hyprland syntax, while mixed float/size/dialog
-  rules remain named blocks so they can still be inspected and toggled
-  individually.
+  Window-rule index that sources the topic-specific rules files.
 - `dotfiles/environment.d/10-hyprland.conf`
   Generated session environment file derived from `theme/theme.env` plus the
   Hyprland-specific session defaults. Session identity such as
   `DESKTOP_SESSION=hyprland-uwsm` is now owned by the UWSM wrapper rather than
   this file.
+- `dotfiles/environment.d/hyprland-session.envlist`
+  Ordered allowlist manifest for the Hyprland session wrapper. This keeps the
+  session env stack data-driven instead of hard-coding file names in shell.
 - `theme/theme.env`
   Canonical theme manifest for GTK theme, cursor/icon theme, Catppuccin accent,
   and Hyprland visual sizing.
@@ -140,16 +155,23 @@ Daemon-stage units started by `hypr-daemons.target`:
   Renderer that regenerates `10-hyprland.conf` and `20-theme.conf` from
   `theme/theme.env`. `render-theme.sh --check` verifies that the generated
   files are still in sync with the manifest.
+- `monitors/profile.env` and `monitors/profiles/*.conf`
+  Canonical monitor-profile selection plus the available monitor/workspace
+  layouts (`desk`, `mobile`, `single-external`).
+- `scripts/render-monitors.sh`
+  Renderer that regenerates `70-monitors.conf` from the selected monitor
+  profile. `render-monitors.sh --check` verifies that the generated file is in
+  sync with the manifest and selected profile.
 - `modules/sessions/dotfiles/hyprland-uwsm-session`
   UWSM-first wrapper. Loads the repo-managed `environment.d` stack, normalizes
   path variables, and then enters `uwsm start`.
 - `scripts/install.sh`
-  Post-install hook that renders the theme files, removes the Hyprland-only
-  keyring override, re-enables the stock `gnome-keyring-daemon` units, and
-  persists the Blueman plugin mask.
+  Post-install hook that renders the theme and monitor files, removes the
+  Hyprland-only keyring override, re-enables the stock
+  `gnome-keyring-daemon` units, and persists the Blueman plugin mask.
 - `dotfiles/hypr/conf.d/70-monitors.conf`
-  Repo-managed, host-specific monitor layout and workspace routing for the
-  current setup.
+  Generated monitor layout and workspace routing for the selected monitor
+  profile.
 - `dotfiles/systemd/user/xdg-desktop-portal-gnome.service.d/10-hyprland.conf`
   and `dotfiles/systemd/user/xdg-desktop-portal-gtk.service.d/10-hyprland.conf`
   Unset `GDK_BACKEND` for the GTK/GNOME portal services so the Hyprland
@@ -161,12 +183,12 @@ Daemon-stage units started by `hypr-daemons.target`:
   `XDG_CURRENT_DESKTOP=Hyprland`.
 - The repo-managed `~/.config/environment.d/*.conf` stack is the canonical
   source for Hyprland session variables under UWSM, but it is consumed through
-  a curated Hyprland-specific allowlist so Niri-only or ad-hoc user overrides
-  do not leak into the Hyprland session wrapper. `hypr-session-init` avoids
-  re-importing that full static environment when UWSM is already managing the
-  session and only backfills missing compositor runtime variables as a safety
-  net. When that fallback path is used, it emits a warning to the journal so
-  session drift is visible.
+  the ordered `hyprland-session.envlist` allowlist so Niri-only or ad-hoc user
+  overrides do not leak into the Hyprland session wrapper.
+  `hypr-session-init` avoids re-importing that full static environment when
+  UWSM is already managing the session and only backfills missing compositor
+  runtime variables as a safety net. When that fallback path is used, it emits
+  a warning to the journal so session drift is visible.
 - Hyprland and Niri now share a common Wayland bootstrap helper for env-file
   parsing, path normalization, `WAYLAND_DISPLAY` detection, and
   systemd/dbus environment sync. Compositor-specific helpers keep only the
@@ -176,6 +198,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   `QT_STYLE_OVERRIDE`, while the Hyprland session layer only keeps generic Qt
   Wayland/scaling hints. `99-dms-icons.conf` now only reinforces icon-theme
   variables and no longer overrides the Qt platform theme.
+- The generated Hyprland env file now exposes both `PATH_CORE` and `PATH_USER`
+  alongside the combined `PATH` so desktop bootstrap path policy stays visible
+  instead of being buried in shell code.
 - Logout flows should prefer `uwsm stop` over `hyprctl dispatch exit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.
@@ -192,10 +217,10 @@ Daemon-stage units started by `hypr-daemons.target`:
   personal helper directories such as `.iptv/bin`, zinit shims, and GOPATH
   bins are no longer injected into the desktop session bootstrap.
 - The systemd graph is intentionally split into `bootstrap -> daemons ->
-  post-bootstrap` so ordering remains visible in unit files rather than hidden
-  in shell scripts.
-- The monitor routing file is intentionally host-specific; this module no
-  longer claims to be a portable multi-host monitor profile.
+  desktop-settings -> post-bootstrap` so ordering remains visible in unit files
+  rather than hidden in shell scripts.
+- The monitor routing file is generated from a selected profile rather than
+  being edited in place; use `monitors/profile.env` to switch profiles.
 - Persistent workspace ownership stays in `70-monitors.conf`; `40-rules.conf`
   only handles per-application placement. The module intentionally does not
   translate app placement into `workspace = ..., on-created-empty:...` rules,

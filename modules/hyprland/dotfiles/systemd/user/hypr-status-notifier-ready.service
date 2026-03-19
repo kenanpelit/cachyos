@@ -1,17 +1,17 @@
 [Unit]
-Description=Hyprland post-bootstrap polish
-After=hypr-bootstrap.service hypr-audio-init.service hypr-daemons.target hypr-desktop-settings.service dbus.service
+Description=Hyprland status notifier watcher readiness gate
+After=graphical-session.target hypr-bootstrap.service dbus.service
 PartOf=hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
-ConditionPathExists=%h/.local/bin/hypr-post-bootstrap
+ConditionPathExists=%h/.local/bin/hypr-status-notifier-ready
 
 [Service]
 Type=oneshot
-TimeoutStartSec=30
+TimeoutStartSec=25
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
-ExecStart=%h/.local/bin/hypr-post-bootstrap
+ExecStart=%h/.local/bin/hypr-status-notifier-ready
 StandardOutput=journal
 StandardError=journal
 

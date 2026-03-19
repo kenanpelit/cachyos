@@ -99,6 +99,10 @@ if [[ -z "${accent_hex}" ]]; then
   exit 1
 fi
 
+path_core='/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl'
+path_user='${HOME}/.local/share/zinit/polaris/bin:${HOME}/.local/bin:${HOME}/bin:${HOME}/.iptv/bin:${HOME}/.local/share/go/bin'
+path_combined='${HOME}/.local/share/zinit/polaris/bin:${HOME}/.local/bin:${HOME}/bin:${HOME}/.iptv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:${HOME}/.local/share/go/bin'
+
 cat >"${tmp_env}" <<EOF
 # Generated from modules/hyprland/theme/theme.env.
 # Update the manifest and rerun modules/hyprland/scripts/render-theme.sh.
@@ -111,7 +115,9 @@ cat >"${tmp_env}" <<EOF
 
 XDG_CURRENT_DESKTOP=Hyprland
 XDG_SESSION_TYPE=wayland
-PATH=\${HOME}/.local/share/zinit/polaris/bin:\${HOME}/.local/bin:\${HOME}/bin:\${HOME}/.iptv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:\${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:\${HOME}/.local/share/go/bin
+PATH_CORE=${path_core}
+PATH_USER=${path_user}
+PATH=${path_combined}
 XDG_DATA_DIRS=\${HOME}/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
 
 BROWSER=start-helium-kenp

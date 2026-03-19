@@ -15,6 +15,10 @@ hypr_session_env_dir() {
   printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_DIR:-$HOME/.config/environment.d}"
 }
 
+hypr_session_env_manifest() {
+  printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_MANIFEST:-$(hypr_session_env_dir)/hyprland-session.envlist}"
+}
+
 hypr_ensure_runtime_dir() {
   session_common_ensure_runtime_dir
 }
@@ -24,17 +28,33 @@ hypr_parse_env_file() {
 }
 
 hypr_parse_env_dir() {
-  local env_dir file
+  local env_dir manifest entry file
   local -a env_files=()
 
   env_dir="$(hypr_session_env_dir)"
-  env_files=(
-    "${env_dir}/10-gtk.conf"
-    "$(hypr_session_env_file)"
-    "${env_dir}/20-qt.conf"
-    "${env_dir}/30-ollama.conf"
-    "${env_dir}/99-dms-icons.conf"
-  )
+  manifest="$(hypr_session_env_manifest)"
+
+  if [[ -r "${manifest}" ]]; then
+    while IFS= read -r entry; do
+      [[ -n "${entry}" ]] || continue
+      [[ "${entry#\#}" == "${entry}" ]] || continue
+      if [[ "${entry}" == /* ]]; then
+        env_files+=("${entry}")
+      else
+        env_files+=("${env_dir}/${entry}")
+      fi
+    done <"${manifest}"
+  fi
+
+  if [[ ${#env_files[@]} -eq 0 ]]; then
+    env_files=(
+      "${env_dir}/10-gtk.conf"
+      "$(hypr_session_env_file)"
+      "${env_dir}/20-qt.conf"
+      "${env_dir}/30-ollama.conf"
+      "${env_dir}/99-dms-icons.conf"
+    )
+  fi
 
   session_common_parse_env_dir "${env_files[@]}"
 }
