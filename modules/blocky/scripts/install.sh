@@ -13,6 +13,9 @@ ENSURE_DST="/usr/local/libexec/osc-mullvad-boot-ensure"
 ENSURE_UNIT_SRC="${SCRIPT_DIR}/../dotfiles/systemd/system/osc-mullvad-boot-ensure.service"
 ENSURE_UNIT_DST="/etc/systemd/system/osc-mullvad-boot-ensure.service"
 ENSURE_UNIT_NAME="osc-mullvad-boot-ensure.service"
+ENSURE_TIMER_SRC="${SCRIPT_DIR}/../dotfiles/systemd/system/osc-mullvad-boot-ensure.timer"
+ENSURE_TIMER_DST="/etc/systemd/system/osc-mullvad-boot-ensure.timer"
+ENSURE_TIMER_NAME="osc-mullvad-boot-ensure.timer"
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -52,6 +55,7 @@ ${SUDO} install -d -m 755 "$(dirname "${ENSURE_DST}")"
 ${SUDO} install -m 755 "${ENSURE_SRC}" "${ENSURE_DST}"
 ${SUDO} install -d -m 755 "$(dirname "${ENSURE_UNIT_DST}")"
 ${SUDO} install -m 644 "${ENSURE_UNIT_SRC}" "${ENSURE_UNIT_DST}"
+${SUDO} install -m 644 "${ENSURE_TIMER_SRC}" "${ENSURE_TIMER_DST}"
 
 # Prevent NetworkManager from overwriting resolv.conf.
 if command -v nmcli >/dev/null 2>&1; then
@@ -65,8 +69,9 @@ fi
 
 ${SUDO} systemctl daemon-reload
 if ${SUDO} systemctl list-unit-files "${ENSURE_UNIT_NAME}" >/dev/null 2>&1; then
-  # Run now to reconcile state immediately:
-  # - Mullvad healthy => stop Blocky
-  # - Mullvad disconnected/unhealthy => start Blocky + local resolver
-  ${SUDO} systemctl enable --now "${ENSURE_UNIT_NAME}"
+  ${SUDO} systemctl disable --now "${ENSURE_UNIT_NAME}" "${ENSURE_TIMER_NAME}" >/dev/null 2>&1 || true
+  ${SUDO} rm -f \
+    "/etc/systemd/system/multi-user.target.wants/${ENSURE_UNIT_NAME}" \
+    "/etc/systemd/system/timers.target.wants/${ENSURE_TIMER_NAME}"
+  ${SUDO} systemctl enable --now "${ENSURE_TIMER_NAME}"
 fi

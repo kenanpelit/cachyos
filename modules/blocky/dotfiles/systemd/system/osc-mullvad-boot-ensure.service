@@ -13,6 +13,3 @@ Environment=OSC_MULLVAD_BOOT_CHECK_URL=https://am.i.mullvad.net/connected
 Environment=OSC_MULLVAD_BOOT_CHECK_EXPECT=You are connected
 Environment=OSC_MULLVAD_BOOT_CONNECT_TIMEOUT=2
 Environment=OSC_MULLVAD_BOOT_MAX_TIME=4
-
-[Install]
-WantedBy=multi-user.target

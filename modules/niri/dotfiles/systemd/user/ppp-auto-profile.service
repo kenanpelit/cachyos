@@ -8,6 +8,3 @@ Requisite=graphical-session.target
 Type=oneshot
 TimeoutStartSec=5
 ExecStart=%h/.local/bin/ppp-auto-profile
-
-[Install]
-WantedBy=graphical-session.target

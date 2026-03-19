@@ -102,6 +102,11 @@ skip_automanaged_unit() {
       # Geoclue is started by its delayed timer, not directly by the service.
       return 0
       ;;
+    niri:ppp-auto-profile.service|niri:ppp-auto-profile.timer)
+      # The niri module owns the delayed PPP timer lifecycle and stale-link
+      # cleanup; keep the generic synchronizer away from both units.
+      return 0
+      ;;
   esac
 
   return 1

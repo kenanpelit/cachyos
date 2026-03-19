@@ -1,0 +1,10 @@
+[Unit]
+Description=Delayed Mullvad/Blocky DNS fail-safe reconcile
+
+[Timer]
+OnBootSec=5s
+AccuracySec=1s
+Unit=osc-mullvad-boot-ensure.service
+
+[Install]
+WantedBy=timers.target
