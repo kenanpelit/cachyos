@@ -1,0 +1,5 @@
+[Unit]
+Description=Hyprland session post-daemons stage
+After=graphical-session.target hypr-daemons.target
+BindsTo=graphical-session.target
+PartOf=hyprland-session.target graphical-session.target

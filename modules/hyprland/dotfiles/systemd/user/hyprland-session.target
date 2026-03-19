@@ -1,7 +1,7 @@
 [Unit]
 Description=Hyprland session (user services)
 Documentation=man:systemd.special(7)
-Wants=graphical-session.target xdg-desktop-autostart.target hypr-bootstrap.service hypr-audio-init.service hypr-daemons.target hypr-desktop-settings.service hypr-post-bootstrap.service
+Wants=graphical-session.target xdg-desktop-autostart.target hypr-bootstrap.service hypr-audio-init.service hypr-daemons.target hypr-post-daemons.target
 After=graphical-session.target dbus.service
 BindsTo=graphical-session.target
 PartOf=graphical-session.target

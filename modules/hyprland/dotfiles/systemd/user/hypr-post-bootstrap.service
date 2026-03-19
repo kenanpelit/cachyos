@@ -16,4 +16,4 @@ StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=hyprland-session.target
+WantedBy=hypr-post-daemons.target

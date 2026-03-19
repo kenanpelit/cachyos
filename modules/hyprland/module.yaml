@@ -55,6 +55,8 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-audio-init.service
 - source: dotfiles/systemd/user/hypr-daemons.target
   target: ~/.config/systemd/user/hypr-daemons.target
+- source: dotfiles/systemd/user/hypr-post-daemons.target
+  target: ~/.config/systemd/user/hypr-post-daemons.target
 - source: dotfiles/systemd/user/hypr-desktop-settings.service
   target: ~/.config/systemd/user/hypr-desktop-settings.service
 - source: dotfiles/systemd/user/hypr-post-bootstrap.service
