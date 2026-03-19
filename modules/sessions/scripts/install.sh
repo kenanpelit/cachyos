@@ -4,7 +4,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 DOTFILES_DIR="${SCRIPT_DIR}/../dotfiles"
-HYPR_DOTFILES_DIR="${SCRIPT_DIR}/../../hyprland/dotfiles"
 WAYLAND_SESSIONS_DIR="/usr/share/wayland-sessions"
 LOCAL_BIN_DIR="/usr/local/bin"
 
@@ -66,7 +65,7 @@ remove_session "hyprland.desktop"
 
 install_session "${DOTFILES_DIR}/niri-uwsm.desktop" "Niri (UWSM)"
 install_session "${DOTFILES_DIR}/gnome-optimized.desktop" "GNOME (Optimized)"
-install_session "${HYPR_DOTFILES_DIR}/hyprland-uwsm.desktop" "Hyprland (UWSM)"
+install_session "${DOTFILES_DIR}/hyprland-uwsm.desktop" "Hyprland (UWSM)"
 
 install_wrapper "${DOTFILES_DIR}/niri-optimized-session" "niri-optimized-session"
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"

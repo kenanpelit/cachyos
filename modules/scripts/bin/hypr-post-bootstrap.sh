@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: hypr-post-bootstrap
-# Description: Late Hyprland session polish for shell startup, cursor sync and
-#              delayed portal orchestration.
+# Description: Late Hyprland session polish for desktop settings and cursor sync.
 # Usage: hypr-post-bootstrap
 # ==============================================================================
 

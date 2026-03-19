@@ -10,6 +10,7 @@ if [[ -r "${helper_path}" ]]; then
   source "${helper_path}"
   hypr_ensure_runtime_dir
   hypr_load_session_env
+  hypr_normalize_session_paths
 fi
 
 export XDG_CURRENT_DESKTOP=Hyprland

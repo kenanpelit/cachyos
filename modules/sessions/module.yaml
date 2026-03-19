@@ -5,6 +5,8 @@ depends_on:
 - base
 - scripts
 dotfiles:
+- source: dotfiles/hyprland-uwsm.desktop
+  target: ~/.local/share/wayland-sessions/hyprland-uwsm.desktop
 - source: dotfiles/niri-uwsm.desktop
   target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
 - source: dotfiles/gnome-optimized.desktop

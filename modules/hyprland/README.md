@@ -24,7 +24,7 @@ module.
 ## Entry points
 
 - The `sessions` module now installs a single Hyprland session entry:
-  `modules/hyprland/dotfiles/hyprland-uwsm.desktop`.
+  `modules/sessions/dotfiles/hyprland-uwsm.desktop`.
 - That desktop entry launches
   `modules/sessions/dotfiles/hyprland-uwsm-session`.
 - TTY login now reuses the same UWSM session path via
@@ -33,8 +33,8 @@ module.
   Hyprland through the same wrapper/session identity.
 - The wrapper loads the curated Hyprland environment stack through
   `hypr-session-common` (`10-gtk.conf`, `10-hyprland.conf`, `20-qt.conf`,
-  `30-ollama.conf`, and `99-dms-icons.conf` when present), applies the
-  Hyprland session identity
+  `30-ollama.conf`, and `99-dms-icons.conf` when present), normalizes path
+  variables, applies the Hyprland session identity
   (`DESKTOP_SESSION=hyprland-uwsm`, `XDG_CURRENT_DESKTOP=Hyprland`), and then
   hands off to `uwsm start`.
 - Once Hyprland is up, `dotfiles/hypr/hyprland.conf` runs:
@@ -51,8 +51,9 @@ module.
 1. A display manager session entry or the TTY launcher starts
    `hyprland-uwsm-session`.
 2. The wrapper loads the curated Hyprland environment stack, applies the
-   Hyprland UWSM session identity, and executes `uwsm start -- start-hyprland`
-   (or `Hyprland` if `start-hyprland` is unavailable).
+   Hyprland UWSM session identity, normalizes paths, and executes
+   `uwsm start -- start-hyprland` (or `Hyprland` if `start-hyprland` is
+   unavailable).
 3. UWSM creates the compositor service, waits for readiness variables, and
    finalizes the session environment for the user manager.
 4. Hyprland reads `~/.config/hypr/hyprland.conf` and runs
@@ -64,9 +65,8 @@ module.
    present, the script falls back to the older full `environment.d` import
    path.
 6. `hyprland-session.target` pulls in:
-   `graphical-session.target`, `graphical-session-pre.target`,
-   `xdg-desktop-autostart.target`, `hypr-bootstrap.service`,
-   `hypr-audio-init.service`, and
+   `graphical-session.target`, `xdg-desktop-autostart.target`,
+   `hypr-bootstrap.service`, `hypr-audio-init.service`, and
    `hypr-daemons.target`.
 7. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
    oneshot stage.
@@ -141,8 +141,8 @@ Daemon-stage units started by `hypr-daemons.target`:
   `theme/theme.env`. `render-theme.sh --check` verifies that the generated
   files are still in sync with the manifest.
 - `modules/sessions/dotfiles/hyprland-uwsm-session`
-  UWSM-first wrapper. Loads the repo-managed `environment.d` stack and then
-  enters `uwsm start`.
+  UWSM-first wrapper. Loads the repo-managed `environment.d` stack, normalizes
+  path variables, and then enters `uwsm start`.
 - `scripts/install.sh`
   Post-install hook that renders the theme files, removes the Hyprland-only
   keyring override, re-enables the stock `gnome-keyring-daemon` units, and
@@ -167,6 +167,10 @@ Daemon-stage units started by `hypr-daemons.target`:
   session and only backfills missing compositor runtime variables as a safety
   net. When that fallback path is used, it emits a warning to the journal so
   session drift is visible.
+- Hyprland and Niri now share a common Wayland bootstrap helper for env-file
+  parsing, path normalization, `WAYLAND_DISPLAY` detection, and
+  systemd/dbus environment sync. Compositor-specific helpers keep only the
+  runtime detection logic that is unique to each compositor.
 - Qt theming authority is intentionally split: `modules/qt/dotfiles/environment.d/20-qt.conf`
   owns `QT_QPA_PLATFORMTHEME`, `QT_QPA_PLATFORMTHEME_QT6`, and
   `QT_STYLE_OVERRIDE`, while the Hyprland session layer only keeps generic Qt
