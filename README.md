@@ -85,6 +85,7 @@ sudo -E dcli sync
 | `hosts/` | Active host definitions (e.g., `hay.yaml`) |
 | `modules/base/` | Core library and bootstrap logic |
 | `modules/scripts/` | Unified binary management and system helpers |
+| `modules/hyprland/` | UWSM-managed Hyprland compositor, session graph, and routing |
 | `modules/niri/` | Optimized scrollable-tiling compositor setup |
 | `modules/noctalia/` | High-performance Quickshell-based desktop UI |
 | `docs/` | Operational runbooks and auto-generated manuals |
@@ -107,6 +108,19 @@ Notes:
 - The display-manager path is the canonical entrypoint for daily use.
 - Hyprland and Niri sessions both enter through UWSM-managed wrappers installed by the `sessions` module.
 - TTY routing exists as an operational fallback and recovery path, not as the primary session orchestration layer.
+
+## 🧭 UWSM Session Model
+
+Hyprland and Niri are both started through repo-managed UWSM wrappers rather
+than being launched as loose compositor processes. In practice this means each
+Wayland session is brought up under `systemd --user`, with explicit compositor
+units, finalized runtime environment variables, and a deterministic startup and
+shutdown path.
+
+This also improves lifecycle management after login. Compositor-bound daemons
+can be tied directly to the compositor service, while long-lived GUI
+applications can be launched through `uwsm app` into named systemd scopes
+instead of inheriting the compositor process tree directly.
 
 ---
 
