@@ -1,0 +1,5 @@
+description: Shared Wayland session environment
+
+# Config-only module. Keep an explicit empty package manifest so dcli
+# validation treats the module as complete.
+packages: []
