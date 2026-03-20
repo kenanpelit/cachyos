@@ -1,13 +1,16 @@
 [Unit]
 Description=Track sunsetr presets by time while running Niri
+DefaultDependencies=no
 After=graphical-session.target sunsetr.service
-PartOf=graphical-session.target niri-session.target
+BindsTo=graphical-session.target
+PartOf=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+ConditionPathExists=%h/.config/sunsetr/schedule.conf
 
 [Timer]
 Unit=sunsetr-auto-profile.service
-OnStartupSec=45s
+OnStartupSec=15s
 OnCalendar=*-*-* 00:00:00
 OnCalendar=*-*-* 02:00:00
 OnCalendar=*-*-* 04:00:00
@@ -19,4 +22,7 @@ OnCalendar=*-*-* 19:00:00
 OnCalendar=*-*-* 21:00:00
 OnCalendar=*-*-* 22:30:00
 Persistent=true
-AccuracySec=1min
+AccuracySec=30s
+
+[Install]
+WantedBy=graphical-session.target

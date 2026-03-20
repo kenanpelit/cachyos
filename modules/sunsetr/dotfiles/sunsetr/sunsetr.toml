@@ -1,6 +1,6 @@
 #[Backend]
-backend = "auto"           # Let sunsetr pick the active Wayland backend automatically
-transition_mode = "static" # Timer-driven presets are authoritative; root config is just fallback
+backend = "auto"
+transition_mode = "static" # The active preset is selected via sunsetr-set + systemd.
 
 #[Smoothing]
 smoothing = true
@@ -8,22 +8,6 @@ startup_duration = 0.3
 shutdown_duration = 0.3
 adaptive_interval = 1
 
-#[Time-based config]
-night_temp = 2200          # Deepest Hyprsunset stage (04:00)
-day_temp = 2200            # Lightest Hyprsunset stage (07:30)
-night_gamma = 88           # Deepest Hyprsunset stage gamma
-day_gamma = 88             # Lightest Hyprsunset stage gamma
-update_interval = 60
-
 #[Static config]
-static_temp = 2200         # Default fallback; service rewrites this to the current preset at startup
-static_gamma = 88
-
-#[Manual transitions]
-sunset = "22:30:00"        # First evening-oriented Hyprsunset anchor
-sunrise = "22:30:00"       # First morning Hyprsunset anchor
-transition_duration = 5
-
-#[Geolocation]
-latitude = 41.008200
-longitude = 28.978400
+static_temp = 2600
+static_gamma = 95

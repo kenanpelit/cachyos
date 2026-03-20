@@ -8,22 +8,6 @@ startup_duration = 0.3
 shutdown_duration = 0.3
 adaptive_interval = 1
 
-#[Time-based config]
-night_temp = 2200
-day_temp = 2200
-night_gamma = 88
-day_gamma = 88
-update_interval = 60
-
 #[Static config]
 static_temp = 2200
 static_gamma = 88
-
-#[Manual transitions]
-sunset = "22:30:00"
-sunrise = "22:30:00"
-transition_duration = 5
-
-#[Geolocation]
-latitude = 41.008200
-longitude = 28.978400

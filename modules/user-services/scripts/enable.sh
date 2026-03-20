@@ -107,11 +107,6 @@ skip_automanaged_unit() {
       # enabled by the generic synchronizer.
       return 0
       ;;
-    sunsetr:sunsetr-auto-profile.service|sunsetr:sunsetr-auto-profile.timer)
-      # Sunsetr is session-bound through the niri-sunsetr wrapper service to
-      # avoid graphical-session/timer ordering cycles.
-      return 0
-      ;;
   esac
 
   return 1

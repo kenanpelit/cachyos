@@ -1,58 +1,45 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: sunsetr-set.sh
-# Description: Profile-aware helper for sunsetr to manage display color temperature
-# Usage: sunsetr-set.sh [list|apply|status|<preset>] [profile] [options]
+# Description: Native preset scheduler/helper for the sunsetr Wayland service
+# Usage: sunsetr-set.sh [list|auto|apply|status|<preset>] [options]
 # ==============================================================================
 set -euo pipefail
 
-# -----------------------------------------------------------------------------
-# sunsetr-set
-# -----------------------------------------------------------------------------
-# Profile-aware helper for sunsetr:
-# - write preset values to a target profile
-# - optionally apply that profile immediately
-# - stay compatible with legacy usage:
-#     sunsetr-set <preset> [profile]
-#     sunsetr-set apply [profile]
-# -----------------------------------------------------------------------------
-
 SCRIPT_NAME="$(basename "$0")"
 CONFIG_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/sunsetr"
-DEFAULT_PROFILE="default"
-DEFAULT_LATITUDE="${SUNSETR_LATITUDE:-41.0082}"
-DEFAULT_LONGITUDE="${SUNSETR_LONGITUDE:-28.9784}"
+DEFAULT_CONFIG_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/sunsetr"
+SCHEDULE_FILE="$CONFIG_ROOT/schedule.conf"
 NOTIFY_ENABLED=1
 APPLY_AFTER_SET=0
+declare -a SCHEDULE_STARTS=()
+declare -a SCHEDULE_PRESETS=()
 
 usage() {
   cat <<EOF
-$SCRIPT_NAME - Sunsetr profile helper
+$SCRIPT_NAME - Sunsetr preset scheduler/helper
 
 Usage:
   $SCRIPT_NAME list
-  $SCRIPT_NAME auto [profile]
-  $SCRIPT_NAME <preset> [profile]
-  $SCRIPT_NAME apply [profile]
-  $SCRIPT_NAME status [profile]
+  $SCRIPT_NAME auto
+  $SCRIPT_NAME apply
+  $SCRIPT_NAME status
+  $SCRIPT_NAME <preset>
 
 Options:
-  --apply                 Apply profile immediately after preset write
-  --lat <value>           Latitude override (default: preset value)
-  --lon <value>           Longitude override (default: preset value)
+  --apply                 Apply the selected preset to a running sunsetr instance
   --no-notify             Disable desktop notifications
   -h, --help              Show help
 
-Presets:
-  Values are read dynamically from:
-  $CONFIG_ROOT/presets/*/sunsetr.toml
+Config:
+  Default config root: $CONFIG_ROOT
+  Schedule manifest:   $SCHEDULE_FILE
 
 Examples:
   $SCRIPT_NAME auto --apply
   $SCRIPT_NAME 2100-dusk
-  $SCRIPT_NAME dusk work
-  $SCRIPT_NAME 0000-night --apply
-  $SCRIPT_NAME apply work
+  $SCRIPT_NAME dusk --apply
+  $SCRIPT_NAME apply
   $SCRIPT_NAME status
 EOF
 }
@@ -82,56 +69,19 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "missing dependency: $1"
 }
 
-ensure_runtime_dir() {
-  if [[ -z "${XDG_RUNTIME_DIR:-}" && -d "/run/user/$(id -u)" ]]; then
-    export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+config_root_canonical() {
+  if [[ -d "$CONFIG_ROOT" ]]; then
+    (cd "$CONFIG_ROOT" && pwd -P)
+  else
+    printf '%s\n' "$CONFIG_ROOT"
   fi
-}
-
-is_preset() {
-  local preset
-  preset="$(canonical_preset_name "$1")"
-  [[ -f "$CONFIG_ROOT/presets/$preset/sunsetr.toml" ]]
-}
-
-scheduled_presets() {
-  local preset_root="$CONFIG_ROOT/presets"
-  local dir preset
-
-  [[ -d "$preset_root" ]] || return 0
-
-  while IFS= read -r -d '' dir; do
-    preset="$(basename "$dir")"
-    [[ "$preset" =~ ^[0-9]{4}- ]] || continue
-    [[ -f "$dir/sunsetr.toml" ]] || continue
-    printf '%s\n' "$preset"
-  done < <(find "$preset_root" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
-}
-
-select_auto_preset() {
-  local now_hhmm="${1:-$(date +%H%M)}"
-  local preset anchor selected="" last=""
-
-  while IFS= read -r preset; do
-    [[ "$preset" =~ ^([0-9]{4})- ]] || continue
-    anchor="${BASH_REMATCH[1]}"
-    last="$preset"
-    if [[ "$anchor" -le "$now_hhmm" ]]; then
-      selected="$preset"
-    fi
-  done < <(scheduled_presets)
-
-  if [[ -n "$selected" ]]; then
-    printf '%s\n' "$selected"
-    return 0
-  fi
-
-  [[ -n "$last" ]] || die "no scheduled presets found in $CONFIG_ROOT/presets"
-  printf '%s\n' "$last"
 }
 
 preset_alias() {
   case "${1,,}" in
+    default | base)
+      printf 'default\n'
+      ;;
     0730 | 07:30 | morning)
       printf '0730-morning\n'
       ;;
@@ -177,16 +127,40 @@ canonical_preset_name() {
   fi
 }
 
-format_preset_label() {
-  local preset="$1"
-  if [[ "$preset" =~ ^([0-9]{2})([0-9]{2})-(.+)$ ]]; then
-    local hh="${BASH_REMATCH[1]}"
-    local mm="${BASH_REMATCH[2]}"
-    local name="${BASH_REMATCH[3]}"
-    printf '%s %s\n' "${hh}:${mm}" "$name"
-  else
-    printf '%s\n' "$preset"
+state_namespace() {
+  local default_root="$DEFAULT_CONFIG_ROOT"
+  local config_root
+  config_root="$(config_root_canonical)"
+
+  if [[ -d "$default_root" ]]; then
+    default_root="$(cd "$default_root" && pwd -P)"
   fi
+
+  if [[ "$config_root" == "$default_root" ]]; then
+    printf 'default\n'
+  else
+    printf 'custom_%s\n' "$(printf '%s' "$config_root" | sha256sum | awk '{print substr($1, 1, 16)}')"
+  fi
+}
+
+state_dir() {
+  local state_home="${XDG_STATE_HOME:-$HOME/.local/state}"
+  printf '%s/sunsetr/%s\n' "$state_home" "$(state_namespace)"
+}
+
+active_preset_path() {
+  printf '%s/active_preset\n' "$(state_dir)"
+}
+
+dir_id_path() {
+  printf '%s/dir_id\n' "$(state_dir)"
+}
+
+is_preset() {
+  local preset
+  preset="$(canonical_preset_name "$1")"
+  [[ "$preset" == "default" ]] && return 0
+  [[ -f "$CONFIG_ROOT/presets/$preset/sunsetr.toml" ]]
 }
 
 toml_get_value() {
@@ -205,271 +179,198 @@ toml_get_value() {
   ' "$cfg_file"
 }
 
-print_preset_line() {
+load_schedule() {
+  local start preset hhmm last=""
+
+  SCHEDULE_STARTS=()
+  SCHEDULE_PRESETS=()
+
+  [[ -f "$SCHEDULE_FILE" ]] || die "schedule file not found: $SCHEDULE_FILE"
+
+  while read -r start preset; do
+    [[ -n "$start" && -n "$preset" ]] || continue
+    [[ "$start" =~ ^[0-9]{2}:[0-9]{2}$ ]] || die "invalid schedule time: $start"
+
+    hhmm="${start/:/}"
+    if [[ -n "$last" && "$hhmm" -le "$last" ]]; then
+      die "schedule must be strictly ascending: $start comes after ${last:0:2}:${last:2:2}"
+    fi
+
+    is_preset "$preset" || die "schedule references missing preset: $preset"
+    SCHEDULE_STARTS+=("$start")
+    SCHEDULE_PRESETS+=("$preset")
+    last="$hhmm"
+  done < <(awk '
+    /^[[:space:]]*#/ { next }
+    NF >= 2 { print $1, $2 }
+  ' "$SCHEDULE_FILE")
+
+  [[ "${#SCHEDULE_PRESETS[@]}" -gt 0 ]] || die "schedule file is empty: $SCHEDULE_FILE"
+}
+
+select_auto_preset() {
+  local now_hhmm="${1:-$(date +%H:%M)}"
+  local now_num="${now_hhmm//:/}"
+  local selected=""
+  local idx
+
+  load_schedule
+  selected="${SCHEDULE_PRESETS[$((${#SCHEDULE_PRESETS[@]} - 1))]}"
+
+  for idx in "${!SCHEDULE_STARTS[@]}"; do
+    if [[ "${SCHEDULE_STARTS[$idx]//:/}" -le "$now_num" ]]; then
+      selected="${SCHEDULE_PRESETS[$idx]}"
+    fi
+  done
+
+  printf '%s\n' "$selected"
+}
+
+write_directory_identity() {
+  local dir
+  dir="$(state_dir)"
+  mkdir -p "$dir"
+  stat -Lc '%i' "$CONFIG_ROOT" > "$(dir_id_path)"
+}
+
+clear_active_preset_state() {
+  rm -f "$(active_preset_path)" "$(dir_id_path)"
+}
+
+get_active_preset_state() {
+  local marker_path
+  local preset
+
+  marker_path="$(active_preset_path)"
+  if [[ ! -f "$marker_path" ]]; then
+    printf 'default\n'
+    return 0
+  fi
+
+  preset="$(tr -d '[:space:]' < "$marker_path")"
+  if [[ -z "$preset" || ! -f "$CONFIG_ROOT/presets/$preset/sunsetr.toml" ]]; then
+    clear_active_preset_state
+    printf 'default\n'
+    return 0
+  fi
+
+  printf '%s\n' "$preset"
+}
+
+set_active_preset_state() {
   local preset="$1"
-  local cfg_file="$CONFIG_ROOT/presets/$preset/sunsetr.toml"
-  local day_temp night_temp day_gamma night_gamma label
 
-  if [[ ! -f "$cfg_file" ]]; then
-    printf '  %-14s (missing: sunsetr.toml)\n' "$preset"
-    return
+  [[ "$preset" != "default" ]] || {
+    clear_active_preset_state
+    return 0
+  }
+
+  is_preset "$preset" || die "preset not found: $preset"
+  write_directory_identity
+  printf '%s\n' "$preset" > "$(active_preset_path)"
+}
+
+sunsetr_instance_running() {
+  sunsetr status >/dev/null 2>&1
+}
+
+apply_runtime_preset() {
+  local preset="$1"
+  local active
+
+  active="$(get_active_preset_state)"
+  if [[ "$preset" == "$active" ]]; then
+    return 0
   fi
 
-  day_temp="$(toml_get_value "$cfg_file" day_temp)"
-  night_temp="$(toml_get_value "$cfg_file" night_temp)"
-  day_gamma="$(toml_get_value "$cfg_file" day_gamma)"
-  night_gamma="$(toml_get_value "$cfg_file" night_gamma)"
-  label="$(format_preset_label "$preset")"
-
-  if [[ -z "$day_temp" || -z "$night_temp" || -z "$day_gamma" || -z "$night_gamma" ]]; then
-    printf '  %-20s (invalid preset values)\n' "$label"
-    return
-  fi
-
-  if [[ "$day_temp" == "$night_temp" && "$day_gamma" == "$night_gamma" ]]; then
-    printf '  %-20s (%sK, %s%%)\n' "$label" "$day_temp" "$day_gamma"
+  if [[ "$preset" == "default" ]]; then
+    sunsetr preset default >/dev/null 2>&1 || die "failed to switch sunsetr to default config"
   else
-    printf '  %-20s (%s/%sK, %s/%s)\n' "$label" "$day_temp" "$night_temp" "$day_gamma" "$night_gamma"
+    sunsetr preset "$preset" >/dev/null 2>&1 || die "failed to switch sunsetr preset: $preset"
+  fi
+}
+
+sync_preset() {
+  local preset="$1"
+  local apply_now="$2"
+
+  if [[ "$apply_now" -eq 1 ]] && sunsetr_instance_running; then
+    apply_runtime_preset "$preset"
+  else
+    set_active_preset_state "$preset"
+  fi
+}
+
+format_preset_label() {
+  local preset="$1"
+  if [[ "$preset" =~ ^([0-9]{2})([0-9]{2})-(.+)$ ]]; then
+    printf '%s:%s %s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"
+  else
+    printf '%s\n' "$preset"
+  fi
+}
+
+show_status() {
+  local scheduled active
+
+  scheduled="$(select_auto_preset)"
+  active="$(get_active_preset_state)"
+
+  log "config root: $CONFIG_ROOT"
+  log "schedule file: $SCHEDULE_FILE"
+  log "scheduled preset: $scheduled"
+  log "active preset state: $active"
+
+  if sunsetr_instance_running; then
+    sunsetr status
+  else
+    log "runtime: not running"
   fi
 }
 
 list_presets() {
-  local preset_root="$CONFIG_ROOT/presets"
-  local preset
-  local -a detected=()
-  local -a preferred=(
-    0730-morning
-    1000-late-morning
-    1300-noon
-    1700-afternoon
-    1900-sunset
-    2100-dusk
-    2230-evening
-    0000-night
-    0200-late-night
-    0400-deep-night
-  )
-  local -A seen=()
+  local idx next_idx start end preset cfg_file temp gamma
 
-  echo "Presetler:"
-
-  if [[ ! -d "$preset_root" ]]; then
-    echo "  (preset dizini yok: $preset_root)"
-    return 0
-  fi
-
-  while IFS= read -r -d '' dir; do
-    if [[ -f "$dir/sunsetr.toml" ]]; then
-      detected+=("$(basename "$dir")")
-    fi
-  done < <(find "$preset_root" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
-
-  if [[ "${#detected[@]}" -eq 0 ]]; then
-    echo "  (preset bulunamadı)"
-    return 0
-  fi
-
-  for preset in "${preferred[@]}"; do
-    local found=0
-    local candidate
-    for candidate in "${detected[@]}"; do
-      if [[ "$candidate" == "$preset" ]]; then
-        print_preset_line "$preset"
-        seen["$preset"]=1
-        found=1
-        break
-      fi
-    done
-    [[ "$found" -eq 1 ]] || true
+  load_schedule
+  printf '%-14s %-22s %s\n' 'Range' 'Preset' 'Target'
+  for idx in "${!SCHEDULE_PRESETS[@]}"; do
+    next_idx=$(((idx + 1) % ${#SCHEDULE_PRESETS[@]}))
+    start="${SCHEDULE_STARTS[$idx]}"
+    end="${SCHEDULE_STARTS[$next_idx]}"
+    preset="${SCHEDULE_PRESETS[$idx]}"
+    cfg_file="$CONFIG_ROOT/presets/$preset/sunsetr.toml"
+    temp="$(toml_get_value "$cfg_file" static_temp)"
+    gamma="$(toml_get_value "$cfg_file" static_gamma)"
+    printf '%-14s %-22s %sK @ %s%%\n' \
+      "${start}-${end}" \
+      "$(format_preset_label "$preset")" \
+      "${temp:-?}" \
+      "${gamma:-?}"
   done
-
-  for preset in "${detected[@]}"; do
-    [[ -n "${seen[$preset]:-}" ]] && continue
-    print_preset_line "$preset"
-  done
-}
-
-validate_profile() {
-  local profile="$1"
-  [[ "$profile" =~ ^[A-Za-z0-9._-]+$ ]] || {
-    die "invalid profile name: $profile"
-  }
-}
-
-profile_to_dir() {
-  local profile="$1"
-  if [[ "$profile" == "$DEFAULT_PROFILE" ]]; then
-    printf '%s\n' "$CONFIG_ROOT"
-  else
-    printf '%s\n' "$CONFIG_ROOT/presets/$profile"
-  fi
-}
-
-ensure_config_dir() {
-  local cfg_dir="$1"
-  local cfg_file="$cfg_dir/sunsetr.toml"
-
-  mkdir -p "$cfg_dir"
-  if [[ ! -f "$cfg_file" && -f "$CONFIG_ROOT/sunsetr.toml" ]]; then
-    cp -f "$CONFIG_ROOT/sunsetr.toml" "$cfg_file"
-  fi
-}
-
-require_existing_config() {
-  local profile="$1"
-  local cfg_dir="$2"
-  local cfg_file="$cfg_dir/sunsetr.toml"
-
-  if [[ -f "$cfg_file" ]]; then
-    return 0
-  fi
-
-  if is_preset "$profile"; then
-    die "apply/status expects a profile, not preset: $profile (use: $SCRIPT_NAME $profile --apply)"
-  fi
-
-  die "profile not found: $profile ($cfg_file)"
-}
-
-apply_preset() {
-  local preset
-  preset="$(canonical_preset_name "$1")"
-  local profile="$2"
-  local latitude="$3"
-  local longitude="$4"
-  local target="default"
-  local -a keys=(
-    backend
-    transition_mode
-    smoothing
-    startup_duration
-    shutdown_duration
-    adaptive_interval
-    day_temp
-    night_temp
-    day_gamma
-    night_gamma
-    update_interval
-    static_temp
-    static_gamma
-    sunset
-    sunrise
-    transition_duration
-    latitude
-    longitude
-  )
-  local -a set_args=()
-  local key value
-  local preset_cfg_file
-
-  if [[ "$profile" != "$DEFAULT_PROFILE" ]]; then
-    target="$profile"
-  fi
-
-  preset_cfg_file="$CONFIG_ROOT/presets/$preset/sunsetr.toml"
-  [[ -f "$preset_cfg_file" ]] || die "preset not found: $preset ($preset_cfg_file)"
-
-  for key in "${keys[@]}"; do
-    value="$(toml_get_value "$preset_cfg_file" "$key")"
-    if [[ -n "$value" ]]; then
-      set_args+=("${key}=${value}")
-    fi
-  done
-
-  if [[ -n "$latitude" ]]; then
-    set_args+=("latitude=${latitude}")
-  elif ! printf '%s\n' "${set_args[@]}" | grep -q '^latitude='; then
-    set_args+=("latitude=${DEFAULT_LATITUDE}")
-  fi
-
-  if [[ -n "$longitude" ]]; then
-    set_args+=("longitude=${longitude}")
-  elif ! printf '%s\n' "${set_args[@]}" | grep -q '^longitude='; then
-    set_args+=("longitude=${DEFAULT_LONGITUDE}")
-  fi
-
-  # Force explicit target to avoid interactive prompt based on active preset.
-  sunsetr --config "$CONFIG_ROOT" set --target "$target" "${set_args[@]}"
-}
-
-systemd_user_ready() {
-  command -v systemctl >/dev/null 2>&1 || return 1
-  systemctl --user show-environment >/dev/null 2>&1
-}
-
-sunsetr_service_installed() {
-  systemd_user_ready || return 1
-  systemctl --user cat sunsetr.service >/dev/null 2>&1
-}
-
-activate_profile() {
-  local profile="$1"
-  local cfg_dir="$2"
-
-  if [[ "$profile" == "$DEFAULT_PROFILE" ]] && sunsetr_service_installed; then
-    if systemctl --user restart sunsetr.service >/dev/null 2>&1; then
-      log "profile applied via sunsetr.service restart: $profile"
-      notify "sunsetr" "Profil uygulandı: $profile"
-      return 0
-    fi
-  fi
-
-  if systemd_user_ready && systemctl --user status sunsetr.service >/dev/null 2>&1; then
-    systemctl --user stop sunsetr.service >/dev/null 2>&1 || true
-  fi
-
-  sunsetr stop >/dev/null 2>&1 || true
-  sunsetr --background --config "$cfg_dir"
-
-  log "profile applied via standalone process: $profile"
-  notify "sunsetr" "Profil uygulandı: $profile"
-}
-
-show_status() {
-  local profile="$1"
-  local cfg_dir="$2"
-
-  log "profile: $profile"
-  log "config: $cfg_dir/sunsetr.toml"
-  sunsetr --config "$cfg_dir" get backend transition_mode day_temp night_temp day_gamma night_gamma static_temp static_gamma sunset sunrise transition_duration latitude longitude
 }
 
 main() {
   require_cmd sunsetr
-  ensure_runtime_dir
 
-  local latitude=""
-  local longitude=""
   local args=()
-
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    --apply)
-      APPLY_AFTER_SET=1
-      shift
-      ;;
-    --lat)
-      [[ $# -ge 2 ]] || die "--lat requires a value"
-      latitude="$2"
-      shift 2
-      ;;
-    --lon)
-      [[ $# -ge 2 ]] || die "--lon requires a value"
-      longitude="$2"
-      shift 2
-      ;;
-    --no-notify)
-      NOTIFY_ENABLED=0
-      shift
-      ;;
-    -h | --help)
-      usage
-      exit 0
-      ;;
-    *)
-      args+=("$1")
-      shift
-      ;;
+      --apply)
+        APPLY_AFTER_SET=1
+        shift
+        ;;
+      --no-notify)
+        NOTIFY_ENABLED=0
+        shift
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        args+=("$1")
+        shift
+        ;;
     esac
   done
 
@@ -479,64 +380,39 @@ main() {
   }
 
   local action="${args[0],,}"
-  action="$(canonical_preset_name "$action")"
-  local profile="$DEFAULT_PROFILE"
-  local cfg_dir
+  local legacy_profile="${args[1]:-}"
+  local target
+
+  if [[ -n "$legacy_profile" && "$legacy_profile" != "default" ]]; then
+    warn "legacy profile argument '$legacy_profile' is ignored; sunsetr now uses native presets"
+  fi
 
   case "$action" in
-  list | -l | --list)
-    list_presets
-    exit 0
-    ;;
-  auto)
-    profile="${args[1]:-$DEFAULT_PROFILE}"
-    validate_profile "$profile"
-    cfg_dir="$(profile_to_dir "$profile")"
-
-    action="$(select_auto_preset)"
-    ensure_config_dir "$cfg_dir"
-    apply_preset "$action" "$profile" "$latitude" "$longitude"
-
-    log "auto preset selected: $action -> $profile"
-    notify "sunsetr" "Otomatik preset: $action -> $profile"
-
-    if [[ "$APPLY_AFTER_SET" -eq 1 ]]; then
-      activate_profile "$profile" "$cfg_dir"
-    fi
-    ;;
-  apply)
-    profile="${args[1]:-$DEFAULT_PROFILE}"
-    validate_profile "$profile"
-    cfg_dir="$(profile_to_dir "$profile")"
-    require_existing_config "$profile" "$cfg_dir"
-    activate_profile "$profile" "$cfg_dir"
-    ;;
-  status | show)
-    profile="${args[1]:-$DEFAULT_PROFILE}"
-    validate_profile "$profile"
-    cfg_dir="$(profile_to_dir "$profile")"
-    require_existing_config "$profile" "$cfg_dir"
-    show_status "$profile" "$cfg_dir"
-    ;;
-  *)
-    if ! is_preset "$action"; then
-      die "unknown command/preset: $action (use: $SCRIPT_NAME list)"
-    fi
-
-    profile="${args[1]:-$DEFAULT_PROFILE}"
-    validate_profile "$profile"
-    cfg_dir="$(profile_to_dir "$profile")"
-
-    ensure_config_dir "$cfg_dir"
-    apply_preset "$action" "$profile" "$latitude" "$longitude"
-
-    log "preset written: $action -> $profile"
-    notify "sunsetr" "Preset yazıldı: $action -> $profile"
-
-    if [[ "$APPLY_AFTER_SET" -eq 1 ]]; then
-      activate_profile "$profile" "$cfg_dir"
-    fi
-    ;;
+    list|-l|--list)
+      list_presets
+      ;;
+    auto)
+      target="$(select_auto_preset)"
+      sync_preset "$target" "$APPLY_AFTER_SET"
+      log "scheduled preset: $target"
+      notify "sunsetr" "Otomatik preset: $target"
+      ;;
+    apply)
+      target="$(get_active_preset_state)"
+      sync_preset "$target" 1
+      log "active preset applied: $target"
+      notify "sunsetr" "Aktif preset uygulandi: $target"
+      ;;
+    status|show)
+      show_status
+      ;;
+    *)
+      target="$(canonical_preset_name "$action")"
+      is_preset "$target" || die "unknown command/preset: $action (use: $SCRIPT_NAME list)"
+      sync_preset "$target" "$APPLY_AFTER_SET"
+      log "preset selected: $target"
+      notify "sunsetr" "Preset secildi: $target"
+      ;;
   esac
 }
 

@@ -83,10 +83,6 @@ session once the environment conditions are satisfied:
   Runs `nm-applet --indicator`.
 - `niri-blueman-applet.service`
   Runs `blueman-applet` after the explicit status-notifier readiness gate.
-- `niri-sunsetr.service`
-  Starts `sunsetr.service` and `sunsetr-auto-profile.timer` on demand from the
-  Niri post-daemons stage instead of binding those units directly into the
-  compositor target graph.
 - `niri-snapper-tools-check.service`
   Runs the snapshot boot check for `snapper-tools`.
 - `niri-sticky.service`
@@ -100,6 +96,16 @@ session once the environment conditions are satisfied:
 The shared `clipse.service` now belongs to the standalone `clipse` module and
 is bound to `graphical-session.target`, so both Niri and Hyprland reuse the
 same clipboard listener unit.
+
+The `sunsetr` module now also follows the shared `graphical-session.target`
+model directly:
+
+- `sunsetr.service`
+  Mirrors upstream's native user unit while adding Niri-specific conditions, so
+  it stays out of Hyprland sessions but no longer needs the old wrapper unit.
+- `sunsetr-auto-profile.timer`
+  Applies the scheduled preset map after startup and at each declared schedule
+  boundary while the Niri session is active.
 
 ## Shared session timers
 

@@ -2698,8 +2698,9 @@ doctor)
           niri-post-bootstrap.service \
           niri-status-notifier-ready.service \
           niri-polkit-agent.service \
-          niri-clipse.service \
-          niri-sunsetr.service \
+          clipse.service \
+          sunsetr.service \
+          sunsetr-auto-profile.timer \
           noctalia.service \
           dms.service \
           dms-plugin-sync.service \

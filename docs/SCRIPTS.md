@@ -809,9 +809,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `sunsetr-set`
-**Description:** Profile-aware helper for sunsetr to manage display color temperature
+**Description:** Native preset scheduler/helper for the sunsetr Wayland service
 
-**Usage:** `sunsetr-set.sh [list|apply|status|<preset>] [profile] [options]`
+**Usage:** `sunsetr-set.sh [list|auto|apply|status|<preset>] [options]`
 
 ---
 

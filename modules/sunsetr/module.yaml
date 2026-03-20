@@ -6,13 +6,11 @@ depends_on:
 dotfiles:
 - source: dotfiles/sunsetr
   target: ~/.config/sunsetr
+- source: dotfiles/systemd/user/sunsetr.service
+  target: ~/.config/systemd/user/sunsetr.service
 - source: dotfiles/systemd/user/sunsetr-auto-profile.service
   target: ~/.config/systemd/user/sunsetr-auto-profile.service
 - source: dotfiles/systemd/user/sunsetr-auto-profile.timer
   target: ~/.config/systemd/user/sunsetr-auto-profile.timer
-- source: dotfiles/systemd/user/niri-sunsetr.service
-  target: ~/.config/systemd/user/niri-sunsetr.service
-- source: dotfiles/systemd/user/sunsetr.service.d/10-cachy.conf
-  target: ~/.config/systemd/user/sunsetr.service.d/10-cachy.conf
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
