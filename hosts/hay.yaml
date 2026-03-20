@@ -44,6 +44,7 @@ enabled_modules:
 - wayland-env
 - gtk
 - qt
+- pipewire-rt
 - niri
 - hyprland
 - hyprsunset

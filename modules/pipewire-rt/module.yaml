@@ -1,0 +1,15 @@
+tags:
+- audio
+- system
+description: PipeWire realtime and nice priority limits
+depends_on:
+- base
+dotfiles:
+- source: dotfiles/systemd/user/pipewire.service.d
+  target: ~/.config/systemd/user/pipewire.service.d
+- source: dotfiles/systemd/user/pipewire-pulse.service.d
+  target: ~/.config/systemd/user/pipewire-pulse.service.d
+- source: dotfiles/systemd/user/wireplumber.service.d
+  target: ~/.config/systemd/user/wireplumber.service.d
+post_install_hook: scripts/install.sh
+post_hook_behavior: always
