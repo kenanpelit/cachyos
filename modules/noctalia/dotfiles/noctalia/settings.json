@@ -130,6 +130,21 @@
                 },
                 {
                     "defaultSettings": {
+                        "activeTodoCount": 0,
+                        "autosaveDelay": 700,
+                        "count": 0,
+                        "notes": [
+                        ],
+                        "scratchpadContent": "",
+                        "showCountsInBar": true,
+                        "todoCount": 0,
+                        "todos": [
+                        ]
+                    },
+                    "id": "plugin:6ee06e:notes"
+                },
+                {
+                    "defaultSettings": {
                         "refreshInterval": 60000
                     },
                     "id": "plugin:6ee06e:npodman"
@@ -262,6 +277,16 @@
                     "id": "Tray",
                     "pinned": [
                     ]
+                },
+                {
+                    "defaultSettings": {
+                        "errorIcon": "alert-circle",
+                        "iconColor": "primary",
+                        "loadingIcon": "loader",
+                        "refreshInterval": 300,
+                        "successIcon": "network"
+                    },
+                    "id": "plugin:6ee06e:nip"
                 },
                 {
                     "defaultSettings": {
