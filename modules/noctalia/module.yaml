@@ -4,16 +4,6 @@ description: Noctalia shell config (Quickshell)
 depends_on:
 - base
 dotfiles:
-- source: dotfiles/noctalia/colors.json
-  target: ~/.config/noctalia/colors.json
-- source: dotfiles/noctalia/settings.json
-  target: ~/.config/noctalia/settings.json
-- source: dotfiles/noctalia/settings.json.bak
-  target: ~/.config/noctalia/settings.json.bak
-- source: dotfiles/noctalia/colorschemes
-  target: ~/.config/noctalia/colorschemes
-- source: dotfiles/noctalia/plugins
-  target: ~/.config/noctalia/plugins
 - source: dotfiles/systemd/user/noctalia.service
   target: ~/.config/systemd/user/noctalia.service
 post_install_hook: scripts/install.sh

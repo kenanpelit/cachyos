@@ -54,14 +54,27 @@ apply_noctalia_plugin_overrides() {
     --argjson enable_hypr "${enable_hypr_plugins}" \
     --arg source_url "${NOCTALIA_PLUGIN_SOURCE_URL}" \
     '
-      def upsert($id; $enabled):
-        .plugins[$id] = (((.plugins[$id] // {}) + {enabled: $enabled})
+      def set_state($container; $id; $enabled):
+        .[$container][$id] = (((.[$container][$id] // {}) + {enabled: $enabled})
           | if has("sourceUrl") then . else . + {sourceUrl: $source_url} end);
 
-      upsert("niri-auto-tile"; $enable_niri)
-      | upsert("niri-overview-launcher"; $enable_niri)
-      | upsert("screen-shot-and-record"; $enable_hypr)
-      | upsert("special-workspaces"; $enable_hypr)
+      if has("states") then
+        set_state("states"; "niri-auto-tile"; $enable_niri)
+        | set_state("states"; "niri-overview-launcher"; $enable_niri)
+        | set_state("states"; "screen-shot-and-record"; $enable_hypr)
+        | set_state("states"; "special-workspaces"; $enable_hypr)
+      elif has("plugins") then
+        set_state("plugins"; "niri-auto-tile"; $enable_niri)
+        | set_state("plugins"; "niri-overview-launcher"; $enable_niri)
+        | set_state("plugins"; "screen-shot-and-record"; $enable_hypr)
+        | set_state("plugins"; "special-workspaces"; $enable_hypr)
+      else
+        . + {states: {}}
+        | set_state("states"; "niri-auto-tile"; $enable_niri)
+        | set_state("states"; "niri-overview-launcher"; $enable_niri)
+        | set_state("states"; "screen-shot-and-record"; $enable_hypr)
+        | set_state("states"; "special-workspaces"; $enable_hypr)
+      end
     ' "${NOCTALIA_PLUGIN_STATE}" > "${tmp}"; then
     mv "${tmp}" "${NOCTALIA_PLUGIN_STATE}"
   else

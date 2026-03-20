@@ -6,29 +6,59 @@ MODULE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 source "$REPO_ROOT/modules/base/lib/core.sh"
 
-plugins_template="$MODULE_DIR/dotfiles/noctalia/plugins.json"
-plugins_state="$USER_HOME/.config/noctalia/plugins.json"
+noctalia_template_dir="$MODULE_DIR/dotfiles/noctalia"
+noctalia_config_dir="$USER_HOME/.config/noctalia"
 
-ensure_writable_plugins_state() {
-  run_as_user mkdir -p "$USER_HOME/.config/noctalia"
-
-  if [[ -L "$plugins_state" ]]; then
-    run_as_user /usr/bin/sh -c '
-      src="$1"
-      dst="$2"
-      tmp="${dst}.tmp.$$"
-      cat "$dst" > "$tmp" 2>/dev/null || cat "$src" > "$tmp"
-      rm -f "$dst"
-      mv "$tmp" "$dst"
-    ' _ "$plugins_template" "$plugins_state"
+ensure_real_dir() {
+  local dir="$1"
+  if run_as_user test -L "$dir"; then
+    run_as_user rm -f "$dir"
   fi
+  run_as_user mkdir -p "$dir"
+}
 
-  if [[ ! -f "$plugins_state" ]]; then
-    run_as_user install -m 644 "$plugins_template" "$plugins_state"
+ensure_writable_file_from_template() {
+  local rel="$1"
+  local src="$noctalia_template_dir/$rel"
+  local dst="$noctalia_config_dir/$rel"
+  local parent
+  parent="$(dirname "$dst")"
+
+  [[ -r "$src" ]] || return 0
+
+  run_as_user mkdir -p "$parent"
+  if run_as_user test -L "$dst"; then
+    run_as_user rm -f "$dst"
+  fi
+  if ! run_as_user test -f "$dst"; then
+    run_as_user install -m 644 "$src" "$dst"
   fi
 }
 
-ensure_writable_plugins_state
+sync_tree_from_template() {
+  local rel="$1"
+  local src="$noctalia_template_dir/$rel/"
+  local dst="$noctalia_config_dir/$rel/"
+
+  ensure_real_dir "$noctalia_config_dir/$rel"
+
+  if command -v rsync >/dev/null 2>&1; then
+    run_as_user rsync -a --delete \
+      --exclude 'clipper/pinned.json' \
+      --exclude 'clipper/notecards/' \
+      "$src" "$dst"
+  else
+    run_as_user cp -a "$src/." "$dst"
+  fi
+}
+
+ensure_real_dir "$noctalia_config_dir"
+sync_tree_from_template "colorschemes"
+sync_tree_from_template "plugins"
+ensure_writable_file_from_template "colors.json"
+ensure_writable_file_from_template "settings.json"
+ensure_writable_file_from_template "settings.json.bak"
+ensure_writable_file_from_template "plugins.json"
 
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
