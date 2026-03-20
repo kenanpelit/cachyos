@@ -16,7 +16,7 @@ dotfiles:
 - source: dotfiles/autostart/snapper-tools-check.desktop
   target: ~/.config/autostart/snapper-tools-check.desktop
 - source: dotfiles/environment.d/10-niri-env.conf
-  target: ~/.config/environment.d/10-niri-env.conf
+  target: ~/.config/session-env/niri/10-niri-env.conf
 - source: dotfiles/environment.d/niri-session.envlist
   target: ~/.config/environment.d/niri-session.envlist
 - source: dotfiles/autostart/geoclue-demo-agent.desktop
@@ -27,8 +27,6 @@ dotfiles:
   target: ~/.config/systemd/user/niri-daemons.target
 - source: dotfiles/systemd/user/niri-post-daemons.target
   target: ~/.config/systemd/user/niri-post-daemons.target
-- source: dotfiles/systemd/user/niri.service.d/10-priority.conf
-  target: ~/.config/systemd/user/niri.service.d/10-priority.conf
 - source: dotfiles/systemd/user/niri-polkit-agent.service
   target: ~/.config/systemd/user/niri-polkit-agent.service
 - source: dotfiles/systemd/user/niri-nm-applet.service
@@ -41,13 +39,15 @@ dotfiles:
   target: ~/.config/systemd/user/niri-snapper-tools-check.service
 - source: dotfiles/systemd/user/niri-bootstrap.service
   target: ~/.config/systemd/user/niri-bootstrap.service
-- source: dotfiles/systemd/user/niri-desktop-settings.service
-  target: ~/.config/systemd/user/niri-desktop-settings.service
+- source: dotfiles/systemd/user/niri-shell-ensure.service
+  target: ~/.config/systemd/user/niri-shell-ensure.service
 - source: dotfiles/systemd/user/niri-post-bootstrap.service
   target: ~/.config/systemd/user/niri-post-bootstrap.service
 - source: dotfiles/systemd/user/niri-sticky.service
   target: ~/.config/systemd/user/niri-sticky.service
 - source: dotfiles/systemd/user/niri-niriswitcher.service
   target: ~/.config/systemd/user/niri-niriswitcher.service
+- source: dotfiles/systemd/user/wayland-wm@niri\x2dsession.service.d/10-session-lifecycle.conf
+  target: ~/.config/systemd/user/wayland-wm@niri\x2dsession.service.d/10-session-lifecycle.conf
 post_install_hook: scripts/ensure-runtime-files.sh
 post_hook_behavior: always

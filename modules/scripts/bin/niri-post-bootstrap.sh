@@ -7,6 +7,12 @@ LOG_TAG="niri-post-bootstrap"
 
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
 
+if [[ -x "${HOME}/.local/bin/niri-desktop-settings" ]]; then
+  if ! "${HOME}/.local/bin/niri-desktop-settings"; then
+    log "desktop settings sync reported an error"
+  fi
+fi
+
 if command -v notify-send >/dev/null 2>&1; then
   notify-send -t 1800 "Niri" "Session ready" >/dev/null 2>&1 || true
 fi

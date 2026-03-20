@@ -12,7 +12,7 @@ dotfiles:
 - source: dotfiles/hypr/hyprland.conf
   target: ~/.config/hypr/hyprland.conf
 - source: dotfiles/environment.d/10-hyprland.conf
-  target: ~/.config/environment.d/10-hyprland.conf
+  target: ~/.config/session-env/hyprland/10-hyprland.conf
 - source: dotfiles/environment.d/hyprland-session.envlist
   target: ~/.config/environment.d/hyprland-session.envlist
 - source: dotfiles/autostart/gnome-keyring-pkcs11.desktop

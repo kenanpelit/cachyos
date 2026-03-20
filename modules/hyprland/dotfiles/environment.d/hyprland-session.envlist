@@ -1,7 +1,6 @@
 # Ordered Hyprland session environment allowlist.
 # Relative entries are resolved under ~/.config/environment.d/.
 10-gtk.conf
-10-hyprland.conf
 20-qt.conf
 30-ollama.conf
 99-dms-icons.conf

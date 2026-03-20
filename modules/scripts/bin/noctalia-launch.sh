@@ -11,6 +11,7 @@ load_hypr_env() {
   # shellcheck source=hypr-session-common.sh
   source "$helper"
   hypr_load_session_env
+  hypr_clear_foreign_session_env
   hypr_normalize_session_paths
   hypr_ensure_runtime_dir
   hypr_detect_wayland_display || true
@@ -22,6 +23,7 @@ load_niri_env() {
   # shellcheck source=niri-session-common.sh
   source "$helper"
   niri_load_session_env
+  niri_clear_foreign_session_env
   niri_normalize_session_paths
   niri_ensure_runtime_dir
   niri_detect_wayland_display || true

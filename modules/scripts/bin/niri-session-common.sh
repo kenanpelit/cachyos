@@ -8,7 +8,7 @@ COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"
 source "${COMMON_HELPER}"
 
 niri_session_env_file() {
-  printf '%s\n' "${NIRI_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-niri-env.conf}"
+  printf '%s\n' "${NIRI_SESSION_ENVIRONMENT_FILE:-$HOME/.config/session-env/niri/10-niri-env.conf}"
 }
 
 niri_session_env_dir() {
@@ -28,7 +28,7 @@ niri_parse_env_file() {
 }
 
 niri_parse_env_dir() {
-  local env_dir manifest entry
+  local env_dir manifest entry env_file
   local -a env_files=()
 
   env_dir="$(niri_session_env_dir)"
@@ -49,11 +49,15 @@ niri_parse_env_dir() {
   if [[ ${#env_files[@]} -eq 0 ]]; then
     env_files=(
       "${env_dir}/10-gtk.conf"
-      "$(niri_session_env_file)"
       "${env_dir}/20-qt.conf"
       "${env_dir}/30-ollama.conf"
       "${env_dir}/99-dms-icons.conf"
     )
+  fi
+
+  env_file="$(niri_session_env_file)"
+  if [[ -r "${env_file}" ]]; then
+    env_files+=("${env_file}")
   fi
 
   session_common_parse_env_dir "${env_files[@]}"
@@ -95,6 +99,18 @@ niri_ensure_session_identity() {
   export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
   export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-niri}"
   export DESKTOP_SESSION="${DESKTOP_SESSION:-niri}"
+}
+
+niri_clear_foreign_session_env() {
+  unset \
+    HYPRLAND_INSTANCE_SIGNATURE \
+    HYPRLAND_SOCKET \
+    HYPRLAND_LOG_WLR \
+    HYPRLAND_NO_RT \
+    HYPRLAND_NO_SD_NOTIFY \
+    HYPRLAND_NO_WATCHDOG_WARNING \
+    HYPRCURSOR_THEME \
+    HYPRCURSOR_SIZE
 }
 
 niri_session_under_uwsm() {

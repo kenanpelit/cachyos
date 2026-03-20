@@ -3,9 +3,17 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
+
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/modules/base/lib/core.sh"
+
+LEGACY_ENV_FILE="${USER_HOME}/.config/environment.d/10-hyprland.conf"
 
 "${MODULE_DIR}/scripts/render-theme.sh"
 "${MODULE_DIR}/scripts/render-monitors.sh"
+
+rm -f "${LEGACY_ENV_FILE}" 2>/dev/null || true
 
 if command -v systemctl >/dev/null 2>&1; then
   systemctl --user daemon-reload >/dev/null 2>&1 || true

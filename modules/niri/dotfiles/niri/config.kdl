@@ -44,11 +44,8 @@ layer-rule {
 // ------------------------------------------------------------------------
 // Startup
 // ------------------------------------------------------------------------
-// Long-running daemons are preferably started via systemd --user (niri-session.target).
-// Here we only start the minimal session bootstrap + helpers that must exist early.
-
-spawn-at-startup "/usr/bin/sh" "-lc" "test -x \"$HOME/.local/bin/niri-session-init\" && exec \"$HOME/.local/bin/niri-session-init\" || exit 0"
-spawn-at-startup "/usr/bin/env" "OSC_SHELL_STARTUP=1" "osc-shell" "ensure"
+// Long-running daemons are started via systemd --user (niri-session.target)
+// from the UWSM-managed compositor service. Keep startup spawns here minimal.
 
 // ------------------------------------------------------------------------
 // Input

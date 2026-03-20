@@ -10,6 +10,7 @@ if [[ -r "${helper_path}" ]]; then
   source "${helper_path}"
   niri_ensure_runtime_dir
   niri_load_session_env
+  niri_clear_foreign_session_env
   niri_normalize_session_paths
 fi
 

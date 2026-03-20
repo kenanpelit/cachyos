@@ -144,7 +144,8 @@ Daemon-stage units started by `hypr-daemons.target`:
   Generated session environment file derived from `theme/theme.env` plus the
   Hyprland-specific session defaults. Session identity such as
   `DESKTOP_SESSION=hyprland-uwsm` is now owned by the UWSM wrapper rather than
-  this file.
+  this file, and it is installed under
+  `~/.config/session-env/hyprland/10-hyprland.conf`.
 - `dotfiles/environment.d/hyprland-session.envlist`
   Ordered allowlist manifest for the Hyprland session wrapper. This keeps the
   session env stack data-driven instead of hard-coding file names in shell.
@@ -163,8 +164,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   profile. `render-monitors.sh --check` verifies that the generated file is in
   sync with the manifest and selected profile.
 - `modules/sessions/dotfiles/hyprland-uwsm-session`
-  UWSM-first wrapper. Loads the repo-managed `environment.d` stack, normalizes
-  path variables, and then enters `uwsm start`.
+  UWSM-first wrapper. Loads the repo-managed shared `environment.d` stack plus
+  the Hyprland-only session file, normalizes path variables, clears foreign
+  compositor variables, and then enters `uwsm start`.
 - `scripts/install.sh`
   Post-install hook that renders the theme and monitor files, removes the
   Hyprland-only keyring override, re-enables the stock
@@ -181,10 +183,11 @@ Daemon-stage units started by `hypr-daemons.target`:
 
 - Most Hyprland units require `WAYLAND_DISPLAY` and
   `XDG_CURRENT_DESKTOP=Hyprland`.
-- The repo-managed `~/.config/environment.d/*.conf` stack is the canonical
-  source for Hyprland session variables under UWSM, but it is consumed through
-  the ordered `hyprland-session.envlist` allowlist so Niri-only or ad-hoc user
-  overrides do not leak into the Hyprland session wrapper.
+- The repo-managed `~/.config/environment.d/*.conf` stack remains the shared
+  base layer, while Hyprland-only variables now live in
+  `~/.config/session-env/hyprland/10-hyprland.conf`. The ordered
+  `hyprland-session.envlist` allowlist keeps Niri-only or ad-hoc user
+  overrides from leaking into the Hyprland session wrapper.
   `hypr-session-init` avoids re-importing that full static environment when
   UWSM is already managing the session and only backfills missing compositor
   runtime variables as a safety net. When that fallback path is used, it emits

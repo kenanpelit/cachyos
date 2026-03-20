@@ -8,7 +8,7 @@ COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"
 source "${COMMON_HELPER}"
 
 hypr_session_env_file() {
-  printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-hyprland.conf}"
+  printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/session-env/hyprland/10-hyprland.conf}"
 }
 
 hypr_session_env_dir() {
@@ -28,7 +28,7 @@ hypr_parse_env_file() {
 }
 
 hypr_parse_env_dir() {
-  local env_dir manifest entry file
+  local env_dir manifest entry file env_file
   local -a env_files=()
 
   env_dir="$(hypr_session_env_dir)"
@@ -49,11 +49,15 @@ hypr_parse_env_dir() {
   if [[ ${#env_files[@]} -eq 0 ]]; then
     env_files=(
       "${env_dir}/10-gtk.conf"
-      "$(hypr_session_env_file)"
       "${env_dir}/20-qt.conf"
       "${env_dir}/30-ollama.conf"
       "${env_dir}/99-dms-icons.conf"
     )
+  fi
+
+  env_file="$(hypr_session_env_file)"
+  if [[ -r "${env_file}" ]]; then
+    env_files+=("${env_file}")
   fi
 
   session_common_parse_env_dir "${env_files[@]}"
@@ -134,6 +138,10 @@ hypr_detect_instance_signature() {
   if [[ -n "${sig:-}" ]]; then
     export HYPRLAND_INSTANCE_SIGNATURE="$sig"
   fi
+}
+
+hypr_clear_foreign_session_env() {
+  unset NIRI_SOCKET
 }
 
 hypr_session_under_uwsm() {

@@ -49,7 +49,7 @@ ensure_hypr_env() {
 }
 
 hypr_session_env_files() {
-  printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-hyprland.conf}"
+  printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/session-env/hyprland/10-hyprland.conf}"
 }
 
 normalize_colon_list() {
@@ -2020,7 +2020,7 @@ setup_environment() {
 	export SYSTEMD_OFFLINE=0
 	debug_log "✓ SYSTEMD_OFFLINE=0 set - systemd user services enabled"
 
-		# Shared session environment now lives in ~/.config/environment.d/10-hyprland.conf.
+		# Shared session environment now lives in ~/.config/session-env/hyprland/10-hyprland.conf.
 		apply_hypr_session_env
 	export WLR_LOG=INFO
 	debug_log "Wayland session: ${XDG_CURRENT_DESKTOP:-Hyprland}"

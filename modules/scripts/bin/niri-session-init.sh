@@ -75,12 +75,13 @@ main() {
   niri_ensure_runtime_dir
 
   if niri_session_under_uwsm; then
-    export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-niri}"
-    export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
-    export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-niri}"
     export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
     export GDMSESSION="${GDMSESSION:-niri-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+    niri_clear_foreign_session_env
+    if [[ -z "${XDG_CURRENT_DESKTOP:-}" || -z "${XDG_SESSION_TYPE:-}" || -z "${XDG_SESSION_DESKTOP:-}" ]]; then
+      niri_ensure_session_identity
+    fi
     if [[ -z "${WAYLAND_DISPLAY:-}" || -z "${NIRI_SOCKET:-}" ]]; then
       log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
       ensure_uwsm_runtime_environment
@@ -88,6 +89,7 @@ main() {
   else
     log_notice "UWSM not detected; using manual environment sync fallback"
     apply_session_env
+    niri_clear_foreign_session_env
     normalize_session_paths
     niri_detect_wayland_display
     niri_detect_socket

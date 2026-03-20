@@ -2694,7 +2694,7 @@ doctor)
           graphical-session.target \
           xdg-desktop-autostart.target \
           niri-bootstrap.service \
-          niri-desktop-settings.service \
+          niri-shell-ensure.service \
           niri-post-bootstrap.service \
           niri-status-notifier-ready.service \
           niri-polkit-agent.service \
