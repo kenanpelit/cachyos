@@ -107,6 +107,12 @@ skip_automanaged_unit() {
       # enabled by the generic synchronizer.
       return 0
       ;;
+    sunsetr:sunsetr.service|sunsetr:sunsetr-auto-profile.timer)
+      # Sunsetr manages its own Niri-scoped enablement and reenable lifecycle in
+      # the module install hook. Letting the generic synchronizer touch these
+      # units every sync creates noisy duplicate enable passes.
+      return 0
+      ;;
   esac
 
   return 1
