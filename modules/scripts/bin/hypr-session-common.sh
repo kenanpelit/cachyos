@@ -142,7 +142,19 @@ hypr_detect_instance_signature() {
 }
 
 hypr_clear_foreign_session_env() {
-  unset NIRI_SOCKET
+  unset \
+    WAYLAND_DISPLAY \
+    DISPLAY \
+    NIRI_SOCKET \
+    HYPRLAND_INSTANCE_SIGNATURE \
+    HYPRLAND_SOCKET \
+    UWSM_WAIT_VARNAMES \
+    UWSM_FINALIZE_VARNAMES \
+    XDG_CURRENT_DESKTOP \
+    XDG_SESSION_DESKTOP \
+    XDG_MENU_PREFIX \
+    DESKTOP_SESSION \
+    GDMSESSION
 }
 
 hypr_session_under_uwsm() {

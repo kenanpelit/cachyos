@@ -9,8 +9,8 @@ if [[ -r "${helper_path}" ]]; then
   # shellcheck source=/dev/null
   source "${helper_path}"
   niri_ensure_runtime_dir
-  niri_load_session_env
   niri_clear_foreign_session_env
+  niri_load_session_env
   niri_normalize_session_paths
 fi
 
@@ -18,12 +18,10 @@ export XDG_CURRENT_DESKTOP=niri
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=niri
 export DESKTOP_SESSION=niri-uwsm
-export GDMSESSION="${GDMSESSION:-niri-uwsm}"
+export GDMSESSION=niri-uwsm
 export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
 export NOCTALIA_STARTUP_HINT="${NOCTALIA_STARTUP_HINT:-1}"
 export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
-export UWSM_WAIT_VARNAMES=NIRI_SOCKET
-export UWSM_FINALIZE_VARNAMES="NIRI_SOCKET XCURSOR_SIZE XCURSOR_THEME"
 
 if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
   session_common_unset_manager_env \
@@ -50,16 +48,14 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     "GDMSESSION=${GDMSESSION}" \
     "GTK_USE_PORTAL=${GTK_USE_PORTAL}" \
     "NOCTALIA_STARTUP_HINT=${NOCTALIA_STARTUP_HINT}" \
-    "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}" \
-    "UWSM_WAIT_VARNAMES=${UWSM_WAIT_VARNAMES}" \
-    "UWSM_FINALIZE_VARNAMES=${UWSM_FINALIZE_VARNAMES}"
+    "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}"
 fi
 
 if command -v uwsm >/dev/null 2>&1; then
   if command -v niri-session >/dev/null 2>&1; then
-    exec uwsm start -- niri-session
+    exec uwsm start -D niri -e -- niri-session
   fi
-  exec uwsm start -- niri
+  exec uwsm start -D niri -e -- niri
 fi
 
 if command -v niri-session >/dev/null 2>&1; then

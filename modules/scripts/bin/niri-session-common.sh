@@ -104,6 +104,16 @@ niri_ensure_session_identity() {
 
 niri_clear_foreign_session_env() {
   unset \
+    WAYLAND_DISPLAY \
+    DISPLAY \
+    NIRI_SOCKET \
+    UWSM_WAIT_VARNAMES \
+    UWSM_FINALIZE_VARNAMES \
+    XDG_CURRENT_DESKTOP \
+    XDG_SESSION_DESKTOP \
+    XDG_MENU_PREFIX \
+    DESKTOP_SESSION \
+    GDMSESSION \
     HYPRLAND_INSTANCE_SIGNATURE \
     HYPRLAND_SOCKET \
     HYPRLAND_LOG_WLR \

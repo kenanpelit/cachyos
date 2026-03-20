@@ -9,8 +9,8 @@ if [[ -r "${helper_path}" ]]; then
   # shellcheck source=/dev/null
   source "${helper_path}"
   hypr_ensure_runtime_dir
-  hypr_load_session_env
   hypr_clear_foreign_session_env
+  hypr_load_session_env
   hypr_normalize_session_paths
 fi
 
@@ -18,11 +18,9 @@ export XDG_CURRENT_DESKTOP=Hyprland
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=Hyprland
 export DESKTOP_SESSION=hyprland-uwsm
-export GDMSESSION="${GDMSESSION:-hyprland-uwsm}"
+export GDMSESSION=hyprland-uwsm
 export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
 export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
-export UWSM_WAIT_VARNAMES=HYPRLAND_INSTANCE_SIGNATURE
-export UWSM_FINALIZE_VARNAMES="HYPRLAND_INSTANCE_SIGNATURE HYPRLAND_CMD HYPRCURSOR_THEME HYPRCURSOR_SIZE XCURSOR_SIZE XCURSOR_THEME"
 
 if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
   session_common_unset_manager_env \
@@ -48,16 +46,14 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     "DESKTOP_SESSION=${DESKTOP_SESSION}" \
     "GDMSESSION=${GDMSESSION}" \
     "GTK_USE_PORTAL=${GTK_USE_PORTAL}" \
-    "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}" \
-    "UWSM_WAIT_VARNAMES=${UWSM_WAIT_VARNAMES}" \
-    "UWSM_FINALIZE_VARNAMES=${UWSM_FINALIZE_VARNAMES}"
+    "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}"
 fi
 
 if command -v uwsm >/dev/null 2>&1; then
   if command -v start-hyprland >/dev/null 2>&1; then
-    exec uwsm start -- start-hyprland
+    exec uwsm start -D Hyprland -e -- start-hyprland
   fi
-  exec uwsm start -- Hyprland
+  exec uwsm start -D Hyprland -e -- Hyprland
 fi
 
 if command -v start-hyprland >/dev/null 2>&1; then
