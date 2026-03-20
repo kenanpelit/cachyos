@@ -10,11 +10,16 @@ load_hypr_env() {
   [[ -r "$helper" ]] || helper="${SCRIPT_DIR}/hypr-session-common"
   # shellcheck source=hypr-session-common.sh
   source "$helper"
-  hypr_load_session_env
   hypr_clear_foreign_session_env
+  hypr_load_session_env
   hypr_normalize_session_paths
   hypr_ensure_runtime_dir
+  export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Hyprland}"
+  export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+  export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
+  export DESKTOP_SESSION="${DESKTOP_SESSION:-hyprland-uwsm}"
   hypr_detect_wayland_display || true
+  hypr_detect_instance_signature || true
 }
 
 load_niri_env() {
@@ -22,10 +27,12 @@ load_niri_env() {
   [[ -r "$helper" ]] || helper="${SCRIPT_DIR}/niri-session-common"
   # shellcheck source=niri-session-common.sh
   source "$helper"
-  niri_load_session_env
   niri_clear_foreign_session_env
+  niri_load_session_env
   niri_normalize_session_paths
   niri_ensure_runtime_dir
+  niri_ensure_session_identity
+  export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
   niri_detect_wayland_display || true
   niri_detect_socket || true
 }
