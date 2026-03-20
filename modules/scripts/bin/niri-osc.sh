@@ -234,10 +234,12 @@ Commands:
   env                Export env to systemd --user (was: niri-session-start)
   init               Bootstrap session (was: niri-init)
   lock               Lock session via DMS/logind (was: niri-lock)
+  size               Set explicit column width and window height
   go                 Move windows to target workspaces (was: niri-arrange-windows)
   here               Bring window here (or launch); `all` gathers a set
   cast               Dynamic screencast helpers (window/monitor/clear/pick)
   flow               Legacy workspace/monitor compatibility shim
+  monitor-smart-next Move workspace to next monitor, else focus next monitor
   doctor             Print session diagnostics (try: --tree, --logs)
   float              Toggle between floating and tiling modes with preset size
   zen                Toggle Zen Mode (hide gaps, borders, bar)
@@ -1555,6 +1557,29 @@ lock)
   )
   ;;
 
+size)
+  # ----------------------------------------------------------------------------
+  # Explicit geometry helper for keybinds.
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    width="${1:-}"
+    height="${2:-}"
+
+    if [[ ! "${width}" =~ ^[0-9]+$ ]] || [[ ! "${height}" =~ ^[0-9]+$ ]]; then
+      echo "Usage: niri-osc set size <width> <height>" >&2
+      exit 2
+    fi
+
+    command -v niri >/dev/null 2>&1 || exit 0
+    niri msg version >/dev/null 2>&1 || exit 0
+
+    niri msg action set-column-width "${width}" >/dev/null 2>&1 || exit 1
+    exec niri msg action set-window-height "${height}"
+  )
+  ;;
+
 arrange-windows)
   echo "niri-osc set: 'arrange-windows' is deprecated; use 'go'." >&2
   exec "$0" go "$@"
@@ -2001,6 +2026,25 @@ EOF
       exit 2
       ;;
     esac
+  )
+  ;;
+
+monitor-smart-next)
+  # ----------------------------------------------------------------------------
+  # Try moving the current workspace to the next monitor; if that action is not
+  # possible in the current layout, just focus the next monitor.
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    command -v niri >/dev/null 2>&1 || exit 0
+    niri msg version >/dev/null 2>&1 || exit 0
+
+    if niri msg action move-workspace-to-monitor-next >/dev/null 2>&1; then
+      exit 0
+    fi
+
+    exec niri msg action focus-monitor-next
   )
   ;;
 

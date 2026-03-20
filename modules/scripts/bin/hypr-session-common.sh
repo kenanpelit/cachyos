@@ -48,6 +48,7 @@ hypr_parse_env_dir() {
 
   if [[ ${#env_files[@]} -eq 0 ]]; then
     env_files=(
+      "${env_dir}/00-wayland.conf"
       "${env_dir}/10-gtk.conf"
       "${env_dir}/20-qt.conf"
       "${env_dir}/30-ollama.conf"

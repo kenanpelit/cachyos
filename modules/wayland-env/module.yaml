@@ -1,0 +1,9 @@
+tags:
+- wm
+- desktop
+description: Shared Wayland session environment defaults
+depends_on:
+- base
+dotfiles:
+- source: dotfiles/environment.d/00-wayland.conf
+  target: ~/.config/environment.d/00-wayland.conf

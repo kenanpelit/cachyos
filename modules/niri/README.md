@@ -15,7 +15,8 @@ UWSM-first session wrapper.
   Niri through the same wrapper/session identity.
 - The wrapper loads the curated Niri environment stack through
   `niri-session-common` and the manifest
-  `~/.config/environment.d/niri-session.envlist`, appends the
+  `~/.config/environment.d/niri-session.envlist`, which now starts with the
+  shared Wayland layer at `~/.config/environment.d/00-wayland.conf`, appends the
   Niri-only session file at `~/.config/session-env/niri/10-niri-env.conf`,
   normalizes path variables, applies the Niri session identity
   (`DESKTOP_SESSION=niri-uwsm`, `XDG_CURRENT_DESKTOP=niri`), clears foreign
@@ -124,7 +125,8 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
 - Units that need deterministic compositor readiness now also require
   `NIRI_SOCKET`.
 - The repo-managed `~/.config/environment.d/*.conf` stack remains the shared
-  base layer, but Niri-only variables now live in
+  base layer. `modules/wayland-env/dotfiles/environment.d/00-wayland.conf`
+  owns compositor-agnostic Wayland toolkit/runtime hints, while Niri-only variables live in
   `~/.config/session-env/niri/10-niri-env.conf` and are consumed through the
   curated Niri-specific allowlist manifest so compositor-specific overrides do
   not leak across sessions. `niri-session-init` remains available as a manual

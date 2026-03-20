@@ -164,9 +164,10 @@ Daemon-stage units started by `hypr-daemons.target`:
   profile. `render-monitors.sh --check` verifies that the generated file is in
   sync with the manifest and selected profile.
 - `modules/sessions/dotfiles/hyprland-uwsm-session`
-  UWSM-first wrapper. Loads the repo-managed shared `environment.d` stack plus
-  the Hyprland-only session file, normalizes path variables, clears foreign
-  compositor variables, and then enters `uwsm start`.
+  UWSM-first wrapper. Loads the repo-managed shared `environment.d` stack
+  including `00-wayland.conf`, plus the Hyprland-only session file, normalizes
+  path variables, clears foreign compositor variables, and then enters
+  `uwsm start`.
 - `scripts/install.sh`
   Post-install hook that renders the theme and monitor files, removes the
   Hyprland-only keyring override, re-enables the stock
@@ -184,7 +185,9 @@ Daemon-stage units started by `hypr-daemons.target`:
 - Most Hyprland units require `WAYLAND_DISPLAY` and
   `XDG_CURRENT_DESKTOP=Hyprland`.
 - The repo-managed `~/.config/environment.d/*.conf` stack remains the shared
-  base layer, while Hyprland-only variables now live in
+  base layer. `modules/wayland-env/dotfiles/environment.d/00-wayland.conf`
+  owns compositor-agnostic Wayland toolkit/runtime hints, while Hyprland-only
+  variables now live in
   `~/.config/session-env/hyprland/10-hyprland.conf`. The ordered
   `hyprland-session.envlist` allowlist keeps Niri-only or ad-hoc user
   overrides from leaking into the Hyprland session wrapper.

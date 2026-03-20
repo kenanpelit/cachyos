@@ -1,5 +1,6 @@
 # Ordered Hyprland session environment allowlist.
 # Relative entries are resolved under ~/.config/environment.d/.
+00-wayland.conf
 10-gtk.conf
 20-qt.conf
 30-ollama.conf

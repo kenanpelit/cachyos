@@ -4,6 +4,7 @@ tags:
 description: Niri compositor config (UWSM-first)
 depends_on:
 - base
+- wayland-env
 - xdg-dirs
 - scripts
 - fonts

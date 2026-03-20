@@ -105,7 +105,7 @@ debug {
 switch-events {
   // Lock when the lid is closed (logind integration).
   lid-close {
-    spawn "sh" "-c" "niri-osc set lock --logind || true"
+    spawn "niri-osc" "set" "lock" "--logind"
   }
 }
 
@@ -272,10 +272,10 @@ binds {
   Mod+Shift+R hotkey-overlay-title="Width 80%"          { set-column-width "80%"; }
   Mod+Alt+R   hotkey-overlay-title="Reset Window Height" { reset-window-height; }
 
-  // Fixed geometry helpers via niri msg
-  Mod+0 hotkey-overlay-title="Size: 960x540 (Half)" { spawn "sh" "-c" "niri msg action set-column-width 960 && niri msg action set-window-height 540"; }
-  Mod+Shift+0 hotkey-overlay-title="Size: 1280x720 (HD)" { spawn "sh" "-c" "niri msg action set-column-width 1280 && niri msg action set-window-height 720"; }
-  Mod+Ctrl+0 hotkey-overlay-title="Size: 1920x1080 (FHD)" { spawn "sh" "-c" "niri msg action set-column-width 1920 && niri msg action set-window-height 1080"; }
+  // Fixed geometry helpers without spawning an intermediate shell.
+  Mod+0 hotkey-overlay-title="Size: 960x540 (Half)" { spawn "niri-osc" "set" "size" "960" "540"; }
+  Mod+Shift+0 hotkey-overlay-title="Size: 1280x720 (HD)" { spawn "niri-osc" "set" "size" "1280" "720"; }
+  Mod+Ctrl+0 hotkey-overlay-title="Size: 1920x1080 (FHD)" { spawn "niri-osc" "set" "size" "1920" "1080"; }
 
   // Fine-grained sizing
   Mod+Minus       hotkey-overlay-title="Width -5%"  { set-column-width "-5%"; }
@@ -537,7 +537,7 @@ binds {
     set-dynamic-cast-window
   }
   Mod+Ctrl+Alt+W repeat=false hotkey-overlay-title="Pick Cast Window" {
-    spawn-sh "niri msg action set-dynamic-cast-window --id $(niri msg --json pick-window | jq -r .id)"
+    spawn "niri-osc" "set" "cast" "pick"
   }
   Mod+Ctrl+Shift+M repeat=false hotkey-overlay-title="Cast Focused Monitor" {
     set-dynamic-cast-monitor
@@ -556,7 +556,7 @@ binds {
     spawn "niri" "msg" "action" "load-config-file"
   }
   Mod+Ctrl+Alt+S repeat=false hotkey-overlay-title="Session Refresh" {
-    spawn-sh "$HOME/.local/bin/niri-osc set env"
+    spawn "niri-osc" "set" "env"
   }
 
   Mod+Ctrl+Alt+D repeat=false hotkey-overlay-title="Session Doctor" {
@@ -572,10 +572,10 @@ binds {
   // Custom apps
   // ----------------------------------------------------------------------
   Alt+T allow-inhibiting=false repeat=false hotkey-overlay-title="KKENP Start" {
-    spawn "/usr/bin/sh" "-lc" "uwsm app -a start-kkenp -- \"$HOME/.local/bin/start-kkenp\" >>\"$HOME/.cache/niri-hotkeys.log\" 2>&1"
+    spawn "uwsm" "app" "-a" "start-kkenp" "--" "start-kkenp"
   }
   Alt+N allow-inhibiting=false repeat=false hotkey-overlay-title="Notes (Anotes)" {
-    spawn "/usr/bin/sh" "-lc" "exec uwsm app -a anotes -- \"$HOME/.local/bin/anotes\""
+    spawn "uwsm" "app" "-a" "anotes" "--" "anotes"
   }
 
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" {
@@ -587,7 +587,7 @@ binds {
   }
 
   Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" {
-    spawn "/usr/bin/sh" "-lc" "exec uwsm app -a rofi-launcher -- \"$HOME/.local/bin/rofi-launcher\""
+    spawn "uwsm" "app" "-a" "rofi-launcher" "--" "rofi-launcher"
   }
 
   Mod+Ctrl+S repeat=false hotkey-overlay-title="Sticky Toggle" {
@@ -703,7 +703,7 @@ binds {
     spawn "niri" "msg" "action" "move-workspace-to-monitor-next"
   }
   Mod+Escape repeat=false hotkey-overlay-title="Smart Move/Focus" {
-    spawn "sh" "-c" "niri msg action move-workspace-to-monitor-next || niri msg action focus-monitor-next"
+    spawn "niri-osc" "set" "monitor-smart-next"
   }
 
   Mod+Alt+Shift+Left hotkey-overlay-title="Move to Monitor Left" { move-column-to-monitor-left; }

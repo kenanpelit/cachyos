@@ -4,6 +4,7 @@ tags:
 description: Hyprland config
 depends_on:
 - base
+- wayland-env
 - scripts
 - wayland-autostart
 post_install_hook: scripts/install.sh
