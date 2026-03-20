@@ -41,6 +41,7 @@ enabled_modules:
 - wezterm
 - alacritty
 - ghostty
+- wayland-env
 - gtk
 - qt
 - niri
