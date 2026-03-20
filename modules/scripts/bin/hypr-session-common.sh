@@ -143,6 +143,7 @@ hypr_detect_instance_signature() {
 
 hypr_clear_foreign_session_env() {
   unset \
+    GDK_BACKEND \
     WAYLAND_DISPLAY \
     DISPLAY \
     NIRI_SOCKET \

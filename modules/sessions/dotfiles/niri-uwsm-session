@@ -25,6 +25,7 @@ export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
 
 if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
   session_common_unset_manager_env \
+    GDK_BACKEND \
     WAYLAND_DISPLAY \
     DISPLAY \
     NIRI_SOCKET \
