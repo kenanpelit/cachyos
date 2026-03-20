@@ -79,6 +79,16 @@
         "widgets": {
             "center": [
                 {
+                    "defaultSettings": {
+                        "customColor": "none",
+                        "showConditionIcon": true,
+                        "showTempUnit": true,
+                        "showTempValue": true,
+                        "tooltipOption": "everything"
+                    },
+                    "id": "plugin:weather-indicator"
+                },
+                {
                     "clockColor": "none",
                     "customFont": "",
                     "formatHorizontal": "HH:mm ddd, MMM dd",
@@ -120,24 +130,19 @@
                 },
                 {
                     "defaultSettings": {
-                        "activeTodoCount": 0,
-                        "autosaveDelay": 700,
-                        "count": 0,
-                        "notes": [
-                        ],
-                        "scratchpadContent": "",
-                        "showCountsInBar": true,
-                        "todoCount": 0,
-                        "todos": [
-                        ]
-                    },
-                    "id": "plugin:6ee06e:notes"
-                },
-                {
-                    "defaultSettings": {
                         "refreshInterval": 60000
                     },
                     "id": "plugin:6ee06e:npodman"
+                },
+                {
+                    "defaultSettings": {
+                        "gammaStep": 2,
+                        "iconOnlyInBar": false,
+                        "showLabelInBar": false,
+                        "tempStep": 150,
+                        "watchdogInterval": 20000
+                    },
+                    "id": "plugin:6ee06e:nsunsetr"
                 },
                 {
                     "defaultSettings": {
@@ -149,28 +154,6 @@
                         "mode": "region"
                     },
                     "id": "plugin:screenshot"
-                },
-                {
-                    "defaultSettings": {
-                        "enableCross": true,
-                        "enableWindowsSelection": true,
-                        "screenshotEditor": "swappy"
-                    },
-                    "id": "plugin:screen-shot-and-record"
-                },
-                {
-                    "iconColor": "none",
-                    "id": "NightLight"
-                },
-                {
-                    "defaultSettings": {
-                        "customColor": "none",
-                        "showConditionIcon": true,
-                        "showTempUnit": true,
-                        "showTempValue": true,
-                        "tooltipOption": "everything"
-                    },
-                    "id": "plugin:weather-indicator"
                 },
                 {
                     "compactMode": false,
@@ -279,16 +262,6 @@
                     "id": "Tray",
                     "pinned": [
                     ]
-                },
-                {
-                    "defaultSettings": {
-                        "errorIcon": "alert-circle",
-                        "iconColor": "primary",
-                        "loadingIcon": "loader",
-                        "refreshInterval": 300,
-                        "successIcon": "network"
-                    },
-                    "id": "plugin:6ee06e:nip"
                 },
                 {
                     "defaultSettings": {

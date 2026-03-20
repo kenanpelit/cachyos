@@ -22,19 +22,23 @@
         },
         "6ee06e:nip": {
             "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
         },
         "6ee06e:notes": {
             "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
         },
         "6ee06e:npodman": {
             "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
         },
         "6ee06e:npower": {
             "enabled": true,
             "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+        },
+        "6ee06e:nsunsetr": {
+            "enabled": true,
+            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
         },
         "6ee06e:nufw": {
             "enabled": true,
