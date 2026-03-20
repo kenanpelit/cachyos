@@ -6,6 +6,8 @@ depends_on:
 dotfiles:
 - source: dotfiles/xdg-desktop-portal/portals.conf
   target: ~/.config/xdg-desktop-portal/niri-portals.conf
+- source: dotfiles/dbus-1/services/org.gnome.Settings.GlobalShortcutsProvider.service
+  target: ~/.local/share/dbus-1/services/org.gnome.Settings.GlobalShortcutsProvider.service
 
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

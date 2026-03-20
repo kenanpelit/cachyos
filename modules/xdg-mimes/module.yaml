@@ -9,9 +9,5 @@ dotfiles:
   target: ~/.local/share/applications
 - source: dotfiles/mimeapps.list
   target: ~/.config/mimeapps.list
-- source: dotfiles/dbus-1/services/org.freedesktop.FileManager1.service
-  target: ~/.local/share/dbus-1/services/org.freedesktop.FileManager1.service
-- source: dotfiles/dbus-1/services/org.Nemo.service
-  target: ~/.local/share/dbus-1/services/org.Nemo.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

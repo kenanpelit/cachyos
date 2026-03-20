@@ -2,8 +2,33 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MODULE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 source "$REPO_ROOT/modules/base/lib/core.sh"
+
+plugins_template="$MODULE_DIR/dotfiles/noctalia/plugins.json"
+plugins_state="$USER_HOME/.config/noctalia/plugins.json"
+
+ensure_writable_plugins_state() {
+  run_as_user mkdir -p "$USER_HOME/.config/noctalia"
+
+  if [[ -L "$plugins_state" ]]; then
+    run_as_user /usr/bin/sh -c '
+      src="$1"
+      dst="$2"
+      tmp="${dst}.tmp.$$"
+      cat "$dst" > "$tmp" 2>/dev/null || cat "$src" > "$tmp"
+      rm -f "$dst"
+      mv "$tmp" "$dst"
+    ' _ "$plugins_template" "$plugins_state"
+  fi
+
+  if [[ ! -f "$plugins_state" ]]; then
+    run_as_user install -m 644 "$plugins_template" "$plugins_state"
+  fi
+}
+
+ensure_writable_plugins_state
 
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true

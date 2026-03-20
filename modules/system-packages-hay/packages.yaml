@@ -44,7 +44,6 @@ packages:
 - dmraid
 - dms-shell-git
 - dnsmasq
-- dolphin
 - dosfstools
 - e2fsprogs
 - efitools
