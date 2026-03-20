@@ -1,9 +1,8 @@
 [Unit]
 Description=Track sunsetr presets by time while running Niri
 DefaultDependencies=no
-After=graphical-session.target sunsetr.service
-BindsTo=graphical-session.target
-PartOf=graphical-session.target
+After=niri-session.target sunsetr.service
+PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 ConditionPathExists=%h/.config/sunsetr/schedule.conf
@@ -25,4 +24,4 @@ Persistent=true
 AccuracySec=30s
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=niri-session.target

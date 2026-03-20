@@ -2,8 +2,8 @@
 Description=Sunsetr blue-light and gamma filter
 Documentation=https://github.com/psi4j/sunsetr?tab=readme-ov-file#sunsetr
 BindsTo=wayland-wm@niri\x2dsession.service
-After=graphical-session.target wayland-wm@niri\x2dsession.service dbus.service
-PartOf=graphical-session.target wayland-wm@niri\x2dsession.service
+After=niri-session.target wayland-wm@niri\x2dsession.service dbus.service
+PartOf=niri-session.target wayland-wm@niri\x2dsession.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 ConditionPathExists=/usr/bin/sunsetr
@@ -28,4 +28,4 @@ ConfigurationDirectory=sunsetr
 ConfigurationDirectoryMode=0755
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=niri-session.target

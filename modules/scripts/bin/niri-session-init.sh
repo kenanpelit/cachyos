@@ -77,7 +77,6 @@ main() {
     export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
     export GDMSESSION="${GDMSESSION:-niri-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
-    niri_clear_foreign_session_env
     if [[ -z "${XDG_CURRENT_DESKTOP:-}" || -z "${XDG_SESSION_TYPE:-}" || -z "${XDG_SESSION_DESKTOP:-}" ]]; then
       niri_ensure_session_identity
     fi
@@ -87,8 +86,8 @@ main() {
     fi
   else
     log_notice "UWSM not detected; using manual environment sync fallback"
-    apply_session_env
     niri_clear_foreign_session_env
+    apply_session_env
     normalize_session_paths
     niri_detect_wayland_display
     niri_detect_socket

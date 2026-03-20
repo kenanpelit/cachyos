@@ -1,8 +1,7 @@
 [Unit]
 Description=Apply the scheduled sunsetr preset for the current time
-After=graphical-session.target sunsetr.service
-BindsTo=graphical-session.target
-PartOf=graphical-session.target
+After=niri-session.target sunsetr.service
+PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 ConditionPathExists=%h/.local/bin/sunsetr-set

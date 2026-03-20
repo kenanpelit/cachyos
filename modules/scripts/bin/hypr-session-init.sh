@@ -91,15 +91,14 @@ main() {
     export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
     export DESKTOP_SESSION="${DESKTOP_SESSION:-hyprland-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
-    hypr_clear_foreign_session_env
     if [[ -z "${WAYLAND_DISPLAY:-}" || -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
       log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
       ensure_uwsm_runtime_environment
     fi
   else
     log_notice "UWSM not detected; using manual environment sync fallback"
-    apply_session_env
     hypr_clear_foreign_session_env
+    apply_session_env
     normalize_session_paths
     hypr_detect_wayland_display
     hypr_detect_instance_signature
