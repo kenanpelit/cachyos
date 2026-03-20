@@ -1,11 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-MODULE_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
-REPO_ROOT="$(cd -- "$MODULE_DIR/../.." && pwd -P)"
-source "$REPO_ROOT/modules/base/lib/core.sh"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MODULE_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd -- "$MODULE_DIR/../.." && pwd)"
+REPO_ROOT_PHYS="$(cd -- "$MODULE_DIR/../.." && pwd -P)"
+source "$REPO_ROOT_PHYS/modules/base/lib/core.sh"
 
+canonical_repo_root() {
+  local candidate="${USER_HOME:-$HOME}/.config/arch-config"
+  local candidate_phys=""
+
+  candidate_phys="$(readlink -f "$candidate" 2>/dev/null || true)"
+  if [[ -n "$candidate_phys" && "$candidate_phys" == "$REPO_ROOT_PHYS" ]]; then
+    printf '%s\n' "$candidate"
+  else
+    printf '%s\n' "$REPO_ROOT"
+  fi
+}
+
+REPO_ROOT="$(canonical_repo_root)"
 script_src="$REPO_ROOT/modules/scripts/bin/sunsetr-set.sh"
 bin_dir="$USER_HOME/.local/bin"
 
