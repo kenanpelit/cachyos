@@ -533,6 +533,25 @@ binds {
     spawn-sh "$HOME/.local/bin/osc-shell ipc call plugin:screenshot takeScreenshot window"
   }
 
+  // Screencast helpers
+  // Pick "niri Dynamic Cast Target" in browser/app share dialogs, then use
+  // these binds to switch what that stream shows.
+  Mod+Ctrl+Shift+W repeat=false hotkey-overlay-title="Cast Focused Window" {
+    set-dynamic-cast-window
+  }
+  Mod+Ctrl+Alt+W repeat=false hotkey-overlay-title="Pick Cast Window" {
+    spawn-sh "niri msg action set-dynamic-cast-window --id $(niri msg --json pick-window | jq -r .id)"
+  }
+  Mod+Ctrl+Shift+M repeat=false hotkey-overlay-title="Cast Focused Monitor" {
+    set-dynamic-cast-monitor
+  }
+  Mod+Ctrl+Shift+X repeat=false hotkey-overlay-title="Clear Cast Target" {
+    clear-dynamic-cast-target
+  }
+  Mod+Ctrl+Alt+F repeat=false hotkey-overlay-title="Windowed Fullscreen" {
+    toggle-windowed-fullscreen
+  }
+
   // ----------------------------------------------------------------------
   // System config / diagnostics
   // ----------------------------------------------------------------------
@@ -1036,6 +1055,16 @@ window-rule {
 }
 
 window-rule {
+  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  match app-id=r#"^org\.gnome\.World\.Secrets$"#
+  match app-id=r#"^com\.bitwarden\.desktop$"#
+  match app-id=r#"^io\.ente\.auth$"#
+  match app-id=r#"^clipse$"#
+  match app-id=r#"^(com\.github\.hluk\.copyq|copyq)$"#
+  match app-id=r#"^gcr-prompter$"#
+  match app-id=r#"^polkit-gnome-authentication-agent-1$"#
+  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|com\.rtosta\.zapzap|org\.telegram\.desktop|Signal|Slack|whatsapp-for-linux)$"#
+  match app-id=r#"^(nm-connection-editor|blueman-manager)$"#
   block-out-from "screen-capture"
 }
 
