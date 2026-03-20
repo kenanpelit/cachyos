@@ -8,57 +8,37 @@ source "$REPO_ROOT/modules/base/lib/core.sh"
 
 noctalia_template_dir="$MODULE_DIR/dotfiles/noctalia"
 noctalia_config_dir="$USER_HOME/.config/noctalia"
+noctalia_backup_root="$USER_HOME/.local/state/cachy/backups/noctalia"
 
-ensure_real_dir() {
-  local dir="$1"
-  if run_as_user test -L "$dir"; then
-    run_as_user rm -f "$dir"
-  fi
-  run_as_user mkdir -p "$dir"
-}
+sync_existing_config_into_repo() {
+  local timestamp backup_dir
 
-ensure_writable_file_from_template() {
-  local rel="$1"
-  local src="$noctalia_template_dir/$rel"
-  local dst="$noctalia_config_dir/$rel"
-  local parent
-  parent="$(dirname "$dst")"
+  if run_as_user test -d "$noctalia_config_dir" && ! run_as_user test -L "$noctalia_config_dir"; then
+    if command -v rsync >/dev/null 2>&1; then
+      run_as_user rsync -a "$noctalia_config_dir/." "$noctalia_template_dir/"
+    else
+      run_as_user cp -a "$noctalia_config_dir/." "$noctalia_template_dir/"
+    fi
 
-  [[ -r "$src" ]] || return 0
-
-  run_as_user mkdir -p "$parent"
-  if run_as_user test -L "$dst"; then
-    run_as_user rm -f "$dst"
-  fi
-  if ! run_as_user test -f "$dst"; then
-    run_as_user install -m 644 "$src" "$dst"
+    timestamp="$(date +%Y%m%d-%H%M%S)"
+    backup_dir="${noctalia_backup_root}/config-${timestamp}"
+    run_as_user mkdir -p "$noctalia_backup_root"
+    run_as_user mv "$noctalia_config_dir" "$backup_dir"
+  elif run_as_user test -e "$noctalia_config_dir" && ! run_as_user test -L "$noctalia_config_dir"; then
+    timestamp="$(date +%Y%m%d-%H%M%S)"
+    backup_dir="${noctalia_backup_root}/path-${timestamp}"
+    run_as_user mkdir -p "$noctalia_backup_root"
+    run_as_user mv "$noctalia_config_dir" "$backup_dir"
   fi
 }
 
-sync_tree_from_template() {
-  local rel="$1"
-  local src="$noctalia_template_dir/$rel/"
-  local dst="$noctalia_config_dir/$rel/"
-
-  ensure_real_dir "$noctalia_config_dir/$rel"
-
-  if command -v rsync >/dev/null 2>&1; then
-    run_as_user rsync -a --delete \
-      --exclude 'clipper/pinned.json' \
-      --exclude 'clipper/notecards/' \
-      "$src" "$dst"
-  else
-    run_as_user cp -a "$src/." "$dst"
-  fi
+ensure_symlinked_config() {
+  run_as_user mkdir -p "$(dirname "$noctalia_config_dir")"
+  run_as_user ln -sfn "$noctalia_template_dir" "$noctalia_config_dir"
 }
 
-ensure_real_dir "$noctalia_config_dir"
-sync_tree_from_template "colorschemes"
-sync_tree_from_template "plugins"
-ensure_writable_file_from_template "colors.json"
-ensure_writable_file_from_template "settings.json"
-ensure_writable_file_from_template "settings.json.bak"
-ensure_writable_file_from_template "plugins.json"
+sync_existing_config_into_repo
+ensure_symlinked_config
 
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
@@ -66,14 +46,3 @@ if command -v systemctl >/dev/null 2>&1; then
     run_as_user systemctl --user try-restart noctalia.service >/dev/null 2>&1 || true
   fi
 fi
-
-# Noctalia ships a polkit plugin upstream, but Hyprland/Niri sessions already
-# use dedicated systemd-managed polkit agents. Remove any stale local copy so
-# plugin updates cannot reintroduce the duplicate agent.
-run_as_user rm -rf "$USER_HOME/.config/noctalia/plugins/polkit-agent" || true
-run_as_user mkdir -p "$USER_HOME/.config/noctalia/plugins/clipper/notecards"
-run_as_user /usr/bin/sh -c 'pinned="$1"; [ -f "$pinned" ] || printf "%s\n" "{\"items\":[]}" > "$pinned"' _ "$USER_HOME/.config/noctalia/plugins/clipper/pinned.json"
-
-# Not: settings.json manipülasyonu dosya yapısını bozabileceği ve dcli sync 
-# çakışması yaratabileceği için devre dışı bırakılmıştır.
-# Ayarlar artık sadece Noctalia UI üzerinden yönetilmelidir.
