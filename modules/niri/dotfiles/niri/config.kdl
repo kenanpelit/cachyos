@@ -1136,6 +1136,23 @@ layer-rule {
 }
 
 layer-rule {
+  match namespace=r#"^noctalia:niri-overview-launcher$"#
+  block-out-from "screencast"
+}
+layer-rule {
+  match namespace=r#"^noctalia:niri-overview-launcher$"#
+  block-out-from "screen-capture"
+}
+layer-rule {
+  match namespace=r#"^noctalia-shell:regionSelector$"#
+  block-out-from "screencast"
+}
+layer-rule {
+  match namespace=r#"^noctalia-shell:regionSelector$"#
+  block-out-from "screen-capture"
+}
+
+layer-rule {
   match namespace="^notifications$"
   geometry-corner-radius 12
 }

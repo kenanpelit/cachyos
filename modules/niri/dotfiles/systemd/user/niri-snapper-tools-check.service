@@ -10,7 +10,7 @@ ConditionPathExists=/usr/bin/snapper-tools
 Type=oneshot
 # Match upstream autostart behavior:
 # only run when booted into a snapshot environment.
-ExecStart=/usr/bin/bash -lc "grep -q .snapshots /proc/cmdline || exit 0; sleep 3; /usr/bin/snapper-tools --autostart || true"
+ExecStart=%h/.local/bin/niri-snapper-tools-check
 StandardOutput=journal
 StandardError=journal
 

@@ -15,10 +15,9 @@ CPUWeight=500
 TimeoutStartSec=120
 
 # Fast-Precheck: Reduced sleep to 100ms for minimum delay
-ExecStartPre=/usr/bin/sh -c 'for i in {1..20}; do [ -f %h/.config/noctalia/settings.json ] && exit 0; sleep 0.1; done; exit 0'
-ExecStartPre=/usr/bin/sh -c 'mkdir -p %h/.config/noctalia/plugins/clipper/notecards && [ -f %h/.config/noctalia/plugins/clipper/pinned.json ] || printf "%s\n" "{\"items\":[]}" > %h/.config/noctalia/plugins/clipper/pinned.json'
+ExecStartPre=%h/.local/bin/noctalia-preflight
 
-ExecCondition=/usr/bin/sh -c 'case "${XDG_CURRENT_DESKTOP:-}" in niri|Hyprland) : ;; *) exit 1 ;; esac; backend="$(osc-shell backend 2>/dev/null || echo noctalia)"; [ "$backend" = "noctalia" ]'
+ExecCondition=%h/.local/bin/noctalia-should-start
 ExecStart=%h/.local/bin/noctalia-launch
 Restart=on-failure
 RestartSec=1
