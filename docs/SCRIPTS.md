@@ -423,3 +423,549 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-here-hypr`
+**Description:** Bring window to current workspace or launch it (Hyprland).
+
+**Usage:** `osc-here-hypr.sh <class/app-id> | all [list]`
+
+---
+
+### 📂 `osc-imagekeeper`
+**Description:** Visual file management tool to detect corrupted and duplicate images.
+
+**Usage:** `osc-imagekeeper.sh [options]`
+
+---
+
+### 📂 `osc-login-prompts`
+**Description:** Session login warmup (GPG, Keyring, secrets) for non-interactive use.
+
+**Usage:** `osc-login-prompts [options]`
+
+---
+
+### 📂 `osc-logs-status`
+**Description:** Unified health check for system log management (journald, logrotate).
+
+**Usage:** `osc-logs-status [options]`
+
+---
+
+### 📂 `osc-mullvad`
+**Description:** Integrated Mullvad VPN Manager for connection and relay control.
+
+**Usage:** `osc-mullvad.sh [COMMAND] [ARGUMENTS]`
+
+---
+
+### 📂 `osc-mullvad-slot`
+**Description:** Shortcut wrapper for Mullvad slot recycle.
+
+**Usage:** `osc-mullvad-slot.sh [--dry-run]`
+
+---
+
+### 📂 `osc-mullvad-toggle`
+**Description:** Toggles Mullvad VPN connection, optionally with Blocky DNS coupling.
+
+**Usage:** `osc-mullvad-toggle.sh [--no-blocky] [--dry-run] [--no-notify]`
+
+---
+
+### 📂 `osc-ndrop`
+**Description:** Toggle a "drop-down" style window for Niri, Hyprland, and GNOME.
+
+**Usage:** `osc-ndrop.sh [OPTIONS] <command...>`
+
+---
+
+### 📂 `osc-open-webui`
+**Description:** Podman helper for Open WebUI lifecycle management.
+
+**Usage:** `osc-open-webui.sh <command> [options]`
+
+---
+
+### 📂 `osc-pass`
+**Description:** Multi-store `pass(1)` wrapper with built-in stores, interactive selection, audit, migrate, and git backup helpers.
+
+**Usage:** `osc-pass.sh [stores|current|path|mkdir|init|env|audit|migrate|select] [args]`
+
+---
+
+### 📂 `osc-pass-tool`
+**Description:** Import and export passwords for the pass password manager.
+
+**Usage:** `osc-pass-tool.sh [import|export] [filename]`
+
+---
+
+### 📂 `osc-proxy`
+**Description:** SSH SOCKS proxy manager for starting, stopping, and checking status.
+
+**Usage:** `osc-proxy.sh [start|stop|restart|status] [hostname] [port]`
+
+---
+
+### 📂 `osc-radio`
+**Description:** Terminal Based Radio Player (Internet radio player using mpv)
+
+**Usage:** `osc-radio.sh [options]`
+
+---
+
+### 📂 `osc-rsync`
+**Description:** Unified RSYNC Operations CLI for backup and transfer workflows
+
+**Usage:** `osc-rsync.sh [command] [options]`
+
+---
+
+### 📂 `osc-safe-reboot`
+**Description:** Safe reboot/shutdown for Brave/Chromium browsers without crash warnings
+
+**Usage:** `osc-safe-reboot.sh [reboot|poweroff]`
+
+---
+
+### 📂 `osc-scrcpy`
+**Description:** Simple scrcpy helper for Wayland/Hyprland/niri with UHID input
+
+**Usage:** `osc-scrcpy.sh [options]`
+
+---
+
+### 📂 `osc-shell`
+**Description:** Shell router for desktop IPC actions (DMS or Noctalia)
+
+**Usage:** `osc-shell.sh [action] [options]`
+
+---
+
+### 📂 `osc-sops-backup`
+**Description:** SOPS age key backup and restore utility (OpenSSL AES-256-CBC)
+
+**Usage:** `osc-sops-backup [backup|restore] [options]`
+
+---
+
+### 📂 `osc-soundctl`
+**Description:** HyprFlow PipeWire Audio Switcher for Hyprland/Wayland
+
+**Usage:** `osc-soundctl.sh [options]`
+
+---
+
+### 📂 `osc-spotify`
+**Description:** HyprFlow Spotify Controller for Hyprland & Wayland
+
+**Usage:** `osc-spotify.sh [options]`
+
+---
+
+### 📂 `osc-ssh`
+**Description:** OSC SSH Master Utility for ASSH, session control, and backups
+
+**Usage:** `osc-ssh.sh [command] [options]`
+
+---
+
+### 📂 `osc-subliminal`
+**Description:** OSC Subliminal Subtitle Downloader for video files
+
+**Usage:** `osc-subliminal.sh <file|directory> [options]`
+
+---
+
+### 📂 `osc-symlink_manager`
+**Description:** Manages symbolic links for configured directories with backup
+
+**Usage:** `osc-symlink_manager.sh [options]`
+
+---
+
+### 📂 `osc-system`
+**Description:** Unified Power Management & Monitoring Utility
+
+**Usage:** `osc-system <command> [options]`
+
+---
+
+### 📂 `osc-tmux-plugins-install`
+**Description:** Tmux Plugin Manager - Plugin installation and management tool
+
+**Usage:** `osc-tmux-plugins-install.sh [options]`
+
+---
+
+### 📂 `osc-tty-autostart`
+**Description:** Shared TTY autostart entry used by zsh login/interactive shells.
+
+**Usage:** `osc-tty-autostart`
+
+---
+
+### 📂 `osc-tty-launcher`
+**Description:** UWSM-aware interactive TTY launcher for desktop routes and VM profiles
+
+**Usage:** `osc-tty-launcher [auto-tty [VT]] | [niri|hyprland|gnome|vmubuntu|vmarch|vmcachy|vmnixos]`
+
+---
+
+### 📂 `osc-tv-splitter`
+**Description:** IPTV Channel Splitter and Player for iptv-org streams
+
+**Usage:** `osc-tv-splitter.sh [options]`
+
+---
+
+### 📂 `osc-video-converter`
+**Description:** Simplified video format conversion tool (FFmpeg helper)
+
+**Usage:** `osc-video-converter.sh [options]`
+
+---
+
+### 📂 `osc-vradio`
+**Description:** VRadio station launcher - starts tradio with preset station
+
+**Usage:** `osc-vradio.sh`
+
+---
+
+### 📂 `osc-wifi-home`
+**Description:** NetworkManager connection setup for home WiFi (Ken_5 and Ken_2_4)
+
+**Usage:** `osc-wifi-home.sh <Ken_5_Password> <Ken_2_4_Password>`
+
+---
+
+### 📂 `osc-wiremix`
+**Description:** Launch wiremix in kitty with stable class/app-id
+
+**Usage:** `osc-wiremix.sh [options]`
+
+---
+
+### 📂 `pdfkes`
+**Description:** Advanced PDF file management and splitting utility (OSC PDF Splitter)
+
+**Usage:** `pdfkes.sh [file] [options]`
+
+---
+
+### 📂 `playlist`
+**Description:** OSC Lesson Playlist Generator (M3U generator for audio files)
+
+**Usage:** `playlist.sh [directory] [options]`
+
+---
+
+### 📂 `pm`
+**Description:** Lightweight package manager wrapper (pacman, paru, yay, apt, dnf)
+
+**Usage:** `pm.sh [command] [package(s)]`
+
+---
+
+### 📂 `ports`
+**Description:** OSC Port Scanner and network discovery utility
+
+**Usage:** `ports.sh [options]`
+
+---
+
+### 📂 `powerprofilesctl-toggle`
+**Description:** Backward-compatible wrapper for power-profile toggle
+
+**Usage:** `powerprofilesctl-toggle.sh`
+
+---
+
+### 📂 `power-profile`
+**Description:** Power profile helper for powerprofilesctl with lock integration
+
+**Usage:** `power-profile.sh [toggle|set <profile>]`
+
+---
+
+### 📂 `ppp-auto-profile`
+**Description:** Periodic power profile chooser using live CPU usage samples
+
+**Usage:** `ppp-auto-profile.sh [--help|--status]`
+
+---
+
+### 📂 `profile_brave`
+**Description:** Brave Profile Launcher with window management and proxy support
+
+**Usage:** `profile_brave.sh [profile_name] [options]`
+
+---
+
+### 📂 `profile_chrome`
+**Description:** Advanced Google Chrome profile launcher and manager
+
+**Usage:** `profile_chrome.sh [profile_name] [options]`
+
+---
+
+### 📂 `publicip`
+**Description:** Advanced public IP address checker with VPN detection
+
+**Usage:** `publicip.sh [options]`
+
+---
+
+### 📂 `record`
+**Description:** Screen recording helper for wf-recorder/ffmpeg
+
+**Usage:** `record.sh [options]`
+
+---
+
+### 📂 `renew_env`
+**Description:** Shell environment renewal tool for tmux panes
+
+**Usage:** `renew_env.sh`
+
+---
+
+### 📂 `rofi-launcher`
+**Description:** Unified Rofi Launcher with Power Menu Integration
+
+**Usage:** `rofi-launcher.sh [options]`
+
+---
+
+### 📂 `rofi-wifi`
+**Description:** WiFi Management Script using iwd and rofi
+
+**Usage:** `rofi-wifi.sh [device] [position] [y_off] [x_off]`
+
+---
+
+### 📂 `runbg`
+**Description:** Background command runner wrapper (nohup-like)
+
+**Usage:** `runbg.sh <command> [args]`
+
+---
+
+### 📂 `schema.json`
+**Description:** No description provided.
+
+**Usage:** `schema.json`
+
+---
+
+### 📂 `screenshot`
+**Description:** Screenshot helper for Hyprland, Niri, Sway, and GNOME
+
+**Usage:** `screenshot.sh [action]`
+
+---
+
+### 📂 `semsumo-daily`
+**Description:** Unified SemsuMo daily launcher for compositor keybinds
+
+**Usage:** `semsumo-daily.sh`
+
+---
+
+### 📂 `semsumo`
+**Description:** Unified Application Launcher & Generator (Hyprland/GNOME/Generic)
+
+**Usage:** `semsumo.sh [options]`
+
+---
+
+### 📂 `sil_ayni_mp4`
+**Description:** Duplicate MP4 file cleaner based on MD5 content matching
+
+**Usage:** `sil_ayni_mp4.sh [directory]`
+
+---
+
+### 📂 `smart-suspend`
+**Description:** Smart Suspend Script for Hyprland with state saving/restoration
+
+**Usage:** `smart-suspend.sh [options]`
+
+---
+
+### 📂 `sqm`
+**Description:** Automatic SQM/CAKE Setup for bufferbloat reduction (WAN/VPN)
+
+**Usage:** `sqm.sh [options]`
+
+---
+
+### 📂 `ssh-launcher`
+**Description:** Launch SSH with optional menu selection using fzf/rofi
+
+**Usage:** `ssh-launcher.sh [ssh_arguments]`
+
+---
+
+### 📂 `sunsetr-set`
+**Description:** Native preset scheduler/helper for the sunsetr Wayland service
+
+**Usage:** `sunsetr-set.sh [list|auto|apply|status|<preset>] [options]`
+
+---
+
+### 📂 `svmarch`
+**Description:** SVM (Simple VM) profile for Arch Linux using QEMU/KVM
+
+**Usage:** `svmarch.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `svmcachy`
+**Description:** SVM (Simple VM) profile for CachyOS using QEMU/KVM
+
+**Usage:** `svmcachy.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `svmnil2`
+**Description:** Simple QEMU/KVM VM manager for CachyOS
+
+**Usage:** `svmnil2.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `svmnil`
+**Description:** SVM (Simple VM) profile for CachyOS using QEMU/KVM
+
+**Usage:** `svmcachy.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `svmnixos`
+**Description:** SVM (Simple VM) profile for NixOS using QEMU/KVM
+
+**Usage:** `svmnixos.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `svmubuntu`
+**Description:** SVM (Simple VM) profile for Ubuntu using QEMU/KVM
+
+**Usage:** `svmubuntu.sh [install|start|stop|status|connect|console|reset] [options]`
+
+---
+
+### 📂 `tarchiver`
+**Description:** Simple tar archive manager for compressing and extracting files
+
+**Usage:** `tarchiver.sh [compress|extract] <target>`
+
+---
+
+### 📂 `ter`
+**Description:** Remote SSH tunnel manager with search and byobu session management
+
+**Usage:** `ter.sh [options] [search_pattern]`
+
+---
+
+### 📂 `tm`
+**Description:** Comprehensive Tmux management tool for sessions, layouts, buffers, and plugins
+
+**Usage:** `tm.sh <module> [command] [parameters]`
+
+---
+
+### 📂 `tm.sh.bak`
+**Description:** Comprehensive Tmux management, session, layouts, buffers, plugins, and more
+
+**Usage:** `tm.sh.bak`
+
+---
+
+### 📂 `tsm`
+**Description:** Advanced Transmission CLI manager with Pass integration and search
+
+**Usage:** `tsm.sh [command] [parameter]`
+
+---
+
+### 📂 `videokes`
+**Description:** Video trimming tool using ffmpeg for quick cutting of video files
+
+**Usage:** `videokes.sh <video_file>`
+
+---
+
+### 📂 `vir`
+**Description:** Vim Remote Editor - Edit remote files over SSH using Vim's SCP
+
+**Usage:** `vir [options] [user@]hostname path/to/file [nvim-options]`
+
+---
+
+### 📂 `vlc-toggle`
+**Description:** Hyprland + VLC play/pause toggle with robust MPRIS detection, fallbacks, and notifications
+
+**Usage:** `vlc-toggle.sh`
+
+---
+
+### 📂 `vmarch`
+**Description:** Linux VM Manager - Manages QEMU/KVM based Linux virtual machines (Arch focus)
+
+**Usage:** `vmarch.sh [OPTIONS]`
+
+---
+
+### 📂 `vm-start`
+**Description:** Basit libvirt VM başlatıcı (win10 VM’ini başlatır)
+
+**Usage:** `vm-start.sh`
+
+---
+
+### 📂 `vnc-connect`
+**Description:** VNC istemci başlatıcı (VNC sunucularına bağlanmak için hafif wrapper)
+
+**Usage:** `vnc-connect.sh`
+
+---
+
+### 📂 `vncviewer-wl`
+**Description:** Run TigerVNC viewer under Xwayland when DISPLAY is missing
+
+**Usage:** `vncviewer-wl [options] [host:display]`
+
+---
+
+### 📂 `vv`
+**Description:** Otomatik numaralandırma ile günlük not tutma aracı
+
+**Usage:** `vv [SEÇENEK] [DOSYA]`
+
+---
+
+### 📂 `walk`
+**Description:** Walker Launcher (minimal, elegant) - Launches Walker with predefined dimensions
+
+**Usage:** `walk.sh`
+
+---
+
+### 📂 `wayland-session-common`
+**Description:** Shared helpers for Wayland session bootstrap scripts.
+
+**Usage:** `wayland-session-common`
+
+---
+
+### 📂 `wm-workspace`
+**Description:** wm-workspace.sh
+
+**Usage:** `wm-workspace`
+
+---
+
