@@ -262,12 +262,6 @@
                     "textColor": "none"
                 },
                 {
-                    "defaultSettings": {
-                        "oscCommand": "osc-mullvad"
-                    },
-                    "id": "plugin:6ee06e:ndns"
-                },
-                {
                     "blacklist": [
                     ],
                     "chevronColor": "none",
@@ -280,13 +274,10 @@
                 },
                 {
                     "defaultSettings": {
-                        "errorIcon": "alert-circle",
-                        "iconColor": "primary",
-                        "loadingIcon": "loader",
-                        "refreshInterval": 300,
-                        "successIcon": "network"
+                        "oscCommand": "osc-mullvad",
+                        "watchdogInterval": 30000
                     },
-                    "id": "plugin:6ee06e:nip"
+                    "id": "plugin:6ee06e:ndns"
                 },
                 {
                     "defaultSettings": {
@@ -294,6 +285,16 @@
                         "watchdogInterval": 120000
                     },
                     "id": "plugin:6ee06e:nufw"
+                },
+                {
+                    "defaultSettings": {
+                        "errorIcon": "alert-circle",
+                        "iconColor": "primary",
+                        "loadingIcon": "loader",
+                        "refreshInterval": 300,
+                        "successIcon": "network"
+                    },
+                    "id": "plugin:6ee06e:nip"
                 }
             ]
         }
