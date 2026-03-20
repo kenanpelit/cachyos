@@ -10,6 +10,7 @@ DMS_DIR="$NIRI_DIR/dms"
 LEGACY_ENV_FILE="$USER_HOME/.config/environment.d/10-niri-env.conf"
 LEGACY_PRIORITY_DROPIN="$USER_HOME/.config/systemd/user/niri.service.d/10-priority.conf"
 LEGACY_DESKTOP_SETTINGS_UNIT="$USER_HOME/.config/systemd/user/niri-desktop-settings.service"
+LEGACY_DESKTOP_SETTINGS_WANTS_LINK="$USER_HOME/.config/systemd/user/niri-post-daemons.target.wants/niri-desktop-settings.service"
 USER_GROUP=""
 if [ "$(id -u)" -eq 0 ]; then
   USER_GROUP="$(id -gn "$REAL_USER" 2>/dev/null || true)"
@@ -39,6 +40,7 @@ done
 rm -f "$LEGACY_ENV_FILE" 2>/dev/null || true
 rm -f "$LEGACY_PRIORITY_DROPIN" 2>/dev/null || true
 rm -f "$LEGACY_DESKTOP_SETTINGS_UNIT" 2>/dev/null || true
+rm -f "$LEGACY_DESKTOP_SETTINGS_WANTS_LINK" 2>/dev/null || true
 
 # Run health check validation
 if [[ -x "$script_dir/validate.sh" ]]; then

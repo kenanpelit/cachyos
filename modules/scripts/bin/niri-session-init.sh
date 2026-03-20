@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: niri-session-init
-# Description: Start niri-session.target from inside the compositor. Under
-#              UWSM, trust the pre-finalized session environment and only fall
-#              back to runtime detection if critical compositor variables are
-#              unexpectedly missing.
+# Description: Compatibility helper for manual/Niri fallback startup and runtime env backfill.
+# Under UWSM, trust the pre-finalized session environment and only fall back to
+# runtime detection if critical compositor variables are unexpectedly missing.
 # Usage: niri-session-init [--no-start-target]
 # ==============================================================================
 

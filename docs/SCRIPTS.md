@@ -319,7 +319,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-post-bootstrap`
-**Description:** Late Niri session polish: desktop settings sync plus ready notification.
+**Description:** Late Niri session polish for desktop settings and ready notification.
 
 **Usage:** `niri-post-bootstrap`
 
@@ -333,7 +333,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-session-init`
-**Description:** Compatibility helper for non-UWSM/manual Niri startup and runtime env backfill.
+**Description:** Compatibility helper for manual/Niri fallback startup and runtime env backfill.
 
 **Usage:** `niri-session-init [--no-start-target]`
 
@@ -968,3 +968,4 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Usage:** `wm-workspace`
 
 ---
+

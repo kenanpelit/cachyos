@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# Lightweight post-bootstrap tasks for Niri session.
+# ==============================================================================
+# Script: niri-post-bootstrap
+# Description: Late Niri session polish for desktop settings and ready notification.
+# Usage: niri-post-bootstrap
+# ==============================================================================
 
 set -euo pipefail
 
