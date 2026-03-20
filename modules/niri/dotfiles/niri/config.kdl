@@ -1024,6 +1024,7 @@ window-rule {
 window-rule {
   match app-id=r#"^(ferdium|Ferdium)$"#
   open-on-workspace "9"
+  default-column-width { proportion 0.85; }
 }
 window-rule {
   match app-id=r#"^com\.rtosta\.zapzap$"#
