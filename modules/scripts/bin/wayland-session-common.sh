@@ -136,3 +136,15 @@ session_common_sync_environment_vars() {
       || true
   fi
 }
+
+session_common_unset_manager_env() {
+  [[ $# -gt 0 ]] || return 0
+  command -v systemctl >/dev/null 2>&1 || return 0
+  systemctl --user unset-environment "$@" >/dev/null 2>&1 || true
+}
+
+session_common_set_manager_env() {
+  [[ $# -gt 0 ]] || return 0
+  command -v systemctl >/dev/null 2>&1 || return 0
+  systemctl --user set-environment "$@" >/dev/null 2>&1 || true
+}
