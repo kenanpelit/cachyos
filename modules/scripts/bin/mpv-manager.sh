@@ -10,6 +10,7 @@ set -euo pipefail
 SOCKET_PATH="/tmp/mpvsocket"
 DOWNLOADS_DIR="${HOME}/Downloads"
 NOTIFICATION_TIMEOUT=1200
+NIRI_MPV_STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/mpv-manager-niri-mpv.state"
 
 compositor() {
   if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
@@ -355,14 +356,122 @@ niri_find_window_id_by_app_id() {
   echo "$id"
 }
 
+niri_wait_window_id_by_app_id() {
+  local app_id="$1"
+  local id=""
+  for _ in {1..40}; do
+    if id="$(niri_find_window_id_by_app_id "$app_id" 2>/dev/null)"; then
+      [[ -n "$id" ]] && {
+        echo "$id"
+        return 0
+      }
+    fi
+    sleep 0.05
+  done
+  return 1
+}
+
+niri_window_xywh_by_id() {
+  local id="$1"
+  local line=""
+
+  if command -v jq >/dev/null 2>&1; then
+    line="$(
+      niri msg -j windows 2>/dev/null \
+        | jq -r --argjson id "$id" '
+            .[]
+            | select(.id == $id)
+            | [
+                (.layout.tile_pos_in_workspace_view[0] | if . == null then empty else round end),
+                (.layout.tile_pos_in_workspace_view[1] | if . == null then empty else round end),
+                (.layout.window_size[0] // empty),
+                (.layout.window_size[1] // empty)
+              ]
+            | @tsv
+          ' \
+        | head -n1
+    )"
+    if [[ -n "$line" ]]; then
+      echo "${line//$'\t'/ }"
+      return 0
+    fi
+  fi
+
+  line="$(
+    niri msg windows 2>/dev/null | awk -v want_id="$id" '
+      /^Window ID[[:space:]]+/ {
+        id=$3
+        gsub(":", "", id)
+        inwin=(id == want_id)
+        x=""; y=""; w=""; h=""
+        next
+      }
+      inwin && /^[[:space:]]*Workspace[- ]view position:/ {
+        x=$3
+        gsub(",", "", x)
+        y=$4
+      }
+      inwin && /^[[:space:]]*Window size:/ {
+        w=$3
+        h=$5
+      }
+      inwin && x != "" && y != "" && w != "" && h != "" {
+        print x, y, w, h
+        exit
+      }
+    '
+  )"
+
+  [[ -n "$line" ]] || return 1
+  echo "$line"
+}
+
+niri_wait_window_xywh_by_id() {
+  local id="$1"
+  local out=""
+  for _ in {1..30}; do
+    if out="$(niri_window_xywh_by_id "$id" 2>/dev/null)"; then
+      [[ -n "$out" ]] && {
+        echo "$out"
+        return 0
+      }
+    fi
+    sleep 0.05
+  done
+  return 1
+}
+
+niri_move_floating_window_by_id() {
+  local id="$1"
+  local x="$2"
+  local y="$3"
+  niri msg action move-floating-window -x "$x" -y "$y" --id "$id"
+}
+
+niri_load_mpv_state() {
+  local key="$1"
+  [[ -f "$NIRI_MPV_STATE_FILE" ]] || return 1
+  sed -n "s/^${key}=//p" "$NIRI_MPV_STATE_FILE" | head -n1
+}
+
+niri_save_mpv_state() {
+  local corner="$1"
+  local top_offset="$2"
+  mkdir -p "$(dirname "$NIRI_MPV_STATE_FILE")"
+  cat >"$NIRI_MPV_STATE_FILE" <<EOF
+corner=$corner
+top_offset=$top_offset
+EOF
+}
+
 niri_focused_window_xywh() {
   # Output: "x y w h" from `niri msg focused-window`
   local info x y w h
   if command -v jq >/dev/null 2>&1; then
     info="$(niri msg -j focused-window 2>/dev/null || true)"
     if [[ -n "$info" ]]; then
-      x="$(jq -r '.workspace_view_position.x? // empty' <<<"$info" 2>/dev/null | head -n1)"
-      y="$(jq -r '.workspace_view_position.y? // empty' <<<"$info" 2>/dev/null | head -n1)"
+      x="$(jq -r '.workspace_view_position.x? | if . == null then empty else round end' <<<"$info" 2>/dev/null | head -n1)"
+      y="$(jq -r '.workspace_view_position.y? | if . == null then empty else round end' <<<"$info" 2>/dev/null | head -n1)"
       w="$(jq -r '.window_size.width? // empty' <<<"$info" 2>/dev/null | head -n1)"
       h="$(jq -r '.window_size.height? // empty' <<<"$info" 2>/dev/null | head -n1)"
       if [[ -n "$x" && -n "$y" && -n "$w" && -n "$h" ]]; then
@@ -408,7 +517,7 @@ niri_maybe_resize_mpv() {
   target_w="${MPV_NIRI_WIDTH:-640}"
   target_h="${MPV_NIRI_HEIGHT:-360}"
 
-  read -r x y w h <<<"$(niri_wait_focused_window_xywh)" || return 1
+  read -r x y w h <<<"$(niri_wait_window_xywh_by_id "$id")" || return 1
 
   # Küçük pencere (PiP gibi) ise elleme.
   if [[ "$w" -le 700 && "$h" -le 500 ]]; then
@@ -419,7 +528,7 @@ niri_maybe_resize_mpv() {
   niri msg action set-window-height --id "$id" "$target_h" >/dev/null 2>&1 || true
 
   # Resize sonrası state'in oturması için kısa bekle.
-  niri_wait_focused_window_xywh >/dev/null 2>&1 || true
+  niri_wait_window_xywh_by_id "$id" >/dev/null 2>&1 || true
 }
 
 niri_focused_output_wh() {
@@ -430,8 +539,8 @@ niri_focused_output_wh() {
   if command -v jq >/dev/null 2>&1; then
     info="$(niri msg -j focused-output 2>/dev/null || true)"
     if [[ -n "$info" ]]; then
-      w="$(jq -r '.current_mode.width? // .mode.width? // empty' <<<"$info" 2>/dev/null | head -n1)"
-      h="$(jq -r '.current_mode.height? // .mode.height? // empty' <<<"$info" 2>/dev/null | head -n1)"
+      w="$(jq -r '.modes[.current_mode].width? // .current_mode.width? // .mode.width? // empty' <<<"$info" 2>/dev/null | head -n1)"
+      h="$(jq -r '.modes[.current_mode].height? // .current_mode.height? // .mode.height? // empty' <<<"$info" 2>/dev/null | head -n1)"
       if [[ -n "$w" && -n "$h" ]]; then
         echo "$w $h"
         return 0
@@ -491,47 +600,51 @@ niri_move_cycle_corners() {
   niri_require
 
   local mpv_id
-  if mpv_id="$(niri_find_window_id_by_app_id "mpv" 2>/dev/null)"; then
-    niri msg action focus-window --id "$mpv_id" >/dev/null 2>&1 || true
-    niri msg action move-window-to-floating --id "$mpv_id" >/dev/null 2>&1 || true
-    niri_maybe_resize_mpv "$mpv_id" || true
-  else
-    mpv_id=""
-    niri msg action move-window-to-floating >/dev/null 2>&1 || true
-  fi
+  mpv_id="$(niri_find_window_id_by_app_id "mpv" 2>/dev/null)" || die "MPV penceresi bulunamadı"
+  niri msg action move-window-to-floating --id "$mpv_id" >/dev/null 2>&1 || true
+  niri_maybe_resize_mpv "$mpv_id" || true
 
   local margin_x margin_y x y w h ow oh
-  # Varsayılanlar: kullanıcının örneğine yakın (x≈1887, y≈105, 640x360, 2560w ekran)
-  margin_x="${MPV_NIRI_MARGIN_X:-33}"
-  margin_y="${MPV_NIRI_MARGIN_Y:-105}"
+  # Niri rule ile aynı anchor: top-right + 32/96 gap.
+  margin_x="${MPV_NIRI_MARGIN_X:-32}"
+  margin_y="${MPV_NIRI_MARGIN_Y:-96}"
 
-  read -r x y w h <<<"$(niri_wait_focused_window_xywh)" || die "Niri: focused-window okunamadı"
+  read -r x y w h <<<"$(niri_wait_window_xywh_by_id "$mpv_id")" || die "Niri: mpv geometry okunamadı"
   read -r ow oh <<<"$(niri_focused_output_wh)" || die "Niri: output boyutu okunamadı"
+
+  local top_offset
+  top_offset="$(niri_load_mpv_state top_offset 2>/dev/null || true)"
+  if [[ -z "$top_offset" ]]; then
+    top_offset=$((y - margin_y))
+    if [[ "$top_offset" -lt 0 ]]; then
+      top_offset=0
+    fi
+  fi
 
   local max_x max_y
   max_x=$((ow - w))
-  max_y=$((oh - h))
+  max_y=$((oh - top_offset - h))
   if [[ "$max_x" -lt 0 ]]; then max_x=0; fi
   if [[ "$max_y" -lt 0 ]]; then max_y=0; fi
 
-  # Corner targets (BL -> TR -> BR -> TL -> BL)
+  local left_fixed right_fixed top_fixed bottom_fixed
+  left_fixed="$margin_x"
+  right_fixed=$((ow - w - margin_x))
+  top_fixed="$margin_y"
+  bottom_fixed=$((oh - top_offset - h - margin_y))
+
+  left_fixed="$(niri_clamp "$left_fixed" 0 "$max_x")"
+  right_fixed="$(niri_clamp "$right_fixed" 0 "$max_x")"
+  top_fixed="$(niri_clamp "$top_fixed" 0 "$max_y")"
+  bottom_fixed="$(niri_clamp "$bottom_fixed" 0 "$max_y")"
+
   local tl_x tl_y tr_x tr_y br_x br_y bl_x bl_y
-  tl_x=$margin_x; tl_y=$margin_y
-  tr_x=$((ow - w - margin_x)); tr_y=$margin_y
-  br_x=$((ow - w - margin_x)); br_y=$((oh - h - margin_y))
-  bl_x=$margin_x; bl_y=$((oh - h - margin_y))
+  tl_x="$left_fixed";  tl_y=$((top_offset + top_fixed))
+  tr_x="$right_fixed"; tr_y=$((top_offset + top_fixed))
+  br_x="$right_fixed"; br_y=$((top_offset + bottom_fixed))
+  bl_x="$left_fixed";  bl_y=$((top_offset + bottom_fixed))
 
-  # Clamp to keep fully visible on screen
-  tl_x="$(niri_clamp "$tl_x" 0 "$max_x")"
-  tr_x="$(niri_clamp "$tr_x" 0 "$max_x")"
-  br_x="$(niri_clamp "$br_x" 0 "$max_x")"
-  bl_x="$(niri_clamp "$bl_x" 0 "$max_x")"
-  tl_y="$(niri_clamp "$tl_y" 0 "$max_y")"
-  tr_y="$(niri_clamp "$tr_y" 0 "$max_y")"
-  br_y="$(niri_clamp "$br_y" 0 "$max_y")"
-  bl_y="$(niri_clamp "$bl_y" 0 "$max_y")"
-
-  local d_tl d_tr d_br d_bl current next tx ty
+  local d_tl d_tr d_br d_bl current next target_x target_y
   d_tl=$(( $(niri_abs $((x - tl_x))) + $(niri_abs $((y - tl_y))) ))
   d_tr=$(( $(niri_abs $((x - tr_x))) + $(niri_abs $((y - tr_y))) ))
   d_br=$(( $(niri_abs $((x - br_x))) + $(niri_abs $((y - br_y))) ))
@@ -548,82 +661,75 @@ niri_move_cycle_corners() {
   fi
 
   case "$current" in
-    bl) next="tr"; tx=$tr_x; ty=$tr_y ;;
-    tr) next="br"; tx=$br_x; ty=$br_y ;;
-    br) next="tl"; tx=$tl_x; ty=$tl_y ;;
-    tl) next="bl"; tx=$bl_x; ty=$bl_y ;;
+    tl) next="tr"; target_x="$right_fixed"; target_y="$top_fixed" ;;
+    tr) next="br"; target_x="$right_fixed"; target_y="$bottom_fixed" ;;
+    br) next="bl"; target_x="$left_fixed"; target_y="$bottom_fixed" ;;
+    bl) next="tl"; target_x="$left_fixed"; target_y="$top_fixed" ;;
   esac
 
-  local dx dy
-  dx=$((tx - x))
-  dy=$((ty - y))
-  if [[ -n "${mpv_id:-}" ]]; then
-    niri msg action move-floating-window --id "$mpv_id" -x "$(printf '%+d' "$dx")" -y "$(printf '%+d' "$dy")" >/dev/null 2>&1 \
-      || die "Niri: move-floating-window başarısız"
-  else
-    niri msg action move-floating-window -x "$(printf '%+d' "$dx")" -y "$(printf '%+d' "$dy")" >/dev/null 2>&1 \
-      || die "Niri: move-floating-window başarısız"
-  fi
+  niri_move_floating_window_by_id "$mpv_id" "$target_x" "$target_y" >/dev/null 2>&1 \
+    || die "Niri: move-floating-window başarısız"
 
-  # Second pass to converge after resize/clamp
-  read -r x y w h <<<"$(niri_focused_window_xywh)" 2>/dev/null || true
-  if [[ -n "${x:-}" && -n "${y:-}" ]]; then
-    dx=$((tx - x))
-    dy=$((ty - y))
-    if [[ -n "${mpv_id:-}" ]]; then
-      niri msg action move-floating-window --id "$mpv_id" -x "$(printf '%+d' "$dx")" -y "$(printf '%+d' "$dy")" >/dev/null 2>&1 || true
-    else
-      niri msg action move-floating-window -x "$(printf '%+d' "$dx")" -y "$(printf '%+d' "$dy")" >/dev/null 2>&1 || true
+  if read -r x y w h <<<"$(niri_window_xywh_by_id "$mpv_id" 2>/dev/null)"; then
+    if [[ "$next" == "tl" || "$next" == "tr" ]]; then
+      top_offset=$((y - margin_y))
+      if [[ "$top_offset" -lt 0 ]]; then
+        top_offset=0
+      fi
     fi
   fi
 
+  niri_save_mpv_state "$next" "$top_offset"
   notify "mpv-manager" "Niri: ${current} -> ${next}"
 }
 
 niri_move_top_right() {
   niri_require
 
-  # Ensure focused window is floating so we can move it.
-  niri msg action move-window-to-floating >/dev/null 2>&1 || true
+  local mpv_id="${1:-}"
+  if [[ -z "$mpv_id" ]]; then
+    mpv_id="$(niri_find_window_id_by_app_id "mpv" 2>/dev/null)" || die "MPV penceresi bulunamadı"
+  fi
+
+  niri msg action move-window-to-floating --id "$mpv_id" >/dev/null 2>&1 || true
+  niri_maybe_resize_mpv "$mpv_id" || true
 
   # Compute target position based on focused output size + current window size.
-  local margin_x margin_y x y w h ow oh tx ty dx dy
-  margin_x="${MPV_NIRI_MARGIN_X:-33}"
-  margin_y="${MPV_NIRI_MARGIN_Y:-105}"
+  local margin_x margin_y x y w h ow oh tx ty top_offset
+  margin_x="${MPV_NIRI_MARGIN_X:-32}"
+  margin_y="${MPV_NIRI_MARGIN_Y:-96}"
 
-  read -r x y w h <<<"$(niri_focused_window_xywh)" || {
-    notify "mpv-manager" "Niri: focused-window okunamadı"
+  read -r x y w h <<<"$(niri_wait_window_xywh_by_id "$mpv_id")" || {
+    notify "mpv-manager" "Niri: mpv geometry okunamadı"
     return 1
   }
   if read -r ow oh <<<"$(niri_focused_output_wh)"; then
     tx=$((ow - w - margin_x))
     ty=$((margin_y))
-
-    # Clamp (keep visible even if sizes are weird)
-    local max_x max_y
-    max_x=$((ow - w))
-    max_y=$((oh - h))
-    if [[ "$max_x" -lt 0 ]]; then max_x=0; fi
-    if [[ "$max_y" -lt 0 ]]; then max_y=0; fi
-    tx="$(niri_clamp "$tx" 0 "$max_x")"
-    ty="$(niri_clamp "$ty" 0 "$max_y")"
   else
     die "Niri: output boyutu okunamadı"
   fi
 
-  dx=$((tx - x))
-  dy=$((ty - y))
+  niri_move_floating_window_by_id "$mpv_id" "$tx" "$ty" >/dev/null 2>&1 || true
 
-  # Apply twice to converge if niri adjusts/clamps after resize.
-  niri msg action move-floating-window -x "$(printf '%+d' "$dx")" -y "$(printf '%+d' "$dy")" >/dev/null 2>&1 || true
-  read -r x y w h <<<"$(niri_focused_window_xywh)" 2>/dev/null || true
-  if [[ -n "${x:-}" && -n "${y:-}" ]]; then
-    dx=$((tx - x))
-    dy=$((ty - y))
-    niri msg action move-floating-window -x "$(printf '%+d' "$dx")" -y "$(printf '%+d' "$dy")" >/dev/null 2>&1 || true
+  if read -r x y w h <<<"$(niri_window_xywh_by_id "$mpv_id" 2>/dev/null)"; then
+    top_offset=$((y - margin_y))
+    if [[ "$top_offset" -lt 0 ]]; then
+      top_offset=0
+    fi
+    niri_save_mpv_state "tr" "$top_offset"
   fi
 
   notify "mpv-manager" "Niri: mpv -> (${tx}, ${ty})"
+}
+
+niri_prepare_new_mpv_window() {
+  niri_require
+
+  local mpv_id=""
+  mpv_id="$(niri_wait_window_id_by_app_id "mpv")" || return 1
+  niri msg action move-window-to-floating --id "$mpv_id" >/dev/null 2>&1 || true
+  niri_move_top_right "$mpv_id" >/dev/null 2>&1 || true
 }
 
 start_mpv() {
@@ -643,6 +749,7 @@ start_mpv() {
         --autofit-larger=640x360 \
         -- >/dev/null 2>&1 &
       disown || true
+      niri_prepare_new_mpv_window || true
       notify "mpv-manager" "MPV başlatıldı (Niri 640x360)"
       ;;
     *)
@@ -702,6 +809,9 @@ play_youtube() {
       "$url" >/dev/null 2>&1 &
   fi
   disown || true
+  if [[ "$(compositor)" == "niri" ]]; then
+    niri_prepare_new_mpv_window || true
+  fi
   notify "mpv-manager" "YouTube oynatılıyor"
 }
 

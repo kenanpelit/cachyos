@@ -778,6 +778,7 @@ window-rule {
   open-focused true
 }
 
+// Keep this in sync with MPV_NIRI_{WIDTH,HEIGHT} and MPV_NIRI_MARGIN_{X,Y}.
 window-rule {
   match app-id=r#"^mpv$"#
   exclude title=r#"^Picture-in-Picture( - mpv)?$"#
