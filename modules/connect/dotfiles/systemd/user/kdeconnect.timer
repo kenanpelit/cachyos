@@ -1,6 +1,5 @@
 [Unit]
 Description=Delayed KDE Connect daemon
-After=graphical-session.target
 PartOf=graphical-session.target
 
 [Timer]

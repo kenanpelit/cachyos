@@ -9,6 +9,7 @@ depends_on:
 - scripts
 - fonts
 - wayland-autostart
+- user-services
 dotfiles:
 - source: dotfiles/niri/config.kdl
   target: ~/.config/niri/config.kdl
@@ -40,6 +41,8 @@ dotfiles:
   target: ~/.config/systemd/user/niri-snapper-tools-check.service
 - source: dotfiles/systemd/user/niri-bootstrap.service
   target: ~/.config/systemd/user/niri-bootstrap.service
+- source: dotfiles/systemd/user/niri-session-env.service
+  target: ~/.config/systemd/user/niri-session-env.service
 - source: dotfiles/systemd/user/niri-shell-ensure.service
   target: ~/.config/systemd/user/niri-shell-ensure.service
 - source: dotfiles/systemd/user/niri-post-bootstrap.service

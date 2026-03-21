@@ -13,15 +13,15 @@ LEGACY_ENV_FILE="${USER_HOME}/.config/environment.d/10-hyprland.conf"
 "${MODULE_DIR}/scripts/render-theme.sh"
 "${MODULE_DIR}/scripts/render-monitors.sh"
 
-rm -f "${LEGACY_ENV_FILE}" 2>/dev/null || true
+run_as_user rm -f "${LEGACY_ENV_FILE}" 2>/dev/null || true
 
 if command -v systemctl >/dev/null 2>&1; then
-  systemctl --user daemon-reload >/dev/null 2>&1 || true
-  systemctl --user disable --now gnome-keyring-secrets.service >/dev/null 2>&1 || true
-  systemctl --user unmask gnome-keyring-daemon.socket gnome-keyring-daemon.service >/dev/null 2>&1 || true
-  systemctl --user enable gnome-keyring-daemon.service >/dev/null 2>&1 || true
+  run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
+  run_as_user systemctl --user disable --now gnome-keyring-secrets.service >/dev/null 2>&1 || true
+  run_as_user systemctl --user unmask gnome-keyring-daemon.socket gnome-keyring-daemon.service >/dev/null 2>&1 || true
+  run_as_user systemctl --user enable gnome-keyring-daemon.service >/dev/null 2>&1 || true
 fi
 
 if command -v dconf >/dev/null 2>&1; then
-  dconf write /org/blueman/general/plugin-list "['!TransferService', '!GameControllerWakelock', '!PPPSupport', '!DhcpClient']" >/dev/null 2>&1 || true
+  run_as_user dconf write /org/blueman/general/plugin-list "['!TransferService', '!GameControllerWakelock', '!PPPSupport', '!DhcpClient']" >/dev/null 2>&1 || true
 fi

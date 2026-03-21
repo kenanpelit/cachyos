@@ -23,7 +23,9 @@ else
   mkdir -p "$DMS_DIR"
 fi
 
-for f in outputs.kdl monitor-auto.kdl zen.kdl cursor.kdl alttab.kdl layout.kdl windowrules.kdl; do
+render_profile_script="$script_dir/render-profile.sh"
+
+for f in outputs.kdl monitor-auto.kdl workspaces-auto.kdl zen.kdl cursor.kdl alttab.kdl layout.kdl windowrules.kdl; do
   path="$DMS_DIR/$f"
   # If it's a broken symlink or doesn't exist, create it
   if [ ! -e "$path" ]; then
@@ -42,11 +44,19 @@ rm -f "$LEGACY_PRIORITY_DROPIN" 2>/dev/null || true
 rm -f "$LEGACY_DESKTOP_SETTINGS_UNIT" 2>/dev/null || true
 rm -f "$LEGACY_DESKTOP_SETTINGS_WANTS_LINK" 2>/dev/null || true
 
+if [[ -x "$render_profile_script" ]]; then
+  "$render_profile_script"
+fi
+
 # Run health check validation
 if [[ -x "$script_dir/validate.sh" ]]; then
-  "$script_dir/validate.sh"
+  if [ "$(id -u)" -eq 0 ]; then
+    run_as_user "$script_dir/validate.sh"
+  else
+    "$script_dir/validate.sh"
+  fi
 fi
 
 if command -v systemctl >/dev/null 2>&1; then
-  systemctl --user daemon-reload >/dev/null 2>&1 || true
+  run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 fi

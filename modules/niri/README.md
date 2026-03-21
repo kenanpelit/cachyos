@@ -36,19 +36,22 @@ UWSM-first session wrapper.
 4. The repo-managed drop-in for `wayland-wm@niri\x2dsession.service` starts
    `niri-session.target` with `ExecStartPost=` once the compositor is ready.
 5. `niri-session.target` pulls in `graphical-session.target`,
-   `xdg-desktop-autostart.target`, `niri-bootstrap.service`,
+   `xdg-desktop-autostart.target`, `niri-session-env.service`, `niri-bootstrap.service`,
    `niri-shell-ensure.service`, `niri-daemons.target`,
    `niri-post-daemons.target`, and the shared
    compositor-session units enabled by other modules.
-6. `niri-bootstrap.service` runs `~/.local/bin/niri-bootstrap`, which now uses
+6. `niri-session-env.service` runs `niri-session-init --no-start-target` before
+   the rest of the session graph so `systemd --user` gets `NIRI_SOCKET` and the
+   finalized runtime vars even when UWSM finalize timing is late.
+7. `niri-bootstrap.service` runs `~/.local/bin/niri-bootstrap`, which now uses
    the shared Niri session helper for runtime env/socket detection before
    calling `niri-osc set init`.
-7. `niri-shell-ensure.service` runs `osc-shell ensure` under `systemd --user`
+8. `niri-shell-ensure.service` runs `osc-shell ensure` under `systemd --user`
    instead of relying on `spawn-at-startup` in `config.kdl`.
-8. `niri-daemons.target` becomes the daemon stage for long-running helpers.
-9. `niri-post-daemons.target` becomes the ordered late stage after
+9. `niri-daemons.target` becomes the daemon stage for long-running helpers.
+10. `niri-post-daemons.target` becomes the ordered late stage after
    `niri-daemons.target`.
-10. `niri-post-bootstrap.service` runs `~/.local/bin/niri-post-bootstrap` after
+11. `niri-post-bootstrap.service` runs `~/.local/bin/niri-post-bootstrap` after
     the daemon services it depends on and performs the GNOME desktop settings
     sync before emitting the ready notification.
 
@@ -58,6 +61,10 @@ These units make up the core Niri session chain:
 
 - `niri-session.target`
   Session umbrella target started by the UWSM compositor service drop-in.
+- `niri-session-env.service`
+  Pre-bootstrap runtime env sync. Runs `niri-session-init --no-start-target`
+  so the user manager sees `NIRI_SOCKET` before condition-gated units are
+  evaluated.
 - `niri-bootstrap.service`
   Early oneshot bootstrap. Uses the shared Niri session helper to normalize
   runtime state and then runs `niri-osc set init`.
@@ -133,6 +140,9 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   not leak across sessions. `niri-session-init` remains available as a manual
   compatibility helper and only backfills missing compositor runtime variables
   when UWSM did not finalize them.
+- Static Niri monitor/workspace defaults are now rendered from the selected
+  Hyprland monitor profile plus the Niri output-name map, so the repo has one
+  profile selector and Niri keeps only a small runtime hotplug override file.
 - The supported entry path is now the UWSM wrapper installed by the `sessions`
   module. Legacy `niri-optimized-session` and the old `niri.service`
   bootstrap drop-in are intentionally removed to keep session ownership in one

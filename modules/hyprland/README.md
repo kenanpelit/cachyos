@@ -65,8 +65,7 @@ module.
    `graphical-session.target`, `xdg-desktop-autostart.target`,
    `hypr-bootstrap.service`, `hypr-audio-init.service`,
    `hypr-shell-ensure.service`,
-   `hypr-daemons.target`, `hypr-desktop-settings.service`, and
-   `hypr-post-bootstrap.service`.
+   `hypr-daemons.target`, and `hypr-post-daemons.target`.
 6. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
    oneshot stage.
 7. `hypr-audio-init.service` runs `osc-soundctl init` as a separate
@@ -76,9 +75,11 @@ module.
    shell bootstrap before tray readiness is checked.
 9. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
     long-running Hypr helpers.
-10. `hypr-desktop-settings.service` runs after the daemon stage and applies the
+10. `hypr-post-daemons.target` becomes the ordered late stage; the enabled
+    desktop-settings and post-bootstrap oneshots are pulled in there.
+11. `hypr-desktop-settings.service` runs after the daemon stage and applies the
     dconf/GSettings desktop theme sync as a tracked oneshot.
-11. `hypr-post-bootstrap.service` then runs after the daemon and desktop
+12. `hypr-post-bootstrap.service` then runs after the daemon and desktop
     settings stages, performing final cursor polish.
 
 ## Session graph

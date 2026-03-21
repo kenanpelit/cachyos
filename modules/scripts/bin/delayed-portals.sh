@@ -7,6 +7,21 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"
+HYPR_HELPER="${SCRIPT_DIR}/hypr-session-common.sh"
+NIRI_HELPER="${SCRIPT_DIR}/niri-session-common.sh"
+[[ -r "${COMMON_HELPER}" ]] || COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common"
+[[ -r "${HYPR_HELPER}" ]] || HYPR_HELPER="${SCRIPT_DIR}/hypr-session-common"
+[[ -r "${NIRI_HELPER}" ]] || NIRI_HELPER="${SCRIPT_DIR}/niri-session-common"
+
+# shellcheck source=wayland-session-common.sh
+source "${COMMON_HELPER}"
+# shellcheck source=hypr-session-common.sh
+source "${HYPR_HELPER}"
+# shellcheck source=niri-session-common.sh
+source "${NIRI_HELPER}"
+
 DELAY="${1:-8}"
 if ! [[ "$DELAY" =~ ^[0-9]+$ ]]; then
     DELAY=8
@@ -15,53 +30,19 @@ fi
 sleep "$DELAY"
 
 ensure_runtime_dir() {
-    if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
-        XDG_RUNTIME_DIR="/run/user/$(id -u)"
-        export XDG_RUNTIME_DIR
-    fi
+    session_common_ensure_runtime_dir
 }
 
 detect_wayland_display() {
-    if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-        return 0
-    fi
-    [[ -n "${XDG_RUNTIME_DIR:-}" ]] || return 0
-    local sock
-    for sock in "${XDG_RUNTIME_DIR}"/wayland-*; do
-        [[ -S "$sock" ]] || continue
-        WAYLAND_DISPLAY="$(basename "$sock")"
-        export WAYLAND_DISPLAY
-        return 0
-    done
+    session_common_detect_wayland_display
 }
 
 detect_hyprland_instance_signature() {
-    [[ -n "${XDG_RUNTIME_DIR:-}" ]] || return 0
-    [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && return 0
-    [[ -d "${XDG_RUNTIME_DIR}/hypr" ]] || return 0
-
-    local sig
-    sig="$(ls "${XDG_RUNTIME_DIR}/hypr" 2>/dev/null | head -n1 || true)"
-    if [[ -n "${sig:-}" ]]; then
-        HYPRLAND_INSTANCE_SIGNATURE="$sig"
-        export HYPRLAND_INSTANCE_SIGNATURE
-    fi
+    hypr_detect_instance_signature
 }
 
 detect_niri_socket() {
-    [[ -n "${XDG_RUNTIME_DIR:-}" ]] || return 0
-    [[ -n "${WAYLAND_DISPLAY:-}" ]] || return 0
-    [[ -n "${NIRI_SOCKET:-}" ]] && return 0
-
-    shopt -s nullglob
-    local sock
-    for sock in "${XDG_RUNTIME_DIR}/niri.${WAYLAND_DISPLAY}."*.sock; do
-        [[ -S "$sock" ]] || continue
-        NIRI_SOCKET="$sock"
-        export NIRI_SOCKET
-        break
-    done
-    shopt -u nullglob
+    niri_detect_socket
 }
 
 detect_desktop_name() {
@@ -134,9 +115,28 @@ wait_for_session_ready() {
     return 1
 }
 
+load_session_layer() {
+    local desktop_name_lc="$1"
+
+    case "$desktop_name_lc" in
+        hyprland)
+            hypr_load_session_env
+            ;;
+        niri)
+            niri_load_session_env
+            ;;
+    esac
+
+    session_common_normalize_session_paths
+}
+
 sync_env() {
     local desktop_name=""
+    local desktop_name_lc=""
     desktop_name="$(detect_desktop_name)"
+    desktop_name_lc="$(printf '%s' "$desktop_name" | tr '[:upper:]' '[:lower:]')"
+
+    load_session_layer "$desktop_name_lc"
 
     export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-$desktop_name}"
     export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"

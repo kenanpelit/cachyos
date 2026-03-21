@@ -7,6 +7,7 @@ depends_on:
 - wayland-env
 - scripts
 - wayland-autostart
+- user-services
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
 dotfiles:
