@@ -7,11 +7,41 @@
 # --- User & Environment Detection ---
 # Detects the real user running the script, even if invoked via sudo
 get_real_user() {
-  if [[ -n "${SUDO_USER:-}" ]]; then
-    echo "$SUDO_USER"
-  else
-    whoami
+  local current_uid current_user candidate
+
+  current_uid="$(id -u)"
+  current_user="$(id -un)"
+
+  # Once privileges have already been dropped, the current process owner is the
+  # only safe answer. Preserved SUDO_USER/DOAS_USER values can otherwise point
+  # back to root and break per-user paths like /run/user/<uid>.
+  if [[ "$current_uid" -ne 0 ]]; then
+    printf '%s\n' "$current_user"
+    return 0
   fi
+
+  for candidate in "${SUDO_USER:-}" "${DOAS_USER:-}"; do
+    if [[ -n "$candidate" && "$candidate" != "root" ]] && id -u "$candidate" >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  if [[ -n "${PKEXEC_UID:-}" && "${PKEXEC_UID}" =~ ^[0-9]+$ ]]; then
+    candidate="$(id -nu "${PKEXEC_UID}" 2>/dev/null || true)"
+    if [[ -n "$candidate" && "$candidate" != "root" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  fi
+
+  candidate="$(logname 2>/dev/null || true)"
+  if [[ -n "$candidate" && "$candidate" != "root" ]] && id -u "$candidate" >/dev/null 2>&1; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  printf '%s\n' "$current_user"
 }
 
 # Gets the home directory of the real user
@@ -28,9 +58,16 @@ get_user_home() {
 # Gets the standard runtime directory for the user
 get_runtime_dir() {
   local real_user="$1"
-  local uid
+  local uid current_uid
+  current_uid="$(id -u)"
   uid="$(id -u "$real_user")"
-  echo "/run/user/$uid"
+
+  if [[ "$uid" -eq "$current_uid" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
+    printf '%s\n' "$XDG_RUNTIME_DIR"
+    return 0
+  fi
+
+  printf '/run/user/%s\n' "$uid"
 }
 
 # --- Execution Wrappers ---
@@ -39,7 +76,7 @@ run_as_user() {
   local real_user
   real_user="$(get_real_user)"
   
-  if [[ "$real_user" != "$(whoami)" ]]; then
+  if [[ "$(id -u)" -eq 0 && "$real_user" != "$(id -un)" ]]; then
     local uid
     local user_home
     uid="$(id -u "$real_user")"
@@ -92,6 +129,6 @@ CACHY_RUNTIME="${USER_RUNTIME}/cachy"
 if [[ "$(id -u)" -eq 0 ]]; then
   install -d -m 0700 -o "$REAL_USER" "$CACHY_RUNTIME" 2>/dev/null || true
 else
-  mkdir -p "$CACHY_RUNTIME"
-  chmod 0700 "$CACHY_RUNTIME"
+  mkdir -p "$CACHY_RUNTIME" >/dev/null 2>&1 || true
+  chmod 0700 "$CACHY_RUNTIME" >/dev/null 2>&1 || true
 fi
