@@ -10,4 +10,4 @@ adaptive_interval = 1
 
 #[Static config]
 static_temp = 2650
-static_gamma = 96
+static_gamma = 95
