@@ -125,7 +125,7 @@ init_state_locked() {
       if type != "object" then {} else . end
       | .manual = (
           if (.manual | type) == "object"
-          then with_entries(select(.value == true or .value == false))
+          then (.manual | with_entries(select(.value == true or .value == false)))
           else {}
           end
         )
@@ -171,7 +171,7 @@ prune_manual_locked_with_windows() {
   local live_ids
   live_ids="$(jq '[.[]? | .id | tostring]' <<<"${windows_json}")"
   state_update_locked '
-    .manual = ((.manual // {}) | with_entries(select(($live | index(.key)) != null)))
+    .manual = ((.manual // {}) | with_entries(select(.key as $key | ($live | index($key)) != null)))
   ' --argjson live "${live_ids}"
 }
 
@@ -202,6 +202,14 @@ workspace_output_by_id() {
   local workspaces_json="$2"
   jq -r --arg id "${workspace_id}" '
     first(.[]? | select((.id | tostring) == $id) | (.output // "")) // ""
+  ' <<<"${workspaces_json}" 2>/dev/null || true
+}
+
+workspace_ref_by_id() {
+  local workspace_id="$1"
+  local workspaces_json="$2"
+  jq -r --arg id "${workspace_id}" '
+    first(.[]? | select((.id | tostring) == $id) | (.name // (.idx | tostring) // "")) // ""
   ' <<<"${workspaces_json}" 2>/dev/null || true
 }
 
@@ -304,7 +312,7 @@ move_window_to_workspace() {
 
 sync_to_workspace() {
   local workspace_id="$1"
-  local windows_json workspaces_json manual_json target_output
+  local windows_json workspaces_json manual_json target_output target_ref
   local entry window_id current_ws window_output app_id title
 
   windows_json="$(live_windows_json || true)"
@@ -317,6 +325,8 @@ sync_to_workspace() {
   with_state_lock prune_manual_locked_with_windows "${windows_json}"
   manual_json="$(with_state_lock manual_json_locked)"
   target_output="$(workspace_output_by_id "${workspace_id}" "${workspaces_json}")"
+  target_ref="$(workspace_ref_by_id "${workspace_id}" "${workspaces_json}")"
+  [[ -n "${target_ref}" ]] || return 0
 
   while IFS=$'\t' read -r window_id current_ws app_id title; do
     [[ -n "${window_id}" ]] || continue
@@ -331,7 +341,7 @@ sync_to_workspace() {
     fi
 
     debug "move sticky window ${window_id} to workspace ${workspace_id}"
-    move_window_to_workspace "${window_id}" "${workspace_id}" || true
+    move_window_to_workspace "${window_id}" "${target_ref}" || true
   done < <(current_sticky_entries "${windows_json}" "${manual_json}")
 }
 
@@ -517,7 +527,7 @@ run_daemon() {
   while true; do
     while IFS= read -r line; do
       handle_event_line "${line}"
-    done < <(niri msg event-stream 2>/dev/null || true)
+    done < <(niri msg -j event-stream 2>/dev/null || true)
 
     debug "event stream ended; reconnecting in ${RECONNECT_DELAY}s"
     sleep "${RECONNECT_DELAY}"
