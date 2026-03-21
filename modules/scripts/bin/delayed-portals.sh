@@ -214,7 +214,7 @@ collect_portal_backends() {
     printf '%s\n' "gtk"
 
     awk -F'=' '
-      /^[[:space:]]*(default|org\.freedesktop\.impl\.portal\.(ScreenCast|Screenshot|RemoteDesktop|FileChooser|OpenURI|Settings|AppChooser|Notification|GlobalShortcuts))[[:space:]]*=/ {
+      /^[[:space:]]*(default|org\.freedesktop\.impl\.portal\.(ScreenCast|Screenshot|RemoteDesktop|FileChooser|OpenURI|Settings|AppChooser|Notification|GlobalShortcuts|Inhibit|Email))[[:space:]]*=/ {
         value = $2
         sub(/[[:space:]]*#.*/, "", value)
         gsub(/[[:space:]]/, "", value)

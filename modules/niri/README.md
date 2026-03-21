@@ -140,6 +140,10 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   not leak across sessions. `niri-session-init` remains available as a manual
   compatibility helper and only backfills missing compositor runtime variables
   when UWSM did not finalize them.
+- The shared `xdg-portal` module now owns the Niri portal preference file:
+  generic dialogs/settings stay on GTK, screencast/screenshot prefer `wlr`,
+  and `RemoteDesktop` stays on GNOME as the only installed backend in this
+  repo that actually advertises that interface.
 - Static Niri monitor/workspace defaults are now rendered from the selected
   Hyprland monitor profile plus the Niri output-name map, so the repo has one
   profile selector and Niri keeps only a small runtime hotplug override file.

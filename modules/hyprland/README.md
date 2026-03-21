@@ -63,23 +63,28 @@ module.
    running.
 5. `hyprland-session.target` pulls in:
    `graphical-session.target`, `xdg-desktop-autostart.target`,
-   `hypr-bootstrap.service`, `hypr-audio-init.service`,
+   `hypr-session-env.service`, `hypr-bootstrap.service`,
+   `hypr-audio-init.service`,
    `hypr-shell-ensure.service`,
    `hypr-daemons.target`, and `hypr-post-daemons.target`.
-6. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
+6. `hypr-session-env.service` runs `hypr-session-init --no-start-target`
+   before the rest of the Hyprland graph so `systemd --user` sees
+   `WAYLAND_DISPLAY` and `HYPRLAND_INSTANCE_SIGNATURE` before late units are
+   evaluated.
+7. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
    oneshot stage.
-7. `hypr-audio-init.service` runs `osc-soundctl init` as a separate
+8. `hypr-audio-init.service` runs `osc-soundctl init` as a separate
    non-blocking-ish oneshot so monitor/workspace normalization is not coupled to
    audio setup.
-8. `hypr-shell-ensure.service` runs `osc-shell ensure` as a compositor-neutral
+9. `hypr-shell-ensure.service` runs `osc-shell ensure` as a compositor-neutral
    shell bootstrap before tray readiness is checked.
-9. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
+10. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
     long-running Hypr helpers.
-10. `hypr-post-daemons.target` becomes the ordered late stage; the enabled
+11. `hypr-post-daemons.target` becomes the ordered late stage; the enabled
     desktop-settings and post-bootstrap oneshots are pulled in there.
-11. `hypr-desktop-settings.service` runs after the daemon stage and applies the
+12. `hypr-desktop-settings.service` runs after the daemon stage and applies the
     dconf/GSettings desktop theme sync as a tracked oneshot.
-12. `hypr-post-bootstrap.service` then runs after the daemon and desktop
+13. `hypr-post-bootstrap.service` then runs after the daemon and desktop
     settings stages, performing final cursor polish.
 
 ## Session graph
@@ -88,6 +93,10 @@ Core session units:
 
 - `hyprland-session.target`
   Session umbrella target started by the compositor service lifecycle drop-in.
+- `hypr-session-env.service`
+  Pre-bootstrap runtime env sync. Runs `hypr-session-init --no-start-target`
+  so the user manager sees the finalized Hyprland runtime variables before the
+  rest of the session units are evaluated.
 - `hypr-bootstrap.service`
   Early oneshot bootstrap. Runs `hypr-session-route --no-notify`.
 - `hypr-audio-init.service`

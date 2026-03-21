@@ -758,6 +758,7 @@ window-rule {
 
 window-rule {
   match title=r#"^(Open File|File Upload|Save As|Confirm to replace files|File Operation Progress|Extract archive|Compress\.\.\.)$"#
+  match app-id="xdg-desktop-portal-wlr"
   match app-id="xdg-desktop-portal-gnome"
   match app-id="xdg-desktop-portal-gtk"
   exclude app-id=r#"^Kenp$"#

@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=org.gnome.Settings.GlobalShortcutsProvider
-Exec=/usr/bin/env -u GDK_BACKEND XDG_SESSION_TYPE=wayland /usr/lib/gnome-control-center-global-shortcuts-provider

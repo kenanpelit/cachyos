@@ -1,0 +1,18 @@
+[Unit]
+Description=Hyprland session runtime environment sync
+After=graphical-session.target wayland-wm@start\x2dhyprland.service wayland-session-waitenv.service dbus.service
+Before=hypr-bootstrap.service hypr-audio-init.service hypr-shell-ensure.service hypr-daemons.target hypr-post-daemons.target
+PartOf=hyprland-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+ConditionPathExists=%h/.local/bin/hypr-session-init
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=%h/.local/bin/hypr-session-init --no-start-target
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=hyprland-session.target
