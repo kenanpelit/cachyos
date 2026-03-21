@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Wait for a session StatusNotifierWatcher before tray applets start.
+# ==============================================================================
+# Script: hypr-status-notifier-ready.sh
+# Description: Wait for StatusNotifierWatcher before Hyprland tray applets start.
+# ==============================================================================
 
 set -euo pipefail
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: noctalia-preflight.sh
+# Description: Ensure writable Noctalia runtime files exist before launch.
+# ==============================================================================
 set -euo pipefail
 
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"

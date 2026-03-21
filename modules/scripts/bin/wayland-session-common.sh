@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Shared helpers for Wayland session bootstrap scripts.
+# ==============================================================================
+# Script: wayland-session-common.sh
+# Description: Shared env parsing and runtime-dir helpers for Wayland sessions.
+# ==============================================================================
 
 session_common_ensure_runtime_dir() {
   if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then

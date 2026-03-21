@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Shared helpers for Niri session bootstrap scripts.
+# ==============================================================================
+# Script: niri-session-common.sh
+# Description: Shared environment/bootstrap helpers for Niri session scripts.
+# ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# wm-workspace.sh
-# Workspace router across compositors (Hyprland, Niri).
-# Used by Fusuma (and other callers) to route workspace/monitor actions to the
-# correct backend (`hypr-osc`, `niri-osc`).
+# ==============================================================================
+# Script: wm-workspace.sh
+# Description: Compositor-aware workspace router for Fusuma and helper scripts.
+# ==============================================================================
 
 set -euo pipefail
 

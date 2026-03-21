@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Dedicated monitor/workspace routing helper for Hyprland session bootstrap.
+# ==============================================================================
+# Script: hypr-session-route.sh
+# Description: Route Hyprland monitor and workspace defaults after session start.
+# ==============================================================================
 
 set -euo pipefail
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: noctalia-should-start.sh
+# Description: ExecCondition helper deciding whether Noctalia should start.
+# ==============================================================================
 set -euo pipefail
 
 case "${XDG_CURRENT_DESKTOP:-}" in

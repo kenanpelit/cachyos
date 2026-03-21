@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Apply desktop theme settings after the shell/tray stage is up.
+# ==============================================================================
+# Script: hypr-desktop-settings.sh
+# Description: Apply GTK, icon, and cursor settings after Hyprland startup.
+# ==============================================================================
 
 set -euo pipefail
 

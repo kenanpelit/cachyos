@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Bootstrap Noctalia with the compositor session environment already loaded.
+# ==============================================================================
+# Script: noctalia-launch.sh
+# Description: Prepare session-specific Noctalia state and launch the shell.
+# ==============================================================================
 
 set -euo pipefail
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: hypr-blueman-applet.sh
+# Description: Wayland-safe Blueman applet wrapper for Hyprland sessions.
+# ==============================================================================
 set -euo pipefail
 
 log() { printf '[hypr-blueman-applet] %s\n' "$*" >&2; }

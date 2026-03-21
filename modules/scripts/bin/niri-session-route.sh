@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Render the runtime Niri monitor profile from live outputs.
+# ==============================================================================
+# Script: niri-session-route.sh
+# Description: Render the runtime Niri monitor profile from current outputs.
+# ==============================================================================
 
 set -euo pipefail
 

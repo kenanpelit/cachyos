@@ -179,7 +179,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-blueman-applet`
-**Description:** Blueman imports some X11-only plugins before honoring plugin-list, which
+**Description:** Wayland-safe Blueman applet wrapper for Hyprland sessions.
 
 **Usage:** `hypr-blueman-applet`
 
@@ -193,7 +193,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-desktop-settings`
-**Description:** Apply desktop theme settings after the shell/tray stage is up.
+**Description:** Apply GTK, icon, and cursor settings after Hyprland startup.
 
 **Usage:** `hypr-desktop-settings`
 
@@ -228,7 +228,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-session-common`
-**Description:** Shared helpers for Hyprland session bootstrap scripts.
+**Description:** Shared environment/bootstrap helpers for Hyprland session scripts.
 
 **Usage:** `hypr-session-common`
 
@@ -242,14 +242,14 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-session-route`
-**Description:** Dedicated monitor/workspace routing helper for Hyprland session bootstrap.
+**Description:** Route Hyprland monitor and workspace defaults after session start.
 
 **Usage:** `hypr-session-route`
 
 ---
 
 ### 📂 `hypr-status-notifier-ready`
-**Description:** Wait for a session StatusNotifierWatcher before tray applets start.
+**Description:** Wait for StatusNotifierWatcher before Hyprland tray applets start.
 
 **Usage:** `hypr-status-notifier-ready`
 
@@ -293,7 +293,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ### 📂 `mpv-manager`
 **Description:** Compositor-aware MPV helper for window management and IPC control.
 
-**Usage:** `mpv-manager.sh [start|playback|play-yt|save-yt|move|stick|wallpaper]`
+**Usage:** `mpv-manager.sh [start|playback|play-yt|save-yt|move|stick|top|wallpaper]`
 
 ---
 
@@ -305,7 +305,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-desktop-settings`
-**Description:** Apply desktop theme settings after the shell/tray stage is up.
+**Description:** Apply GTK, icon, and cursor settings after Niri startup.
 
 **Usage:** `niri-desktop-settings`
 
@@ -326,7 +326,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-session-common`
-**Description:** Shared helpers for Niri session bootstrap scripts.
+**Description:** Shared environment/bootstrap helpers for Niri session scripts.
 
 **Usage:** `niri-session-common`
 
@@ -340,14 +340,14 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-session-route`
-**Description:** Render the runtime Niri monitor profile from live outputs.
+**Description:** Render the runtime Niri monitor profile from current outputs.
 
 **Usage:** `niri-session-route`
 
 ---
 
 ### 📂 `niri-snapper-tools-check`
-**Description:** No description provided.
+**Description:** Delayed snapper-tools autostart check for Niri snapshot boots.
 
 **Usage:** `niri-snapper-tools-check`
 
@@ -361,28 +361,28 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-status-notifier-ready`
-**Description:** Wait for a session StatusNotifierWatcher before tray applets start.
+**Description:** Wait for StatusNotifierWatcher before Niri tray applets start.
 
 **Usage:** `niri-status-notifier-ready`
 
 ---
 
 ### 📂 `noctalia-launch`
-**Description:** Bootstrap Noctalia with the compositor session environment already loaded.
+**Description:** Prepare session-specific Noctalia state and launch the shell.
 
 **Usage:** `noctalia-launch`
 
 ---
 
 ### 📂 `noctalia-preflight`
-**Description:** No description provided.
+**Description:** Ensure writable Noctalia runtime files exist before launch.
 
 **Usage:** `noctalia-preflight`
 
 ---
 
 ### 📂 `noctalia-should-start`
-**Description:** No description provided.
+**Description:** ExecCondition helper deciding whether Noctalia should start.
 
 **Usage:** `noctalia-should-start`
 
@@ -900,7 +900,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `tm.sh.bak`
-**Description:** Comprehensive Tmux management, session, layouts, buffers, plugins, and more
+**Description:** Backup copy of the unified tmux management helper.
 
 **Usage:** `tm.sh.bak`
 
@@ -977,21 +977,21 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `wayland-session-common`
-**Description:** Shared helpers for Wayland session bootstrap scripts.
+**Description:** Shared env parsing and runtime-dir helpers for Wayland sessions.
 
 **Usage:** `wayland-session-common`
 
 ---
 
 ### 📂 `wm-workspace`
-**Description:** wm-workspace.sh
+**Description:** Compositor-aware workspace router for Fusuma and helper scripts.
 
 **Usage:** `wm-workspace`
 
 ---
 
 ### 📂 `yt-cookies-youtube`
-**Description:** No description provided.
+**Description:** Export and validate YouTube cookies in Netscape format via yt-dlp.
 
 **Usage:** `yt-cookies-youtube`
 

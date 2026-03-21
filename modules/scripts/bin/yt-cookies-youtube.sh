@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Script: yt-cookies-youtube.sh
+# Description: Export and validate YouTube cookies in Netscape format via yt-dlp.
+# ==============================================================================
 set -euo pipefail
 
 DEFAULT_OUTPUT="${XDG_CONFIG_HOME:-$HOME/.config}/yt-dlp/cookies-youtube.txt"

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Shared helpers for Hyprland session bootstrap scripts.
+# ==============================================================================
+# Script: hypr-session-common.sh
+# Description: Shared environment/bootstrap helpers for Hyprland session scripts.
+# ==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"

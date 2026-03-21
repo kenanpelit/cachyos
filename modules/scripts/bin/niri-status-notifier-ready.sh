@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Wait for a session StatusNotifierWatcher before tray applets start.
+# ==============================================================================
+# Script: niri-status-notifier-ready.sh
+# Description: Wait for StatusNotifierWatcher before Niri tray applets start.
+# ==============================================================================
 
 set -euo pipefail
 
