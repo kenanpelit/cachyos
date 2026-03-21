@@ -990,3 +990,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `yt-cookies-youtube`
+**Description:** No description provided.
+
+**Usage:** `yt-cookies-youtube`
+
+---
+
