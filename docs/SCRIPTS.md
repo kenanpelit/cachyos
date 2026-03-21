@@ -45,6 +45,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `bt-autoconnect-once`
+**Description:** Bounded Bluetooth auto-connect helper for the user timer service.
+
+**Usage:** `bt-autoconnect-once`
+
+---
+
 ### 📂 `cachy-mount`
 **Description:** Dual-disk BTRFS helper to detect and mount other OS partitions.
 
@@ -235,7 +242,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-session-init`
-**Description:** Start hyprland-session.target from inside the compositor.
+**Description:** Compatibility helper for manual/Hyprland fallback startup and runtime env backfill.
 
 **Usage:** `hypr-session-init [--no-start-target]`
 
@@ -300,7 +307,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ### 📂 `niri-bootstrap`
 **Description:** Standardized bootstrap for Niri session.
 
-**Usage:** `niri-bootstrap.sh`
+**Usage:** `niri-bootstrap`
 
 ---
 
@@ -826,6 +833,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Launch SSH with optional menu selection using fzf/rofi
 
 **Usage:** `ssh-launcher.sh [ssh_arguments]`
+
+---
+
+### 📂 `status-notifier-ready`
+**Description:** Shared readiness gate that waits for the StatusNotifierWatcher on the session bus.
+
+**Usage:** `status-notifier-ready`
 
 ---
 

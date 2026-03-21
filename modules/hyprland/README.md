@@ -38,14 +38,15 @@ module.
   variables, applies the Hyprland session identity
   (`DESKTOP_SESSION=hyprland-uwsm`, `XDG_CURRENT_DESKTOP=Hyprland`), and then
   hands off to `uwsm start`.
-- Once Hyprland is up, `dotfiles/hypr/hyprland.conf` runs:
-  `exec-once = ~/.local/bin/hypr-session-init`.
-- `hypr-session-init` is now the compositor-side entrypoint that starts
-  `hyprland-session.target`. Under UWSM it trusts the pre-finalized session
-  environment and only falls back to runtime detection/sync if
-  `WAYLAND_DISPLAY` or `HYPRLAND_INSTANCE_SIGNATURE` are unexpectedly missing.
-  Outside UWSM it retains the older full env-sync path as a compatibility
-  fallback.
+- Once Hyprland is up, the repo-managed drop-in for
+  `wayland-wm@start\x2dhyprland.service` starts `hyprland-session.target` with
+  `ExecStartPost=` once the compositor service is ready.
+- `hypr-session-init` remains available as a manual compatibility helper for
+  runtime env backfill and emergency target restarts. Under UWSM it trusts the
+  pre-finalized session environment and only falls back to runtime
+  detection/sync if `WAYLAND_DISPLAY` or `HYPRLAND_INSTANCE_SIGNATURE` are
+  unexpectedly missing. Outside UWSM it retains the older full env-sync path as
+  a compatibility fallback.
 
 ## Startup flow
 
@@ -57,32 +58,27 @@ module.
    unavailable).
 3. UWSM creates the compositor service, waits for readiness variables, and
    finalizes the session environment for the user manager.
-4. Hyprland reads `~/.config/hypr/hyprland.conf` and runs
-   `~/.local/bin/hypr-session-init`.
-5. If the session is UWSM-managed, `hypr-session-init` starts
-   `hyprland-session.target` immediately and only performs runtime
-   detection/sync as a fallback when UWSM did not finalize
-   `WAYLAND_DISPLAY` or `HYPRLAND_INSTANCE_SIGNATURE`. If UWSM is not
-   present, the script falls back to the older full `environment.d` import
-   path.
-6. `hyprland-session.target` pulls in:
+4. The repo-managed drop-in for `wayland-wm@start\x2dhyprland.service` starts
+   `hyprland-session.target` with `ExecStartPost=` once Hyprland is actually
+   running.
+5. `hyprland-session.target` pulls in:
    `graphical-session.target`, `xdg-desktop-autostart.target`,
    `hypr-bootstrap.service`, `hypr-audio-init.service`,
    `hypr-shell-ensure.service`,
    `hypr-daemons.target`, `hypr-desktop-settings.service`, and
    `hypr-post-bootstrap.service`.
-7. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
+6. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
    oneshot stage.
-8. `hypr-audio-init.service` runs `osc-soundctl init` as a separate
+7. `hypr-audio-init.service` runs `osc-soundctl init` as a separate
    non-blocking-ish oneshot so monitor/workspace normalization is not coupled to
    audio setup.
-9. `hypr-shell-ensure.service` runs `osc-shell ensure` as a compositor-neutral
+8. `hypr-shell-ensure.service` runs `osc-shell ensure` as a compositor-neutral
    shell bootstrap before tray readiness is checked.
-10. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
-   long-running Hypr helpers.
-11. `hypr-desktop-settings.service` runs after the daemon stage and applies the
+9. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
+    long-running Hypr helpers.
+10. `hypr-desktop-settings.service` runs after the daemon stage and applies the
     dconf/GSettings desktop theme sync as a tracked oneshot.
-12. `hypr-post-bootstrap.service` then runs after the daemon and desktop
+11. `hypr-post-bootstrap.service` then runs after the daemon and desktop
     settings stages, performing final cursor polish.
 
 ## Session graph
@@ -90,7 +86,7 @@ module.
 Core session units:
 
 - `hyprland-session.target`
-  Session umbrella target started by `hypr-session-init`.
+  Session umbrella target started by the compositor service lifecycle drop-in.
 - `hypr-bootstrap.service`
   Early oneshot bootstrap. Runs `hypr-session-route --no-notify`.
 - `hypr-audio-init.service`
@@ -132,8 +128,9 @@ Daemon-stage units started by `hypr-daemons.target`:
 ## Config layout
 
 - `dotfiles/hypr/hyprland.conf`
-  Minimal root config that sources the split files and starts
-  `hypr-session-init`.
+  Minimal root config that sources the split files; session-target startup is
+  now owned by the compositor service lifecycle drop-in rather than Hyprland
+  `exec-once`.
 - `dotfiles/hypr/conf.d/20-theme.conf`
   Generated Hyprland theme file derived from `theme/theme.env`. Contains the
   palette plus the visual assignments for borders, blur, shadow, opacity,
@@ -198,10 +195,11 @@ Daemon-stage units started by `hypr-daemons.target`:
   `~/.config/session-env/hyprland/10-hyprland.conf`. The ordered
   `hyprland-session.envlist` allowlist keeps Niri-only or ad-hoc user
   overrides from leaking into the Hyprland session wrapper.
-  `hypr-session-init` avoids re-importing that full static environment when
-  UWSM is already managing the session and only backfills missing compositor
-  runtime variables as a safety net. When that fallback path is used, it emits
-  a warning to the journal so session drift is visible.
+  `hypr-session-init` remains available as a manual compatibility helper and
+  avoids re-importing that full static environment when UWSM is already
+  managing the session, only backfilling missing compositor runtime variables
+  as a safety net. When that fallback path is used, it emits a warning to the
+  journal so session drift is visible.
 - Hyprland and Niri now share a common Wayland bootstrap helper for env-file
   parsing, path normalization, `WAYLAND_DISPLAY` detection, and
   systemd/dbus environment sync. Compositor-specific helpers keep only the

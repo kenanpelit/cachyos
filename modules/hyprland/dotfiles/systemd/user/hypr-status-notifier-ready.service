@@ -4,14 +4,15 @@ After=graphical-session.target hypr-bootstrap.service hypr-shell-ensure.service 
 PartOf=hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
-ConditionPathExists=%h/.local/bin/hypr-status-notifier-ready
+ConditionPathExists=%h/.local/bin/status-notifier-ready
 
 [Service]
 Type=oneshot
 TimeoutStartSec=25
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
-ExecStart=%h/.local/bin/hypr-status-notifier-ready
+Environment=STATUS_NOTIFIER_READY_LOG_TAG=hypr-status-notifier-ready
+ExecStart=%h/.local/bin/status-notifier-ready
 StandardOutput=journal
 StandardError=journal
 

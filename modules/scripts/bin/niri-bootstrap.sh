@@ -1,42 +1,58 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: niri-bootstrap.sh
+# Script: niri-bootstrap
 # Description: Standardized bootstrap for Niri session.
-# Usage: niri-bootstrap.sh
+# Usage: niri-bootstrap
 # ==============================================================================
 
-set -eEuo pipefail
+set -euo pipefail
 
-log() { printf "[niri-bootstrap] %s\n" "$*"; }
-warn() { printf "[niri-bootstrap] WARN: %s\n" "$*" >&2; }
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMMON_HELPER="${SCRIPT_DIR}/niri-session-common.sh"
+[[ -r "${COMMON_HELPER}" ]] || COMMON_HELPER="${SCRIPT_DIR}/niri-session-common"
+# shellcheck source=niri-session-common.sh
+source "${COMMON_HELPER}"
 
-# Turbo: Removed artificial delay, relying on service dependencies
-# Ensure PATH includes local bin
-export PATH="$HOME/.local/bin:$PATH"
+log() { printf '[niri-bootstrap] %s\n' "$*"; }
+warn() { printf '[niri-bootstrap] WARN: %s\n' "$*" >&2; }
 
-# Minimal readiness check before calling osc
+export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+ensure_niri_env() {
+  niri_ensure_runtime_dir
+  niri_ensure_session_identity
+  niri_detect_wayland_display
+  niri_detect_socket
+}
+
 wait_for_socket() {
   local i
-  for i in $(seq 1 100); do
-    [[ -S "$NIRI_SOCKET" ]] && return 0
-    sleep 0.05
+  for i in $(seq 1 120); do
+    niri_detect_socket
+    [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]] && return 0
+    sleep 0.1
   done
   return 1
 }
 
-if command -v niri-osc >/dev/null 2>&1; then
-  # NIRI_SOCKET is usually exported by niri itself or niri-osc set env
-  if [[ -n "${NIRI_SOCKET:-}" ]]; then
-    wait_for_socket || warn "Socket not found, attempting anyway..."
+main() {
+  ensure_niri_env || true
+
+  if ! wait_for_socket; then
+    warn "NIRI_SOCKET did not become ready in time; continuing"
+  fi
+
+  if ! command -v niri-osc >/dev/null 2>&1; then
+    warn "niri-osc not found"
+    exit 1
   fi
 
   if ! niri-osc set init; then
     warn "niri-osc set init failed"
     exit 1
   fi
-else
-  warn "niri-osc not found"
-  exit 1
-fi
 
-exit 0
+  log "niri-bootstrap completed."
+}
+
+main

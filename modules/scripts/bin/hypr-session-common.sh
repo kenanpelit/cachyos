@@ -147,6 +147,7 @@ hypr_detect_instance_signature() {
 hypr_clear_foreign_session_env() {
   unset \
     GDK_BACKEND \
+    NOCTALIA_STARTUP_HINT \
     WAYLAND_DISPLAY \
     DISPLAY \
     NIRI_SOCKET \

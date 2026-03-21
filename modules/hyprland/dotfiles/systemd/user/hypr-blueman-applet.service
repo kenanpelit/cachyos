@@ -14,7 +14,6 @@ RestrictRealtime=yes
 RestrictSUIDSGID=yes
 Environment="BLUEMAN_PLUGIN_LIST=['!TransferService', '!GameControllerWakelock', '!PPPSupport', '!DhcpClient']"
 Environment=GDK_BACKEND=wayland,x11
-ExecStartPre=/usr/bin/sh -lc 'command -v dconf >/dev/null 2>&1 && dconf write /org/blueman/general/plugin-list "$BLUEMAN_PLUGIN_LIST" >/dev/null 2>&1 || true'
 ExecStart=%h/.local/bin/hypr-blueman-applet
 Restart=on-failure
 RestartSec=3

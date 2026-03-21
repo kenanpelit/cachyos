@@ -6,26 +6,10 @@
 
 set -euo pipefail
 
-LOG_TAG="hypr-status-notifier-ready"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HELPER="${SCRIPT_DIR}/status-notifier-ready.sh"
+[[ -r "${HELPER}" ]] || HELPER="${SCRIPT_DIR}/status-notifier-ready"
 
-log() { printf '[%s] %s\n' "$LOG_TAG" "$*" >&2; }
+export STATUS_NOTIFIER_READY_LOG_TAG="${STATUS_NOTIFIER_READY_LOG_TAG:-hypr-status-notifier-ready}"
 
-if ! command -v gdbus >/dev/null 2>&1; then
-  log "gdbus not found; skipping watcher readiness gate"
-  exit 0
-fi
-
-deadline=$((SECONDS + 20))
-while (( SECONDS < deadline )); do
-  if gdbus introspect \
-    --session \
-    --dest org.kde.StatusNotifierWatcher \
-    --object-path /StatusNotifierWatcher \
-    >/dev/null 2>&1; then
-    log "StatusNotifierWatcher is ready"
-    exit 0
-  fi
-  sleep 1
-done
-
-log "StatusNotifierWatcher was not ready before timeout; continuing anyway"
+exec "${HELPER}" "$@"

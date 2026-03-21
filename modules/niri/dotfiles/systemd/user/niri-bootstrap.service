@@ -7,14 +7,14 @@ PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+ConditionPathExists=%h/.local/bin/niri-bootstrap
 
 [Service]
 Type=oneshot
 TimeoutStartSec=60
 RemainAfterExit=yes
-Environment=PATH=/usr/local/bin:/usr/bin:/bin
-Environment=NIRI_BOOT_DELAY=0
-ExecStart=/usr/bin/bash "%h/.local/bin/niri-bootstrap"
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=%h/.local/bin/niri-bootstrap
 StandardOutput=journal
 StandardError=journal
 

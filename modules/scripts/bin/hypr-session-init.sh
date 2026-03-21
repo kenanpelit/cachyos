@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: hypr-session-init
-# Description: Start hyprland-session.target from inside the compositor.
+# Description: Compatibility helper for manual/Hyprland fallback startup and runtime env backfill.
 #              Under UWSM, trust the pre-finalized session environment and only
 #              fall back to runtime detection if critical compositor variables
 #              are unexpectedly missing.

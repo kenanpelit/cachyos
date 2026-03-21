@@ -33,6 +33,7 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     HYPRLAND_CMD \
     HYPRCURSOR_THEME \
     HYPRCURSOR_SIZE \
+    NOCTALIA_STARTUP_HINT \
     UWSM_WAIT_VARNAMES \
     UWSM_FINALIZE_VARNAMES \
     XDG_CURRENT_DESKTOP \

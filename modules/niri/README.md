@@ -40,8 +40,9 @@ UWSM-first session wrapper.
    `niri-shell-ensure.service`, `niri-daemons.target`,
    `niri-post-daemons.target`, and the shared
    compositor-session units enabled by other modules.
-6. `niri-bootstrap.service` runs `~/.local/bin/niri-bootstrap`, which calls
-   `niri-osc set init`.
+6. `niri-bootstrap.service` runs `~/.local/bin/niri-bootstrap`, which now uses
+   the shared Niri session helper for runtime env/socket detection before
+   calling `niri-osc set init`.
 7. `niri-shell-ensure.service` runs `osc-shell ensure` under `systemd --user`
    instead of relying on `spawn-at-startup` in `config.kdl`.
 8. `niri-daemons.target` becomes the daemon stage for long-running helpers.
@@ -58,7 +59,8 @@ These units make up the core Niri session chain:
 - `niri-session.target`
   Session umbrella target started by the UWSM compositor service drop-in.
 - `niri-bootstrap.service`
-  Early oneshot bootstrap. Runs `niri-osc set init`.
+  Early oneshot bootstrap. Uses the shared Niri session helper to normalize
+  runtime state and then runs `niri-osc set init`.
 - `niri-shell-ensure.service`
   Starts the shell backend through `osc-shell ensure` under `systemd --user`.
 - `niri-daemons.target`

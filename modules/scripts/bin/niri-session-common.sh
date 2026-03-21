@@ -108,6 +108,7 @@ niri_ensure_session_identity() {
 niri_clear_foreign_session_env() {
   unset \
     GDK_BACKEND \
+    NOCTALIA_STARTUP_HINT \
     WAYLAND_DISPLAY \
     DISPLAY \
     NIRI_SOCKET \

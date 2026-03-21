@@ -7,6 +7,10 @@ set -euo pipefail
 
 log() { printf '[hypr-blueman-applet] %s\n' "$*" >&2; }
 
+if command -v dconf >/dev/null 2>&1; then
+  dconf write /org/blueman/general/plugin-list "${BLUEMAN_PLUGIN_LIST:-['!TransferService', '!GameControllerWakelock', '!PPPSupport', '!DhcpClient']}" >/dev/null 2>&1 || true
+fi
+
 # Blueman imports some X11-only plugins before honoring plugin-list, which
 # produces a known Wayland-only false-positive warning. Filter only those
 # specific lines and keep every other warning/error visible in the journal.
