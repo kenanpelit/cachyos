@@ -3812,6 +3812,7 @@ Sticky actions:
   add <window_id>
   remove <window_id>
   list
+  toggle-id <window_id>
   toggle-active
   toggle-appid <app_id>
   toggle-title <title-substring>
@@ -3944,6 +3945,38 @@ niri_workspaces_json() {
 
 focused_window_id() {
   niri msg -j focused-window 2>/dev/null | jq -r '.id // empty'
+}
+
+window_app_id_by_id_json() {
+  local window_id="$1"
+  local windows_json="$2"
+  jq -r --arg id "$window_id" '
+    first(.[]? | select((.id | tostring) == $id) | (.app_id // "")) // empty
+  ' <<<"$windows_json" 2>/dev/null || true
+}
+
+raise_window_preserve_focus() {
+  local window_id="$1"
+  local previous_id=""
+  local focused=0
+
+  previous_id="$(focused_window_id || true)"
+
+  for _ in {1..10}; do
+    if niri msg action focus-window --id "$window_id" >/dev/null 2>&1; then
+      focused=1
+      break
+    fi
+    sleep 0.02
+  done
+
+  [[ "$focused" -eq 1 ]] || return 1
+
+  if [[ -n "$previous_id" && "$previous_id" != "$window_id" ]]; then
+    niri msg action focus-window-previous >/dev/null 2>&1 \
+      || niri msg action focus-window --id "$previous_id" >/dev/null 2>&1 \
+      || true
+  fi
 }
 
 active_workspace_id() {
@@ -4255,9 +4288,14 @@ daemon_tick_locked() {
   last_ws="$(state_get_last_workspace_locked)"
   if [[ "$ws_id" != "$last_ws" ]]; then
     local -a ids
+    local app_id
     mapfile -t ids < <(state_list_locked "sticky")
     for window_id in "${ids[@]}"; do
       move_window_to_workspace "$window_id" "$ws_idx" || true
+      app_id="$(window_app_id_by_id_json "$window_id" "$windows_json")"
+      if [[ "$app_id" == "mpv" ]]; then
+        raise_window_preserve_focus "$window_id" || true
+      fi
     done
     state_set_last_workspace_locked "$ws_id"
     printf 'changed\n'
@@ -4298,6 +4336,18 @@ cmd_sticky() {
       ;;
     list|l)
       with_lock state_list_json_locked "sticky"
+      ;;
+    toggle-id|ti)
+      [[ $# -eq 1 ]] || err "sticky toggle-id requires <window_id>"
+      require_window_id "$1"
+      local window_id="$1" out
+
+      out="$(with_lock sticky_toggle_target_locked "$window_id")"
+      case "$out" in
+        Added*) notify low "Sticky" "Window added" ;;
+        Removed*) notify low "Sticky" "Window removed" ;;
+      esac
+      printf '%s\n' "$out"
       ;;
     toggle-active|t)
       local window_id out
@@ -4431,7 +4481,7 @@ main() {
     stage)
       cmd_stage "$@"
       ;;
-    list|l|add|a|remove|r|toggle-active|t|toggle-appid|ta|toggle-title|tt)
+    list|l|add|a|remove|r|toggle-id|ti|toggle-active|t|toggle-appid|ta|toggle-title|tt)
       cmd_sticky "$cmd" "$@"
       ;;
     *)

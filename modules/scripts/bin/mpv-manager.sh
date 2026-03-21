@@ -2,7 +2,7 @@
 # ==============================================================================
 # Script: mpv-manager.sh
 # Description: Compositor-aware MPV helper for window management and IPC control.
-# Usage: mpv-manager.sh [start|playback|play-yt|save-yt|move|stick|wallpaper]
+# Usage: mpv-manager.sh [start|playback|play-yt|save-yt|move|stick|top|wallpaper]
 # ==============================================================================
 
 set -euo pipefail
@@ -66,8 +66,8 @@ Commands:
   play-yt     Play YouTube URL from clipboard or argument
   save-yt     Download YouTube URL from clipboard or argument (yt-dlp)
 
-Window management (Hyprland; limited elsewhere):
-  move | stick | wallpaper
+Window management (compositor-aware):
+  move | stick | top | wallpaper
 EOF
 }
 
@@ -502,39 +502,23 @@ niri_window_xywh_by_id() {
   echo "$line"
 }
 
-niri_window_is_floating_by_id() {
-  local id="$1"
-  local value=""
+resolve_niri_osc_bin() {
+  local candidate
 
-  if command -v jq >/dev/null 2>&1; then
-    value="$(
-      niri msg -j windows 2>/dev/null \
-        | jq -r --argjson id "$id" '.[] | select(.id == $id) | .is_floating' \
-        | head -n1
-    )"
-    case "$value" in
-      true) return 0 ;;
-      false) return 1 ;;
-    esac
+  if command -v niri-osc >/dev/null 2>&1; then
+    command -v niri-osc
+    return 0
   fi
 
-  value="$(
-    niri msg windows 2>/dev/null | awk -v want_id="$id" '
-      /^Window ID[[:space:]]+/ {
-        id=$3
-        gsub(":", "", id)
-        inwin=(id == want_id)
-        next
-      }
-      inwin && /^[[:space:]]*Is floating:/ {
-        if ($3 == "yes") print "yes"
-        else print "no"
-        exit
-      }
-    '
-  )"
+  for candidate in \
+    "$HOME/.config/arch-config/modules/scripts/bin/niri-osc.sh" \
+    "$HOME/.cachy/modules/scripts/bin/niri-osc.sh"
+  do
+    [[ -x "$candidate" ]] || continue
+    printf '%s\n' "$candidate"
+    return 0
+  done
 
-  [[ "$value" == "yes" ]] && return 0
   return 1
 }
 
@@ -558,6 +542,40 @@ niri_move_floating_window_by_id() {
   local x="$2"
   local y="$3"
   niri msg action move-floating-window -x "$x" -y "$y" --id "$id"
+}
+
+niri_focused_window_id() {
+  if command -v jq >/dev/null 2>&1; then
+    niri msg -j focused-window 2>/dev/null | jq -r '.id // empty'
+    return 0
+  fi
+
+  niri msg focused-window 2>/dev/null \
+    | sed -n 's/^[[:space:]]*Window ID[[:space:]]*\([0-9]\+\):.*$/\1/p' \
+    | head -n1
+}
+
+niri_raise_window_by_id() {
+  local id="$1"
+  local previous_id=""
+  local focused=0
+
+  previous_id="$(niri_focused_window_id 2>/dev/null || true)"
+  for _ in {1..10}; do
+    if niri msg action focus-window --id "$id" >/dev/null 2>&1; then
+      focused=1
+      break
+    fi
+    sleep 0.02
+  done
+
+  [[ "$focused" -eq 1 ]] || return 1
+
+  if [[ -n "$previous_id" && "$previous_id" != "$id" ]]; then
+    niri msg action focus-window-previous >/dev/null 2>&1 \
+      || niri msg action focus-window --id "$previous_id" >/dev/null 2>&1 \
+      || true
+  fi
 }
 
 niri_load_mpv_state() {
@@ -832,6 +850,8 @@ niri_move_top_right() {
     niri_save_mpv_state "tr" "$top_offset"
   fi
 
+  niri_raise_window_by_id "$mpv_id" >/dev/null 2>&1 || true
+
   notify "mpv-manager" "Niri: mpv -> (${tx}, ${ty})"
 }
 
@@ -847,26 +867,32 @@ niri_prepare_new_mpv_window() {
 niri_toggle_stick() {
   niri_require
 
-  local mpv_id was_floating
+  local mpv_id niri_osc_bin out
   mpv_id="$(niri_find_window_id_by_app_id "mpv" 2>/dev/null)" || die "MPV penceresi bulunamadı"
+  niri_osc_bin="$(resolve_niri_osc_bin)" || die "niri-osc bulunamadı"
 
-  if niri_window_is_floating_by_id "$mpv_id"; then
-    was_floating=true
-  else
-    was_floating=false
-  fi
+  out="$("$niri_osc_bin" sticky sticky toggle-id "$mpv_id" 2>&1)" || die "$out"
+  case "$out" in
+    Added*)
+      niri_move_top_right "$mpv_id" >/dev/null 2>&1 || true
+      notify "mpv-manager" "Niri: mpv sticky etkin"
+      ;;
+    Removed*)
+      notify "mpv-manager" "Niri: mpv sticky kapalı"
+      ;;
+    *)
+      notify "mpv-manager" "$out"
+      ;;
+  esac
+}
 
-  if $was_floating; then
-    niri msg action move-window-to-tiling --id "$mpv_id" >/dev/null 2>&1 \
-      || die "Niri: move-window-to-tiling başarısız"
-    notify "mpv-manager" "Niri: mpv -> tiling"
-    return 0
-  fi
+niri_raise_mpv() {
+  niri_require
 
-  niri msg action move-window-to-floating --id "$mpv_id" >/dev/null 2>&1 \
-    || die "Niri: move-window-to-floating başarısız"
-  niri_move_top_right "$mpv_id" >/dev/null 2>&1 || true
-  notify "mpv-manager" "Niri: mpv -> floating"
+  local mpv_id
+  mpv_id="$(niri_find_window_id_by_app_id "mpv" 2>/dev/null)" || die "MPV penceresi bulunamadı"
+  niri msg action move-window-to-floating --id "$mpv_id" >/dev/null 2>&1 || true
+  niri_move_top_right "$mpv_id"
 }
 
 start_mpv() {
@@ -953,12 +979,16 @@ main() {
   shift
 
   case "$cmd" in
-    move|stick|wallpaper)
+    move|stick|top|wallpaper)
       case "$(compositor)" in
         hyprland)
           case "$cmd" in
             move) hypr_move_window ;;
             stick) hypr_toggle_stick ;;
+            top)
+              hypr_focus_mpv || die "MPV penceresi bulunamadı"
+              notify "mpv-manager" "Hyprland: mpv öne alındı"
+              ;;
             wallpaper) hypr_wallpaper ;;
           esac
           ;;
@@ -966,6 +996,7 @@ main() {
           case "$cmd" in
             move) niri_move_cycle_corners ;;
             stick) niri_toggle_stick ;;
+            top) niri_raise_mpv ;;
             *)
               die "Bu komut Niri'de desteklenmiyor: $cmd"
               ;;
