@@ -612,7 +612,7 @@ binds {
   Mod+Ctrl+Y repeat=false hotkey-overlay-title="MPV Play YouTube" {
     spawn "mpv-manager" "play-yt"
   }
-  Mod+Ctrl+F9 repeat=false hotkey-overlay-title="MPV Stick" {
+  Mod+Alt+Y repeat=false hotkey-overlay-title="MPV Stick" {
     spawn "mpv-manager" "stick"
   }
   Mod+Ctrl+F10 repeat=false hotkey-overlay-title="MPV Move" {
