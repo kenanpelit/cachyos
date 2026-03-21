@@ -5,7 +5,7 @@ PartOf=graphical-session.target hyprland-session.target niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
-Environment=QS_CACHE_DIR=%t/noctalia-qml-cache
+Environment=QS_CACHE_DIR=%C/noctalia-qml-cache
 Environment=XDG_ICON_THEME=kora
 Environment=ICON_THEME=kora
 Environment=QT_ICON_THEME=kora

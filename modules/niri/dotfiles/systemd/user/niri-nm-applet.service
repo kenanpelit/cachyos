@@ -1,7 +1,8 @@
 [Unit]
 Description=NetworkManager applet (Niri)
 BindsTo=wayland-wm@niri\x2dsession.service
-After=graphical-session.target wayland-wm@niri\x2dsession.service niri-bootstrap.service dbus.service
+Wants=niri-status-notifier-ready.service
+After=graphical-session.target wayland-wm@niri\x2dsession.service niri-bootstrap.service niri-status-notifier-ready.service dbus.service
 PartOf=niri-daemons.target graphical-session.target wayland-wm@niri\x2dsession.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri

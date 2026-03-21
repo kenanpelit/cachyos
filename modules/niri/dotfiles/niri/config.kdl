@@ -760,12 +760,7 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^mpv$"#
-  variable-refresh-rate true
-}
-
-window-rule {
-  match title=r#"(?i)^picture[- ]in[- ]picture$"#
+  match title=r#"(?i)^picture[- ]in[- ]picture( - mpv)?$"#
   open-floating true
   default-column-width { fixed 640; }
   default-window-height { fixed 360; }
@@ -782,6 +777,7 @@ window-rule {
 window-rule {
   match app-id=r#"^mpv$"#
   exclude title=r#"^Picture-in-Picture( - mpv)?$"#
+  variable-refresh-rate true
   open-floating true
   default-column-width { fixed 640; }
   default-window-height { fixed 360; }
