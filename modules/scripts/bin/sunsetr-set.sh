@@ -13,6 +13,7 @@ SCHEDULE_FILE="$CONFIG_ROOT/schedule.conf"
 NOTIFY_ENABLED=1
 APPLY_AFTER_SET=0
 declare -a SCHEDULE_STARTS=()
+declare -a SCHEDULE_START_KEYS=()
 declare -a SCHEDULE_PRESETS=()
 
 usage() {
@@ -179,27 +180,44 @@ toml_get_value() {
   ' "$cfg_file"
 }
 
+hhmm_sort_key() {
+  local raw="${1//:/}"
+  local hour minute
+
+  [[ "$raw" =~ ^[0-9]{4}$ ]] || return 1
+  hour="${raw:0:2}"
+  minute="${raw:2:2}"
+
+  (( 10#$hour <= 23 )) || return 1
+  (( 10#$minute <= 59 )) || return 1
+
+  printf '%d\n' "$(( (10#$hour * 100) + 10#$minute ))"
+}
+
 load_schedule() {
-  local start preset hhmm last=""
+  local start preset hhmm last="" hhmm_key last_key=""
 
   SCHEDULE_STARTS=()
+  SCHEDULE_START_KEYS=()
   SCHEDULE_PRESETS=()
 
   [[ -f "$SCHEDULE_FILE" ]] || die "schedule file not found: $SCHEDULE_FILE"
 
   while read -r start preset; do
     [[ -n "$start" && -n "$preset" ]] || continue
-    [[ "$start" =~ ^[0-9]{2}:[0-9]{2}$ ]] || die "invalid schedule time: $start"
 
     hhmm="${start/:/}"
-    if [[ -n "$last" && "$hhmm" -le "$last" ]]; then
+    hhmm_key="$(hhmm_sort_key "$start")" || die "invalid schedule time: $start"
+    if [[ -n "$last_key" ]] && (( hhmm_key <= last_key )); then
       die "schedule must be strictly ascending: $start comes after ${last:0:2}:${last:2:2}"
     fi
 
     is_preset "$preset" || die "schedule references missing preset: $preset"
     SCHEDULE_STARTS+=("$start")
+    SCHEDULE_START_KEYS+=("$hhmm_key")
     SCHEDULE_PRESETS+=("$preset")
     last="$hhmm"
+    last_key="$hhmm_key"
   done < <(awk '
     /^[[:space:]]*#/ { next }
     NF >= 2 { print $1, $2 }
@@ -210,15 +228,16 @@ load_schedule() {
 
 select_auto_preset() {
   local now_hhmm="${1:-$(date +%H:%M)}"
-  local now_num="${now_hhmm//:/}"
+  local now_key
   local selected=""
   local idx
 
   load_schedule
+  now_key="$(hhmm_sort_key "$now_hhmm")" || die "invalid current time: $now_hhmm"
   selected="${SCHEDULE_PRESETS[$((${#SCHEDULE_PRESETS[@]} - 1))]}"
 
   for idx in "${!SCHEDULE_STARTS[@]}"; do
-    if [[ "${SCHEDULE_STARTS[$idx]//:/}" -le "$now_num" ]]; then
+    if (( SCHEDULE_START_KEYS[idx] <= now_key )); then
       selected="${SCHEDULE_PRESETS[$idx]}"
     fi
   done
