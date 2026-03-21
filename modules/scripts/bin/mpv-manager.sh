@@ -502,6 +502,42 @@ niri_window_xywh_by_id() {
   echo "$line"
 }
 
+niri_window_is_floating_by_id() {
+  local id="$1"
+  local value=""
+
+  if command -v jq >/dev/null 2>&1; then
+    value="$(
+      niri msg -j windows 2>/dev/null \
+        | jq -r --argjson id "$id" '.[] | select(.id == $id) | .is_floating' \
+        | head -n1
+    )"
+    case "$value" in
+      true) return 0 ;;
+      false) return 1 ;;
+    esac
+  fi
+
+  value="$(
+    niri msg windows 2>/dev/null | awk -v want_id="$id" '
+      /^Window ID[[:space:]]+/ {
+        id=$3
+        gsub(":", "", id)
+        inwin=(id == want_id)
+        next
+      }
+      inwin && /^[[:space:]]*Is floating:/ {
+        if ($3 == "yes") print "yes"
+        else print "no"
+        exit
+      }
+    '
+  )"
+
+  [[ "$value" == "yes" ]] && return 0
+  return 1
+}
+
 niri_wait_window_xywh_by_id() {
   local id="$1"
   local out=""
@@ -808,6 +844,31 @@ niri_prepare_new_mpv_window() {
   niri_move_top_right "$mpv_id" >/dev/null 2>&1 || true
 }
 
+niri_toggle_stick() {
+  niri_require
+
+  local mpv_id was_floating
+  mpv_id="$(niri_find_window_id_by_app_id "mpv" 2>/dev/null)" || die "MPV penceresi bulunamadı"
+
+  if niri_window_is_floating_by_id "$mpv_id"; then
+    was_floating=true
+  else
+    was_floating=false
+  fi
+
+  if $was_floating; then
+    niri msg action move-window-to-tiling --id "$mpv_id" >/dev/null 2>&1 \
+      || die "Niri: move-window-to-tiling başarısız"
+    notify "mpv-manager" "Niri: mpv -> tiling"
+    return 0
+  fi
+
+  niri msg action move-window-to-floating --id "$mpv_id" >/dev/null 2>&1 \
+    || die "Niri: move-window-to-floating başarısız"
+  niri_move_top_right "$mpv_id" >/dev/null 2>&1 || true
+  notify "mpv-manager" "Niri: mpv -> floating"
+}
+
 start_mpv() {
   case "$(compositor)" in
     hyprland) hypr_start_mpv ;;
@@ -904,12 +965,7 @@ main() {
         niri)
           case "$cmd" in
             move) niri_move_cycle_corners ;;
-            stick)
-              # Niri'de Hyprland'daki "pin" yok; en yakın karşılık pencereyi floating'e almak.
-              niri_require
-              niri msg action move-window-to-floating >/dev/null 2>&1 || true
-              notify "mpv-manager" "Niri: window -> floating"
-              ;;
+            stick) niri_toggle_stick ;;
             *)
               die "Bu komut Niri'de desteklenmiyor: $cmd"
               ;;
