@@ -970,6 +970,10 @@ window-rule {
   open-on-workspace "3"
 }
 window-rule {
+  match app-id=r#"^Nil$"#
+  open-on-workspace "3"
+}
+window-rule {
   match app-id=r#"^CompecTA$"#
   open-on-workspace "4"
 }
