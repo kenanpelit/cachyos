@@ -52,6 +52,8 @@ dotfiles:
   target: ~/.config/systemd/user/hypr-clip-persist.service
 - source: dotfiles/systemd/user/hypr-bootstrap.service
   target: ~/.config/systemd/user/hypr-bootstrap.service
+- source: dotfiles/systemd/user/hypr-shell-ensure.service
+  target: ~/.config/systemd/user/hypr-shell-ensure.service
 - source: dotfiles/systemd/user/hypr-audio-init.service
   target: ~/.config/systemd/user/hypr-audio-init.service
 - source: dotfiles/systemd/user/hypr-daemons.target

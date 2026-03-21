@@ -68,6 +68,7 @@ module.
 6. `hyprland-session.target` pulls in:
    `graphical-session.target`, `xdg-desktop-autostart.target`,
    `hypr-bootstrap.service`, `hypr-audio-init.service`,
+   `hypr-shell-ensure.service`,
    `hypr-daemons.target`, `hypr-desktop-settings.service`, and
    `hypr-post-bootstrap.service`.
 7. `hypr-bootstrap.service` runs `~/.local/bin/hypr-bootstrap` as the early
@@ -75,11 +76,13 @@ module.
 8. `hypr-audio-init.service` runs `osc-soundctl init` as a separate
    non-blocking-ish oneshot so monitor/workspace normalization is not coupled to
    audio setup.
-9. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
+9. `hypr-shell-ensure.service` runs `osc-shell ensure` as a compositor-neutral
+   shell bootstrap before tray readiness is checked.
+10. `hypr-daemons.target` becomes the daemon stage. It explicitly wants the
    long-running Hypr helpers.
-10. `hypr-desktop-settings.service` runs after the daemon stage and applies the
+11. `hypr-desktop-settings.service` runs after the daemon stage and applies the
     dconf/GSettings desktop theme sync as a tracked oneshot.
-11. `hypr-post-bootstrap.service` then runs after the daemon and desktop
+12. `hypr-post-bootstrap.service` then runs after the daemon and desktop
     settings stages, performing final cursor polish.
 
 ## Session graph
@@ -93,11 +96,14 @@ Core session units:
 - `hypr-audio-init.service`
   Separate oneshot audio initialization. Runs `osc-soundctl init` after the
   bootstrap stage.
+- `hypr-shell-ensure.service`
+  One-shot shell backend ensure stage. Runs `osc-shell ensure` before the tray
+  readiness gate so Noctalia/DMS shell IPC is present deterministically.
 - `hypr-daemons.target`
   Explicit daemon stage. It now declares the core Hyprland services it wants.
 - `hypr-status-notifier-ready.service`
   Shell-neutral readiness gate that waits for `org.kde.StatusNotifierWatcher`
-  before tray applets such as Blueman start.
+  before tray applets such as NetworkManager and Blueman start.
 - `hypr-desktop-settings.service`
   Tracked oneshot desktop settings sync. Applies GTK/icon/cursor preferences
   after the daemon stage instead of backgrounding a detached shell job.
@@ -112,7 +118,8 @@ Daemon-stage units started by `hypr-daemons.target`:
 - `hyprland-polkit-agent.service`
   Runs `polkit-gnome-authentication-agent-1`.
 - `hypr-nm-applet.service`
-  Runs `nm-applet --indicator`.
+  Runs `nm-applet --indicator` after the explicit status-notifier readiness
+  gate.
 - `hypr-blueman-applet.service`
   Runs `blueman-applet` after disabling Blueman plugins that race on OBEX
   agent ownership and after the explicit status-notifier readiness gate.
