@@ -346,6 +346,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-snapper-tools-check`
+**Description:** No description provided.
+
+**Usage:** `niri-snapper-tools-check`
+
+---
+
 ### 📂 `niri-start`
 **Description:** Daily startup sequence for Niri session via semsumo.
 
@@ -364,6 +371,20 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Bootstrap Noctalia with the compositor session environment already loaded.
 
 **Usage:** `noctalia-launch`
+
+---
+
+### 📂 `noctalia-preflight`
+**Description:** No description provided.
+
+**Usage:** `noctalia-preflight`
+
+---
+
+### 📂 `noctalia-should-start`
+**Description:** No description provided.
+
+**Usage:** `noctalia-should-start`
 
 ---
 
