@@ -6,7 +6,6 @@ packages:
   - clight
   - chromium-widevine
   - gammastep
-  - hyprsunset
   - efibootmgr
   - ente-auth-bin
   # - ferdium # Duplicate

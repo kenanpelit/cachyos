@@ -47,7 +47,6 @@ enabled_modules:
 - pipewire-rt
 - niri
 - hyprland
-- hyprsunset
 - sessions
 - sway
 - stasis

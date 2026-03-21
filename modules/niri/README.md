@@ -98,15 +98,14 @@ The shared `clipse.service` now belongs to the standalone `clipse` module and
 is bound to `graphical-session.target`, so both Niri and Hyprland reuse the
 same clipboard listener unit.
 
-The `sunsetr` module is Niri-scoped and no longer hooks directly into the
-shared `graphical-session.target`:
+The `sunsetr` module is now shared across the Hyprland and Niri Wayland
+sessions and hooks into the shared `graphical-session.target`:
 
 - `sunsetr.service`
-  Runs only from `niri-session.target` and remains lifecycle-bound to
-  `wayland-wm@niri\x2dsession.service`.
+  Runs from `graphical-session.target` during supported Wayland sessions.
 - `sunsetr-auto-profile.timer`
   Applies the scheduled preset map after startup and at each declared schedule
-  boundary while the Niri session is active.
+  boundary while the graphical Wayland session is active.
 
 ## Shared session timers
 

@@ -31,9 +31,9 @@ fi
 run_as_user mkdir -p "$bin_dir"
 run_as_user ln -sfn "$script_src" "$bin_dir/sunsetr-set"
 
-niri_session_active() {
-  run_as_user systemctl --user is-active --quiet niri-session.target \
-    || run_as_user systemctl --user is-active --quiet 'wayland-wm@niri\x2dsession.service'
+supported_wayland_session_active() {
+  run_as_user systemctl --user is-active --quiet 'wayland-wm@niri\x2dsession.service' \
+    || run_as_user systemctl --user is-active --quiet 'wayland-wm@start\x2dhyprland.service'
 }
 
 ensure_user_link() {
@@ -50,9 +50,9 @@ ensure_user_link() {
 if command -v systemctl >/dev/null 2>&1; then
   user_systemd_dir="$USER_HOME/.config/systemd/user"
   systemd_dir="$REPO_ROOT/modules/sunsetr/dotfiles/systemd/user"
-  niri_wants_dir="$user_systemd_dir/niri-session.target.wants"
+  graphical_wants_dir="$user_systemd_dir/graphical-session.target.wants"
 
-  run_as_user mkdir -p "$user_systemd_dir" "$niri_wants_dir"
+  run_as_user mkdir -p "$user_systemd_dir" "$graphical_wants_dir"
   ensure_user_link "$systemd_dir/sunsetr.service" "$user_systemd_dir/sunsetr.service"
   ensure_user_link "$systemd_dir/sunsetr-auto-profile.service" "$user_systemd_dir/sunsetr-auto-profile.service"
   ensure_user_link "$systemd_dir/sunsetr-auto-profile.timer" "$user_systemd_dir/sunsetr-auto-profile.timer"
@@ -60,15 +60,17 @@ if command -v systemctl >/dev/null 2>&1; then
   rm -f \
     "$user_systemd_dir/niri-sunsetr.service" \
     "$user_systemd_dir/niri-post-daemons.target.wants/niri-sunsetr.service" \
-    "$user_systemd_dir/graphical-session.target.wants/sunsetr.service" \
-    "$user_systemd_dir/graphical-session.target.wants/sunsetr-auto-profile.timer" \
+    "$user_systemd_dir/niri-session.target.wants/sunsetr.service" \
+    "$user_systemd_dir/niri-session.target.wants/sunsetr-auto-profile.timer" \
+    "$user_systemd_dir/hyprland-session.target.wants/sunsetr.service" \
+    "$user_systemd_dir/hyprland-session.target.wants/sunsetr-auto-profile.timer" \
     "$user_systemd_dir/sunsetr.service.d/10-cachy.conf"
   rmdir "$user_systemd_dir/sunsetr.service.d" >/dev/null 2>&1 || true
-  ensure_user_link "$user_systemd_dir/sunsetr.service" "$niri_wants_dir/sunsetr.service"
-  ensure_user_link "$user_systemd_dir/sunsetr-auto-profile.timer" "$niri_wants_dir/sunsetr-auto-profile.timer"
+  ensure_user_link "$user_systemd_dir/sunsetr.service" "$graphical_wants_dir/sunsetr.service"
+  ensure_user_link "$user_systemd_dir/sunsetr-auto-profile.timer" "$graphical_wants_dir/sunsetr-auto-profile.timer"
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
-  if niri_session_active; then
+  if supported_wayland_session_active; then
     run_as_user systemctl --user try-restart sunsetr.service >/dev/null 2>&1 || true
     run_as_user systemctl --user try-restart sunsetr-auto-profile.timer >/dev/null 2>&1 || true
     run_as_user systemctl --user start sunsetr-auto-profile.service >/dev/null 2>&1 || true
