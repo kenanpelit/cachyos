@@ -99,6 +99,7 @@ manifest_checksum="$(
 
 tmp_outputs="$(mktemp)"
 tmp_workspaces="$(mktemp)"
+chmod 0644 "${tmp_outputs}" "${tmp_workspaces}"
 
 cleanup() {
   rm -f "${tmp_outputs}" "${tmp_workspaces}"
