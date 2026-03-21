@@ -311,6 +311,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-float-sticky`
+**Description:** Event-driven floating sticky daemon for Niri with toggle helpers.
+
+**Usage:** `niri-float-sticky.sh [daemon|list|set-active|unset-active|clear-active|toggle-active|set-id <id>|unset-id <id>|clear-id <id>|toggle-id <id>] [options]`
+
+---
+
 ### 📂 `niri-osc`
 **Description:** Unified single-file Niri helper multiplexer (set, flow, sticky, etc.).
 

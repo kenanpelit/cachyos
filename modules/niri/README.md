@@ -85,7 +85,7 @@ session once the environment conditions are satisfied:
 - `niri-snapper-tools-check.service`
   Runs the snapshot boot check for `snapper-tools`.
 - `niri-sticky.service`
-  Runs `niri-osc sticky`.
+  Runs `niri-float-sticky daemon` for floating sticky windows across workspaces.
 - `niri-niriswitcher.service`
   Runs `niriswitcher`.
 - Niri-only daemon-stage services are now lifecycle-bound directly to
