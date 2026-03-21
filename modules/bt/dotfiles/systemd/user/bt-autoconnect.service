@@ -1,11 +1,9 @@
 [Unit]
 Description=Bluetooth auto-connect
 Wants=pipewire.service wireplumber.service
-After=pipewire.service wireplumber.service
+After=graphical-session.target pipewire.service wireplumber.service
 
 [Service]
-Type=simple
-TimeoutStartSec=10s
-ExecStart=/usr/bin/bash -lc '%h/.local/bin/bluetooth_toggle --connect'
-Restart=on-failure
-RestartSec=30
+Type=oneshot
+TimeoutStartSec=90s
+ExecStart=%h/.local/bin/bt-autoconnect-once
