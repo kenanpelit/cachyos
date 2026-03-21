@@ -590,8 +590,8 @@ binds {
     spawn "uwsm" "app" "-a" "rofi-launcher" "--" "rofi-launcher"
   }
 
-  Mod+Ctrl+S repeat=false hotkey-overlay-title="Sticky Toggle" {
-    spawn "niri-osc" "sticky" "stage" "toggle-active"
+  Mod+Shift+S repeat=false hotkey-overlay-title="Sticky Toggle" {
+    spawn "niri-float-sticky" "toggle-active"
   }
 
   Mod+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Nemo)" {

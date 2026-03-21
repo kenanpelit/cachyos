@@ -319,7 +319,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `niri-osc`
-**Description:** Unified single-file Niri helper multiplexer (set, flow, sticky, etc.).
+**Description:** Unified single-file Niri helper multiplexer (set, flow, keybinds, drop).
 
 **Usage:** `niri-osc <scope> [args...]`
 
@@ -392,13 +392,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** ExecCondition helper deciding whether Noctalia should start.
 
 **Usage:** `noctalia-should-start`
-
----
-
-### 📂 `nsticky-toggle`
-**Description:** Smart toggle for nsticky (sticky -> stage -> unstage).
-
-**Usage:** `nsticky-toggle.sh`
 
 ---
 

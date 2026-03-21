@@ -502,26 +502,6 @@ niri_window_xywh_by_id() {
   echo "$line"
 }
 
-resolve_niri_osc_bin() {
-  local candidate
-
-  if command -v niri-osc >/dev/null 2>&1; then
-    command -v niri-osc
-    return 0
-  fi
-
-  for candidate in \
-    "$HOME/.config/arch-config/modules/scripts/bin/niri-osc.sh" \
-    "$HOME/.cachy/modules/scripts/bin/niri-osc.sh"
-  do
-    [[ -x "$candidate" ]] || continue
-    printf '%s\n' "$candidate"
-    return 0
-  done
-
-  return 1
-}
-
 resolve_niri_float_sticky_bin() {
   local candidate
 
@@ -887,15 +867,11 @@ niri_prepare_new_mpv_window() {
 niri_toggle_stick() {
   niri_require
 
-  local mpv_id niri_osc_bin niri_float_sticky_bin out
+  local mpv_id niri_float_sticky_bin out
   mpv_id="$(niri_find_window_id_by_app_id "mpv" 2>/dev/null)" || die "MPV penceresi bulunamadı"
 
-  if niri_float_sticky_bin="$(resolve_niri_float_sticky_bin 2>/dev/null)"; then
-    out="$("$niri_float_sticky_bin" toggle-id "$mpv_id" 2>&1)" || die "$out"
-  else
-    niri_osc_bin="$(resolve_niri_osc_bin)" || die "niri-float-sticky veya niri-osc bulunamadı"
-    out="$("$niri_osc_bin" sticky sticky toggle-id "$mpv_id" 2>&1)" || die "$out"
-  fi
+  niri_float_sticky_bin="$(resolve_niri_float_sticky_bin)" || die "niri-float-sticky bulunamadı"
+  out="$("$niri_float_sticky_bin" toggle-id "$mpv_id" 2>&1)" || die "$out"
 
   case "$out" in
     Sticky\ enabled*|Added*)
