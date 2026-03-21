@@ -63,12 +63,88 @@ Usage: mpv-manager <command>
 Commands:
   start       Start MPV (pseudo-gui + IPC socket)
   playback    Toggle pause/play via IPC
-  play-yt     Play YouTube URL from clipboard
-  save-yt     Download YouTube URL from clipboard (yt-dlp)
+  play-yt     Play YouTube URL from clipboard or argument
+  save-yt     Download YouTube URL from clipboard or argument (yt-dlp)
 
 Window management (Hyprland; limited elsewhere):
   move | stick | wallpaper
 EOF
+}
+
+is_youtube_url() {
+  local url="${1:-}"
+  [[ "$url" =~ ^https?://([a-zA-Z0-9-]+\.)?(youtube\.com|youtube-nocookie\.com|youtu\.be)/ ]]
+}
+
+resolve_youtube_url() {
+  local url="${1:-}"
+  if [[ -z "$url" ]]; then
+    url="$(read_clipboard)"
+  fi
+  url="$(printf '%s' "$url" | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  is_youtube_url "$url" || die "Panodaki/argümandaki URL YouTube değil"
+  printf '%s\n' "$url"
+}
+
+resolve_yt_dlp_mpv_bin() {
+  local candidate
+
+  if command -v yt-dlp-mpv >/dev/null 2>&1; then
+    command -v yt-dlp-mpv
+    return 0
+  fi
+
+  for candidate in \
+    "$HOME/.config/arch-config/modules/mpv/scripts/yt-dlp-mpv" \
+    "$HOME/.cachy/modules/mpv/scripts/yt-dlp-mpv"
+  do
+    [[ -x "$candidate" ]] || continue
+    printf '%s\n' "$candidate"
+    return 0
+  done
+
+  return 1
+}
+
+mpv_ipc_loadfile() {
+  local target="$1"
+  local mode="${2:-replace}"
+  local json
+
+  if command -v jq >/dev/null 2>&1; then
+    json="$(jq -cn --arg target "$target" --arg mode "$mode" '{command:["loadfile", $target, $mode]}')"
+  else
+    target="${target//\\/\\\\}"
+    target="${target//\"/\\\"}"
+    mode="${mode//\\/\\\\}"
+    mode="${mode//\"/\\\"}"
+    json="{\"command\":[\"loadfile\",\"$target\",\"$mode\"]}"
+  fi
+
+  mpv_ipc "$json"
+}
+
+start_mpv_with_youtube() {
+  local url="$1"
+  local ytdl_target="ytdl://$url"
+  local ytdlp_mpv_bin=""
+  local -a mpv_args=(
+    --player-operation-mode=pseudo-gui
+    --input-ipc-server="$SOCKET_PATH"
+    --idle
+    --no-audio-display
+  )
+
+  if ytdlp_mpv_bin="$(resolve_yt_dlp_mpv_bin 2>/dev/null || true)"; then
+    mpv_args+=(--script-opts-append="ytdl_hook-ytdl_path=$ytdlp_mpv_bin")
+  fi
+
+  if [[ "$(compositor)" == "niri" ]]; then
+    mpv_args+=(--autofit=640x360 --autofit-larger=640x360)
+  fi
+
+  mpv "${mpv_args[@]}" "$ytdl_target" >/dev/null 2>&1 &
+  disown || true
 }
 
 require_hypr() {
@@ -783,32 +859,16 @@ play_youtube() {
   command -v mpv >/dev/null 2>&1 || die "mpv not found"
 
   local url
-  url="$(read_clipboard)"
-  [[ "$url" =~ ^https?://(www\.)?(youtube\.com|youtu\.?be)/ ]] || die "Panodaki URL YouTube değil"
+  url="$(resolve_youtube_url "${1:-}")"
 
   if mpv_running && have_socket; then
-    mpv_ipc "{ \"command\": [\"loadfile\", \"$url\", \"replace\"] }"
+    mpv_ipc_loadfile "ytdl://$url" "replace"
     notify "mpv-manager" "YouTube yüklendi (replace)"
     return 0
   fi
 
   rm -f "$SOCKET_PATH" 2>/dev/null || true
-  if [[ "$(compositor)" == "niri" ]]; then
-    mpv --player-operation-mode=pseudo-gui \
-      --input-ipc-server="$SOCKET_PATH" \
-      --idle \
-      --no-audio-display \
-      --autofit=640x360 \
-      --autofit-larger=640x360 \
-      "$url" >/dev/null 2>&1 &
-  else
-    mpv --player-operation-mode=pseudo-gui \
-      --input-ipc-server="$SOCKET_PATH" \
-      --idle \
-      --no-audio-display \
-      "$url" >/dev/null 2>&1 &
-  fi
-  disown || true
+  start_mpv_with_youtube "$url"
   if [[ "$(compositor)" == "niri" ]]; then
     niri_prepare_new_mpv_window || true
   fi
@@ -819,8 +879,7 @@ download_youtube() {
   command -v yt-dlp >/dev/null 2>&1 || die "yt-dlp not found"
 
   local url
-  url="$(read_clipboard)"
-  [[ "$url" =~ ^https?://(www\.)?(youtube\.com|youtu\.?be)/ ]] || die "Panodaki URL YouTube değil"
+  url="$(resolve_youtube_url "${1:-}")"
 
   mkdir -p "$DOWNLOADS_DIR"
   (cd "$DOWNLOADS_DIR" && yt-dlp -f "bestvideo+bestaudio/best" --merge-output-format mp4 --embed-thumbnail --add-metadata "$url")
@@ -868,10 +927,10 @@ main() {
       toggle_playback
       ;;
     play-yt)
-      play_youtube
+      play_youtube "${1:-}"
       ;;
     save-yt)
-      download_youtube
+      download_youtube "${1:-}"
       ;;
     -h|--help|help)
       usage

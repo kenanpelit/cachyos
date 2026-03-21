@@ -2,14 +2,40 @@
 set -euo pipefail
 
 cookie_file="${XDG_CONFIG_HOME:-$HOME/.config}/yt-dlp/cookies-youtube.txt"
-# brave cookies: browser root dir (must contain "Local State" and "Default/")
-brave_dir="$HOME/.brave/isolated/Kenp"
+cookie_helper="${YT_COOKIES_HELPER:-yt-cookies-youtube}"
 ytdlp="yt-dlp"
 
 extra_args=(
   --extractor-args "youtube:player_client=android_sdkless,web_safari"
   --js-runtimes "deno"
 )
+
+resolve_cookie_helper() {
+  local candidate
+
+  if command -v "$cookie_helper" >/dev/null 2>&1; then
+    command -v "$cookie_helper"
+    return 0
+  fi
+
+  for candidate in \
+    "$HOME/.config/arch-config/modules/scripts/bin/yt-cookies-youtube.sh" \
+    "$HOME/.cachy/modules/scripts/bin/yt-cookies-youtube.sh"
+  do
+    [[ -x "$candidate" ]] || continue
+    printf '%s\n' "$candidate"
+    return 0
+  done
+
+  return 1
+}
+
+refresh_cookie_file() {
+  local helper_bin
+  helper_bin="$(resolve_cookie_helper)" || return 1
+  echo "[yt-dlp-mpv] refreshing cookies via $helper_bin..." >&2
+  "$helper_bin" --quiet --force --output "$cookie_file"
+}
 
 try_with_cookie_file_then_browser_fallback() {
   local err
@@ -21,10 +47,12 @@ try_with_cookie_file_then_browser_fallback() {
   fi
 
   if grep -Fq "Sign in to confirm you’re not a bot" "$err"; then
-    echo "[yt-dlp-mpv] bot-check: cookies-youtube.txt yetmedi; tarayıcıdan direkt okumayı deniyorum..." >&2
-    "$ytdlp" "${extra_args[@]}" --cookies-from-browser "brave+basictext:$brave_dir" "$@"
+    echo "[yt-dlp-mpv] bot-check: cookie dosyasını Helium'dan yenilemeyi deniyorum..." >&2
     rm -f "$err"
-    return $?
+    if refresh_cookie_file; then
+      exec "$ytdlp" "${extra_args[@]}" --cookies "$cookie_file" "$@"
+    fi
+    return 1
   fi
 
   cat "$err" >&2
@@ -38,9 +66,9 @@ if [[ -r "$cookie_file" ]]; then
   exit 0
 fi
 
-if [[ -d "$brave_dir" ]]; then
-  echo "[yt-dlp-mpv] cookies file missing; using cookies-from-browser (Brave) directly" >&2
-  exec "$ytdlp" "${extra_args[@]}" --cookies-from-browser "brave+basictext:$brave_dir" "$@"
+if refresh_cookie_file && [[ -r "$cookie_file" ]]; then
+  echo "[yt-dlp-mpv] using refreshed cookies file: $cookie_file" >&2
+  exec "$ytdlp" "${extra_args[@]}" --cookies "$cookie_file" "$@"
 fi
 
 echo "[yt-dlp-mpv] no cookies available; proceeding without auth" >&2
