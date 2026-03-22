@@ -486,7 +486,10 @@ binds {
   }
 
   // Screenshots
-  Print repeat=false hotkey-overlay-title="Screenshot Area" {
+  Print repeat=false hotkey-overlay-title="Screenshot Rec" {
+    spawn "screenshot" "rec"
+  }
+  Shift+Print repeat=false hotkey-overlay-title="Screenshot Area" {
     spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "region"
   }
   Ctrl+Print repeat=false hotkey-overlay-title="Screenshot Screen" {
