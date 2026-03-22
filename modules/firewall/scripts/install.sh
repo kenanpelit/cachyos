@@ -38,12 +38,17 @@ TRANSMISSION_PEER_PORT="${TRANSMISSION_PEER_PORT:-51413}"
 ALLOW_KDECONNECT_PORTS="${ALLOW_KDECONNECT_PORTS:-0}"
 KDECONNECT_PORT_RANGE="${KDECONNECT_PORT_RANGE:-1714:1764}"
 KDECONNECT_ALLOWED_SUBNETS="${KDECONNECT_ALLOWED_SUBNETS:-}"
+ALLOW_MDNS_PORT="${ALLOW_MDNS_PORT:-0}"
+MDNS_PORT="${MDNS_PORT:-5353}"
 
 if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw --force reset
   ${SUDO} ufw default deny incoming
   ${SUDO} ufw default allow outgoing
   ${SUDO} ufw allow "${SSH_PORT}/tcp"
+
+  # Allow mDNS for local discovery (Avahi/KDE Connect)
+  ${SUDO} ufw allow 5353/udp
 
   if [ "${ALLOW_TRANSMISSION_PORTS}" = "1" ]; then
     ${SUDO} ufw allow "${TRANSMISSION_WEB_PORT}/tcp"
