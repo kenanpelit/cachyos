@@ -542,6 +542,10 @@ autoload -Uz _dcli 2>/dev/null || true
 autoload -Uz _osc-shell 2>/dev/null || true
 (( $+functions[_osc-shell] )) && compdef _osc-shell osc-shell
 
+# Bind osc-media completion explicitly for cached compinit sessions too.
+autoload -Uz _osc-media 2>/dev/null || true
+(( $+functions[_osc-media] )) && compdef _osc-media osc-media osc-media.sh
+
 # --------------------------------------------------------------------
 # Completion System Styles
 # 
