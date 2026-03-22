@@ -68,9 +68,9 @@ have_cmd() {
 
 clean_text() {
   local value="${1:-}"
-  printf '%s' "$value" \
-    | tr '\r' ' ' \
-    | sed ':a;N;$!ba;s/\n/, /g; s/[[:space:]]\+/ /g; s/^ //; s/ $//'
+  printf '%s' "$value" |
+    tr '\r' ' ' |
+    sed ':a;N;$!ba;s/\n/, /g; s/[[:space:]]\+/ /g; s/^ //; s/ $//'
 }
 
 truncate_text() {
@@ -78,7 +78,7 @@ truncate_text() {
   local max_len="${2:-$MAX_FIELD_LENGTH}"
 
   text="$(clean_text "${1:-}")"
-  if (( ${#text} > max_len )); then
+  if ((${#text} > max_len)); then
     printf '%s...\n' "${text:0:max_len}"
   else
     printf '%s\n' "$text"
@@ -87,40 +87,40 @@ truncate_text() {
 
 normalize_status() {
   case "${1:-}" in
-    Playing|playing) printf 'Playing\n' ;;
-    Paused|paused) printf 'Paused\n' ;;
-    Stopped|stopped) printf 'Stopped\n' ;;
-    *) printf 'Unknown\n' ;;
+  Playing | playing) printf 'Playing\n' ;;
+  Paused | paused) printf 'Paused\n' ;;
+  Stopped | stopped) printf 'Stopped\n' ;;
+  *) printf 'Unknown\n' ;;
   esac
 }
 
 status_label() {
   case "${1:-Unknown}" in
-    Playing) printf 'Oynatiliyor\n' ;;
-    Paused) printf 'Duraklatildi\n' ;;
-    Stopped) printf 'Durduruldu\n' ;;
-    *) printf 'Hazir\n' ;;
+  Playing) printf 'Oynatiliyor\n' ;;
+  Paused) printf 'Duraklatildi\n' ;;
+  Stopped) printf 'Durduruldu\n' ;;
+  *) printf 'Hazir\n' ;;
   esac
 }
 
 command_label() {
   case "${1:-}" in
-    toggle) printf 'Play/Pause\n' ;;
-    play) printf 'Oynat\n' ;;
-    pause) printf 'Duraklat\n' ;;
-    next) printf 'Sonraki parca\n' ;;
-    prev|previous) printf 'Onceki parca\n' ;;
-    stop) printf 'Durdur\n' ;;
-    status) printf 'Durum\n' ;;
-    *) printf 'Medya kontrolu\n' ;;
+  toggle) printf 'Play/Pause\n' ;;
+  play) printf 'Oynat\n' ;;
+  pause) printf 'Duraklat\n' ;;
+  next) printf 'Sonraki parca\n' ;;
+  prev | previous) printf 'Onceki parca\n' ;;
+  stop) printf 'Durdur\n' ;;
+  status) printf 'Durum\n' ;;
+  *) printf 'Medya kontrolu\n' ;;
   esac
 }
 
 player_is_browser() {
   case "${1,,}" in
-    *firefox*|*chromium*|*chrome*|*brave*|*zen*|*vivaldi*|*edge*)
-      return 0
-      ;;
+  *firefox* | *chromium* | *chrome* | *brave* | *zen* | *vivaldi* | *edge*)
+    return 0
+    ;;
   esac
   return 1
 }
@@ -130,23 +130,23 @@ player_pretty_name() {
   local lower="${name,,}"
 
   case "$lower" in
-    spotify*) printf 'Spotify\n' ;;
-    vlc*) printf 'VLC\n' ;;
-    mpv*) printf 'MPV\n' ;;
-    mpd) printf 'MPD\n' ;;
-    firefox*) printf 'Firefox\n' ;;
-    chromium*) printf 'Chromium\n' ;;
-    chrome*) printf 'Chrome\n' ;;
-    brave*) printf 'Brave\n' ;;
-    zen*) printf 'Zen\n' ;;
-    vivaldi*) printf 'Vivaldi\n' ;;
-    edge*) printf 'Edge\n' ;;
-    *)
-      printf '%s\n' "$name" \
-        | awk -F'.' '{print $1}' \
-        | tr '_-' '  ' \
-        | awk '{for (i=1; i<=NF; ++i) $i=toupper(substr($i,1,1)) substr($i,2); print}'
-      ;;
+  spotify*) printf 'Spotify\n' ;;
+  vlc*) printf 'VLC\n' ;;
+  mpv*) printf 'MPV\n' ;;
+  mpd) printf 'MPD\n' ;;
+  firefox*) printf 'Firefox\n' ;;
+  chromium*) printf 'Chromium\n' ;;
+  chrome*) printf 'Chrome\n' ;;
+  brave*) printf 'Brave\n' ;;
+  zen*) printf 'Zen\n' ;;
+  vivaldi*) printf 'Vivaldi\n' ;;
+  edge*) printf 'Edge\n' ;;
+  *)
+    printf '%s\n' "$name" |
+      awk -F'.' '{print $1}' |
+      tr '_-' '  ' |
+      awk '{for (i=1; i<=NF; ++i) $i=toupper(substr($i,1,1)) substr($i,2); print}'
+    ;;
   esac
 }
 
@@ -154,23 +154,23 @@ player_icon() {
   local lower="${1,,}"
 
   case "$lower" in
-    spotify*)
-      if [[ -f /usr/share/icons/hicolor/256x256/apps/spotify.png ]]; then
-        printf '/usr/share/icons/hicolor/256x256/apps/spotify.png\n'
-      else
-        printf 'spotify\n'
-      fi
-      ;;
-    vlc*) printf 'vlc\n' ;;
-    mpv*) printf 'mpv\n' ;;
-    mpd) printf 'audio-x-generic\n' ;;
-    firefox*) printf 'firefox\n' ;;
-    chromium*|chrome*) printf 'chromium\n' ;;
-    brave*) printf 'brave-browser\n' ;;
-    zen*) printf 'browser\n' ;;
-    vivaldi*) printf 'vivaldi\n' ;;
-    edge*) printf 'microsoft-edge\n' ;;
-    *) printf 'audio-x-generic\n' ;;
+  spotify*)
+    if [[ -f /usr/share/icons/hicolor/256x256/apps/spotify.png ]]; then
+      printf '/usr/share/icons/hicolor/256x256/apps/spotify.png\n'
+    else
+      printf 'spotify\n'
+    fi
+    ;;
+  vlc*) printf 'vlc\n' ;;
+  mpv*) printf 'mpv\n' ;;
+  mpd) printf 'audio-x-generic\n' ;;
+  firefox*) printf 'firefox\n' ;;
+  chromium* | chrome*) printf 'chromium\n' ;;
+  brave*) printf 'brave-browser\n' ;;
+  zen*) printf 'browser\n' ;;
+  vivaldi*) printf 'vivaldi\n' ;;
+  edge*) printf 'microsoft-edge\n' ;;
+  *) printf 'audio-x-generic\n' ;;
   esac
 }
 
@@ -178,15 +178,14 @@ resolve_notification_icon() {
   local art="${MEDIA_ART_URL:-}"
 
   case "$art" in
-    file://*)
-      art="${art#file://}"
-      art="${art//%20/ }"
-      ;;
-    /*)
-      ;;
-    *)
-      art=""
-      ;;
+  file://*)
+    art="${art#file://}"
+    art="${art//%20/ }"
+    ;;
+  /*) ;;
+  *)
+    art=""
+    ;;
   esac
 
   if [[ -n "$art" && -f "$art" ]]; then
@@ -261,9 +260,9 @@ spotify_should_autostart() {
   [[ "$TARGET_PLAYER" == "spotify" ]] || return 1
 
   case "$COMMAND" in
-    toggle|play|next|prev|previous|status)
-      return 0
-      ;;
+  toggle | play | next | prev | previous | status)
+    return 0
+    ;;
   esac
 
   return 1
@@ -275,7 +274,7 @@ wait_for_target_player() {
   local attempt=""
   local elapsed=0
 
-  while (( elapsed < timeout * 4 )); do
+  while ((elapsed < timeout * 4)); do
     attempt="$(pick_best_mpris_for_target "$target")"
     if [[ "$attempt" != none:* ]]; then
       printf '%s\n' "$attempt"
@@ -423,30 +422,30 @@ candidate_score() {
   local lower="${name,,}"
 
   case "$status" in
-    Playing) score=300 ;;
-    Paused) score=180 ;;
-    Stopped) score=40 ;;
-    *) score=20 ;;
+  Playing) score=300 ;;
+  Paused) score=180 ;;
+  Stopped) score=40 ;;
+  *) score=20 ;;
   esac
 
   case "$kind" in
-    mpv|mpd)
-      score=$((score + 40))
-      ;;
-    mpris)
-      if player_is_browser "$name"; then
-        score=$((score + 8))
-      else
-        score=$((score + 35))
-      fi
-      ;;
+  mpv | mpd)
+    score=$((score + 40))
+    ;;
+  mpris)
+    if player_is_browser "$name"; then
+      score=$((score + 8))
+    else
+      score=$((score + 35))
+    fi
+    ;;
   esac
 
   case "$lower" in
-    spotify*) score=$((score + 35)) ;;
-    vlc*) score=$((score + 28)) ;;
-    mpv*) score=$((score + 24)) ;;
-    firefox*|chromium*|chrome*|brave*|zen*|vivaldi*|edge*) score=$((score + 10)) ;;
+  spotify*) score=$((score + 35)) ;;
+  vlc*) score=$((score + 28)) ;;
+  mpv*) score=$((score + 24)) ;;
+  firefox* | chromium* | chrome* | brave* | zen* | vivaldi* | edge*) score=$((score + 10)) ;;
   esac
 
   if [[ "${kind}:${name}" == "$LAST_PLAYER_ID" ]]; then
@@ -454,9 +453,9 @@ candidate_score() {
   fi
 
   case "$COMMAND" in
-    toggle|play|pause|next|prev|previous|status)
-      [[ "$status" == "Playing" ]] && score=$((score + 18))
-      ;;
+  toggle | play | pause | next | prev | previous | status)
+    [[ "$status" == "Playing" ]] && score=$((score + 18))
+    ;;
   esac
 
   if [[ "$COMMAND" == "play" && "$status" == "Paused" ]]; then
@@ -478,17 +477,17 @@ pick_best_mpris_for_target() {
     [[ -n "$player" ]] || continue
 
     case "$target" in
-      browser)
-        player_is_browser "$player" || continue
-        ;;
-      *)
-        [[ "${player,,}" == *"${target,,}"* ]] || continue
-        ;;
+    browser)
+      player_is_browser "$player" || continue
+      ;;
+    *)
+      [[ "${player,,}" == *"${target,,}"* ]] || continue
+      ;;
     esac
 
     status="$(mpris_status "$player")"
     score="$(candidate_score "mpris" "$player" "$status")"
-    if (( score > best_score )); then
+    if ((score > best_score)); then
       best_score="$score"
       best_player="$player"
     fi
@@ -503,29 +502,29 @@ pick_best_mpris_for_target() {
 
 resolve_explicit_target() {
   case "$TARGET_PLAYER" in
-    mpd)
-      if mpd_available; then
-        printf 'mpd:mpd\n'
-      else
-        printf 'none:mpd\n'
-      fi
-      ;;
-    mpv)
-      if [[ -S "$MPV_SOCKET" ]] || pgrep -x mpv >/dev/null 2>&1; then
-        printf 'mpv:mpv\n'
-      else
-        printf 'none:mpv\n'
-      fi
-      ;;
-    spotify)
-      ensure_spotify_target_ready
-      ;;
-    vlc|browser)
-      pick_best_mpris_for_target "$TARGET_PLAYER"
-      ;;
-    *)
-      pick_best_mpris_for_target "$TARGET_PLAYER"
-      ;;
+  mpd)
+    if mpd_available; then
+      printf 'mpd:mpd\n'
+    else
+      printf 'none:mpd\n'
+    fi
+    ;;
+  mpv)
+    if [[ -S "$MPV_SOCKET" ]] || pgrep -x mpv >/dev/null 2>&1; then
+      printf 'mpv:mpv\n'
+    else
+      printf 'none:mpv\n'
+    fi
+    ;;
+  spotify)
+    ensure_spotify_target_ready
+    ;;
+  vlc | browser)
+    pick_best_mpris_for_target "$TARGET_PLAYER"
+    ;;
+  *)
+    pick_best_mpris_for_target "$TARGET_PLAYER"
+    ;;
   esac
 }
 
@@ -545,7 +544,7 @@ get_active_player_type() {
   if mpv_socket_ready; then
     status="$(mpv_status)"
     score="$(candidate_score "mpv" "mpv" "$status")"
-    if (( score > best_score )); then
+    if ((score > best_score)); then
       best_score="$score"
       best_kind="mpv"
       best_name="mpv"
@@ -555,7 +554,7 @@ get_active_player_type() {
   if mpd_available; then
     status="$(mpd_status)"
     score="$(candidate_score "mpd" "mpd" "$status")"
-    if (( score > best_score )); then
+    if ((score > best_score)); then
       best_score="$score"
       best_kind="mpd"
       best_name="mpd"
@@ -566,7 +565,7 @@ get_active_player_type() {
     [[ -n "$player" ]] || continue
     status="$(mpris_status "$player")"
     score="$(candidate_score "mpris" "$player" "$status")"
-    if (( score > best_score )); then
+    if ((score > best_score)); then
       best_score="$score"
       best_kind="mpris"
       best_name="$player"
@@ -642,18 +641,18 @@ load_current_metadata() {
   MEDIA_ART_URL=""
 
   case "$ACTIVE_PLAYER_KIND" in
-    mpris) load_mpris_metadata "$ACTIVE_PLAYER_NAME" ;;
-    mpd) load_mpd_metadata ;;
-    mpv) load_mpv_metadata ;;
+  mpris) load_mpris_metadata "$ACTIVE_PLAYER_NAME" ;;
+  mpd) load_mpd_metadata ;;
+  mpv) load_mpv_metadata ;;
   esac
 }
 
 read_current_status() {
   case "$ACTIVE_PLAYER_KIND" in
-    mpris) ACTIVE_STATUS="$(mpris_status "$ACTIVE_PLAYER_NAME")" ;;
-    mpd) ACTIVE_STATUS="$(mpd_status)" ;;
-    mpv) ACTIVE_STATUS="$(mpv_status)" ;;
-    *) ACTIVE_STATUS="Unknown" ;;
+  mpris) ACTIVE_STATUS="$(mpris_status "$ACTIVE_PLAYER_NAME")" ;;
+  mpd) ACTIVE_STATUS="$(mpd_status)" ;;
+  mpv) ACTIVE_STATUS="$(mpv_status)" ;;
+  *) ACTIVE_STATUS="Unknown" ;;
   esac
 }
 
@@ -661,10 +660,10 @@ execute_mpris_command() {
   local action="$COMMAND"
 
   case "$COMMAND" in
-    toggle) action="play-pause" ;;
-    prev) action="previous" ;;
-    previous) action="previous" ;;
-    status) return 0 ;;
+  toggle) action="play-pause" ;;
+  prev) action="previous" ;;
+  previous) action="previous" ;;
+  status) return 0 ;;
   esac
 
   playerctl -p "$ACTIVE_PLAYER_NAME" "$action" >/dev/null 2>&1
@@ -672,14 +671,14 @@ execute_mpris_command() {
 
 execute_mpd_command() {
   case "$COMMAND" in
-    toggle) mpc toggle >/dev/null 2>&1 ;;
-    play) mpc play >/dev/null 2>&1 ;;
-    pause) mpc pause >/dev/null 2>&1 ;;
-    next) mpc next >/dev/null 2>&1 ;;
-    prev|previous) mpc prev >/dev/null 2>&1 ;;
-    stop) mpc stop >/dev/null 2>&1 ;;
-    status) return 0 ;;
-    *) return 1 ;;
+  toggle) mpc toggle >/dev/null 2>&1 ;;
+  play) mpc play >/dev/null 2>&1 ;;
+  pause) mpc pause >/dev/null 2>&1 ;;
+  next) mpc next >/dev/null 2>&1 ;;
+  prev | previous) mpc prev >/dev/null 2>&1 ;;
+  stop) mpc stop >/dev/null 2>&1 ;;
+  status) return 0 ;;
+  *) return 1 ;;
   esac
 }
 
@@ -689,14 +688,14 @@ execute_mpv_command() {
   mpv_socket_ready || fail "MPV kontrolu" "MPV IPC soketi bulunamadi: $MPV_SOCKET"
 
   case "$COMMAND" in
-    toggle) payload='{"command":["cycle","pause"]}' ;;
-    play) payload='{"command":["set_property","pause",false]}' ;;
-    pause) payload='{"command":["set_property","pause",true]}' ;;
-    next) payload='{"command":["playlist-next"]}' ;;
-    prev|previous) payload='{"command":["playlist-prev"]}' ;;
-    stop) payload='{"command":["stop"]}' ;;
-    status) return 0 ;;
-    *) return 1 ;;
+  toggle) payload='{"command":["cycle","pause"]}' ;;
+  play) payload='{"command":["set_property","pause",false]}' ;;
+  pause) payload='{"command":["set_property","pause",true]}' ;;
+  next) payload='{"command":["playlist-next"]}' ;;
+  prev | previous) payload='{"command":["playlist-prev"]}' ;;
+  stop) payload='{"command":["stop"]}' ;;
+  status) return 0 ;;
+  *) return 1 ;;
   esac
 
   mpv_raw "$payload" >/dev/null
@@ -704,10 +703,10 @@ execute_mpv_command() {
 
 execute_active_command() {
   case "$ACTIVE_PLAYER_KIND" in
-    mpris) execute_mpris_command ;;
-    mpd) execute_mpd_command ;;
-    mpv) execute_mpv_command ;;
-    *) return 1 ;;
+  mpris) execute_mpris_command ;;
+  mpd) execute_mpd_command ;;
+  mpv) execute_mpv_command ;;
+  *) return 1 ;;
   esac
 }
 
@@ -753,27 +752,27 @@ if [[ $# -eq 0 || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
 fi
 
 case "${1,,}" in
-  spotify|vlc|mpv|mpd|mpc|browser)
-    TARGET_PLAYER="${1,,}"
-    COMMAND="${2:-toggle}"
-    [[ "$TARGET_PLAYER" == "mpc" ]] && TARGET_PLAYER="mpd"
-    ;;
-  toggle|play|pause|next|prev|previous|stop|status)
-    COMMAND="${1,,}"
-    ;;
-  *)
-    printf 'Error: Unknown command or player: %s\n' "${1:-}" >&2
-    show_help
-    ;;
+spotify | vlc | mpv | mpd | mpc | browser)
+  TARGET_PLAYER="${1,,}"
+  COMMAND="${2:-toggle}"
+  [[ "$TARGET_PLAYER" == "mpc" ]] && TARGET_PLAYER="mpd"
+  ;;
+toggle | play | pause | next | prev | previous | stop | status)
+  COMMAND="${1,,}"
+  ;;
+*)
+  printf 'Error: Unknown command or player: %s\n' "${1:-}" >&2
+  show_help
+  ;;
 esac
 
 case "${COMMAND,,}" in
-  toggle|play|pause|next|prev|previous|stop|status)
-    COMMAND="${COMMAND,,}"
-    ;;
-  *)
-    fail "Medya kontrolu" "Gecersiz komut: $COMMAND"
-    ;;
+toggle | play | pause | next | prev | previous | stop | status)
+  COMMAND="${COMMAND,,}"
+  ;;
+*)
+  fail "Medya kontrolu" "Gecersiz komut: $COMMAND"
+  ;;
 esac
 
 ACTION_LABEL="$(command_label "$COMMAND")"
