@@ -290,13 +290,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `mpc-control`
-**Description:** Quick command-line controller for mpd using mpc.
-
-**Usage:** `mpc-control.sh [toggle|play|pause|stop|next|prev|status|vol up|vol down]`
-
----
-
 ### 📂 `mpv-manager`
 **Description:** Compositor-aware MPV helper for window management and IPC control.
 
@@ -588,13 +581,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** HyprFlow PipeWire Audio Switcher for Hyprland/Wayland
 
 **Usage:** `osc-soundctl.sh [options]`
-
----
-
-### 📂 `osc-spotify`
-**Description:** HyprFlow Spotify Controller for Hyprland & Wayland
-
-**Usage:** `osc-spotify.sh [options]`
 
 ---
 
@@ -945,13 +931,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Vim Remote Editor - Edit remote files over SSH using Vim's SCP
 
 **Usage:** `vir [options] [user@]hostname path/to/file [nvim-options]`
-
----
-
-### 📂 `vlc-toggle`
-**Description:** Hyprland + VLC play/pause toggle with robust MPRIS detection, fallbacks, and notifications
-
-**Usage:** `vlc-toggle.sh`
 
 ---
 
