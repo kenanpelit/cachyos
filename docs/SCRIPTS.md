@@ -482,7 +482,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ### 📂 `osc-media`
 **Description:** Smart media controller that routes commands to the active player
 
-**Usage:** `osc-media.sh [toggle|play|pause|next|prev|stop|status]`
+**Usage:** `osc-media.sh [player] <command>`
 
 ---
 
