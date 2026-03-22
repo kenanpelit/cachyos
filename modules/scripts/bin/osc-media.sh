@@ -13,6 +13,7 @@ set -Eeuo pipefail
 NOTIFY_TIMEOUT="${NOTIFY_TIMEOUT:-3200}"
 SYNC_ID="x-canonical-private-synchronous:osc-media"
 MPV_SOCKET="${MPV_SOCKET:-/tmp/mpvsocket}"
+SPOTIFY_START_TIMEOUT="${SPOTIFY_START_TIMEOUT:-12}"
 STATE_ROOT="${XDG_RUNTIME_DIR:-}"
 if [[ -z "$STATE_ROOT" || ! -d "$STATE_ROOT" || ! -w "$STATE_ROOT" ]]; then
   STATE_ROOT="/tmp"
@@ -240,6 +241,86 @@ write_last_player() {
   printf '%s\n' "$player_id" >"$LAST_PLAYER_FILE" 2>/dev/null || true
 }
 
+spotify_process_running() {
+  pgrep -x spotify >/dev/null 2>&1 && return 0
+
+  pgrep -af '[s]potify' 2>/dev/null | awk '
+    {
+      cmd=$2
+      sub(/^.*\//, "", cmd)
+      if (cmd == "spotify") {
+        found=1
+        exit
+      }
+    }
+    END { exit(found ? 0 : 1) }
+  '
+}
+
+spotify_should_autostart() {
+  [[ "$TARGET_PLAYER" == "spotify" ]] || return 1
+
+  case "$COMMAND" in
+    toggle|play|next|prev|previous|status)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+wait_for_target_player() {
+  local target="$1"
+  local timeout="${2:-$SPOTIFY_START_TIMEOUT}"
+  local attempt=""
+  local elapsed=0
+
+  while (( elapsed < timeout * 4 )); do
+    attempt="$(pick_best_mpris_for_target "$target")"
+    if [[ "$attempt" != none:* ]]; then
+      printf '%s\n' "$attempt"
+      return 0
+    fi
+    sleep 0.25
+    elapsed=$((elapsed + 1))
+  done
+
+  printf 'none:%s\n' "$target"
+}
+
+ensure_spotify_target_ready() {
+  local resolved=""
+
+  resolved="$(pick_best_mpris_for_target "spotify")"
+  if [[ "$resolved" != none:* ]]; then
+    printf '%s\n' "$resolved"
+    return 0
+  fi
+
+  spotify_should_autostart || {
+    printf '%s\n' "$resolved"
+    return 0
+  }
+
+  have_cmd spotify || {
+    printf 'none:spotify\n'
+    return 0
+  }
+
+  if ! spotify_process_running; then
+    notify_media \
+      "Spotify · Baslatiliyor" \
+      "Spotify aciliyor, hazir olunca komut gonderilecek." \
+      "$(player_icon "spotify")" \
+      "normal" \
+      2600
+    spotify >/dev/null 2>&1 &
+    disown || true
+  fi
+
+  wait_for_target_player "spotify" "$SPOTIFY_START_TIMEOUT"
+}
+
 list_mpris_players() {
   have_cmd playerctl || return 0
   playerctl -l 2>/dev/null | awk '
@@ -436,7 +517,10 @@ resolve_explicit_target() {
         printf 'none:mpv\n'
       fi
       ;;
-    spotify|vlc|browser)
+    spotify)
+      ensure_spotify_target_ready
+      ;;
+    vlc|browser)
       pick_best_mpris_for_target "$TARGET_PLAYER"
       ;;
     *)
