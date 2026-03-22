@@ -47,8 +47,10 @@ if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw default allow outgoing
   ${SUDO} ufw allow "${SSH_PORT}/tcp"
 
-  # Allow mDNS for local discovery (Avahi/KDE Connect)
-  ${SUDO} ufw allow 5353/udp
+  if [ "${ALLOW_MDNS_PORT}" = "1" ]; then
+    # Allow mDNS for local discovery (Avahi/KDE Connect)
+    ${SUDO} ufw allow "${MDNS_PORT}/udp"
+  fi
 
   if [ "${ALLOW_TRANSMISSION_PORTS}" = "1" ]; then
     ${SUDO} ufw allow "${TRANSMISSION_WEB_PORT}/tcp"
