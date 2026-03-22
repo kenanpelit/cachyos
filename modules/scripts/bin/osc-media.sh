@@ -78,11 +78,36 @@ notify_media() {
   local body="$2"
   local icon_path="${3:-audio-headphones}"
 
-  notify-send -t "$NOTIFY_TIMEOUT" \
-    -h string:"$SYNC_ID" \
-    -i "$icon_path" \
-    "$title" \
-    "$body"
+  # Strip path parameters and use base name for common icons
+  if [ "$icon_path" = "spotify" ]; then
+    icon_path="/usr/share/icons/hicolor/256x256/apps/spotify.png"
+  fi
+
+  # Prevent totally empty bodies from causing blank popups
+  if [ -z "$body" ] || [ "$body" = " " ]; then
+    body="Medya Bilgisi Bulunamadı"
+  fi
+
+  # Truncate extremely long strings to prevent broken notifications
+  local max_length=100
+  if [ ${#body} -gt $max_length ]; then
+    body="${body:0:$max_length}..."
+  fi
+
+  # Use fallback icon if specified icon doesn't exist on system
+  if [[ ! -f "$icon_path" ]] && [[ "$icon_path" == /* ]]; then
+    icon_path="audio-headphones"
+  fi
+
+  if command -v notify-send >/dev/null 2>&1; then
+      notify-send -t "$NOTIFY_TIMEOUT" \
+        -h string:"$SYNC_ID" \
+        -i "$icon_path" \
+        "$title" \
+        "$body"
+  else
+      echo -e "$title\n$body"
+  fi
 }
 
 # 3. Determine active player if none was explicitly targeted
