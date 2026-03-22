@@ -573,7 +573,7 @@ binds {
 
   // MPV manager helpers (your scripts live in ~/.local/bin)
   Alt+U repeat=false hotkey-overlay-title="MPV Playback" {
-    spawn "mpv-manager" "playback"
+    spawn "osc-media" "mpv" "toggle"
   }
   Mod+Ctrl+Y repeat=false hotkey-overlay-title="MPV Play YouTube" {
     spawn "mpv-manager" "play-yt"
