@@ -480,7 +480,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-media`
-**Description:** Smart media controller that routes commands to the active player
+**Description:** Sticky auto media controller with smarter player selection and richer notifications.
 
 **Usage:** `osc-media.sh [player] <command>`
 
@@ -1017,4 +1017,3 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Usage:** `yt-cookies-youtube`
 
 ---
-
