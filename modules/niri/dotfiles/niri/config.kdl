@@ -443,20 +443,20 @@ binds {
   }
 
   Alt+E repeat=false hotkey-overlay-title="Spotify Toggle" {
-    spawn "osc-spotify"
+    spawn "osc-media" "spotify" "toggle"
   }
   Alt+Ctrl+N repeat=false hotkey-overlay-title="Spotify Next" {
-    spawn "osc-spotify" "next"
+    spawn "osc-media" "spotify" "next"
   }
   Alt+Ctrl+B repeat=false hotkey-overlay-title="Spotify Prev" {
-    spawn "osc-spotify" "prev"
+    spawn "osc-media" "spotify" "prev"
   }
 
   Alt+Ctrl+E repeat=false hotkey-overlay-title="MPC Toggle" {
-    spawn "mpc-control" "toggle"
+    spawn "osc-media" "mpc" "toggle"
   }
   Alt+I repeat=false hotkey-overlay-title="VLC Toggle" {
-    spawn "vlc-toggle"
+    spawn "osc-media" "browser" "toggle"
   }
 
   // ----------------------------------------------------------------------
