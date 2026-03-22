@@ -30,6 +30,11 @@ BT_MIC_LEVEL=5
 DEFAULT_VOLUME_LEVEL=15
 DEFAULT_MIC_LEVEL=0
 
+# Notifications
+NOTIFY_TIMEOUT=4200
+NOTIFY_APP_NAME="Bluetooth Toggle"
+NOTIFY_SYNC_ID="x-canonical-private-synchronous:bluetooth-toggle"
+
 # Timing / retry
 BLUETOOTH_TIMEOUT=12       # seconds for bluetoothctl single commands
 AUDIO_WAIT_TIME=4          # seconds before audio routing attempts
@@ -38,6 +43,10 @@ SCAN_WAIT_SECONDS=45       # wait for device visibility during scan (dual-boot n
 CONNECT_WAIT_SECONDS=12    # wait to see Connected: yes after connect
 WPCTL_NODE_WAIT_SECONDS=20 # wait for bluez nodes in wpctl Settings
 BT_FORCE_A2DP_PROFILE=false
+BT_INFO_RETRY_COUNT=5
+BT_INFO_RETRY_DELAY=1
+DISCONNECT_WAIT_SECONDS=6
+BATTERY_NOTIFY_WAIT_SECONDS=6
 
 # ==============================================================================
 # Colors & logging
@@ -57,11 +66,24 @@ log() {
   WARNING) color=$YELLOW ;;
   INFO) color=$BLUE ;;
   esac
-  echo -e "${color}[$(date '+%Y-%m-%d %H:%M:%S')] [$level] $msg${NC}"
+  echo -e "${color}[$(date '+%Y-%m-%d %H:%M:%S')] [$level] $msg${NC}" >&2
 }
 
 send_notification() {
-  command -v notify-send >/dev/null 2>&1 && notify-send -t 5000 "$1" "$2"
+  local title="$1" body="$2"
+  local urgency="${3:-normal}" icon="${4:-bluetooth}" timeout="${5:-$NOTIFY_TIMEOUT}"
+
+  [ "${NOTIFY_ENABLED}" = true ] || return 0
+  command -v notify-send >/dev/null 2>&1 || return 0
+
+  notify-send \
+    -a "$NOTIFY_APP_NAME" \
+    -u "$urgency" \
+    -t "$timeout" \
+    -h string:"$NOTIFY_SYNC_ID" \
+    -i "$icon" \
+    "$title" \
+    "$body" >/dev/null 2>&1 || true
 }
 
 # ==============================================================================
@@ -70,8 +92,10 @@ send_notification() {
 
 MODE="toggle" # toggle | connect | disconnect
 MODE_BATTERY_ONLY=false
+MODE_STATUS_ONLY=false
 MODE_REKEY=false
 AUTO_REKEY=false
+NOTIFY_ENABLED=true
 
 AUDIO_BACKEND=""
 BACKEND_FORCED=""
@@ -105,7 +129,10 @@ _sudo() {
 # user systemd units on some setups.
 _btctl_batch() {
   local input="${1:-}"
-  printf '%b\nquit\n' "$input" | timeout "$BLUETOOTH_TIMEOUT" bluetoothctl 2>&1 || true
+  printf '%b\nquit\n' "$input" \
+    | timeout "$BLUETOOTH_TIMEOUT" bluetoothctl 2>&1 \
+    | sed -E $'s/\x1B\\[[0-9;?]*[ -/]*[@-~]//g; s/\r//g' \
+    | sed '/^\[bluetooth\]#/d; /^Waiting to connect to bluetoothd\.\.\.$/d'
 }
 
 # Run a single bluetoothctl command with a hard timeout and capture output.
@@ -129,7 +156,65 @@ check_bluetooth_service() {
   fi
 }
 
+_rfkill_dump() {
+  command -v rfkill >/dev/null 2>&1 || return 1
+  rfkill list bluetooth 2>/dev/null || rfkill list 2>/dev/null || return 1
+}
+
+_rfkill_any_blocked() {
+  local kind="$1"
+  _rfkill_dump | awk -v needle="${kind}: yes" '
+    index($0, needle) > 0 { found=1; exit }
+    END { exit(found ? 0 : 1) }
+  '
+}
+
+rfkill_soft_blocked() {
+  _rfkill_any_blocked "Soft blocked"
+}
+
+rfkill_hard_blocked() {
+  _rfkill_any_blocked "Hard blocked"
+}
+
+rfkill_summary() {
+  if ! command -v rfkill >/dev/null 2>&1; then
+    printf 'unknown\n'
+    return 0
+  fi
+
+  if rfkill_hard_blocked; then
+    printf 'hard-blocked\n'
+  elif rfkill_soft_blocked; then
+    printf 'soft-blocked\n'
+  else
+    printf 'unblocked\n'
+  fi
+}
+
+ensure_rfkill_unblocked() {
+  command -v rfkill >/dev/null 2>&1 || return 0
+
+  if rfkill_hard_blocked; then
+    log "Bluetooth is hard blocked by hardware switch/firmware." "ERROR"
+    return 1
+  fi
+
+  if rfkill_soft_blocked; then
+    log "Bluetooth is soft-blocked. Unblocking with rfkill..." "WARNING"
+    _sudo rfkill unblock bluetooth >/dev/null 2>&1 || _sudo rfkill unblock all >/dev/null 2>&1 || true
+    sleep 1
+    if rfkill_soft_blocked; then
+      log "Bluetooth remains soft-blocked after rfkill unblock." "ERROR"
+      return 1
+    fi
+  fi
+
+  return 0
+}
+
 check_bluetooth_power() {
+  ensure_rfkill_unblocked || return 1
   if ! _btctl_capture show | grep -q "Powered: yes"; then
     log "Bluetooth is powered off. Powering on..." "WARNING"
     _btctl_capture power on >/dev/null 2>&1 || true
@@ -179,18 +264,188 @@ _wait_until_device_visible() {
   return 1
 }
 
-# Battery percentage from bluetoothctl info (may not be supported)
-get_battery_percentage() {
-  local addr="$1"
+device_info_snapshot() {
+  local mac="$1"
+  local out=""
+  local attempt=0
+
+  while [ $attempt -lt "$BT_INFO_RETRY_COUNT" ]; do
+    out="$(_btctl_capture info "$mac")"
+    if printf '%s\n' "$out" | grep -qE "Device ${mac}|Connected:|Paired:|Trusted:|Battery Percentage"; then
+      printf '%s\n' "$out"
+      return 0
+    fi
+    attempt=$((attempt + 1))
+    [ $attempt -lt "$BT_INFO_RETRY_COUNT" ] && sleep "$BT_INFO_RETRY_DELAY"
+  done
+
+  printf '%s\n' "$out"
+}
+
+_device_info_value_from_snapshot() {
+  local snapshot="$1" key="$2"
+  printf '%s\n' "$snapshot" | awk -v key="$key" '
+    {
+      split($0, parts, ":")
+      if (length(parts) < 2) {
+        next
+      }
+      field=parts[1]
+      gsub(/^[[:space:]]+/, "", field)
+      gsub(/[[:space:]]+$/, "", field)
+      if (tolower(field) == tolower(key)) {
+        value=substr($0, index($0, ":") + 1)
+        gsub(/^[[:space:]]+/, "", value)
+        gsub(/[[:space:]]+$/, "", value)
+        print value
+        exit
+      }
+    }
+  '
+}
+
+_device_info_value() {
+  local mac="$1" key="$2"
+  _device_info_value_from_snapshot "$(device_info_snapshot "$mac")" "$key"
+}
+
+device_connected_state() {
+  local state="${2:-}"
+  [ -n "$state" ] || state="$(_device_info_value "$1" "Connected" || true)"
+  [ -n "$state" ] && printf '%s\n' "$state" || printf 'unknown\n'
+}
+
+device_paired_state() {
+  local state="${2:-}"
+  [ -n "$state" ] || state="$(_device_info_value "$1" "Paired" || true)"
+  [ -n "$state" ] && printf '%s\n' "$state" || printf 'unknown\n'
+}
+
+device_trusted_state() {
+  local state="${2:-}"
+  [ -n "$state" ] || state="$(_device_info_value "$1" "Trusted" || true)"
+  [ -n "$state" ] && printf '%s\n' "$state" || printf 'unknown\n'
+}
+
+bluetooth_power_state() {
+  local state
+  state="$(_btctl_capture show | awk -F': ' '/Powered:/ {print $2; exit}' || true)"
+  [ -n "$state" ] && printf '%s\n' "$state" || printf 'unknown\n'
+}
+
+get_battery_percentage_from_snapshot() {
+  local snapshot="$1"
   local raw pct
-  raw="$(_btctl_capture info "$addr" | awk -F': ' '/Battery Percentage/ {gsub(/[[:space:]]*/,"",$2); print $2; exit}')"
+
+  raw="$(printf '%s\n' "$snapshot" | awk -F': ' '
+    /Battery Percentage/ {
+      gsub(/[[:space:]]*/, "", $2)
+      print $2
+      exit
+    }
+  ')"
   [ -z "$raw" ] && return 0
   if echo "$raw" | grep -q '([0-9]\+)'; then
     pct="$(echo "$raw" | sed -n 's/.*(\([0-9]\+\)).*/\1/p')"
   else
     pct="$(echo "$raw" | tr -cd '0-9')"
   fi
-  [ -n "${pct:-}" ] && echo "${pct}%"
+  [ -n "${pct:-}" ] && printf '%s%%\n' "$pct"
+}
+
+device_battery_or_na() {
+  local battery="" snapshot="${2:-}"
+  if [ -n "$snapshot" ]; then
+    battery="$(get_battery_percentage_from_snapshot "$snapshot")" || true
+  else
+    battery="$(get_battery_percentage "$1")" || true
+  fi
+  [ -n "$battery" ] && printf '%s\n' "$battery" || printf 'n/a\n'
+}
+
+audio_backend_label() {
+  [ -n "$AUDIO_BACKEND" ] && printf '%s\n' "$AUDIO_BACKEND" || printf 'unavailable\n'
+}
+
+build_status_report() {
+  local mac="$1" name="$2"
+  local wait_for_battery="${3:-false}"
+  local snapshot=""
+  local connected="" paired="" trusted=""
+
+  snapshot="$(collect_device_snapshot_for_report "$mac" "$wait_for_battery")"
+  connected="$(_device_info_value_from_snapshot "$snapshot" "Connected" || true)"
+  paired="$(_device_info_value_from_snapshot "$snapshot" "Paired" || true)"
+  trusted="$(_device_info_value_from_snapshot "$snapshot" "Trusted" || true)"
+
+  cat <<EOF
+Target: ${name} (${mac})
+Connected: $(device_connected_state "$mac" "$connected")
+Paired: $(device_paired_state "$mac" "$paired")
+Trusted: $(device_trusted_state "$mac" "$trusted")
+Battery: $(device_battery_or_na "$mac" "$snapshot")
+Powered: $(bluetooth_power_state)
+RFKill: $(rfkill_summary)
+Audio backend: $(audio_backend_label)
+EOF
+}
+
+collect_device_snapshot_for_report() {
+  local mac="$1" wait_for_battery="${2:-false}"
+  local snapshot=""
+  local connected="" battery=""
+  local t=0
+
+  snapshot="$(device_info_snapshot "$mac")"
+  connected="$(_device_info_value_from_snapshot "$snapshot" "Connected" || true)"
+
+  if [ "$wait_for_battery" = true ] && [ "${connected,,}" = "yes" ]; then
+    battery="$(get_battery_percentage_from_snapshot "$snapshot" || true)"
+    while [ -z "$battery" ] && [ $t -lt "$BATTERY_NOTIFY_WAIT_SECONDS" ]; do
+      sleep 1
+      snapshot="$(device_info_snapshot "$mac")"
+      connected="$(_device_info_value_from_snapshot "$snapshot" "Connected" || true)"
+      battery="$(get_battery_percentage_from_snapshot "$snapshot" || true)"
+      t=$((t + 1))
+    done
+  fi
+
+  printf '%s\n' "$snapshot"
+}
+
+build_notification_report() {
+  local mac="$1" name="$2" wait_for_battery="${3:-false}"
+  local snapshot=""
+  local connected="" battery="" paired="" trusted=""
+
+  snapshot="$(collect_device_snapshot_for_report "$mac" "$wait_for_battery")"
+  connected="$(_device_info_value_from_snapshot "$snapshot" "Connected" || true)"
+  battery="$(device_battery_or_na "$mac" "$snapshot")"
+  paired="$(_device_info_value_from_snapshot "$snapshot" "Paired" || true)"
+  trusted="$(_device_info_value_from_snapshot "$snapshot" "Trusted" || true)"
+
+  cat <<EOF
+Device: ${name}
+Battery: ${battery}
+Connected: $(device_connected_state "$mac" "$connected")
+Paired: $(device_paired_state "$mac" "$paired")
+Trusted: $(device_trusted_state "$mac" "$trusted")
+EOF
+}
+
+show_status_report() {
+  build_status_report "$DEVICE_ADDRESS" "$DEVICE_NAME"
+}
+
+notify_connection_snapshot() {
+  local title="$1" icon="$2" urgency="${3:-normal}" wait_for_battery="${4:-false}"
+  send_notification "$title" "$(build_notification_report "$DEVICE_ADDRESS" "$DEVICE_NAME" "$wait_for_battery")" "$urgency" "$icon"
+}
+
+# Battery percentage from bluetoothctl info (may not be supported)
+get_battery_percentage() {
+  local addr="$1"
+  get_battery_percentage_from_snapshot "$(device_info_snapshot "$addr")"
 }
 
 # ==============================================================================
@@ -198,9 +453,18 @@ get_battery_percentage() {
 # ==============================================================================
 
 detect_backend() {
+  AUDIO_BACKEND=""
+
   if [ -n "$BACKEND_FORCED" ]; then
     case "$BACKEND_FORCED" in
-    wpctl | pactl) AUDIO_BACKEND="$BACKEND_FORCED" ;;
+    wpctl | pactl)
+      if command -v "$BACKEND_FORCED" >/dev/null 2>&1; then
+        AUDIO_BACKEND="$BACKEND_FORCED"
+      else
+        log "Forced backend is unavailable: $BACKEND_FORCED" "ERROR"
+        exit 1
+      fi
+      ;;
     *)
       log "Invalid backend: $BACKEND_FORCED (use wpctl|pactl)" "ERROR"
       exit 1
@@ -212,11 +476,11 @@ detect_backend() {
     elif command -v pactl >/dev/null 2>&1; then
       AUDIO_BACKEND="pactl"
     else
-      log "No audio backend found. Install PipeWire (wpctl) or PulseAudio (pactl)." "ERROR"
-      exit 1
+      log "No audio backend found. Bluetooth audio routing will be skipped." "WARNING"
+      return 0
     fi
   fi
-  log "Audio backend: ${AUDIO_BACKEND}" "INFO"
+  [ -n "$AUDIO_BACKEND" ] && log "Audio backend: ${AUDIO_BACKEND}" "INFO"
 }
 
 # ==============================================================================
@@ -389,6 +653,9 @@ audio_find_bt_sink() {
     _find_id_by_mac_and_media_class_in_block "$filter_block" "$macU" "$macUnd" "Audio/Sink" && return 0
     return 1
     ;;
+  *)
+    return 1
+    ;;
   esac
 }
 
@@ -403,6 +670,9 @@ audio_find_bt_source() {
     _find_default_serial_from_settings source "$macU" "$macUnd" && return 0
     _find_id_in_block_by_name "$filter_block" "bluez_input|Audio/Source|${DEFAULT_DEVICE_NAME}|${ALTERNATIVE_DEVICE_NAME}|S4|SLP4|Liberty|soundcore" && return 0
     _find_id_by_mac_and_media_class_in_block "$filter_block" "$macU" "$macUnd" "Audio/Source" && return 0
+    return 1
+    ;;
+  *)
     return 1
     ;;
   esac
@@ -445,6 +715,11 @@ audio_set_source_volume_pct() {
 # ==============================================================================
 
 configure_audio_default() {
+  if [ -z "$AUDIO_BACKEND" ]; then
+    log "Skipping default audio restore: no audio backend available." "WARNING"
+    return 0
+  fi
+
   if audio_set_sink_volume_pct "$DEFAULT_VOLUME_LEVEL" 2>/dev/null && audio_set_source_volume_pct "$DEFAULT_MIC_LEVEL" 2>/dev/null; then
     log "Default audio levels set: sink %${DEFAULT_VOLUME_LEVEL}, mic %${DEFAULT_MIC_LEVEL}" "SUCCESS"
   else
@@ -453,6 +728,11 @@ configure_audio_default() {
 }
 
 configure_audio_bluetooth() {
+  if [ -z "$AUDIO_BACKEND" ]; then
+    log "Skipping Bluetooth audio routing: no audio backend available." "WARNING"
+    return 0
+  fi
+
   if ! _is_connected "$DEVICE_ADDRESS"; then
     log "Skipping audio routing: device is not connected." "WARNING"
     return 1
@@ -637,15 +917,8 @@ _rekey_and_repair() {
   _set_alias_best_effort "$DEVICE_ADDRESS" "$alias_name"
   [ -n "$alias_name" ] && log "Alias set (best effort): $alias_name" "SUCCESS"
 
-  local battery=""
-  battery="$(get_battery_percentage "$DEVICE_ADDRESS")" || true
-  if [ -n "$battery" ]; then
-    send_notification "Bluetooth Rekey OK" "$DEVICE_NAME connected. Battery: $battery"
-  else
-    send_notification "Bluetooth Rekey OK" "$DEVICE_NAME connected."
-  fi
-
   configure_audio_bluetooth || true
+  notify_connection_snapshot "Bluetooth Rekey OK" "bluetooth-active" "normal" true
   return 0
 }
 
@@ -707,7 +980,13 @@ _connect_device_with_scan() {
 
 _disconnect_device() {
   local mac="$1"
+  local t=0
   _btctl_capture disconnect "$mac" >/dev/null 2>&1 || true
+  while [ $t -lt "$DISCONNECT_WAIT_SECONDS" ]; do
+    _is_connected "$mac" || return 0
+    sleep 1
+    t=$((t + 1))
+  done
   _is_connected "$mac" && return 1
   return 0
 }
@@ -731,8 +1010,8 @@ manage_connection() {
       log "Disconnecting..." "INFO"
       if _disconnect_device "$mac"; then
         log "Disconnected." "SUCCESS"
-        send_notification "Bluetooth Disconnected" "$name disconnected."
         configure_audio_default || true
+        notify_connection_snapshot "Bluetooth Disconnected" "bluetooth-disabled" "normal"
         return 0
       else
         log "Failed to disconnect (non-fatal)." "WARNING"
@@ -760,14 +1039,8 @@ manage_connection() {
 
       if [ "${rc:-0}" -eq 0 ]; then
         log "Connected." "SUCCESS"
-        local battery=""
-        battery="$(get_battery_percentage "$mac")" || true
-        if [ -n "$battery" ]; then
-          send_notification "Bluetooth Connected" "$name connected. Battery: $battery"
-        else
-          send_notification "Bluetooth Connected" "$name connected."
-        fi
         configure_audio_bluetooth || true
+        notify_connection_snapshot "Bluetooth Connected" "bluetooth-active" "normal" true
         return 0
       fi
 
@@ -777,6 +1050,7 @@ manage_connection() {
         if _connect_device_with_scan "$mac"; then
           log "Connected (after scan)." "SUCCESS"
           configure_audio_bluetooth || true
+          notify_connection_snapshot "Bluetooth Connected" "bluetooth-active" "normal" true
           return 0
         fi
       fi
@@ -822,6 +1096,8 @@ Other:
   --backend=wpctl       Force PipeWire wpctl
   --backend=pactl       Force PulseAudio pactl
   --battery             Only show battery (if supported)
+  --status              Show current adapter/device status without changing state
+  --no-notify           Disable desktop notifications
   -v, --verbose         set -x
   -q, --quiet           suppress stderr
   -h, --help            show help
@@ -856,6 +1132,10 @@ parse_arguments() {
       MODE_BATTERY_ONLY=true
       shift
       ;;
+    --status)
+      MODE_STATUS_ONLY=true
+      shift
+      ;;
     --rekey)
       MODE_REKEY=true
       shift
@@ -874,6 +1154,10 @@ parse_arguments() {
       ;;
     --backend=*)
       BACKEND_FORCED="${1#*=}"
+      shift
+      ;;
+    --no-notify)
+      NOTIFY_ENABLED=false
       shift
       ;;
     -v | --verbose)
@@ -925,12 +1209,7 @@ main() {
   check_command bluetoothctl
   check_command timeout
 
-  check_bluetooth_service
-  check_bluetooth_power || exit 1
-
   detect_backend
-  if [ "$AUDIO_BACKEND" = "wpctl" ]; then check_command wpctl; fi
-  if [ "$AUDIO_BACKEND" = "pactl" ]; then check_command pactl; fi
 
   log "Target device: $DEVICE_NAME ($DEVICE_ADDRESS)" "INFO"
 
@@ -938,14 +1217,21 @@ main() {
     local battery=""
     battery="$(get_battery_percentage "$DEVICE_ADDRESS")" || true
     if [ -n "$battery" ]; then
-      send_notification "BT Battery" "$DEVICE_NAME: $battery"
-      log "Battery: $battery" "INFO"
+      printf '%s\n' "$battery"
       exit 0
     else
       log "Battery info not available." "WARNING"
       exit 1
     fi
   fi
+
+  if [ "$MODE_STATUS_ONLY" = true ]; then
+    show_status_report
+    exit 0
+  fi
+
+  check_bluetooth_service
+  check_bluetooth_power || exit 1
 
   if [ "$MODE_REKEY" = true ]; then
     _rekey_and_repair && {
