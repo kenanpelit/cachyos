@@ -298,14 +298,23 @@ apply_runtime_preset() {
   local active
 
   active="$(get_active_preset_state)"
-  if [[ "$preset" == "$active" ]]; then
+  if [[ "$preset" == "$active" && "$preset" != "default" ]]; then
+    set_active_preset_state "$preset"
     return 0
   fi
 
+  set_active_preset_state "$preset"
+
   if [[ "$preset" == "default" ]]; then
-    sunsetr preset default >/dev/null 2>&1 || die "failed to switch sunsetr to default config"
+    sunsetr preset default >/dev/null 2>&1 || {
+      set_active_preset_state "$active"
+      die "failed to switch sunsetr to default config"
+    }
   else
-    sunsetr preset "$preset" >/dev/null 2>&1 || die "failed to switch sunsetr preset: $preset"
+    sunsetr preset "$preset" >/dev/null 2>&1 || {
+      set_active_preset_state "$active"
+      die "failed to switch sunsetr preset: $preset"
+    }
   fi
 }
 
