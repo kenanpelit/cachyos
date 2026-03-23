@@ -236,8 +236,6 @@ binds {
   Mod+C hotkey-overlay-title="Center Column"   { center-column; }
 
   // Mouse Interaction
-  Mod+MouseLeft  { move-window-interactive; }
-  Mod+MouseRight { resize-window-interactive; }
   Mod+MouseMiddle { close-window; }
 
   // ----------------------------------------------------------------------
