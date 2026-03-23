@@ -144,7 +144,7 @@ layout {
   }
 
   struts {
-    // top 0
+    top 36
     // bottom 0
     // left 0
     // right 0
@@ -236,6 +236,8 @@ binds {
   Mod+C hotkey-overlay-title="Center Column"   { center-column; }
 
   // Mouse Interaction
+  Mod+MouseLeft  { move-window-interactive; }
+  Mod+MouseRight { resize-window-interactive; }
   Mod+MouseMiddle { close-window; }
 
   // ----------------------------------------------------------------------
@@ -719,6 +721,11 @@ window-rule {
 window-rule {
   match app-id=r#"^org\.quickshell$"#
   open-floating true
+}
+
+window-rule {
+  match app-id=r#"^steam_app_\d+$"#
+  variable-refresh-rate true
 }
 
 window-rule {
