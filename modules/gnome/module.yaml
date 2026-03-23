@@ -7,5 +7,7 @@ depends_on:
 dotfiles:
 - source: scripts/gnome_tty
   target: ~/.local/bin/gnome_tty
+- source: scripts/setup-gnome.sh
+  target: ~/.local/bin/setup-gnome
 post_install_hook: scripts/setup-gnome.sh
 post_hook_behavior: ask
