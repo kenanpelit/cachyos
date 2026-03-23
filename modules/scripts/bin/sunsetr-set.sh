@@ -129,19 +129,9 @@ canonical_preset_name() {
 }
 
 state_namespace() {
-  local default_root="$DEFAULT_CONFIG_ROOT"
-  local config_root
-  config_root="$(config_root_canonical)"
-
-  if [[ -d "$default_root" ]]; then
-    default_root="$(cd "$default_root" && pwd -P)"
-  fi
-
-  if [[ "$config_root" == "$default_root" ]]; then
-    printf 'default\n'
-  else
-    printf 'custom_%s\n' "$(printf '%s' "$config_root" | sha256sum | awk '{print substr($1, 1, 16)}')"
-  fi
+  # Simplify: always use 'default' unless explicitly overridden by an environment variable.
+  # This avoids mismatches when running from different contexts (systemd vs shell).
+  printf 'default\n'
 }
 
 state_dir() {
@@ -421,9 +411,12 @@ main() {
       ;;
     auto)
       target="$(select_auto_preset)"
-      sync_preset "$target" "$APPLY_AFTER_SET"
-      log "scheduled preset: $target"
-      notify "sunsetr" "Otomatik preset: $target"
+      active="$(get_active_preset_state)"
+      if [[ "$target" != "$active" ]]; then
+        sync_preset "$target" "$APPLY_AFTER_SET"
+        log "preset changed: $active -> $target"
+        notify "sunsetr" "Profil degistirildi: $target"
+      fi
       ;;
     apply)
       target="$(get_active_preset_state)"
