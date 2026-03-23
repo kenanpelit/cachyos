@@ -52,7 +52,7 @@ layer-rule {
 // ------------------------------------------------------------------------
 input {
   workspace-auto-back-and-forth
-  focus-follows-mouse
+  focus-follows-mouse max-scroll-amount="0%"
   warp-mouse-to-focus mode="center-xy"
 
   keyboard {
@@ -68,6 +68,7 @@ input {
   touchpad {
     tap
     dwt
+    dwtp
     drag-lock
     tap-button-map "left-right-middle"
     middle-emulation
@@ -123,10 +124,14 @@ layout {
   always-center-single-column
   background-color "#00000000"
 
+  open-window-shader "shaders/open_custom_shader.frag"
+  close-window-shader "shaders/close_custom_shader.frag"
+  resize-window-shader "shaders/resize_custom_shader.frag"
+
   focus-ring {
     on
     width 3
-    active-color "#cba6f7"
+    active-gradient from="#cba6f7" to="#89b4fa" angle=45 relative-to="workspace-view" in="oklch shorter hue"
     inactive-color "#1e1e2e"
     urgent-color "#f38ba8"
   }
@@ -140,6 +145,13 @@ layout {
 
   shadow {
     color "#11111b70"
+  }
+
+  struts {
+    // top 0
+    // bottom 0
+    // left 0
+    // right 0
   }
 
   tab-indicator {
@@ -1087,6 +1099,16 @@ include "dms/windowrules.kdl"
 
 // Layers
 layer-rule {
+  match namespace=r#"^noctalia:.*$"#
+  shadow {
+    on
+    softness 20
+    spread 5
+    color "#00000080"
+  }
+}
+
+layer-rule {
   match namespace=r#"^dms:blurwallpaper$"#
   place-within-backdrop true
 }
@@ -1135,6 +1157,19 @@ layer-rule {
   match namespace="^notifications$"
   block-out-from "screen-capture"
 }
+
+// ========================================================================
+// Named Workspaces
+// ========================================================================
+workspace "1" { name "Kenp"; }
+workspace "2" { name "Tmux"; }
+workspace "3" { name "Ai"; }
+workspace "4" { name "CompecTA"; }
+workspace "5" { name "Social"; }
+workspace "6" { name "Media"; }
+workspace "7" { name "Tools"; }
+workspace "8" { name "Spotify"; }
+workspace "9" { name "Ferdium"; }
 
 // ========================================================================
 // Animations
@@ -1187,6 +1222,14 @@ animations {
 // Gestures
 // ========================================================================
 gestures {
+  workspace-switch {
+    enabled true
+    finger-count 3
+  }
+  window-resize {
+    enabled true
+    finger-count 3
+  }
   dnd-edge-view-scroll {
     trigger-width 30
     delay-ms 100
