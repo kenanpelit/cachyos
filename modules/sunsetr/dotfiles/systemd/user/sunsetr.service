@@ -1,34 +1,22 @@
 [Unit]
-Description=Sunsetr blue-light and gamma filter with integrated scheduler
+Description=Sunsetr blue-light and gamma filter
 Documentation=https://github.com/psi4j/sunsetr?tab=readme-ov-file#sunsetr
 BindsTo=graphical-session.target
 After=graphical-session.target dbus.service
 PartOf=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
-ConditionPathExists=/usr/bin/sunsetr
-ConditionPathExists=%h/.config/sunsetr/schedule.conf
-ConditionPathExists=%h/.config/sunsetr/sunsetr.toml
-ConditionPathExists=%h/.local/bin/sunsetr-set
-ConditionPathExists=%h/.local/bin/sunsetr-scheduler
 
 [Service]
-Type=simple
+Type=forking
 Environment=PATH=/usr/bin:/usr/local/bin:%h/.local/bin
 Environment=HOME=%h
-NoNewPrivileges=yes
-RestrictRealtime=yes
-RestrictSUIDSGID=yes
-
-# Start the standalone scheduler script
-ExecStart=%h/.local/bin/sunsetr-scheduler
+ExecStartPre=-/usr/bin/sunsetr stop
+ExecStart=/usr/bin/sunsetr -b
+ExecStartPost=/usr/bin/bash -c '%h/.local/bin/sunsetr-scheduler-loop &'
 
 Restart=on-failure
 RestartSec=10
 Slice=background.slice
-StandardOutput=journal
-StandardError=journal
-ConfigurationDirectory=sunsetr
-ConfigurationDirectoryMode=0755
 
 [Install]
 WantedBy=graphical-session.target

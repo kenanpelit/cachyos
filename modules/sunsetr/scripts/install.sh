@@ -32,6 +32,7 @@ fi
 run_as_user mkdir -p "$bin_dir"
 run_as_user ln -sfn "$script_src" "$bin_dir/sunsetr-set"
 run_as_user ln -sfn "$scheduler_src" "$bin_dir/sunsetr-scheduler"
+run_as_user ln -sfn "$REPO_ROOT/modules/scripts/bin/sunsetr-scheduler-loop.sh" "$bin_dir/sunsetr-scheduler-loop"
 
 supported_wayland_session_active() {
   run_as_user systemctl --user is-active --quiet 'wayland-wm@niri\x2dsession.service' \
