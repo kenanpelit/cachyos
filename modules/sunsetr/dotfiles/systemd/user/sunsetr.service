@@ -9,6 +9,7 @@ ConditionPathExists=/usr/bin/sunsetr
 ConditionPathExists=%h/.config/sunsetr/schedule.conf
 ConditionPathExists=%h/.config/sunsetr/sunsetr.toml
 ConditionPathExists=%h/.local/bin/sunsetr-set
+ConditionPathExists=%h/.local/bin/sunsetr-scheduler
 
 [Service]
 Type=simple
@@ -16,21 +17,8 @@ NoNewPrivileges=yes
 RestrictRealtime=yes
 RestrictSUIDSGID=yes
 
-# Start the daemon and a background loop for scheduling
-ExecStartPre=-/usr/bin/sunsetr stop
-ExecStartPre=%h/.local/bin/sunsetr-set auto --no-notify
-ExecStart=/usr/bin/bash -c '\
-  /usr/bin/sunsetr & \
-  SUNSETR_PID=$!; \
-  echo "Sunsetr daemon started with PID $SUNSETR_PID"; \
-  while true; do \
-    sleep 60; \
-    if ! kill -0 $SUNSETR_PID 2>/dev/null; then \
-      echo "Sunsetr daemon died, exiting scheduler loop"; \
-      exit 1; \
-    fi; \
-    %h/.local/bin/sunsetr-set auto --apply --no-notify; \
-  done'
+# Start the standalone scheduler script
+ExecStart=%h/.local/bin/sunsetr-scheduler
 
 Restart=on-failure
 RestartSec=10

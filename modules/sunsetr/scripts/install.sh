@@ -21,6 +21,7 @@ canonical_repo_root() {
 
 REPO_ROOT="$(canonical_repo_root)"
 script_src="$REPO_ROOT/modules/scripts/bin/sunsetr-set.sh"
+scheduler_src="$REPO_ROOT/modules/scripts/bin/sunsetr-scheduler.sh"
 bin_dir="$USER_HOME/.local/bin"
 
 if [[ ! -f "$script_src" ]]; then
@@ -30,6 +31,7 @@ fi
 
 run_as_user mkdir -p "$bin_dir"
 run_as_user ln -sfn "$script_src" "$bin_dir/sunsetr-set"
+run_as_user ln -sfn "$scheduler_src" "$bin_dir/sunsetr-scheduler"
 
 supported_wayland_session_active() {
   run_as_user systemctl --user is-active --quiet 'wayland-wm@niri\x2dsession.service' \
@@ -54,10 +56,11 @@ if command -v systemctl >/dev/null 2>&1; then
 
   run_as_user mkdir -p "$user_systemd_dir" "$graphical_wants_dir"
   ensure_user_link "$systemd_dir/sunsetr.service" "$user_systemd_dir/sunsetr.service"
-  ensure_user_link "$systemd_dir/sunsetr-auto-profile.service" "$user_systemd_dir/sunsetr-auto-profile.service"
-  ensure_user_link "$systemd_dir/sunsetr-auto-profile.timer" "$user_systemd_dir/sunsetr-auto-profile.timer"
 
   rm -f \
+    "$user_systemd_dir/sunsetr-auto-profile.service" \
+    "$user_systemd_dir/sunsetr-auto-profile.timer" \
+    "$user_systemd_dir/graphical-session.target.wants/sunsetr-auto-profile.timer" \
     "$user_systemd_dir/niri-sunsetr.service" \
     "$user_systemd_dir/niri-post-daemons.target.wants/niri-sunsetr.service" \
     "$user_systemd_dir/niri-session.target.wants/sunsetr.service" \
@@ -67,14 +70,11 @@ if command -v systemctl >/dev/null 2>&1; then
     "$user_systemd_dir/sunsetr.service.d/10-cachy.conf"
   rmdir "$user_systemd_dir/sunsetr.service.d" >/dev/null 2>&1 || true
   ensure_user_link "$user_systemd_dir/sunsetr.service" "$graphical_wants_dir/sunsetr.service"
-  ensure_user_link "$user_systemd_dir/sunsetr-auto-profile.timer" "$graphical_wants_dir/sunsetr-auto-profile.timer"
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
   if supported_wayland_session_active; then
     run_as_user systemctl --user try-restart sunsetr.service >/dev/null 2>&1 || true
-    run_as_user systemctl --user try-restart sunsetr-auto-profile.timer >/dev/null 2>&1 || true
-    run_as_user systemctl --user start sunsetr-auto-profile.service >/dev/null 2>&1 || true
   else
-    run_as_user systemctl --user stop sunsetr-auto-profile.timer sunsetr.service >/dev/null 2>&1 || true
+    run_as_user systemctl --user stop sunsetr.service >/dev/null 2>&1 || true
   fi
 fi
