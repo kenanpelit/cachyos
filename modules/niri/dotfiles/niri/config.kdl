@@ -1171,48 +1171,40 @@ animations {
   }
 
   window-open {
-    duration-ms 400
+    duration-ms 450
     curve "ease-out-expo"
     custom-shader r"
-      vec4 expanding_circle(vec3 coords_geo, vec3 size_geo) {
+      vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+          float p = niri_clamped_progress;
           vec3 coords_tex = niri_geo_to_tex * coords_geo;
           vec4 color = texture2D(niri_tex, coords_tex.st);
-
-          vec2 coords = (coords_geo.xy - vec2(0.5, 0.5)) * size_geo.xy * 2.0;
-          coords = coords / length(size_geo.xy);
-          float p = niri_clamped_progress;
-          if (p * p <= dot(coords, coords))
-              color = vec4(0.0);
-
-          return color;
-      }
-      vec4 open_color(vec3 coords_geo, vec3 size_geo) {
-          return expanding_circle(coords_geo, size_geo);
+          vec2 center_dist = (coords_geo.xy - vec2(0.5)) * size_geo.xy;
+          float radius = length(center_dist);
+          float max_radius = length(size_geo.xy) * 0.5 * p;
+          if (radius > max_radius) return vec4(0.0);
+          float alpha = smoothstep(max_radius, max_radius - 2.0, radius);
+          return color * alpha * p;
       }
     "
   }
 
   window-close {
-    duration-ms 200
+    duration-ms 250
     curve "ease-out-quad"
     custom-shader r"
-      vec4 fall_and_rotate(vec3 coords_geo, vec3 size_geo) {
-          float progress = niri_clamped_progress * niri_clamped_progress;
-          vec2 coords = (coords_geo.xy - vec2(0.5, 1.0)) * size_geo.xy;
-          coords.y -= progress * 200.0;
-          float random = (niri_random_seed - 0.5) / 2.0;
-          random = sign(random) - random;
-          float max_angle = 0.05 * random;
-          float angle = progress * max_angle;
-          mat2 rotate = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-          coords = rotate * coords;
-          coords_geo = vec3(coords / size_geo.xy + vec2(0.5, 1.0), 1.0);
-          vec3 coords_tex = niri_geo_to_tex * coords_geo;
-          vec4 color = texture2D(niri_tex, coords_tex.st);
-          return color * (1.0 - niri_clamped_progress);
-      }
       vec4 close_color(vec3 coords_geo, vec3 size_geo) {
-          return fall_and_rotate(coords_geo, size_geo);
+          float p = niri_clamped_progress;
+          float inv_p = 1.0 - p;
+          float fall = inv_p * inv_p * 0.2;
+          float angle = (niri_random_seed - 0.5) * 0.2 * inv_p;
+          mat2 rotate = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+          vec2 coords = (coords_geo.xy - vec2(0.5, 0.5)) * size_geo.xy;
+          coords = rotate * coords;
+          coords.y += fall * size_geo.y;
+          vec3 new_coords_geo = vec3(coords / size_geo.xy + vec2(0.5), 1.0);
+          vec3 coords_tex = niri_geo_to_tex * new_coords_geo;
+          vec4 color = texture2D(niri_tex, coords_tex.st);
+          return color * p;
       }
     "
   }
@@ -1228,22 +1220,12 @@ animations {
   window-resize {
     spring damping-ratio=0.85 stiffness=600 epsilon=0.0001
     custom-shader r"
-      vec4 stretch_or_crop_next(vec3 coords_curr_geo, vec3 size_curr_geo) {
-          vec3 coords_next_geo = niri_curr_geo_to_next_geo * coords_curr_geo;
-          vec3 coords_stretch = niri_geo_to_tex_next * coords_curr_geo;
-          vec3 coords_crop = niri_geo_to_tex_next * coords_next_geo;
-          bool can_crop_by_x = niri_curr_geo_to_next_geo[0][0] <= 1.0;
-          bool can_crop_by_y = niri_curr_geo_to_next_geo[1][1] <= 1.0;
-          vec3 coords = coords_stretch;
-          if (can_crop_by_x) coords.x = coords_crop.x;
-          if (can_crop_by_y) coords.y = coords_crop.y;
-          vec4 color = texture2D(niri_tex_next, coords.st);
-          if (can_crop_by_x && (coords_curr_geo.x < 0.0 || 1.0 < coords_curr_geo.x)) color = vec4(0.0);
-          if (can_crop_by_y && (coords_curr_geo.y < 0.0 || 1.0 < coords_curr_geo.y)) color = vec4(0.0);
-          return color;
-      }
       vec4 resize_color(vec3 coords_curr_geo, vec3 size_curr_geo) {
-          return stretch_or_crop_next(coords_curr_geo, size_curr_geo);
+          vec3 coords_tex_prev = niri_geo_to_tex_prev * coords_curr_geo;
+          vec4 color_prev = texture2D(niri_tex_prev, coords_tex_prev.st);
+          vec3 coords_tex_next = niri_geo_to_tex_next * coords_curr_geo;
+          vec4 color_next = texture2D(niri_tex_next, coords_tex_next.st);
+          return mix(color_prev, color_next, niri_clamped_progress);
       }
     "
   }
