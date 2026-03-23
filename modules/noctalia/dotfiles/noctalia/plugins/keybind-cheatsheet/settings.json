@@ -128,6 +128,10 @@
           "desc": "Lock Screen"
         },
         {
+          "keys": "Ctrl + Alt + BackSpace",
+          "desc": "Emergency Exit"
+        },
+        {
           "keys": "Super + Shift + Delete",
           "desc": "Inhibit Idle"
         },
@@ -237,6 +241,10 @@
         },
         {
           "keys": "PrtSc",
+          "desc": "Screenshot Rec"
+        },
+        {
+          "keys": "Shift + PrtSc",
           "desc": "Screenshot Area"
         },
         {
@@ -246,6 +254,10 @@
         {
           "keys": "Alt + PrtSc",
           "desc": "Screenshot Window"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + W",
+          "desc": "Pick Cast Window"
         },
         {
           "keys": "Super + Ctrl + Alt + R",
@@ -280,7 +292,7 @@
           "desc": "Rofi Launcher"
         },
         {
-          "keys": "Super + Ctrl + S",
+          "keys": "Super + Shift + S",
           "desc": "Sticky Toggle"
         },
         {
@@ -304,11 +316,11 @@
           "desc": "MPV Play YouTube"
         },
         {
-          "keys": "Super + Ctrl + F9",
+          "keys": "Ctrl + Alt + Y",
           "desc": "MPV Stick"
         },
         {
-          "keys": "Super + Ctrl + F10",
+          "keys": "Shift + Alt + Y",
           "desc": "MPV Move"
         },
         {
@@ -533,7 +545,7 @@
         },
         {
           "keys": "Super + Shift + R",
-          "desc": "Width 80%"
+          "desc": "Width 50%"
         },
         {
           "keys": "Super + Minus",
@@ -620,6 +632,22 @@
         {
           "keys": "Alt + F1",
           "desc": "Keybinds (Niri)"
+        },
+        {
+          "keys": "Super + Ctrl + Shift + W",
+          "desc": "Cast Focused Window"
+        },
+        {
+          "keys": "Super + Ctrl + Shift + M",
+          "desc": "Cast Focused Monitor"
+        },
+        {
+          "keys": "Super + Ctrl + Shift + X",
+          "desc": "Clear Cast Target"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + F",
+          "desc": "Windowed Fullscreen"
         },
         {
           "keys": "Super + Ctrl + Escape",
@@ -770,5 +798,6 @@
   "hyprlandConfigPath": "~/.config/hypr/conf.d/40-binds.conf",
   "modKeyVariable": "$mod",
   "windowHeight": 850,
-  "windowWidth": 1400
+  "windowWidth": 1440,
+  "columnCount": 3
 }
