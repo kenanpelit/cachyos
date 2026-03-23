@@ -52,7 +52,7 @@ layer-rule {
 // ------------------------------------------------------------------------
 input {
   workspace-auto-back-and-forth
-  focus-follows-mouse max-scroll-amount="5%"
+  focus-follows-mouse max-scroll-amount="90%"
   warp-mouse-to-focus mode="center-xy"
 
   keyboard {
