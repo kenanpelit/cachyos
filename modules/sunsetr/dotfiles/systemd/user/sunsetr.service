@@ -13,6 +13,8 @@ ConditionPathExists=%h/.local/bin/sunsetr-scheduler
 
 [Service]
 Type=simple
+Environment=PATH=/usr/bin:/usr/local/bin:%h/.local/bin
+Environment=HOME=%h
 NoNewPrivileges=yes
 RestrictRealtime=yes
 RestrictSUIDSGID=yes

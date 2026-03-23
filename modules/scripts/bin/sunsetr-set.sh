@@ -275,6 +275,9 @@ set_active_preset_state() {
   }
 
   is_preset "$preset" || die "preset not found: $preset"
+  local s_dir
+  s_dir="$(state_dir)"
+  mkdir -p "$s_dir"
   write_directory_identity
   printf '%s\n' "$preset" > "$(active_preset_path)"
 }

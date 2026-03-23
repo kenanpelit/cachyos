@@ -26,6 +26,9 @@ $SUNSETR_BIN &
 SUNSETR_PID=$!
 log "Started sunsetr daemon with PID $SUNSETR_PID"
 
+# Wait for daemon to initialize its socket/IPC
+sleep 2
+
 # 2. Initial sync
 $SETTER_BIN auto --apply --no-notify || true
 
