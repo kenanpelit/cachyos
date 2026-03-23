@@ -8,9 +8,5 @@ dotfiles:
   target: ~/.config/sunsetr
 - source: dotfiles/systemd/user/sunsetr.service
   target: ~/.config/systemd/user/sunsetr.service
-- source: dotfiles/systemd/user/sunsetr-auto-profile.service
-  target: ~/.config/systemd/user/sunsetr-auto-profile.service
-- source: dotfiles/systemd/user/sunsetr-auto-profile.timer
-  target: ~/.config/systemd/user/sunsetr-auto-profile.timer
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

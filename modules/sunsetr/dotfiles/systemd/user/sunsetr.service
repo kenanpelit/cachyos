@@ -1,5 +1,5 @@
 [Unit]
-Description=Sunsetr blue-light and gamma filter
+Description=Sunsetr blue-light and gamma filter with integrated scheduler
 Documentation=https://github.com/psi4j/sunsetr?tab=readme-ov-file#sunsetr
 BindsTo=graphical-session.target
 After=graphical-session.target dbus.service
@@ -15,11 +15,25 @@ Type=simple
 NoNewPrivileges=yes
 RestrictRealtime=yes
 RestrictSUIDSGID=yes
+
+# Start the daemon and a background loop for scheduling
 ExecStartPre=-/usr/bin/sunsetr stop
 ExecStartPre=%h/.local/bin/sunsetr-set auto --no-notify
-ExecStart=/usr/bin/sunsetr
+ExecStart=/usr/bin/bash -c '\
+  /usr/bin/sunsetr & \
+  SUNSETR_PID=$!; \
+  echo "Sunsetr daemon started with PID $SUNSETR_PID"; \
+  while true; do \
+    sleep 60; \
+    if ! kill -0 $SUNSETR_PID 2>/dev/null; then \
+      echo "Sunsetr daemon died, exiting scheduler loop"; \
+      exit 1; \
+    fi; \
+    %h/.local/bin/sunsetr-set auto --apply --no-notify; \
+  done'
+
 Restart=on-failure
-RestartSec=30
+RestartSec=10
 Slice=background.slice
 StandardOutput=journal
 StandardError=journal
