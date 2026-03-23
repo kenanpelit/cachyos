@@ -42,7 +42,7 @@ modules/noctalia/dotfiles/noctalia/plugins/*:*
 modules/dms/dotfiles/DankMaterialShell/plugins/dankBitwarden/
 modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections
 modules/dms/dotfiles/DankMaterialShell/plugins/sshConnections.meta
-modules/ytdlp/dotfiles/yt-dlp/cookies-youtube.txt
+modules/ytdlp/dotfiles/yt-dlp/cookies-youtube*
 mimeinfo.cache
 
 # Chromium/Chrome auto-generated PWA and profile shortcuts
