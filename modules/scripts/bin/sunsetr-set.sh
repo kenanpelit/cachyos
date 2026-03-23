@@ -7,8 +7,8 @@
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
-CONFIG_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/sunsetr"
-DEFAULT_CONFIG_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/sunsetr"
+CONFIG_ROOT="$HOME/.config/sunsetr"
+DEFAULT_CONFIG_ROOT="$HOME/.config/sunsetr"
 SCHEDULE_FILE="$CONFIG_ROOT/schedule.conf"
 NOTIFY_ENABLED=1
 APPLY_AFTER_SET=0
@@ -135,8 +135,8 @@ state_namespace() {
 }
 
 state_dir() {
-  local state_home="${XDG_STATE_HOME:-$HOME/.local/state}"
-  printf '%s/sunsetr/%s\n' "$state_home" "$(state_namespace)"
+  # Use a fixed path relative to HOME to ensure consistency
+  printf '%s/.local/state/sunsetr/default\n' "$HOME"
 }
 
 active_preset_path() {
