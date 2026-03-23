@@ -1155,19 +1155,6 @@ layer-rule {
 }
 
 // ========================================================================
-// Named Workspaces
-// ========================================================================
-workspace "Kenp"
-workspace "Tmux"
-workspace "Ai"
-workspace "CompecTA"
-workspace "Social"
-workspace "Media"
-workspace "Tools"
-workspace "Spotify"
-workspace "Ferdium"
-
-// ========================================================================
 // Animations
 // ========================================================================
 animations {
