@@ -13,12 +13,6 @@ depends_on:
 dotfiles:
 - source: dotfiles/niri/config.kdl
   target: ~/.config/niri/config.kdl
-- source: dotfiles/niri/shaders/open_custom_shader.frag
-  target: ~/.config/niri/shaders/open_custom_shader.frag
-- source: dotfiles/niri/shaders/close_custom_shader.frag
-  target: ~/.config/niri/shaders/close_custom_shader.frag
-- source: dotfiles/niri/shaders/resize_custom_shader.frag
-  target: ~/.config/niri/shaders/resize_custom_shader.frag
 - source: dotfiles/autostart/org.kde.kdeconnect.daemon.desktop
   target: ~/.config/autostart/org.kde.kdeconnect.daemon.desktop
 - source: dotfiles/autostart/snapper-tools-check.desktop
