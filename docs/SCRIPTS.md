@@ -836,6 +836,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `sunsetr-scheduler`
+**Description:** Background scheduler loop for sunsetr daemon and presets
+
+**Usage:** `sunsetr-scheduler`
+
+---
+
 ### 📂 `sunsetr-set`
 **Description:** Native preset scheduler/helper for the sunsetr Wayland service
 
