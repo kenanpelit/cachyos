@@ -127,7 +127,7 @@ layout {
   focus-ring {
     on
     width 3
-    active-gradient from="#cba6f7" to="#89b4fa" angle=45 relative-to="workspace-view" in="oklch shorter hue"
+    active-gradient from="#00ffff" to="#bd8ff5" angle=45 relative-to="workspace-view" in="oklch shorter hue"
     inactive-color "#1e1e2e"
     urgent-color "#f38ba8"
   }
