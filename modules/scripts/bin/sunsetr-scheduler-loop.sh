@@ -1,40 +1,55 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: sunsetr-scheduler-loop.sh
-# Description: Enhanced background loop for preset sync with logging
+# Description: Integrated background loop for sunsetr preset sync
 # ==============================================================================
 set -euo pipefail
 
-SETTER_BIN="$HOME/.local/bin/sunsetr-set"
+SCHEDULE_FILE="$HOME/.config/sunsetr/schedule.conf"
 CHECK_INTERVAL=60
 
 log() {
-    printf '[sunsetr-scheduler-loop] %s\n' "$*"
+    printf '[sunsetr-scheduler] %s\n' "$*"
+}
+
+select_auto_preset() {
+    [[ -f "$SCHEDULE_FILE" ]] || return 1
+    
+    local now_key=$(date +%H%M)
+    now_key=$((10#$now_key))
+    
+    local selected=""
+    local first_preset=""
+    local last_preset=""
+    
+    # schedule.conf format: HH:MM PRESET_NAME
+    while read -r start preset; do
+        [[ -z "$start" || -z "$preset" ]] && continue
+        local start_key=$(echo "$start" | tr -d ':')
+        start_key=$((10#$start_key))
+        
+        [[ -z "$first_preset" ]] && first_preset="$preset"
+        if (( now_key >= start_key )); then
+            selected="$preset"
+        fi
+        last_preset="$preset"
+    done < <(awk '/^[0-9]/ { print $1, $2 }' "$SCHEDULE_FILE")
+    
+    echo "${selected:-$last_preset}"
 }
 
 log "Starting scheduler loop..."
-
-# Wait for sunsetr to be ready
 sleep 5
 
 while true; do
-    # 1. Check if sunsetr daemon is alive
     if sunsetr status >/dev/null 2>&1; then
-        # 2. Get target preset based on time
-        TARGET_PRESET=$($SETTER_BIN auto | tr -d '[:space:]')
-        
-        # 3. Get current active preset (natively)
-        # We look for the line "Active preset: <name>"
-        # Using grep -o to extract exactly what follows the colon
+        TARGET_PRESET=$(select_auto_preset)
         CURRENT_ACTIVE=$(sunsetr status 2>/dev/null | grep "Active preset:" | sed 's/.*Active preset: //' | tr -d '[:space:]' || echo "default")
         
         if [[ -n "$TARGET_PRESET" && "$TARGET_PRESET" != "$CURRENT_ACTIVE" ]]; then
-            log "Time-based sync: $CURRENT_ACTIVE -> $TARGET_PRESET"
-            sunsetr preset "$TARGET_PRESET" >/dev/null 2>&1 || log "ERROR: Failed to set preset $TARGET_PRESET"
+            log "Syncing preset: $CURRENT_ACTIVE -> $TARGET_PRESET"
+            sunsetr preset "$TARGET_PRESET" >/dev/null 2>&1 || true
         fi
-    else
-        log "WARN: Sunsetr daemon not responding."
     fi
-    
     sleep $CHECK_INTERVAL
 done
