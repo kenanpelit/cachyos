@@ -37,7 +37,7 @@ NBox {
   Loader {
     id: weatherEffectLoader
     anchors.fill: parent
-    active: root.showEffects && root.weatherReady && (root.isRaining || root.isSnowing || root.isCloudy || root.isFoggy || root.isClearDay || root.isClearNight)
+    active: root.showEffects && (root.isRaining || root.isSnowing || root.isCloudy || root.isFoggy || root.isClearDay || root.isClearNight)
 
     sourceComponent: Item {
       anchors.fill: parent
