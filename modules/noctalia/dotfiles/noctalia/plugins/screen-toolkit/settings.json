@@ -1,7 +1,7 @@
 {
   "stateIsRunning": false,
   "stateActiveTool": "",
-  "transAvailable": false,
+  "transAvailable": true,
   "stateMirrorVisible": false,
   "resultHex": "#1B1D26",
   "resultRgb": "rgb(27, 29, 38)",
@@ -11,5 +11,11 @@
   "colorHistory": [
     "#1B1D26"
   ],
-  "paletteColors": []
+  "paletteColors": [],
+  "installedLangs": [
+    "eng"
+  ],
+  "ocrResult": "Welcome to the\nCachyOS Wiki\n\nEmpowering your Arch Linux experience.\n\ncetnesered 2\n\nGetting Started\n\nCachyOS FAQ & Troubleshooting Guide > How CachyOS Improves Performance >\n\nFind answers to common questions about CachyOS. Check out the changes we make in order to improve\nperformance.\n\nRequirements & Preinstall setup > Installation Guide >\n\nMaking sure your system is ready for CachyOS installation. Step-by-step instructions to install CachyOS on your system.\n\n¢ Edit page Last updated: Jan 22, 2026",
+  "ocrCapturePath": "/tmp/screen-toolkit-ocr.png",
+  "translateResult": "Hoş geldiniz\nCachyOS Wiki\n\nArch Linux deneyiminizi güçlendiriyoruz.\n\nÇetnered 2\n\nBaşlarken\n\nCachyOS SSS ve Sorun Giderme Kılavuzu > CachyOS Performansı Nasıl Artırır >\n\nCachyOS ile ilgili sık sorulan soruların yanıtlarını bulun. İyileştirmek için yaptığımız değişikliklere göz atın\nperformans.\n\nGereksinimler ve Ön Kurulum kurulumu > Kurulum Kılavuzu >\n\nSisteminizin CachyOS kurulumuna hazır olduğundan emin olun. CachyOS'u sisteminize kurmak için adım adım talimatlar.\n\n¢ Sayfayı düzenle Son güncelleme: 22 Ocak 2026"
 }
