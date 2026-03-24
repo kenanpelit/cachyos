@@ -81,3 +81,11 @@ packages:
   #- zapzap-git # Use git version to avoid provider prompt if possible
   - x2goclient
   - xdotool
+  - tesseract
+  - tesseract-data-eng
+  - imagemagick
+  - zbar
+  - translate-shell
+  - wf-recorder
+  - ffmpeg
+  - gifski

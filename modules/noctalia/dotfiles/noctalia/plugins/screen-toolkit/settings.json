@@ -1,0 +1,15 @@
+{
+  "stateIsRunning": false,
+  "stateActiveTool": "",
+  "transAvailable": false,
+  "stateMirrorVisible": false,
+  "resultHex": "#1B1D26",
+  "resultRgb": "rgb(27, 29, 38)",
+  "resultHsv": "hsv(229, 29%, 15%)",
+  "resultHsl": "hsl(229, 17%, 13%)",
+  "colorCapturePath": "/tmp/screen-toolkit-colorpicker.png",
+  "colorHistory": [
+    "#1B1D26"
+  ],
+  "paletteColors": []
+}

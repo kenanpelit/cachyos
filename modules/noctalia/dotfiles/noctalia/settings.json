@@ -295,6 +295,9 @@
                         "successIcon": "network"
                     },
                     "id": "plugin:6ee06e:nip"
+                },
+                {
+                    "id": "plugin:screen-toolkit"
                 }
             ]
         }
