@@ -49,7 +49,7 @@ enabled_modules:
 - hyprland
 - sessions
 - sway
-- stasis
+# - stasis
 - xdg-portal
 - rofi
 # - walker
