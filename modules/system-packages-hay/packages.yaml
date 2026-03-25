@@ -5,6 +5,7 @@ packages:
 - alacritty
 - alsa-firmware
 - alsa-plugins
+- antigravity
 - awesome-terminal-fonts
 - baobab
 - bemenu
@@ -33,6 +34,29 @@ packages:
 - cantarell-fonts
 - capitaine-cursors
 - chwd
+- cosmic-app-library
+- cosmic-applets
+- cosmic-bg
+- cosmic-comp
+- cosmic-files
+- cosmic-greeter
+- cosmic-idle
+- cosmic-initial-setup
+- cosmic-launcher
+- cosmic-notifications
+- cosmic-osd
+- cosmic-panel
+- cosmic-player
+- cosmic-randr
+- cosmic-screenshot
+- cosmic-session
+- cosmic-settings
+- cosmic-settings-daemon
+- cosmic-store
+- cosmic-terminal
+- cosmic-text-editor
+- cosmic-wallpapers
+- cosmic-workspaces
 - cryptsetup
 - dcli-arch-git
 - decibels
@@ -44,6 +68,7 @@ packages:
 - dmraid
 - dms-shell-git
 - dnsmasq
+- dolphin
 - dosfstools
 - e2fsprogs
 - efitools
@@ -71,6 +96,7 @@ packages:
 - gnome-contacts
 - gnome-control-center
 - gnome-disk-utility
+- gnome-extensions-cli
 - gnome-font-viewer
 - gnome-logs
 - gnome-maps
@@ -117,6 +143,7 @@ packages:
 - haveged
 - hdparm
 - hwdetect
+- hyprsunset
 - inetutils
 - intel-media-driver
 - name: io.ente.auth
@@ -134,7 +161,10 @@ packages:
 - libgsf
 - libnma
 - libopenraw
+- libsimple
 - libwnck3
+- lidm-git
+- lidm-systemd-git
 - linux-cachyos
 - linux-cachyos-bore
 - linux-cachyos-bore-headers
@@ -150,6 +180,7 @@ packages:
 - micro
 - modemmanager
 - mtools
+- mullvad-browser-bin
 - nano
 - nano-syntax-highlighting
 - nautilus
@@ -165,6 +196,8 @@ packages:
 - opencl-mesa
 - orca
 - name: org.ferdium.Ferdium
+  type: flatpak
+- name: org.freedesktop.Platform
   type: flatpak
 - name: org.freedesktop.Platform.GL.default
   type: flatpak
@@ -229,6 +262,7 @@ packages:
 - wireless-regdb
 - wofi
 - wpa_supplicant
+- xdg-desktop-portal-cosmic
 - xdg-user-dirs-gtk
 - xf86-input-libinput
 - xfsprogs
