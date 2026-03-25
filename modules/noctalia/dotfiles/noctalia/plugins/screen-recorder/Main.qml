@@ -107,6 +107,19 @@ Item {
     readonly property string customReplayDuration: pluginApi?.pluginSettings?.customReplayDuration || "30"
     readonly property string replayStorage: pluginApi?.pluginSettings?.replayStorage || "ram"
 
+    readonly property var codecResolutionLimits: ({
+            "h264": "4096x4096"
+        })
+
+    function buildResolutionFlag() {
+        if (resolution !== "original") {
+            return `-s ${resolution}`;
+        }
+
+        var maxResolution = codecResolutionLimits[videoCodec];
+        return maxResolution ? `-s ${maxResolution}` : "";
+    }
+
     function buildTooltip() {
         if (!isAvailable) {
             return pluginApi.tr("messages.not-installed");
@@ -279,7 +292,7 @@ Item {
             })();
 
         var actualFrameRate = (frameRate === "custom") ? customFrameRate : frameRate;
-        var resolutionFlag = (resolution !== "original") ? `-s ${resolution}` : "";
+        var resolutionFlag = buildResolutionFlag();
         var restoreFlag = restorePortalSession ? "-restore-portal-session yes" : "";
         var flags = `-w ${source} -f ${actualFrameRate} -k ${videoCodec} ${audioFlags} -q ${quality} -cursor ${showCursor ? "yes" : "no"} -cr ${colorRange} ${resolutionFlag} ${restoreFlag} -o "${outputPath}"`;
         var primePrefix = primeRun ? "prime-run " : "";
@@ -544,7 +557,7 @@ Item {
 
         var actualDuration = (replayDuration === "custom") ? customReplayDuration : replayDuration;
         var actualFrameRate = (frameRate === "custom") ? customFrameRate : frameRate;
-        var resolutionFlag = (resolution !== "original") ? `-s ${resolution}` : "";
+        var resolutionFlag = buildResolutionFlag();
 
         const audioFlags = (() => {
                 if (audioSource === "none") {
