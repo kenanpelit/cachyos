@@ -14,13 +14,92 @@ local http = want("socket.http")
 local https = want("ssl.https")
 
 local options = {
-    source_lang = "fr",
+    source_lang = "",
+    source_langs = "en,tr",
     load_autosub_binding = "alt+y",
     autoload_autosub_binding = "alt+Y",
     cache_dir = ".cache/ytsub/",
     filter_sub_single_line = false,
 }
 require("mp.options").read_options(options)
+
+local function trim(value)
+    return (value or ""):match("^%s*(.-)%s*$")
+end
+
+local function split_csv(value)
+    local items = {}
+
+    for item in string.gmatch(value or "", "([^,]+)") do
+        local normalized_item = trim(item):lower()
+
+        if normalized_item ~= "" then
+            table.insert(items, normalized_item)
+        end
+    end
+
+    return items
+end
+
+local function get_source_languages()
+    local langs = split_csv(options.source_langs)
+
+    if #langs == 0 then
+        local fallback = trim(options.source_lang):lower()
+
+        if fallback ~= "" then
+            table.insert(langs, fallback)
+        end
+    end
+
+    return langs
+end
+
+local function find_subtitle_key(subs, lang)
+    local wanted = trim(lang):lower()
+
+    if wanted == "" then
+        return nil
+    end
+
+    for _, matcher in ipairs({
+        function(key)
+            return key == wanted
+        end,
+        function(key)
+            return key:match("^" .. wanted .. "%-") ~= nil
+        end,
+        function(key)
+            return key:match("^" .. wanted .. "%(") ~= nil
+        end,
+    }) do
+        for key, _ in pairs(subs) do
+            local normalized = key:lower()
+
+            if matcher(normalized) then
+                return key
+            end
+        end
+    end
+
+    return nil
+end
+
+local function get_available_subtitles(info_json)
+    local auto_subs = info_json["automatic_captions"]
+
+    if auto_subs ~= nil and next(auto_subs) ~= nil then
+        return auto_subs, "automatic captions"
+    end
+
+    local subtitles = info_json["subtitles"]
+
+    if subtitles ~= nil and next(subtitles) ~= nil then
+        return subtitles, "subtitles"
+    end
+
+    return nil, nil
+end
 
 -- create cache directory for subtitles if it doesn't exist
 local res = utils.file_info(options.cache_dir)
@@ -61,16 +140,20 @@ local function filter_sub(path)
         table.insert(lines, line)
     end
     local out = io.open(path, "w")
-    for i,line in pairs(lines) do
+    for i, line in ipairs(lines) do
         if i < 5 or i % 8 == 5 or i % 8 == 7 or i % 8 == 0 then
             out:write(line)
             out:write("\n")
         end
-        i = i + 1
     end
 end
 
 local function load_autosub(lang, sub_info, ytid, is_primary)
+    if sub_info == nil then
+        info("subtitle language unavailable: " .. tostring(lang))
+        return false
+    end
+
     local lang_name
     local url
     for _,v in pairs(sub_info) do
@@ -141,8 +224,10 @@ local function load_autosub(lang, sub_info, ytid, is_primary)
             mp.set_property("secondary-sid", n_subs + 1)
         end
         info(lang_name .. ' loaded')
+        return true
     else
         info('failed to download ' .. lang_name)
+        return false
     end
 end
 
@@ -154,30 +239,40 @@ local function ytsub(is_auto)
     end
 
     local j = utils.parse_json(ytdl_output['stdout'])
-    local subs = j['automatic_captions']
-    if subs == nil or next(subs) == nil then
-        info('no auto-subs found')
+    local subs, source_type = get_available_subtitles(j)
+
+    if subs == nil then
+        info('no subtitles found')
         return
     end
 
     if is_auto then
-        -- load the original language as primary subtitle and
-        -- the source language as secondary subtitle
-        local source_lang = options.source_lang
+        local preferred_langs = get_source_languages()
+        local selected = {}
+        local seen = {}
 
-        local orig_lang
-        for k,_ in pairs(subs) do
-            if string.find(k, "(orig)") ~= nil then
-                orig_lang = k
+        for _, lang in ipairs(preferred_langs) do
+            local key = find_subtitle_key(subs, lang)
+
+            if key ~= nil and not seen[key] then
+                table.insert(selected, key)
+                seen[key] = true
+            end
+
+            if #selected == 2 then
                 break
             end
         end
 
-        load_autosub(orig_lang, subs[orig_lang], j["id"], true)
-        if orig_lang == source_lang.."-orig" then
-            info("source language and original language are the same ("..source_lang..")")
-        else
-            load_autosub(source_lang, subs[source_lang], j["id"], false)
+        if #selected == 0 then
+            info("preferred subtitles not found in " .. source_type .. ": " .. table.concat(preferred_langs, ", "))
+            return
+        end
+
+        load_autosub(selected[1], subs[selected[1]], j["id"], true)
+
+        if selected[2] ~= nil then
+            load_autosub(selected[2], subs[selected[2]], j["id"], false)
         end
 
     else
