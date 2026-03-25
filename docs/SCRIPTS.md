@@ -493,6 +493,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-mullvad-split`
+**Description:** Elegant list of processes excluded from Mullvad VPN.
+
+**Usage:** `osc-mullvad-split`
+
+---
+
 ### 📂 `osc-mullvad-toggle`
 **Description:** Toggles Mullvad VPN connection, optionally with Blocky DNS coupling.
 
