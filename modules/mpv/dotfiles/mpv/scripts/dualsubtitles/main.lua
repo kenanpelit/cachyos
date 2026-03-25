@@ -38,6 +38,17 @@ config = {
     secondary_on_hover     = false,
     hover_height_percent   = 50,
 
+    --key bindings
+    secondary_forward_key       = "Alt+k",
+    secondary_backward_key      = "Alt+K",
+    secondary_position_down_key = "Ctrl+Alt+DOWN",
+    secondary_position_up_key   = "Ctrl+Alt+UP",
+    visibility_key              = "v",
+    swap_key                    = "u",
+    merge_key                   = "Alt+m",
+    delete_merged_key           = "Alt+M",
+    copy_key                    = "Alt+c",
+
     --merged subtitle
     top_style              = "fn:Noto Sans,fs:65,1c:&H0000DEFF,2c:&H000000FF,3c:&H00000000,4c:&H00000000,b:1,i:0,u:0,s:0,sx:100,sy:100,fsp:0,frz:0,bs:1,bord:4,shad:0,an:8,ml:0,mr:0,mv:40,enc:1",
     bottom_style           = "fn:Noto Sans,fs:65,1c:&H00FFFFFF,2c:&H000000FF,3c:&H00000000,4c:&H00000000,b:0,i:0,u:0,s:0,sx:100,sy:100,fsp:0,frz:0,bs:1,bord:1.5,shad:0,an:2,ml:0,mr:0,mv:40,enc:1",
@@ -320,18 +331,25 @@ local function cycleSecondaryPosition(mode)
     end
 end
 
+local function bindConfiguredKey(key, name, handler, flags)
+
+    if not key or h.isEmpty(key) then return end
+
+    mp.add_key_binding(key, name, handler, flags)
+end
+
 mp.register_event("file-loaded", setSubtitles)
 
-mp.add_key_binding("k",      "dualsubtitles_secondaryforward",     function() cycleSecondary(1) end)
-mp.add_key_binding("K",      "dualsubtitles_secondarybackward",    function() cycleSecondary(2) end)
-mp.add_key_binding("Ctrl+r", "dualsubtitles_increasesecondarypos", function() cycleSecondaryPosition(1) end, {repeatable = true})
-mp.add_key_binding("Ctrl+R", "dualsubtitles_decreasesecondarypos", function() cycleSecondaryPosition(2) end, {repeatable = true})
+bindConfiguredKey(config.secondary_forward_key,       "dualsubtitles_secondaryforward",     function() cycleSecondary(1) end)
+bindConfiguredKey(config.secondary_backward_key,      "dualsubtitles_secondarybackward",    function() cycleSecondary(2) end)
+bindConfiguredKey(config.secondary_position_down_key, "dualsubtitles_increasesecondarypos", function() cycleSecondaryPosition(1) end, {repeatable = true})
+bindConfiguredKey(config.secondary_position_up_key,   "dualsubtitles_decreasesecondarypos", function() cycleSecondaryPosition(2) end, {repeatable = true})
 
-mp.add_key_binding("v",      "dualsubtitles_hide",         hideSubtitles)
-mp.add_key_binding("u",      "dualsubtitles_swap",         swapSubtitles)
-mp.add_key_binding("Ctrl+b", "dualsubtitles_merge",        mergeSubtitles)
-mp.add_key_binding("Ctrl+B", "dualsubtitles_deletemerged", deleteMergedFile)
-mp.add_key_binding("Ctrl+C", "dualsubtitles_copy", function(state)
+bindConfiguredKey(config.visibility_key,    "dualsubtitles_hide",         hideSubtitles)
+bindConfiguredKey(config.swap_key,          "dualsubtitles_swap",         swapSubtitles)
+bindConfiguredKey(config.merge_key,         "dualsubtitles_merge",        mergeSubtitles)
+bindConfiguredKey(config.delete_merged_key, "dualsubtitles_deletemerged", deleteMergedFile)
+bindConfiguredKey(config.copy_key,          "dualsubtitles_copy", function(state)
 
     if state.event == "down" then
 
@@ -340,7 +358,7 @@ mp.add_key_binding("Ctrl+C", "dualsubtitles_copy", function(state)
 
         copySubtitlesOnUp()
     end
-end, {complex=true})
+end, {complex = true})
 
 mp.observe_property("track-list", "native", updateSubtitleList)
 
