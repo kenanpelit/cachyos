@@ -1,24 +1,39 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-mullvad-split
-# Description: Lists processes excluded from Mullvad VPN with their names and args.
+# Description: Elegant list of processes excluded from Mullvad VPN.
 # ==============================================================================
 set -euo pipefail
 
-# Get PIDs from mullvad command, filtering only numeric output
+# Check if mullvad is installed
+if ! command -v mullvad >/dev/null 2>&1; then
+    echo -e "\e[31mError: mullvad-cli is not installed.\e[0m"
+    exit 1
+fi
+
+# Get PIDs from mullvad
 pids=$(mullvad split-tunnel list | grep -E '^[0-9]+$' | xargs || true)
 
 if [[ -z "$pids" ]]; then
-    echo "No processes are currently excluded from the Mullvad tunnel."
+    echo -e "\e[1;33mNo processes are currently excluded from the Mullvad tunnel.\e[0m"
     exit 0
 fi
 
-echo -e "\e[1;36mExcluded Processes Details:\e[0m"
-printf "%-8s %-20s %s\n" "PID" "COMMAND" "FULL ARGS"
-printf "%-8s %-20s %s\n" "---" "-------" "---------"
+echo -e "\e[1;36m┏━ Mullvad Split-Tunnel Status ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\e[0m"
+printf "\e[1;36m┃\e[0m \e[1m%-8s\e[0m │ \e[1m%-15s\e[0m │ \e[1m%s\e[0m\n" "PID" "COMMAND" "ARGUMENTS"
+echo -e "\e[1;36m┣━━━━━━━━━━╋━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
 
-# Use ps to get info. Replace spaces with commas for ps -p compatibility.
-# We use -o pid=,comm=,args= to remove headers and get clean output.
-ps -p "${pids// /,}" -o pid=,comm=,args= | while read -r pid comm args; do
-    printf "\e[32m%-8s\e[0m \e[1m%-20.20s\e[0m %s\n" "$pid" "$comm" "$args"
+# Fetch process info and format output
+# Using a tab-separated format for 'column' tool to handle alignment perfectly
+ps -p "${pids// /,}" -o pid=,comm=,args= --sort=comm | while read -r pid comm args; do
+    # Remove the command name from the start of args if it's there to keep it clean
+    clean_args=$(echo "$args" | sed "s|^$comm ||" | sed "s|^[^ ]*/$comm ||")
+    
+    # If args is empty or same as comm, show a dash
+    [[ -z "$clean_args" || "$clean_args" == "$comm" ]] && clean_args="-"
+
+    # Print formatted row
+    printf "\e[1;36m┃\e[0m \e[32m%-8s\e[0m │ \e[1m%-15.15s\e[0m │ %-50.150s\n" "$pid" "$comm" "$clean_args"
 done
+
+echo -e "\e[1;36m┗━━━━━━━━━━┻━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
