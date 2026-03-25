@@ -1,18 +1,4 @@
 // ========================================================================
-// Niri Configuration - CachyOS
-// ========================================================================
-// Notes:
-// - This config is designed for CachyOS where some tools may live in /usr/bin
-//   while personal helpers live in ~/.local/bin.
-// - KDL does not support variables. To keep things robust, external commands
-//   are launched via `sh -lc` and guarded with `command -v` where appropriate.
-// - Alt+Number binds are set with allow-inhibiting=false to survive shortcut
-//   inhibition (games, remote-viewer, some Electron apps, etc.).
-// - KDL parsing is strict: avoid packing multiple child nodes into one-line
-//   blocks; keep blocks multi-line for reliability.
-// ========================================================================
-
-// ========================================================================
 // NIRI COMPOSITOR CONFIGURATION
 // ========================================================================
 // Optimized for CachyOS / DMS (Dank Material Shell) / Noctalia.
@@ -26,6 +12,7 @@ cursor {
   hide-after-inactive-ms 1000
 }
 
+// Request applications to skip Client Side Decorations (CSD) where possible.
 prefer-no-csd
 
 hotkey-overlay {
@@ -114,7 +101,7 @@ debug {
 // SWITCH EVENTS
 // ------------------------------------------------------------------------
 switch-events {
-  // Integration with logind for laptop lid actions.
+  // Integration with logind for laptop lid actions (locking, etc).
   lid-close {
     spawn "niri-osc" "set" "lock" "--logind"
   }
@@ -123,13 +110,13 @@ switch-events {
 // ------------------------------------------------------------------------
 // HARDWARE & MONITOR LAYOUT
 // ------------------------------------------------------------------------
-
+// Note: These files are managed externally by DMS/Config scripts.
 include "dms/outputs.kdl"
 include "dms/monitor-auto.kdl"
 include "dms/workspaces-auto.kdl"
 
 layout {
-  // Inner and outer gaps between windows.
+  // Inner and outer gaps between windows for a consistent look.
   gaps 6
   // Strategy for centering columns when they overflow the monitor width.
   center-focused-column "on-overflow"
@@ -150,10 +137,12 @@ layout {
   }
 
   shadow {
+    // Subtle shadow for all tiled windows.
     color "#11111b70"
   }
 
   tab-indicator {
+    // Configuration for tabbed columns (grouping windows).
     hide-when-single-tab
     place-within-column
     width 4
@@ -168,10 +157,11 @@ layout {
   }
 
   insert-hint {
+    // Visual hint when moving or inserting windows.
     color "#cba6f780"
   }
 
-  // Sizing presets for column widths.
+  // Sizing presets for column widths toggled via Mod+R.
   preset-column-widths {
     proportion 0.30
     proportion 0.50
@@ -180,7 +170,7 @@ layout {
     proportion 1.0
   }
 
-  // Sizing presets for window heights.
+  // Sizing presets for window heights toggled via Mod+Ctrl+R.
   preset-window-heights {
     proportion 0.30
     proportion 0.50
@@ -189,13 +179,14 @@ layout {
     proportion 1.0
   }
 
-  // Windows open at 90% width by default.
+  // Windows open at 90% width by default to maintain visibility of adjacent columns.
   default-column-width {
     proportion 0.90
   }
 }
 
 recent-windows {
+  // Highlights used in the recent windows list (Alt+Tab).
   highlight {
     active-color "#cba6f7"
     urgent-color "#f38ba8"
@@ -206,7 +197,7 @@ include "dms/zen.kdl"
 include "dms/cursor.kdl"
 
 // ========================================================================
-// Keybinds
+// KEYBINDINGS
 // ========================================================================
 binds {
   // ----------------------------------------------------------------------
@@ -222,7 +213,7 @@ binds {
   Mod+K hotkey-overlay-title="Focus Up"    { focus-workspace-up; }
   Mod+J hotkey-overlay-title="Focus Down"  { focus-workspace-down; }
 
-  // Window Focus (Within Column)
+  // Navigation within tabbed columns.
   Mod+Ctrl+K hotkey-overlay-title="Focus Window Up"   { focus-window-up; }
   Mod+Ctrl+J hotkey-overlay-title="Focus Window Down" { focus-window-down; }
 
@@ -240,14 +231,14 @@ binds {
   Mod+Shift+J hotkey-overlay-title="Move Down"  { move-window-down; }
 
   // ----------------------------------------------------------------------
-  // Core Actions
+  // Core Window Actions
   // ----------------------------------------------------------------------
   Mod+Q hotkey-overlay-title="Close Window" { close-window; }
   Mod+F hotkey-overlay-title="Fullscreen"   { fullscreen-window; }
   Mod+M hotkey-overlay-title="Maximize Column" { maximize-column; }
   Mod+C hotkey-overlay-title="Center Column"   { center-column; }
 
-  // Mouse Interaction
+  // Alternative close bind using mouse middle click.
   Mod+MouseMiddle { close-window; }
 
   // ----------------------------------------------------------------------
@@ -258,46 +249,49 @@ binds {
   Mod+Shift+R hotkey-overlay-title="Width 50%"          { set-column-width "50%"; }
   Mod+Alt+R   hotkey-overlay-title="Reset Window Height" { reset-window-height; }
 
-  // Fixed geometry helpers without spawning an intermediate shell.
+  // Fixed geometry helpers via niri-osc (Half, HD, FHD).
   Mod+0 hotkey-overlay-title="Size: 960x540 (Half)" { spawn "niri-osc" "set" "size" "960" "540"; }
   Mod+Shift+0 hotkey-overlay-title="Size: 1280x720 (HD)" { spawn "niri-osc" "set" "size" "1280" "720"; }
   Mod+Ctrl+0 hotkey-overlay-title="Size: 1920x1080 (FHD)" { spawn "niri-osc" "set" "size" "1920" "1080"; }
 
-  // Fine-grained sizing
+  // Fine-grained incremental sizing.
   Mod+Minus       hotkey-overlay-title="Width -5%"  { set-column-width "-5%"; }
   Mod+Equal       hotkey-overlay-title="Width +5%"  { set-column-width "+5%"; }
   Mod+Shift+Minus hotkey-overlay-title="Height -5%" { set-window-height "-5%"; }
   Mod+Shift+Equal hotkey-overlay-title="Height +5%" { set-window-height "+5%"; }
 
   // ----------------------------------------------------------------------
-  // Advanced Modes
+  // Advanced Layout Modes
   // ----------------------------------------------------------------------
   Alt+G      repeat=false hotkey-overlay-title="Max to Edges" { maximize-window-to-edges; }
   Mod+Alt+O  repeat=false hotkey-overlay-title="Overview (Niri)" { toggle-overview; }
   Mod+Ctrl+W hotkey-overlay-title="Toggle Tabbed Mode" { toggle-column-tabbed-display; }
 
+  // Floating window management.
   Mod+G hotkey-overlay-title="Toggle Float/Tile" { spawn "niri-osc" "set" "float"; }
   Mod+Ctrl+BackSpace hotkey-overlay-title="Focus Float/Tile" { switch-focus-between-floating-and-tiling; }
 
+  // Layout expansion and alignment helpers.
   Mod+Ctrl+Shift+F hotkey-overlay-title="Expand Column (Fill)" { expand-column-to-available-width;}
   Mod+Ctrl+Shift+C hotkey-overlay-title="Center Visible Columns" { center-visible-columns;}
 
+  // Focus modes (Zen: hide UI, Pin: Always on Top/PiP).
   Mod+Z repeat=false hotkey-overlay-title="Zen Mode" { spawn "niri-osc" "set" "zen"; }
   Mod+P repeat=false hotkey-overlay-title="Pin Window (PiP)" { spawn "niri-osc" "set" "pin"; }
 
-  // Consume / Expel (Window Grouping)
+  // Consume / Expel (Window Grouping into tabbed columns).
   Mod+Ctrl+Left  hotkey-overlay-title="Consume/Expel Left"  { consume-or-expel-window-left; }
   Mod+Ctrl+Right hotkey-overlay-title="Consume/Expel Right" { consume-or-expel-window-right; }
   Mod+Ctrl+H     hotkey-overlay-title="Consume/Expel Left"  { consume-or-expel-window-left; }
   Mod+Ctrl+L     hotkey-overlay-title="Consume/Expel Right" { consume-or-expel-window-right; }
 
-  // Opacity control
+  // Dynamic Opacity control.
   Mod+O hotkey-overlay-title="Toggle Opacity Rule" { toggle-window-rule-opacity; }
   Mod+Shift+WheelScrollDown hotkey-overlay-title="Opacity -10%" { spawn "niri" "msg" "action" "set-window-opacity" "-0.1"; }
   Mod+Shift+WheelScrollUp hotkey-overlay-title="Opacity +10%" { spawn "niri" "msg" "action" "set-window-opacity" "+0.1";}
 
   // ----------------------------------------------------------------------
-  // Scratchpad (niri-osc flow)
+  // Scratchpad Management (handled via niri-osc flow)
   // ----------------------------------------------------------------------
   Mod+BackSpace repeat=false hotkey-overlay-title="Scratch: Toggle" {
     spawn "niri-osc" "flow" "scratchpad-toggle"
@@ -309,7 +303,7 @@ binds {
     spawn "niri-osc" "flow" "scratchpad-show-all"
   }
 
-  // Marks (niri-osc flow)
+  // Window Marking (tagging windows for quick focus).
   Mod+Alt+G repeat=false hotkey-overlay-title="Mark: Toggle Default" {
     spawn "niri-osc" "flow" "toggle-mark"
   }
@@ -321,7 +315,7 @@ binds {
   }
 
   // ----------------------------------------------------------------------
-  // Launchers (Shell Router: DMS/Noctalia)
+  // DMS / Noctalia Shell Integrations (Launcher & Centers)
   // ----------------------------------------------------------------------
   Mod+Space repeat=false hotkey-overlay-title="Launcher" {
     spawn "osc-shell" "ipc" "call" "launcher" "toggle"
@@ -339,7 +333,7 @@ binds {
     spawn "osc-shell" "ipc" "call" "notifications" "toggleHistory"
   }
 
-  // Clipboard tools
+  // Personal workflow tools and widgets.
   Mod+V repeat=false hotkey-overlay-title="CopyQ Toggle" {
     spawn "copyq" "toggle"
   }
@@ -359,12 +353,12 @@ binds {
     spawn "osc-shell" "ipc" "call" "plugin:assistant-panel" "toggle"
   }
 
-  // Window switching
+  // Navigation via Alt+Tab integrated with the DMS launcher.
   Alt+Tab hotkey-overlay-title="Switch Windows" {
     spawn "osc-shell" "ipc" "call" "launcher" "windows"
   }
 
-  // UI toggles
+  // UI Component Visibility toggles.
   Mod+B repeat=false hotkey-overlay-title="Toggle Bar" {
     spawn "osc-shell" "ipc" "call" "bar" "toggle"
   }
@@ -375,7 +369,7 @@ binds {
     spawn "osc-shell" "ipc" "call" "bar" "toggleAutoHide"
   }
 
-  // Power & session
+  // Session & Power management.
   Mod+Delete repeat=false hotkey-overlay-title="Power Menu" {
     spawn "osc-shell" "ipc" "call" "sessionMenu" "toggle"
   }
@@ -389,7 +383,7 @@ binds {
     spawn "osc-shell" "ipc" "call" "idleInhibitor" "toggle"
   }
 
-  // Appearance
+  // Aesthetic & Wallpaper management.
   Mod+Y repeat=false hotkey-overlay-title="Wallpaper Menu" {
     spawn "osc-shell" "ipc" "call" "wallpaper" "toggle"
   }
@@ -406,7 +400,7 @@ binds {
     spawn "osc-shell" "ipc" "call" "nightLight" "toggle"
   }
 
-  // Help
+  // Help & Documentation triggers.
   Mod+Alt+Slash repeat=false hotkey-overlay-title="Keybind Settings" {
     spawn "osc-shell" "ipc" "call" "plugin:keybind-cheatsheet" "toggle"
   }
@@ -416,7 +410,7 @@ binds {
   Alt+F1 repeat=false hotkey-overlay-title="Keybinds (Niri)" { show-hotkey-overlay; }
 
   // ----------------------------------------------------------------------
-  // System hardware (Audio/Brightness)
+  // Hardware Media Control (Volume / Brightness)
   // ----------------------------------------------------------------------
   XF86AudioRaiseVolume allow-when-locked=true hotkey-overlay-title="Vol +" {
     spawn "osc-shell" "ipc" "call" "volume" "increase"
@@ -438,22 +432,8 @@ binds {
     spawn "osc-shell" "ipc" "call" "brightness" "decrease"
   }
 
-  // Media control (MPRIS)
-  // XF86AudioPlay allow-when-locked=true hotkey-overlay-title="Play/Pause" {
-  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "playPause"
-  // }
-  // XF86AudioNext allow-when-locked=true hotkey-overlay-title="Next" {
-  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "next"
-  // }
-  // XF86AudioPrev allow-when-locked=true hotkey-overlay-title="Prev" {
-  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "previous"
-  // }
-  // XF86AudioStop allow-when-locked=true hotkey-overlay-title="Stop" {
-  //   spawn "/usr/bin/dms" "ipc" "call" "mpris" "stop"
-  // }
-
   // ----------------------------------------------------------------------
-  // Custom scripts (Audio/Media)
+  // Custom Media & Sound Routing
   // ----------------------------------------------------------------------
   Alt+A repeat=false hotkey-overlay-title="Switch Audio Output" {
     spawn "osc-soundctl" "switch"
@@ -462,6 +442,7 @@ binds {
     spawn "osc-soundctl" "switch-mic"
   }
 
+  // Spotify integration.
   Alt+E repeat=false hotkey-overlay-title="Spotify Toggle" {
     spawn "osc-media" "spotify" "toggle"
   }
@@ -472,6 +453,7 @@ binds {
     spawn "osc-media" "spotify" "prev"
   }
 
+  // Local media (MPC) and Browser media.
   Alt+Ctrl+E repeat=false hotkey-overlay-title="MPC Toggle" {
     spawn "osc-media" "mpc" "toggle"
   }
@@ -480,7 +462,7 @@ binds {
   }
 
   // ----------------------------------------------------------------------
-  // System tools
+  // System Utility Tools
   // ----------------------------------------------------------------------
   Mod+Shift+C repeat=false hotkey-overlay-title="Color Picker" {
     spawn "/usr/bin/hyprpicker" "-a"
@@ -490,11 +472,12 @@ binds {
     spawn "osc-shell" "ipc" "call" "plugin:clipper" "toggle"
   }
 
-  // Clipse in a floating kitty window
+  // Clipse history manager running in a floating terminal.
   Mod+Alt+V repeat=false hotkey-overlay-title="Clipse (Floating)" {
     spawn "uwsm" "app" "-a" "clipse" "--" "/usr/bin/kitty" "--class" "clipse" "-e" "clipse"
   }
 
+  // Connectivity toggles.
   F10 repeat=false hotkey-overlay-title="Bluetooth Toggle" {
     spawn "bluetooth_toggle"
   }
@@ -505,7 +488,7 @@ binds {
     spawn "osc-mullvad-slot"
   }
 
-  // Screenshots
+  // Screenshots: Rec (Area), Region, Output (Screen), Window.
   Print repeat=false hotkey-overlay-title="Screenshot Rec" {
     spawn "screenshot" "rec"
   }
@@ -519,9 +502,7 @@ binds {
     spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "window"
   }
 
-  // Screencast helpers
-  // Pick "niri Dynamic Cast Target" in browser/app share dialogs, then use
-  // these binds to switch what that stream shows.
+  // Dynamic Screencasting helpers.
   Mod+Ctrl+Shift+W repeat=false hotkey-overlay-title="Cast Focused Window" {
     set-dynamic-cast-window
   }
@@ -538,27 +519,24 @@ binds {
     toggle-windowed-fullscreen
   }
 
-  // ----------------------------------------------------------------------
-  // System config / diagnostics
-  // ----------------------------------------------------------------------
+  // Config Reload & System Doctor.
   Mod+Ctrl+Alt+R repeat=false hotkey-overlay-title="Reload Config" {
     spawn "niri" "msg" "action" "load-config-file"
   }
   Mod+Ctrl+Alt+S repeat=false hotkey-overlay-title="Session Refresh" {
     spawn "niri-osc" "set" "env"
   }
-
   Mod+Ctrl+Alt+D repeat=false hotkey-overlay-title="Session Doctor" {
     spawn "uwsm" "app" "-a" "niri-doctor" "--" "/usr/bin/kitty" "--class" "niri-doctor" "-e" "bash" "-lc" "$HOME/.local/bin/niri-osc set doctor; echo; read -n 1 -s -r -p 'Press any key to close'"
   }
 
-  // Toggle Wayland shortcut inhibition. Use with care.
+  // Toggle Wayland shortcut inhibition for games/remote-viewer.
   Mod+Ctrl+Escape allow-inhibiting=false repeat=false hotkey-overlay-title="Toggle Shortcut Inhibit" {
     toggle-keyboard-shortcuts-inhibit
   }
 
   // ----------------------------------------------------------------------
-  // Custom apps
+  // Specific Application Launchers
   // ----------------------------------------------------------------------
   Alt+T allow-inhibiting=false repeat=false hotkey-overlay-title="KKENP Start" {
     spawn "uwsm" "app" "-a" "start-kkenp" "--" "start-kkenp"
@@ -566,23 +544,20 @@ binds {
   Alt+N allow-inhibiting=false repeat=false hotkey-overlay-title="Notes (Anotes)" {
     spawn "uwsm" "app" "-a" "anotes" "--" "anotes"
   }
-
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" {
     spawn "semsumo-daily"
   }
-
   Mod+Return repeat=false hotkey-overlay-title="Dropdown Terminal" {
     spawn "niri-osc" "drop" "kitty" "--class" "dropdown-terminal"
   }
-
   Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" {
     spawn "uwsm" "app" "-a" "rofi-launcher" "--" "rofi-launcher"
   }
-
   Mod+Shift+S repeat=false hotkey-overlay-title="Sticky Toggle" {
     spawn "niri-float-sticky" "toggle-active"
   }
 
+  // File Managers: Nemo (GUI), Yazi (Terminal).
   Mod+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Nemo)" {
     spawn "uwsm" "app" "-a" "nemo" "--" "nemo"
   }
@@ -594,7 +569,7 @@ binds {
     spawn "uwsm" "app" "-a" "kitty" "--" "kitty"
   }
 
-  // MPV manager helpers (your scripts live in ~/.local/bin)
+  // MPV Playback & Management helpers.
   Alt+U repeat=false hotkey-overlay-title="MPV Playback" {
     spawn "osc-media" "mpv" "toggle"
   }
@@ -621,7 +596,7 @@ binds {
   }
 
   // ----------------------------------------------------------------------
-  // Workspace focus (1..9)
+  // Workspace Navigation (1..9)
   // ----------------------------------------------------------------------
   Mod+1 hotkey-overlay-title="Workspace 1" { focus-workspace "1"; }
   Mod+2 hotkey-overlay-title="Workspace 2" { focus-workspace "2"; }
@@ -633,7 +608,7 @@ binds {
   Mod+8 hotkey-overlay-title="Workspace 8" { focus-workspace "8"; }
   Mod+9 hotkey-overlay-title="Workspace 9" { focus-workspace "9"; }
 
-  // Move column to workspace (1..9)
+  // Move current column to workspace (1..9).
   Mod+Shift+1 hotkey-overlay-title="Move To WS 1" { move-column-to-workspace "1"; }
   Mod+Shift+2 hotkey-overlay-title="Move To WS 2" { move-column-to-workspace "2"; }
   Mod+Shift+3 hotkey-overlay-title="Move To WS 3" { move-column-to-workspace "3"; }
@@ -645,11 +620,8 @@ binds {
   Mod+Shift+9 hotkey-overlay-title="Move To WS 9" { move-column-to-workspace "9"; }
 
   // ----------------------------------------------------------------------
-  // "Here" actions (Alt+1..0) - protected against inhibit
+  // "Here" Actions (Workspace shortcuts for specific apps)
   // ----------------------------------------------------------------------
-  // If Alt+Number doesn't work, you are likely pressing Right Alt (AltGr) on TR-F.
-  // Test with `wev`: Right Alt often shows as ISO_Level3_Shift (Mod5), not Alt.
-
   Alt+1 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Kenp" { spawn "niri-osc" "set" "here" "Kenp"; }
   Alt+2 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: TmuxKenp" { spawn "niri-osc" "set" "here" "TmuxKenp"; }
   Alt+3 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ai" { spawn "niri-osc" "set" "here" "Ai"; }
@@ -661,33 +633,31 @@ binds {
   Alt+9 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ferdium" { spawn "niri-osc" "set" "here" "ferdium"; }
   Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-osc" "set" "here" "all"; }
 
+  // Global window rearrangement.
   Mod+Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "niri-osc" "set" "go"; }
 
   // ----------------------------------------------------------------------
-  // Workspace navigation / wheel / monitors
+  // Advanced Navigation & Monitor Focus
   // ----------------------------------------------------------------------
   Mod+Ctrl+C repeat=false hotkey-overlay-title="Move to Empty WS" { move-window-to-workspace 255; }
   Mod+Page_Up hotkey-overlay-title="Move Win WS Up" { move-window-to-workspace-up; }
   Mod+Page_Down hotkey-overlay-title="Move Win WS Down" { move-window-to-workspace-down; }
 
+  // Wheel scroll for workspace and monitor navigation.
   Mod+WheelScrollDown cooldown-ms=150 hotkey-overlay-title="WS Down" { focus-workspace-down; }
   Mod+WheelScrollUp cooldown-ms=150 hotkey-overlay-title="WS Up" { focus-workspace-up; }
   Mod+WheelScrollRight hotkey-overlay-title="Focus Right" { focus-column-right; }
   Mod+WheelScrollLeft hotkey-overlay-title="Focus Left" { focus-column-left; }
 
+  // Monitor-specific navigation.
   Mod+A repeat=false hotkey-overlay-title="Focus Next Monitor" {
     spawn "niri" "msg" "action" "focus-monitor-next"
   }
-
   Mod+Alt+H hotkey-overlay-title="Monitor Left" { focus-monitor-left; }
   Mod+Alt+L hotkey-overlay-title="Monitor Right" { focus-column-right; }
   Mod+Alt+K hotkey-overlay-title="Monitor Up" { focus-monitor-up; }
   Mod+Alt+J hotkey-overlay-title="Monitor Down" { focus-monitor-down; }
-  Mod+Alt+Left hotkey-overlay-title="Monitor Left" { focus-monitor-left; }
-  Mod+Alt+Right hotkey-overlay-title="Monitor Right" { focus-column-right; }
-  Mod+Alt+Up hotkey-overlay-title="Monitor Up" { focus-monitor-up; }
-  Mod+Alt+Down hotkey-overlay-title="Monitor Down" { focus-monitor-down; }
-
+  
   Mod+E repeat=false hotkey-overlay-title="Move WS Next Monitor" {
     spawn "niri" "msg" "action" "move-workspace-to-monitor-next"
   }
@@ -695,6 +665,7 @@ binds {
     spawn "niri-osc" "set" "monitor-smart-next"
   }
 
+  // Cross-monitor window movement.
   Mod+Alt+Shift+Left hotkey-overlay-title="Move to Monitor Left" { move-column-to-monitor-left; }
   Mod+Alt+Shift+Right hotkey-overlay-title="Move to Monitor Right" { move-column-to-monitor-right; }
   Mod+Ctrl+Up hotkey-overlay-title="Move to Monitor Up" { move-column-to-monitor-up; }
@@ -702,21 +673,19 @@ binds {
 }
 
 // ========================================================================
-// Window Rules
+// WINDOW RULES
 // ========================================================================
-
+// General rules for corner radius and geometry.
 window-rule {
   geometry-corner-radius 12
   clip-to-geometry true
 }
 
+// Visual feedback for floating vs tiled windows.
 window-rule {
   match is-floating=true
-  shadow {
-    on
-  }
+  shadow { on }
 }
-
 window-rule {
   match is-floating=false
   shadow {
@@ -728,6 +697,7 @@ window-rule {
   }
 }
 
+// Specific Application Rules (Floating, Sizing, Placement).
 window-rule {
   match app-id=r#"^org\.quickshell$"#
   open-floating true
@@ -738,6 +708,7 @@ window-rule {
   variable-refresh-rate true
 }
 
+// Hide XWayland video bridge from view.
 window-rule {
   match app-id="xwaylandvideobridge"
   open-floating true
@@ -747,27 +718,17 @@ window-rule {
   default-window-height { fixed 1; }
 }
 
-window-rule {
-  match app-id=r#"^$"# title=r#"^$"#
-  open-floating true
-  open-focused false
-}
-
+// PiP (Picture-in-Picture) configurations for browsers and MPV.
 window-rule {
   match title=r#"(?i)^picture[- ]in[- ]picture( - mpv)?$"#
   open-floating true
   default-column-width { fixed 640; }
   default-window-height { fixed 360; }
   default-floating-position x=32 y=96 relative-to="top-right"
-  min-width 640
-  max-width 640
-  min-height 360
-  max-height 360
   opacity 1.0
   open-focused true
 }
 
-// Keep this in sync with MPV_NIRI_{WIDTH,HEIGHT} and MPV_NIRI_MARGIN_{X,Y}.
 window-rule {
   match app-id=r#"^mpv$"#
   exclude title=r#"^Picture-in-Picture( - mpv)?$"#
@@ -776,19 +737,14 @@ window-rule {
   default-column-width { fixed 640; }
   default-window-height { fixed 360; }
   default-floating-position x=32 y=96 relative-to="top-right"
-  min-width 640
-  max-width 640
-  min-height 360
-  max-height 360
   opacity 1.0
   open-focused true
 }
 
+// Floating rules for system dialogs and portals.
 window-rule {
   match title=r#"^(Open File|File Upload|Save As|Confirm to replace files|File Operation Progress|Extract archive|Compress\.\.\.)$"#
-  match app-id="xdg-desktop-portal-wlr"
-  match app-id="xdg-desktop-portal-gnome"
-  match app-id="xdg-desktop-portal-gtk"
+  match app-id=r#"^xdg-desktop-portal-(wlr|gnome|gtk)$"#
   exclude app-id=r#"^Kenp$"#
   open-floating true
   default-column-width { proportion 0.50; }
@@ -796,131 +752,53 @@ window-rule {
   open-focused true
 }
 
+// Floating rules for utility apps (Calculator, Polkit, etc).
 window-rule {
-  match app-id=r#"^org\.gnome\.Calculator$"#
-  match app-id=r#"^kcalc$"#
+  match app-id=r#"^(org\.gnome\.Calculator|kcalc)$"#
   open-floating true
   default-column-width { fixed 400; }
   default-window-height { fixed 600; }
-  default-floating-position x=0 y=100 relative-to="top"
-  min-width 400
-  max-width 400
-  min-height 600
-  max-height 600
   open-focused true
 }
 
 window-rule {
-  match app-id=r#"^polkit-gnome-authentication-agent-1$"#
-  open-floating true
-  default-column-width { fixed 520; }
-  default-window-height { fixed 240; }
-  min-width 520
-  max-width 520
-  min-height 240
-  max-height 240
-  open-focused true
-}
-
-window-rule {
-  match app-id=r#"^gcr-prompter$"#
+  match app-id=r#"^(polkit-gnome-authentication-agent-1|gcr-prompter)$"#
   open-floating true
   default-column-width { fixed 600; }
-  default-window-height { fixed 230; }
-  default-floating-position x=0 y=96 relative-to="top"
-  min-width 600
-  max-width 600
-  min-height 230
-  max-height 230
+  default-window-height { fixed 240; }
   open-focused true
 }
 
+// Floating rules for system management tools.
 window-rule {
-  match app-id=r#"^org\.gnome\.Decibels$"#
-  open-floating true
-  default-column-width { fixed 640; }
-  default-window-height { fixed 360; }
-  default-floating-position x=32 y=96 relative-to="top-right"
-  min-width 640
-  max-width 640
-  min-height 360
-  max-height 360
-  opacity 0.5
-  open-focused true
-}
-
-window-rule {
-  match app-id=r#"^hyprland-share-picker$"#
-  match app-id=r#"^pavucontrol$"#
-  open-floating true
-  open-focused true
-}
-
-window-rule {
-  match app-id=r#"^(blueman-manager|nm-connection-editor|org\.gnome\.Settings|gnome-disks)$"#
+  match app-id=r#"^(blueman-manager|nm-connection-editor|org\.gnome\.Settings|gnome-disks|pavucontrol)$"#
   open-floating true
   default-column-width { fixed 900; }
   default-window-height { fixed 650; }
-  min-width 900
-  max-width 900
-  min-height 650
-  max-height 650
   open-focused true
 }
 
+// Sidebar-style tools (Clipse, Wiremix, CopyQ).
 window-rule {
   match app-id=r#"^(clipse|clipse-gui|wiremix|org\.pulseaudio\.pavucontrol|io\.ente\.auth|com\.github\.hluk\.copyq|copyq)$"#
   open-floating true
-  default-column-width { proportion 0.250000; }
-  default-window-height { proportion 0.800000; }
+  default-column-width { proportion 0.25; }
+  default-window-height { proportion 0.80; }
   default-floating-position x=32 y=144 relative-to="top-right"
   open-focused true
 }
 
+// Scrcpy optimized phone-ratio placement.
 window-rule {
   match app-id=r#"^scrcpy$"#
   open-floating true
-  // Keep scrcpy at a phone-like 9x20 ratio to avoid side gaps.
   default-column-width { fixed 432; }
   default-window-height { fixed 960; }
-  min-width 432
-  max-width 432
-  min-height 960
-  max-height 960
   default-floating-position x=32 y=144 relative-to="top-right"
   open-focused true
 }
 
-window-rule {
-  match app-id=r#"^clip-preview$"#
-  open-floating true
-  default-column-width { fixed 900; }
-  default-window-height { fixed 700; }
-  min-width 900
-  max-width 900
-  min-height 700
-  max-height 700
-  opacity 0.98
-  open-focused true
-  shadow {
-    on
-    spread 5
-    softness 30
-  }
-}
-
-window-rule {
-  match app-id=r#"^anote$"#
-  open-floating true
-  default-column-width { fixed 1152; }
-  default-window-height { fixed 864; }
-  min-width 1152
-  max-width 1152
-  min-height 864
-  max-height 864
-  open-focused true
-}
-
+// Dropdown terminal styling.
 window-rule {
   match app-id="dropdown-terminal"
   open-floating true
@@ -936,196 +814,38 @@ window-rule {
   }
 }
 
-window-rule {
-  match app-id=r#"^Kenp$"# title=r#"^Save File$"#
-  default-column-width { fixed 1280; }
-  default-window-height { fixed 933; }
-  open-floating true
-}
+// Default Workspace placements by application ID.
+window-rule { match app-id=r#"^Kenp$"# open-on-workspace "1" }
+window-rule { match app-id=r#"^(kitty|org\.wezfurlong\.wezterm)$"# title=r#"^Tmux$"# open-on-workspace "2" }
+window-rule { match app-id=r#"^(Ai|Nil)$"# open-on-workspace "3" }
+window-rule { match app-id=r#"^CompecTA$"# open-on-workspace "4" }
+window-rule { match app-id=r#"^(discord|WebCord|audacious)$"# open-on-workspace "5" }
+window-rule { match app-id=r#"^(org\.telegram\.desktop|vlc|remote-viewer)$"# open-on-workspace "6" }
+window-rule { match app-id=r#"^(transmission|org\.keepassxc\.KeePassXC|(brave-youtube|chrome-youtube)\.com__-Default)$"# open-on-workspace "7" }
+window-rule { match app-id=r#"^(spotify|Spotify|com\.spotify\.Client)$"# open-on-workspace "8" }
+window-rule { match app-id=r#"^(ferdium|Ferdium|com\.rtosta\.zapzap|(Whats|chrome-web\.whatsapp\.com__-Default))$"# open-on-workspace "9" }
 
+// Privacy: Block sensitive applications from appearing in screenshots or screencasts.
 window-rule {
-  match app-id=r#"^TmuxKenp$"# title=r#"^Tmux$"#
-  open-on-workspace "2"
-  default-column-width { proportion 0.90; }
-}
-
-window-rule {
-  match app-id=r#"^(kitty|org\.wezfurlong\.wezterm)$"# title=r#"^Tmux$"#
-  open-on-workspace "2"
-  default-column-width { proportion 0.90; }
-}
-
-// Workspace placement by app-id
-window-rule {
-  match app-id=r#"^Kenp$"#
-  open-on-workspace "1"
-}
-window-rule {
-  match app-id=r#"^Ai$"#
-  open-on-workspace "3"
-}
-window-rule {
-  match app-id=r#"^Nil$"#
-  open-on-workspace "3"
-}
-window-rule {
-  match app-id=r#"^CompecTA$"#
-  open-on-workspace "4"
-}
-
-window-rule {
-  match app-id=r#"^discord$"#
-  open-on-workspace "5"
-}
-window-rule {
-  match app-id=r#"^WebCord$"#
-  open-on-workspace "5"
-}
-window-rule {
-  match app-id=r#"^audacious$"#
-  open-on-workspace "5"
-}
-
-window-rule {
-  match app-id=r#"^org\.telegram\.desktop$"#
-  open-on-workspace "6"
-}
-window-rule {
-  match app-id=r#"^vlc$"#
-  open-on-workspace "6"
-}
-window-rule {
-  match app-id=r#"^remote-viewer$"#
-  open-on-workspace "6"
-}
-
-window-rule {
-  match app-id=r#"^transmission$"#
-  open-on-workspace "7"
-}
-window-rule {
-  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
-  open-on-workspace "7"
-}
-window-rule {
-  match app-id=r#"^(brave-youtube|chrome-youtube)\.com__-Default$"#
-  open-on-workspace "7"
-}
-
-window-rule {
-  match app-id=r#"^(spotify|Spotify|com\.spotify\.Client)$"#
-  open-on-workspace "8"
-}
-
-window-rule {
-  match app-id=r#"^(ferdium|Ferdium)$"#
-  open-on-workspace "9"
-  default-column-width { proportion 0.90; }
-}
-window-rule {
-  match app-id=r#"^com\.rtosta\.zapzap$"#
-  open-on-workspace "9"
-}
-window-rule {
-  match app-id=r#"^(Whats|chrome-web\.whatsapp\.com__-Default)$"#
-  open-on-workspace "9"
-}
-
-// Privacy: exclude sensitive windows/layers from screencast/screenshot capture.
-window-rule {
-  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
-  match app-id=r#"^org\.gnome\.World\.Secrets$"#
-  match app-id=r#"^com\.bitwarden\.desktop$"#
-  match app-id=r#"^io\.ente\.auth$"#
-  match app-id=r#"^clipse$"#
-  match app-id=r#"^(com\.github\.hluk\.copyq|copyq)$"#
-  match app-id=r#"^gcr-prompter$"#
-  match app-id=r#"^polkit-gnome-authentication-agent-1$"#
-  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|com\.rtosta\.zapzap|org\.telegram\.desktop|Signal|Slack|whatsapp-for-linux)$"#
-  match app-id=r#"^(nm-connection-editor|blueman-manager)$"#
+  match app-id=r#"^(org\.keepassxc\.KeePassXC|io\.ente\.auth|clipse|copyq|gcr-prompter|polkit-gnome-authentication-agent-1)$"#
+  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|org\.telegram\.desktop|Signal|Slack)$"#
   block-out-from "screencast"
-}
-
-window-rule {
-  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
-  match app-id=r#"^org\.gnome\.World\.Secrets$"#
-  match app-id=r#"^com\.bitwarden\.desktop$"#
-  match app-id=r#"^io\.ente\.auth$"#
-  match app-id=r#"^clipse$"#
-  match app-id=r#"^(com\.github\.hluk\.copyq|copyq)$"#
-  match app-id=r#"^gcr-prompter$"#
-  match app-id=r#"^polkit-gnome-authentication-agent-1$"#
-  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|com\.rtosta\.zapzap|org\.telegram\.desktop|Signal|Slack|whatsapp-for-linux)$"#
-  match app-id=r#"^(nm-connection-editor|blueman-manager)$"#
   block-out-from "screen-capture"
 }
 
+// Visual feedback when a window is being actively cast.
 window-rule {
   match is-window-cast-target=true
-  focus-ring {
-    active-color "#f38ba8"
-    inactive-color "#7d0d2d"
-  }
-  border {
-    inactive-color "#7d0d2d"
-  }
-  shadow {
-    color "#7d0d2d70"
-  }
-  tab-indicator {
-    active-color "#f38ba8"
-    inactive-color "#7d0d2d"
-  }
-}
-
-window-rule {
-  match app-id=r#"^(org\.gnome\..*|org\.wezfurlong\.wezterm|zen|com\.mitchellh\.ghostty|kitty|firefox|brave-browser)$"#
-  match app-id=r#"^(Kenp|Ai|CompecTA|Whats|Exclude|(brave-youtube|chrome-youtube)\.com__-Default|ferdium|Ferdium)$"#
-  draw-border-with-background false
-}
-
-window-rule {
-  match is-active=false
-  exclude is-window-cast-target=true
-  exclude app-id=r#"^TmuxKenp$"#
-  exclude app-id=r#"^mpv$"#
-  exclude app-id=r#"^vlc$"#
-  exclude app-id=r#"^(brave-youtube|chrome-youtube)\.com__-Default$"#
-  exclude title=r#"^Picture-in-Picture$"#
-  exclude app-id=r#"^steam_app_\d+$"#
-  exclude app-id=r#"^com\.obsproject\.Studio$"#
-  opacity 0.95
-}
-
-window-rule {
-  match is-window-cast-target=true
+  focus-ring { active-color "#f38ba8"; inactive-color "#7d0d2d" }
   opacity 1.0
 }
 
-window-rule {
-  match app-id=r#"^TmuxKenp$"#
-  opacity 1.0
-}
-
-// DMS-managed dynamic window rules (generated at runtime).
+// DMS-managed dynamic window rules.
 include "dms/windowrules.kdl"
 
-// Layers
-layer-rule {
-  match namespace=r#"^noctalia:.*$"#
-  shadow {
-    on
-    softness 20
-    spread 5
-    color "#00000080"
-  }
-}
-
-layer-rule {
-  match namespace=r#"^dms:blurwallpaper$"#
-  place-within-backdrop true
-}
-
+// ------------------------------------------------------------------------
+// LAYER RULES (UI Components)
+// ------------------------------------------------------------------------
 layer-rule {
   match namespace=r#"^dms:(bar|dock|panel).*$"#
   geometry-corner-radius 0
@@ -1133,41 +853,13 @@ layer-rule {
 
 layer-rule {
   match namespace=r#"^dms:(launcher|osd|popup).*$"#
-  shadow {
-    on
-    color "#00000060"
-    spread 2
-    softness 12
-  }
-}
-
-layer-rule {
-  match namespace=r#"^noctalia:niri-overview-launcher$"#
-  block-out-from "screencast"
-}
-layer-rule {
-  match namespace=r#"^noctalia:niri-overview-launcher$"#
-  block-out-from "screen-capture"
-}
-layer-rule {
-  match namespace=r#"^noctalia-shell:regionSelector$"#
-  block-out-from "screencast"
-}
-layer-rule {
-  match namespace=r#"^noctalia-shell:regionSelector$"#
-  block-out-from "screen-capture"
+  shadow { on; color "#00000060"; spread 2; softness 12 }
 }
 
 layer-rule {
   match namespace="^notifications$"
   geometry-corner-radius 12
-}
-layer-rule {
-  match namespace="^notifications$"
   block-out-from "screencast"
-}
-layer-rule {
-  match namespace="^notifications$"
   block-out-from "screen-capture"
 }
 
@@ -1175,61 +867,23 @@ layer-rule {
 // ANIMATIONS
 // ------------------------------------------------------------------------
 animations {
-  // Snappy Motion Profile: High stiffness, controlled damping for a responsive feel.
+  // SNAPPY MOTION PROFILE: High stiffness for instant feedback.
 
-  workspace-switch {
-    spring damping-ratio=0.85 stiffness=500 epsilon=0.0001
-  }
+  workspace-switch { spring damping-ratio=0.85 stiffness=500 epsilon=0.0001 }
+  window-open { spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001 }
+  window-close { spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001 }
+  window-resize { spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001 }
 
-  window-open {
-    spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
-  }
-
-  window-close {
-    spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
-  }
-
-  // Snappy Resize: Unified with window opening/closing for visual consistency.
-  window-resize {
-    spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
-  }
-
-  // View movement within a workspace (scrollable tiling feel).
-  horizontal-view-movement {
-    spring damping-ratio=0.92 stiffness=600 epsilon=0.0001
-  }
+  horizontal-view-movement { spring damping-ratio=0.92 stiffness=600 epsilon=0.0001 }
+  window-movement { spring damping-ratio=0.85 stiffness=600 epsilon=0.0001 }
   
-  window-movement {
-    spring damping-ratio=0.85 stiffness=600 epsilon=0.0001
-  }
-
-  config-notification-open-close {
-    spring damping-ratio=0.6 stiffness=1000 epsilon=0.001
-  }
-  
-  exit-confirmation-open-close {
-    spring damping-ratio=0.6 stiffness=500 epsilon=0.01
-  }
-  
-  overview-open-close {
-    spring damping-ratio=0.92 stiffness=1000 epsilon=0.0001
-  }
-  
-  recent-windows-close {
-    spring damping-ratio=0.9 stiffness=800 epsilon=0.001
-  }
+  overview-open-close { spring damping-ratio=0.92 stiffness=1000 epsilon=0.0001 }
 }
 
-// ========================================================================
-// Gestures
-// ========================================================================
+// ------------------------------------------------------------------------
+// GESTURES
+// ------------------------------------------------------------------------
 gestures {
-  dnd-edge-view-scroll {
-    trigger-width 30
-    delay-ms 100
-    max-speed 1500
-  }
-  hot-corners {
-    off
-  }
+  dnd-edge-view-scroll { trigger-width 30; delay-ms 100; max-speed 1500 }
+  hot-corners { off }
 }
