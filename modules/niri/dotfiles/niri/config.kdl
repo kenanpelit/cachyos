@@ -126,7 +126,7 @@ layout {
   focus-ring {
     on
     width 3
-    active-gradient from="#00ffff" to="#00ffff" angle=45 relative-to="workspace-view" in="oklch shorter hue"
+    active-gradient from="#bd8ff5" to="#cba6f7" angle=45 relative-to="workspace-view" in="oklch shorter hue"
     inactive-color "#313244"
     urgent-color "#f38ba8"
   }
@@ -151,14 +151,14 @@ layout {
     position "top"
     gaps-between-tabs 4
     corner-radius 8
-    active-color "#00ffff"
+    active-color "#cba6f7"
     inactive-color "#6b02e9"
     urgent-color "#f38ba8"
   }
 
   insert-hint {
     // Visual hint when moving or inserting windows.
-    color "#00ffff80"
+    color "#cba6f780"
   }
 
   // Sizing presets for column widths toggled via Mod+R.
@@ -189,7 +189,7 @@ layout {
 recent-windows {
   // Highlights used in the recent windows list (Alt+Tab).
   highlight {
-    active-color "#00ffff"
+    active-color "#cba6f7"
     urgent-color "#f38ba8"
   }
 }
