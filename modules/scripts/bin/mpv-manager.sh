@@ -143,7 +143,12 @@ start_mpv_with_youtube() {
     mpv_args+=(--autofit=640x360 --autofit-larger=640x360)
   fi
 
-  mpv "${mpv_args[@]}" "$ytdl_target" >/dev/null 2>&1 &
+  # Try to use mullvad-exclude if available to bypass VPN blocks for YouTube
+  if command -v mullvad-exclude >/dev/null 2>&1; then
+    mullvad-exclude mpv "${mpv_args[@]}" "$ytdl_target" >/dev/null 2>&1 &
+  else
+    mpv "${mpv_args[@]}" "$ytdl_target" >/dev/null 2>&1 &
+  fi
   disown || true
 }
 
