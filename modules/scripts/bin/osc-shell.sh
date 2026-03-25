@@ -97,13 +97,33 @@ detect_compositor() {
     printf 'niri\n'
     return 0
   fi
+  
+  # Check for Niri socket in common runtime dir locations as fallback
+  if [[ -z "${NIRI_SOCKET:-}" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
+    for sock in "${XDG_RUNTIME_DIR}"/niri.*.sock; do
+      [[ -S "$sock" ]] || continue
+      printf 'niri\n'
+      return 0
+    done
+  fi
+
   if [[ -n "${HYPRLAND_SOCKET:-}" && -S "${HYPRLAND_SOCKET}" ]]; then
     printf 'hyprland\n'
     return 0
   fi
+
   if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" && -n "${XDG_RUNTIME_DIR:-}" && -d "${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}" ]]; then
     printf 'hyprland\n'
     return 0
+  fi
+  
+  # Check for Hyprland socket dir in common runtime dir as fallback
+  if [[ -n "${XDG_RUNTIME_DIR:-}" && -d "${XDG_RUNTIME_DIR}/hypr" ]]; then
+    for dir in "${XDG_RUNTIME_DIR}"/hypr/*; do
+      [[ -d "$dir" ]] || continue
+      printf 'hyprland\n'
+      return 0
+    done
   fi
 
   local all
