@@ -101,6 +101,115 @@ local function get_available_subtitles(info_json)
     return nil, nil
 end
 
+local function get_ytdl_target(info_json)
+    local target = nil
+
+    if info_json ~= nil then
+        target = info_json["webpage_url"] or info_json["original_url"]
+    end
+
+    if target == nil or trim(target) == "" then
+        target = mp.get_property("path")
+    end
+
+    target = trim(target)
+
+    if target == "" then
+        return nil
+    end
+
+    return target:gsub("^ytdl://", "")
+end
+
+local function append_unique(values, seen, value)
+    local normalized = trim(value)
+
+    if normalized == "" or seen[normalized] then
+        return
+    end
+
+    table.insert(values, normalized)
+    seen[normalized] = true
+end
+
+local function get_ytdl_candidates()
+    local candidates = {}
+    local seen = {}
+
+    append_unique(candidates, seen, mp.get_property_native("user-data/mpv/ytdl/path"))
+    append_unique(candidates, seen, mp.get_property("options/script-opts/ytdl_hook-ytdl_path"))
+    append_unique(candidates, seen, "yt-dlp-mpv")
+    append_unique(candidates, seen, "yt-dlp")
+
+    return candidates
+end
+
+local function run_ytdl_command(extra_args, capture_output)
+    local last_result = nil
+
+    for _, ytdl_bin in ipairs(get_ytdl_candidates()) do
+        local args = {ytdl_bin}
+
+        for _, arg in ipairs(extra_args) do
+            table.insert(args, arg)
+        end
+
+        local command = {
+            name = "subprocess",
+            playback_only = false,
+            args = args,
+        }
+
+        if capture_output then
+            command.capture_stdout = true
+            command.capture_stderr = true
+        end
+
+        local result = mp.command_native(command)
+        last_result = result
+
+        if result.status == 0 then
+            return result, ytdl_bin
+        end
+
+        if result.stderr ~= nil and trim(result.stderr) ~= "" then
+            mp.msg.warn(string.format("[ytsub] %s failed: %s", ytdl_bin, trim(result.stderr)))
+        end
+    end
+
+    return last_result, nil
+end
+
+local function query_subtitles_with_ytdl(info_json)
+    local target = get_ytdl_target(info_json)
+
+    if target == nil then
+        return nil
+    end
+
+    local result, ytdl_bin = run_ytdl_command({
+        "-J",
+        "--no-playlist",
+        "--skip-download",
+        "--write-subs",
+        "--write-auto-sub",
+        "--sub-langs",
+        "all,-live_chat",
+        target,
+    }, true)
+
+    if result == nil or result.status ~= 0 or result.stdout == nil or trim(result.stdout) == "" then
+        if result.stderr ~= nil and trim(result.stderr) ~= "" then
+            mp.msg.warn("[ytsub] yt-dlp subtitle query failed: " .. trim(result.stderr))
+        end
+        return nil
+    end
+
+    mp.msg.info("[ytsub] subtitle metadata resolved via " .. tostring(ytdl_bin))
+
+    return utils.parse_json(result.stdout)
+end
+
 -- create cache directory for subtitles if it doesn't exist
 local res = utils.file_info(options.cache_dir)
 if not res or not res.is_dir then
@@ -146,9 +255,10 @@ local function filter_sub(path)
             out:write("\n")
         end
     end
+    out:close()
 end
 
-local function load_autosub(lang, sub_info, ytid, is_primary)
+local function load_autosub(lang, sub_info, ytid, is_primary, source_type)
     if sub_info == nil then
         info("subtitle language unavailable: " .. tostring(lang))
         return false
@@ -161,6 +271,13 @@ local function load_autosub(lang, sub_info, ytid, is_primary)
         if v["ext"] == "vtt" then
             url = v["url"]
         end
+    end
+
+    lang_name = lang_name or lang
+
+    if url == nil then
+        info("no VTT subtitle URL found for " .. tostring(lang_name))
+        return false
     end
 
     info('loading '..lang_name)
@@ -178,7 +295,13 @@ local function load_autosub(lang, sub_info, ytid, is_primary)
         -- sub file not already present, download
         if http ~= nil and https ~= nil then
             -- downloading via direct url
-            local body, _ = http.request(url)
+            local client = http
+
+            if string.match(url, "^https://") then
+                client = https
+            end
+
+            local body, _ = client.request(url)
             if body ~= nil then
                 f = assert(io.open(subfile, 'wb'))
                 f:write(body)
@@ -187,12 +310,25 @@ local function load_autosub(lang, sub_info, ytid, is_primary)
             end
         else
             -- lua http modules not available, download via yt-dlp
-            local ytdl_path = mp.get_property_native('user-data/mpv/ytdl/path')
-            if ytdl_path ~= nil then
-                mp.command_native({
-                    name = "subprocess",
-                    args = {ytdl_path, "--skip-download", "--sub-lang", lang, "--write-auto-sub", "-o", subfile_base, ytid}
-                })
+            local args = {"--skip-download", "--sub-lang", lang}
+
+            if source_type == "automatic captions" then
+                table.insert(args, "--write-auto-sub")
+            else
+                table.insert(args, "--write-sub")
+            end
+
+            table.insert(args, "-o")
+            table.insert(args, subfile_base)
+            table.insert(args, ytid)
+
+            local result, ytdl_bin = run_ytdl_command(args, false)
+
+            if ytdl_bin ~= nil then
+                mp.msg.info("[ytsub] subtitle download attempted via " .. ytdl_bin)
+            end
+
+            if result ~= nil and result.status == 0 then
                 f = io.open(subfile, "r")
                 if f ~= nil then
                     io.close(f)
@@ -208,7 +344,7 @@ local function load_autosub(lang, sub_info, ytid, is_primary)
     -- load the subtitle file as track ans select it
     if sub_is_available then
         if is_primary then
-            mp.command("sub-add " .. subfile .. " select 'youtube auto-sub' '" .. lang .. "'")
+            mp.commandv("sub-add", subfile, "select", "youtube subtitle", lang)
         else
             -- compute the number of subtitle tracks in order to select the new track by id
             local n_tracks = mp.get_property_native("track-list/count")
@@ -220,7 +356,7 @@ local function load_autosub(lang, sub_info, ytid, is_primary)
                 end
                 i = i + 1
             end
-            mp.command("sub-add " .. subfile .. " auto 'youtube auto-sub' '" .. lang .. "'")
+            mp.commandv("sub-add", subfile, "auto", "youtube subtitle", lang)
             mp.set_property("secondary-sid", n_subs + 1)
         end
         info(lang_name .. ' loaded')
@@ -239,11 +375,26 @@ local function ytsub(is_auto)
     end
 
     local j = utils.parse_json(ytdl_output['stdout'])
+
+    if j == nil then
+        info("failed to parse ytdl metadata")
+        return
+    end
+
     local subs, source_type = get_available_subtitles(j)
 
     if subs == nil then
-        info('no subtitles found')
-        return
+        local refreshed = query_subtitles_with_ytdl(j)
+
+        if refreshed ~= nil then
+            j = refreshed
+            subs, source_type = get_available_subtitles(j)
+        end
+
+        if subs == nil then
+            info('no subtitles found')
+            return
+        end
     end
 
     if is_auto then
@@ -269,10 +420,10 @@ local function ytsub(is_auto)
             return
         end
 
-        load_autosub(selected[1], subs[selected[1]], j["id"], true)
+        load_autosub(selected[1], subs[selected[1]], j["id"], true, source_type)
 
         if selected[2] ~= nil then
-            load_autosub(selected[2], subs[selected[2]], j["id"], false)
+            load_autosub(selected[2], subs[selected[2]], j["id"], false, source_type)
         end
 
     else
@@ -282,10 +433,12 @@ local function ytsub(is_auto)
             table.insert(langs, k)
         end
 
+        table.sort(langs)
+
         input.select({
             prompt = "Select a language",
             items = langs,
-            submit = function(lang_id) load_autosub(langs[lang_id], subs[langs[lang_id]], j["id"], true) end,
+            submit = function(lang_id) load_autosub(langs[lang_id], subs[langs[lang_id]], j["id"], true, source_type) end,
         })
     end
 end
