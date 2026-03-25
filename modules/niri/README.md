@@ -16,8 +16,10 @@ UWSM-first session wrapper.
 - The wrapper loads the curated Niri environment stack through
   `niri-session-common` and the manifest
   `~/.config/environment.d/niri-session.envlist`, which now starts with the
-  shared Wayland layer at `~/.config/environment.d/00-wayland.conf`, appends the
-  Niri-only session file at `~/.config/session-env/niri/10-niri-env.conf`,
+  shared Wayland layer at `~/.config/environment.d/00-wayland.conf`, includes
+  the shared GTK/Qt layers, optionally includes repo-managed overlays such as
+  `30-ollama.conf` when present, and explicitly includes the Niri-only session
+  file at `~/.config/session-env/niri/10-niri-env.conf`,
   normalizes path variables, applies the Niri session identity
   (`DESKTOP_SESSION=niri-uwsm`, `XDG_CURRENT_DESKTOP=niri`), clears foreign
   compositor variables, and then hands off to `uwsm start -- niri-session`.
@@ -137,16 +139,20 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   owns compositor-agnostic Wayland toolkit/runtime hints, while Niri-only variables live in
   `~/.config/session-env/niri/10-niri-env.conf` and are consumed through the
   curated Niri-specific allowlist manifest so compositor-specific overrides do
-  not leak across sessions. `niri-session-init` remains available as a manual
-  compatibility helper and only backfills missing compositor runtime variables
-  when UWSM did not finalize them.
+  not leak across sessions. Optional manifest entries are skipped cleanly, while
+  missing required entries now emit a warning instead of failing silently.
+  `niri-session-init` remains available as a manual compatibility helper and
+  only backfills missing compositor runtime variables when UWSM did not
+  finalize them.
 - The shared `xdg-portal` module now owns the Niri portal preference file:
-  generic dialogs/settings stay on GTK, screencast/screenshot prefer `wlr`,
+  generic dialogs/settings stay on GTK, screencast/screenshot stay on `gnome`,
   and `RemoteDesktop` stays on GNOME as the only installed backend in this
   repo that actually advertises that interface.
 - Static Niri monitor/workspace defaults are now rendered from the selected
-  Hyprland monitor profile plus the Niri output-name map, so the repo has one
-  profile selector and Niri keeps only a small runtime hotplug override file.
+  Niri monitor profile plus the Niri output-name map, so the module keeps its
+  own profile selector and runtime-rendered output files without depending on
+  Hyprland-owned monitor profile assets. The selector now lives in
+  `modules/niri/profiles/profile.env` via `NIRI_MONITOR_PROFILE`.
 - The supported entry path is now the UWSM wrapper installed by the `sessions`
   module. Legacy `niri-optimized-session` and the old `niri.service`
   bootstrap drop-in are intentionally removed to keep session ownership in one

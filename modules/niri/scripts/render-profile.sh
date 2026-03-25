@@ -8,8 +8,8 @@ REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
 # shellcheck source=/dev/null
 source "${REPO_ROOT}/modules/base/lib/core.sh"
 
-PROFILE_MANIFEST="${NIRI_PROFILE_MANIFEST:-${REPO_ROOT}/modules/hyprland/monitors/profile.env}"
-PROFILES_DIR="${NIRI_PROFILE_DIR:-${REPO_ROOT}/modules/hyprland/monitors/profiles}"
+PROFILE_MANIFEST="${NIRI_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
+PROFILES_DIR="${NIRI_PROFILE_DIR:-${MODULE_DIR}/profiles/profiles}"
 OUTPUT_MAP_FILE="${NIRI_OUTPUT_MAP_FILE:-${MODULE_DIR}/profiles/output-map.tsv}"
 TARGET_DMS_DIR="${NIRI_DMS_DIR:-${USER_HOME}/.config/niri/dms}"
 OUTPUTS_OUT="${TARGET_DMS_DIR}/outputs.kdl"
@@ -20,7 +20,7 @@ usage() {
 Usage: render-profile.sh [--check] [--out-dir DIR]
 
 Without arguments, renders the static Niri outputs/workspaces files from the
-selected monitor profile.
+selected Niri monitor profile.
 With --check, verifies the rendered files match the target directory.
 EOF
 }
@@ -73,10 +73,10 @@ done
 # shellcheck source=/dev/null
 source "${PROFILE_MANIFEST}"
 
-: "${HYPR_MONITOR_PROFILE:=desk}"
+: "${NIRI_MONITOR_PROFILE:=${HYPR_MONITOR_PROFILE:-desk}}"
 
-PROFILE_FILE="${PROFILES_DIR}/${HYPR_MONITOR_PROFILE}.conf"
-[[ -r "${PROFILE_FILE}" ]] || die "Unknown HYPR_MONITOR_PROFILE: ${HYPR_MONITOR_PROFILE}"
+PROFILE_FILE="${PROFILES_DIR}/${NIRI_MONITOR_PROFILE}.conf"
+[[ -r "${PROFILE_FILE}" ]] || die "Unknown NIRI_MONITOR_PROFILE: ${NIRI_MONITOR_PROFILE}"
 
 declare -A OUTPUT_NAME_MAP=()
 
@@ -107,13 +107,13 @@ cleanup() {
 trap cleanup EXIT
 
 {
-  printf '// Generated from modules/hyprland/monitors/profile.env and %s.\n' "$(basename "${PROFILE_FILE}")"
+  printf '// Generated from modules/niri/profiles/profile.env and %s.\n' "$(basename "${PROFILE_FILE}")"
   printf '// Update the selected monitor profile or output map and rerun modules/niri/scripts/render-profile.sh.\n'
   printf '// Source checksum: %s\n\n' "${manifest_checksum}"
 } > "${tmp_outputs}"
 
 {
-  printf '// Generated from modules/hyprland/monitors/profile.env and %s.\n' "$(basename "${PROFILE_FILE}")"
+  printf '// Generated from modules/niri/profiles/profile.env and %s.\n' "$(basename "${PROFILE_FILE}")"
   printf '// Update the selected monitor profile or output map and rerun modules/niri/scripts/render-profile.sh.\n'
   printf '// Source checksum: %s\n\n' "${manifest_checksum}"
 } > "${tmp_workspaces}"

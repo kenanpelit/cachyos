@@ -26,8 +26,8 @@ ensure_niri_env() {
 }
 
 wait_for_socket() {
-  local i
-  for i in $(seq 1 120); do
+  local _
+  for _ in $(seq 1 120); do
     niri_detect_socket
     [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]] && return 0
     sleep 0.1

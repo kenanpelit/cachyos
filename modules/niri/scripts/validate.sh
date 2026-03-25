@@ -6,6 +6,8 @@ repo_root="$(cd "$script_dir/../../.." && pwd)"
 source "$repo_root/modules/base/lib/core.sh"
 
 NIRI_CONFIG="$USER_HOME/.config/niri/config.kdl"
+NIRI_DMS_DIR="$USER_HOME/.config/niri/dms"
+RENDER_PROFILE_SCRIPT="$script_dir/render-profile.sh"
 
 log_info "Validating Niri configuration..."
 
@@ -25,4 +27,25 @@ else
     log_error "Niri config validation failed!"
     niri validate -c "$NIRI_CONFIG" # Show the error output
     exit 1
+fi
+
+if [[ -x "$RENDER_PROFILE_SCRIPT" ]] && [[ -d "$NIRI_DMS_DIR" ]]; then
+    log_info "Validating rendered Niri output/workspace profile..."
+    if [ "$(id -u)" -eq 0 ]; then
+        if run_as_user "$RENDER_PROFILE_SCRIPT" --check --out-dir "$NIRI_DMS_DIR" >/dev/null 2>&1; then
+            log_success "Rendered Niri profile matches runtime files!"
+        else
+            log_error "Rendered Niri profile drift detected!"
+            run_as_user "$RENDER_PROFILE_SCRIPT" --check --out-dir "$NIRI_DMS_DIR"
+            exit 1
+        fi
+    else
+        if "$RENDER_PROFILE_SCRIPT" --check --out-dir "$NIRI_DMS_DIR" >/dev/null 2>&1; then
+            log_success "Rendered Niri profile matches runtime files!"
+        else
+            log_error "Rendered Niri profile drift detected!"
+            "$RENDER_PROFILE_SCRIPT" --check --out-dir "$NIRI_DMS_DIR"
+            exit 1
+        fi
+    fi
 fi

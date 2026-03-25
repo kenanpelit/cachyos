@@ -5,10 +5,13 @@ description: Niri compositor config (UWSM-first)
 depends_on:
 - base
 - wayland-env
+- gtk
+- qt
 - xdg-dirs
 - scripts
 - fonts
 - wayland-autostart
+- xdg-portal
 - user-services
 dotfiles:
 - source: dotfiles/niri/config.kdl

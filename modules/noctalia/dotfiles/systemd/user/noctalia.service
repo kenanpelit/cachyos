@@ -6,9 +6,6 @@ ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
 Environment=QS_CACHE_DIR=%C/noctalia-qml-cache
-Environment=XDG_ICON_THEME=kora
-Environment=ICON_THEME=kora
-Environment=QT_ICON_THEME=kora
 # High-Priority: Ensure the shell gets CPU time immediately
 Nice=-15
 CPUWeight=500
