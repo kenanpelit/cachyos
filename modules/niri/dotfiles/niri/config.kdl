@@ -12,19 +12,31 @@
 //   blocks; keep blocks multi-line for reliability.
 // ========================================================================
 
+// ========================================================================
+// NIRI COMPOSITOR CONFIGURATION
+// ========================================================================
+// Optimized for CachyOS / DMS (Dank Material Shell) / Noctalia.
+// Focus: Clean aesthetics, predictable tiling, and performance.
+// ========================================================================
+
 cursor {
+  // Hide cursor during keyboard input for better focus.
   hide-when-typing
+  // Auto-hide after 1 second of inactivity to keep workspace clean.
   hide-after-inactive-ms 1000
 }
 
 prefer-no-csd
 
 hotkey-overlay {
+  // Skip showing the help overlay at startup for a cleaner entry.
   skip-at-startup
+  // Hide keys that aren't currently bound to avoid clutter.
   hide-not-bound
 }
 
 overview {
+  // Zoom level for the workspace overview.
   zoom 0.25
   backdrop-color "#313244"
   workspace-shadow {
@@ -35,24 +47,21 @@ overview {
   }
 }
 
-// Put wallpaper surfaces into the overview backdrop when available.
+// Integrate wallpaper surfaces into the overview backdrop for visual depth.
 layer-rule {
   match namespace="^wallpaper$"
   place-within-backdrop true
 }
 
 // ------------------------------------------------------------------------
-// Startup
-// ------------------------------------------------------------------------
-// Long-running daemons are started via systemd --user (niri-session.target)
-// from the UWSM-managed compositor service. Keep startup spawns here minimal.
-
-// ------------------------------------------------------------------------
-// Input
+// INPUT CONFIGURATION
 // ------------------------------------------------------------------------
 input {
+  // Cycle workspaces automatically when reaching the boundaries.
   workspace-auto-back-and-forth
+  // Enable focus-follows-mouse with a high threshold for intentionality.
   focus-follows-mouse max-scroll-amount="90%"
+  // Warp mouse to focus for deterministic navigation.
   warp-mouse-to-focus mode="center-xy"
 
   keyboard {
@@ -61,14 +70,15 @@ input {
       variant "f"
       options "ctrl:nocaps"
     }
+    // Responsive repeat rates for fast terminal/Vim navigation.
     repeat-delay 250
     repeat-rate 35
   }
 
   touchpad {
     tap
-    dwt
-    dwtp
+    dwt    // Disable-while-typing.
+    dwtp   // Disable-while-trackpointing.
     drag-lock
     tap-button-map "left-right-middle"
     middle-emulation
@@ -95,31 +105,33 @@ input {
   }
 }
 
-// Work around Electron/Chromium apps that treat "activated" as focus.
+// Performance tweak: deactivate unfocused Electron/Chromium windows.
 debug {
   deactivate-unfocused-windows
 }
 
 // ------------------------------------------------------------------------
-// Switch Events
+// SWITCH EVENTS
 // ------------------------------------------------------------------------
 switch-events {
-  // Lock when the lid is closed (logind integration).
+  // Integration with logind for laptop lid actions.
   lid-close {
     spawn "niri-osc" "set" "lock" "--logind"
   }
 }
 
-// ========================================================================
-// Hardware Configuration (Monitors & Workspaces)
-// ========================================================================
+// ------------------------------------------------------------------------
+// HARDWARE & MONITOR LAYOUT
+// ------------------------------------------------------------------------
 
 include "dms/outputs.kdl"
 include "dms/monitor-auto.kdl"
 include "dms/workspaces-auto.kdl"
 
 layout {
+  // Inner and outer gaps between windows.
   gaps 6
+  // Strategy for centering columns when they overflow the monitor width.
   center-focused-column "on-overflow"
   always-center-single-column
   background-color "#00000000"
@@ -133,21 +145,12 @@ layout {
   }
 
   border {
+    // Border is kept off to prioritize the focus-ring aesthetic.
     off
-    active-color "#cba6f7"
-    inactive-color "#1e1e2e"
-    urgent-color "#f38ba8"
   }
 
   shadow {
     color "#11111b70"
-  }
-
-  struts {
-    // top 0
-    // bottom 0
-    // left 0
-    // right 0
   }
 
   tab-indicator {
@@ -168,6 +171,7 @@ layout {
     color "#cba6f780"
   }
 
+  // Sizing presets for column widths.
   preset-column-widths {
     proportion 0.30
     proportion 0.50
@@ -176,6 +180,7 @@ layout {
     proportion 1.0
   }
 
+  // Sizing presets for window heights.
   preset-window-heights {
     proportion 0.30
     proportion 0.50
@@ -184,7 +189,7 @@ layout {
     proportion 1.0
   }
 
-  // Match your preferred default (≈85% width).
+  // Windows open at 90% width by default.
   default-column-width {
     proportion 0.90
   }
@@ -1166,12 +1171,11 @@ layer-rule {
   block-out-from "screen-capture"
 }
 
-// ========================================================================
-// Animations
-// ========================================================================
+// ------------------------------------------------------------------------
+// ANIMATIONS
+// ------------------------------------------------------------------------
 animations {
-  // Premium Motion Profile: fluid curves with responsive slide dynamics.
-  // Updated for a softer spring feel (stiffness reduced).
+  // Snappy Motion Profile: High stiffness, controlled damping for a responsive feel.
 
   workspace-switch {
     spring damping-ratio=0.85 stiffness=500 epsilon=0.0001
@@ -1185,36 +1189,32 @@ animations {
     spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
   }
 
-  // Snappy but smooth movement (Hyprland-like responsiveness).
+  // Snappy Resize: Unified with window opening/closing for visual consistency.
+  window-resize {
+    spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
+  }
+
+  // View movement within a workspace (scrollable tiling feel).
   horizontal-view-movement {
     spring damping-ratio=0.92 stiffness=600 epsilon=0.0001
   }
+  
   window-movement {
     spring damping-ratio=0.85 stiffness=600 epsilon=0.0001
-  }
-
-  window-resize {
-    spring damping-ratio=0.85 stiffness=600 epsilon=0.0001
-    custom-shader r"
-      vec4 resize_color(vec3 coords_curr_geo, vec3 size_curr_geo) {
-          vec3 coords_tex_prev = niri_geo_to_tex_prev * coords_curr_geo;
-          vec4 color_prev = texture2D(niri_tex_prev, coords_tex_prev.st);
-          vec3 coords_tex_next = niri_geo_to_tex_next * coords_curr_geo;
-          vec4 color_next = texture2D(niri_tex_next, coords_tex_next.st);
-          return mix(color_prev, color_next, niri_clamped_progress);
-      }
-    "
   }
 
   config-notification-open-close {
     spring damping-ratio=0.6 stiffness=1000 epsilon=0.001
   }
+  
   exit-confirmation-open-close {
     spring damping-ratio=0.6 stiffness=500 epsilon=0.01
   }
+  
   overview-open-close {
     spring damping-ratio=0.92 stiffness=1000 epsilon=0.0001
   }
+  
   recent-windows-close {
     spring damping-ratio=0.9 stiffness=800 epsilon=0.001
   }
