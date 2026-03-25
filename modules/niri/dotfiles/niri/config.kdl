@@ -1,5 +1,5 @@
 // ========================================================================
-// Niri Configuration - DankMaterialShell Edition (CachyOS)
+// Niri Configuration - CachyOS
 // ========================================================================
 // Notes:
 // - This config is designed for CachyOS where some tools may live in /usr/bin
@@ -172,14 +172,21 @@ layout {
     proportion 0.30
     proportion 0.50
     proportion 0.70
-    proportion 0.80
+    proportion 0.90
+    proportion 1.0
+  }
+
+  preset-window-heights {
+    proportion 0.30
+    proportion 0.50
+    proportion 0.70
     proportion 0.90
     proportion 1.0
   }
 
   // Match your preferred default (≈85% width).
   default-column-width {
-    proportion 0.85
+    proportion 0.90
   }
 }
 
@@ -934,13 +941,13 @@ window-rule {
 window-rule {
   match app-id=r#"^TmuxKenp$"# title=r#"^Tmux$"#
   open-on-workspace "2"
-  default-column-width { proportion 0.85; }
+  default-column-width { proportion 0.90; }
 }
 
 window-rule {
   match app-id=r#"^(kitty|org\.wezfurlong\.wezterm)$"# title=r#"^Tmux$"#
   open-on-workspace "2"
-  default-column-width { proportion 0.85; }
+  default-column-width { proportion 0.90; }
 }
 
 // Workspace placement by app-id
@@ -1008,7 +1015,7 @@ window-rule {
 window-rule {
   match app-id=r#"^(ferdium|Ferdium)$"#
   open-on-workspace "9"
-  default-column-width { proportion 0.85; }
+  default-column-width { proportion 0.90; }
 }
 window-rule {
   match app-id=r#"^com\.rtosta\.zapzap$"#
