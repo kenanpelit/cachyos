@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: osc-mullvad-split
+# Description: Lists processes excluded from Mullvad VPN with their names and args.
+# ==============================================================================
+set -euo pipefail
+
+# Get PIDs from mullvad command, filtering only numeric output
+pids=$(mullvad split-tunnel list | grep -E '^[0-9]+$' | xargs || true)
+
+if [[ -z "$pids" ]]; then
+    echo "No processes are currently excluded from the Mullvad tunnel."
+    exit 0
+fi
+
+echo -e "\e[1;36mExcluded Processes Details:\e[0m"
+printf "%-8s %-20s %s\n" "PID" "COMMAND" "FULL ARGS"
+printf "%-8s %-20s %s\n" "---" "-------" "---------"
+
+# Use ps to get info. Replace spaces with commas for ps -p compatibility.
+# We use -o pid=,comm=,args= to remove headers and get clean output.
+ps -p "${pids// /,}" -o pid=,comm=,args= | while read -r pid comm args; do
+    printf "\e[32m%-8s\e[0m \e[1m%-20.20s\e[0m %s\n" "$pid" "$comm" "$args"
+done
