@@ -684,7 +684,9 @@ window-rule {
 // Visual feedback for floating vs tiled windows.
 window-rule {
   match is-floating=true
-  shadow { on }
+  shadow {
+    on
+  }
 }
 window-rule {
   match is-floating=false
@@ -744,6 +746,13 @@ window-rule {
 // Floating rules for system dialogs and portals.
 window-rule {
   match title=r#"^(Open File|File Upload|Save As|Confirm to replace files|File Operation Progress|Extract archive|Compress\.\.\.)$"#
+  open-floating true
+  default-column-width { proportion 0.50; }
+  default-window-height { proportion 0.75; }
+  open-focused true
+}
+
+window-rule {
   match app-id=r#"^xdg-desktop-portal-(wlr|gnome|gtk)$"#
   exclude app-id=r#"^Kenp$"#
   open-floating true
@@ -805,7 +814,9 @@ window-rule {
   default-column-width { proportion 0.8; }
   default-window-height { fixed 600; }
   default-floating-position x=0 y=20 relative-to="top"
-  border { off; }
+  border {
+    off
+  }
   shadow {
     on
     spread 10
@@ -815,28 +826,69 @@ window-rule {
 }
 
 // Default Workspace placements by application ID.
-window-rule { match app-id=r#"^Kenp$"# open-on-workspace "1" }
-window-rule { match app-id=r#"^(kitty|org\.wezfurlong\.wezterm)$"# title=r#"^Tmux$"# open-on-workspace "2" }
-window-rule { match app-id=r#"^(Ai|Nil)$"# open-on-workspace "3" }
-window-rule { match app-id=r#"^CompecTA$"# open-on-workspace "4" }
-window-rule { match app-id=r#"^(discord|WebCord|audacious)$"# open-on-workspace "5" }
-window-rule { match app-id=r#"^(org\.telegram\.desktop|vlc|remote-viewer)$"# open-on-workspace "6" }
-window-rule { match app-id=r#"^(transmission|org\.keepassxc\.KeePassXC|(brave-youtube|chrome-youtube)\.com__-Default)$"# open-on-workspace "7" }
-window-rule { match app-id=r#"^(spotify|Spotify|com\.spotify\.Client)$"# open-on-workspace "8" }
-window-rule { match app-id=r#"^(ferdium|Ferdium|com\.rtosta\.zapzap|(Whats|chrome-web\.whatsapp\.com__-Default))$"# open-on-workspace "9" }
+window-rule {
+  match app-id=r#"^Kenp$"#
+  open-on-workspace "1"
+}
+window-rule {
+  match app-id=r#"^(kitty|org\.wezfurlong\.wezterm)$"#
+  match title=r#"^Tmux$"#
+  open-on-workspace "2"
+}
+window-rule {
+  match app-id=r#"^(Ai|Nil)$"#
+  open-on-workspace "3"
+}
+window-rule {
+  match app-id=r#"^CompecTA$"#
+  open-on-workspace "4"
+}
+window-rule {
+  match app-id=r#"^(discord|WebCord|audacious)$"#
+  open-on-workspace "5"
+}
+window-rule {
+  match app-id=r#"^(org\.telegram\.desktop|vlc|remote-viewer)$"#
+  open-on-workspace "6"
+}
+window-rule {
+  match app-id=r#"^(transmission|org\.keepassxc\.KeePassXC|(brave-youtube|chrome-youtube)\.com__-Default)$"#
+  open-on-workspace "7"
+}
+window-rule {
+  match app-id=r#"^(spotify|Spotify|com\.spotify\.Client)$"#
+  open-on-workspace "8"
+}
+window-rule {
+  match app-id=r#"^(ferdium|Ferdium|com\.rtosta\.zapzap|(Whats|chrome-web\.whatsapp\.com__-Default))$"#
+  open-on-workspace "9"
+}
 
 // Privacy: Block sensitive applications from appearing in screenshots or screencasts.
 window-rule {
   match app-id=r#"^(org\.keepassxc\.KeePassXC|io\.ente\.auth|clipse|copyq|gcr-prompter|polkit-gnome-authentication-agent-1)$"#
+  block-out-from "screencast"
+}
+window-rule {
+  match app-id=r#"^(org\.keepassxc\.KeePassXC|io\.ente\.auth|clipse|copyq|gcr-prompter|polkit-gnome-authentication-agent-1)$"#
+  block-out-from "screen-capture"
+}
+window-rule {
   match app-id=r#"^(discord|WebCord|ferdium|Ferdium|org\.telegram\.desktop|Signal|Slack)$"#
   block-out-from "screencast"
+}
+window-rule {
+  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|org\.telegram\.desktop|Signal|Slack)$"#
   block-out-from "screen-capture"
 }
 
 // Visual feedback when a window is being actively cast.
 window-rule {
   match is-window-cast-target=true
-  focus-ring { active-color "#f38ba8"; inactive-color "#7d0d2d" }
+  focus-ring {
+    active-color "#f38ba8"
+    inactive-color "#7d0d2d"
+  }
   opacity 1.0
 }
 
@@ -853,13 +905,24 @@ layer-rule {
 
 layer-rule {
   match namespace=r#"^dms:(launcher|osd|popup).*$"#
-  shadow { on; color "#00000060"; spread 2; softness 12 }
+  shadow {
+    on
+    color "#00000060"
+    spread 2
+    softness 12
+  }
 }
 
 layer-rule {
   match namespace="^notifications$"
   geometry-corner-radius 12
+}
+layer-rule {
+  match namespace="^notifications$"
   block-out-from "screencast"
+}
+layer-rule {
+  match namespace="^notifications$"
   block-out-from "screen-capture"
 }
 
@@ -869,21 +932,41 @@ layer-rule {
 animations {
   // SNAPPY MOTION PROFILE: High stiffness for instant feedback.
 
-  workspace-switch { spring damping-ratio=0.85 stiffness=500 epsilon=0.0001 }
-  window-open { spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001 }
-  window-close { spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001 }
-  window-resize { spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001 }
+  workspace-switch {
+    spring damping-ratio=0.85 stiffness=500 epsilon=0.0001
+  }
+  window-open {
+    spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
+  }
+  window-close {
+    spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
+  }
+  window-resize {
+    spring damping-ratio=0.8 stiffness=1000 epsilon=0.0001
+  }
 
-  horizontal-view-movement { spring damping-ratio=0.92 stiffness=600 epsilon=0.0001 }
-  window-movement { spring damping-ratio=0.85 stiffness=600 epsilon=0.0001 }
+  horizontal-view-movement {
+    spring damping-ratio=0.92 stiffness=600 epsilon=0.0001
+  }
+  window-movement {
+    spring damping-ratio=0.85 stiffness=600 epsilon=0.0001
+  }
   
-  overview-open-close { spring damping-ratio=0.92 stiffness=1000 epsilon=0.0001 }
+  overview-open-close {
+    spring damping-ratio=0.92 stiffness=1000 epsilon=0.0001
+  }
 }
 
 // ------------------------------------------------------------------------
 // GESTURES
 // ------------------------------------------------------------------------
 gestures {
-  dnd-edge-view-scroll { trigger-width 30; delay-ms 100; max-speed 1500 }
-  hot-corners { off }
+  dnd-edge-view-scroll {
+    trigger-width 30
+    delay-ms 100
+    max-speed 1500
+  }
+  hot-corners {
+    off
+  }
 }
