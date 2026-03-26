@@ -10,6 +10,8 @@ LOCAL_BIN_DIR="/usr/local/bin"
 # shellcheck source=/dev/null
 source "$REPO_ROOT/modules/base/lib/core.sh"
 
+USER_WAYLAND_SESSIONS_DIR="${USER_HOME}/.local/share/wayland-sessions"
+
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
   if ! command -v sudo >/dev/null 2>&1; then
@@ -59,19 +61,38 @@ remove_session() {
   fi
 }
 
+remove_user_session() {
+  local name="$1"
+  local target="${USER_WAYLAND_SESSIONS_DIR}/${name}"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    echo "Removing user session ${target}..."
+    run_as_user rm -f "$target"
+  fi
+}
+
+remove_wrapper() {
+  local name="$1"
+  local target="${LOCAL_BIN_DIR}/${name}"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    echo "Removing wrapper ${target}..."
+    run_root rm -f "$target"
+  fi
+}
+
 remove_session "niri.desktop"
 remove_session "niri-optimized.desktop"
 remove_session "hyprland.desktop"
+remove_session "gnome-optimized.desktop"
+remove_user_session "gnome-optimized.desktop"
 
 install_session "${DOTFILES_DIR}/niri-uwsm.desktop" "Niri (UWSM)"
-install_session "${DOTFILES_DIR}/gnome-optimized.desktop" "GNOME (Optimized)"
 install_session "${DOTFILES_DIR}/hyprland-uwsm.desktop" "Hyprland (UWSM)"
 
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
-install_wrapper "${DOTFILES_DIR}/gnome-optimized-session" "gnome-optimized-session"
 
 run_root rm -f "${LOCAL_BIN_DIR}/niri-optimized-session"
+remove_wrapper "gnome-optimized-session"
 
 if command -v systemctl >/dev/null 2>&1; then
   user_systemd_dir="$USER_HOME/.config/systemd/user"

@@ -9,8 +9,6 @@ dotfiles:
   target: ~/.local/share/wayland-sessions/hyprland-uwsm.desktop
 - source: dotfiles/niri-uwsm.desktop
   target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
-- source: dotfiles/gnome-optimized.desktop
-  target: ~/.local/share/wayland-sessions/gnome-optimized.desktop
 - source: dotfiles/systemd/user/geoclue-agent.service
   target: ~/.config/systemd/user/geoclue-agent.service
 - source: dotfiles/systemd/user/geoclue-agent.timer

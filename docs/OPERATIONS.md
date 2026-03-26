@@ -37,7 +37,6 @@ Session launchers are user-home agnostic and call scripts via `$HOME/.local/bin`
 
 - `modules/sessions/dotfiles/niri-uwsm.desktop`
 - `modules/sessions/dotfiles/hyprland-uwsm.desktop`
-- `modules/sessions/dotfiles/gnome-optimized.desktop`
 
 Operational checks:
 
