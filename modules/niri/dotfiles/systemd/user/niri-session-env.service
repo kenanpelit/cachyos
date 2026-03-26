@@ -4,13 +4,13 @@ After=graphical-session.target wayland-wm@niri\x2dsession.service wayland-sessio
 Before=niri-bootstrap.service niri-daemons.target niri-post-daemons.target
 PartOf=niri-session.target
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-ConditionPathExists=%h/.local/bin/niri-osc
+ConditionPathExists=%h/.local/bin/niri-session-init
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
-ExecStart=%h/.local/bin/niri-osc set env --no-start-target
+ExecStart=%h/.local/bin/niri-session-init --no-start-target
 StandardOutput=journal
 StandardError=journal
 

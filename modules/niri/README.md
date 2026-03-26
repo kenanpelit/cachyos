@@ -42,20 +42,20 @@ UWSM-first session wrapper.
    `niri-shell-ensure.service`, `niri-daemons.target`,
    `niri-post-daemons.target`, and the shared
    compositor-session units enabled by other modules.
-6. `niri-session-env.service` runs `niri-osc set env --no-start-target` before
+6. `niri-session-env.service` runs `niri-session-init --no-start-target` before
    the rest of the session graph so `systemd --user` gets `NIRI_SOCKET` and the
    finalized runtime vars even when UWSM finalize timing is late.
-7. `niri-bootstrap.service` runs `~/.local/bin/niri-osc set bootstrap`, which
-   uses the shared Niri session helper for runtime env/socket detection before
+7. `niri-bootstrap.service` runs `~/.local/bin/niri-bootstrap`, which now uses
+   the shared Niri session helper for runtime env/socket detection before
    calling `niri-osc set init`.
 8. `niri-shell-ensure.service` runs `osc-shell ensure` under `systemd --user`
    instead of relying on `spawn-at-startup` in `config.kdl`.
 9. `niri-daemons.target` becomes the daemon stage for long-running helpers.
 10. `niri-post-daemons.target` becomes the ordered late stage after
    `niri-daemons.target`.
-11. `niri-post-bootstrap.service` runs `~/.local/bin/niri-osc set post-bootstrap`
-    after the daemon services it depends on, performs the GNOME desktop
-    settings sync, and then emits the ready notification.
+11. `niri-post-bootstrap.service` runs `~/.local/bin/niri-post-bootstrap` after
+    the daemon services it depends on and performs the GNOME desktop settings
+    sync before emitting the ready notification.
 
 ## What starts during session startup
 
@@ -64,12 +64,12 @@ These units make up the core Niri session chain:
 - `niri-session.target`
   Session umbrella target started by the UWSM compositor service drop-in.
 - `niri-session-env.service`
-  Pre-bootstrap runtime env sync. Runs `niri-osc set env --no-start-target`
+  Pre-bootstrap runtime env sync. Runs `niri-session-init --no-start-target`
   so the user manager sees `NIRI_SOCKET` before condition-gated units are
   evaluated.
 - `niri-bootstrap.service`
   Early oneshot bootstrap. Uses the shared Niri session helper to normalize
-  runtime state and then runs `niri-osc set bootstrap`.
+  runtime state and then runs `niri-osc set init`.
 - `niri-shell-ensure.service`
   Starts the shell backend through `osc-shell ensure` under `systemd --user`.
 - `niri-daemons.target`
@@ -77,12 +77,11 @@ These units make up the core Niri session chain:
 - `niri-post-daemons.target`
   Ordered late stage for session polish and optional post-daemon services.
 - `niri-post-bootstrap.service`
-  Late oneshot polish. Runs `niri-osc set post-bootstrap`, which applies the
-  desktop theme/icon/cursor sync and then sends a best-effort "Session ready"
-  notification after the daemon stage completes.
+  Late oneshot polish. Runs the desktop theme/icon/cursor sync and then sends
+  a best-effort "Session ready" notification after the daemon stage completes.
 - `niri-status-notifier-ready.service`
   Waits for a session `StatusNotifierWatcher` before tray applets such as
-  Blueman start via `niri-osc set status-notifier-ready`.
+  Blueman start.
 
 These services belong to `niri-daemons.target` and normally come up with the
 session once the environment conditions are satisfied:
@@ -95,8 +94,7 @@ session once the environment conditions are satisfied:
 - `niri-blueman-applet.service`
   Runs `blueman-applet` after the explicit status-notifier readiness gate.
 - `niri-snapper-tools-check.service`
-  Runs the snapshot boot check for `snapper-tools` via
-  `niri-osc set snapper-tools-check`.
+  Runs the snapshot boot check for `snapper-tools`.
 - `niri-sticky.service`
   Runs `niri-float-sticky daemon` for floating sticky windows across workspaces.
 - `niri-niriswitcher.service`
@@ -143,9 +141,9 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   curated Niri-specific allowlist manifest so compositor-specific overrides do
   not leak across sessions. Optional manifest entries are skipped cleanly, while
   missing required entries now emit a warning instead of failing silently.
-  `niri-session-common` remains available as the shared shell library, while
-  manual/runtime backfill now lives under `niri-osc set env` and only fills in
-  missing compositor runtime variables when UWSM did not finalize them.
+  `niri-session-init` remains available as a manual compatibility helper and
+  only backfills missing compositor runtime variables when UWSM did not
+  finalize them.
 - The shared `xdg-portal` module now owns the Niri portal preference file:
   generic dialogs/settings stay on GTK, screencast/screenshot stay on `gnome`,
   and `RemoteDesktop` stays on GNOME as the only installed backend in this

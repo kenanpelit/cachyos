@@ -5,7 +5,7 @@ PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-ConditionPathExists=%h/.local/bin/niri-osc
+ConditionPathExists=%h/.local/bin/status-notifier-ready
 
 [Service]
 Type=oneshot
@@ -13,7 +13,7 @@ TimeoutStartSec=25
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
 Environment=STATUS_NOTIFIER_READY_LOG_TAG=niri-status-notifier-ready
-ExecStart=%h/.local/bin/niri-osc set status-notifier-ready
+ExecStart=%h/.local/bin/status-notifier-ready
 StandardOutput=journal
 StandardError=journal
 
