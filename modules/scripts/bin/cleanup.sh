@@ -13,6 +13,7 @@ readonly HOST_FILE="${REPO_ROOT}/hosts/hay.yaml"
 readonly BASE_DESKTOP_PACKAGES_FILE="${REPO_ROOT}/modules/base/packages-desktop.yaml"
 readonly GNOME_MODULE_FILE="${REPO_ROOT}/modules/gnome/packages.yaml"
 readonly SYSTEM_PACKAGES_FILE="${REPO_ROOT}/modules/system-packages-hay/packages.yaml"
+readonly XDG_MIMEAPPS_FILE="${REPO_ROOT}/modules/xdg-mimes/dotfiles/mimeapps.list"
 readonly COSMIC_MODULE_DIR="${REPO_ROOT}/modules/cosmic"
 readonly LIDM_INSTALL_SCRIPT="${REPO_ROOT}/modules/lidm/scripts/install.sh"
 
@@ -446,12 +447,22 @@ cleanup_gnome_repo() {
   replace_exact_line "${HOST_FILE}" "  pdf: org.gnome.Evince.desktop" "  pdf: org.pwmt.zathura.desktop"
   replace_exact_line "${HOST_FILE}" "  archive: org.gnome.FileRoller.desktop" "  archive: nemo.desktop"
   replace_exact_line "${HOST_FILE}" "    application/pdf: org.gnome.Evince.desktop" "    application/pdf: org.pwmt.zathura.desktop"
+  replace_exact_line "${HOST_FILE}" "    application/zip: org.gnome.FileRoller.desktop" "    application/zip: nemo.desktop"
+  replace_exact_line "${HOST_FILE}" "    application/rar: org.gnome.FileRoller.desktop" "    application/rar: nemo.desktop"
+  replace_exact_line "${HOST_FILE}" "    application/7z: org.gnome.FileRoller.desktop" "    application/7z: nemo.desktop"
+  replace_exact_line "${HOST_FILE}" "    application/*tar: org.gnome.FileRoller.desktop" "    application/*tar: nemo.desktop"
+
+  replace_exact_line "${XDG_MIMEAPPS_FILE}" "application/pdf=org.gnome.Evince.desktop" "application/pdf=org.pwmt.zathura.desktop"
+  replace_exact_line "${XDG_MIMEAPPS_FILE}" "application/*tar=org.gnome.FileRoller.desktop" "application/*tar=nemo.desktop"
+  replace_exact_line "${XDG_MIMEAPPS_FILE}" "application/7z=org.gnome.FileRoller.desktop" "application/7z=nemo.desktop"
+  replace_exact_line "${XDG_MIMEAPPS_FILE}" "application/rar=org.gnome.FileRoller.desktop" "application/rar=nemo.desktop"
+  replace_exact_line "${XDG_MIMEAPPS_FILE}" "application/zip=org.gnome.FileRoller.desktop" "application/zip=nemo.desktop"
 
   remove_exact_lines "${GNOME_MODULE_FILE}" "${GNOME_MODULE_REMOVE_LINES[@]}"
   remove_exact_lines "${SYSTEM_PACKAGES_FILE}" "${GNOME_REPO_REMOVE_LINES[@]}"
   remove_exact_lines "${BASE_DESKTOP_PACKAGES_FILE}" "${GNOME_BASE_REPO_REMOVE_LINES[@]}"
 
-  stage_paths "${HOST_FILE}" "${GNOME_MODULE_FILE}" "${SYSTEM_PACKAGES_FILE}" "${BASE_DESKTOP_PACKAGES_FILE}"
+  stage_paths "${HOST_FILE}" "${GNOME_MODULE_FILE}" "${SYSTEM_PACKAGES_FILE}" "${BASE_DESKTOP_PACKAGES_FILE}" "${XDG_MIMEAPPS_FILE}"
 }
 
 cleanup_gnome_system() {

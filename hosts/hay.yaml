@@ -154,9 +154,9 @@ default_apps:
     application/vnd.ms-powerpoint: libreoffice-impress.desktop
     application/rtf: libreoffice-writer.desktop
     application/pdf: org.pwmt.zathura.desktop
-    application/zip: org.gnome.FileRoller.desktop
-    application/rar: org.gnome.FileRoller.desktop
-    application/7z: org.gnome.FileRoller.desktop
-    application/*tar: org.gnome.FileRoller.desktop
+    application/zip: nemo.desktop
+    application/rar: nemo.desktop
+    application/7z: nemo.desktop
+    application/*tar: nemo.desktop
     x-scheme-handler/discord: webcord.desktop
     x-scheme-handler/mpv: open-in-mpv.desktop

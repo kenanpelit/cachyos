@@ -1,9 +1,9 @@
 [Added Associations]
-application/*tar=org.gnome.FileRoller.desktop
-application/7z=org.gnome.FileRoller.desktop
+application/*tar=nemo.desktop
+application/7z=nemo.desktop
 application/msword=libreoffice.desktop
-application/pdf=org.gnome.Evince.desktop
-application/rar=org.gnome.FileRoller.desktop
+application/pdf=org.pwmt.zathura.desktop
+application/rar=nemo.desktop
 application/rtf=libreoffice.desktop
 application/vnd.ms-excel=libreoffice.desktop
 application/vnd.ms-powerpoint=libreoffice.desktop
@@ -15,7 +15,7 @@ application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=libreoffice.de
 application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice.desktop
 application/xhtml+xml=helium-kenp.desktop
 application/x-bittorrent=transmission-gtk.desktop;
-application/zip=org.gnome.FileRoller.desktop
+application/zip=nemo.desktop
 audio/aac=mpv.desktop
 audio/mpeg=mpv.desktop
 audio/ogg=mpv.desktop
@@ -56,11 +56,11 @@ x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
 x-scheme-handler/magnet=transmission-gtk.desktop;
 
 [Default Applications]
-application/*tar=org.gnome.FileRoller.desktop
-application/7z=org.gnome.FileRoller.desktop
+application/*tar=nemo.desktop
+application/7z=nemo.desktop
 application/msword=libreoffice-writer.desktop
-application/pdf=org.gnome.Evince.desktop
-application/rar=org.gnome.FileRoller.desktop
+application/pdf=org.pwmt.zathura.desktop
+application/rar=nemo.desktop
 application/rtf=libreoffice-writer.desktop
 application/vnd.ms-excel=libreoffice-calc.desktop
 application/vnd.ms-powerpoint=libreoffice-impress.desktop
@@ -77,7 +77,7 @@ application/x-extension-xht=helium-kenp.desktop
 application/x-extension-xhtml=helium-kenp.desktop
 application/x-bittorrent=transmission-gtk.desktop
 application/xhtml+xml=helium-kenp.desktop
-application/zip=org.gnome.FileRoller.desktop
+application/zip=nemo.desktop
 audio/aac=mpv.desktop
 audio/flac=vlc.desktop
 audio/mpeg=mpv.desktop
