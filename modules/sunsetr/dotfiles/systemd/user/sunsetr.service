@@ -2,8 +2,8 @@
 Description=Sunsetr blue-light and gamma filter
 Documentation=https://github.com/psi4j/sunsetr?tab=readme-ov-file#sunsetr
 BindsTo=graphical-session.target
-After=graphical-session.target dbus.service
-PartOf=graphical-session.target
+After=graphical-session.target niri-session-env.service hypr-session-env.service dbus.service
+PartOf=graphical-session.target niri-session.target hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
@@ -20,3 +20,5 @@ Slice=background.slice
 
 [Install]
 WantedBy=graphical-session.target
+WantedBy=niri-session.target
+WantedBy=hyprland-session.target

@@ -62,6 +62,7 @@ sync_session_environment() {
 ensure_uwsm_runtime_environment() {
   niri_detect_wayland_display
   niri_detect_socket
+  session_common_detect_x11_display
   niri_sync_runtime_environment
 }
 
@@ -91,6 +92,7 @@ main() {
     normalize_session_paths
     niri_detect_wayland_display
     niri_detect_socket
+    session_common_detect_x11_display
     sync_session_environment
   fi
 

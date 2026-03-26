@@ -53,8 +53,10 @@ if command -v systemctl >/dev/null 2>&1; then
   user_systemd_dir="$USER_HOME/.config/systemd/user"
   systemd_dir="$REPO_ROOT/modules/sunsetr/dotfiles/systemd/user"
   graphical_wants_dir="$user_systemd_dir/graphical-session.target.wants"
+  niri_wants_dir="$user_systemd_dir/niri-session.target.wants"
+  hypr_wants_dir="$user_systemd_dir/hyprland-session.target.wants"
 
-  run_as_user mkdir -p "$user_systemd_dir" "$graphical_wants_dir"
+  run_as_user mkdir -p "$user_systemd_dir" "$graphical_wants_dir" "$niri_wants_dir" "$hypr_wants_dir"
   ensure_user_link "$systemd_dir/sunsetr.service" "$user_systemd_dir/sunsetr.service"
 
   rm -f \
@@ -70,6 +72,8 @@ if command -v systemctl >/dev/null 2>&1; then
     "$user_systemd_dir/sunsetr.service.d/10-cachy.conf"
   rmdir "$user_systemd_dir/sunsetr.service.d" >/dev/null 2>&1 || true
   ensure_user_link "$user_systemd_dir/sunsetr.service" "$graphical_wants_dir/sunsetr.service"
+  ensure_user_link "$user_systemd_dir/sunsetr.service" "$niri_wants_dir/sunsetr.service"
+  ensure_user_link "$user_systemd_dir/sunsetr.service" "$hypr_wants_dir/sunsetr.service"
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
 
   if supported_wayland_session_active; then

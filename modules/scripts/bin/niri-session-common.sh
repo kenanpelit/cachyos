@@ -97,6 +97,39 @@ niri_normalize_session_paths() {
 }
 
 niri_detect_wayland_display() {
+  [[ -n "${WAYLAND_DISPLAY:-}" ]] && return 0
+
+  local sock base rest display
+
+  if [[ -n "${NIRI_SOCKET:-}" ]] && [[ -S "${NIRI_SOCKET}" ]]; then
+    base="$(basename "${NIRI_SOCKET}")"
+    rest="${base#niri.}"
+    display="${rest%%.*}"
+    if [[ "${display}" == wayland-* ]]; then
+      export WAYLAND_DISPLAY="${display}"
+      return 0
+    fi
+  fi
+
+  [[ -n "${XDG_RUNTIME_DIR:-}" ]] || {
+    session_common_detect_wayland_display
+    return 0
+  }
+
+  shopt -s nullglob
+  for sock in "${XDG_RUNTIME_DIR}"/niri.wayland-*.*.sock "${XDG_RUNTIME_DIR}"/niri.*.sock; do
+    [[ -S "$sock" ]] || continue
+    base="$(basename "$sock")"
+    rest="${base#niri.}"
+    display="${rest%%.*}"
+    [[ "${display}" == wayland-* ]] || continue
+    export NIRI_SOCKET="$sock"
+    export WAYLAND_DISPLAY="${display}"
+    shopt -u nullglob
+    return 0
+  done
+  shopt -u nullglob
+
   session_common_detect_wayland_display
 }
 
