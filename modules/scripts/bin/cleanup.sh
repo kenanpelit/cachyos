@@ -10,6 +10,7 @@ fi
 
 readonly REPO_ROOT
 readonly HOST_FILE="${REPO_ROOT}/hosts/hay.yaml"
+readonly BASE_DESKTOP_PACKAGES_FILE="${REPO_ROOT}/modules/base/packages-desktop.yaml"
 readonly GNOME_MODULE_FILE="${REPO_ROOT}/modules/gnome/packages.yaml"
 readonly SYSTEM_PACKAGES_FILE="${REPO_ROOT}/modules/system-packages-hay/packages.yaml"
 readonly COSMIC_MODULE_DIR="${REPO_ROOT}/modules/cosmic"
@@ -221,6 +222,10 @@ readonly -a GNOME_REPO_REMOVE_LINES=(
   "- tecla"
   "- totem"
   "- yelp"
+)
+
+readonly -a GNOME_BASE_REPO_REMOVE_LINES=(
+  "  - gnome-monitor-config-git"
 )
 
 usage() {
@@ -444,8 +449,9 @@ cleanup_gnome_repo() {
 
   remove_exact_lines "${GNOME_MODULE_FILE}" "${GNOME_MODULE_REMOVE_LINES[@]}"
   remove_exact_lines "${SYSTEM_PACKAGES_FILE}" "${GNOME_REPO_REMOVE_LINES[@]}"
+  remove_exact_lines "${BASE_DESKTOP_PACKAGES_FILE}" "${GNOME_BASE_REPO_REMOVE_LINES[@]}"
 
-  stage_paths "${HOST_FILE}" "${GNOME_MODULE_FILE}" "${SYSTEM_PACKAGES_FILE}"
+  stage_paths "${HOST_FILE}" "${GNOME_MODULE_FILE}" "${SYSTEM_PACKAGES_FILE}" "${BASE_DESKTOP_PACKAGES_FILE}"
 }
 
 cleanup_gnome_system() {

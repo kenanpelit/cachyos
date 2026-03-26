@@ -7,7 +7,6 @@ packages:
   - brightnessctl
   - tigervnc
   - remmina
-  - gnome-monitor-config-git
   # tigervnc is enforced via the base hook to keep it on extra/tigervnc.
 
   # Documents (moved evince, zathura)
