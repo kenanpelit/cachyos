@@ -56,7 +56,7 @@ enabled_modules:
 - dms
 - noctalia
 # - dms-greeter
-- gdm
+- lidm
 - fusuma
 - bt
 - connect
@@ -103,8 +103,8 @@ default_apps:
   file_manager: nemo.desktop
   terminal: kitty.desktop
   office: libreoffice-startcenter.desktop
-  pdf: org.gnome.Evince.desktop
-  archive: org.gnome.FileRoller.desktop
+  pdf: org.pwmt.zathura.desktop
+  archive: nemo.desktop
   video: mpv.desktop
   music: mpv.desktop
   image: imv-dir.desktop
@@ -153,7 +153,7 @@ default_apps:
     application/vnd.ms-excel: libreoffice-calc.desktop
     application/vnd.ms-powerpoint: libreoffice-impress.desktop
     application/rtf: libreoffice-writer.desktop
-    application/pdf: org.gnome.Evince.desktop
+    application/pdf: org.pwmt.zathura.desktop
     application/zip: org.gnome.FileRoller.desktop
     application/rar: org.gnome.FileRoller.desktop
     application/7z: org.gnome.FileRoller.desktop
