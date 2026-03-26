@@ -185,6 +185,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `home-net-vpn`
+**Description:** Bring up the home Wi-Fi profile, then reconcile Mullvad/Blocky.
+
+**Usage:** `home-net-vpn`
+
+---
+
 ### 📂 `hypr-blueman-applet`
 **Description:** Wayland-safe Blueman applet wrapper for Hyprland sessions.
 
