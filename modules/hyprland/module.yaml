@@ -5,6 +5,8 @@ description: Hyprland config
 depends_on:
 - base
 - wayland-env
+- gtk
+- qt
 - scripts
 - wayland-autostart
 - user-services

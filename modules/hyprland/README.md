@@ -8,7 +8,7 @@ This module owns the Hyprland compositor config, the Hyprland-specific
 
 - install the Hyprland config split under `~/.config/hypr`
 - install the canonical Hypr session environment file
-- install the ordered Hypr session env allowlist manifest
+- install the self-contained ordered Hypr session env allowlist manifest
 - make the Hyprland UWSM wrapper consume the curated repo-managed
   environment stack before the compositor starts
 - render the managed monitor/workspace mapping from a selected monitor profile
@@ -35,7 +35,9 @@ module.
 - The wrapper loads the curated Hyprland environment stack through
   `hypr-session-common` plus the ordered allowlist manifest at
   `~/.config/environment.d/hyprland-session.envlist`, normalizes path
-  variables, applies the Hyprland session identity
+  variables, applies the Hyprland session identity, and supports optional
+  `?entry` manifest rows plus `$HOME`/`${HOME}` expansion for explicit session
+  overlays
   (`DESKTOP_SESSION=hyprland-uwsm`, `XDG_CURRENT_DESKTOP=Hyprland`), and then
   hands off to `uwsm start`.
 - Once Hyprland is up, the repo-managed drop-in for
@@ -156,16 +158,19 @@ Daemon-stage units started by `hypr-daemons.target`:
   Window-rule index that sources the topic-specific rules files.
 - `dotfiles/environment.d/10-hyprland.conf`
   Generated session environment file derived from `theme/theme.env` plus the
-  Hyprland-specific session defaults. Session identity such as
+  Hyprland-specific session defaults and session policy. Shared GTK/Qt toolkit
+  hints remain in the shared `environment.d` layer. Session identity such as
   `DESKTOP_SESSION=hyprland-uwsm` is now owned by the UWSM wrapper rather than
   this file, and it is installed under
   `~/.config/session-env/hyprland/10-hyprland.conf`.
 - `dotfiles/environment.d/hyprland-session.envlist`
-  Ordered allowlist manifest for the Hyprland session wrapper. This keeps the
-  session env stack data-driven instead of hard-coding file names in shell.
+  Ordered allowlist manifest for the Hyprland session wrapper. It explicitly
+  includes the Hyprland session overlay file, supports optional `?entry`
+  syntax, expands `$HOME`/`${HOME}`, and keeps the session env stack
+  data-driven instead of hard-coding file names in shell.
 - `theme/theme.env`
-  Canonical theme manifest for GTK theme, cursor/icon theme, Catppuccin accent,
-  and Hyprland visual sizing.
+  Canonical theme manifest for GTK theme, cursor theme, Catppuccin accent, and
+  Hyprland visual sizing.
 - `scripts/render-theme.sh`
   Renderer that regenerates `10-hyprland.conf` and `20-theme.conf` from
   `theme/theme.env`. `render-theme.sh --check` verifies that the generated
@@ -186,6 +191,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   Post-install hook that renders the theme and monitor files, removes the
   Hyprland-only keyring override, re-enables the stock
   `gnome-keyring-daemon` units, and persists the Blueman plugin mask.
+- `scripts/validate.sh`
+  Repo-side validation helper that runs the generator drift checks and shell
+  syntax checks together in one command.
 - `dotfiles/hypr/conf.d/70-monitors.conf`
   Generated monitor layout and workspace routing for the selected monitor
   profile.
@@ -203,8 +211,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   owns compositor-agnostic Wayland toolkit/runtime hints, while Hyprland-only
   variables now live in
   `~/.config/session-env/hyprland/10-hyprland.conf`. The ordered
-  `hyprland-session.envlist` allowlist keeps Niri-only or ad-hoc user
-  overrides from leaking into the Hyprland session wrapper.
+  `hyprland-session.envlist` allowlist is now self-contained, so the wrapper
+  no longer appends hidden overlay files on its own and missing required
+  manifest entries are warned about instead of silently ignored.
   `hypr-session-init` remains available as a manual compatibility helper and
   avoids re-importing that full static environment when UWSM is already
   managing the session, only backfilling missing compositor runtime variables
@@ -214,14 +223,16 @@ Daemon-stage units started by `hypr-daemons.target`:
   parsing, path normalization, `WAYLAND_DISPLAY` detection, and
   systemd/dbus environment sync. Compositor-specific helpers keep only the
   runtime detection logic that is unique to each compositor.
-- Qt theming authority is intentionally split: `modules/qt/dotfiles/environment.d/20-qt.conf`
-  owns `QT_QPA_PLATFORMTHEME`, `QT_QPA_PLATFORMTHEME_QT6`, and
-  `QT_STYLE_OVERRIDE`, while the Hyprland session layer only keeps generic Qt
-  Wayland/scaling hints. `99-dms-icons.conf` now only reinforces icon-theme
-  variables and no longer overrides the Qt platform theme.
+- Shared GTK/Qt env layers own toolkit hints, scale settings, and icon-theme
+  variables. The generated Hyprland session layer now keeps only
+  compositor/session-specific defaults such as cursor sync, Hyprland runtime
+  flags, PATH policy, and desktop-session policy toggles.
 - The generated Hyprland env file now exposes both `PATH_CORE` and `PATH_USER`
   alongside the combined `PATH` so desktop bootstrap path policy stays visible
   instead of being buried in shell code.
+- `HYPR_SYNC_GNOME_APPEARANCE=1` remains the default, but the desktop-settings
+  sync can now be disabled per session/profile when separate GNOME appearance
+  state is desired.
 - Logout flows should prefer `uwsm stop` over `hyprctl dispatch exit` so the
   compositor, session targets, and UWSM-managed user services shut down
   together.

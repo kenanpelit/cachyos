@@ -11,6 +11,18 @@ LOG_TAG="hypr-desktop-settings"
 log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
 warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
 
+case "${HYPR_SYNC_GNOME_APPEARANCE:-1}" in
+  1|true|yes|on)
+    ;;
+  0|false|no|off)
+    log "GNOME appearance sync disabled; skipping"
+    exit 0
+    ;;
+  *)
+    warn "unrecognized HYPR_SYNC_GNOME_APPEARANCE=${HYPR_SYNC_GNOME_APPEARANCE}; treating as enabled"
+    ;;
+esac
+
 if ! command -v gsettings >/dev/null 2>&1; then
   log "gsettings not found; skipping desktop settings sync"
   exit 0

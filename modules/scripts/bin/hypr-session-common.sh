@@ -10,6 +10,10 @@ COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"
 # shellcheck source=wayland-session-common.sh
 source "${COMMON_HELPER}"
 
+hypr_log_warn() {
+  printf '[hypr-session-common] WARN: %s\n' "$*" >&2
+}
+
 hypr_session_env_file() {
   printf '%s\n' "${HYPR_SESSION_ENVIRONMENT_FILE:-$HOME/.config/session-env/hyprland/10-hyprland.conf}"
 }
@@ -31,37 +35,49 @@ hypr_parse_env_file() {
 }
 
 hypr_parse_env_dir() {
-  local env_dir manifest entry file env_file
+  local env_dir manifest raw_entry entry env_file
+  local optional=false
   local -a env_files=()
 
   env_dir="$(hypr_session_env_dir)"
   manifest="$(hypr_session_env_manifest)"
 
   if [[ -r "${manifest}" ]]; then
-    while IFS= read -r entry; do
-      [[ -n "${entry}" ]] || continue
-      [[ "${entry#\#}" == "${entry}" ]] || continue
-      if [[ "${entry}" == /* ]]; then
-        env_files+=("${entry}")
-      else
-        env_files+=("${env_dir}/${entry}")
+    while IFS= read -r raw_entry; do
+      [[ -n "${raw_entry}" ]] || continue
+      [[ "${raw_entry#\#}" == "${raw_entry}" ]] || continue
+
+      optional=false
+      entry="${raw_entry}"
+      if [[ "${entry}" == \?* ]]; then
+        optional=true
+        entry="${entry#\?}"
       fi
+
+      entry="${entry//\$\{HOME\}/$HOME}"
+      entry="${entry//\$HOME/$HOME}"
+      if [[ "${entry}" != /* ]]; then
+        entry="${env_dir}/${entry}"
+      fi
+
+      if [[ -r "${entry}" ]]; then
+        env_files+=("${entry}")
+        continue
+      fi
+
+      $optional && continue
+      hypr_log_warn "missing required session env entry: ${entry}"
     done <"${manifest}"
   fi
 
   if [[ ${#env_files[@]} -eq 0 ]]; then
+    env_file="$(hypr_session_env_file)"
     env_files=(
       "${env_dir}/00-wayland.conf"
       "${env_dir}/10-gtk.conf"
       "${env_dir}/20-qt.conf"
-      "${env_dir}/30-ollama.conf"
-      "${env_dir}/99-dms-icons.conf"
+      "${env_file}"
     )
-  fi
-
-  env_file="$(hypr_session_env_file)"
-  if [[ -r "${env_file}" ]]; then
-    env_files+=("${env_file}")
   fi
 
   session_common_parse_env_dir "${env_files[@]}"
