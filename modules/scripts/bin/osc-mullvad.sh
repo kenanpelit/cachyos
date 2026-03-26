@@ -19,6 +19,7 @@ VERSION="3.0.0"
 SCRIPT_NAME=$(basename "$0")
 TIMEOUT=30 # Seconds to wait for connection before timeout
 CONNECTION_RETRIES=3
+TOGGLE_LOCK_FILE="${OSC_MULLVAD_TOGGLE_LOCK_FILE:-${XDG_RUNTIME_DIR:-/tmp}/osc-mullvad-toggle.$(id -u).lock}"
 
 # Storage directories and files (everything under ~/.mullvad by default)
 MULLVAD_DIR="${OSC_MULLVAD_DIR:-$HOME/.mullvad}"
@@ -487,6 +488,117 @@ toggle_basic_vpn_with_blocky() {
 	# Unknown/error state -> enforce safe fallback rule.
 	log "VPN durumu belirsiz; fail-safe ensure uygulanıyor."
 	ensure_blocky_for_vpn_state
+}
+
+toggle_usage() {
+	cat <<EOF
+Usage:
+  $SCRIPT_NAME toggle [--with-blocky|--no-blocky] [--dry-run] [--no-notify]
+
+Options:
+  --with-blocky    Toggle VPN and keep Blocky coupled as fallback
+  --no-blocky      Toggle only Mullvad
+  --dry-run        Show the expected transition without changing state
+  --no-notify      Suppress desktop notifications for this invocation
+EOF
+}
+
+toggle_preview() {
+	local with_blocky="${1:-1}"
+	local vpn_connected="0"
+	local blocky_active="0"
+
+	if mullvad_is_connected; then
+		vpn_connected="1"
+	fi
+
+	if blocky_is_active; then
+		blocky_active="1"
+	fi
+
+	echo "[dry-run] current: mullvad=$([[ "$vpn_connected" == "1" ]] && echo connected || echo disconnected), blocky=$([[ "$blocky_active" == "1" ]] && echo on || echo off)"
+	if [[ "$with_blocky" == "1" ]]; then
+		if [[ "$vpn_connected" == "1" ]]; then
+			echo "[dry-run] next: disconnect Mullvad, start Blocky"
+		else
+			echo "[dry-run] next: stop Blocky, connect Mullvad"
+		fi
+	else
+		if [[ "$vpn_connected" == "1" ]]; then
+			echo "[dry-run] next: disconnect Mullvad"
+		else
+			echo "[dry-run] next: connect Mullvad"
+		fi
+	fi
+}
+
+toggle_main() {
+	local with_blocky="0"
+	local dry_run="0"
+	local notify_enabled="1"
+	local lock_wait_sec="${OSC_MULLVAD_TOGGLE_LOCK_WAIT_SEC:-3}"
+
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+		--with-blocky | --blocky | --dns=auto | --dns-auto)
+			with_blocky="1"
+			;;
+		--no-blocky)
+			with_blocky="0"
+			;;
+		--dry-run)
+			dry_run="1"
+			;;
+		--no-notify)
+			notify_enabled="0"
+			;;
+		-h | --help | help)
+			toggle_usage
+			return 0
+			;;
+		*)
+			echo -e "${RED}Unknown toggle option:${NC} $1" >&2
+			toggle_usage >&2
+			return 2
+			;;
+		esac
+		shift
+	done
+
+	if [[ "$dry_run" == "1" ]]; then
+		toggle_preview "$with_blocky"
+		return 0
+	fi
+
+	[[ "$lock_wait_sec" =~ ^[0-9]+$ ]] || lock_wait_sec=3
+
+	if command -v flock >/dev/null 2>&1; then
+		if ! { exec 9>"$TOGGLE_LOCK_FILE"; } 2>/dev/null; then
+			log "warn: toggle lock unavailable, continuing without lock: $TOGGLE_LOCK_FILE"
+		else
+			flock -w "$lock_wait_sec" 9 || {
+				echo -e "${RED}another toggle is already running${NC}" >&2
+				return 1
+			}
+		fi
+	fi
+
+	local saved_no_notify="${OSC_MULLVAD_NO_NOTIFY:-0}"
+	local rc=0
+
+	if [[ "$notify_enabled" != "1" ]]; then
+		export OSC_MULLVAD_NO_NOTIFY=1
+	fi
+
+	if [[ "$with_blocky" == "1" ]]; then
+		toggle_basic_vpn_with_blocky || rc=$?
+		ensure_blocky_for_vpn_state "${OSC_MULLVAD_TOGGLE_ENSURE_GRACE_SEC:-0}" || true
+	else
+		toggle_basic_vpn || rc=$?
+	fi
+
+	export OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+	return "$rc"
 }
 
 # ----------------------------------------------------------------------------
@@ -1591,10 +1703,34 @@ slot_cmd_status() {
 	fi
 }
 
+slot_exec_in_terminal() {
+	local cmd="${1:-recycle}"
+	shift || true
+
+	if ! command -v kitty >/dev/null 2>&1; then
+		slot_die "kitty not found; install kitty or run without --hold"
+	fi
+
+	local args=("$0" "slot")
+	[[ "$SLOT_DRY_RUN" == "true" ]] && args+=("--dry-run")
+	args+=("--hold" "--run" "$cmd")
+	[[ $# -gt 0 ]] && args+=("$@")
+
+	local quoted=()
+	local arg escaped
+	for arg in "${args[@]}"; do
+		printf -v escaped '%q' "$arg"
+		quoted+=("$escaped")
+	done
+
+	exec kitty --hold --class mullvad -T mullvad --single-instance \
+		-e bash --noprofile --norc -lc "${quoted[*]}"
+}
+
 slot_usage() {
 	cat <<EOF
 Usage:
-  $SCRIPT_NAME slot [--dry-run] <command>
+  $SCRIPT_NAME slot [--dry-run] [--hold] <command>
 
 Commands:
   recycle        Revoke other OS device(s) from slot state -> login -> connect -> record self
@@ -1617,17 +1753,44 @@ Env:
 Examples:
   $SCRIPT_NAME slot recycle
   $SCRIPT_NAME slot --dry-run recycle
+  $SCRIPT_NAME slot --hold recycle
 EOF
 }
 
 slot_main() {
-	if [[ "${1:-}" == "--dry-run" ]]; then
-		SLOT_DRY_RUN="true"
-		shift
+	local slot_hold="false"
+	local slot_run_mode="false"
+
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+		--dry-run)
+			SLOT_DRY_RUN="true"
+			shift
+			;;
+		--hold | --terminal)
+			slot_hold="true"
+			shift
+			;;
+		--run)
+			slot_run_mode="true"
+			shift
+			;;
+		*)
+			break
+			;;
+		esac
+	done
+
+	local cmd="${1:-}"
+	if [[ -z "$cmd" ]]; then
+		cmd=$([[ "$slot_hold" == "true" ]] && echo "recycle" || echo "help")
+	else
+		shift || true
 	fi
 
-	local cmd="${1:-help}"
-	shift || true
+	if [[ "$slot_hold" == "true" && "$slot_run_mode" != "true" ]]; then
+		slot_exec_in_terminal "$cmd" "$@"
+	fi
 
 	case "$cmd" in
 	recycle) slot_cmd_recycle ;;
@@ -1834,6 +1997,39 @@ obf_cycle() {
 _obf_current_mode() {
 	mullvad obfuscation get 2>/dev/null |
 		awk -F': ' '/^Obfuscation mode/ {print tolower($2)}'
+}
+
+split_usage() {
+	cat <<EOF
+Usage:
+  $SCRIPT_NAME split
+
+Description:
+  Show the processes currently excluded from Mullvad split tunnel.
+EOF
+}
+
+show_split_tunnel_status() {
+	local pids=""
+
+	pids="$(mullvad split-tunnel list 2>/dev/null | awk '/^[0-9]+$/ {print}' | xargs || true)"
+	if [[ -z "$pids" ]]; then
+		echo -e "\e[1;33mNo processes are currently excluded from the Mullvad tunnel.\e[0m"
+		return 0
+	fi
+
+	echo -e "\e[1;36m┏━ Mullvad Split-Tunnel Status ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\e[0m"
+	printf "\e[1;36m┃\e[0m \e[1m%-8s\e[0m │ \e[1m%-15s\e[0m │ \e[1m%s\e[0m\n" "PID" "COMMAND" "ARGUMENTS"
+	echo -e "\e[1;36m┣━━━━━━━━━━╋━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\e[0m"
+
+	ps -p "${pids// /,}" -o pid=,comm=,args= --sort=comm | while read -r pid comm args; do
+		local clean_args
+		clean_args=$(echo "$args" | sed "s|^$comm ||" | sed "s|^[^ ]*/$comm ||")
+		[[ -z "$clean_args" || "$clean_args" == "$comm" ]] && clean_args="-"
+		printf "\e[1;36m┃\e[0m \e[32m%-8s\e[0m │ \e[1m%-15.15s\e[0m │ %-50.150s\n" "$pid" "$comm" "$clean_args"
+	done
+
+	echo -e "\e[1;36m┗━━━━━━━━━━┻━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\e[0m"
 }
 
 show_status() {
@@ -2176,6 +2372,8 @@ show_help() {
 	echo -e "    ${GREEN}disconnect${NC}        Disconnect from Mullvad VPN"
 	echo -e "    ${GREEN}toggle${NC}            Toggle VPN connection on/off"
 	echo -e "    ${GREEN}toggle --with-blocky${NC}  Toggle VPN and stop/start Blocky accordingly"
+	echo -e "    ${GREEN}toggle --dry-run${NC}  Preview the next toggle action"
+	echo -e "    ${GREEN}split${NC}             Show Mullvad split-tunnel excluded processes"
 	echo -e "    ${GREEN}ensure${NC}            Enforce fail-safe DNS rule (VPN unhealthy => Blocky ON)"
 	echo -e "    ${GREEN}status${NC}            Show current connection status and details"
 	echo -e "    ${GREEN}test${NC}              Test current connection for leaks/issues"
@@ -2205,6 +2403,7 @@ show_help() {
 	echo -e ""
 	echo -e "${YELLOW}Device Slot (multi-machine):${NC}"
 	echo -e "    ${GREEN}slot recycle${NC}       Revoke other machine device(s) -> login -> connect -> record self"
+	echo -e "    ${GREEN}slot --hold recycle${NC}  Open a held kitty window and run slot recycle"
 	echo -e "    ${GREEN}slot status${NC}        Show slot state + current device"
 	echo -e "    ${GREEN}slot whoami${NC}        Print current Mullvad device name"
 	echo -e "    ${GREEN}slot list${NC}          List devices on the account"
@@ -2219,6 +2418,7 @@ show_help() {
 	echo -e "    ${GREEN}$SCRIPT_NAME disconnect${NC}        # Disconnect from VPN"
 	echo -e "    ${GREEN}$SCRIPT_NAME toggle${NC}            # Toggle VPN connection on/off"
 	echo -e "    ${GREEN}$SCRIPT_NAME toggle --with-blocky${NC}  # Toggle VPN + Blocky auto"
+	echo -e "    ${GREEN}$SCRIPT_NAME split${NC}             # Show split-tunnel excluded processes"
 	echo -e "    ${GREEN}$SCRIPT_NAME ensure${NC}            # VPN unhealthy/disconnected => Blocky fallback"
 	echo -e "    ${GREEN}$SCRIPT_NAME protocol${NC}          # Switch between OpenVPN/WireGuard"
 	echo -e "    ${GREEN}$SCRIPT_NAME random${NC}            # Switch to any random relay"
@@ -2278,12 +2478,20 @@ main() {
 		fi
 		;;
 	"toggle")
+		toggle_main "${@:2}"
+		;;
+	"split")
 		case "${2:-}" in
-		--with-blocky | --blocky | --dns=auto | --dns-auto)
-			toggle_basic_vpn_with_blocky
+		"" )
+			show_split_tunnel_status
+			;;
+		-h | --help | help)
+			split_usage
 			;;
 		*)
-			toggle_basic_vpn
+			echo -e "${RED}Unknown split option:${NC} ${2:-<none>}" >&2
+			split_usage >&2
+			exit 2
 			;;
 		esac
 		;;

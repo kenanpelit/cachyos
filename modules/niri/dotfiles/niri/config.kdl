@@ -483,10 +483,10 @@ binds {
     spawn "bluetooth_toggle"
   }
   Alt+F12 repeat=false hotkey-overlay-title="VPN Toggle" {
-    spawn "osc-mullvad-toggle"
+    spawn "osc-mullvad" "toggle" "--with-blocky"
   }
   Mod+Alt+F12 repeat=false hotkey-overlay-title="VPN Slot Recycle" {
-    spawn "osc-mullvad-slot"
+    spawn "osc-mullvad" "slot" "--hold" "recycle"
   }
 
   // Screenshots: Rec (Area), Region, Output (Screen), Window.

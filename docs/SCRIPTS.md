@@ -484,26 +484,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 **Usage:** `osc-mullvad.sh [COMMAND] [ARGUMENTS]`
 
----
-
-### 📂 `osc-mullvad-slot`
-**Description:** Shortcut wrapper for Mullvad slot recycle.
-
-**Usage:** `osc-mullvad-slot.sh [--dry-run]`
-
----
-
-### 📂 `osc-mullvad-split`
-**Description:** Elegant list of processes excluded from Mullvad VPN.
-
-**Usage:** `osc-mullvad-split`
-
----
-
-### 📂 `osc-mullvad-toggle`
-**Description:** Toggles Mullvad VPN connection, optionally with Blocky DNS coupling.
-
-**Usage:** `osc-mullvad-toggle.sh [--no-blocky] [--dry-run] [--no-notify]`
+**Integrated subcommands:**
+- `osc-mullvad.sh toggle [--with-blocky|--no-blocky] [--dry-run] [--no-notify]`
+- `osc-mullvad.sh split`
+- `osc-mullvad.sh slot [--dry-run] [--hold] recycle`
 
 ---
 
@@ -1010,4 +994,3 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Usage:** `yt-cookies-youtube`
 
 ---
-
