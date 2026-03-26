@@ -15,6 +15,10 @@ dotfiles:
   target: ~/.config/systemd/user/geoclue-agent.service
 - source: dotfiles/systemd/user/geoclue-agent.timer
   target: ~/.config/systemd/user/geoclue-agent.timer
+- source: dotfiles/systemd/user/home-net-vpn.service
+  target: ~/.config/systemd/user/home-net-vpn.service
+- source: dotfiles/systemd/user/home-net-vpn.timer
+  target: ~/.config/systemd/user/home-net-vpn.timer
 - source: dotfiles/systemd/user/ppp-auto-profile.service
   target: ~/.config/systemd/user/ppp-auto-profile.service
 - source: dotfiles/systemd/user/ppp-auto-profile.timer

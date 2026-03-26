@@ -1,0 +1,11 @@
+[Unit]
+Description=Run home Wi-Fi and Mullvad setup 10 seconds after login
+PartOf=graphical-session.target
+
+[Timer]
+OnActiveSec=10s
+AccuracySec=1s
+Unit=home-net-vpn.service
+
+[Install]
+WantedBy=graphical-session.target

@@ -82,14 +82,20 @@ if command -v systemctl >/dev/null 2>&1; then
   # dotfiles, so disabling them on every sync just recreates the main symlinks.
   run_as_user rm -f \
     "$user_systemd_dir/default.target.wants/geoclue-agent.timer" \
+    "$user_systemd_dir/default.target.wants/home-net-vpn.timer" \
     "$user_systemd_dir/default.target.wants/ppp-auto-profile.service" \
     "$user_systemd_dir/default.target.wants/ppp-auto-profile.timer" \
     "$user_systemd_dir/graphical-session.target.wants/geoclue-agent.service" \
+    "$user_systemd_dir/graphical-session.target.wants/home-net-vpn.service" \
     "$user_systemd_dir/graphical-session.target.wants/ppp-auto-profile.service" \
     || true
 
   if ! run_as_user systemctl --user is-enabled geoclue-agent.timer >/dev/null 2>&1; then
     run_as_user systemctl --user enable --now geoclue-agent.timer >/dev/null 2>&1 || true
+  fi
+
+  if ! run_as_user systemctl --user is-enabled home-net-vpn.timer >/dev/null 2>&1; then
+    run_as_user systemctl --user enable --now home-net-vpn.timer >/dev/null 2>&1 || true
   fi
 
   if ! run_as_user systemctl --user is-enabled ppp-auto-profile.timer >/dev/null 2>&1; then
