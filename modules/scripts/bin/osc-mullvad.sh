@@ -91,6 +91,8 @@ notify() {
 	local title="$1"
 	local message="$2"
 	local icon="$3"
+	local urgency="${4:-normal}"
+	local sync_tag="${5:-}"
 
 	# Useful when running under pkexec wrapper; avoid duplicate notifications.
 	if [[ "${OSC_MULLVAD_NO_NOTIFY:-0}" == "1" ]]; then
@@ -104,7 +106,11 @@ notify() {
 		return 0
 	fi
 
-	notify-send -t 5000 "$title" "$message" -i "$icon" >/dev/null 2>&1 || true
+	local cmd=(notify-send -a "osc-mullvad" -u "$urgency" -t 5000)
+	[[ -n "$icon" ]] && cmd+=(-i "$icon")
+	[[ -n "$sync_tag" ]] && cmd+=(-h "string:x-canonical-private-synchronous:${sync_tag}")
+	cmd+=("$title" "$message")
+	"${cmd[@]}" >/dev/null 2>&1 || true
 }
 
 # Loglama fonksiyonu
@@ -532,11 +538,144 @@ toggle_preview() {
 	fi
 }
 
+mullvad_status_verbose() {
+	mullvad status -v 2>/dev/null || mullvad status 2>/dev/null || true
+}
+
+mullvad_visible_location() {
+	local status_output
+	status_output="$(mullvad_status_verbose)"
+	printf '%s\n' "$status_output" |
+		awk -F'Visible location:[[:space:]]*' '/Visible location:/ {print $2; exit}' |
+		sed 's/[[:space:]]*\. IPv4:.*$//' |
+		xargs || true
+}
+
+mullvad_visible_ip() {
+	local status_output
+	status_output="$(mullvad_status_verbose)"
+	printf '%s\n' "$status_output" |
+		sed -n 's/.*IPv4:[[:space:]]*\([0-9.]\{7,\}\).*/\1/p' |
+		head -n 1
+}
+
+toggle_progress_notify() {
+	local with_blocky="${1:-0}"
+	local vpn_connected="0"
+	local title="Switching Mullvad"
+	local body=""
+
+	if mullvad_is_connected; then
+		vpn_connected="1"
+	fi
+
+	if [[ "$with_blocky" == "1" ]]; then
+		if [[ "$vpn_connected" == "1" ]]; then
+			body=$'Disconnecting Mullvad VPN\nEnabling Blocky DNS fallback...'
+		else
+			body=$'Stopping Blocky DNS fallback\nConnecting Mullvad VPN...'
+		fi
+	else
+		if [[ "$vpn_connected" == "1" ]]; then
+			body="Disconnecting Mullvad VPN..."
+		else
+			body="Connecting Mullvad VPN..."
+		fi
+	fi
+
+	notify "$title" "$body" "network-vpn" "normal" "osc-mullvad-toggle"
+}
+
+toggle_result_notify() {
+	local with_blocky="${1:-0}"
+	local rc="${2:-0}"
+	local vpn_connected="0"
+	local blocky_active="0"
+	local relay=""
+	local location=""
+	local ip=""
+	local title=""
+	local body=""
+	local icon="network-vpn"
+	local urgency="normal"
+
+	if mullvad_is_connected; then
+		vpn_connected="1"
+	fi
+	if blocky_is_active; then
+		blocky_active="1"
+	fi
+
+	relay="$(get_current_relay || true)"
+	location="$(mullvad_visible_location || true)"
+	ip="$(mullvad_visible_ip || true)"
+
+	if [[ "$with_blocky" == "1" ]]; then
+		case "${vpn_connected}:${blocky_active}" in
+		1:0)
+			title="Mullvad Active"
+			body=$'Mode: Mullvad VPN'
+			[[ -n "$relay" ]] && body+=$'\n'"Relay: $relay"
+			[[ -n "$location" ]] && body+=$'\n'"Location: $location"
+			[[ -n "$ip" ]] && body+=$'\n'"Exit IP: $ip"
+			body+=$'\nBlocky: disabled'
+			icon="network-vpn"
+			;;
+		0:1)
+			title="Blocky Fallback Active"
+			body=$'Mode: DNS fallback\nMullvad: disconnected\nBlocky: enabled\nDNS: local ad-block active'
+			icon="network-server"
+			;;
+		1:1)
+			title="Mixed Protection State"
+			body=$'Mullvad: connected\nBlocky: enabled\nExpected only one protection mode to be active.'
+			[[ -n "$relay" ]] && body+=$'\n'"Relay: $relay"
+			icon="dialog-warning"
+			urgency="critical"
+			;;
+		0:0)
+			title="Protection Needs Attention"
+			body=$'Mullvad: disconnected\nBlocky: disabled\nExpected Blocky fallback to be active.'
+			icon="dialog-warning"
+			urgency="critical"
+			;;
+		esac
+	else
+		if [[ "$vpn_connected" == "1" ]]; then
+			title="Mullvad Connected"
+			body=$'Mode: Mullvad VPN'
+			[[ -n "$relay" ]] && body+=$'\n'"Relay: $relay"
+			[[ -n "$location" ]] && body+=$'\n'"Location: $location"
+			[[ -n "$ip" ]] && body+=$'\n'"Exit IP: $ip"
+			icon="network-vpn"
+		else
+			title="Mullvad Disconnected"
+			body="VPN tunnel is off."
+			icon="network-vpn-disconnected"
+		fi
+	fi
+
+	if [[ "$rc" -ne 0 && "$urgency" != "critical" ]]; then
+		urgency="critical"
+		body+=$'\n\nLast action reported a non-zero exit status.'
+		icon="dialog-warning"
+	fi
+
+	notify "$title" "$body" "$icon" "$urgency" "osc-mullvad-toggle"
+}
+
 toggle_main() {
 	local with_blocky="0"
 	local dry_run="0"
 	local notify_enabled="1"
 	local lock_wait_sec="${OSC_MULLVAD_TOGGLE_LOCK_WAIT_SEC:-3}"
+	local saved_no_notify="${OSC_MULLVAD_NO_NOTIFY:-0}"
+	local saved_no_notify_set="0"
+	local rc=0
+
+	if [[ ${OSC_MULLVAD_NO_NOTIFY+x} ]]; then
+		saved_no_notify_set="1"
+	fi
 
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
@@ -583,12 +722,11 @@ toggle_main() {
 		fi
 	fi
 
-	local saved_no_notify="${OSC_MULLVAD_NO_NOTIFY:-0}"
-	local rc=0
-
-	if [[ "$notify_enabled" != "1" ]]; then
-		export OSC_MULLVAD_NO_NOTIFY=1
+	if [[ "$notify_enabled" == "1" ]]; then
+		toggle_progress_notify "$with_blocky"
 	fi
+
+	export OSC_MULLVAD_NO_NOTIFY=1
 
 	if [[ "$with_blocky" == "1" ]]; then
 		toggle_basic_vpn_with_blocky || rc=$?
@@ -597,7 +735,16 @@ toggle_main() {
 		toggle_basic_vpn || rc=$?
 	fi
 
-	export OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+	if [[ "$saved_no_notify_set" == "1" ]]; then
+		export OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+	else
+		unset OSC_MULLVAD_NO_NOTIFY
+	fi
+
+	if [[ "$notify_enabled" == "1" ]]; then
+		toggle_result_notify "$with_blocky" "$rc"
+	fi
+
 	return "$rc"
 }
 
