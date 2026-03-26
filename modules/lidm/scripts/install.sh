@@ -2,6 +2,10 @@
 set -euo pipefail
 
 SUDO=""
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+KEYMAP_DROPIN_SRC="${SCRIPT_DIR}/../dotfiles/systemd/system/lidm.service.d/10-vconsole-keymap.conf"
+KEYMAP_DROPIN_DST="/etc/systemd/system/lidm.service.d/10-vconsole-keymap.conf"
+
 if [ "$(id -u)" -ne 0 ]; then
   if ! command -v sudo >/dev/null 2>&1; then
     echo "sudo is required" >&2
@@ -25,6 +29,20 @@ disable_unit_if_exists() {
   fi
 }
 
+install_root_file_if_changed() {
+  local src="$1"
+  local dst="$2"
+  local mode="$3"
+
+  run_root install -d "$(dirname "${dst}")"
+
+  if run_root test -f "${dst}" && run_root cmp -s "${src}" "${dst}"; then
+    return 0
+  fi
+
+  run_root install -m "${mode}" "${src}" "${dst}"
+}
+
 echo "==> LiDM display manager setup"
 
 disable_unit_if_exists gdm.service
@@ -40,12 +58,15 @@ if ! run_root systemctl list-unit-files lidm.service >/dev/null 2>&1; then
   exit 1
 fi
 
+install_root_file_if_changed "${KEYMAP_DROPIN_SRC}" "${KEYMAP_DROPIN_DST}" 644
+
 run_root systemctl daemon-reload
 run_root systemctl unmask lidm.service >/dev/null 2>&1 || true
 run_root systemctl enable lidm.service >/dev/null 2>&1 || run_root systemctl enable --force lidm.service >/dev/null 2>&1
 
 echo "Done."
 echo "Enabled: lidm.service"
+echo "Installed: lidm.service keymap preload drop-in"
 echo "Disabled (if present): gdm, greetd, sddm, lightdm, lxdm, ly, emptty"
 echo "Session wrappers and desktop entries are provided by the sessions module."
 echo

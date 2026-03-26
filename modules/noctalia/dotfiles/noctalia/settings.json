@@ -473,7 +473,7 @@
     "clockStyle": "custom",
     "compactLockScreen": false,
     "dimmerOpacity": 0.2,
-    "enableBlurBehind": false,
+    "enableBlurBehind": true,
     "enableLockScreenCountdown": true,
     "enableLockScreenMediaControls": false,
     "enableShadows": true,
@@ -766,7 +766,7 @@
         "wallpaper": ""
       }
     ],
-    "overviewBlur": 0,
+    "overviewBlur": 0.4,
     "overviewEnabled": false,
     "overviewTint": 0.6,
     "panelPosition": "follow_bar",
