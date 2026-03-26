@@ -73,6 +73,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `cleanup`
+**Description:** No description provided.
+
+**Usage:** `cleanup`
+
+---
+
 ### 📂 `clustergit`
 **Description:** Multi-repository Git status monitoring tool with rich reporting.
 

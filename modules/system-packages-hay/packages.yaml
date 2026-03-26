@@ -194,6 +194,7 @@ packages:
 - xorg-xdpyinfo
 - xorg-xinput
 - zathura
+- zathura-pdf-poppler
 - zip
 - zsh-history-substring-search
 exclude: []
