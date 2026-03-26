@@ -10,6 +10,9 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/appShortcut"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/appShortcut
 	url = https://github.com/oabragh/AppShortcut
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/audioSlots"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/audioSlots
+	url = https://github.com/lpv11/dms-audio-slots
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dmsPass"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/dmsPass
 	url = https://github.com/LouisKottmann/dms-pass
@@ -133,6 +136,9 @@
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dankRssWidget"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/dankRssWidget
 	url = https://github.com/BrendonJL/dms-rss-widget
+[submodule "modules/dms/dotfiles/DankMaterialShell/plugins/dankSystemDoctor"]
+	path = modules/dms/dotfiles/DankMaterialShell/plugins/dankSystemDoctor
+	url = https://github.com/NordicsSys/DankSystemDoctor
 [submodule "modules/dms/dotfiles/DankMaterialShell/plugins/developerUtilities"]
 	path = modules/dms/dotfiles/DankMaterialShell/plugins/developerUtilities
 	url = https://github.com/xxyangyoulin/dms-plugin-developer-utilities

@@ -108,6 +108,10 @@
       "enabled": false,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
+    "sys-info-widget": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
     "timer": {
       "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
