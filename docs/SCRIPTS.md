@@ -484,11 +484,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 **Usage:** `osc-mullvad.sh [COMMAND] [ARGUMENTS]`
 
-**Integrated subcommands:**
-- `osc-mullvad.sh toggle [--with-blocky|--no-blocky] [--dry-run] [--no-notify]`
-- `osc-mullvad.sh split`
-- `osc-mullvad.sh slot [--dry-run] [--hold] recycle`
-
 ---
 
 ### 📂 `osc-ndrop`
@@ -994,3 +989,4 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Usage:** `yt-cookies-youtube`
 
 ---
+
