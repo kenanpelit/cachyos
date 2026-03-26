@@ -9,6 +9,7 @@ depends_on:
 - qt
 - scripts
 - wayland-autostart
+- xdg-portal
 - user-services
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

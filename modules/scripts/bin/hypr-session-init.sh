@@ -71,6 +71,7 @@ sync_session_environment() {
 ensure_uwsm_runtime_environment() {
   hypr_detect_wayland_display
   hypr_detect_instance_signature
+  session_common_detect_x11_display
   hypr_sync_runtime_environment
 }
 
@@ -90,6 +91,7 @@ main() {
     export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
     export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Hyprland}"
     export DESKTOP_SESSION="${DESKTOP_SESSION:-hyprland-uwsm}"
+    export GDMSESSION="${GDMSESSION:-hyprland-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
     if [[ -z "${WAYLAND_DISPLAY:-}" || -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
       log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
@@ -102,6 +104,7 @@ main() {
     normalize_session_paths
     hypr_detect_wayland_display
     hypr_detect_instance_signature
+    session_common_detect_x11_display
     sync_session_environment
   fi
 

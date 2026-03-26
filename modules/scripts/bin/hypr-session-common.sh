@@ -197,6 +197,7 @@ hypr_collect_env_vars() {
     XDG_SESSION_TYPE
     XDG_SESSION_DESKTOP
     DESKTOP_SESSION
+    GDMSESSION
   )
   local var
   local -A seen=()

@@ -187,6 +187,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   including `00-wayland.conf`, plus the Hyprland-only session file, normalizes
   path variables, clears foreign compositor variables, and then enters
   `uwsm start`.
+- `packages.yaml`
+  Keeps Hyprland-specific packages such as `xdg-desktop-portal-hyprland`,
+  while the shared `xdg-portal` module owns the generic portal package set.
 - `scripts/install.sh`
   Post-install hook that renders the theme and monitor files, removes the
   Hyprland-only keyring override, re-enables the stock

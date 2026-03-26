@@ -5,14 +5,17 @@ set -euo pipefail
 helper_path="${HOME}/.local/bin/hypr-session-common"
 [[ -r "${helper_path}.sh" ]] && helper_path="${helper_path}.sh"
 
-if [[ -r "${helper_path}" ]]; then
-  # shellcheck source=/dev/null
-  source "${helper_path}"
-  hypr_ensure_runtime_dir
-  hypr_clear_foreign_session_env
-  hypr_load_session_env
-  hypr_normalize_session_paths
+if [[ ! -r "${helper_path}" ]]; then
+  printf '[hyprland-uwsm-session] ERROR: required helper missing: %s\n' "${helper_path}" >&2
+  exit 1
 fi
+
+# shellcheck source=/dev/null
+source "${helper_path}"
+hypr_ensure_runtime_dir
+hypr_clear_foreign_session_env
+hypr_load_session_env
+hypr_normalize_session_paths
 
 export XDG_CURRENT_DESKTOP=Hyprland
 export XDG_SESSION_TYPE=wayland
@@ -47,6 +50,9 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     "XDG_SESSION_DESKTOP=${XDG_SESSION_DESKTOP}" \
     "DESKTOP_SESSION=${DESKTOP_SESSION}" \
     "GDMSESSION=${GDMSESSION}" \
+    "PATH=${PATH}" \
+    "XDG_DATA_DIRS=${XDG_DATA_DIRS:-}" \
+    "XDG_CONFIG_DIRS=${XDG_CONFIG_DIRS:-/etc/xdg}" \
     "GTK_USE_PORTAL=${GTK_USE_PORTAL}" \
     "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}"
 fi

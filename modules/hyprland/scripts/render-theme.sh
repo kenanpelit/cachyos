@@ -107,12 +107,10 @@ cat >"${tmp_env}" <<EOF
 # Source checksum: ${manifest_checksum}
 
 # Canonical Hyprland session layer.
-# UWSM/session wrappers own DESKTOP_SESSION and XDG_SESSION_DESKTOP. This file
-# provides the Hyprland-specific environment that should win inside the
-# compositor session.
+# Session identity lives in the UWSM wrapper + session init helpers. Keep this
+# file focused on paths, toolkit defaults, and compositor-specific session
+# hints.
 
-XDG_CURRENT_DESKTOP=Hyprland
-XDG_SESSION_TYPE=wayland
 PATH_CORE=${path_core}
 PATH_USER=${path_user}
 PATH=${path_combined}
