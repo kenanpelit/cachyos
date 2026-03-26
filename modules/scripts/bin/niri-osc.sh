@@ -4,11 +4,11 @@
 # Description: Unified single-file Niri helper multiplexer (set, flow, keybinds, drop).
 # Usage: niri-osc <scope> [args...]
 # ==============================================================================
-# Version: 2.0.0
+# Version: 2.1.0
 
 set -euo pipefail
 
-NIRI_OSC_VERSION="2.0.0"
+NIRI_OSC_VERSION="2.1.0"
 NIRI_OSC_SELF="${BASH_SOURCE[0]}"
 
 niri_osc_usage() {
@@ -205,9 +205,11 @@ niri_osc_payload_set() {
 #
 # Interface:
 # - `niri-osc set <subcommand> [args...]`
-# - Major groups: session (`tty`, `env`, `init`, `lock`), routing (`go`, `here`,
-#   `flow`, `cast`), diagnostics (`doctor`), and layout toggles (`float`, `zen`,
-#   `pin`).
+# - Major groups: session (`tty`, `env`, `bootstrap`, `post-bootstrap`,
+#   `desktop-settings`, `session-route`, `status-notifier-ready`,
+#   `snapper-tools-check`, `start`, `init`, `lock`), routing (`go`, `here`,
+#   `flow`, `cast`), diagnostics (`doctor`), and layout toggles (`float`,
+#   `zen`, `pin`).
 #
 # Design notes:
 # - Intentionally self-contained because each `*.sh` is packaged as an
@@ -229,7 +231,16 @@ Usage:
 Commands:
   tty                Start Niri from TTY/DM (was: niri_tty)
   clipse             Start clipse clipboard listener (background)
-  env                Export env to systemd --user (was: niri-session-start)
+  env                Sync session env/runtime vars (was: niri-session-init)
+  bootstrap          Wait for NIRI_SOCKET and run init (was: niri-bootstrap)
+  post-bootstrap     Late desktop polish + ready notify
+  desktop-settings   Apply GTK/icon/cursor settings
+  session-route      Render runtime monitor profile
+  status-notifier-ready
+                     Wait for StatusNotifierWatcher before tray applets
+  snapper-tools-check
+                     Delayed snapshot boot check for snapper-tools
+  start              Daily semsumo startup helper
   init               Bootstrap session (was: niri-init)
   lock               Lock session via DMS/logind (was: niri-lock)
   size               Set explicit column width and window height
@@ -245,10 +256,53 @@ Commands:
 
 Examples:
   niri-osc set env
+  niri-osc set bootstrap
   niri-osc set lock
   niri-osc set zen
   niri-osc set pin
 EOF
+}
+
+niri_osc_set_script_dir() {
+  local source_path="${NIRI_OSC_BIN:-${BASH_SOURCE[0]}}"
+  local resolved=""
+
+  if command -v readlink >/dev/null 2>&1; then
+    resolved="$(readlink -f "$source_path" 2>/dev/null || true)"
+    if [[ -n "$resolved" ]]; then
+      source_path="$resolved"
+    fi
+  fi
+
+  (
+    cd "$(dirname "$source_path")" && pwd
+  )
+}
+
+niri_osc_set_source_helper() {
+  local helper_name="$1"
+  local script_dir helper_path
+
+  script_dir="$(niri_osc_set_script_dir)"
+  helper_path="${script_dir}/${helper_name}.sh"
+  [[ -r "$helper_path" ]] || helper_path="${script_dir}/${helper_name}"
+  [[ -r "$helper_path" ]] || return 1
+
+  # shellcheck source=/dev/null
+  source "$helper_path"
+}
+
+niri_osc_set_exec_helper() {
+  local helper_name="$1"
+  shift || true
+
+  local script_dir helper_path
+  script_dir="$(niri_osc_set_script_dir)"
+  helper_path="${script_dir}/${helper_name}.sh"
+  [[ -x "$helper_path" ]] || helper_path="${script_dir}/${helper_name}"
+  [[ -x "$helper_path" ]] || return 1
+
+  exec "$helper_path" "$@"
 }
 
 cmd="${1:-}"
@@ -1291,23 +1345,384 @@ tty)
   )
   ;;
 
-env)
+desktop-settings)
   # ----------------------------------------------------------------------------
-  # Embedded: niri-session-start.sh
+  # Embedded: niri-desktop-settings.sh
   # ----------------------------------------------------------------------------
   (
     set -euo pipefail
 
-    if [[ -x "${HOME}/.local/bin/niri-session-init" ]]; then
-      exec "${HOME}/.local/bin/niri-session-init"
+    LOG_TAG="niri-desktop-settings"
+
+    log() { printf '[%s] %s\n' "$LOG_TAG" "$*"; }
+    warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
+
+    if ! command -v gsettings >/dev/null 2>&1; then
+      log "gsettings not found; skipping desktop settings sync"
+      exit 0
     fi
 
-    if command -v niri-session-init >/dev/null 2>&1; then
-      exec niri-session-init
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' >/dev/null 2>&1 || warn "failed to set color-scheme"
+    gsettings set org.gnome.desktop.interface gtk-theme "${GTK_THEME:-catppuccin-mocha-mauve-standard+default}" >/dev/null 2>&1 || warn "failed to set gtk-theme"
+    gsettings set org.gnome.desktop.interface icon-theme "${XDG_ICON_THEME:-${ICON_THEME:-kora}}" >/dev/null 2>&1 || warn "failed to set icon-theme"
+    gsettings set org.gnome.desktop.interface cursor-theme "${XCURSOR_THEME:-capitaine-cursors}" >/dev/null 2>&1 || warn "failed to set cursor-theme"
+
+    log "desktop settings sync completed"
+  )
+  ;;
+
+env | session-init)
+  # ----------------------------------------------------------------------------
+  # Embedded: niri-session-init.sh
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    start_target=true
+
+    if ! niri_osc_set_source_helper niri-session-common; then
+      printf '[niri-session-init] %s\n' "niri-session-common not found" >&2
+      exit 1
     fi
 
-    printf '[niri-env] %s\n' "niri-session-init not found" >&2
-    exit 1
+    log_warn() {
+      local message="$1"
+      printf '[niri-session-init] WARN: %s\n' "$message" >&2
+      if command -v logger >/dev/null 2>&1; then
+        logger -t niri-session-init -- "WARN: $message" >/dev/null 2>&1 || true
+      fi
+    }
+
+    log_notice() {
+      local message="$1"
+      printf '[niri-session-init] NOTICE: %s\n' "$message" >&2
+      if command -v logger >/dev/null 2>&1; then
+        logger -t niri-session-init -- "NOTICE: $message" >/dev/null 2>&1 || true
+      fi
+    }
+
+    case "${1:-}" in
+    "" | --start-target)
+      ;;
+    --no-start-target)
+      start_target=false
+      ;;
+    *)
+      echo "Usage: niri-osc set env [--no-start-target]" >&2
+      exit 2
+      ;;
+    esac
+
+    apply_session_env() {
+      niri_load_session_env
+      niri_ensure_session_identity
+      export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+    }
+
+    normalize_session_paths() {
+      niri_normalize_session_paths
+    }
+
+    sync_session_environment() {
+      niri_sync_session_environment
+    }
+
+    ensure_uwsm_runtime_environment() {
+      niri_detect_wayland_display
+      niri_detect_socket
+      niri_sync_runtime_environment
+    }
+
+    start_session_target() {
+      command -v systemctl >/dev/null 2>&1 || return 0
+      systemctl --user start --no-block niri-session.target >/dev/null 2>&1 || true
+    }
+
+    main() {
+      niri_ensure_runtime_dir
+
+      if niri_session_under_uwsm; then
+        export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
+        export GDMSESSION="${GDMSESSION:-niri-uwsm}"
+        export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+        if [[ -z "${XDG_CURRENT_DESKTOP:-}" || -z "${XDG_SESSION_TYPE:-}" || -z "${XDG_SESSION_DESKTOP:-}" ]]; then
+          niri_ensure_session_identity
+        fi
+        if [[ -z "${WAYLAND_DISPLAY:-}" || -z "${NIRI_SOCKET:-}" ]]; then
+          log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
+          ensure_uwsm_runtime_environment
+        fi
+      else
+        log_notice "UWSM not detected; using manual environment sync fallback"
+        niri_clear_foreign_session_env
+        apply_session_env
+        normalize_session_paths
+        niri_detect_wayland_display
+        niri_detect_socket
+        sync_session_environment
+      fi
+
+      if [[ "$start_target" == "true" ]]; then
+        start_session_target
+      fi
+    }
+
+    main
+  )
+  ;;
+
+bootstrap)
+  # ----------------------------------------------------------------------------
+  # Embedded: niri-bootstrap.sh
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    if ! niri_osc_set_source_helper niri-session-common; then
+      printf '[niri-bootstrap] %s\n' "niri-session-common not found" >&2
+      exit 1
+    fi
+
+    log() { printf '[niri-bootstrap] %s\n' "$*"; }
+    warn() { printf '[niri-bootstrap] WARN: %s\n' "$*" >&2; }
+
+    export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+    ensure_niri_env() {
+      niri_ensure_runtime_dir
+      niri_ensure_session_identity
+      niri_detect_wayland_display
+      niri_detect_socket
+    }
+
+    wait_for_socket() {
+      local _
+      for _ in $(seq 1 120); do
+        niri_detect_socket
+        [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]] && return 0
+        sleep 0.1
+      done
+      return 1
+    }
+
+    main() {
+      ensure_niri_env || true
+
+      if ! wait_for_socket; then
+        warn "NIRI_SOCKET did not become ready in time; continuing"
+      fi
+
+      if ! "$0" init; then
+        warn "niri-osc set init failed"
+        exit 1
+      fi
+
+      log "niri-bootstrap completed."
+    }
+
+    main
+  )
+  ;;
+
+post-bootstrap)
+  # ----------------------------------------------------------------------------
+  # Embedded: niri-post-bootstrap.sh
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    if ! niri_osc_set_source_helper niri-session-common; then
+      printf '[niri-post-bootstrap] %s\n' "niri-session-common not found" >&2
+      exit 1
+    fi
+
+    LOG_TAG="niri-post-bootstrap"
+
+    log() { printf '[%s] %s\n' "$LOG_TAG" "$*" >&2; }
+    warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
+
+    export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+    ensure_niri_env() {
+      niri_ensure_runtime_dir
+      niri_ensure_session_identity
+      niri_detect_wayland_display
+      niri_detect_socket
+    }
+
+    main() {
+      ensure_niri_env || true
+
+      if ! "$0" desktop-settings; then
+        warn "desktop-settings failed; continuing"
+      else
+        log "desktop-settings"
+      fi
+
+      if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 1800 "Niri" "Session ready" >/dev/null 2>&1 || true
+      fi
+
+      log "niri-post-bootstrap completed"
+    }
+
+    main
+  )
+  ;;
+
+session-route)
+  # ----------------------------------------------------------------------------
+  # Embedded: niri-session-route.sh
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    LOG_TAG="niri-session-route"
+
+    log() { printf '[%s] %s\n' "$LOG_TAG" "$*" >&2; }
+
+    if ! command -v niri >/dev/null 2>&1; then
+      log "niri not found; skipping runtime monitor routing"
+      exit 0
+    fi
+
+    if ! command -v jq >/dev/null 2>&1; then
+      log "jq not found; skipping runtime monitor routing"
+      exit 0
+    fi
+
+    if ! niri msg version >/dev/null 2>&1; then
+      log "niri IPC unavailable; skipping runtime monitor routing"
+      exit 0
+    fi
+
+    outputs_json="$(niri msg -j outputs 2>/dev/null || true)"
+    if [[ -z "${outputs_json:-}" ]]; then
+      log "no output data returned; skipping runtime monitor routing"
+      exit 0
+    fi
+
+    config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    dms_dir="${config_home}/niri/dms"
+    profile_file="${dms_dir}/monitor-auto.kdl"
+
+    mkdir -p "$dms_dir"
+
+    if [[ -L "$profile_file" ]]; then
+      rm -f "$profile_file"
+    fi
+
+    detect_json="$(echo "$outputs_json" | jq -c '[.[] | select(((.current_mode.width // .mode.width // 0) > 0) and ((.current_mode.height // .mode.height // 0) > 0))]' 2>/dev/null || true)"
+    if [[ -z "${detect_json:-}" || "${detect_json:-[]}" == "[]" ]]; then
+      detect_json="$outputs_json"
+    fi
+
+    internal_output="$(echo "$detect_json" | jq -r '[.[] | .name | select(test("^eDP"))][0] // empty' 2>/dev/null || true)"
+    external_output="$(echo "$detect_json" | jq -r '[.[] | .name | select(test("^eDP")|not)][0] // empty' 2>/dev/null || true)"
+
+    if [[ -z "$internal_output" ]]; then
+      internal_output="$(echo "$outputs_json" | jq -r '.[0].name // empty' 2>/dev/null || true)"
+    fi
+
+    [[ -n "$internal_output" ]] || exit 0
+
+    internal_vrr="false"
+    if [[ -n "$internal_output" ]]; then
+      internal_vrr="$(echo "$detect_json" | jq -r --arg n "$internal_output" '.[] | select(.name == $n) | if .modes then (.modes[] | select(.is_current) | .vrr_capable) else false end // false' 2>/dev/null || echo "false")"
+    fi
+
+    ext_w=0
+    ext_h=0
+    int_w=0
+    if [[ -n "$external_output" && "$external_output" != "$internal_output" ]]; then
+      ext_w="$(echo "$detect_json" | jq -r --arg o "$external_output" '.[] | select(.name == $o) | (.current_mode.width // .mode.width // 0)' 2>/dev/null | head -n 1 || true)"
+      ext_h="$(echo "$detect_json" | jq -r --arg o "$external_output" '.[] | select(.name == $o) | (.current_mode.height // .mode.height // 0)' 2>/dev/null | head -n 1 || true)"
+      int_w="$(echo "$detect_json" | jq -r --arg o "$internal_output" '.[] | select(.name == $o) | (.current_mode.width // .mode.width // 0)' 2>/dev/null | head -n 1 || true)"
+    fi
+
+    [[ "$ext_w" =~ ^[0-9]+$ ]] || ext_w=0
+    [[ "$ext_h" =~ ^[0-9]+$ ]] || ext_h=0
+    [[ "$int_w" =~ ^[0-9]+$ ]] || int_w=0
+
+    int_x=0
+    int_y=0
+    if [[ "$ext_w" -gt 0 && "$ext_h" -gt 0 ]]; then
+      if [[ "$int_w" -gt 0 && "$ext_w" -gt "$int_w" ]]; then
+        int_x=$(((ext_w - int_w) / 2))
+      fi
+      int_y="$ext_h"
+    fi
+
+    {
+      echo "// Auto-generated by niri-session-route."
+      echo "// Output-only runtime profile. Workspace mapping stays in config.kdl."
+      if [[ -n "$external_output" && "$external_output" != "$internal_output" ]]; then
+        echo "output \"$external_output\" { position x=0 y=0; scale 1.0; }"
+        if [[ "$internal_vrr" == "true" ]]; then
+          echo "output \"$internal_output\" { position x=${int_x} y=${int_y}; scale 1.0; variable-refresh-rate on-demand=true; }"
+        else
+          echo "output \"$internal_output\" { position x=${int_x} y=${int_y}; scale 1.0; }"
+        fi
+      else
+        if [[ "$internal_vrr" == "true" ]]; then
+          echo "output \"$internal_output\" { position x=0 y=0; scale 1.0; variable-refresh-rate on-demand=true; }"
+        else
+          echo "output \"$internal_output\" { position x=0 y=0; scale 1.0; }"
+        fi
+      fi
+    } >"$profile_file"
+
+    niri msg action load-config-file >/dev/null 2>&1 || true
+    log "monitor output profile updated (internal=${internal_output}, external=${external_output:-none})"
+  )
+  ;;
+
+status-notifier-ready)
+  # ----------------------------------------------------------------------------
+  # Embedded: niri-status-notifier-ready.sh
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    export STATUS_NOTIFIER_READY_LOG_TAG="${STATUS_NOTIFIER_READY_LOG_TAG:-niri-status-notifier-ready}"
+
+    if ! niri_osc_set_exec_helper status-notifier-ready "$@"; then
+      printf '[niri-status-notifier-ready] %s\n' "status-notifier-ready not found" >&2
+      exit 1
+    fi
+  )
+  ;;
+
+snapper-tools-check)
+  # ----------------------------------------------------------------------------
+  # Embedded: niri-snapper-tools-check.sh
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    grep -q '.snapshots' /proc/cmdline || exit 0
+    sleep 3
+    /usr/bin/snapper-tools --autostart || true
+  )
+  ;;
+
+start)
+  # ----------------------------------------------------------------------------
+  # Embedded: niri-start.sh
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    export PATH="$HOME/.local/bin:$PATH"
+
+    mkdir -p "$HOME/.logs/semsumo"
+    echo "Starting daily routine at $(date)" >>"$HOME/.logs/semsumo/niri-start.log"
+
+    if command -v semsumo >/dev/null 2>&1; then
+      exec semsumo launch --daily -all
+    fi
+
+    exec "$HOME/.local/bin/semsumo" launch --daily -all
   )
   ;;
 
@@ -1481,7 +1896,7 @@ init)
       fi
     fi
 
-    run_if_present niri-session-route &
+    "$0" session-route &
     if [[ "${NIRI_INIT_ENFORCE_WORKSPACE_BOUNDS:-0}" == "1" ]]; then
       normalize_workspace_range
       compact_out_of_range_empty_workspaces

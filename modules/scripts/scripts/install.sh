@@ -170,7 +170,18 @@ cleanup_legacy_bins() {
     niri-set
     niri-flow
     niri-keybinds
+    niri-bootstrap
+    niri-desktop-settings
+    niri-post-bootstrap
+    niri-session-init
+    niri-session-route
+    niri-snapper-tools-check
+    niri-start
+    niri-status-notifier-ready
     osc-perf-mode
+    osc-mullvad-slot
+    osc-mullvad-toggle
+    osc-mullvad-split
     rofi-performance
   )
 

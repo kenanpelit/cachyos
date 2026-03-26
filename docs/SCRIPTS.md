@@ -297,20 +297,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `niri-bootstrap`
-**Description:** Standardized bootstrap for Niri session.
-
-**Usage:** `niri-bootstrap`
-
----
-
-### 📂 `niri-desktop-settings`
-**Description:** Apply GTK, icon, and cursor settings after Niri startup.
-
-**Usage:** `niri-desktop-settings`
-
----
-
 ### 📂 `niri-float-sticky`
 **Description:** Event-driven floating sticky daemon for Niri with toggle helpers.
 
@@ -323,12 +309,15 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 **Usage:** `niri-osc <scope> [args...]`
 
----
-
-### 📂 `niri-post-bootstrap`
-**Description:** Late Niri session polish for desktop settings and ready notification.
-
-**Usage:** `niri-post-bootstrap`
+Session/lifecycle examples:
+`niri-osc set env [--no-start-target]`
+`niri-osc set bootstrap`
+`niri-osc set post-bootstrap`
+`niri-osc set desktop-settings`
+`niri-osc set session-route`
+`niri-osc set status-notifier-ready`
+`niri-osc set snapper-tools-check`
+`niri-osc set start`
 
 ---
 
@@ -336,41 +325,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Shared environment/bootstrap helpers for Niri session scripts.
 
 **Usage:** `niri-session-common`
-
----
-
-### 📂 `niri-session-init`
-**Description:** Compatibility helper for manual/Niri fallback startup and runtime env backfill.
-
-**Usage:** `niri-session-init [--no-start-target]`
-
----
-
-### 📂 `niri-session-route`
-**Description:** Render the runtime Niri monitor profile from current outputs.
-
-**Usage:** `niri-session-route`
-
----
-
-### 📂 `niri-snapper-tools-check`
-**Description:** Delayed snapper-tools autostart check for Niri snapshot boots.
-
-**Usage:** `niri-snapper-tools-check`
-
----
-
-### 📂 `niri-start`
-**Description:** Daily startup sequence for Niri session via semsumo.
-
-**Usage:** `niri-start.sh`
-
----
-
-### 📂 `niri-status-notifier-ready`
-**Description:** Wait for StatusNotifierWatcher before Niri tray applets start.
-
-**Usage:** `niri-status-notifier-ready`
 
 ---
 
@@ -483,11 +437,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Integrated Mullvad VPN Manager for connection and relay control.
 
 **Usage:** `osc-mullvad.sh [COMMAND] [ARGUMENTS]`
-
-**Integrated subcommands:**
-- `osc-mullvad.sh toggle [--with-blocky|--no-blocky] [--dry-run] [--no-notify]`
-- `osc-mullvad.sh split`
-- `osc-mullvad.sh slot [--dry-run] [--hold] recycle`
 
 ---
 
