@@ -20,18 +20,23 @@ canonical_repo_root() {
 }
 
 REPO_ROOT="$(canonical_repo_root)"
-script_src="$REPO_ROOT/modules/scripts/bin/sunsetr-set.sh"
 scheduler_src="$REPO_ROOT/modules/scripts/bin/sunsetr-scheduler.sh"
+scheduler_loop_src="$REPO_ROOT/modules/scripts/bin/sunsetr-scheduler-loop.sh"
 bin_dir="$USER_HOME/.local/bin"
 
-if [[ ! -f "$script_src" ]]; then
-  echo "[sunsetr-install] WARN: source script not found: $script_src" >&2
+if [[ ! -f "$scheduler_src" ]]; then
+  echo "[sunsetr-install] WARN: source script not found: $scheduler_src" >&2
+  exit 0
+fi
+
+if [[ ! -f "$scheduler_loop_src" ]]; then
+  echo "[sunsetr-install] WARN: source script not found: $scheduler_loop_src" >&2
   exit 0
 fi
 
 run_as_user mkdir -p "$bin_dir"
 run_as_user ln -sfn "$scheduler_src" "$bin_dir/sunsetr-scheduler"
-run_as_user ln -sfn "$REPO_ROOT/modules/scripts/bin/sunsetr-scheduler-loop.sh" "$bin_dir/sunsetr-scheduler-loop"
+run_as_user ln -sfn "$scheduler_loop_src" "$bin_dir/sunsetr-scheduler-loop"
 
 supported_wayland_session_active() {
   run_as_user systemctl --user is-active --quiet 'wayland-wm@niri\x2dsession.service' \

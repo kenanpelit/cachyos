@@ -1,6 +1,6 @@
 #[Backend]
 backend = "auto"
-transition_mode = "static" # The active preset is selected via sunsetr-set + systemd.
+transition_mode = "static" # The active preset is selected via the scheduler + systemd.
 
 #[Smoothing]
 smoothing = true
