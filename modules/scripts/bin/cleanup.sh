@@ -1,12 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-if git -C "${SCRIPT_DIR}" rev-parse --show-toplevel >/dev/null 2>&1; then
-  REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
-else
-  REPO_ROOT="${SCRIPT_DIR}"
-fi
+init_die() {
+  printf 'ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+
+is_repo_root() {
+  local candidate="$1"
+  [[ -n "$candidate" ]] || return 1
+  [[ -d "$candidate/modules" ]] || return 1
+  [[ -d "$candidate/hosts" ]] || return 1
+  [[ -f "$candidate/config.yaml" || -f "$candidate/hosts/hay.yaml" ]] || return 1
+}
+
+find_repo_root() {
+  local candidate git_root
+  local -a candidates=()
+
+  [[ -n "${DCLI_REPO_ROOT:-}" ]] && candidates+=("${DCLI_REPO_ROOT}")
+  [[ -n "${ARCH_CONFIG_ROOT:-}" ]] && candidates+=("${ARCH_CONFIG_ROOT}")
+  candidates+=("${SCRIPT_DIR}" "$(pwd -P)" "${HOME}/.cachy" "${HOME}/.config/arch-config")
+
+  for candidate in "${candidates[@]}"; do
+    [[ -n "$candidate" ]] || continue
+    candidate="$(cd -- "$candidate" 2>/dev/null && pwd -P || true)"
+    [[ -n "$candidate" ]] || continue
+
+    git_root="$(git -C "$candidate" rev-parse --show-toplevel 2>/dev/null || true)"
+    if [[ -n "$git_root" ]] && is_repo_root "$git_root"; then
+      printf '%s\n' "$git_root"
+      return 0
+    fi
+
+    if is_repo_root "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+REPO_ROOT="$(find_repo_root)" || init_die "Unable to locate repo root. Set DCLI_REPO_ROOT or install the repo under ~/.cachy."
 
 readonly REPO_ROOT
 readonly HOST_FILE="${REPO_ROOT}/hosts/hay.yaml"
