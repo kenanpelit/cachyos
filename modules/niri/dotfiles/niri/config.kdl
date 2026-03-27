@@ -235,6 +235,7 @@ binds {
   // Core Window Actions
   // ----------------------------------------------------------------------
   Mod+Q hotkey-overlay-title="Close Window" { close-window; }
+  Alt+F4 hotkey-overlay-title="Close Window Alt+F4" { close-window; }
   Mod+F hotkey-overlay-title="Fullscreen"   { fullscreen-window; }
   Mod+M hotkey-overlay-title="Maximize Column" { maximize-column; }
   Mod+C hotkey-overlay-title="Center Column"   { center-column; }
