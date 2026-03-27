@@ -1597,6 +1597,66 @@ slot_state_get() {
 	awk -F'=' -v k="$key" '$1==k {sub($1"=",""); print; found=1; exit} END{exit (found?0:1)}' "$SLOT_STATE_FILE"
 }
 
+slot_state_find_key_ci() {
+	local wanted="$1"
+	[[ -f "$SLOT_STATE_FILE" ]] || return 1
+	awk -F'=' -v wanted="$wanted" '
+    BEGIN {
+      wanted_lc = tolower(wanted)
+    }
+    /^DEV_/ {
+      key_lc = tolower($1)
+      if (key_lc == wanted_lc) {
+        print $1
+        found = 1
+        exit
+      }
+    }
+    END { exit(found ? 0 : 1) }
+  ' "$SLOT_STATE_FILE"
+}
+
+slot_resolve_selector_to_device() {
+	local selector="$1"
+	local key=""
+	local dev=""
+	local selector_key=""
+
+	[[ -n "$selector" ]] || return 1
+
+	# First allow explicit state keys like DEV_cachyos.
+	if dev="$(slot_state_get "$selector" 2>/dev/null)"; then
+		printf '%s' "$dev"
+		return 0
+	fi
+
+	# Then allow bare OS identifiers like "cachyos".
+	selector_key="DEV_$(slot_sanitize_key "$selector")"
+	if dev="$(slot_state_get "$selector_key" 2>/dev/null)"; then
+		printf '%s' "$dev"
+		return 0
+	fi
+
+	# Finally try case-insensitive key lookup for convenience.
+	if key="$(slot_state_find_key_ci "$selector" 2>/dev/null)"; then
+		dev="$(slot_state_get "$key" 2>/dev/null || true)"
+		if [[ -n "$dev" ]]; then
+			printf '%s' "$dev"
+			return 0
+		fi
+	fi
+
+	if key="$(slot_state_find_key_ci "$selector_key" 2>/dev/null)"; then
+		dev="$(slot_state_get "$key" 2>/dev/null || true)"
+		if [[ -n "$dev" ]]; then
+			printf '%s' "$dev"
+			return 0
+		fi
+	fi
+
+	return 1
+}
+
 slot_state_set() {
 	local key="$1"
 	local val="$2"
@@ -1629,7 +1689,13 @@ slot_current_device_name() {
 }
 
 slot_list_devices() {
-	mullvad account list-devices 2>/dev/null | awk '
+	local acc="${1:-}"
+	local -a list_cmd=(mullvad account list-devices)
+	if [[ -n "$acc" ]]; then
+		list_cmd+=(--account "$acc")
+	fi
+
+	"${list_cmd[@]}" 2>/dev/null | awk '
     /^[[:space:]]*Devices on the account:[[:space:]]*$/ { next }
     /^[[:space:]]*$/ { next }
     { print }
@@ -1687,15 +1753,22 @@ slot_login_if_needed() {
 	fi
 
 	local acc=""
+	local login_output=""
 	if ! acc="$(slot_get_account_number)"; then
 		slot_die "Not logged in. Export MULLVAD_ACCOUNT_NUMBER or store it in pass ($SLOT_PASS_ENTRY)."
 		return 1
 	fi
 
 	slot_log "Logging in to Mullvad account (secret not shown)"
-	if slot_do_cmd mullvad account login "$acc" >/dev/null; then
+	if login_output="$(slot_do_cmd mullvad account login "$acc" 2>&1 >/dev/null)"; then
 		slot_ok "Logged in"
 	else
+		if printf '%s\n' "$login_output" | grep -qi 'too many devices'; then
+			slot_warn "Too many devices on the Mullvad account; revoke one device first."
+			slot_log "Devices on account:"
+			slot_list_devices "$acc" || slot_warn "Could not list devices for the account."
+			slot_warn "Use: $SCRIPT_NAME slot revoke '<device name|UID|os-id|DEV_key>'"
+		fi
 		slot_die "mullvad account login failed"
 		return 1
 	fi
@@ -1825,8 +1898,44 @@ slot_cmd_whoami() {
 }
 
 slot_cmd_list() {
-	slot_login_if_needed || return 1
-	slot_list_devices
+	local acc=""
+	if slot_is_logged_in; then
+		slot_list_devices
+		return $?
+	fi
+
+	if ! acc="$(slot_get_account_number)"; then
+		slot_die "Not logged in. Export MULLVAD_ACCOUNT_NUMBER or store it in pass ($SLOT_PASS_ENTRY)."
+		return 1
+	fi
+
+	slot_list_devices "$acc"
+}
+
+slot_cmd_revoke() {
+	local selector="${*:-}"
+	local dev=""
+	local acc=""
+
+	if [[ -z "$selector" ]]; then
+		slot_die "Usage: $SCRIPT_NAME slot revoke '<device name|UID|os-id|DEV_key>'"
+		return 1
+	fi
+
+	if ! slot_is_logged_in; then
+		if ! acc="$(slot_get_account_number)"; then
+			slot_die "Not logged in. Export MULLVAD_ACCOUNT_NUMBER or store it in pass ($SLOT_PASS_ENTRY)."
+			return 1
+		fi
+	fi
+
+	if dev="$(slot_resolve_selector_to_device "$selector" 2>/dev/null)"; then
+		slot_log "Resolved selector '$selector' -> '$dev' via $SLOT_STATE_FILE"
+	else
+		dev="$selector"
+	fi
+
+	slot_revoke_device "$dev" "$acc"
 }
 
 slot_cmd_status() {
@@ -1882,7 +1991,8 @@ Usage:
 Commands:
   recycle        Revoke other OS device(s) from slot state -> login -> connect -> record self
   whoami         Print current Mullvad device name
-  list           List devices on the account
+  list           List devices on the account (works even when not logged in)
+  revoke         Revoke a device by name, UID, os-id or DEV_key
   status         Show mullvad status + OS ID + slot state entries
   disconnect     Disconnect VPN
 
@@ -1899,6 +2009,9 @@ Env:
 
 Examples:
   $SCRIPT_NAME slot recycle
+  $SCRIPT_NAME slot list
+  $SCRIPT_NAME slot revoke 'Warm Dingo'
+  $SCRIPT_NAME slot revoke cachyos
   $SCRIPT_NAME slot --dry-run recycle
   $SCRIPT_NAME slot --hold recycle
 EOF
@@ -1943,6 +2056,7 @@ slot_main() {
 	recycle) slot_cmd_recycle ;;
 	whoami) slot_cmd_whoami ;;
 	list) slot_cmd_list ;;
+	revoke) slot_cmd_revoke "$@" ;;
 	status) slot_cmd_status ;;
 	disconnect) slot_disconnect ;;
 	-h | --help | help | "") slot_usage ;;
@@ -2553,7 +2667,8 @@ show_help() {
 	echo -e "    ${GREEN}slot --hold recycle${NC}  Open a held kitty window and run slot recycle"
 	echo -e "    ${GREEN}slot status${NC}        Show slot state + current device"
 	echo -e "    ${GREEN}slot whoami${NC}        Print current Mullvad device name"
-	echo -e "    ${GREEN}slot list${NC}          List devices on the account"
+	echo -e "    ${GREEN}slot list${NC}          List devices on the account (no login required)"
+	echo -e "    ${GREEN}slot revoke${NC} <dev>  Revoke a device by name, UID, os-id or DEV_key"
 	echo -e "    ${GREEN}slot disconnect${NC}    Disconnect VPN"
 	echo -e ""
 	echo -e "${YELLOW}Automatic Switching:${NC}"
