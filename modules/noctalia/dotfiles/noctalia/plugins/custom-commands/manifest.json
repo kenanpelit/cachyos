@@ -1,9 +1,11 @@
 {
   "id": "custom-commands",
   "name": "Custom Commands",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Define and run custom shell commands from the launcher",
-  "tags": ["Launcher"],
+  "tags": [
+    "Launcher"
+  ],
   "minNoctaliaVersion": "4.4.1",
   "author": "Noctalia Team",
   "official": true,
@@ -14,7 +16,9 @@
     "main": "Main.qml",
     "settings": "Settings.qml"
   },
-  "dependencies": { "plugins": [] },
+  "dependencies": {
+    "plugins": []
+  },
   "metadata": {
     "commandPrefix": "run",
     "defaultSettings": {

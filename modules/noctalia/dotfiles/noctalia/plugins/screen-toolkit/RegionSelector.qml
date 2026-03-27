@@ -206,6 +206,8 @@ Variants {
         }
 
         // ── Size badge ────────────────────────────────────────
+        // Shows physical pixel dimensions (what grim will actually capture),
+        // so on HiDPI screens the numbers match the real output size.
         Rectangle {
             visible: win.dragging && win.selW > 20
             opacity: win.fadeOpacity
@@ -215,10 +217,13 @@ Variants {
             height: 26; radius: 6
             color: Qt.rgba(0, 0, 0, 0.75)
             z: 10
+
+            readonly property real scale: win.screen?.devicePixelRatio ?? 1.0
+
             Text {
                 id: sizeLabel
                 anchors.centerIn: parent
-                text: Math.round(win.selW) + " × " + Math.round(win.selH)
+                text: Math.round(win.selW * parent.scale) + " × " + Math.round(win.selH * parent.scale)
                 color: "white"; font.pixelSize: 12
                 font.family: "monospace"; font.weight: Font.Bold
             }

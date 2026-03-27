@@ -75,6 +75,13 @@ Variants {
         WlrLayershell.exclusionMode: ExclusionMode.Ignore
         WlrLayershell.namespace: "noctalia-annotate"
 
+        // ── Screen-local region coordinates ────────────
+        // regionX/Y are in screen-local logical pixels (from launchAnnotate).
+        // PanelWindow already uses screen-local coords so no offset needed,
+        // but we keep localX/Y as aliases for clarity.
+        readonly property real localX: root.regionX
+        readonly property real localY: root.regionY
+
         // ── State ──────────────────────────────────────
         property string tool: "pencil"
         property color drawColor: "#FF4444"
@@ -130,6 +137,8 @@ Variants {
         }
 
         // ── Pixelate ───────────────────────────────────
+        // Always pixelates the base screenshot, never the zoom image,
+        // so blur strokes reference the original capture.
         Process {
             id: pixelateProc
             onExited: (code) => {
@@ -144,11 +153,12 @@ Variants {
         property string _lastPreparedPath: ""
 
         function preparePixelImage() {
-            if (root.imagePath === overlayWin._lastPreparedPath && overlayWin.pixelImgReady) {
+            var basePath = "/tmp/screen-toolkit-annotate.png"
+            if (basePath === overlayWin._lastPreparedPath && overlayWin.pixelImgReady) {
                 drawCanvas.requestPaint()
                 return
             }
-            overlayWin._lastPreparedPath = root.imagePath
+            overlayWin._lastPreparedPath = basePath
             pixelImgReady = false
             pixelateProc.exec({ command: [
                 "bash", "-c",
@@ -241,19 +251,23 @@ Variants {
                     overlayWin.panY = 0.0
                     overlayWin.isPanning = false
                     drawCanvas.requestPaint()
+                    // Clean up zoom temp file if it was created
+                    cleanupProc.exec({ command: ["bash", "-c", "rm -f /tmp/screen-toolkit-annotate-zoom.png"] })
                 } else {
                     overlayWin.preparePixelImage()
                 }
             }
         }
 
+        Process { id: cleanupProc }
+
         // ── Dark overlay ───────────────────────────────
         Rectangle {
             anchors.fill: parent
             color: Qt.rgba(0, 0, 0, 0.55)
             Rectangle {
-                x: root.regionX
-                y: root.regionY
+                x: overlayWin.localX
+                y: overlayWin.localY
                 width: root.regionW
                 height: root.regionH
                 color: "transparent"
@@ -261,7 +275,7 @@ Variants {
             MouseArea {
                 anchors.fill: parent
                 onClicked: (mouse) => {
-                    var ix = root.regionX, iy = root.regionY
+                    var ix = overlayWin.localX, iy = overlayWin.localY
                     var iw = root.regionW, ih = root.regionH
                     var inRegion  = mouse.x >= ix && mouse.x <= ix+iw && mouse.y >= iy && mouse.y <= iy+ih
                     var inToolbar = mouse.x >= toolbar.x && mouse.x <= toolbar.x+toolbar.width
@@ -280,8 +294,8 @@ Variants {
         // ── Capture root ───────────────────────────────
         Item {
             id: captureRoot
-            x: root.regionX
-            y: root.regionY
+            x: overlayWin.localX
+            y: overlayWin.localY
             width: root.regionW
             height: root.regionH
             clip: true
@@ -323,8 +337,8 @@ Variants {
         // ── Blur preview ───────────────────────────────
         Rectangle {
             visible: root.zoomScale <= 1.0 && overlayWin.drawing && overlayWin.currentStroke && overlayWin.currentStroke.type === "blur"
-            x: root.regionX + (overlayWin.currentStroke ? Math.min(overlayWin.currentStroke.x1, overlayWin.currentStroke.x2) : 0)
-            y: root.regionY + (overlayWin.currentStroke ? Math.min(overlayWin.currentStroke.y1, overlayWin.currentStroke.y2) : 0)
+            x: overlayWin.localX + (overlayWin.currentStroke ? Math.min(overlayWin.currentStroke.x1, overlayWin.currentStroke.x2) : 0)
+            y: overlayWin.localY + (overlayWin.currentStroke ? Math.min(overlayWin.currentStroke.y1, overlayWin.currentStroke.y2) : 0)
             width:  overlayWin.currentStroke ? Math.abs(overlayWin.currentStroke.x2 - overlayWin.currentStroke.x1) : 0
             height: overlayWin.currentStroke ? Math.abs(overlayWin.currentStroke.y2 - overlayWin.currentStroke.y1) : 0
             color: "transparent"; border.color: "#ffffff"; border.width: 1.5; opacity: 0.8
@@ -333,8 +347,8 @@ Variants {
         // ── Zoom badge ─────────────────────────────────
         Rectangle {
             visible: root.zoomScale > 1.0
-            x: root.regionX + root.regionW - width - 8
-            y: root.regionY + 8
+            x: overlayWin.localX + root.regionW - width - 8
+            y: overlayWin.localY + 8
             width: zoomBadgeRow.implicitWidth + 12; height: 22; radius: 6
             color: Qt.rgba(0, 0, 0, 0.6)
             Row {
@@ -348,8 +362,8 @@ Variants {
         // ── Drawing canvas ─────────────────────────────
         Canvas {
             id: drawCanvas
-            x: root.regionX
-            y: root.regionY
+            x: overlayWin.localX
+            y: overlayWin.localY
             width: root.regionW
             height: root.regionH
             visible: root.zoomScale <= 1.0
@@ -494,7 +508,7 @@ Variants {
 
         // ── Pan area (zoom mode only) ───────────────────
         MouseArea {
-            x: root.regionX; y: root.regionY
+            x: overlayWin.localX; y: overlayWin.localY
             width: root.regionW; height: root.regionH
             visible: root.zoomScale > 1.0
             hoverEnabled: true
@@ -516,20 +530,20 @@ Variants {
         Rectangle {
             id: toolbar
 
-            readonly property real spaceBelow: overlayWin.height - (root.regionY + root.regionH)
-            readonly property real spaceAbove: root.regionY
-            readonly property real spaceRight: overlayWin.width - (root.regionX + root.regionW)
+            readonly property real spaceBelow: overlayWin.height - (overlayWin.localY + root.regionH)
+            readonly property real spaceAbove: overlayWin.localY
+            readonly property real spaceRight: overlayWin.width - (overlayWin.localX + root.regionW)
             readonly property bool useVertical: spaceBelow < 56 && spaceAbove < 56
 
             width:  useVertical ? 56 : (toolbarContent.implicitWidth + Style.marginM * 2)
             height: useVertical ? (toolbarContent.implicitHeight + Style.marginM * 2) : 52
 
             x: useVertical
-               ? (spaceRight >= 56 ? root.regionX + root.regionW + 8 : Math.max(8, root.regionX - width - 8))
-               : Math.max(8, Math.min(root.regionX + (root.regionW - width) / 2, overlayWin.width - width - 8))
+               ? (spaceRight >= 56 ? overlayWin.localX + root.regionW + 8 : Math.max(8, overlayWin.localX - width - 8))
+               : Math.max(8, Math.min(overlayWin.localX + (root.regionW - width) / 2, overlayWin.width - width - 8))
             y: useVertical
-               ? Math.max(8, Math.min(root.regionY + (root.regionH - height) / 2, overlayWin.height - height - 8))
-               : (spaceBelow >= 56 ? root.regionY + root.regionH + 8 : Math.max(8, root.regionY - height - 8))
+               ? Math.max(8, Math.min(overlayWin.localY + (root.regionH - height) / 2, overlayWin.height - height - 8))
+               : (spaceBelow >= 56 ? overlayWin.localY + root.regionH + 8 : Math.max(8, overlayWin.localY - height - 8))
 
             radius: Style.radiusL
             color: Color.mSurface
@@ -853,24 +867,21 @@ Variants {
             var filename = "annotate-" + ts + ".png"
             saveFileProc.savedPath = filename
             if (root.zoomScale > 1.0) {
+                // Shell-quote imagePath in case it contains spaces
                 saveFileProc.exec({ command: [
                     "bash", "-c",
                     "DEST=$([ -d \"$HOME/Pictures/Screenshots\" ] && echo \"$HOME/Pictures/Screenshots\" || echo \"$HOME/Pictures\"); " +
-                    "cp " + root.imagePath + " \"$DEST/" + filename + "\" && echo \"$DEST\""
+                    "cp \"" + root.imagePath + "\" \"$DEST/" + filename + "\" && echo \"$DEST\""
                 ]})
             } else {
-                var dpr = overlayWin.screen?.devicePixelRatio ?? 1.0
-                var pw = Math.round(root.regionW * dpr)
-                var ph = Math.round(root.regionH * dpr)
                 drawCanvas.grabToImage(function(result) {
                     result.saveToFile("/tmp/screen-toolkit-overlay.png")
                     saveFileProc.exec({ command: [
                         "bash", "-c",
                         "DEST=$([ -d \"$HOME/Pictures/Screenshots\" ] && echo \"$HOME/Pictures/Screenshots\" || echo \"$HOME/Pictures\"); " +
-                        "magick /tmp/screen-toolkit-overlay.png -resize " + pw + "x" + ph + "! /tmp/screen-toolkit-overlay-hires.png && " +
-                        "magick /tmp/screen-toolkit-annotate.png /tmp/screen-toolkit-overlay-hires.png " +
+                        "magick /tmp/screen-toolkit-annotate.png /tmp/screen-toolkit-overlay.png " +
                         "-composite \"$DEST/" + filename + "\" && " +
-                        "rm -f /tmp/screen-toolkit-overlay.png /tmp/screen-toolkit-overlay-hires.png && echo \"$DEST\""
+                        "rm -f /tmp/screen-toolkit-overlay.png && echo \"$DEST\""
                     ]})
                 })
             }
@@ -880,20 +891,17 @@ Variants {
             if (overlayWin.isSaving) return
             overlayWin.isSaving = true
             if (root.zoomScale > 1.0) {
-                copyProc.exec({ command: ["bash", "-c", "wl-copy < " + root.imagePath] })
+                // Shell-quote imagePath in case it contains spaces
+                copyProc.exec({ command: ["bash", "-c", "wl-copy < \"" + root.imagePath + "\""] })
             } else {
-                var dpr = overlayWin.screen?.devicePixelRatio ?? 1.0
-                var pw = Math.round(root.regionW * dpr)
-                var ph = Math.round(root.regionH * dpr)
                 drawCanvas.grabToImage(function(result) {
                     result.saveToFile("/tmp/screen-toolkit-overlay.png")
                     saveProc.exec({ command: [
                         "bash", "-c",
-                        "magick /tmp/screen-toolkit-overlay.png -resize " + pw + "x" + ph + "! /tmp/screen-toolkit-overlay-hires.png && " +
-                        "magick /tmp/screen-toolkit-annotate.png /tmp/screen-toolkit-overlay-hires.png " +
+                        "magick /tmp/screen-toolkit-annotate.png /tmp/screen-toolkit-overlay.png " +
                         "-composite /tmp/screen-toolkit-annotated.png && " +
                         "wl-copy < /tmp/screen-toolkit-annotated.png && " +
-                        "rm -f /tmp/screen-toolkit-overlay.png /tmp/screen-toolkit-overlay-hires.png"
+                        "rm -f /tmp/screen-toolkit-overlay.png"
                     ]})
                 })
             }

@@ -447,7 +447,7 @@ Item {
                     "bash", "-c",
                     _grimRegionCmd("/tmp/screen-toolkit-lens.png") + " && " +
                     "notify-send 'Screen Toolkit' 'Uploading to Lens...' 2>/dev/null; " +
-                    "URL=$(curl -sS -F 'file=@/tmp/screen-toolkit-lens.png' 'https://0x0.st' 2>/dev/null); " +
+                    "URL=$(curl -sS --connect-timeout 10 --max-time 30 -F 'file=@/tmp/screen-toolkit-lens.png' 'https://0x0.st' 2>/dev/null); " +
                     "rm -f /tmp/screen-toolkit-lens.png; " +
                     "if [ -n \"$URL\" ]; then xdg-open \"https://lens.google.com/uploadbyurl?url=$URL\" 2>/dev/null; else exit 1; fi"
                 ]
@@ -525,9 +525,12 @@ Item {
                          (sy + Math.round(root._regionY / scale)) + " " +
                          Math.round(root._regionW / scale) + "x" +
                          Math.round(root._regionH / scale)
+            // Local coords for UI overlay positioning (no screen offset)
+            var localX = Math.round(root._regionX / scale)
+            var localY = Math.round(root._regionY / scale)
             root.isRunning = false
             root.activeTool = "record"
-            recordOverlay.startRecording(region, root.pendingRecordFormat, root.pendingRecordAudioOut, root.pendingRecordAudioIn)
+            recordOverlay.startRecording(region, root.pendingRecordFormat, root.pendingRecordAudioOut, root.pendingRecordAudioIn, localX, localY)
         }
     }
 

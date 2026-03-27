@@ -23,6 +23,11 @@ Item {
     property int  xPos: -1
     property int  yPos: -1
 
+    // Track which screen was active when the mirror was first shown.
+    // This is more reliable than always using Quickshell.screens[0],
+    // which is not guaranteed to be the user's main monitor.
+    property var _primaryScreen: null
+
     Variants {
         model: Quickshell.screens
 
@@ -30,7 +35,9 @@ Item {
             id: win
             required property ShellScreen modelData
 
-            readonly property bool isPrimary: modelData === Quickshell.screens[0]
+            // isPrimary is true for whichever screen was current when mirror
+            // was first opened, or the first screen as a safe fallback.
+            readonly property bool isPrimary: modelData === (root._primaryScreen ?? Quickshell.screens[0])
 
             screen: modelData
             anchors { top: true; bottom: true; left: true; right: true }
@@ -43,9 +50,16 @@ Item {
             WlrLayershell.namespace: "noctalia-mirror"
 
             onVisibleChanged: {
-                if (visible && isPrimary && root.xPos === -1 && screen.width > 0) {
-                    root.xPos = screen.width  - root.currentWidth  - 24
-                    root.yPos = Math.round((screen.height - root.currentHeight) / 2)
+                if (visible && isPrimary) {
+                    if (root.xPos === -1 && screen.width > 0) {
+                        // First show: place in the top-right corner
+                        root.xPos = screen.width  - root.currentWidth  - 24
+                        root.yPos = Math.round((screen.height - root.currentHeight) / 2)
+                    } else {
+                        // Subsequent shows: clamp position in case resolution changed
+                        root.xPos = Math.max(0, Math.min(root.xPos, screen.width  - root.currentWidth))
+                        root.yPos = Math.max(0, Math.min(root.yPos, screen.height - root.currentHeight))
+                    }
                 }
             }
 
@@ -54,7 +68,11 @@ Item {
                               resizeTR.pressed || resizeTL.pressed)
 
             Item { id: fullMask; anchors.fill: parent }
-            mask: Region { item: win.isInteracting ? fullMask : container }
+
+            // Non-primary windows are fully click-through (mask: null).
+            // Primary uses fullMask during interaction so resize/drag don't
+            // lose events, and container mask otherwise to stay minimal.
+            mask: Region { item: !win.isPrimary ? null : (win.isInteracting ? fullMask : container) }
 
             MediaDevices { id: mediaDevices }
 
@@ -69,25 +87,31 @@ Item {
                 color: "black"
                 clip: true
 
-                CaptureSession {
-                    id: captureSession
-                    camera: Camera {
-                        id: camera
-                        active: win.visible && win.isPrimary
-                        cameraDevice: mediaDevices.videoInputs.length > 0
-                            ? mediaDevices.videoInputs[0]
-                            : null
-                    }
-                    videoOutput: videoOutput
-                }
-
-                VideoOutput {
-                    id: videoOutput
+                Loader {
+                    id: cameraLoader
+                    active: win.visible && win.isPrimary
                     anchors.fill: parent
-                    fillMode: VideoOutput.PreserveAspectCrop
-                    transform: Scale {
-                        origin.x: videoOutput.width / 2
-                        xScale: root.isFlipped ? -1 : 1
+                    sourceComponent: Component {
+                        Item {
+                            anchors.fill: parent
+                            CaptureSession {
+                                camera: Camera {
+                                    id: camera
+                                    active: true
+                                    cameraDevice: mediaDevices.videoInputs[0] ?? mediaDevices.defaultVideoInput
+                                }
+                                videoOutput: videoOutput
+                            }
+                            VideoOutput {
+                                id: videoOutput
+                                anchors.fill: parent
+                                fillMode: VideoOutput.PreserveAspectCrop
+                                transform: Scale {
+                                    origin.x: videoOutput.width / 2
+                                    xScale: root.isFlipped ? -1 : 1
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -171,7 +195,7 @@ Item {
                                 id: flipHover
                                 anchors.fill: parent; cursorShape: Qt.PointingHandCursor; hoverEnabled: true
                                 onClicked: root.isFlipped = !root.isFlipped
-                                onEntered: TooltipService.show(parent, root.isFlipped ? root.pluginApi?.tr("tooltips.unflipcamera") : root.pluginApi?.tr("tooltips.flipCamera"))
+                                onEntered: TooltipService.show(parent, root.isFlipped ? root.pluginApi?.tr("tooltips.unflipCamera") : root.pluginApi?.tr("tooltips.flipCamera"))
                                 onExited:  TooltipService.hide()
                             }
                         }
@@ -248,6 +272,17 @@ Item {
                 ResizeHandle { id: resizeTR; mode: 2; anchors.top:    parent.top;    anchors.right: parent.right }
                 ResizeHandle { id: resizeTL; mode: 3; anchors.top:    parent.top;    anchors.left:  parent.left  }
             }
+        }
+    }
+
+    // Store the current screen when mirror is first toggled on.
+    // pluginApi.withCurrentScreen gives us the screen where the panel
+    // lives, which is the right monitor to show the mirror on.
+    onIsVisibleChanged: {
+        if (isVisible && _primaryScreen === null && pluginApi) {
+            pluginApi.withCurrentScreen(screen => { _primaryScreen = screen })
+        } else if (!isVisible) {
+            _primaryScreen = null
         }
     }
 }

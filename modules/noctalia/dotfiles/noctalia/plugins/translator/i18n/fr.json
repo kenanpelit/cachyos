@@ -104,12 +104,19 @@
     "error": "Erreur de traduction",
     "targetLanguage": "Langue cible: {code}",
     "translating": "Traduction en cours...",
-    "translation": "Traduction ({code})"
+    "translation": "Traduction ({code})",
+    "missingApiKey": "Clé API manquante",
+    "invalidApiKey": "Clé API invalide",
+    "pressEnter": "Appuyez sur Entrée pour traduire"
   },
   "settings": {
-    "backend": {
-      "description": "Choisissez le service de traduction à utiliser",
-      "label": "Service de traduction"
-    }
+      "backend-description": "Choisissez le service de traduction à utiliser",
+      "backend-label": "Service de traduction",
+      "realTime-label": "Traduction en temps réel",
+      "realTime-description": "Traduire au fur et à mesure que vous tapez (Peut entraîner une consommation importante de tokens)",
+      "apiKey-placeholder": "Entrez votre clé API ici",
+      "apiKey-label": "Clé API",
+      "showPreview-label": "Aperçu de la traduction",
+      "showPreview-description": "Afficher le résultat de la traduction dans le panneau d'aperçu"
   }
 }

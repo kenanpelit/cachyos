@@ -23,6 +23,12 @@ Item {
     property int regionW: 400
     property int regionH: 300
 
+    // Screen-local coords for UI overlay positioning.
+    // regionX/Y include the screen offset (for wf-recorder/grim),
+    // uiX/uiY are screen-local logical pixels (for QML element positioning).
+    property int uiX: 0
+    property int uiY: 0
+
     property int _elapsed: 0
     property int _frameToken: 0
     property string format: "gif"
@@ -31,7 +37,7 @@ Item {
 
     property bool _previewBusy: false
 
-    function startRecording(regionStr, fmt, audOut, audIn) {
+    function startRecording(regionStr, fmt, audOut, audIn, localX, localY) {
         if (root.isRecording || root.isConverting) return
         root.format = (fmt === "mp4") ? "mp4" : "gif"
         root.audioOutput = audOut === true
@@ -46,6 +52,9 @@ Item {
             root.regionW = parseInt(wh[0]) || 400
             root.regionH = parseInt(wh[1]) || 300
         }
+
+        root.uiX = localX ?? root.regionX
+        root.uiY = localY ?? root.regionY
 
         root.region       = regionStr
         root.mp4Path      = "/tmp/screen-toolkit-record-" + Date.now() + ".mp4"
@@ -230,8 +239,8 @@ Item {
 
             Rectangle {
                 visible: root.isRecording
-                x: root.regionX - 2
-                y: root.regionY - 2
+                x: root.uiX - 2
+                y: root.uiY - 2
                 width:  root.regionW + 4
                 height: root.regionH + 4
                 color: "transparent"
@@ -246,14 +255,14 @@ Item {
 
                 readonly property real cardW: cardRect.implicitWidth  + 2
                 readonly property real cardH: cardRect.implicitHeight + 2
-                readonly property real spaceBelow: parent.height - (root.regionY + root.regionH)
+                readonly property real spaceBelow: parent.height - (root.uiY + root.regionH)
 
                 x: Math.max(8, Math.min(
-                    root.regionX + (root.regionW - cardW) / 2,
+                    root.uiX + (root.regionW - cardW) / 2,
                     parent.width - cardW - 8))
                 y: spaceBelow >= cardH + 10
-                   ? root.regionY + root.regionH + 8
-                   : root.regionY - cardH - 8
+                   ? root.uiY + root.regionH + 8
+                   : root.uiY - cardH - 8
 
                 width: cardW
                 height: cardH
@@ -285,7 +294,7 @@ Item {
                             Image {
                                 anchors.fill: parent
                                 visible: root.isRecording || root.isConverting
-                                source: root._frameToken >= 0
+                                source: root._frameToken > 0
                                     ? "file:///tmp/screen-toolkit-record-preview.png?" + root._frameToken
                                     : ""
                                 fillMode: Image.PreserveAspectFit
