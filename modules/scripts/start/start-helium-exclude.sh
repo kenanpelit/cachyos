@@ -10,7 +10,7 @@ readonly VPN_MODE="bypass"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=1
 readonly COMMAND="profile_helium"
-readonly ARGS_STR="Exclude --separate --restore-last-session"
+readonly ARGS_STR="Kenp --separate --class=Exclude --title=Exclude --restore-last-session"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager
@@ -29,6 +29,9 @@ echo "Initializing helium-exclude on $WM_TYPE..."
 APP_ARGS=()
 if [[ -n "$ARGS_STR" ]]; then
     read -r -a APP_ARGS <<<"$ARGS_STR"
+fi
+if [[ $# -gt 0 ]]; then
+    APP_ARGS+=("$@")
 fi
 
 # External monitor setup (GNOME only)

@@ -101,7 +101,7 @@ declare -A HELIUM_BROWSERS=(
   ["helium-ai"]="profile_helium|Ai --separate --restore-last-session|3|secure|2|false"
   ["helium-compecta"]="profile_helium|CompecTA --separate --restore-last-session|4|secure|2|false"
   ["helium-whats"]="profile_helium|Whats --separate --restore-last-session|9|secure|1|false"
-  ["helium-exclude"]="profile_helium|Exclude --separate --restore-last-session|6|bypass|1|false"
+  ["helium-exclude"]="profile_helium|Kenp --separate --class=Exclude --title=Exclude --restore-last-session|6|bypass|1|false"
   ["helium-youtube"]="profile_helium|--youtube --separate --class helium-youtube.com__-Default|7|secure|1|false"
   ["helium-tiktok"]="profile_helium|--tiktok --separate --class tiktok --title tiktok|6|secure|1|true"
   ["helium-spotify"]="profile_helium|--spotify --separate --class spotify --title spotify|8|secure|1|true"
@@ -759,6 +759,9 @@ echo "Initializing PROFILE_NAME on $WM_TYPE..."
 APP_ARGS=()
 if [[ -n "$ARGS_STR" ]]; then
     read -r -a APP_ARGS <<<"$ARGS_STR"
+fi
+if [[ $# -gt 0 ]]; then
+    APP_ARGS+=("$@")
 fi
 
 # External monitor setup (GNOME only)
