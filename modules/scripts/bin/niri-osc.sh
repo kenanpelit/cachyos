@@ -248,7 +248,7 @@ Commands:
   here               Bring window here (or launch); `all` gathers a set
   cast               Dynamic screencast helpers (window/monitor/clear/pick)
   flow               Legacy workspace/monitor compatibility shim
-  monitor-smart-next Move workspace to next monitor, else focus next monitor
+  monitor-smart-next Move focused window to next monitor and focus it
   doctor             Print session diagnostics (try: --tree, --logs)
   float              Toggle between floating and tiling modes with preset size
   zen                Toggle Zen Mode (hide gaps, borders, bar)
@@ -2442,17 +2442,24 @@ EOF
 
 monitor-smart-next)
   # ----------------------------------------------------------------------------
-  # Try moving the current workspace to the next monitor; if that action is not
-  # possible in the current layout, just focus the next monitor.
+  # Move the focused window to the next monitor and then focus that moved
+  # window. If there is no focused window, or moving fails, just focus the next
+  # monitor.
   # ----------------------------------------------------------------------------
   (
     set -euo pipefail
 
+    local focused_id=""
+
     command -v niri >/dev/null 2>&1 || exit 0
     niri msg version >/dev/null 2>&1 || exit 0
 
-    if niri msg action move-workspace-to-monitor-next >/dev/null 2>&1; then
-      exit 0
+    focused_id="$(niri msg -j focused-window 2>/dev/null | jq -r '.id // empty' || true)"
+    if [[ -n "$focused_id" ]]; then
+      if niri msg action move-window-to-monitor-next >/dev/null 2>&1; then
+        niri msg action focus-window --id "$focused_id" >/dev/null 2>&1 || true
+        exit 0
+      fi
     fi
 
     exec niri msg action focus-monitor-next

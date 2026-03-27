@@ -756,6 +756,10 @@
         },
         {
           "keys": "Super + Shift + A",
+          "desc": "Move Window Next Monitor"
+        },
+        {
+          "keys": "Super + Ctrl + E",
           "desc": "Move WS Next Monitor"
         },
         {
