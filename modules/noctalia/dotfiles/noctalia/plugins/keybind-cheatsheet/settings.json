@@ -755,6 +755,10 @@
           "desc": "Monitor Down"
         },
         {
+          "keys": "Super + Ctrl + A",
+          "desc": "Move Window Next Monitor"
+        },
+        {
           "keys": "Super + Escape",
           "desc": "Move Window Next Monitor"
         },
