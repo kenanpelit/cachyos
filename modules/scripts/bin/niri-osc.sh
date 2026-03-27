@@ -2449,7 +2449,7 @@ monitor-smart-next)
   (
     set -euo pipefail
 
-    local focused_id=""
+    focused_id=""
 
     command -v niri >/dev/null 2>&1 || exit 0
     niri msg version >/dev/null 2>&1 || exit 0
