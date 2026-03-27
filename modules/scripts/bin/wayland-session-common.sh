@@ -156,8 +156,7 @@ session_common_under_uwsm() {
   [[ -n "${UWSM_ID:-}" ]] \
     || [[ -n "${UWSM_FINALIZE_VARNAMES:-}" ]] \
     || [[ -n "${UWSM_WAIT_VARNAMES:-}" ]] \
-    || [[ "${DESKTOP_SESSION:-}" == *-uwsm* ]] \
-    || [[ "${GDMSESSION:-}" == *-uwsm* ]]
+    || [[ "${DESKTOP_SESSION:-}" == *-uwsm* ]]
 }
 
 session_common_sync_environment_vars() {

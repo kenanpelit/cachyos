@@ -1759,13 +1759,12 @@ GDM_MODE=false
 FORCE_TTY_MODE=false
 
 # =============================================================================
-# GDM Detection - Script Başlangıcında Otomatik
+# Session Detection - Script Başlangıcında Otomatik
 # =============================================================================
-# GDM session indicators (multiple checks for reliability):
-#   1. GDMSESSION environment variable (set by GDM)
-#   2. XDG_SESSION_CLASS=user (GDM sets this)
-#   3. DBUS_SESSION_BUS_ADDRESS already set (GDM provides D-Bus)
-#   4. Systemd user session already active (GDM starts it)
+# Session indicators (multiple checks for reliability):
+#   1. XDG_SESSION_CLASS=user
+#   2. DBUS_SESSION_BUS_ADDRESS already set
+#   3. Systemd user session already active
 
 detect_gdm_session() {
 	if [[ "$FORCE_TTY_MODE" == "true" ]]; then
@@ -1773,9 +1772,8 @@ detect_gdm_session() {
 		return 0
 	fi
 
-	# More aggressive GDM detection
-	if [[ -n "${GDMSESSION:-}" ]] ||
-		[[ "${XDG_SESSION_CLASS:-}" == "user" ]] ||
+	# Session detection for already bootstrapped graphical environments
+	if [[ "${XDG_SESSION_CLASS:-}" == "user" ]] ||
 		[[ -n "${DBUS_SESSION_BUS_ADDRESS:-}" && -n "${XDG_SESSION_ID:-}" ]] ||
 		[[ "$(loginctl show-session "$XDG_SESSION_ID" -p Type 2>/dev/null)" == *"wayland"* ]]; then
 		GDM_MODE=true
@@ -1785,7 +1783,6 @@ detect_gdm_session() {
 
 	# Log detection result
 	debug_log "GDM Detection: GDM_MODE=$GDM_MODE"
-	debug_log "  GDMSESSION=${GDMSESSION:-unset}"
 	debug_log "  XDG_SESSION_CLASS=${XDG_SESSION_CLASS:-unset}"
 	debug_log "  DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:+set}"
 }
@@ -2311,7 +2308,6 @@ main() {
 	debug_log "Version: $SCRIPT_VERSION"
 	debug_log "User: $USER | TTY: $(tty 2>/dev/null || echo 'N/A')"
 	debug_log "GDM_MODE: $GDM_MODE | DEBUG: $DEBUG_MODE | DRY_RUN: $DRY_RUN"
-	debug_log "GDMSESSION: ${GDMSESSION:-unset}"
 	debug_log "XDG_SESSION_CLASS: ${XDG_SESSION_CLASS:-unset}"
 	debug_log "DBUS_SESSION_BUS_ADDRESS: ${DBUS_SESSION_BUS_ADDRESS:-unset}"
 	debug_log "════════════════════════════════════════════════════════"

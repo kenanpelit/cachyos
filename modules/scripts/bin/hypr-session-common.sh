@@ -174,8 +174,7 @@ hypr_clear_foreign_session_env() {
     XDG_CURRENT_DESKTOP \
     XDG_SESSION_DESKTOP \
     XDG_MENU_PREFIX \
-    DESKTOP_SESSION \
-    GDMSESSION
+    DESKTOP_SESSION
 }
 
 hypr_session_under_uwsm() {
@@ -197,7 +196,6 @@ hypr_collect_env_vars() {
     XDG_SESSION_TYPE
     XDG_SESSION_DESKTOP
     DESKTOP_SESSION
-    GDMSESSION
   )
   local var
   local -A seen=()
@@ -227,7 +225,6 @@ XDG_CURRENT_DESKTOP
 XDG_SESSION_TYPE
 XDG_SESSION_DESKTOP
 DESKTOP_SESSION
-GDMSESSION
 EOF
 }
 

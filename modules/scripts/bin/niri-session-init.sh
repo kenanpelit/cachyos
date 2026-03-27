@@ -76,7 +76,6 @@ main() {
 
   if niri_session_under_uwsm; then
     export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
-    export GDMSESSION="${GDMSESSION:-niri-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
     if [[ -z "${XDG_CURRENT_DESKTOP:-}" || -z "${XDG_SESSION_TYPE:-}" || -z "${XDG_SESSION_DESKTOP:-}" ]]; then
       niri_ensure_session_identity

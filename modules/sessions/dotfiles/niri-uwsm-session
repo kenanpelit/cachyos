@@ -21,7 +21,6 @@ export XDG_CURRENT_DESKTOP=niri
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=niri
 export DESKTOP_SESSION=niri-uwsm
-export GDMSESSION=niri-uwsm
 export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
 export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
 
@@ -42,14 +41,12 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     XDG_CURRENT_DESKTOP \
     XDG_SESSION_TYPE \
     XDG_SESSION_DESKTOP \
-    DESKTOP_SESSION \
-    GDMSESSION
+    DESKTOP_SESSION
   session_common_set_manager_env \
     "XDG_CURRENT_DESKTOP=${XDG_CURRENT_DESKTOP}" \
     "XDG_SESSION_TYPE=${XDG_SESSION_TYPE}" \
     "XDG_SESSION_DESKTOP=${XDG_SESSION_DESKTOP}" \
     "DESKTOP_SESSION=${DESKTOP_SESSION}" \
-    "GDMSESSION=${GDMSESSION}" \
     "PATH=${PATH}" \
     "XDG_DATA_DIRS=${XDG_DATA_DIRS:-}" \
     "XDG_CONFIG_DIRS=${XDG_CONFIG_DIRS:-/etc/xdg}" \

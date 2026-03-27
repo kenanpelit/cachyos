@@ -1021,7 +1021,7 @@ tty)
     FORCE_TTY_MODE=false
 
     # =============================================================================
-    # GDM Detection
+    # Session Detection
     # =============================================================================
     detect_gdm_session() {
       if [[ "$FORCE_TTY_MODE" == "true" ]]; then
@@ -1029,8 +1029,7 @@ tty)
         return 0
       fi
 
-      if [[ -n "${GDMSESSION:-}" ]] ||
-        [[ "${XDG_SESSION_CLASS:-}" == "user" ]] ||
+      if [[ "${XDG_SESSION_CLASS:-}" == "user" ]] ||
         [[ -n "${DBUS_SESSION_BUS_ADDRESS:-}" && -n "${XDG_SESSION_ID:-}" ]] ||
         [[ "$(loginctl show-session "$XDG_SESSION_ID" -p Type 2>/dev/null)" == *"wayland"* ]]; then
         GDM_MODE=true
@@ -1443,7 +1442,6 @@ env | session-init)
 
       if niri_session_under_uwsm; then
         export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
-        export GDMSESSION="${GDMSESSION:-niri-uwsm}"
         export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
         if [[ -z "${XDG_CURRENT_DESKTOP:-}" || -z "${XDG_SESSION_TYPE:-}" || -z "${XDG_SESSION_DESKTOP:-}" ]]; then
           niri_ensure_session_identity
