@@ -11,9 +11,94 @@ initial_path = "/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
 shell_login_flag = "short"
 focus_behaviour = "default"
 
+[background]
+show_background = true
+
+[background.style]
+color = "$bg"
+show_border = true
+border_color = "$panel_border"
+
+[power_controls]
+hint_margin = 3
+
+[[power_controls.base_entries]]
+hint = "Shutdown"
+hint_color = "$muted"
+hint_modifiers = ""
+key = "F1"
+cmd = "systemctl poweroff -l"
+
+[[power_controls.base_entries]]
+hint = "Reboot"
+hint_color = "$muted"
+hint_modifiers = ""
+key = "F2"
+cmd = "systemctl reboot -l"
+
 [environment_switcher]
+switcher_visibility = "visible"
+toggle_hint = "Sessions %key%"
+toggle_hint_color = "$muted"
+toggle_hint_modifiers = ""
 include_tty_shell = false
 remember = true
+show_movers = true
+mover_color = "$muted"
+mover_modifiers = ""
+mover_color_focused = "$accent"
+mover_modifiers_focused = "bold"
+left_mover = "<"
+right_mover = ">"
+mover_margin = 2
+show_neighbours = true
+neighbour_color = "$subtext"
+neighbour_modifiers = ""
+neighbour_color_focused = "$text"
+neighbour_modifiers_focused = ""
+neighbour_margin = 2
+selected_color = "$text"
+selected_modifiers = "underlined"
+selected_color_focused = "$accent_soft"
+selected_modifiers_focused = "bold,underlined"
+max_display_length = 16
+no_envs_text = "No sessions"
+no_envs_color = "$text"
+no_envs_modifiers = ""
+no_envs_color_focused = "$danger"
+no_envs_modifiers_focused = "bold"
+
+[username_field]
+remember = true
+
+[username_field.style]
+show_title = true
+title = "$login_title"
+title_color = "$subtext"
+content_color = "$text"
+title_color_focused = "$accent"
+content_color_focused = "$accent_soft"
+show_border = true
+border_color = "$field_border"
+border_color_focused = "$accent"
+use_max_width = true
+max_width = 56
+
+[password_field]
+content_replacement_character = "*"
+
+[password_field.style]
+show_title = true
+title = "$password_title"
+title_color = "$subtext"
+content_color = "$text"
+title_color_focused = "$accent"
+content_color_focused = "$accent_soft"
+show_border = true
+border_color = "$field_border"
+border_color_focused = "$accent"
+use_max_width = true
+max_width = 56
 
 [x11]
 xserver_log_path = "/var/log/lemurs.xorg.log"

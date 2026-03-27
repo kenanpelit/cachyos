@@ -1,0 +1,12 @@
+bg = "#1e1e2e"
+panel_border = "#585b70"
+field_border = "#6c7086"
+text = "#cdd6f4"
+subtext = "#bac2de"
+muted = "#7f849c"
+accent = "#cba6f7"
+accent_soft = "#f5c2e7"
+danger = "#f38ba8"
+
+login_title = "User"
+password_title = "Password"
