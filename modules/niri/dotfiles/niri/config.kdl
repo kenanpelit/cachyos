@@ -597,6 +597,7 @@ binds {
     spawn "osc-wiremix"
   }
 
+  // BEGIN OSC_NIRI_WORKSPACE_SHORTCUTS
   // ----------------------------------------------------------------------
   // Workspace Navigation (1..9)
   // ----------------------------------------------------------------------
@@ -637,6 +638,7 @@ binds {
 
   // Global window rearrangement.
   Mod+Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "niri-osc" "set" "go"; }
+  // END OSC_NIRI_WORKSPACE_SHORTCUTS
 
   // ----------------------------------------------------------------------
   // Advanced Navigation & Monitor Focus
@@ -831,14 +833,14 @@ window-rule {
   }
 }
 
+// BEGIN OSC_NIRI_WORKSPACE_RULES
 // Default Workspace placements by application ID.
 window-rule {
   match app-id=r#"^Kenp$"#
   open-on-workspace "1"
 }
 window-rule {
-  match app-id=r#"^(kitty|org\.wezfurlong\.wezterm)$"#
-  match title=r#"^Tmux$"#
+  match app-id=r#"^(TmuxKenp|kitty|org\.wezfurlong\.wezterm)$"#
   open-on-workspace "2"
 }
 window-rule {
@@ -854,7 +856,7 @@ window-rule {
   open-on-workspace "5"
 }
 window-rule {
-  match app-id=r#"^(org\.telegram\.desktop|vlc|remote-viewer)$"#
+  match app-id=r#"^(Exclude|org\.telegram\.desktop|vlc|remote-viewer)$"#
   open-on-workspace "6"
 }
 window-rule {
@@ -869,6 +871,7 @@ window-rule {
   match app-id=r#"^(ferdium|Ferdium|com\.rtosta\.zapzap|(Whats|chrome-web\.whatsapp\.com__-Default))$"#
   open-on-workspace "9"
 }
+// END OSC_NIRI_WORKSPACE_RULES
 
 // Privacy: Block sensitive applications from appearing in screenshots or screencasts.
 window-rule {
