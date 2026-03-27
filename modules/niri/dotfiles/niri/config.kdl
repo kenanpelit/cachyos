@@ -661,12 +661,12 @@ binds {
   Mod+Alt+L hotkey-overlay-title="Monitor Right" { focus-column-right; }
   Mod+Alt+K hotkey-overlay-title="Monitor Up" { focus-monitor-up; }
   Mod+Alt+J hotkey-overlay-title="Monitor Down" { focus-monitor-down; }
-  
-  Mod+E repeat=false hotkey-overlay-title="Move WS Next Monitor" {
+
+  Mod+Shift+A repeat=false hotkey-overlay-title="Move WS Next Monitor" {
     spawn "niri" "msg" "action" "move-workspace-to-monitor-next"
   }
-  Mod+Escape repeat=false hotkey-overlay-title="Smart Move/Focus" {
-    spawn "niri-osc" "set" "monitor-smart-next"
+  Mod+Escape repeat=false hotkey-overlay-title="Focus Next Monitor" {
+    spawn "niri" "msg" "action" "focus-monitor-next"
   }
 
   // Cross-monitor window movement.

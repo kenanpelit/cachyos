@@ -767,12 +767,12 @@
           "desc": "Monitor Down"
         },
         {
-          "keys": "Super + E",
+          "keys": "Super + Shift + A",
           "desc": "Move WS Next Monitor"
         },
         {
           "keys": "Super + Escape",
-          "desc": "Smart Move/Focus"
+          "desc": "Focus Next Monitor"
         },
         {
           "keys": "Super + Alt + Shift + Left",
