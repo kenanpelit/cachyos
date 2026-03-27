@@ -15,7 +15,7 @@ readonly GNOME_MODULE_FILE="${REPO_ROOT}/modules/gnome/packages.yaml"
 readonly SYSTEM_PACKAGES_FILE="${REPO_ROOT}/modules/system-packages-hay/packages.yaml"
 readonly XDG_MIMEAPPS_FILE="${REPO_ROOT}/modules/xdg-mimes/dotfiles/mimeapps.list"
 readonly COSMIC_MODULE_DIR="${REPO_ROOT}/modules/cosmic"
-readonly LIDM_INSTALL_SCRIPT="${REPO_ROOT}/modules/lidm/scripts/install.sh"
+readonly LEMURS_INSTALL_SCRIPT="${REPO_ROOT}/modules/lemurs/scripts/install.sh"
 
 DRY_RUN=0
 ASSUME_YES=0
@@ -422,11 +422,11 @@ remove_installed_packages() {
   run_root "${cmd[@]}"
 }
 
-ensure_lidm_available() {
-  if ! package_installed lidm-git || ! package_installed lidm-systemd-git; then
-    die "LiDM packages are not installed. Install lidm-git and lidm-systemd-git first."
+ensure_lemurs_available() {
+  if ! package_installed lemurs-git && ! package_installed lemurs; then
+    die "Lemurs is not installed. Install lemurs-git first."
   fi
-  [[ -x "${LIDM_INSTALL_SCRIPT}" ]] || die "Missing LiDM install helper: ${LIDM_INSTALL_SCRIPT}"
+  [[ -x "${LEMURS_INSTALL_SCRIPT}" ]] || die "Missing Lemurs install helper: ${LEMURS_INSTALL_SCRIPT}"
 }
 
 cleanup_cosmic_repo() {
@@ -443,7 +443,8 @@ cleanup_cosmic_system() {
 
 cleanup_gnome_repo() {
   log "Cleaning GNOME repo references."
-  replace_exact_line "${HOST_FILE}" "- gdm" "- lidm"
+  replace_exact_line "${HOST_FILE}" "- gdm" "- lemurs"
+  replace_exact_line "${HOST_FILE}" "- lidm" "- lemurs"
   replace_exact_line "${HOST_FILE}" "  pdf: org.gnome.Evince.desktop" "  pdf: org.pwmt.zathura.desktop"
   replace_exact_line "${HOST_FILE}" "  archive: org.gnome.FileRoller.desktop" "  archive: nemo.desktop"
   replace_exact_line "${HOST_FILE}" "    application/pdf: org.gnome.Evince.desktop" "    application/pdf: org.pwmt.zathura.desktop"
@@ -466,9 +467,9 @@ cleanup_gnome_repo() {
 }
 
 cleanup_gnome_system() {
-  log "Switching display manager from GDM to LiDM."
-  ensure_lidm_available
-  run_root bash "${LIDM_INSTALL_SCRIPT}"
+  log "Switching display manager to Lemurs."
+  ensure_lemurs_available
+  run_root bash "${LEMURS_INSTALL_SCRIPT}"
 
   log "Removing GNOME packages while keeping nautilus + xdg-desktop-portal-gnome."
   remove_installed_packages "${GNOME_REMOVE_PACKAGES[@]}"

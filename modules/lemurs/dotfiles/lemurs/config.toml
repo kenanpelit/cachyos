@@ -1,0 +1,30 @@
+tty = 7
+
+main_log_path = "/var/log/lemurs.log"
+client_log_path = "/var/log/lemurs.client.log"
+cache_path = "/var/cache/lemurs"
+
+do_log = true
+pam_service = "lemurs"
+system_shell = "/bin/sh"
+initial_path = "/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
+shell_login_flag = "short"
+focus_behaviour = "default"
+
+[environment_switcher]
+include_tty_shell = false
+remember = true
+
+[x11]
+xserver_log_path = "/var/log/lemurs.xorg.log"
+x11_display = ":1"
+xserver_timeout_secs = 60
+xserver_path = "/usr/bin/X"
+xauth_path = "/usr/bin/xauth"
+scripts_path = "/etc/lemurs/wms"
+xsetup_path = "/etc/lemurs/xsetup.sh"
+xsessions_path = "/usr/share/xsessions"
+
+[wayland]
+scripts_path = "/etc/lemurs/wayland"
+wayland_sessions_path = "/usr/share/wayland-sessions"
