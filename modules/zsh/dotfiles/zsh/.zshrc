@@ -546,6 +546,10 @@ autoload -Uz _osc-shell 2>/dev/null || true
 autoload -Uz _osc-media 2>/dev/null || true
 (( $+functions[_osc-media] )) && compdef _osc-media osc-media osc-media.sh
 
+# Bind osc-mullvad completion explicitly for cached compinit sessions too.
+autoload -Uz _osc-mullvad 2>/dev/null || true
+(( $+functions[_osc-mullvad] )) && compdef _osc-mullvad osc-mullvad osc-mullvad.sh
+
 # --------------------------------------------------------------------
 # Completion System Styles
 # 

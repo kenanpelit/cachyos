@@ -1,0 +1,271 @@
+#compdef osc-mullvad osc-mullvad.sh
+
+_osc_mullvad_countries() {
+  reply=(
+    at be bg br ca ch cl co cz de dk ee es fi fr gb gr hk hr hu id ie il
+    it jp mx my ng nl no nz pe ph pl pt ro rs se sg si sk th tr ua us za
+  )
+}
+
+_osc_mullvad_country_groups() {
+  reply=(all europe americas asia africa other apac asia-pacific africa-me)
+}
+
+_osc_mullvad_favorites() {
+  emulate -L zsh
+
+  local file="${OSC_MULLVAD_FAVORITES_FILE:-${OSC_MULLVAD_CONFIG_DIR:-${OSC_MULLVAD_DIR:-$HOME/.mullvad}}/favorites.txt}"
+  local relay rest
+  local -a relays
+
+  [[ -r "$file" ]] || {
+    reply=()
+    return 0
+  }
+
+  while IFS='|' read -r relay rest; do
+    [[ -n "$relay" ]] && relays+=("$relay")
+  done < "$file"
+
+  reply=(${(u)relays})
+}
+
+_osc_mullvad_slot_selectors() {
+  emulate -L zsh
+
+  local file="${OSC_MULLVAD_SLOT_STATE_FILE:-${OSC_MULLVAD_STATE_DIR:-${OSC_MULLVAD_DIR:-$HOME/.mullvad}}/slot.state}"
+  local line key dev os_id
+  local -a selectors
+
+  [[ -r "$file" ]] || {
+    reply=()
+    return 0
+  }
+
+  while IFS= read -r line; do
+    [[ "$line" == DEV_*=* ]] || continue
+    key="${line%%=*}"
+    dev="${line#*=}"
+    selectors+=("$key")
+
+    os_id="${key#DEV_}"
+    [[ -n "$os_id" ]] && selectors+=("$os_id")
+    [[ -n "$dev" ]] && selectors+=("$dev")
+  done < "$file"
+
+  reply=(${(u)selectors})
+}
+
+_osc_mullvad_complete_slot() {
+  emulate -L zsh
+
+  local subcmd_index=3
+  local i slot_cmd
+  local -a slot_words selectors
+  slot_words=(
+    '--dry-run:preview actions without changing account state'
+    '--hold:run inside a held kitty terminal'
+    '--terminal:alias for --hold'
+    'recycle:revoke known foreign devices, login, connect and record current device'
+    'whoami:print current Mullvad device name'
+    'list:list devices on the account without requiring login'
+    'revoke:revoke a device by name, UID, os-id or DEV_key'
+    'status:show slot state and current device'
+    'disconnect:disconnect Mullvad'
+  )
+
+  for (( i = 3; i < CURRENT; ++i )); do
+    case "${words[i]}" in
+      --dry-run|--hold|--terminal) (( subcmd_index++ )) ;;
+      *) break ;;
+    esac
+  done
+
+  if (( CURRENT <= subcmd_index )); then
+    _describe -t osc-mullvad-slot 'slot option or command' slot_words
+    return
+  fi
+
+  slot_cmd="${words[subcmd_index]:-}"
+  case "$slot_cmd" in
+    revoke)
+      if (( CURRENT == subcmd_index + 1 )); then
+        _osc_mullvad_slot_selectors
+        selectors=("${reply[@]}")
+        if (( ${#selectors[@]} )); then
+          compadd -Q -- "${selectors[@]}"
+        else
+          _message 'device name, UID, os-id or DEV_key'
+        fi
+      else
+        _message 'device name, UID, os-id or DEV_key'
+      fi
+      ;;
+    recycle|whoami|list|status|disconnect)
+      _message 'no additional arguments'
+      ;;
+    *)
+      _describe -t osc-mullvad-slot 'slot command' slot_words
+      ;;
+  esac
+}
+
+_osc_mullvad() {
+  emulate -L zsh
+
+  local cmd="${words[2]:-}"
+  local -a commands countries groups first_words favorite_actions favorites selectors
+
+  commands=(
+    'connect:connect to Mullvad using current defaults'
+    'disconnect:disconnect Mullvad'
+    'toggle:toggle Mullvad on or off'
+    'split:show split-tunnel status'
+    'ensure:enforce fail-safe DNS/VPN state'
+    'status:show current Mullvad status'
+    'test:test the current connection'
+    'protocol:toggle between WireGuard and OpenVPN'
+    'random:connect to a random relay'
+    'slot:manage device-slot operations'
+    'favorite:manage favorite relays'
+    'fastest:find and connect to the fastest relay'
+    'fastest-fav:find the fastest relay and add it to favorites'
+    'fastest-fav-many:add multiple working relays to favorites'
+    'fastest-fav-sweep:sweep groups/countries and seed favorites'
+    'owned:connect to a Mullvad-owned relay'
+    'rented:connect to a rented relay'
+    'timer:manage automatic relay switching'
+    'obf:manage obfuscation mode'
+    'obfuscation:alias for obf'
+    'help:show help'
+    'version:show version'
+  )
+
+  _osc_mullvad_countries
+  countries=("${reply[@]}")
+  first_words=("${commands[@]}")
+  for cmd in "${countries[@]}"; do
+    first_words+=("${cmd}:connect to a random relay in ${cmd}")
+  done
+
+  if (( CURRENT == 2 )); then
+    _describe -t osc-mullvad-command 'command or country' first_words
+    return
+  fi
+
+  cmd="${words[2]:-}"
+  case "$cmd" in
+    connect|disconnect|status|test|protocol|random|help|-h|--help|version|-v|--version)
+      _message 'no additional arguments'
+      ;;
+    toggle)
+      _arguments \
+        '(-h --help --with-blocky --dry-run)'{-h,--help}'[show toggle help]' \
+        '--with-blocky[toggle Blocky together with Mullvad]' \
+        '--dry-run[preview the toggle action]'
+      ;;
+    split)
+      _values 'split option' \
+        'help[show split help]' \
+        '--help[show split help]' \
+        '-h[show split help]'
+      ;;
+    ensure)
+      _arguments \
+        '--grace[grace period in seconds]:seconds:' \
+        '--poll[poll interval in seconds]:seconds:' \
+        '--no-internet-check[skip internet reachability check]' \
+        '--no-disconnect[do not force disconnect]'
+      ;;
+    slot)
+      _osc_mullvad_complete_slot
+      ;;
+    favorite)
+      favorite_actions=(
+        'add:add the current relay to favorites'
+        'remove:remove a relay from favorites'
+        'list:list favorite relays'
+        'connect:connect to a favorite relay'
+      )
+
+      if (( CURRENT == 3 )); then
+        _describe -t osc-mullvad-favorite 'favorite action' favorite_actions
+        return
+      fi
+
+      case "${words[3]:-}" in
+        remove|connect)
+          _osc_mullvad_favorites
+          favorites=("${reply[@]}")
+          if (( ${#favorites[@]} )); then
+            compadd -- "${favorites[@]}"
+          else
+            _message 'favorite relay'
+          fi
+          ;;
+        add|list)
+          _message 'no additional arguments'
+          ;;
+        *)
+          _describe -t osc-mullvad-favorite 'favorite action' favorite_actions
+          ;;
+      esac
+      ;;
+    fastest|fastest-fav|owned|rented)
+      if (( CURRENT == 3 )); then
+        compadd -- "${countries[@]}"
+      else
+        _message 'city slug (optional)'
+      fi
+      ;;
+    fastest-fav-many)
+      if (( CURRENT == 3 )); then
+        _values 'country or count' "${(@)countries}" '1' '2' '3' '5' '10'
+      else
+        _message 'count (optional)'
+      fi
+      ;;
+    fastest-fav-sweep)
+      _osc_mullvad_country_groups
+      groups=("${reply[@]}")
+      if (( CURRENT == 3 )); then
+        compadd -- "${groups[@]}" "${countries[@]}"
+      else
+        _message 'country code or per-country count'
+      fi
+      ;;
+    timer)
+      if (( CURRENT == 3 )); then
+        _values 'timer action or minutes' \
+          'stop[stop the automatic switching timer]' \
+          '15[every 15 minutes]' \
+          '30[every 30 minutes]' \
+          '60[every 60 minutes]'
+      else
+        _message 'minutes'
+      fi
+      ;;
+    obf|obfuscation)
+      _values 'obfuscation mode' \
+        'udp2tcp:force udp2tcp mode' \
+        'shadowsocks:force Shadowsocks mode' \
+        'off:disable obfuscation' \
+        'auto:let Mullvad decide automatically' \
+        'hunt443:search for a relay yielding TCP/443 in udp2tcp mode' \
+        'cycle:cycle through obfuscation modes'
+      ;;
+    *)
+      if (( ${countries[(Ie)$cmd]} )); then
+        if (( CURRENT == 3 )); then
+          _message 'city slug (optional)'
+        else
+          _message 'no additional arguments'
+        fi
+      else
+        _describe -t osc-mullvad-command 'command or country' first_words
+      fi
+      ;;
+  esac
+}
+
+_osc_mullvad "$@"
