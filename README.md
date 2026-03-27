@@ -76,6 +76,67 @@ cd ~/.cachy
 sudo -E dcli sync
 ```
 
+## ⌨️ Keyboard Layout Warning
+
+This repo is opinionated about keyboard defaults and assumes **Turkish F** unless you deliberately change it:
+
+- **TTY / login manager**: Turkish F (`KEYMAP=trf`)
+- **Niri**: `layout "tr"` + `variant "f"`
+- **Hyprland**: `kb_layout=tr` + `kb_variant=f`
+
+If you do **not** use Turkish F, change the layout before your first serious `dcli sync`. Otherwise you can end up with mixed keyboard behavior between TTY, Lemurs/LiDM, Niri, and Hyprland.
+
+Current source locations:
+
+- `TTY / Lemurs / LiDM`: live `/etc/vconsole.conf`
+- `Niri`: `modules/niri/dotfiles/niri/config.kdl`
+- `Hyprland`: `modules/hyprland/dotfiles/hypr/conf.d/30-input.conf`
+
+Recommended helper:
+
+```bash
+osc-keyboard-layout status
+```
+
+Example output on this host:
+
+```text
+Repo-managed layout
+  Niri:      layout=tr variant=f options=ctrl:nocaps
+  Hyprland:  layout=tr variant=f options=ctrl:nocaps
+
+Live TTY/login-manager layout
+  vconsole:  layout=tr variant=f keymap=trf
+```
+
+Common usage:
+
+```bash
+osc-keyboard-layout set trf
+osc-keyboard-layout set trq
+osc-keyboard-layout set --layout us --variant '' --tty-keymap us
+```
+
+What it updates:
+
+- Repo-managed Niri keyboard block
+- Repo-managed Hyprland input block
+- Live `/etc/vconsole.conf` for TTY and text-mode login managers
+
+After changing layout:
+
+```bash
+sudo -E dcli sync
+```
+
+Notes:
+
+- This is important because TTY and the display manager read `vconsole`, while Niri and Hyprland read their own compositor configs.
+- If you only change one side, login and desktop sessions can disagree about the active keyboard layout.
+- TTY/login-manager changes apply immediately best-effort and definitely on next login.
+- Niri and Hyprland layout changes apply on the next session start, or after you reload/re-enter the compositor.
+- If you want to update only repo files or only the live TTY side, use `--repo-only` or `--live-only`.
+
 ---
 
 ## 📑 Repository Structure

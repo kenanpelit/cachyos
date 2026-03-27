@@ -472,6 +472,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-keyboard-layout`
+**Description:** Inspect or update the shared keyboard layout for TTY, Niri, and Hyprland.
+
+**Usage:** `osc-keyboard-layout.sh status | set [preset|--layout L --variant V --tty-keymap K]`
+
+---
+
 ### 📂 `osc-login-prompts`
 **Description:** Session login warmup (GPG, Keyring, secrets) for non-interactive use.
 
