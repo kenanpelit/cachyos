@@ -118,6 +118,7 @@ packages:
 - nano
 - nano-syntax-highlighting
 - nautilus
+- neovim-symlinks
 - netctl
 - networkmanager-openvpn
 - nfs-utils
@@ -142,8 +143,8 @@ packages:
   type: flatpak
 - otf-font-awesome
 - pamixer
-- pavucontrol
 - papers
+- pavucontrol
 - perl
 - pipewire-alsa
 - pipewire-pulse
