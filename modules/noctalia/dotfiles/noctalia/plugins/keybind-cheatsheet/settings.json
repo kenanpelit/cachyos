@@ -349,6 +349,10 @@
           "desc": "Close Window"
         },
         {
+          "keys": "Alt + F4",
+          "desc": "Close Window Alt+F4"
+        },
+        {
           "keys": "Super + F",
           "desc": "Fullscreen"
         },
@@ -748,22 +752,6 @@
         },
         {
           "keys": "Super + Alt + J",
-          "desc": "Monitor Down"
-        },
-        {
-          "keys": "Super + Alt + Left",
-          "desc": "Monitor Left"
-        },
-        {
-          "keys": "Super + Alt + Right",
-          "desc": "Monitor Right"
-        },
-        {
-          "keys": "Super + Alt + Up",
-          "desc": "Monitor Up"
-        },
-        {
-          "keys": "Super + Alt + Down",
           "desc": "Monitor Down"
         },
         {
