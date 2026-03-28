@@ -44,6 +44,10 @@
       "enabled": true,
       "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
     },
+    "6ee06e:nworkspace": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
     "assistant-panel": {
       "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
