@@ -17,6 +17,9 @@ NOCTALIA_SETTINGS_STATE="${NOCTALIA_CONFIG_DIR}/settings.json"
 NOCTALIA_PLUGIN_SOURCE_URL="https://github.com/noctalia-dev/noctalia-plugins"
 NOCTALIA_SESSION_OVERRIDE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/noctalia"
 NOCTALIA_SESSION_OVERRIDE_STATE="${NOCTALIA_SESSION_OVERRIDE_DIR}/session-overrides.json"
+NOCTALIA_REMOVED_PLUGIN_ID="niri-auto-tile"
+NOCTALIA_REMOVED_PLUGIN_WIDGET_ID="plugin:niri-auto-tile"
+NOCTALIA_REMOVED_PLUGIN_DIR="${NOCTALIA_CONFIG_DIR}/plugins/${NOCTALIA_REMOVED_PLUGIN_ID}"
 
 ensure_noctalia_plugin_state() {
   mkdir -p "${NOCTALIA_CONFIG_DIR}"
@@ -39,6 +42,41 @@ ensure_noctalia_settings_state() {
 
   if [[ ! -f "${NOCTALIA_SETTINGS_STATE}" && -r "${NOCTALIA_SETTINGS_TEMPLATE}" ]]; then
     install -m 644 "${NOCTALIA_SETTINGS_TEMPLATE}" "${NOCTALIA_SETTINGS_STATE}"
+  fi
+}
+
+prune_removed_noctalia_plugin_state() {
+  local tmp
+
+  rm -rf "${NOCTALIA_REMOVED_PLUGIN_DIR}"
+
+  command -v jq >/dev/null 2>&1 || return 0
+
+  if [[ -f "${NOCTALIA_PLUGIN_STATE}" ]]; then
+    tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-prune-plugins.XXXXXX")"
+    if jq --arg id "${NOCTALIA_REMOVED_PLUGIN_ID}" '
+      if has("states") then .states |= del(.[$id]) else . end
+      | if has("plugins") then .plugins |= del(.[$id]) else . end
+    ' "${NOCTALIA_PLUGIN_STATE}" > "${tmp}"; then
+      mv "${tmp}" "${NOCTALIA_PLUGIN_STATE}"
+    else
+      rm -f "${tmp}"
+    fi
+  fi
+
+  if [[ -f "${NOCTALIA_SETTINGS_STATE}" ]]; then
+    tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-prune-settings.XXXXXX")"
+    if jq --arg widget_id "${NOCTALIA_REMOVED_PLUGIN_WIDGET_ID}" '
+      if .bar?.right?.widgets then
+        .bar.right.widgets |= map(select((.id // "") != $widget_id))
+      else
+        .
+      end
+    ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
+      mv "${tmp}" "${NOCTALIA_SETTINGS_STATE}"
+    else
+      rm -f "${tmp}"
+    fi
   fi
 }
 
@@ -75,18 +113,15 @@ apply_noctalia_plugin_overrides() {
           | if has("sourceUrl") then . else . + {sourceUrl: $source_url} end);
 
       if has("states") then
-        set_state("states"; "niri-auto-tile"; $enable_niri)
-        | set_state("states"; "niri-overview-launcher"; $enable_niri)
+        set_state("states"; "niri-overview-launcher"; $enable_niri)
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
       elif has("plugins") then
-        set_state("plugins"; "niri-auto-tile"; $enable_niri)
-        | set_state("plugins"; "niri-overview-launcher"; $enable_niri)
+        set_state("plugins"; "niri-overview-launcher"; $enable_niri)
         | set_state("plugins"; "screen-shot-and-record"; $enable_hypr)
         | set_state("plugins"; "special-workspaces"; $enable_hypr)
       else
         . + {states: {}}
-        | set_state("states"; "niri-auto-tile"; $enable_niri)
         | set_state("states"; "niri-overview-launcher"; $enable_niri)
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
@@ -201,6 +236,7 @@ esac
 
 apply_noctalia_settings_overrides "${session_backend}"
 apply_noctalia_plugin_overrides "${session_backend}"
+prune_removed_noctalia_plugin_state
 
 export XDG_ICON_THEME="${XDG_ICON_THEME:-${ICON_THEME:-kora}}"
 export ICON_THEME="${ICON_THEME:-$XDG_ICON_THEME}"
