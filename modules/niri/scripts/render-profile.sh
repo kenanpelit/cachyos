@@ -123,14 +123,6 @@ while IFS= read -r line || [[ -n "$line" ]]; do
       {
         printf 'workspace "%s" {\n' "${workspace_id}"
         printf '  open-on-output "%s"\n' "${output_name}"
-        if [[ "${workspace_id}" == "8" ]]; then
-          printf '  layout {\n'
-          printf '    border {\n'
-          printf '      active-color "#89dceb"\n'
-          printf '      inactive-color "#313244"\n'
-          printf '    }\n'
-          printf '  }\n'
-        fi
         printf '}\n\n'
       } >> "${tmp_workspaces}"
       ;;
