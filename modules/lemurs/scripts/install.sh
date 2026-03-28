@@ -63,8 +63,8 @@ disable_unit_if_exists ly.service
 disable_unit_if_exists emptty.service
 
 if ! run_root systemctl list-unit-files lemurs.service >/dev/null 2>&1; then
-  echo "lemurs.service not found. Install package 'lemurs-git' first." >&2
-  exit 1
+  echo "lemurs.service not found yet. Skipping Lemurs setup for this run." >&2
+  exit 0
 fi
 
 run_root install -d /etc/lemurs /etc/lemurs/wms /etc/lemurs/wayland

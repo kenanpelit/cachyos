@@ -19,11 +19,10 @@ run_root() {
   fi
 }
 
-# neovim-symlinks conflicts with packages that provide the classic vi/vim
-# entrypoints. Remove them before the package batch begins so dcli can keep
-# running non-interactively.
+# lemurs-git uses rustup as a make dependency. rustup conflicts with distro
+# rust/cargo/rustfmt packages, so remove them before the package build starts.
 if command -v pacman >/dev/null 2>&1; then
-  for pkg in vim vi-vim-symlink; do
+  for pkg in rust cargo rustfmt; do
     if pacman -Qq "$pkg" >/dev/null 2>&1; then
       run_root pacman -Rns --noconfirm "$pkg"
     fi

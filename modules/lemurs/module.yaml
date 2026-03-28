@@ -4,5 +4,7 @@ description: Lemurs display manager for TTY-based session launch
 depends_on:
 - base
 - sessions
+pre_install_hook: scripts/preinstall.sh
+pre_hook_behavior: always
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

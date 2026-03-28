@@ -19,11 +19,10 @@ run_root() {
   fi
 }
 
-# neovim-symlinks conflicts with packages that provide the classic vi/vim
-# entrypoints. Remove them before the package batch begins so dcli can keep
-# running non-interactively.
+# niri-git conflicts with the distro stable/binary variants. Remove them before
+# the module package batch starts so dcli can keep running non-interactively.
 if command -v pacman >/dev/null 2>&1; then
-  for pkg in vim vi-vim-symlink; do
+  for pkg in niri niri-bin; do
     if pacman -Qq "$pkg" >/dev/null 2>&1; then
       run_root pacman -Rns --noconfirm "$pkg"
     fi

@@ -8,5 +8,7 @@ dotfiles:
   target: ~/.config/noctalia
 - source: dotfiles/systemd/user/noctalia.service
   target: ~/.config/systemd/user/noctalia.service
+pre_install_hook: scripts/preinstall.sh
+pre_hook_behavior: always
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
