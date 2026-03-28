@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MODULE_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 REAL_USER="${SUDO_USER:-$(whoami)}"
 USER_HOME="$(getent passwd "$REAL_USER" | cut -d: -f6 2>/dev/null || true)"
@@ -10,6 +11,7 @@ if [ -z "${USER_HOME:-}" ]; then
 fi
 
 BIN_DIR="${USER_HOME}/.local/bin"
+WRAPPER_SRC="${MODULE_ROOT}/dotfiles/bin/pacman-sudo-paru"
 WRAPPER_DST="${BIN_DIR}/pacman-sudo-paru"
 PARU_DIR="${USER_HOME}/.config/paru"
 PARU_CONF="${PARU_DIR}/paru.conf"
@@ -27,16 +29,30 @@ write_paru_conf() {
   printf "%s" "$PARU_CONF_CONTENT" >"$PARU_CONF"
 }
 
+install_wrapper() {
+  if [ ! -f "$WRAPPER_SRC" ]; then
+    echo "Missing wrapper source: $WRAPPER_SRC" >&2
+    return 1
+  fi
+
+  install -m 755 "$WRAPPER_SRC" "$WRAPPER_DST"
+}
+
 if [ "$(id -u)" -eq 0 ]; then
   USER_GROUP="$(id -gn "$REAL_USER" 2>/dev/null || true)"
   install -d -m 755 -o "$REAL_USER" -g "${USER_GROUP:-$REAL_USER}" "$BIN_DIR"
   install -d -m 755 -o "$REAL_USER" -g "${USER_GROUP:-$REAL_USER}" "$PARU_DIR"
+  install_wrapper
   write_paru_conf
+  chown "$REAL_USER:${USER_GROUP:-$REAL_USER}" "$WRAPPER_DST"
+  chmod 755 "$WRAPPER_DST"
   chown "$REAL_USER:${USER_GROUP:-$REAL_USER}" "$PARU_CONF"
   chmod 644 "$PARU_CONF"
 else
   install -d -m 755 "$BIN_DIR"
   install -d -m 755 "$PARU_DIR"
+  install_wrapper
   write_paru_conf
+  chmod 755 "$WRAPPER_DST"
   chmod 644 "$PARU_CONF"
 fi

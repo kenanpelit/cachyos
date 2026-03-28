@@ -4,6 +4,8 @@ description: Paru configuration (sudo pacman wrapper + user config)
 depends_on:
 - pacman
 - base
+pre_install_hook: scripts/install.sh
+pre_hook_behavior: always
 dotfiles:
 - source: dotfiles/bin/pacman-sudo-paru
   target: ~/.local/bin/pacman-sudo-paru
