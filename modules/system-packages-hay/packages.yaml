@@ -55,7 +55,6 @@ packages:
 - globalprotect-openconnect
 - gnome-settings-daemon
 - gnome-themes-extra
-- greetd
 - grub-btrfs-support
 - grub-hook
 - gst-libav
