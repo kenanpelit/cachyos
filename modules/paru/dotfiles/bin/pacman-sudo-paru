@@ -59,10 +59,24 @@ has_ask_override() {
 }
 
 augment_pacman_args() {
+  local inject=false
+  local inserted=false
+  local arg
+
   if is_transaction_operation "$@" && has_noconfirm "$@" && ! has_ask_override "$@"; then
-    printf '%s\0' "$@" --ask 4
-  else
-    printf '%s\0' "$@"
+    inject=true
+  fi
+
+  for arg in "$@"; do
+    if $inject && ! $inserted && [[ "$arg" == "--" ]]; then
+      printf '%s\0' --ask 4
+      inserted=true
+    fi
+    printf '%s\0' "$arg"
+  done
+
+  if $inject && ! $inserted; then
+    printf '%s\0' --ask 4
   fi
 }
 
