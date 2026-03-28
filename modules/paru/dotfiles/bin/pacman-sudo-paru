@@ -4,7 +4,7 @@ set -euo pipefail
 SUDO_BIN="/usr/bin/sudo"
 PACMAN_BIN="/usr/bin/pacman"
 
-is_sync_operation() {
+is_transaction_operation() {
   local arg
   for arg in "$@"; do
     case "$arg" in
@@ -14,12 +14,56 @@ is_sync_operation() {
     --sync | -S)
       return 0
       ;;
+    --upgrade | -U)
+      return 0
+      ;;
     -*S*)
+      return 0
+      ;;
+    -*U*)
       return 0
       ;;
     esac
   done
   return 1
+}
+
+has_noconfirm() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+    --)
+      break
+      ;;
+    --noconfirm)
+      return 0
+      ;;
+    esac
+  done
+  return 1
+}
+
+has_ask_override() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+    --)
+      break
+      ;;
+    --ask | --ask=*)
+      return 0
+      ;;
+    esac
+  done
+  return 1
+}
+
+augment_pacman_args() {
+  if is_transaction_operation "$@" && has_noconfirm "$@" && ! has_ask_override "$@"; then
+    printf '%s\0' "$@" --ask 4
+  else
+    printf '%s\0' "$@"
+  fi
 }
 
 cleanup_corrupt_cache() {
@@ -42,9 +86,12 @@ cleanup_corrupt_cache() {
 run_pacman() {
   local log_file="$1"
   shift
+  local -a pacman_args
+
+  mapfile -d '' -t pacman_args < <(augment_pacman_args "$@")
 
   set +e
-  "$SUDO_BIN" "$PACMAN_BIN" "$@" 2> >(tee "$log_file" >&2)
+  "$SUDO_BIN" "$PACMAN_BIN" "${pacman_args[@]}" 2> >(tee "$log_file" >&2)
   local rc=$?
   set -e
 
@@ -61,7 +108,7 @@ main() {
   fi
   local rc=$?
 
-  if ! is_sync_operation "$@"; then
+  if ! is_transaction_operation "$@"; then
     exit "$rc"
   fi
 
@@ -73,7 +120,9 @@ main() {
   cleanup_corrupt_cache "$log_file"
   "$SUDO_BIN" "$PACMAN_BIN" -Syy >/dev/null 2>&1 || true
 
-  exec "$SUDO_BIN" "$PACMAN_BIN" "$@"
+  local -a pacman_args
+  mapfile -d '' -t pacman_args < <(augment_pacman_args "$@")
+  exec "$SUDO_BIN" "$PACMAN_BIN" "${pacman_args[@]}"
 }
 
 main "$@"
