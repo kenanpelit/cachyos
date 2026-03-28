@@ -551,7 +551,10 @@ binds {
   Mod+Return repeat=false hotkey-overlay-title="Dropdown Terminal" {
     spawn "niri-osc" "drop" "kitty" "--class" "dropdown-terminal"
   }
-  Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" {
+  Alt+Space repeat=false hotkey-overlay-title="Custom Commands" {
+    spawn "osc-shell" "ipc" "call" "plugin:custom-commands" "toggle"
+  }
+  Mod+Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" {
     spawn "uwsm" "app" "-a" "rofi-launcher" "--" "rofi-launcher"
   }
   Mod+Shift+S repeat=false hotkey-overlay-title="Sticky Toggle" {
