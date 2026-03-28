@@ -100,7 +100,7 @@ declare -A CONFIG=(
   [iso_url]="https://mirror.rabisu.com/ubuntu/ubuntu-releases/24.04.2/ubuntu-24.04.2-desktop-amd64.iso"
   [iso_checksum]=""
   [display_mode]="gtk"
-  [gtk_gl]="off" # off|on
+  [gtk_gl]="on" # off|on; keep enabled so Wayland compositors get a real virgl-backed renderer
   [boot_mode]="bios"
   [boot_order]="auto" # auto|disk|cdrom
   [shared_dir]="/run/user/$(id -u)"
@@ -372,6 +372,7 @@ build_qemu_command() {
       out+=(-device virtio-vga-gl)
       out+=(-display "gtk,gl=on")
     else
+      log_warn "GTK GL is disabled; Wayland compositors like Niri may start without any outputs in the guest."
       out+=(-device virtio-vga)
       out+=(-display "gtk,gl=off")
     fi
