@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: semsumo.sh
-# Description: Unified Application Launcher & Generator (Hyprland/GNOME/Generic)
+# Description: Unified Application Launcher & Generator (Hyprland/Niri/Generic)
 # Usage: semsumo.sh [options]
 # ==============================================================================
 #   Features:
-#   - Automatic window manager detection (Hyprland, GNOME, generic Wayland/X11)
+#   - Automatic window manager detection (Hyprland, Niri, generic Wayland/X11)
 #   - Application startup verification with timeout (Hyprland)
 #   - Startup script generation for all profiles
 #   - Multi-browser support (Helium, Brave, Chrome)
@@ -88,10 +88,8 @@ declare -A DAILY_PROFILES=(
 declare -A TERMINALS=(
   ["kkenp"]="kitty|--class TmuxKenp -T Tmux --override background_opacity=1.0 -e tm|2|secure|1|false"
   ["mkenp"]="kitty|--class TmuxKenp -T Tmux --override background_opacity=1.0 -e tm|2|secure|1|false"
-  ["wkenp"]="wezterm|start --class TmuxKenp -e tm|2|bypass|1|false"
-  ["wezterm"]="wezterm|start --class wezterm|2|secure|1|false"
   ["kitty-single"]="kitty|--class kitty -T kitty --single-instance|2|secure|1|false"
-  ["wezterm-rmpc"]="wezterm|start --class rmpc -e rmpc|0|secure|1|false"
+  ["rmpc"]="kitty|--class rmpc -T rmpc -e rmpc|0|secure|1|false"
 )
 
 # Browser Applications - Helium
@@ -161,9 +159,6 @@ detect_window_manager() {
   elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
     WM_TYPE="niri"
     log "INFO" "DETECT" "Detected Niri window manager"
-  elif [[ "$XDG_CURRENT_DESKTOP" == *"GNOME"* ]] || command -v gnome-shell &>/dev/null; then
-    WM_TYPE="gnome"
-    log "INFO" "DETECT" "Detected GNOME desktop environment"
   elif [[ -n "$WAYLAND_DISPLAY" ]]; then
     WM_TYPE="wayland"
     log "INFO" "DETECT" "Detected generic Wayland session"
@@ -307,18 +302,7 @@ log() {
 }
 
 setup_external_monitor() {
-  if [[ "$DRY_RUN" == "true" ]]; then
-    return 0
-  fi
-
-  if [[ "$WM_TYPE" == "gnome" ]] && command -v xrandr >/dev/null 2>&1; then
-    local external_monitor=$(xrandr --query | grep " connected" | grep -v "eDP" | head -1 | awk '{print $1}')
-    if [[ -n "$external_monitor" ]]; then
-      log "INFO" "DISPLAY" "Setting external monitor $external_monitor as primary..."
-      xrandr --output "$external_monitor" --primary
-      sleep 1
-    fi
-  fi
+  return 0
 }
 
 switch_workspace() {
@@ -346,26 +330,6 @@ switch_workspace() {
       sleep 1
     fi
     ;;
-  gnome)
-    local target_workspace=$((workspace - 1))
-    # Wayland'da wmctrl çalışmadığı için önce gdbus (org.gnome.Shell.Eval) deneriz.
-    if command -v gdbus >/dev/null 2>&1; then
-      log "INFO" "WORKSPACE" "Switching to workspace $workspace (GNOME via gdbus)"
-      gdbus call --session \
-        --dest org.gnome.Shell \
-        --object-path /org/gnome/Shell \
-        --method org.gnome.Shell.Eval \
-        "global.workspace_manager.get_workspace_by_index($target_workspace).activate(global.get_current_time());" \
-        >/dev/null 2>&1 || true
-      sleep 1
-    elif command -v wmctrl >/dev/null 2>&1; then
-      log "INFO" "WORKSPACE" "Switching to workspace $workspace (GNOME via wmctrl)"
-      wmctrl -s "$target_workspace"
-      sleep 1
-    else
-      log "WARN" "WORKSPACE" "GNOME workspace switching needs gdbus (preferred) or wmctrl"
-    fi
-    ;;
   *)
     if command -v wmctrl >/dev/null 2>&1; then
       local target_workspace=$((workspace - 1))
@@ -390,7 +354,7 @@ focus_tmuxkenp_best_effort() {
         hyprctl dispatch focuswindow "title:^Tmux$" >/dev/null 2>&1 || true
     fi
     ;;
-  niri | gnome | *)
+  niri | *)
     # Niri'de workspace 2'ye geçmek genelde yeterli (aktif pencere otomatik odaklanır).
     true
     ;;
@@ -412,19 +376,11 @@ is_app_running() {
         jq -e '.[] | select((.class // "") == "TmuxKenp")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
-      wkenp)
-        jq -e '.[] | select((.class // "") == "TmuxKenp" or (.class // "") == "wezterm")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
       kitty-single)
         jq -e '.[] | select((.class // "") == "kitty")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
-      wezterm)
-        jq -e '.[] | select((.class // "") == "wezterm" or (.class // "") == "org.wezfurlong.wezterm")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      wezterm-rmpc)
+      rmpc)
         jq -e '.[] | select((.class // "") == "rmpc")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
@@ -634,7 +590,6 @@ get_class_pattern() {
   telegram) echo "Telegram|telegram-desktop|org.telegram.desktop" ;;
   zapzap) echo "zapzap|ZapZap|com.rtosta.zapzap" ;;
   kitty* | kkenp | mkenp) echo "kitty" ;;
-  wezterm* | wkenp) echo "wezterm|org.wezfurlong.wezterm" ;;
   *) echo "$profile" ;;
   esac
 }
@@ -658,22 +613,6 @@ make_fullscreen() {
       log "INFO" "FULLSCREEN" "Making window fullscreen (Niri)"
       sleep 1
       niri msg action fullscreen-window
-      sleep 1
-    fi
-    ;;
-  gnome)
-    if command -v gdbus >/dev/null 2>&1; then
-      log "INFO" "FULLSCREEN" "Making window fullscreen (GNOME)"
-      sleep 1
-      gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell --method org.gnome.Shell.Eval "global.display.get_focus_window().make_fullscreen()" >/dev/null 2>&1
-      sleep 1
-    elif command -v wmctrl >/dev/null 2>&1; then
-      log "INFO" "FULLSCREEN" "Making window fullscreen (wmctrl)"
-      sleep 1
-      local window_id=$(wmctrl -l | tail -1 | awk '{print $1}')
-      if [[ -n "$window_id" ]]; then
-        wmctrl -i -r "$window_id" -b add,fullscreen
-      fi
       sleep 1
     fi
     ;;
@@ -748,8 +687,6 @@ if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
     WM_TYPE="hyprland"
 elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
     WM_TYPE="niri"
-elif [[ "$XDG_CURRENT_DESKTOP" == *"GNOME"* ]] || command -v gnome-shell &>/dev/null; then
-    WM_TYPE="gnome"
 else
     WM_TYPE="generic"
 fi
@@ -762,16 +699,6 @@ if [[ -n "$ARGS_STR" ]]; then
 fi
 if [[ $# -gt 0 ]]; then
     APP_ARGS+=("$@")
-fi
-
-# External monitor setup (GNOME only)
-if [[ "$WM_TYPE" == "gnome" ]] && command -v xrandr >/dev/null 2>&1; then
-    EXTERNAL_MONITOR=$(xrandr --query | grep " connected" | grep -v "eDP" | head -1 | awk '{print $1}')
-    if [[ -n "$EXTERNAL_MONITOR" ]]; then
-        echo "Setting $EXTERNAL_MONITOR as primary..."
-        xrandr --output "$EXTERNAL_MONITOR" --primary
-        sleep 1
-    fi
 fi
 
 # Switch to workspace
@@ -798,7 +725,7 @@ if [[ "$WORKSPACE" != "0" ]]; then
             sleep 1
         fi
         ;;
-    gnome|*)
+    *)
         if command -v wmctrl >/dev/null 2>&1; then
             TARGET=$((WORKSPACE - 1))
             echo "Switching to workspace $WORKSPACE..."
@@ -877,14 +804,6 @@ if [[ "$FULLSCREEN" == "true" ]]; then
         ;;
     niri)
         command -v niri >/dev/null 2>&1 && niri msg action fullscreen-window
-        ;;
-    gnome)
-        if command -v gdbus >/dev/null 2>&1; then
-            gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell --method org.gnome.Shell.Eval "global.display.get_focus_window().make_fullscreen()" >/dev/null 2>&1
-        elif command -v wmctrl >/dev/null 2>&1; then
-            WID=$(wmctrl -l | tail -1 | awk '{print $1}')
-            [[ -n "$WID" ]] && wmctrl -i -r "$WID" -b add,fullscreen
-        fi
         ;;
     esac
 fi
@@ -1487,7 +1406,7 @@ show_help() {
   echo "    --no-notify           Disable desktop notifications"
   echo
   echo -e "${BOLD}Features:${NC}"
-  echo "    - Auto-detects window manager (Hyprland/GNOME/generic)"
+  echo "    - Auto-detects window manager (Hyprland/Niri/generic)"
   echo "    - Window verification on Hyprland (requires jq)"
   echo "    - VPN bypass/secure mode support (Mullvad)"
   echo "    - Multi-browser profile support"

@@ -18,8 +18,6 @@ if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
     WM_TYPE="hyprland"
 elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
     WM_TYPE="niri"
-elif [[ "$XDG_CURRENT_DESKTOP" == *"GNOME"* ]] || command -v gnome-shell &>/dev/null; then
-    WM_TYPE="gnome"
 else
     WM_TYPE="generic"
 fi
@@ -30,15 +28,8 @@ APP_ARGS=()
 if [[ -n "$ARGS_STR" ]]; then
     read -r -a APP_ARGS <<<"$ARGS_STR"
 fi
-
-# External monitor setup (GNOME only)
-if [[ "$WM_TYPE" == "gnome" ]] && command -v xrandr >/dev/null 2>&1; then
-    EXTERNAL_MONITOR=$(xrandr --query | grep " connected" | grep -v "eDP" | head -1 | awk '{print $1}')
-    if [[ -n "$EXTERNAL_MONITOR" ]]; then
-        echo "Setting $EXTERNAL_MONITOR as primary..."
-        xrandr --output "$EXTERNAL_MONITOR" --primary
-        sleep 1
-    fi
+if [[ $# -gt 0 ]]; then
+    APP_ARGS+=("$@")
 fi
 
 # Switch to workspace
@@ -57,11 +48,15 @@ if [[ "$WORKSPACE" != "0" ]]; then
     niri)
         if command -v niri >/dev/null 2>&1; then
             echo "Switching to workspace $WORKSPACE..."
-            "$HOME/.local/bin/niri-osc" flow legacy -wn "$WORKSPACE"
+            if [[ -x "$HOME/.local/bin/niri-osc" ]]; then
+                "$HOME/.local/bin/niri-osc" flow legacy -wn "$WORKSPACE"
+            else
+                niri msg action focus-workspace "$WORKSPACE"
+            fi
             sleep 1
         fi
         ;;
-    gnome|*)
+    *)
         if command -v wmctrl >/dev/null 2>&1; then
             TARGET=$((WORKSPACE - 1))
             echo "Switching to workspace $WORKSPACE..."
@@ -140,14 +135,6 @@ if [[ "$FULLSCREEN" == "true" ]]; then
         ;;
     niri)
         command -v niri >/dev/null 2>&1 && niri msg action fullscreen-window
-        ;;
-    gnome)
-        if command -v gdbus >/dev/null 2>&1; then
-            gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell --method org.gnome.Shell.Eval "global.display.get_focus_window().make_fullscreen()" >/dev/null 2>&1
-        elif command -v wmctrl >/dev/null 2>&1; then
-            WID=$(wmctrl -l | tail -1 | awk '{print $1}')
-            [[ -n "$WID" ]] && wmctrl -i -r "$WID" -b add,fullscreen
-        fi
         ;;
     esac
 fi

@@ -795,7 +795,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `semsumo`
-**Description:** Unified Application Launcher & Generator (Hyprland/GNOME/Generic)
+**Description:** Unified Application Launcher & Generator (Hyprland/Niri/Generic)
 
 **Usage:** `semsumo.sh [options]`
 

@@ -135,62 +135,7 @@ actions = { "run" = "start-webcord" }
 icon = "webcord"
 
 [[entries]]
-text = "Wezterm - RMPC"
-keywords = ["wezterm", "rmpc", "terminal", "music"]
-actions = { "run" = "start-wezterm-rmpc" }
-icon = "wezterm"
-
-[[entries]]
-text = "Wezterm"
-keywords = ["wezterm", "terminal"]
-actions = { "run" = "start-wezterm" }
-icon = "wezterm"
-
-[[entries]]
-text = "Kenp (W)"
-keywords = ["wkenp", "kenp"]
-actions = { "run" = "start-wkenp" }
-icon = "utilities-terminal"
-
-[[entries]]
-text = "Zen - Compecta"
-keywords = ["zen", "compecta", "browser"]
-actions = { "run" = "start-zen-compecta" }
-icon = "zen-browser"
-
-[[entries]]
-text = "Zen - Discord"
-keywords = ["zen", "discord", "browser"]
-actions = { "run" = "start-zen-discord" }
-icon = "zen-browser"
-
-[[entries]]
-text = "Zen - Kenp"
-keywords = ["zen", "kenp", "browser"]
-actions = { "run" = "start-zen-kenp" }
-icon = "zen-browser"
-
-[[entries]]
-text = "Zen - No VPN"
-keywords = ["zen", "novpn", "browser"]
-actions = { "run" = "start-zen-novpn" }
-icon = "zen-browser"
-
-[[entries]]
-text = "Zen - Proxy"
-keywords = ["zen", "proxy", "browser"]
-actions = { "run" = "start-zen-proxy" }
-icon = "zen-browser"
-
-[[entries]]
-text = "Zen - Spotify"
-keywords = ["zen", "spotify", "browser", "music"]
-actions = { "run" = "start-zen-spotify" }
-icon = "zen-browser"
-
-[[entries]]
-text = "Zen - Whats"
-keywords = ["zen", "whats", "whatsapp", "browser"]
-actions = { "run" = "start-zen-whats" }
-icon = "zen-browser"
-
+text = "RMPC"
+keywords = ["rmpc", "music", "terminal"]
+actions = { "run" = "start-rmpc" }
+icon = "music"

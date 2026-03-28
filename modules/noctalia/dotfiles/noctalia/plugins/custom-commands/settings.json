@@ -7,7 +7,7 @@
     },
     {
       "name": "System Monitor",
-      "command": "gnome-system-monitor || plasma-systemmonitor || xfce4-taskmanager",
+      "command": "kitty --class btop -T btop -e btop",
       "icon": "activity"
     },
     {
@@ -201,19 +201,9 @@
       "icon": "message-circle"
     },
     {
-      "name": "WezTerm",
-      "command": "start-wezterm",
-      "icon": "terminal-2"
-    },
-    {
-      "name": "WezTerm RMPC",
-      "command": "start-wezterm-rmpc",
+      "name": "RMPC",
+      "command": "start-rmpc",
       "icon": "music"
-    },
-    {
-      "name": "Wkenp",
-      "command": "start-wkenp",
-      "icon": "terminal-2"
     },
     {
       "name": "ZapZap",
