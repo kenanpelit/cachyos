@@ -15,8 +15,8 @@ NOCTALIA_PLUGIN_STATE="${NOCTALIA_CONFIG_DIR}/plugins.json"
 NOCTALIA_SETTINGS_TEMPLATE="${REPO_ROOT}/modules/noctalia/dotfiles/noctalia/settings.json"
 NOCTALIA_SETTINGS_STATE="${NOCTALIA_CONFIG_DIR}/settings.json"
 NOCTALIA_PLUGIN_SOURCE_URL="https://github.com/noctalia-dev/noctalia-plugins"
-NOCTALIA_SESSION_OVERRIDE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/noctalia"
-NOCTALIA_SESSION_OVERRIDE_STATE="${NOCTALIA_SESSION_OVERRIDE_DIR}/session-overrides.json"
+NOCTALIA_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/noctalia"
+NOCTALIA_SESSION_OVERRIDE_STATE="${NOCTALIA_CACHE_DIR}/session-overrides.json"
 NOCTALIA_REMOVED_PLUGIN_ID="niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_WIDGET_ID="plugin:niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_DIR="${NOCTALIA_CONFIG_DIR}/plugins/${NOCTALIA_REMOVED_PLUGIN_ID}"
@@ -134,59 +134,23 @@ apply_noctalia_plugin_overrides() {
 }
 
 apply_noctalia_settings_overrides() {
-  local session_name="${1:-}"
   local tmp
 
   command -v jq >/dev/null 2>&1 || return 0
   ensure_noctalia_settings_state
   [[ -f "${NOCTALIA_SETTINGS_STATE}" ]] || return 0
 
-  case "${session_name}" in
-    niri)
-      mkdir -p "${NOCTALIA_SESSION_OVERRIDE_DIR}"
+  rm -f "${NOCTALIA_SESSION_OVERRIDE_STATE}"
 
-      if [[ ! -f "${NOCTALIA_SESSION_OVERRIDE_STATE}" ]]; then
-        tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-session.XXXXXX")"
-        if jq '
-          {
-            general: {
-              enableBlurBehind: (.general.enableBlurBehind // false)
-            },
-            wallpaper: {
-              overviewBlur: (.wallpaper.overviewBlur // 0)
-            }
-          }
-        ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
-          mv "${tmp}" "${NOCTALIA_SESSION_OVERRIDE_STATE}"
-        else
-          rm -f "${tmp}"
-        fi
-      fi
-
-      tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-settings.XXXXXX")"
-      if jq '
-        .general.enableBlurBehind = false
-        | .wallpaper.overviewBlur = 0
-      ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
-        mv "${tmp}" "${NOCTALIA_SETTINGS_STATE}"
-      else
-        rm -f "${tmp}"
-      fi
-      ;;
-    hyprland)
-      [[ -f "${NOCTALIA_SESSION_OVERRIDE_STATE}" ]] || return 0
-      tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-settings.XXXXXX")"
-      if jq --slurpfile saved "${NOCTALIA_SESSION_OVERRIDE_STATE}" '
-        .general.enableBlurBehind = ($saved[0].general.enableBlurBehind // .general.enableBlurBehind)
-        | .wallpaper.overviewBlur = ($saved[0].wallpaper.overviewBlur // .wallpaper.overviewBlur)
-      ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
-        mv "${tmp}" "${NOCTALIA_SETTINGS_STATE}"
-        rm -f "${NOCTALIA_SESSION_OVERRIDE_STATE}"
-      else
-        rm -f "${tmp}"
-      fi
-      ;;
-  esac
+  tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-settings.XXXXXX")"
+  if jq '
+    .general.enableBlurBehind = false
+    | .wallpaper.overviewBlur = 0
+  ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
+    mv "${tmp}" "${NOCTALIA_SETTINGS_STATE}"
+  else
+    rm -f "${tmp}"
+  fi
 }
 
 load_hypr_env() {
@@ -234,7 +198,7 @@ case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-}}" in
     ;;
 esac
 
-apply_noctalia_settings_overrides "${session_backend}"
+apply_noctalia_settings_overrides
 apply_noctalia_plugin_overrides "${session_backend}"
 prune_removed_noctalia_plugin_state
 
