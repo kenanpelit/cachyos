@@ -26,11 +26,8 @@ else
 fi
 
 if [ -f "$STATIC_OUTPUTS_SOURCE" ]; then
-  if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
-    install -m0644 -o "$REAL_USER" -g "$USER_GROUP" "$STATIC_OUTPUTS_SOURCE" "$STATIC_OUTPUTS_TARGET"
-  else
-    install -m0644 "$STATIC_OUTPUTS_SOURCE" "$STATIC_OUTPUTS_TARGET"
-  fi
+  # Keep outputs.kdl as a symlink so the repo remains the single source of truth.
+  run_as_user ln -sfn "$STATIC_OUTPUTS_SOURCE" "$STATIC_OUTPUTS_TARGET"
 fi
 
 render_profile_script="$script_dir/render-profile.sh"
