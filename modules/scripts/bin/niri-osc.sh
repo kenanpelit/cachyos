@@ -3019,7 +3019,6 @@ doctor)
           kdeconnect-indicator.service \
           fusuma.service \
           cliphist.service \
-          stasis.service \
           xdg-desktop-portal.service \
           xdg-desktop-portal-gnome.service \
           xdg-desktop-portal-wlr.service \

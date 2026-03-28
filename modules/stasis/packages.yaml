@@ -1,7 +1,0 @@
-description: Stasis packages
-
-packages:
-  - brightnessctl
-  - libnotify
-  # NOTE: likely AUR on Arch/CachyOS (auto-detected by dcli)
-  - stasis-git

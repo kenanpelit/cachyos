@@ -165,7 +165,6 @@ packages:
 - snapper-tools
 - socat
 - sof-firmware
-- stasis-git
 - statis
 - swaylock-effects-git
 - swaylock-fancy-git
