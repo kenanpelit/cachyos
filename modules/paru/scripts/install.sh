@@ -16,6 +16,9 @@ WRAPPER_DST="${BIN_DIR}/pacman-sudo-paru"
 PARU_DIR="${USER_HOME}/.config/paru"
 PARU_CONF="${PARU_DIR}/paru.conf"
 PARU_CONF_CONTENT="# See paru.conf(5)
+[options]
+UseAsk
+
 [bin]
 Sudo = /usr/bin/sudo
 Pacman = ${WRAPPER_DST}

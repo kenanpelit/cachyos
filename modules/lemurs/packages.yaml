@@ -1,4 +1,3 @@
 description: Lemurs display manager packages
 packages:
-  - rustup
   - lemurs-git

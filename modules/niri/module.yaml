@@ -58,7 +58,5 @@ dotfiles:
   target: ~/.config/systemd/user/niri-niriswitcher.service
 - source: dotfiles/systemd/user/wayland-wm@niri\x2dsession.service.d/10-session-lifecycle.conf
   target: ~/.config/systemd/user/wayland-wm@niri\x2dsession.service.d/10-session-lifecycle.conf
-pre_install_hook: scripts/preinstall.sh
-pre_hook_behavior: always
 post_install_hook: scripts/ensure-runtime-files.sh
 post_hook_behavior: always
