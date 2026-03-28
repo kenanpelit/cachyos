@@ -41,7 +41,6 @@ packages:
 - direnv
 - distro-grub-themes-arch
 - dmraid
-- dms-shell-git
 - dnsmasq
 - dolphin
 - dosfstools

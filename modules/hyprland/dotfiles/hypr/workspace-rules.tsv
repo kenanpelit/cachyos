@@ -1,0 +1,32 @@
+# class_regex	workspace_id	title_regex(optional)
+^(vlc)$	6
+^(audacious|Audacious)$	5
+^(Discord)$	5
+^(WebCord)$	5
+^(discord)$	5
+^(Brave-browser)$	9	^(web.whatsapp.com)$
+.*	9	^(web.whatsapp.com)$
+^(Ferdium|ferdium)$	9
+.*	4	^(Meet).*$
+^(Vncviewer)$	6	^(.*TigerVNC)$
+^(evince)$	3
+.*	6	^(New Private Tab - Brave)$
+^(Kenp)$	1
+^(Kenp)$	6	^Kenp Browser (Inkognito)$
+^((brave|chrome)-youtube\.com__-Default)$	7
+^(Brave-browser)$	8	^(Spotify - Web Player).*
+^(Tmux)$	2	^(Tmux)$
+^(kitty|org\.wezfurlong\.wezterm)$	2	^(Tmux)$
+^(TmuxKenp)$	2
+^(Ai)$	3
+^(Nil)$	3
+^(CompecTA)$	4
+.*	4	^(compecta)$
+^(org\.telegram\.desktop)$	6
+^(com\.rtosta\.zapzap|zapzap)$	9
+^(remote-viewer)$	6
+^(org\.keepassxc\.KeePassXC)$	7
+^(transmission|com\.transmissionbt\.transmission.*)$	7
+^(Spotify|spotify|com\.spotify\.Client)$	8
+^(qemu-system-x86_64)$	6
+^(qemu)$	6

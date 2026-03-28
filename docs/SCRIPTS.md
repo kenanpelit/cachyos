@@ -207,7 +207,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `hypr-bootstrap`
-**Description:** Early Hyprland bootstrap for monitor/workspace normalization.
+**Description:** Early Hyprland bootstrap stage.
 
 **Usage:** `hypr-bootstrap`
 
@@ -259,13 +259,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Compatibility helper for manual/Hyprland fallback startup and runtime env backfill.
 
 **Usage:** `hypr-session-init [--no-start-target]`
-
----
-
-### 📂 `hypr-session-route`
-**Description:** Route Hyprland monitor and workspace defaults after session start.
-
-**Usage:** `hypr-session-route`
 
 ---
 
@@ -357,13 +350,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Compatibility helper for manual/Niri fallback startup and runtime env backfill.
 
 **Usage:** `niri-session-init [--no-start-target]`
-
----
-
-### 📂 `niri-session-route`
-**Description:** Render the runtime Niri monitor profile from current outputs.
-
-**Usage:** `niri-session-route`
 
 ---
 
@@ -578,7 +564,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-shell`
-**Description:** Shell router for desktop IPC actions (DMS or Noctalia)
+**Description:** Shell router for desktop IPC actions (Noctalia)
 
 **Usage:** `osc-shell.sh [action] [options]`
 

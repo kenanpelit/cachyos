@@ -167,6 +167,7 @@ install_privileged_system_bins() {
 cleanup_legacy_bins() {
   local legacy_bins=(
     hypr-set
+    hypr-session-route
     niri-set
     niri-flow
     niri-keybinds

@@ -1,7 +1,7 @@
 // ========================================================================
 // NIRI COMPOSITOR CONFIGURATION
 // ========================================================================
-// Optimized for CachyOS / DMS (Dank Material Shell) / Noctalia.
+// Optimized for CachyOS / Noctalia.
 // Focus: Clean aesthetics, predictable tiling, and performance.
 // ========================================================================
 
@@ -110,10 +110,10 @@ switch-events {
 // ------------------------------------------------------------------------
 // HARDWARE & MONITOR LAYOUT
 // ------------------------------------------------------------------------
-// Note: These files are managed externally by DMS/Config scripts.
-include "dms/outputs.kdl"
-include "dms/monitor-auto.kdl"
-include "dms/workspaces-auto.kdl"
+// Declarative monitor layout is owned directly by the Niri module.
+include "outputs.kdl"
+// Workspace placement stays runtime-managed so workspace-mode toggles still work.
+include optional=true "runtime/workspaces-auto.kdl"
 
 layout {
   // Inner and outer gaps between windows for a consistent look.
@@ -194,8 +194,7 @@ recent-windows {
   }
 }
 
-include "dms/zen.kdl"
-include "dms/cursor.kdl"
+include optional=true "runtime/zen.kdl"
 
 // ========================================================================
 // KEYBINDINGS
@@ -317,7 +316,7 @@ binds {
   }
 
   // ----------------------------------------------------------------------
-  // DMS / Noctalia Shell Integrations (Launcher & Centers)
+  // Noctalia Shell Integrations (Launcher & Centers)
   // ----------------------------------------------------------------------
   Mod+Space repeat=false hotkey-overlay-title="Launcher" {
     spawn "osc-shell" "ipc" "call" "launcher" "toggle"
@@ -355,7 +354,7 @@ binds {
     spawn "osc-shell" "ipc" "call" "plugin:assistant-panel" "toggle"
   }
 
-  // Navigation via Alt+Tab integrated with the DMS launcher.
+  // Navigation via Alt+Tab integrated with the shell launcher.
   Alt+Tab hotkey-overlay-title="Switch Windows" {
     spawn "osc-shell" "ipc" "call" "launcher" "windows"
   }
@@ -406,7 +405,7 @@ binds {
   Mod+Alt+Slash repeat=false hotkey-overlay-title="Keybind Settings" {
     spawn "osc-shell" "ipc" "call" "plugin:keybind-cheatsheet" "toggle"
   }
-  Mod+F1 repeat=false hotkey-overlay-title="Keybinds (DMS)" {
+  Mod+F1 repeat=false hotkey-overlay-title="Keybinds (Shell)" {
     spawn "osc-shell" "ipc" "call" "plugin:keybind-cheatsheet" "toggle"
   }
   Alt+F1 repeat=false hotkey-overlay-title="Keybinds (Niri)" { show-hotkey-overlay; }
@@ -901,19 +900,16 @@ window-rule {
   opacity 1.0
 }
 
-// DMS-managed dynamic window rules.
-include "dms/windowrules.kdl"
-
 // ------------------------------------------------------------------------
 // LAYER RULES (UI Components)
 // ------------------------------------------------------------------------
 layer-rule {
-  match namespace=r#"^dms:(bar|dock|panel).*$"#
+  match namespace=r#"(^|.*[:\-])(bar|dock|panel).*$"#
   geometry-corner-radius 0
 }
 
 layer-rule {
-  match namespace=r#"^dms:(launcher|osd|popup).*$"#
+  match namespace=r#"(^|.*[:\-])(launcher|osd|popup).*$"#
   shadow {
     on
     color "#00000060"

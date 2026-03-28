@@ -11,17 +11,16 @@ source "${REPO_ROOT}/modules/base/lib/core.sh"
 PROFILE_MANIFEST="${NIRI_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
 PROFILES_DIR="${NIRI_PROFILE_DIR:-${MODULE_DIR}/profiles/profiles}"
 OUTPUT_MAP_FILE="${NIRI_OUTPUT_MAP_FILE:-${MODULE_DIR}/profiles/output-map.tsv}"
-TARGET_DMS_DIR="${NIRI_DMS_DIR:-${USER_HOME}/.config/niri/dms}"
-OUTPUTS_OUT="${TARGET_DMS_DIR}/outputs.kdl"
-WORKSPACES_OUT="${TARGET_DMS_DIR}/workspaces-auto.kdl"
+TARGET_RUNTIME_DIR="${NIRI_RUNTIME_DIR:-${USER_HOME}/.config/niri/runtime}"
+WORKSPACES_OUT="${TARGET_RUNTIME_DIR}/workspaces-auto.kdl"
 
 usage() {
   cat <<'EOF'
 Usage: render-profile.sh [--check] [--out-dir DIR]
 
-Without arguments, renders the static Niri outputs/workspaces files from the
+Without arguments, renders the static Niri workspace placement file from the
 selected Niri monitor profile.
-With --check, verifies the rendered files match the target directory.
+With --check, verifies the rendered workspace file matches the target directory.
 EOF
 }
 
@@ -32,17 +31,6 @@ trim() {
   printf '%s\n' "$value"
 }
 
-format_scale() {
-  local scale="$1"
-
-  if [[ "$scale" =~ ^[0-9]+$ ]]; then
-    printf '%s.0\n' "$scale"
-    return 0
-  fi
-
-  printf '%s\n' "$scale"
-}
-
 mode="write"
 while (($#)); do
   case "$1" in
@@ -51,9 +39,8 @@ while (($#)); do
       shift
       ;;
     --out-dir)
-      TARGET_DMS_DIR="$2"
-      OUTPUTS_OUT="${TARGET_DMS_DIR}/outputs.kdl"
-      WORKSPACES_OUT="${TARGET_DMS_DIR}/workspaces-auto.kdl"
+      TARGET_RUNTIME_DIR="$2"
+      WORKSPACES_OUT="${TARGET_RUNTIME_DIR}/workspaces-auto.kdl"
       shift 2
       ;;
     -h|--help)
@@ -97,12 +84,11 @@ manifest_checksum="$(
     awk '{print $1}'
 )"
 
-tmp_outputs="$(mktemp)"
 tmp_workspaces="$(mktemp)"
-chmod 0644 "${tmp_outputs}" "${tmp_workspaces}"
+chmod 0644 "${tmp_workspaces}"
 
 cleanup() {
-  rm -f "${tmp_outputs}" "${tmp_workspaces}"
+  rm -f "${tmp_workspaces}"
 }
 trap cleanup EXIT
 
@@ -110,15 +96,8 @@ trap cleanup EXIT
   printf '// Generated from modules/niri/profiles/profile.env and %s.\n' "$(basename "${PROFILE_FILE}")"
   printf '// Update the selected monitor profile or output map and rerun modules/niri/scripts/render-profile.sh.\n'
   printf '// Source checksum: %s\n\n' "${manifest_checksum}"
-} > "${tmp_outputs}"
-
-{
-  printf '// Generated from modules/niri/profiles/profile.env and %s.\n' "$(basename "${PROFILE_FILE}")"
-  printf '// Update the selected monitor profile or output map and rerun modules/niri/scripts/render-profile.sh.\n'
-  printf '// Source checksum: %s\n\n' "${manifest_checksum}"
 } > "${tmp_workspaces}"
 
-declare -A seen_outputs=()
 declare -A seen_workspaces=()
 
 while IFS= read -r line || [[ -n "$line" ]]; do
@@ -127,31 +106,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
 
   case "$line" in
     monitor=*)
-      payload="${line#monitor=}"
-      IFS=',' read -r monitor_selector mode_value position_value scale_value _ <<<"${payload}"
-      monitor_selector="$(trim "${monitor_selector}")"
-      [[ -n "${monitor_selector}" ]] || continue
-
-      output_name="${OUTPUT_NAME_MAP["${monitor_selector}"]:-}"
-      [[ -n "${output_name}" ]] || die "Missing Niri output map for monitor selector: ${monitor_selector}"
-      [[ -z "${seen_outputs[${output_name}]:-}" ]] || continue
-      seen_outputs["${output_name}"]=1
-
-      position_value="$(trim "${position_value}")"
-      scale_value="$(format_scale "$(trim "${scale_value}")")"
-      pos_x="${position_value%%x*}"
-      pos_y="${position_value#*x}"
-
-      {
-        printf 'output "%s" {\n' "${output_name}"
-        printf '  mode "%s"\n' "$(trim "${mode_value}")"
-        printf '  position x=%s y=%s\n' "${pos_x}" "${pos_y}"
-        printf '  scale %s\n' "${scale_value}"
-        if [[ "${output_name}" == eDP* ]]; then
-          printf '  variable-refresh-rate on-demand=true\n'
-        fi
-        printf '}\n\n'
-      } >> "${tmp_outputs}"
+      continue
       ;;
     workspace=*)
       payload="${line#workspace=}"
@@ -183,11 +138,9 @@ while IFS= read -r line || [[ -n "$line" ]]; do
 done < "${PROFILE_FILE}"
 
 if [[ "${mode}" == "check" ]]; then
-  diff -u "${OUTPUTS_OUT}" "${tmp_outputs}"
   diff -u "${WORKSPACES_OUT}" "${tmp_workspaces}"
   exit 0
 fi
 
-run_as_user mkdir -p "${TARGET_DMS_DIR}"
-run_as_user install -m 644 "${tmp_outputs}" "${OUTPUTS_OUT}"
+run_as_user mkdir -p "${TARGET_RUNTIME_DIR}"
 run_as_user install -m 644 "${tmp_workspaces}" "${WORKSPACES_OUT}"

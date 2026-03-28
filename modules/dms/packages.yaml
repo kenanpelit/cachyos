@@ -1,5 +1,0 @@
-description: DankMaterialShell helper packages
-
-packages:
-  - jq
-  - dbus

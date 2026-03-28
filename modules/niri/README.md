@@ -148,10 +148,11 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   generic dialogs/settings stay on GTK, screencast/screenshot stay on `gnome`,
   and `RemoteDesktop` stays on GNOME as the only installed backend in this
   repo that actually advertises that interface.
-- Static Niri monitor/workspace defaults are now rendered from the selected
-  Niri monitor profile plus the Niri output-name map, so the module keeps its
-  own profile selector and runtime-rendered output files without depending on
-  Hyprland-owned monitor profile assets. The selector now lives in
+- Static Niri outputs are now declared directly in
+  `modules/niri/dotfiles/niri/outputs.kdl`. Workspace placement remains
+  runtime-rendered from the selected Niri monitor profile plus the Niri
+  output-name map, so the module keeps its own profile selector without
+  depending on Hyprland-owned monitor profile assets. The selector lives in
   `modules/niri/profiles/profile.env` via `NIRI_MONITOR_PROFILE`.
 - The supported entry path is now the UWSM wrapper installed by the `sessions`
   module. Legacy `niri-optimized-session` and the old `niri.service`

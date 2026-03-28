@@ -40,6 +40,8 @@ dotfiles:
   target: ~/.config/hypr/conf.d/60-submaps.conf
 - source: dotfiles/hypr/conf.d/70-monitors.conf
   target: ~/.config/hypr/conf.d/70-monitors.conf
+- source: dotfiles/hypr/workspace-rules.tsv
+  target: ~/.config/hypr/workspace-rules.tsv
 - source: dotfiles/portals.conf
   target: ~/.config/xdg-desktop-portal/hyprland-portals.conf
 - source: dotfiles/portals.conf

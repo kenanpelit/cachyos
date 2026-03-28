@@ -6,7 +6,9 @@ repo_root="$(cd "$script_dir/../../.." && pwd)"
 source "$repo_root/modules/base/lib/core.sh"
 
 NIRI_DIR="$USER_HOME/.config/niri"
-DMS_DIR="$NIRI_DIR/dms"
+RUNTIME_DIR="$NIRI_DIR/runtime"
+STATIC_OUTPUTS_SOURCE="$repo_root/modules/niri/dotfiles/niri/outputs.kdl"
+STATIC_OUTPUTS_TARGET="$NIRI_DIR/outputs.kdl"
 LEGACY_ENV_FILE="$USER_HOME/.config/environment.d/10-niri-env.conf"
 LEGACY_PRIORITY_DROPIN="$USER_HOME/.config/systemd/user/niri.service.d/10-priority.conf"
 LEGACY_DESKTOP_SETTINGS_UNIT="$USER_HOME/.config/systemd/user/niri-desktop-settings.service"
@@ -17,26 +19,31 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
-  install -d -m0755 -o "$REAL_USER" -g "$USER_GROUP" "$NIRI_DIR" "$DMS_DIR"
-  chown "$REAL_USER:$USER_GROUP" "$NIRI_DIR" "$DMS_DIR" 2>/dev/null || true
+  install -d -m0755 -o "$REAL_USER" -g "$USER_GROUP" "$NIRI_DIR"
+  chown "$REAL_USER:$USER_GROUP" "$NIRI_DIR" 2>/dev/null || true
 else
-  mkdir -p "$DMS_DIR"
+  mkdir -p "$NIRI_DIR"
+fi
+
+if [ -f "$STATIC_OUTPUTS_SOURCE" ]; then
+  if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
+    install -m0644 -o "$REAL_USER" -g "$USER_GROUP" "$STATIC_OUTPUTS_SOURCE" "$STATIC_OUTPUTS_TARGET"
+  else
+    install -m0644 "$STATIC_OUTPUTS_SOURCE" "$STATIC_OUTPUTS_TARGET"
+  fi
 fi
 
 render_profile_script="$script_dir/render-profile.sh"
 
-for f in outputs.kdl monitor-auto.kdl workspaces-auto.kdl zen.kdl cursor.kdl alttab.kdl layout.kdl windowrules.kdl; do
-  path="$DMS_DIR/$f"
-  # If it's a broken symlink or doesn't exist, create it
-  if [ ! -e "$path" ]; then
-    echo "Creating empty runtime file: $path"
-    if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
-      install -m0644 -o "$REAL_USER" -g "$USER_GROUP" /dev/null "$path"
-    else
-      : > "$path"
-    fi
-  fi
-  chmod 0644 "$path" || true
+legacy_runtime_files=(
+  "$RUNTIME_DIR/cursor.kdl"
+  "$RUNTIME_DIR/windowrules.kdl"
+  "$RUNTIME_DIR/alttab.kdl"
+  "$RUNTIME_DIR/layout.kdl"
+)
+
+for legacy_path in "${legacy_runtime_files[@]}"; do
+  rm -f "$legacy_path" 2>/dev/null || true
 done
 
 rm -f "$LEGACY_ENV_FILE" 2>/dev/null || true

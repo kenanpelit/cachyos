@@ -100,13 +100,14 @@ Core session units:
   so the user manager sees the finalized Hyprland runtime variables before the
   rest of the session units are evaluated.
 - `hypr-bootstrap.service`
-  Early oneshot bootstrap. Runs `hypr-session-route --no-notify`.
+  Early oneshot bootstrap stage. Waits for `hyprctl` readiness and keeps the
+  session graph ordering explicit without doing runtime monitor routing.
 - `hypr-audio-init.service`
   Separate oneshot audio initialization. Runs `osc-soundctl init` after the
   bootstrap stage.
 - `hypr-shell-ensure.service`
   One-shot shell backend ensure stage. Runs `osc-shell ensure` before the tray
-  readiness gate so Noctalia/DMS shell IPC is present deterministically.
+  readiness gate so Noctalia shell IPC is present deterministically.
 - `hypr-daemons.target`
   Explicit daemon stage. It now declares the core Hyprland services it wants.
 - `hypr-status-notifier-ready.service`
@@ -182,6 +183,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   Renderer that regenerates `70-monitors.conf` from the selected monitor
   profile. `render-monitors.sh --check` verifies that the generated file is in
   sync with the manifest and selected profile.
+- `dotfiles/hypr/workspace-rules.tsv`
+  Canonical window-to-workspace arranger rules consumed by `hypr-osc
+  arrange-windows`.
 - `modules/sessions/dotfiles/hyprland-uwsm-session`
   UWSM-first wrapper. Loads the repo-managed shared `environment.d` stack
   including `00-wayland.conf`, plus the Hyprland-only session file, normalizes

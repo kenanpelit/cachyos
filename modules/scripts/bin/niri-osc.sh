@@ -206,16 +206,16 @@ niri_osc_payload_set() {
 # Interface:
 # - `niri-osc set <subcommand> [args...]`
 # - Major groups: session (`tty`, `env`, `bootstrap`, `post-bootstrap`,
-#   `desktop-settings`, `session-route`, `status-notifier-ready`,
-#   `snapper-tools-check`, `start`, `init`, `lock`), routing (`go`, `here`,
+#   `desktop-settings`, `status-notifier-ready`, `snapper-tools-check`,
+#   `start`, `init`, `lock`), routing (`go`, `here`,
 #   `flow`, `cast`), diagnostics (`doctor`), and layout toggles (`float`,
 #   `zen`, `pin`).
 #
 # Design notes:
 # - Intentionally self-contained because each `*.sh` is packaged as an
 #   independent binary by `modules/home/scripts/bin.nix`.
-# - Prefers graceful fallback behavior for optional desktop integrations (DMS,
-#   notifications, portals, etc.).
+# - Prefers graceful fallback behavior for optional desktop integrations
+#   (notifications, portals, etc.).
 #
 # See:
 # - `niri-osc set help`
@@ -235,14 +235,13 @@ Commands:
   bootstrap          Wait for NIRI_SOCKET and run init (was: niri-bootstrap)
   post-bootstrap     Late desktop polish + ready notify
   desktop-settings   Apply GTK/icon/cursor settings
-  session-route      Render runtime monitor profile
   status-notifier-ready
                      Wait for StatusNotifierWatcher before tray applets
   snapper-tools-check
                      Delayed snapshot boot check for snapper-tools
   start              Daily semsumo startup helper
   init               Bootstrap session (was: niri-init)
-  lock               Lock session via DMS/logind (was: niri-lock)
+  lock               Lock session via logind or the active shell backend
   size               Set explicit column width and window height
   go                 Move windows to target workspaces (was: niri-arrange-windows)
   here               Bring window here (or launch); `all` gathers a set
@@ -317,7 +316,7 @@ zen)
     set -euo pipefail
 
     STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/niri-zen.state"
-    ZEN_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/niri/dms/zen.kdl"
+    ZEN_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/zen.kdl"
 
     ensure_zen_file() {
       mkdir -p "$(dirname "$ZEN_FILE")" 2>/dev/null || true
@@ -365,12 +364,6 @@ EOF
       notify-send -t 1000 "Zen Mode" "${1:-}" 2>/dev/null || true
     }
 
-    dms_ipc_call() {
-      command -v dms >/dev/null 2>&1 || return 1
-      # Silent fallback if dms-server is not reachable
-      dms ipc call "$@" 2>/dev/null | tr -d '\r' || return 1
-    }
-
     shell_ipc_call() {
       if command -v osc-shell >/dev/null 2>&1; then
         osc-shell ipc call "$@" 2>/dev/null | tr -d '\r' || return 1
@@ -390,11 +383,11 @@ EOF
       fi
 
       case "$out" in
-      dms | noctalia)
-        printf '%s\n' "$out"
+      noctalia)
+        printf 'noctalia\n'
         ;;
       *)
-        printf 'dms\n'
+        printf 'unknown\n'
         ;;
       esac
     }
@@ -423,37 +416,11 @@ EOF
     SHELL_BACKEND="$(detect_shell_backend)"
 
     get_bar_state() {
-      if [[ "$SHELL_BACKEND" == "noctalia" ]]; then
-        # No portable "bar status" method in Noctalia IPC yet.
-        echo "unknown"
-        return 0
-      fi
-
-      local out norm
-      out="$(dms_ipc_call bar status index 0 2>/dev/null | tail -n 1 || echo "unknown")"
-      norm="$(printf '%s' "$out" | tr '[:upper:]' '[:lower:]' | xargs || echo "unknown")"
-      case "$norm" in
-      visible | shown | show | on | true | 1) echo "visible" ;;
-      hidden | hide | off | false | 0) echo "hidden" ;;
-      *) echo "unknown" ;;
-      esac
+      echo "unknown"
     }
 
     get_dnd_state() {
-      if [[ "$SHELL_BACKEND" == "noctalia" ]]; then
-        # No portable DND getter in Noctalia IPC yet.
-        echo "unknown"
-        return 0
-      fi
-
-      local out norm
-      out="$(dms_ipc_call notifications getDoNotDisturb | tail -n 1 || true)"
-      norm="$(printf '%s' "$out" | tr '[:upper:]' '[:lower:]' | xargs || true)"
-      case "$norm" in
-      true | on | yes | 1) echo "true" ;;
-      false | off | no | 0) echo "false" ;;
-      *) echo "unknown" ;;
-      esac
+      echo "unknown"
     }
 
     set_bar_state() {
@@ -463,10 +430,10 @@ EOF
 
       case "$desired" in
       visible)
-        shell_ipc_call bar showBar >/dev/null 2>&1 || dms_ipc_call bar reveal index 0 >/dev/null 2>&1 || true
+        shell_ipc_call bar showBar >/dev/null 2>&1 || true
         ;;
       hidden)
-        shell_ipc_call bar hideBar >/dev/null 2>&1 || dms_ipc_call bar hide index 0 >/dev/null 2>&1 || true
+        shell_ipc_call bar hideBar >/dev/null 2>&1 || true
         ;;
       *)
         ;;
@@ -479,17 +446,14 @@ EOF
       [[ "$current" == "$desired" ]] && return 0
 
       case "$desired" in
-      true | false)
-        # DMS notifications IPC exposes toggle + getter (no explicit set).
-        if [[ "$current" != "unknown" ]]; then
-          dms_ipc_call notifications toggleDoNotDisturb >/dev/null 2>&1 || true
-        elif [[ "$SHELL_BACKEND" == "noctalia" ]]; then
-          # Noctalia has explicit DND methods.
-          if [[ "$desired" == "true" ]]; then
-            shell_ipc_call notifications enableDND >/dev/null 2>&1 || true
-          else
-            shell_ipc_call notifications disableDND >/dev/null 2>&1 || true
-          fi
+      true)
+        if [[ "$current" != "true" ]]; then
+          shell_ipc_call notifications enableDND >/dev/null 2>&1 || shell_ipc_call notifications toggleDND >/dev/null 2>&1 || true
+        fi
+        ;;
+      false)
+        if [[ "$current" != "false" ]]; then
+          shell_ipc_call notifications disableDND >/dev/null 2>&1 || shell_ipc_call notifications toggleDND >/dev/null 2>&1 || true
         fi
         ;;
       *)
@@ -552,8 +516,8 @@ EOF
         [[ "$STATE_DND" == "toggle" ]] && shell_ipc_call notifications toggleDND >/dev/null 2>&1 || true
       else
         # Legacy fallback for older empty marker files.
-        shell_ipc_call bar toggle >/dev/null 2>&1 || dms_ipc_call bar toggle index 0 >/dev/null 2>&1 || true
-        dms_ipc_call notifications toggle-dnd >/dev/null 2>&1 || dms_ipc_call notifications toggleDoNotDisturb >/dev/null 2>&1 || true
+        shell_ipc_call bar toggle >/dev/null 2>&1 || true
+        shell_ipc_call notifications toggleDND >/dev/null 2>&1 || true
       fi
 
       rm -f "$STATE_FILE"
@@ -987,7 +951,7 @@ tty)
     # Niri Universal Launcher - TTY & GDM Compatible
     # =============================================================================
     # Derived from legacy tty launcher logic, adapted for Niri.
-    # Optimized for Niri compositor + DankMaterialShell integration
+    # Optimized for Niri compositor + shell integration
     # =============================================================================
 
     # =============================================================================
@@ -1250,14 +1214,6 @@ tty)
         fi
       fi
 
-      # Restart critical user services for correct environment
-      if [[ "$GDM_MODE" == "true" ]]; then
-        if [[ -n "$timeout_bin" ]]; then
-          $timeout_bin 2s systemctl --user restart dms.service 2>/dev/null || true
-        else
-          systemctl --user restart dms.service 2>/dev/null || true
-        fi
-      fi
     }
 
     # =============================================================================
@@ -1568,113 +1524,6 @@ post-bootstrap)
   )
   ;;
 
-session-route)
-  # ----------------------------------------------------------------------------
-  # Embedded: niri-session-route.sh
-  # ----------------------------------------------------------------------------
-  (
-    set -euo pipefail
-
-    LOG_TAG="niri-session-route"
-
-    log() { printf '[%s] %s\n' "$LOG_TAG" "$*" >&2; }
-
-    if ! command -v niri >/dev/null 2>&1; then
-      log "niri not found; skipping runtime monitor routing"
-      exit 0
-    fi
-
-    if ! command -v jq >/dev/null 2>&1; then
-      log "jq not found; skipping runtime monitor routing"
-      exit 0
-    fi
-
-    if ! niri msg version >/dev/null 2>&1; then
-      log "niri IPC unavailable; skipping runtime monitor routing"
-      exit 0
-    fi
-
-    outputs_json="$(niri msg -j outputs 2>/dev/null || true)"
-    if [[ -z "${outputs_json:-}" ]]; then
-      log "no output data returned; skipping runtime monitor routing"
-      exit 0
-    fi
-
-    config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
-    dms_dir="${config_home}/niri/dms"
-    profile_file="${dms_dir}/monitor-auto.kdl"
-
-    mkdir -p "$dms_dir"
-
-    if [[ -L "$profile_file" ]]; then
-      rm -f "$profile_file"
-    fi
-
-    detect_json="$(echo "$outputs_json" | jq -c '[.[] | select(((.current_mode.width // .mode.width // 0) > 0) and ((.current_mode.height // .mode.height // 0) > 0))]' 2>/dev/null || true)"
-    if [[ -z "${detect_json:-}" || "${detect_json:-[]}" == "[]" ]]; then
-      detect_json="$outputs_json"
-    fi
-
-    internal_output="$(echo "$detect_json" | jq -r '[.[] | .name | select(test("^eDP"))][0] // empty' 2>/dev/null || true)"
-    external_output="$(echo "$detect_json" | jq -r '[.[] | .name | select(test("^eDP")|not)][0] // empty' 2>/dev/null || true)"
-
-    if [[ -z "$internal_output" ]]; then
-      internal_output="$(echo "$outputs_json" | jq -r '.[0].name // empty' 2>/dev/null || true)"
-    fi
-
-    [[ -n "$internal_output" ]] || exit 0
-
-    internal_vrr="false"
-    if [[ -n "$internal_output" ]]; then
-      internal_vrr="$(echo "$detect_json" | jq -r --arg n "$internal_output" '.[] | select(.name == $n) | if .modes then (.modes[] | select(.is_current) | .vrr_capable) else false end // false' 2>/dev/null || echo "false")"
-    fi
-
-    ext_w=0
-    ext_h=0
-    int_w=0
-    if [[ -n "$external_output" && "$external_output" != "$internal_output" ]]; then
-      ext_w="$(echo "$detect_json" | jq -r --arg o "$external_output" '.[] | select(.name == $o) | (.current_mode.width // .mode.width // 0)' 2>/dev/null | head -n 1 || true)"
-      ext_h="$(echo "$detect_json" | jq -r --arg o "$external_output" '.[] | select(.name == $o) | (.current_mode.height // .mode.height // 0)' 2>/dev/null | head -n 1 || true)"
-      int_w="$(echo "$detect_json" | jq -r --arg o "$internal_output" '.[] | select(.name == $o) | (.current_mode.width // .mode.width // 0)' 2>/dev/null | head -n 1 || true)"
-    fi
-
-    [[ "$ext_w" =~ ^[0-9]+$ ]] || ext_w=0
-    [[ "$ext_h" =~ ^[0-9]+$ ]] || ext_h=0
-    [[ "$int_w" =~ ^[0-9]+$ ]] || int_w=0
-
-    int_x=0
-    int_y=0
-    if [[ "$ext_w" -gt 0 && "$ext_h" -gt 0 ]]; then
-      if [[ "$int_w" -gt 0 && "$ext_w" -gt "$int_w" ]]; then
-        int_x=$(((ext_w - int_w) / 2))
-      fi
-      int_y="$ext_h"
-    fi
-
-    {
-      echo "// Auto-generated by niri-session-route."
-      echo "// Output-only runtime profile. Workspace mapping stays in config.kdl."
-      if [[ -n "$external_output" && "$external_output" != "$internal_output" ]]; then
-        echo "output \"$external_output\" { position x=0 y=0; scale 1.0; }"
-        if [[ "$internal_vrr" == "true" ]]; then
-          echo "output \"$internal_output\" { position x=${int_x} y=${int_y}; scale 1.0; variable-refresh-rate on-demand=true; }"
-        else
-          echo "output \"$internal_output\" { position x=${int_x} y=${int_y}; scale 1.0; }"
-        fi
-      else
-        if [[ "$internal_vrr" == "true" ]]; then
-          echo "output \"$internal_output\" { position x=0 y=0; scale 1.0; variable-refresh-rate on-demand=true; }"
-        else
-          echo "output \"$internal_output\" { position x=0 y=0; scale 1.0; }"
-        fi
-      fi
-    } >"$profile_file"
-
-    niri msg action load-config-file >/dev/null 2>&1 || true
-    log "monitor output profile updated (internal=${internal_output}, external=${external_output:-none})"
-  )
-  ;;
-
 status-notifier-ready)
   # ----------------------------------------------------------------------------
   # Embedded: niri-status-notifier-ready.sh
@@ -1894,7 +1743,6 @@ init)
       fi
     fi
 
-    "$0" session-route &
     if [[ "${NIRI_INIT_ENFORCE_WORKSPACE_BOUNDS:-0}" == "1" ]]; then
       normalize_workspace_range
       compact_out_of_range_empty_workspaces
@@ -1937,34 +1785,24 @@ lock)
   (
     set -euo pipefail
 
-    is_dms_locked() {
-      command -v dms >/dev/null 2>&1 || return 1
-      local out
-      out="$(dms ipc call lock isLocked 2>/dev/null | tr -d '\r' | tail -n 1 || true)"
-      [[ "$out" == "true" ]]
-    }
-
-    if is_dms_locked; then
-      exit 0
-    fi
-
-    mode="dms"
     if [[ "${1:-}" == "--logind" ]]; then
-      mode="logind"
       shift || true
     fi
 
-    case "$mode" in
-    logind)
-      if command -v loginctl >/dev/null 2>&1; then
-        exec loginctl lock-session
-      fi
-      exec dms ipc call lock lock
-      ;;
-    *)
-      exec dms ipc call lock lock
-      ;;
-    esac
+    if command -v loginctl >/dev/null 2>&1; then
+      exec loginctl lock-session
+    fi
+
+    if command -v osc-shell >/dev/null 2>&1; then
+      exec osc-shell ipc call lockScreen lock
+    fi
+
+    if [[ -x "${HOME}/.local/bin/osc-shell" ]]; then
+      exec "${HOME}/.local/bin/osc-shell" ipc call lockScreen lock
+    fi
+
+    echo "No lock backend available." >&2
+    exit 1
   )
   ;;
 
@@ -2078,7 +1916,7 @@ EOF
     NIRI=(niri msg)
     WORKSPACES_JSON=""
 
-    rules_file="${XDG_CONFIG_HOME:-$HOME/.config}/niri/dms/workspace-rules.tsv"
+    rules_file="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/workspace-rules.tsv"
     declare -a RULE_PATTERNS=()
     declare -a RULE_WORKSPACES=()
     declare -a RULE_TITLE_PATTERNS=()
@@ -3050,14 +2888,23 @@ doctor)
     }
 
     config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
-    niri_config_file="${config_home}/niri/config.kdl"
-    niri_dms_dir="${config_home}/niri/dms"
+    niri_config_dir="${config_home}/niri"
+    niri_config_file="${niri_config_dir}/config.kdl"
+    niri_runtime_dir="${niri_config_dir}/runtime"
 
     include_is_declared() {
       local include_path="${1:-}"
       [[ -n "$include_path" ]] || return 1
       [[ -f "$niri_config_file" ]] || return 1
-      grep -Fq "include \"${include_path}\"" "$niri_config_file"
+      grep -Fq "include \"${include_path}\"" "$niri_config_file" \
+        || grep -Fq "include optional=true \"${include_path}\"" "$niri_config_file"
+    }
+
+    include_is_optional() {
+      local include_path="${1:-}"
+      [[ -n "$include_path" ]] || return 1
+      [[ -f "$niri_config_file" ]] || return 1
+      grep -Fq "include optional=true \"${include_path}\"" "$niri_config_file"
     }
 
     check_runtime_include_file() {
@@ -3072,7 +2919,11 @@ doctor)
       fi
 
       if [[ ! -e "$abs_path" ]]; then
-        kv "$label" "missing"
+        if include_is_optional "$include_path"; then
+          kv "$label" "missing (optional)"
+        else
+          kv "$label" "missing"
+        fi
         return 0
       fi
 
@@ -3164,9 +3015,6 @@ doctor)
           sunsetr.service \
           sunsetr-auto-profile.timer \
           noctalia.service \
-          dms.service \
-          dms-plugin-sync.service \
-          dms-resume-restart.service \
           kdeconnectd.service \
           kdeconnect-indicator.service \
           fusuma.service \
@@ -3212,12 +3060,11 @@ doctor)
     fi
 
     echo
-    echo "Runtime includes (strict)"
+    echo "Runtime includes"
     kv "config.kdl" "$([[ -f "$niri_config_file" ]] && echo "$niri_config_file" || echo "missing")"
-    check_runtime_include_file "include:dms/outputs.kdl" "dms/outputs.kdl" "${niri_dms_dir}/outputs.kdl"
-    check_runtime_include_file "include:dms/monitor-auto.kdl" "dms/monitor-auto.kdl" "${niri_dms_dir}/monitor-auto.kdl"
-    check_runtime_include_file "include:dms/zen.kdl" "dms/zen.kdl" "${niri_dms_dir}/zen.kdl"
-    check_runtime_include_file "include:dms/cursor.kdl" "dms/cursor.kdl" "${niri_dms_dir}/cursor.kdl"
+    check_runtime_include_file "include:outputs.kdl" "outputs.kdl" "${niri_config_dir}/outputs.kdl"
+    check_runtime_include_file "include:runtime/workspaces-auto.kdl" "runtime/workspaces-auto.kdl" "${niri_runtime_dir}/workspaces-auto.kdl"
+    check_runtime_include_file "include:runtime/zen.kdl" "runtime/zen.kdl" "${niri_runtime_dir}/zen.kdl"
   )
   ;;
 

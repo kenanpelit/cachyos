@@ -53,9 +53,7 @@ enabled_modules:
 - xdg-portal
 - rofi
 # - walker
-- dms
 - noctalia
-# - dms-greeter
 - lemurs
 - fusuma
 - bt

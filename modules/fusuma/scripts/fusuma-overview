@@ -49,10 +49,13 @@ detect_compositor() {
 compositor="$(detect_compositor || true)"
 
 if [[ "$compositor" == "hyprland" ]]; then
-  if command -v dms >/dev/null 2>&1; then
-    exec dms ipc call hypr toggleOverview
+  if command -v hypr-expo >/dev/null 2>&1; then
+    exec hypr-expo toggle
   fi
-  log_error "fusuma-overview: dms not found in PATH"
+  if command -v osc-shell >/dev/null 2>&1; then
+    exec osc-shell ipc call launcher windows
+  fi
+  log_error "fusuma-overview: no overview backend found"
   exit 127
 fi
 

@@ -81,9 +81,9 @@ POWER_CMD[reboot]="systemctl reboot -i"
 POWER_TEXT[lockscreen]="Lock Screen"
 POWER_ICON[lockscreen]="󰍁"
 POWER_COLOR[lockscreen]="#7aa2f7"
-# Prefer DMS lock when available (works on Niri too), otherwise fall back to Hyprlock,
+# Prefer the active shell backend for locking, otherwise fall back to Hyprlock,
 # then finally logind lock-session.
-POWER_CMD[lockscreen]="dms ipc call lock lock || hyprlock || loginctl lock-session"
+POWER_CMD[lockscreen]="osc-shell ipc call lockScreen lock || hyprlock || loginctl lock-session"
 
 POWER_TEXT[logout]="Sign Out"
 POWER_ICON[logout]="󰗼"

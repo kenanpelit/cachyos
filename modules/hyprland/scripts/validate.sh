@@ -9,6 +9,8 @@ render_theme_script="$script_dir/render-theme.sh"
 render_monitors_script="$script_dir/render-monitors.sh"
 
 shell_scripts=(
+  "$repo_root/modules/scripts/bin/hypr-bootstrap.sh"
+  "$repo_root/modules/scripts/bin/hypr-osc.sh"
   "$repo_root/modules/scripts/bin/hypr-session-common.sh"
   "$repo_root/modules/scripts/bin/hypr-session-init.sh"
   "$repo_root/modules/scripts/bin/hypr-desktop-settings.sh"

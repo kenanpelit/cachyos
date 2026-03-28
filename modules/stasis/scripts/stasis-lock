@@ -40,38 +40,15 @@ if command -v hyprlock >/dev/null 2>&1 && ensure_hypr_signature; then
   exit 0
 fi
 
-# Niri (and others): use DMS lock if available and block until unlocked.
-if command -v dms >/dev/null 2>&1; then
-  (dms ipc call lock lock >/dev/null 2>&1 || true) &
-  disown || true
-
-  if [[ "$wait" != "1" ]]; then
-    exit 0
+# Other compositors: ask the active shell backend to lock if available.
+if command -v osc-shell >/dev/null 2>&1; then
+  if [[ "$wait" == "1" ]]; then
+    osc-shell ipc call lockScreen lock >/dev/null 2>&1 || true
+  else
+    osc-shell ipc call lockScreen lock >/dev/null 2>&1 &
+    disown || true
   fi
-
-  failures="0"
-  while true; do
-    out="$(
-      dms ipc call lock isLocked 2>/dev/null \
-        | tr -d '\r' \
-        | tail -n 1 \
-        | tr -d '[:space:]' \
-        || true
-    )"
-
-    case "$out" in
-      true) ;;
-      false) exit 0 ;;
-      *)
-        failures="$((failures + 1))"
-        if [[ "$failures" -ge 20 ]]; then
-          exit 0
-        fi
-        ;;
-    esac
-
-    sleep 0.25
-  done
+  exit 0
 fi
 
 # Fallback: logind lock (may use compositor's default locker).

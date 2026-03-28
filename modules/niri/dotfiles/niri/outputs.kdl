@@ -1,0 +1,16 @@
+// Declarative output layout owned by the Niri module.
+// Keep this file static; do not generate monitor routing at runtime.
+
+output "DP-3" {
+  mode "2560x1440@59"
+  scale 1
+  position x=0 y=0
+  focus-at-startup
+}
+
+output "eDP-1" {
+  mode "1920x1200@60"
+  scale 1
+  position x=320 y=1440
+  variable-refresh-rate on-demand=true
+}

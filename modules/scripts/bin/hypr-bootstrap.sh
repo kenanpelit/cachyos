@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: hypr-bootstrap
-# Description: Early Hyprland bootstrap for monitor/workspace normalization.
+# Description: Early Hyprland bootstrap stage.
 # Usage: hypr-bootstrap
 # ==============================================================================
 
@@ -61,8 +61,6 @@ main() {
   if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
     warn "HYPRLAND_INSTANCE_SIGNATURE is unset; continuing anyway"
   fi
-
-  run_if_present hypr-session-route --no-notify
 
   log "hypr-bootstrap completed."
 }

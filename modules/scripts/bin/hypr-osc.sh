@@ -370,7 +370,7 @@ Commands:
   init               Session bootstrap
   bootstrap          Session bootstrap stage (internal)
   post-bootstrap     Session post-bootstrap stage (internal)
-  lock               Lock session via DMS/logind
+  lock               Lock session via shell/logind
   here               Move specific window to current workspace (smart match)
   arrange-windows     Move windows to target workspaces
   workspace-monitor  Workspace/monitor helper
@@ -382,7 +382,6 @@ Commands:
   maximize-window-to-edges  Maximize window to screen edges (Niri-like)
   focus-float-tile   Toggle focus float/tile
   workspace-move-or-focus  Move workspace to next monitor or focus it
-  switch             Smart monitor/workspace switcher
   doctor             Print Hyprland session diagnostics
   toggle-float        Toggle floating for active window
   toggle-opacity      Toggle active/inactive opacity
@@ -694,8 +693,7 @@ Usage:
 
 Notes:
   - Uses workspace rules from (first found):
-      - ~/.config/hypr/dms/workspace-rules.tsv
-      - ~/.config/niri/dms/workspace-rules.tsv
+      - ~/.config/hypr/workspace-rules.tsv
   - TSV format: <class_regex>\t<workspace_id>\t<title_regex?>
 EOF
       }
@@ -714,8 +712,7 @@ EOF
 
       rules_file=""
       for candidate in \
-        "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/dms/workspace-rules.tsv" \
-        "${XDG_CONFIG_HOME:-$HOME/.config}/niri/dms/workspace-rules.tsv"
+        "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/workspace-rules.tsv"
       do
         if [[ -f "$candidate" ]]; then
           rules_file="$candidate"
@@ -746,31 +743,12 @@ EOF
       fi
 
       if [[ "${#RULE_PATTERNS[@]}" -eq 0 ]]; then
-        # Fallback: match the default "daily" workspace mapping.
-        RULE_PATTERNS+=("^(TmuxKenp|Tmux)$"); RULE_WORKSPACES+=("2"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^(kitty|org\\.wezfurlong\\.wezterm)$"); RULE_WORKSPACES+=("2"); RULE_TITLE_PATTERNS+=("^Tmux$")
-        RULE_PATTERNS+=("^Kenp$"); RULE_WORKSPACES+=("1"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^Ai$"); RULE_WORKSPACES+=("3"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^CompecTA$"); RULE_WORKSPACES+=("4"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^WebCord$"); RULE_WORKSPACES+=("5"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^(discord|Discord)$"); RULE_WORKSPACES+=("5"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^org\\.telegram\\.desktop$"); RULE_WORKSPACES+=("6"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^vlc$"); RULE_WORKSPACES+=("6"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^remote-viewer$"); RULE_WORKSPACES+=("6"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^brave-youtube\\.com__-Default$"); RULE_WORKSPACES+=("7"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^org\\.keepassxc\\.KeePassXC$"); RULE_WORKSPACES+=("7"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^transmission$"); RULE_WORKSPACES+=("7"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^(spotify|Spotify|com\\.spotify\\.Client)$"); RULE_WORKSPACES+=("8"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^ferdium$"); RULE_WORKSPACES+=("9"); RULE_TITLE_PATTERNS+=("")
-        RULE_PATTERNS+=("^com\\.rtosta\\.zapzap$"); RULE_WORKSPACES+=("9"); RULE_TITLE_PATTERNS+=("")
+        echo "hypr-osc arrange-windows: missing or empty ~/.config/hypr/workspace-rules.tsv" >&2
+        exit 1
       fi
 
       if (( VERBOSE )); then
-        if [[ -n "$rules_file" ]]; then
-          echo "hypr-osc arrange-windows: rules_file=$rules_file" >&2
-        else
-          echo "hypr-osc arrange-windows: using built-in rules" >&2
-        fi
+        echo "hypr-osc arrange-windows: rules_file=$rules_file" >&2
       fi
 
       focused="$(hyprctl activewindow -j 2>/dev/null || echo '{}')"
@@ -1130,8 +1108,8 @@ EOF
 	        hyprctl keyword general:gaps_out 10 >/dev/null
 	        hyprctl keyword decoration:rounding 10 >/dev/null
 	        hyprctl keyword general:border_size 2 >/dev/null
-	        dms ipc call bar toggle index 0 >/dev/null 2>&1 || true
-	        dms ipc call notifications toggle-dnd >/dev/null 2>&1 || true
+	        osc-shell ipc call bar toggle >/dev/null 2>&1 || true
+	        osc-shell ipc call notifications toggleDND >/dev/null 2>&1 || true
 	        printf '%s\n' "off" >"$state_file" 2>/dev/null || true
 	        notify-send -t 1000 "Zen Mode" "Off"
 	      else
@@ -1140,8 +1118,8 @@ EOF
 	        hyprctl keyword general:gaps_out 0 >/dev/null
 	        hyprctl keyword decoration:rounding 0 >/dev/null
 	        hyprctl keyword general:border_size 0 >/dev/null
-	        dms ipc call bar toggle index 0 >/dev/null 2>&1 || true
-	        dms ipc call notifications toggle-dnd >/dev/null 2>&1 || true
+	        osc-shell ipc call bar toggle >/dev/null 2>&1 || true
+	        osc-shell ipc call notifications toggleDND >/dev/null 2>&1 || true
 	        printf '%s\n' "on" >"$state_file" 2>/dev/null || true
 	        notify-send -t 1000 "Zen Mode" "On"
 	      fi
@@ -1152,34 +1130,18 @@ EOF
 	    (
 	      set -euo pipefail
 
-	      is_dms_locked() {
-	        command -v dms >/dev/null 2>&1 || return 1
-	        local out
-	        out="$(dms ipc call lock isLocked 2>/dev/null | tr -d '\r' | tail -n 1 || true)"
-	        [[ "$out" == "true" ]]
-	      }
-
-	      if is_dms_locked; then
-	        exit 0
-	      fi
-
-	      mode="dms"
 	      if [[ "${1:-}" == "--logind" ]]; then
-	        mode="logind"
 	        shift || true
 	      fi
 
-	      case "$mode" in
-	        logind)
-	          if command -v loginctl >/dev/null 2>&1; then
-	            exec loginctl lock-session
-	          fi
-	          exec dms ipc call lock lock
-	          ;;
-	        *)
-	          exec dms ipc call lock lock
-	          ;;
-	      esac
+	      if command -v loginctl >/dev/null 2>&1; then
+	        exec loginctl lock-session
+	      fi
+	      if command -v osc-shell >/dev/null 2>&1; then
+	        exec osc-shell ipc call lockScreen lock
+	      fi
+	      printf '%s\n' "No lock backend available." >&2
+	      exit 1
 	    )
 	    ;;
 
@@ -1621,7 +1583,6 @@ EOF
           xdg-desktop-portal-gnome.service
           xdg-desktop-portal-hyprland.service
           xdg-desktop-portal-gtk.service
-          dms.service
         )
         for u in "${units[@]}"; do
           state="$(systemctl --user is-active "$u" 2>/dev/null || true)"
@@ -3350,16 +3311,6 @@ main() {
 
 # Run main function
 main "$@"
-    )
-    ;;
-  switch)
-    (
-      set -euo pipefail
-      if command -v hypr-session-route >/dev/null 2>&1; then
-        exec hypr-session-route "$@"
-      fi
-      printf 'hypr-session-route is not installed.\n' >&2
-      exit 1
     )
     ;;
   toggle-float|toggle_float)

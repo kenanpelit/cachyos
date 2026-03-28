@@ -336,7 +336,7 @@ _osc_shell() {
     '--help:show usage'
     '-h:show usage'
   )
-  backends=(dms noctalia)
+  backends=(noctalia)
   compositors=(default niri hyprland)
   profile_sub=(show set use)
   ipc_sub=(show call)

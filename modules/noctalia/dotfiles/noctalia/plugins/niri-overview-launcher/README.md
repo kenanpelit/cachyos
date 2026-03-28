@@ -26,4 +26,4 @@ The plugin:
 
 ## Credits
 
-Inspired by the implementation in [DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell)
+Inspired by earlier shell overview launcher patterns

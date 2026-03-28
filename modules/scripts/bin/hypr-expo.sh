@@ -21,9 +21,5 @@ if command -v qs >/dev/null 2>&1; then
   exec qs -c noctalia-shell ipc call launcher windows
 fi
 
-if command -v dms >/dev/null 2>&1; then
-  exec dms ipc call dash toggle overview
-fi
-
 printf '%s\n' "hypr-expo: no compatible overview backend found" >&2
 exit 1

@@ -3,8 +3,8 @@ set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-TARGET_DMS_DIR="${NIRI_DMS_DIR:-${XDG_CONFIG_HOME}/niri/dms}"
-TARGET_FILE="${TARGET_DMS_DIR}/workspaces-auto.kdl"
+TARGET_RUNTIME_DIR="${NIRI_RUNTIME_DIR:-${XDG_CONFIG_HOME}/niri/runtime}"
+TARGET_FILE="${TARGET_RUNTIME_DIR}/workspaces-auto.kdl"
 CONFIG_FILE_DEFAULT="${NIRI_CONFIG_FILE:-${XDG_CONFIG_HOME}/niri/config.kdl}"
 
 BEGIN_SHORTCUTS='  // BEGIN OSC_NIRI_WORKSPACE_SHORTCUTS'
@@ -59,7 +59,7 @@ EOF
 }
 
 ensure_target_dir() {
-  mkdir -p "${TARGET_DMS_DIR}"
+  mkdir -p "${TARGET_RUNTIME_DIR}"
 }
 
 workspace_count() {
@@ -682,7 +682,7 @@ apply_managed() {
   replace_marked_block "${config_file}" "${BEGIN_RULES}" "${END_RULES}" managed_rules_content
 
   render_script="${repo_root}/modules/niri/scripts/render-profile.sh"
-  NIRI_DMS_DIR="${TARGET_DMS_DIR}" bash "${render_script}"
+  NIRI_RUNTIME_DIR="${TARGET_RUNTIME_DIR}" bash "${render_script}"
   prime_managed_live_workspaces
   reload_niri_config
   rearrange_live_windows_managed
