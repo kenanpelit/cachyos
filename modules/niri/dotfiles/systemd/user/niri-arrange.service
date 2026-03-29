@@ -1,7 +1,6 @@
 [Unit]
 Description=Niri initial workspace arrangement
-After=niri-bootstrap.service niri-audio-init.service
-Before=niri-daemons.target
+After=niri-bootstrap.service
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET

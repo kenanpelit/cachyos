@@ -1,7 +1,7 @@
 [Unit]
 Description=Niri shell backend ensure
-After=niri-bootstrap.service niri-audio-init.service niri-arrange.service dbus.service
-Before=niri-status-notifier-ready.service niri-daemons.target
+After=niri-bootstrap.service dbus.service
+Before=niri-status-notifier-ready.service
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET

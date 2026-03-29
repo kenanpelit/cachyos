@@ -172,14 +172,14 @@ import_session_environment() {
 wait_for_niri_startup_settle() {
   [[ "${OSC_SHELL_STARTUP:-0}" == "1" ]] || return 0
   [[ "$(detect_compositor)" == "niri" ]] || return 0
-  ensure_systemd_user || return 0
 
-  # Wait for Niri bootstrap/daemon stage on fresh login (best-effort).
+  # `niri-shell-ensure.service` already starts after bootstrap/session env.
+  # Only give the compositor socket a brief chance to materialize if the
+  # environment was imported slightly ahead of the runtime socket creation.
   local i
-  for i in {1..160}; do
-    if systemctl --user is-active --quiet niri-bootstrap.service ||
-      systemctl --user is-active --quiet niri-daemons.target; then
-      break
+  for i in {1..20}; do
+    if [[ -n "${WAYLAND_DISPLAY:-}" && -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+      return 0
     fi
     sleep 0.05
   done

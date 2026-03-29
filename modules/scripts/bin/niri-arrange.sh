@@ -44,11 +44,17 @@ main() {
     if [[ "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
       local focus_ws
       focus_ws="${NIRI_INIT_FOCUS_WORKSPACE:-2}"
-      niri-osc go --focus "ws:${focus_ws}"
-      log "arranged windows and focused ws:${focus_ws}"
+      if niri-osc set go --focus "ws:${focus_ws}"; then
+        log "arranged windows and focused ws:${focus_ws}"
+      else
+        warn "arrangement helper failed; continuing without blocking startup"
+      fi
     else
-      niri-osc go
-      log "arranged windows"
+      if niri-osc set go; then
+        log "arranged windows"
+      else
+        warn "arrangement helper failed; continuing without blocking startup"
+      fi
     fi
     exit 0
   fi
