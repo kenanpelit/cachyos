@@ -1,6 +1,6 @@
 [qt4] # Qt interface
 qt-opacity=1.000000
-qt-fs-opacity=0.800000
+qt-fs-opacity=0.920000
 qt-system-tray=1
 qt-notification=0
 qt-start-minimized=0
@@ -17,17 +17,18 @@ qt-filter-toolbar=1
 qt-adv-options=0
 qt-advanced-pref=0
 qt-error-dialogs=1
-qt-slider-colors=255;255;255;20;210;20;255;199;15;245;39;29
+qt-slider-colors=205;214;244;166;227;161;249;226;175;243;139;168
 qt-titlebar=1
 qt-name-in-title=1
 qt-fs-controller=1
 qt-recentplay-filter=0
 qt-menubar=1
 qt-minimal-view=0
-qt-bgcone=1
+qt-dark-palette=1
+qt-bgcone=0
 qt-bgcone-expands=0
-qt-icon-change=1
-qt-max-volume=125
+qt-icon-change=0
+qt-max-volume=150
 
 [skins2] # Skins interface
 skins2-last=/usr/share/vlc/skins2/default.vlt
@@ -37,7 +38,7 @@ skins2-config=[{"id":"main","visible":true,"x":26,"y":26,"width":580,"height":42
 intf=qt
 extraintf=
 
-# Catppuccin-inspired interface colors
+# Catppuccin-inspired dark interface
 qt-display-mode=0
 qt-privacy-ask=0
 
