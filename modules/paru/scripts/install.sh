@@ -32,30 +32,25 @@ write_paru_conf() {
   printf "%s" "$PARU_CONF_CONTENT" >"$PARU_CONF"
 }
 
-install_wrapper() {
+ensure_wrapper_source() {
   if [ ! -f "$WRAPPER_SRC" ]; then
     echo "Missing wrapper source: $WRAPPER_SRC" >&2
     return 1
   fi
-
-  install -m 755 "$WRAPPER_SRC" "$WRAPPER_DST"
 }
 
 if [ "$(id -u)" -eq 0 ]; then
   USER_GROUP="$(id -gn "$REAL_USER" 2>/dev/null || true)"
   install -d -m 755 -o "$REAL_USER" -g "${USER_GROUP:-$REAL_USER}" "$BIN_DIR"
   install -d -m 755 -o "$REAL_USER" -g "${USER_GROUP:-$REAL_USER}" "$PARU_DIR"
-  install_wrapper
+  ensure_wrapper_source
   write_paru_conf
-  chown "$REAL_USER:${USER_GROUP:-$REAL_USER}" "$WRAPPER_DST"
-  chmod 755 "$WRAPPER_DST"
   chown "$REAL_USER:${USER_GROUP:-$REAL_USER}" "$PARU_CONF"
   chmod 644 "$PARU_CONF"
 else
   install -d -m 755 "$BIN_DIR"
   install -d -m 755 "$PARU_DIR"
-  install_wrapper
+  ensure_wrapper_source
   write_paru_conf
-  chmod 755 "$WRAPPER_DST"
   chmod 644 "$PARU_CONF"
 fi
