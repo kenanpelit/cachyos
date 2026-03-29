@@ -6,6 +6,15 @@
 # ==============================================================================
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"
+[[ -r "${COMMON_HELPER}" ]] || COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common"
+if [[ -r "${COMMON_HELPER}" ]]; then
+  # shellcheck source=wayland-session-common.sh
+  source "${COMMON_HELPER}"
+  session_common_backfill_visual_env
+fi
+
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 SEMSUMO_DAILY_POWER_PROFILE="${SEMSUMO_DAILY_POWER_PROFILE:-performance}"
 

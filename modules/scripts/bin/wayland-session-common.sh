@@ -112,6 +112,72 @@ session_common_normalize_session_paths() {
   export XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS:-/etc/xdg}"
 }
 
+session_common_backfill_visual_env() {
+  local kv key value
+  local config_home env_dir session_env_file=""
+
+  if [[ -n "${XCURSOR_THEME:-}" && "${XCURSOR_THEME}" != "default" && -n "${XCURSOR_SIZE:-}" ]]; then
+    return 0
+  fi
+
+  if command -v systemctl >/dev/null 2>&1; then
+    while IFS= read -r kv; do
+      [[ "$kv" == *=* ]] || continue
+      key="${kv%%=*}"
+      value="${kv#*=}"
+      case "$key" in
+      XCURSOR_THEME | XCURSOR_SIZE | GTK_THEME | XDG_ICON_THEME | QT_ICON_THEME | QT_QPA_PLATFORMTHEME | QT_QPA_PLATFORMTHEME_QT6 | QT_STYLE_OVERRIDE)
+        [[ -n "$value" ]] && export "$key=$value"
+        ;;
+      esac
+    done < <(systemctl --user show-environment 2>/dev/null || true)
+  fi
+
+  if [[ -z "${XCURSOR_THEME:-}" || "${XCURSOR_THEME}" == "default" ]]; then
+    config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+    env_dir="${config_home}/environment.d"
+
+    case "${XDG_CURRENT_DESKTOP:-}" in
+    *[Nn]iri*)
+      session_env_file="${config_home}/session-env/niri/10-niri-env.conf"
+      ;;
+    *[Hh]ypr* | *[Hh]yprland*)
+      session_env_file="${config_home}/session-env/hyprland/10-hyprland.conf"
+      ;;
+    *)
+      if [[ -n "${NIRI_SOCKET:-}" ]]; then
+        session_env_file="${config_home}/session-env/niri/10-niri-env.conf"
+      elif [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+        session_env_file="${config_home}/session-env/hyprland/10-hyprland.conf"
+      fi
+      ;;
+    esac
+
+    while IFS= read -r kv; do
+      [[ "$kv" == *=* ]] || continue
+      key="${kv%%=*}"
+      value="${kv#*=}"
+      case "$key" in
+      XCURSOR_THEME | XCURSOR_SIZE | GTK_THEME | XDG_ICON_THEME | QT_ICON_THEME | QT_QPA_PLATFORMTHEME | QT_QPA_PLATFORMTHEME_QT6 | QT_STYLE_OVERRIDE)
+        [[ -n "$value" ]] && export "$key=$value"
+        ;;
+      esac
+    done < <(
+      session_common_parse_env_dir \
+        "${env_dir}/00-wayland.conf" \
+        "${env_dir}/10-gtk.conf" \
+        "${env_dir}/20-qt.conf" \
+        "${session_env_file}"
+    )
+  fi
+
+  if [[ -z "${XCURSOR_THEME:-}" || "${XCURSOR_THEME}" == "default" ]]; then
+    export XCURSOR_THEME="capitaine-cursors"
+  fi
+
+  export XCURSOR_SIZE="${XCURSOR_SIZE:-24}"
+}
+
 session_common_detect_wayland_display() {
   [[ -n "${WAYLAND_DISPLAY:-}" ]] && return 0
   [[ -n "${XDG_RUNTIME_DIR:-}" ]] || return 0
