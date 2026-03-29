@@ -11,6 +11,8 @@ fi
 
 user_systemd_dir="$USER_HOME/.config/systemd/user"
 user_dbus_service_dir="$USER_HOME/.local/share/dbus-1/services"
+# These two unit-file links are intentionally managed here instead of
+# `module.yaml` so dotfile sync and the install hook do not fight each other.
 timer_unit="$REPO_ROOT/modules/xdg-portal/dotfiles/systemd/user/xdg-desktop-portal-delayed.timer"
 service_unit="$REPO_ROOT/modules/xdg-portal/dotfiles/systemd/user/xdg-desktop-portal-delayed.service"
 
