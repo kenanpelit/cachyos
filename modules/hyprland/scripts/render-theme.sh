@@ -48,10 +48,8 @@ trap cleanup EXIT
 : "${CATPPUCCIN_FLAVOR:=mocha}"
 : "${CATPPUCCIN_ACCENT:=mauve}"
 : "${GTK_THEME:=catppuccin-mocha-mauve-standard+default}"
-: "${XCURSOR_THEME:=capitaine-cursors}"
-: "${XCURSOR_SIZE:=24}"
-: "${HYPRCURSOR_THEME:=${XCURSOR_THEME}}"
-: "${HYPRCURSOR_SIZE:=${XCURSOR_SIZE}}"
+: "${HYPRCURSOR_THEME:=capitaine-cursors}"
+: "${HYPRCURSOR_SIZE:=24}"
 : "${THEME_HIGHLIGHT_HEX:=00bcd4}"
 : "${THEME_BORDER_SIZE:=3}"
 : "${THEME_ROUNDING:=8}"
@@ -97,26 +95,15 @@ if [[ -z "${accent_hex}" ]]; then
   exit 1
 fi
 
-path_core='/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl'
-path_user='${HOME}/.local/share/zinit/polaris/bin:${HOME}/.local/bin:${HOME}/bin:${HOME}/.iptv/bin:${HOME}/.local/share/go/bin'
-path_combined='${HOME}/.local/share/zinit/polaris/bin:${HOME}/.local/bin:${HOME}/bin:${HOME}/.iptv/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:${HOME}/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:${HOME}/.local/share/go/bin'
-
 cat >"${tmp_env}" <<EOF
 # Generated from modules/hyprland/theme/theme.env.
 # Update the manifest and rerun modules/hyprland/scripts/render-theme.sh.
 # Source checksum: ${manifest_checksum}
 
 # Canonical Hyprland session layer.
-# Session identity lives in the UWSM wrapper + session init helpers. Keep this
-# file focused on paths, toolkit defaults, and compositor-specific session
-# hints.
+# Session identity lives in the UWSM wrapper + session init helpers. Shared
+# PATH/browser/runtime defaults live in 00-wayland.conf.
 
-PATH_CORE=${path_core}
-PATH_USER=${path_user}
-PATH=${path_combined}
-XDG_DATA_DIRS=\${HOME}/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
-
-BROWSER=start-helium-kenp
 EDITOR=nvim
 VISUAL=nvim
 TERMINAL=kitty
@@ -127,14 +114,11 @@ HYPRLAND_NO_RT=1
 HYPRLAND_NO_SD_NOTIFY=1
 HYPRLAND_NO_WATCHDOG_WARNING=1
 
-XCURSOR_THEME=${XCURSOR_THEME}
-XCURSOR_SIZE=${XCURSOR_SIZE}
 HYPRCURSOR_THEME=${HYPRCURSOR_THEME}
 HYPRCURSOR_SIZE=${HYPRCURSOR_SIZE}
 FONTCONFIG_FILE=/etc/fonts/fonts.conf
 LIBVA_DRIVER_NAME=iHD
 
-CATPPUCCIN_FLAVOR=${CATPPUCCIN_FLAVOR}
 CATPPUCCIN_ACCENT=${CATPPUCCIN_ACCENT}
 EOF
 
