@@ -6,6 +6,9 @@
 // ========================================================================
 
 cursor {
+  // Apply the system-wide cursor theme directly in the compositor, not just via env.
+  xcursor-theme "capitaine-cursors"
+  xcursor-size 24
   // Hide cursor during keyboard input for better focus.
   hide-when-typing
   // Auto-hide after 1 second of inactivity to keep workspace clean.
