@@ -13,3 +13,5 @@ dotfiles:
   target: ~/.config/autostart/blueman.desktop
 - source: dotfiles/autostart/gnome-keyring-secrets.desktop
   target: ~/.config/autostart/gnome-keyring-secrets.desktop
+- source: dotfiles/autostart/xapp-sn-watcher.desktop
+  target: ~/.config/autostart/xapp-sn-watcher.desktop

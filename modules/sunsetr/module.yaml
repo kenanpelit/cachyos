@@ -8,5 +8,7 @@ dotfiles:
   target: ~/.config/sunsetr
 - source: dotfiles/systemd/user/sunsetr.service
   target: ~/.config/systemd/user/sunsetr.service
+- source: dotfiles/systemd/user/sunsetr-scheduler.service
+  target: ~/.config/systemd/user/sunsetr-scheduler.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

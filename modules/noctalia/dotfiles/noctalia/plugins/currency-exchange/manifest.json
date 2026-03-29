@@ -24,7 +24,8 @@
       "sourceCurrency": "USD",
       "targetCurrency": "EUR",
       "widgetDisplayMode": "icon",
-      "refreshInterval": 60
+      "refreshInterval": 60,
+      "startupDelaySeconds": 25
     }
   }
 }

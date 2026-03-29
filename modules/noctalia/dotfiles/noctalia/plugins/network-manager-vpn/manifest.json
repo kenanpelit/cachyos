@@ -25,7 +25,8 @@
     "defaultSettings": {
       "displayMode": "onhover",
       "disconnectedColor": "none",
-      "connectedColor": "primary"
+      "connectedColor": "primary",
+      "pollInterval": 15000
     }
   }
 }

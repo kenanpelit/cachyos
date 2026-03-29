@@ -34,6 +34,8 @@ dotfiles:
   target: ~/.config/systemd/user/niri-daemons.target
 - source: dotfiles/systemd/user/niri-post-daemons.target
   target: ~/.config/systemd/user/niri-post-daemons.target
+- source: dotfiles/systemd/user/niri-session-ready.target
+  target: ~/.config/systemd/user/niri-session-ready.target
 - source: dotfiles/systemd/user/niri-polkit-agent.service
   target: ~/.config/systemd/user/niri-polkit-agent.service
 - source: dotfiles/systemd/user/niri-nm-applet.service
@@ -46,10 +48,16 @@ dotfiles:
   target: ~/.config/systemd/user/niri-snapper-tools-check.service
 - source: dotfiles/systemd/user/niri-bootstrap.service
   target: ~/.config/systemd/user/niri-bootstrap.service
+- source: dotfiles/systemd/user/niri-audio-init.service
+  target: ~/.config/systemd/user/niri-audio-init.service
+- source: dotfiles/systemd/user/niri-arrange.service
+  target: ~/.config/systemd/user/niri-arrange.service
 - source: dotfiles/systemd/user/niri-session-env.service
   target: ~/.config/systemd/user/niri-session-env.service
 - source: dotfiles/systemd/user/niri-shell-ensure.service
   target: ~/.config/systemd/user/niri-shell-ensure.service
+- source: dotfiles/systemd/user/niri-desktop-settings.service
+  target: ~/.config/systemd/user/niri-desktop-settings.service
 - source: dotfiles/systemd/user/niri-post-bootstrap.service
   target: ~/.config/systemd/user/niri-post-bootstrap.service
 - source: dotfiles/systemd/user/niri-sticky.service

@@ -13,6 +13,7 @@ TimeoutStartSec=25
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
 Environment=STATUS_NOTIFIER_READY_LOG_TAG=niri-status-notifier-ready
+Environment=STATUS_NOTIFIER_READY_SLEEP_SECS=0.25
 ExecStart=%h/.local/bin/status-notifier-ready
 StandardOutput=journal
 StandardError=journal

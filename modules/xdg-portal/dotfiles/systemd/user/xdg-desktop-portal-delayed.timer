@@ -1,7 +1,6 @@
 [Unit]
 Description=Delayed XDG Desktop Portal Timer (10s)
-After=graphical-session.target hyprland-session.target niri-session.target
-PartOf=graphical-session.target hyprland-session.target niri-session.target
+PartOf=graphical-session.target
 
 [Timer]
 OnActiveSec=10s
@@ -9,5 +8,4 @@ AccuracySec=1s
 Unit=xdg-desktop-portal-delayed.service
 
 [Install]
-WantedBy=hyprland-session.target
-WantedBy=niri-session.target
+WantedBy=graphical-session.target

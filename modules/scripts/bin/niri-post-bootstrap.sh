@@ -45,8 +45,6 @@ run_if_present() {
 main() {
   ensure_niri_env || true
 
-  run_if_present niri-desktop-settings
-
   if command -v notify-send >/dev/null 2>&1; then
     notify-send -t 1800 "Niri" "Session ready" >/dev/null 2>&1 || true
   fi

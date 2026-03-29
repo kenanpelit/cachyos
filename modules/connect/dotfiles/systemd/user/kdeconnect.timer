@@ -3,7 +3,7 @@ Description=Delayed KDE Connect daemon
 PartOf=graphical-session.target
 
 [Timer]
-OnActiveSec=3s
+OnActiveSec=10s
 AccuracySec=1s
 Unit=kdeconnect.service
 

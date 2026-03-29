@@ -9,6 +9,16 @@ source "$REPO_ROOT/modules/base/lib/core.sh"
 noctalia_template_dir="$MODULE_DIR/dotfiles/noctalia"
 noctalia_config_dir="$USER_HOME/.config/noctalia"
 noctalia_backup_root="$USER_HOME/.local/state/cachy/backups/noctalia"
+user_systemd_dir="$USER_HOME/.config/systemd/user"
+
+cleanup_legacy_noctalia_wants() {
+  run_as_user rm -f \
+    "$user_systemd_dir/default.target.wants/noctalia.service" \
+    "$user_systemd_dir/graphical-session.target.wants/noctalia.service" \
+    "$user_systemd_dir/hyprland-session.target.wants/noctalia.service" \
+    "$user_systemd_dir/niri-session.target.wants/noctalia.service" \
+    >/dev/null 2>&1 || true
+}
 
 sync_existing_config_into_repo() {
   local timestamp backup_dir
@@ -39,6 +49,7 @@ ensure_symlinked_config() {
 
 sync_existing_config_into_repo
 ensure_symlinked_config
+cleanup_legacy_noctalia_wants
 
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true

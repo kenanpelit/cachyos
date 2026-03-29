@@ -12,6 +12,6 @@ AUTOSTART_DIR="${USER_HOME}/.config/autostart"
 
 run_as_user mkdir -p "${AUTOSTART_DIR}"
 
-for name in nm-applet.desktop blueman.desktop gnome-keyring-secrets.desktop; do
+for name in nm-applet.desktop blueman.desktop gnome-keyring-secrets.desktop xapp-sn-watcher.desktop; do
   run_as_user ln -sfn "${MODULE_DIR}/dotfiles/autostart/${name}" "${AUTOSTART_DIR}/${name}"
 done

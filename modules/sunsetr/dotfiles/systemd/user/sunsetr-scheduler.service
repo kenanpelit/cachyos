@@ -1,0 +1,21 @@
+[Unit]
+Description=Sunsetr preset scheduler
+Requires=sunsetr.service
+After=sunsetr.service
+BindsTo=graphical-session.target
+PartOf=graphical-session.target niri-session.target hyprland-session.target sunsetr.service
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionPathExists=%h/.local/bin/sunsetr-scheduler-loop
+
+[Service]
+Type=simple
+Environment=PATH=/usr/bin:/usr/local/bin:%h/.local/bin
+Environment=HOME=%h
+ExecStart=%h/.local/bin/sunsetr-scheduler-loop
+Restart=on-failure
+RestartSec=10
+Slice=background.slice
+
+[Install]
+WantedBy=niri-session.target
+WantedBy=hyprland-session.target

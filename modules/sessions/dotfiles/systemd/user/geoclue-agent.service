@@ -9,3 +9,6 @@ Type=simple
 ExecStart=/usr/lib/geoclue-2.0/demos/agent
 Restart=on-failure
 RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

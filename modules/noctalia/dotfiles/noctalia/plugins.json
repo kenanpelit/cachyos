@@ -1,12 +1,12 @@
 {
   "sources": [
     {
-      "enabled": true,
+      "enabled": false,
       "name": "Noctalia Plugins",
       "url": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     {
-      "enabled": true,
+      "enabled": false,
       "name": "Nplugins",
       "url": "https://github.com/kenanpelit/noctalia-nplugins"
     }

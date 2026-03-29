@@ -106,13 +106,20 @@ if command -v systemctl >/dev/null 2>&1; then
     "$user_systemd_dir/default.target.wants/home-net-vpn.timer" \
     "$user_systemd_dir/default.target.wants/ppp-auto-profile.service" \
     "$user_systemd_dir/default.target.wants/ppp-auto-profile.timer" \
+    "$user_systemd_dir/graphical-session.target.wants/geoclue-agent.timer" \
     "$user_systemd_dir/graphical-session.target.wants/geoclue-agent.service" \
     "$user_systemd_dir/graphical-session.target.wants/home-net-vpn.service" \
     "$user_systemd_dir/graphical-session.target.wants/ppp-auto-profile.service" \
     || true
 
-  if ! run_as_user systemctl --user is-enabled geoclue-agent.timer >/dev/null 2>&1; then
-    run_as_user systemctl --user enable --now geoclue-agent.timer >/dev/null 2>&1 || true
+  run_as_user systemctl --user disable --now geoclue-agent.timer >/dev/null 2>&1 || true
+
+  if ! run_as_user systemctl --user is-enabled geoclue-agent.service >/dev/null 2>&1; then
+    run_as_user systemctl --user enable geoclue-agent.service >/dev/null 2>&1 || true
+  fi
+
+  if run_as_user systemctl --user is-active graphical-session.target >/dev/null 2>&1; then
+    run_as_user systemctl --user start geoclue-agent.service >/dev/null 2>&1 || true
   fi
 
   if ! run_as_user systemctl --user is-enabled home-net-vpn.timer >/dev/null 2>&1; then

@@ -1,19 +1,19 @@
 [Unit]
-Description=Niri shell backend ensure
-After=niri-bootstrap.service niri-audio-init.service niri-arrange.service dbus.service
-Before=niri-status-notifier-ready.service niri-daemons.target
+Description=Niri initial workspace arrangement
+After=niri-bootstrap.service niri-audio-init.service
+Before=niri-daemons.target
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-ConditionPathExists=%h/.local/bin/osc-shell
+ConditionPathExists=%h/.local/bin/niri-arrange
 
 [Service]
 Type=oneshot
+TimeoutStartSec=30
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
-Environment=OSC_SHELL_STARTUP=1
-ExecStart=%h/.local/bin/osc-shell ensure
+ExecStart=%h/.local/bin/niri-arrange
 StandardOutput=journal
 StandardError=journal
 

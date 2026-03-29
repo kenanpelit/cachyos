@@ -7,15 +7,13 @@ PartOf=graphical-session.target niri-session.target hyprland-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
-Type=forking
+Type=oneshot
+RemainAfterExit=yes
 Environment=PATH=/usr/bin:/usr/local/bin:%h/.local/bin
 Environment=HOME=%h
-ExecStartPre=-/usr/bin/sunsetr stop
+ExecStartPre=/usr/bin/bash -lc '/usr/bin/sunsetr status >/dev/null 2>&1 && /usr/bin/sunsetr stop >/dev/null 2>&1 || true'
 ExecStart=/usr/bin/sunsetr -b
-ExecStartPost=/usr/bin/bash -c '%h/.local/bin/sunsetr-scheduler-loop &'
-
-Restart=on-failure
-RestartSec=10
+ExecStop=/usr/bin/bash -lc '/usr/bin/sunsetr status >/dev/null 2>&1 && /usr/bin/sunsetr stop >/dev/null 2>&1 || true'
 Slice=background.slice
 
 [Install]

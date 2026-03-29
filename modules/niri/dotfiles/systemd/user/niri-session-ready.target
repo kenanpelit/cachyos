@@ -1,0 +1,9 @@
+[Unit]
+Description=Niri session ready stage
+Requires=niri-post-daemons.target niri-desktop-settings.service niri-post-bootstrap.service
+After=niri-post-daemons.target niri-desktop-settings.service niri-post-bootstrap.service
+BindsTo=graphical-session.target
+PartOf=niri-session.target graphical-session.target
+
+[Install]
+WantedBy=niri-session.target

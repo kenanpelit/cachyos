@@ -1385,6 +1385,7 @@ env | session-init)
     ensure_uwsm_runtime_environment() {
       niri_detect_wayland_display
       niri_detect_socket
+      session_common_detect_x11_display
       niri_sync_runtime_environment
     }
 
@@ -1397,6 +1398,8 @@ env | session-init)
       niri_ensure_runtime_dir
 
       if niri_session_under_uwsm; then
+        apply_session_env
+        normalize_session_paths
         export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
         export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
         if [[ -z "${XDG_CURRENT_DESKTOP:-}" || -z "${XDG_SESSION_TYPE:-}" || -z "${XDG_SESSION_DESKTOP:-}" ]]; then
@@ -1406,6 +1409,8 @@ env | session-init)
           log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
           ensure_uwsm_runtime_environment
         fi
+        sync_session_environment
+        niri_sync_runtime_environment
       else
         log_notice "UWSM not detected; using manual environment sync fallback"
         niri_clear_foreign_session_env
@@ -1506,12 +1511,6 @@ post-bootstrap)
 
     main() {
       ensure_niri_env || true
-
-      if ! "$0" desktop-settings; then
-        warn "desktop-settings failed; continuing"
-      else
-        log "desktop-settings"
-      fi
 
       if command -v notify-send >/dev/null 2>&1; then
         notify-send -t 1800 "Niri" "Session ready" >/dev/null 2>&1 || true
@@ -1754,19 +1753,7 @@ init)
       notify "focused monitor: $target"
     fi
 
-    run_if_present osc-soundctl init &
-
-    if [[ "${NIRI_INIT_SKIP_ARRANGE:-0}" != "1" ]]; then
-      # We call the subcommand directly to avoid depending on extra binaries.
-      if [[ "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
-        focus_ws="${NIRI_INIT_FOCUS_WORKSPACE:-2}"
-        "$0" go --focus "ws:${focus_ws}" &
-        notify "go: ws:${focus_ws}"
-      else
-        "$0" go &
-        notify "go"
-      fi
-    elif [[ "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
+    if [[ "${NIRI_INIT_SKIP_ARRANGE:-0}" == "1" && "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
       # Best-effort fallback: this may refer to workspace index in niri.
       focus_ws="${NIRI_INIT_FOCUS_WORKSPACE:-2}"
       niri msg action focus-workspace "$focus_ws" >/dev/null 2>&1 || true
@@ -3004,22 +2991,29 @@ doctor)
           niri-session.target \
           niri-daemons.target \
           niri-post-daemons.target \
+          niri-session-ready.target \
           graphical-session.target \
           xdg-desktop-autostart.target \
           niri-bootstrap.service \
+          niri-audio-init.service \
+          niri-arrange.service \
           niri-shell-ensure.service \
+          niri-desktop-settings.service \
           niri-post-bootstrap.service \
           niri-status-notifier-ready.service \
           niri-polkit-agent.service \
           clipse.service \
           sunsetr.service \
-          sunsetr-auto-profile.timer \
+          sunsetr-scheduler.service \
+          geoclue-agent.service \
           noctalia.service \
           kdeconnectd.service \
           kdeconnect-indicator.service \
           fusuma.service \
           cliphist.service \
           xdg-desktop-portal.service \
+          xdg-desktop-portal-delayed.timer \
+          xdg-desktop-portal-delayed.service \
           xdg-desktop-portal-gnome.service \
           xdg-desktop-portal-wlr.service \
           xdg-desktop-portal-gtk.service

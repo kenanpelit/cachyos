@@ -1,19 +1,20 @@
 [Unit]
-Description=Niri shell backend ensure
-After=niri-bootstrap.service niri-audio-init.service niri-arrange.service dbus.service
-Before=niri-status-notifier-ready.service niri-daemons.target
+Description=Niri audio initialization
+Wants=pipewire.service wireplumber.service
+After=niri-bootstrap.service pipewire.service wireplumber.service
 PartOf=niri-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=NIRI_SOCKET
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
-ConditionPathExists=%h/.local/bin/osc-shell
+ConditionPathExists=%h/.local/bin/osc-soundctl
 
 [Service]
 Type=oneshot
+TimeoutStartSec=30
 RemainAfterExit=yes
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
-Environment=OSC_SHELL_STARTUP=1
-ExecStart=%h/.local/bin/osc-shell ensure
+Environment=TERM=dumb
+ExecStart=%h/.local/bin/osc-soundctl init
 StandardOutput=journal
 StandardError=journal
 

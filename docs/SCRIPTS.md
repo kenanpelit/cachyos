@@ -304,6 +304,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-arrange`
+**Description:** Tracked initial workspace arrangement for the Niri session.
+
+**Usage:** `niri-arrange`
+
+---
+
 ### 📂 `niri-bootstrap`
 **Description:** Standardized bootstrap for Niri session.
 
@@ -844,7 +851,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `sunsetr-scheduler`
-**Description:** No description provided.
+**Description:** One-shot preset sync for sunsetr based on the current schedule
 
 **Usage:** `sunsetr-scheduler`
 

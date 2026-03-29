@@ -2,7 +2,7 @@
 Description=Niri bootstrap (init)
 Wants=pipewire.service wireplumber.service
 After=graphical-session.target wayland-wm@niri\x2dsession.service wayland-session-waitenv.service niri-session-env.service pipewire.service wireplumber.service
-Before=niri-daemons.target
+Before=niri-audio-init.service niri-arrange.service niri-shell-ensure.service niri-daemons.target
 PartOf=niri-session.target
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 ConditionPathExists=%h/.local/bin/niri-bootstrap

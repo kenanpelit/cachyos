@@ -174,7 +174,7 @@
             "iconOnlyInBar": false,
             "showLabelInBar": false,
             "tempStep": 150,
-            "watchdogInterval": 20000
+            "watchdogInterval": 60000
           },
           "id": "plugin:6ee06e:nsunsetr"
         },
@@ -256,7 +256,7 @@
           "defaultSettings": {
             "maxVisibleNetworks": 6,
             "showLabelInBar": true,
-            "watchdogInterval": 30000
+            "watchdogInterval": 60000
           },
           "id": "plugin:6ee06e:network"
         },
@@ -284,7 +284,7 @@
         },
         {
           "defaultSettings": {
-            "watchdogInterval": 15000
+            "watchdogInterval": 30000
           },
           "id": "plugin:6ee06e:npower"
         },
@@ -327,14 +327,16 @@
         {
           "defaultSettings": {
             "oscCommand": "osc-mullvad",
-            "watchdogInterval": 30000
+            "watchdogInterval": 60000
           },
           "id": "plugin:6ee06e:ndns"
         },
         {
           "defaultSettings": {
             "allowPrivilegedReads": true,
-            "watchdogInterval": 120000
+            "detailInterval": 1800000,
+            "startupDelay": 20000,
+            "watchdogInterval": 300000
           },
           "id": "plugin:6ee06e:nufw"
         },
@@ -343,7 +345,8 @@
             "errorIcon": "alert-circle",
             "iconColor": "primary",
             "loadingIcon": "loader",
-            "refreshInterval": 300,
+            "refreshInterval": 900,
+            "startupDelaySeconds": 20,
             "successIcon": "network"
           },
           "id": "plugin:6ee06e:nip"
@@ -584,7 +587,7 @@
     "use12hourFormat": false,
     "useFahrenheit": false,
     "weatherEnabled": true,
-    "weatherShowEffects": true
+    "weatherShowEffects": false
   },
   "network": {
     "airplaneModeEnabled": false,

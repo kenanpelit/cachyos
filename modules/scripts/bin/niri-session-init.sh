@@ -75,6 +75,8 @@ main() {
   niri_ensure_runtime_dir
 
   if niri_session_under_uwsm; then
+    apply_session_env
+    normalize_session_paths
     export DESKTOP_SESSION="${DESKTOP_SESSION:-niri-uwsm}"
     export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
     if [[ -z "${XDG_CURRENT_DESKTOP:-}" || -z "${XDG_SESSION_TYPE:-}" || -z "${XDG_SESSION_DESKTOP:-}" ]]; then
@@ -84,6 +86,8 @@ main() {
       log_warn "UWSM session missing runtime compositor variables; falling back to runtime sync"
       ensure_uwsm_runtime_environment
     fi
+    sync_session_environment
+    niri_sync_runtime_environment
   else
     log_notice "UWSM not detected; using manual environment sync fallback"
     niri_clear_foreign_session_env
