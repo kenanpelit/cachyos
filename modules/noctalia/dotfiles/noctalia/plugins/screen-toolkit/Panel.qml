@@ -211,6 +211,7 @@ Item {
     property string selectedRecordFormat: "gif"
     property bool recordAudioOutput: false
     property bool recordAudioInput: false
+    property bool recordCursor: false
 
     function triggerFocused() {
         var t = root.toolDefs[root.focusedTool].tool
@@ -294,12 +295,12 @@ Item {
                         verticalCenter: parent.verticalCenter
                         margins: Style.marginM
                     }
-                    spacing: 6
+                    spacing: Style.marginS
 
-                    readonly property int btnSize: Math.floor((width - 6 * 4) / 5)
+                    readonly property int btnSize: Math.floor((width - Style.marginS * 4) / 5)
 
                     Row {
-                        spacing: 6
+                        spacing: Style.marginS
                         Repeater {
                             model: root.toolDefs.slice(0, 5)
                             delegate: ToolBtn {
@@ -315,7 +316,7 @@ Item {
                     }
 
                     Row {
-                        spacing: 6
+                        spacing: Style.marginS
                         Repeater {
                             model: root.toolDefs.slice(5, 10)
                             delegate: ToolBtn {
@@ -391,11 +392,11 @@ Item {
                         model: [{ id: "gif", label: "GIF", hint: "· 30s" }, { id: "mp4", label: "MP4", hint: "" }]
                         delegate: Rectangle {
                             height: 26
-                            width: fmtLabel.implicitWidth + (modelData.hint !== "" ? fmtHint.implicitWidth + 4 : 0) + Style.marginM * 2 + 8
+                            width: fmtLabel.implicitWidth + (modelData.hint !== "" ? fmtHint.implicitWidth + Style.marginXS : 0) + Style.marginM * 2 + Style.marginS
                             radius: Style.radiusS
                             color: root.selectedRecordFormat === modelData.id ? Color.mPrimary : (fmtArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
                             Row {
-                                anchors.centerIn: parent; spacing: 4
+                                anchors.centerIn: parent; spacing: Style.marginXS
                                 NText {
                                     id: fmtLabel
                                     text: modelData.label
@@ -420,9 +421,9 @@ Item {
                     width: parent.width; spacing: Style.marginS
                     NText { text: pluginApi?.tr("panel.audio"); color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXS; height: 26; verticalAlignment: Text.AlignVCenter }
                     Rectangle {
-                        height: 26; width: audioOutIcon.implicitWidth + audioOutLabel.implicitWidth + Style.marginM * 2 + Style.marginS + 4; radius: Style.radiusS
+                        height: 26; width: audioOutIcon.implicitWidth + audioOutLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS; radius: Style.radiusS
                         color: root.recordAudioOutput ? Color.mPrimary : (audioOutArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
-                        Row { anchors.centerIn: parent; spacing: 4
+                        Row { anchors.centerIn: parent; spacing: Style.marginXS
                             NIcon { id: audioOutIcon; icon: root.recordAudioOutput ? "volume" : "volume-off"; color: root.recordAudioOutput ? Color.mOnPrimary : Color.mOnSurface; scale: 0.8 }
                             NText { id: audioOutLabel; text: pluginApi?.tr("panel.system"); color: root.recordAudioOutput ? Color.mOnPrimary : Color.mOnSurface; pointSize: Style.fontSizeXS; font.weight: root.recordAudioOutput ? Font.Bold : Font.Normal }
                         }
@@ -432,15 +433,27 @@ Item {
                             onExited: TooltipService.hide() }
                     }
                     Rectangle {
-                        height: 26; width: micIcon.implicitWidth + micLabel.implicitWidth + Style.marginM * 2 + Style.marginS + 4; radius: Style.radiusS
+                        height: 26; width: micIcon.implicitWidth + micLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS; radius: Style.radiusS
                         color: root.recordAudioInput ? Color.mPrimary : (micArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
-                        Row { anchors.centerIn: parent; spacing: 4
+                        Row { anchors.centerIn: parent; spacing: Style.marginXS
                             NIcon { id: micIcon;  icon: root.recordAudioInput ? "microphone" : "microphone-off"; color: root.recordAudioInput ? Color.mOnPrimary : Color.mOnSurface; scale: 0.8 }
                             NText { id: micLabel; text: pluginApi?.tr("panel.mic"); color: root.recordAudioInput ? Color.mOnPrimary : Color.mOnSurface; pointSize: Style.fontSizeXS; font.weight: root.recordAudioInput ? Font.Bold : Font.Normal }
                         }
                         MouseArea { id: micArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                             onClicked: root.recordAudioInput = !root.recordAudioInput
                             onEntered: TooltipService.show(micArea, pluginApi?.tr("tooltips.microphone"))
+                            onExited: TooltipService.hide() }
+                    }
+                    Rectangle {
+                        height: 26; width: cursorIcon.implicitWidth + cursorLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS; radius: Style.radiusS
+                        color: root.recordCursor ? Color.mPrimary : (cursorArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
+                        Row { anchors.centerIn: parent; spacing: Style.marginXS
+                            NIcon { id: cursorIcon; icon: "pointer"; color: root.recordCursor ? Color.mOnPrimary : Color.mOnSurface; scale: 0.8 }
+                            NText { id: cursorLabel; text: pluginApi?.tr("panel.cursor"); color: root.recordCursor ? Color.mOnPrimary : Color.mOnSurface; pointSize: Style.fontSizeXS; font.weight: root.recordCursor ? Font.Bold : Font.Normal }
+                        }
+                        MouseArea { id: cursorArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: root.recordCursor = !root.recordCursor
+                            onEntered: TooltipService.show(cursorArea, pluginApi?.tr("tooltips.cursor"))
                             onExited: TooltipService.hide() }
                     }
                 }
@@ -455,7 +468,7 @@ Item {
                         NText { text: pluginApi?.tr("panel.record"); color: recStartBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary; font.weight: Font.Bold; pointSize: Style.fontSizeS }
                     }
                     MouseArea { id: recStartBtn; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: root.mainInstance?.runRecord(root.selectedRecordFormat, root.recordAudioOutput, root.recordAudioInput) }
+                        onClicked: root.mainInstance?.runRecord(root.selectedRecordFormat, root.recordAudioOutput, root.recordAudioInput, root.recordCursor) }
                 }
             }
 

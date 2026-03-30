@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Services.Media
 import "MusicUtils.js" as MusicUtils
 
 Item {
@@ -145,6 +146,22 @@ Item {
     }
 
     function onLastNoticeChanged() {
+      if (launcher) {
+        launcher.updateResults();
+      }
+    }
+  }
+
+  Connections {
+    target: MediaService
+
+    function onTrackTitleChanged() {
+      if (launcher) {
+        launcher.updateResults();
+      }
+    }
+
+    function onPlayerIdentityChanged() {
       if (launcher) {
         launcher.updateResults();
       }
@@ -783,6 +800,43 @@ Item {
     };
   }
 
+  function buildMprisSearchItem() {
+    var trackTitle = (MediaService.trackTitle || "").trim();
+    if (trackTitle.length === 0) {
+      return null;
+    }
+
+    var providerLabel = mainInstance?.providerLabel() || pluginApi?.tr("providers.youtube");
+    var playerIdentity = (MediaService.playerIdentity || "").trim();
+    var description = playerIdentity.length > 0
+        ? pluginApi?.tr("actions.mprisTrackDescWithPlayer", {
+            "title": trackTitle,
+            "provider": providerLabel,
+            "player": playerIdentity
+          })
+        : pluginApi?.tr("actions.mprisTrackDesc", {
+            "title": trackTitle,
+            "provider": providerLabel
+          });
+
+    return {
+      "id": "mpris-search:" + trackTitle.toLowerCase(),
+      "name": pluginApi?.tr("actions.searchMprisTrack"),
+      "description": description,
+      "icon": "device-speaker",
+      "isTablerIcon": true,
+      "isImage": false,
+      "provider": root,
+      "kind": "mpris-search",
+      "_score": 25,
+      "onActivate": function () {
+        if (launcher) {
+          launcher.setSearchText(commandName + " " + trackTitle);
+        }
+      }
+    };
+  }
+
   function buildImportFolderPromptItem() {
     return {
       "id": "import-folder-prompt",
@@ -1036,6 +1090,11 @@ Item {
 
     items.push(buildSavedBrowseItem());
     items.push(buildImportFolderPromptItem());
+
+    var mprisSearchItem = buildMprisSearchItem();
+    if (mprisSearchItem) {
+      items.push(mprisSearchItem);
+    }
 
     if (mainInstance?.showHomeRecent !== false && recentEntries.length > 0) {
       items.push(buildSectionItem(pluginApi?.tr("home.recentlyPlayed"), pluginApi?.tr("home.recentlyPlayedDesc"), "history"));

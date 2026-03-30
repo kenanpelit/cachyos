@@ -17,6 +17,10 @@ Item {
   property string requestedUrl: ""
   property string previewError: ""
   property bool descriptionExpanded: false
+  property bool showChips: true
+  property bool showLengthDetails: true
+  property bool showPlaybackProgress: true
+  property bool showInlineSpeedControls: true
   property real livePosition: 0
   property bool seekDragging: false
   readonly property var detailCacheOwner: currentItem?.provider || null
@@ -256,7 +260,7 @@ Item {
       return;
     }
 
-    if (!currentItem?.isPlaying) {
+    if (!isItemPlayingNow(currentItem)) {
       livePosition = 0;
     }
   }
@@ -400,12 +404,15 @@ Item {
     }
   }
 
-  ScrollView {
+  NScrollView {
     id: contentArea
     anchors.fill: parent
     anchors.margins: Style.marginS
     clip: true
-    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+    horizontalPolicy: ScrollBar.AlwaysOff
+    verticalPolicy: ScrollBar.AsNeeded
+    reserveScrollbarSpace: false
+    gradientColor: Color.mSurfaceVariant
 
     Item {
       id: previewContent
@@ -431,7 +438,7 @@ Item {
 
       RowLayout {
         Layout.fillWidth: true
-        visible: detailCacheOwner?.mainInstance?.showPreviewChips !== false
+        visible: previewPanel.showChips && detailCacheOwner?.mainInstance?.showPreviewChips !== false
         spacing: Style.marginXS
 
         Repeater {
@@ -520,7 +527,7 @@ Item {
 
       RowLayout {
         Layout.fillWidth: true
-        visible: (showUploaderMetadata && effectiveUploader() !== "") || currentItem?.isPlaying === true
+        visible: (showUploaderMetadata && effectiveUploader() !== "") || isItemPlayingNow(currentItem)
         spacing: Style.marginXS
 
         NText {
@@ -534,7 +541,7 @@ Item {
         }
 
         RowLayout {
-          visible: currentItem?.isPlaying === true
+          visible: isItemPlayingNow(currentItem) && previewPanel.showInlineSpeedControls
           spacing: Math.max(2, Math.round(Style.marginXS * 0.5))
 
           NButton {
@@ -542,7 +549,7 @@ Item {
             backgroundColor: "transparent"
             textColor: Color.mOnSurfaceVariant
             outlined: false
-            enabled: currentItem?.isPlaying === true
+            enabled: isItemPlayingNow(currentItem)
             implicitWidth: Math.round(24 * Style.uiScaleRatio)
             implicitHeight: Math.round(24 * Style.uiScaleRatio)
             onClicked: detailCacheOwner?.mainInstance?.adjustSpeed(-0.05)
@@ -574,7 +581,7 @@ Item {
             backgroundColor: "transparent"
             textColor: Color.mOnSurfaceVariant
             outlined: false
-            enabled: currentItem?.isPlaying === true
+            enabled: isItemPlayingNow(currentItem)
             implicitWidth: Math.round(24 * Style.uiScaleRatio)
             implicitHeight: Math.round(24 * Style.uiScaleRatio)
             onClicked: detailCacheOwner?.mainInstance?.adjustSpeed(0.05)
@@ -586,7 +593,7 @@ Item {
         id: progressWrapper
         Layout.fillWidth: true
         Layout.preferredHeight: progressSlider.implicitHeight + progressTimes.implicitHeight + Style.marginXS
-        visible: currentItem?.isPlaying === true && effectiveDuration() > 0
+        visible: previewPanel.showPlaybackProgress && isItemPlayingNow(currentItem) && effectiveDuration() > 0
         property real localSeekRatio: -1
         property real lastSentSeekRatio: -1
         property real seekEpsilon: 0.01
@@ -631,7 +638,7 @@ Item {
           stepSize: 0
           snapAlways: false
           heightRatio: 0.4
-          enabled: currentItem?.isPlaying === true && effectiveDuration() > 0
+          enabled: isItemPlayingNow(currentItem) && effectiveDuration() > 0
           value: progressWrapper.progressRatio
 
           onMoved: {
@@ -692,13 +699,13 @@ Item {
         columnSpacing: Style.marginS
 
         NText {
-          visible: showDurationMetadata
+          visible: showDurationMetadata && previewPanel.showLengthDetails
           text: visible ? previewTr("preview.length") : ""
           pointSize: Style.fontSizeS
           color: Color.mOnSurfaceVariant
         }
         NText {
-          visible: showDurationMetadata
+          visible: showDurationMetadata && previewPanel.showLengthDetails
           text: MusicUtils.formatDuration(effectiveDuration()) || "-"
           pointSize: Style.fontSizeS
           color: Color.mOnSurface
@@ -799,7 +806,9 @@ Item {
 
       Item {
         Layout.fillWidth: true
-        visible: effectiveDescription() !== "" || previewError !== "" || currentItem?.lastError
+        visible: effectiveDescription() !== ""
+            || previewError !== ""
+            || String(currentItem?.lastError || "").trim().length > 0
         implicitHeight: descriptionColumn.implicitHeight
 
         ColumnLayout {
@@ -847,10 +856,10 @@ Item {
         visible: isItemStartingNow(currentItem)
         spacing: Style.marginXS
 
-        BusyIndicator {
+        NBusyIndicator {
           running: true
-          width: Style.baseWidgetSize * 0.75
-          height: width
+          size: Math.round(Style.baseWidgetSize * 0.75)
+          color: Color.mPrimary
         }
 
         NText {
@@ -866,10 +875,10 @@ Item {
         Layout.fillWidth: true
         visible: loadingDetails
 
-        BusyIndicator {
+        NBusyIndicator {
           running: true
-          width: Style.baseWidgetSize * 0.75
-          height: width
+          size: Math.round(Style.baseWidgetSize * 0.75)
+          color: Color.mPrimary
         }
 
         NText {

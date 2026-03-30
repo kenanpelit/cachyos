@@ -15,6 +15,7 @@ Item {
     property string pendingRecordFormat: "gif"
     property bool pendingRecordAudioOut: false
     property bool pendingRecordAudioIn: false
+    property bool pendingRecordCursor: false
     property string pendingTool: ""
 
     // ── Sync state to pluginSettings so Panel can read without mainInstance ──
@@ -117,6 +118,20 @@ Item {
             var path = detectTransProc.stdout.text.trim()
             if (pluginApi) {
                 pluginApi.pluginSettings.transAvailable = path !== "" && path.startsWith("/")
+                pluginApi.saveSettings()
+            }
+        }
+    }
+
+    Process {
+        id: detectRecorderProc
+        stdout: StdioCollector {}
+        onExited: {
+            var path = detectRecorderProc.stdout.text.trim()
+            if (pluginApi) {
+                pluginApi.pluginSettings.detectedRecorder =
+                    path.endsWith("wl-screenrec") ? "wl-screenrec" :
+                    path.endsWith("wf-recorder")  ? "wf-recorder"  : ""
                 pluginApi.saveSettings()
             }
         }
@@ -390,19 +405,15 @@ Item {
         id: launchColorPicker
         interval: 150; repeat: false
         onTriggered: {
-            colorPickerProc.exec({
-                command: [
-                    "bash", "-c",
-                    "COORDS=$(slurp -p 2>/dev/null) || exit 1; " +
-                    "X=$(echo \"$COORDS\" | cut -d',' -f1); " +
-                    "Y=$(echo \"$COORDS\" | cut -d',' -f2 | cut -d' ' -f1); " +
-                    "GX=$((X-5)); GY=$((Y-5)); " +
-                    "FILE=/tmp/screen-toolkit-colorpicker.png; " +
-                    "grim -g \"${GX},${GY} 11x11\" \"$FILE\" 2>/dev/null || exit 1; " +
-                    "HEX=$(magick \"$FILE\" -alpha off -format '#%[hex:p{5,5}]' info:- 2>/dev/null); " +
-                    "[ -n \"$HEX\" ] && printf '%s|%s' \"$HEX\" \"$FILE\" || exit 1"
-                ]
-            })
+            var file = "/tmp/screen-toolkit-colorpicker.png"
+            var cmd = "COORDS=$(slurp -p 2>/dev/null) || exit 1"
+                    + "; X=$(echo \"$COORDS\" | cut -d',' -f1)"
+                    + "; Y=$(echo \"$COORDS\" | cut -d',' -f2 | cut -d' ' -f1)"
+                    + "; GX=$((X-5)); GY=$((Y-5))"
+                    + "; grim -g \"${GX},${GY} 11x11\" \"" + file + "\" 2>/dev/null || exit 1"
+                    + "; HEX=$(magick \"" + file + "\" -alpha off -format '#%[hex:p{5,5}]' info:- 2>/dev/null)"
+                    + "; [ -n \"$HEX\" ] && printf '%s|%s' \"$HEX\" \"" + file + "\" || exit 1"
+            colorPickerProc.exec({ command: ["bash", "-c", cmd] })
         }
     }
 
@@ -414,13 +425,11 @@ Item {
         id: launchOcr
         interval: 50; repeat: false
         onTriggered: {
-            ocrProc.exec({
-                command: [
-                    "bash", "-c",
-                    _grimRegionCmd("/tmp/screen-toolkit-ocr.png") + "; " +
-                    "cat /tmp/screen-toolkit-ocr.png | tesseract - - -l " + root.pendingLangStr + " 2>/dev/null"
-                ]
-            })
+            var file = "/tmp/screen-toolkit-ocr.png"
+            var lang = root.pendingLangStr
+            var cmd = _grimRegionCmd(file)
+                    + "; cat " + file + " | tesseract - - -l " + lang + " 2>/dev/null"
+            ocrProc.exec({ command: ["bash", "-c", cmd] })
         }
     }
 
@@ -428,13 +437,9 @@ Item {
         id: launchQr
         interval: 50; repeat: false
         onTriggered: {
-            qrProc.exec({
-                command: [
-                    "bash", "-c",
-                    _grimRegionCmd("/tmp/screen-toolkit-qr.png") + "; " +
-                    "zbarimg -q --raw /tmp/screen-toolkit-qr.png 2>/dev/null"
-                ]
-            })
+            var file = "/tmp/screen-toolkit-qr.png"
+            var cmd = _grimRegionCmd(file) + "; zbarimg -q --raw " + file + " 2>/dev/null"
+            qrProc.exec({ command: ["bash", "-c", cmd] })
         }
     }
 
@@ -442,16 +447,13 @@ Item {
         id: launchLens
         interval: 50; repeat: false
         onTriggered: {
-            lensProc.exec({
-                command: [
-                    "bash", "-c",
-                    _grimRegionCmd("/tmp/screen-toolkit-lens.png") + " && " +
-                    "notify-send 'Screen Toolkit' 'Uploading to Lens...' 2>/dev/null; " +
-                    "URL=$(curl -sS --connect-timeout 10 --max-time 30 -F 'file=@/tmp/screen-toolkit-lens.png' 'https://0x0.st' 2>/dev/null); " +
-                    "rm -f /tmp/screen-toolkit-lens.png; " +
-                    "if [ -n \"$URL\" ]; then xdg-open \"https://lens.google.com/uploadbyurl?url=$URL\" 2>/dev/null; else exit 1; fi"
-                ]
-            })
+            var file = "/tmp/screen-toolkit-lens.png"
+            var cmd = _grimRegionCmd(file)
+                    + " && notify-send 'Screen Toolkit' 'Uploading to Lens...' 2>/dev/null"
+                    + "; URL=$(curl -sS -F 'file=@" + file + "' 'https://0x0.st' 2>/dev/null)"
+                    + "; rm -f " + file
+                    + "; if [ -n \"$URL\" ]; then xdg-open \"https://lens.google.com/uploadbyurl?url=$URL\" 2>/dev/null; else exit 1; fi"
+            lensProc.exec({ command: ["bash", "-c", cmd] })
         }
     }
 
@@ -466,12 +468,7 @@ Item {
                             Math.round(root._regionW / scale) + "x" +
                             Math.round(root._regionH / scale)
             annotateRegionProc._pendingRegion = regionStr
-            annotateProc.exec({
-                command: [
-                    "bash", "-c",
-                    _grimRegionCmd("/tmp/screen-toolkit-annotate.png")
-                ]
-            })
+            annotateProc.exec({ command: ["bash", "-c", _grimRegionCmd("/tmp/screen-toolkit-annotate.png")] })
         }
     }
 
@@ -479,23 +476,19 @@ Item {
         id: launchPin
         interval: 50; repeat: false
         onTriggered: {
-            pinGrimProc.exec({
-                command: [
-                    "bash", "-c",
-                    (function() {
-                        var scale = root._regionScreen?.devicePixelRatio ?? 1.0
-                        var sx = root._regionScreen?.x ?? 0
-                        var sy = root._regionScreen?.y ?? 0
-                        var gx = sx + Math.round(root._regionX / scale)
-                        var gy = sy + Math.round(root._regionY / scale)
-                        var gw = Math.round(root._regionW / scale)
-                        var gh = Math.round(root._regionH / scale)
-                        return "FILE=/tmp/screen-toolkit-pin-$(date +%s%3N).png; " +
-                               "grim -s 2 -g \"" + gx + "," + gy + " " + gw + "x" + gh + "\" \"$FILE\" 2>/dev/null || exit 1; " +
-                               "echo \"$FILE|" + gw + "x" + gh + "\""
-                    })()
-                ]
-            })
+            var scale = root._regionScreen?.devicePixelRatio ?? 1.0
+            var sx = root._regionScreen?.x ?? 0
+            var sy = root._regionScreen?.y ?? 0
+            var gx = sx + Math.round(root._regionX / scale)
+            var gy = sy + Math.round(root._regionY / scale)
+            var gw = Math.round(root._regionW / scale)
+            var gh = Math.round(root._regionH / scale)
+            var region = gx + "," + gy + " " + gw + "x" + gh
+            var size   = gw + "x" + gh
+            var cmd = "FILE=/tmp/screen-toolkit-pin-$(date +%s%3N).png"
+                    + "; grim -s 2 -g \"" + region + "\" \"$FILE\" 2>/dev/null || exit 1"
+                    + "; echo \"$FILE|" + size + "\""
+            pinGrimProc.exec({ command: ["bash", "-c", cmd] })
         }
     }
 
@@ -503,14 +496,11 @@ Item {
         id: launchPalette
         interval: 50; repeat: false
         onTriggered: {
-            paletteProc.exec({
-                command: [
-                    "bash", "-c",
-                    _grimRegionCmd("/tmp/screen-toolkit-palette.png") + "; " +
-                    "magick /tmp/screen-toolkit-palette.png -alpha off +dither -colors 8 -unique-colors txt:- 2>/dev/null " +
-                    "| grep -v '^#' | grep -oP '#[0-9a-fA-F]{6}' | head -8"
-                ]
-            })
+            var file = "/tmp/screen-toolkit-palette.png"
+            var args = "-alpha off +dither -colors 8 -unique-colors txt:-"
+            var cmd = _grimRegionCmd(file)
+                    + "; magick " + file + " " + args + " 2>/dev/null | grep -v '^#' | grep -oP '#[0-9a-fA-F]{6}' | head -8"
+            paletteProc.exec({ command: ["bash", "-c", cmd] })
         }
     }
 
@@ -530,7 +520,7 @@ Item {
             var localY = Math.round(root._regionY / scale)
             root.isRunning = false
             root.activeTool = "record"
-            recordOverlay.startRecording(region, root.pendingRecordFormat, root.pendingRecordAudioOut, root.pendingRecordAudioIn, localX, localY)
+            recordOverlay.startRecording(region, root.pendingRecordFormat, root.pendingRecordAudioOut, root.pendingRecordAudioIn, root.pendingRecordCursor, localX, localY)
         }
     }
 
@@ -564,9 +554,7 @@ Item {
 
     function copyToClipboard(text) {
         if (!text || text === "") return
-        clipProc.exec({
-            command: ["bash", "-c", "printf '%s' " + shellEscape(text) + " | wl-copy 2>/dev/null"]
-        })
+        clipProc.exec({ command: ["bash", "-c", "printf '%s' " + shellEscape(text) + " | wl-copy 2>/dev/null"] })
     }
 
     function shellEscape(str) {
@@ -590,9 +578,7 @@ Item {
             pluginApi.pluginSettings.translateResult = ""
             pluginApi.saveSettings()
         }
-        translateProc.exec({
-            command: ["bash", "-c", "trans -brief -to " + targetLang + " " + shellEscape(text)]
-        })
+        translateProc.exec({ command: ["bash", "-c", "trans -brief -to " + targetLang + " " + shellEscape(text)] })
     }
 
     // ── Public tool runners ───────────────────────────────────
@@ -641,11 +627,12 @@ Item {
         measureOverlay.show()
     }
 
-    function runRecord(format, audioOut, audioIn) {
+    function runRecord(format, audioOut, audioIn, cursor) {
         if (root.isRunning || recordOverlay.isRecording || recordOverlay.isConverting) return
         root.pendingRecordFormat   = format   || "gif"
         root.pendingRecordAudioOut = audioOut === true
         root.pendingRecordAudioIn  = audioIn  === true
+        root.pendingRecordCursor   = cursor   === true
         _runSlurpTool("record")
     }
 
@@ -655,12 +642,9 @@ Item {
 
     function detectCapabilities() {
         root._detectedLangs = []
-        detectLangsProc.exec({
-            command: ["bash", "-c", "tesseract --list-langs 2>/dev/null | tail -n +2"]
-        })
-        detectTransProc.exec({
-            command: ["bash", "-c", "which trans 2>/dev/null"]
-        })
+        detectLangsProc.exec({ command: ["bash", "-c", "tesseract --list-langs 2>/dev/null | tail -n +2"] })
+        detectTransProc.exec({ command: ["bash", "-c", "which trans 2>/dev/null"] })
+        detectRecorderProc.exec({ command: ["bash", "-c", "which wl-screenrec 2>/dev/null || which wf-recorder 2>/dev/null"] })
     }
 
     // ── IPC ───────────────────────────────────────────────────
@@ -676,6 +660,7 @@ Item {
         function pin()          { root.runPin() }
         function palette()      { root.runPalette() }
         function record()       { root.runRecord("gif") }
+        function recordStop()   { if (recordOverlay.isRecording) recordOverlay.stopRecording() }
         function mirror()       { root.runMirror() }
         function toggle() {
             if (!pluginApi) return

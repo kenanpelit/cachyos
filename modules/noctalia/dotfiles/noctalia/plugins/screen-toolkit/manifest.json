@@ -1,7 +1,7 @@
 {
   "id": "screen-toolkit",
   "name": "Screen Toolkit",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.5.0",
   "author": "ycf-anon",
   "license": "MIT",
@@ -30,7 +30,8 @@
         "eng"
       ],
       "transAvailable": false,
-      "selectedOcrLang": "eng"
+      "selectedOcrLang": "eng",
+      "detectedRecorder": ""
     }
   }
 }

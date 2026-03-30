@@ -20,6 +20,10 @@ DraggableDesktopWidget {
     property string distroVal: "..."
     property string kernelVal: "..."
     property string uptimeVal: "..."
+    property string lanaddressVal: "..."
+    property string ipaddressVal: "..."
+
+
 	// Changed font size to L
     // --- Data Fetching ---
     Process {
@@ -45,6 +49,20 @@ DraggableDesktopWidget {
             onTextChanged: if (text.trim() !== "") root.uptimeVal = text.trim()
         }
     }
+    Process {
+        id: lanaddressProc
+        command: ["sh", "-c",  "ip -4 addr show scope global | awk '/inet/ {print $2}' | head -n 1 | cut -d/ -f1"]
+        stdout: StdioCollector {
+            onTextChanged: if (text.trim() !== "") root.lanaddressVal = text.trim()
+        }
+    }
+    Process {
+        id: ipaddressProc
+        command: ["curl", "ifconfig.me"]
+        stdout: StdioCollector {
+            onTextChanged: if (text.trim() !== "") root.ipaddressVal = text.trim()
+        }
+    }
 
     // Refresh all data on startup and uptime every minute
     Timer { 
@@ -53,6 +71,9 @@ DraggableDesktopWidget {
             distroProc.running = true
             kernelProc.running = true
             uptimeProc.running = true
+            lanaddressProc.running = true
+            ipaddressProc.running = true
+
         }
     }
 
@@ -78,13 +99,13 @@ DraggableDesktopWidget {
                 NText { 
                     text: pluginApi?.tr("widget.distribution")
                     color: Color.mOnSurfaceVariant
-                    font.pointSize: Style.fontSizeL * widgetScale
+                    font.pointSize: Style.fontSizeM * widgetScale
                 }
                 NText { 
                     text: root.distroVal
                     color: Color.mOnSurface
                     font.bold: true
-                    font.pointSize: Style.fontSizeL * widgetScale
+                    font.pointSize: Style.fontSizeM * widgetScale
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignRight 
                 }
@@ -93,13 +114,13 @@ DraggableDesktopWidget {
                 NText { 
                     text: pluginApi?.tr("widget.kernel")
                     color: Color.mOnSurfaceVariant
-                    font.pointSize: Style.fontSizeL * widgetScale
+                    font.pointSize: Style.fontSizeM * widgetScale
                 }
                 NText { 
                     text: root.kernelVal
                     color: Color.mOnSurface
                     font.bold: true
-                    font.pointSize: Style.fontSizeL * widgetScale
+                    font.pointSize: Style.fontSizeM * widgetScale
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignRight
                     elide: Text.ElideRight
@@ -109,16 +130,47 @@ DraggableDesktopWidget {
                 NText { 
                     text: pluginApi?.tr("widget.uptime")
                     color: Color.mOnSurfaceVariant
-                    font.pointSize: Style.fontSizeL * widgetScale
+                    font.pointSize: Style.fontSizeM * widgetScale
                 }
                 NText { 
                     text: root.uptimeVal
                     color: Color.mOnSurface
                     font.bold: true
-                    font.pointSize: Style.fontSizeL * widgetScale
+                    font.pointSize: Style.fontSizeM * widgetScale
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignRight 
                 }
+
+                // Row 4: LAN Address
+                NText {
+                    text: pluginApi?.tr("widget.lanaddress")
+                    color: Color.mOnSurfaceVariant
+                    font.pointSize: Style.fontSizeM * widgetScale
+                }
+                NText {
+                    text: root.lanaddressVal
+                    color: Color.mOnSurface
+                    font.bold: true
+                    font.pointSize: Style.fontSizeM * widgetScale
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignRight
+                }
+
+                // Row 5: IP Address
+                NText {
+                    text: pluginApi?.tr("widget.ipaddress")
+                    color: Color.mOnSurfaceVariant
+                    font.pointSize: Style.fontSizeM * widgetScale
+                }
+                NText {
+                    text: root.ipaddressVal
+                    color: Color.mOnSurface
+                    font.bold: true
+                    font.pointSize: Style.fontSizeM * widgetScale
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignRight
+                }
+
             }
         }
     }

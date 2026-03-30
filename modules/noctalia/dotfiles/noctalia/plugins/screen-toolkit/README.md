@@ -46,34 +46,32 @@ Record a selected region as MP4 or GIF (GIF limited to ~15s). Optional system au
 Webcam Mirror:
 Floating webcam preview window. Can be moved, resized, and flipped horizontally.
 
-## Requirements:
-grim, slurp, wl-clipboard, tesseract, imagemagick, zbar, curl, translate-shell, wf-recorder, ffmpeg
-
+Requirements:
+grim, slurp, wl-clipboard, tesseract, imagemagick, zbar, curl, translate-shell, ffmpeg
+Screen recording: wl-screenrec (preferred) or wf-recorder (fallback)
 For GIF recording: gifski
 
 ## Install packages:
 
 Arch Linux:
-```bash
-sudo pacman -S grim slurp wl-clipboard tesseract tesseract-data-eng imagemagick zbar curl translate-shell wf-recorder ffmpeg
+sudo pacman -S grim slurp wl-clipboard tesseract tesseract-data-eng imagemagick zbar curl translate-shell ffmpeg
+sudo pacman -S wl-screenrec   # preferred recorder
+# or: sudo pacman -S wf-recorder  # fallback
 yay -S gifski
 ```
 
 Debian / Ubuntu:
-```bash
-sudo apt install grim slurp wl-clipboard tesseract-ocr tesseract-ocr-eng imagemagick zbar-tools curl translate-shell wf-recorder ffmpeg
+sudo apt install grim slurp wl-clipboard tesseract-ocr tesseract-ocr-eng imagemagick zbar-tools curl translate-shell wl-screenrec ffmpeg
 cargo install gifski
 ```
 
 Fedora:
-```bash
-sudo dnf install grim slurp wl-clipboard tesseract tesseract-langpack-eng ImageMagick zbar curl translate-shell wf-recorder ffmpeg
+sudo dnf install grim slurp wl-clipboard tesseract tesseract-langpack-eng ImageMagick zbar curl translate-shell wl-screenrec ffmpeg
 cargo install gifski
 ```
 
 openSUSE:
-```bash
-sudo zypper install grim slurp wl-clipboard tesseract-ocr tesseract-ocr-traineddata-english ImageMagick zbar curl translate-shell wf-recorder ffmpeg
+sudo zypper install grim slurp wl-clipboard tesseract-ocr tesseract-ocr-traineddata-english ImageMagick zbar curl translate-shell wl-screenrec ffmpeg
 cargo install gifski
 ```
 
@@ -83,7 +81,7 @@ Add to your configuration.nix or home.nix:
 ```bash
 environment.systemPackages = with pkgs; [
   grim slurp wl-clipboard tesseract imagemagick zbar curl
-  translate-shell wf-recorder ffmpeg gifski
+  translate-shell wl-screenrec ffmpeg gifski
 ];
 ```
 
@@ -107,8 +105,9 @@ annotate      → Open annotation tool
 measure       → Start measuring overlay  
 pin           → Pin a region to screen  
 palette       → Extract colors  
-record        → Start screen recording  
-mirror        → Toggle webcam mirror  
+record        → Start screen recording
+recordStop    → Stop an active recording (useful when if mouse click is blocked during capture)
+mirror        → Toggle webcam mirror
 
 ## Example:
 ```bash
