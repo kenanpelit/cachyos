@@ -11,31 +11,6 @@
       "icon": "activity"
     },
     {
-      "name": "Discord",
-      "command": "start-discord",
-      "icon": "message-circle"
-    },
-    {
-      "name": "Ferdium",
-      "command": "start-ferdium",
-      "icon": "message-circle"
-    },
-    {
-      "name": "Firefox Compecta",
-      "command": "start-firefox-compecta",
-      "icon": "globe"
-    },
-    {
-      "name": "Firefox Kenp",
-      "command": "start-firefox-kenp",
-      "icon": "globe"
-    },
-    {
-      "name": "Firefox Proxy",
-      "command": "start-firefox-proxy",
-      "icon": "globe"
-    },
-    {
       "name": "Helium AI",
       "command": "start-helium-ai",
       "icon": "globe"
@@ -129,6 +104,31 @@
       "name": "RMPC",
       "command": "start-rmpc",
       "icon": "music"
+    },
+    {
+      "name": "Discord",
+      "command": "start-discord",
+      "icon": "message-circle"
+    },
+    {
+      "name": "Ferdium",
+      "command": "start-ferdium",
+      "icon": "message-circle"
+    },
+    {
+      "name": "Firefox Compecta",
+      "command": "start-firefox-compecta",
+      "icon": "globe"
+    },
+    {
+      "name": "Firefox Kenp",
+      "command": "start-firefox-kenp",
+      "icon": "globe"
+    },
+    {
+      "name": "Firefox Proxy",
+      "command": "start-firefox-proxy",
+      "icon": "globe"
     },
     {
       "name": "Brave AI",
