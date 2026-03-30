@@ -35,9 +35,9 @@ ALLOW_CUSTOM_SERVICE_PORT="${ALLOW_CUSTOM_SERVICE_PORT:-0}"
 CUSTOM_SERVICE_PORT="${CUSTOM_SERVICE_PORT:-1401}"
 TRANSMISSION_WEB_PORT="${TRANSMISSION_WEB_PORT:-9091}"
 TRANSMISSION_PEER_PORT="${TRANSMISSION_PEER_PORT:-51413}"
-ALLOW_KDECONNECT_PORTS="${ALLOW_KDECONNECT_PORTS:-0}"
-KDECONNECT_PORT_RANGE="${KDECONNECT_PORT_RANGE:-1714:1764}"
-KDECONNECT_ALLOWED_SUBNETS="${KDECONNECT_ALLOWED_SUBNETS:-}"
+ALLOW_VALENT_PORTS="${ALLOW_VALENT_PORTS:-${ALLOW_KDECONNECT_PORTS:-0}}"
+VALENT_PORT_RANGE="${VALENT_PORT_RANGE:-${KDECONNECT_PORT_RANGE:-1714:1764}}"
+VALENT_ALLOWED_SUBNETS="${VALENT_ALLOWED_SUBNETS:-${KDECONNECT_ALLOWED_SUBNETS:-}}"
 ALLOW_MDNS_PORT="${ALLOW_MDNS_PORT:-0}"
 MDNS_PORT="${MDNS_PORT:-5353}"
 
@@ -48,7 +48,7 @@ if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw allow "${SSH_PORT}/tcp"
 
   if [ "${ALLOW_MDNS_PORT}" = "1" ]; then
-    # Allow mDNS for local discovery (Avahi/KDE Connect)
+    # Allow mDNS for local discovery (Avahi/Valent)
     ${SUDO} ufw allow "${MDNS_PORT}/udp"
   fi
 
@@ -61,18 +61,18 @@ if command -v ufw >/dev/null 2>&1; then
     ${SUDO} ufw allow "${CUSTOM_SERVICE_PORT}/tcp"
   fi
 
-  if [ "${ALLOW_KDECONNECT_PORTS}" = "1" ]; then
-    if [ -n "${KDECONNECT_ALLOWED_SUBNETS// /}" ]; then
+  if [ "${ALLOW_VALENT_PORTS}" = "1" ]; then
+    if [ -n "${VALENT_ALLOWED_SUBNETS// /}" ]; then
       # Accept comma and/or whitespace separated subnet list.
-      IFS=', ' read -r -a kde_subnets <<< "${KDECONNECT_ALLOWED_SUBNETS}"
-      for subnet in "${kde_subnets[@]}"; do
+      IFS=', ' read -r -a valent_subnets <<< "${VALENT_ALLOWED_SUBNETS}"
+      for subnet in "${valent_subnets[@]}"; do
         [ -n "${subnet}" ] || continue
-        ${SUDO} ufw allow from "${subnet}" to any port "${KDECONNECT_PORT_RANGE}" proto udp
-        ${SUDO} ufw allow from "${subnet}" to any port "${KDECONNECT_PORT_RANGE}" proto tcp
+        ${SUDO} ufw allow from "${subnet}" to any port "${VALENT_PORT_RANGE}" proto udp
+        ${SUDO} ufw allow from "${subnet}" to any port "${VALENT_PORT_RANGE}" proto tcp
       done
     else
-      ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/udp"
-      ${SUDO} ufw allow "${KDECONNECT_PORT_RANGE}/tcp"
+      ${SUDO} ufw allow "${VALENT_PORT_RANGE}/udp"
+      ${SUDO} ufw allow "${VALENT_PORT_RANGE}/tcp"
     fi
   fi
 

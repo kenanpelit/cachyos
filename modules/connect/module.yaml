@@ -1,17 +1,15 @@
 tags:
 - network
 - tool
-description: KDE Connect configuration portable config
+description: Valent mobile integration portable config
 depends_on:
 - base
 dotfiles:
-- source: dotfiles/systemd/user/kdeconnect.service
-  target: ~/.config/systemd/user/kdeconnect.service
-- source: dotfiles/systemd/user/kdeconnect.timer
-  target: ~/.config/systemd/user/kdeconnect.timer
-- source: dotfiles/systemd/user/kdeconnect-indicator.service
-  target: ~/.config/systemd/user/kdeconnect-indicator.service
-- source: dotfiles/bin/kdeconnectd-wrapper
-  target: ~/.local/bin/kdeconnectd-wrapper
+- source: dotfiles/systemd/user/valent.service
+  target: ~/.config/systemd/user/valent.service
+- source: dotfiles/systemd/user/valent.timer
+  target: ~/.config/systemd/user/valent.timer
+- source: dotfiles/autostart/ca.andyholmes.Valent-autostart.desktop
+  target: ~/.config/autostart/ca.andyholmes.Valent-autostart.desktop
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

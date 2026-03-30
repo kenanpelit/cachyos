@@ -71,10 +71,10 @@ skip_automanaged_unit() {
   local unit="$2"
 
   case "${module}:${unit}" in
-    connect:kdeconnect.service|connect:kdeconnect.timer|connect:kdeconnect-indicator.service)
-      # KDE Connect has compositor/session-aware enablement handled by the
-      # connect module's own install hook. Enabling it blindly here can pull
-      # graphical-session.target too early and break UWSM compositor startup.
+    connect:kdeconnect.service|connect:kdeconnect.timer|connect:kdeconnect-indicator.service|connect:valent.service|connect:valent.timer)
+      # Mobile-device integration units have compositor/session-aware enablement
+      # handled by the connect module's own install hook. Enabling them blindly
+      # here can pull graphical-session.target too early and break UWSM startup.
       return 0
       ;;
     cliphist:cliphist.service)

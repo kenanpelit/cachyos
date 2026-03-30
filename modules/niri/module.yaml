@@ -18,8 +18,6 @@ dotfiles:
   target: ~/.config/niri/config.kdl
 - source: dotfiles/niri/outputs.kdl
   target: ~/.config/niri/outputs.kdl
-- source: dotfiles/autostart/org.kde.kdeconnect.daemon.desktop
-  target: ~/.config/autostart/org.kde.kdeconnect.daemon.desktop
 - source: dotfiles/autostart/snapper-tools-check.desktop
   target: ~/.config/autostart/snapper-tools-check.desktop
 - source: dotfiles/environment.d/10-niri-env.conf

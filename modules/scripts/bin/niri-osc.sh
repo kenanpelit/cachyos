@@ -3007,8 +3007,7 @@ doctor)
           sunsetr-scheduler.service \
           geoclue-agent.service \
           noctalia.service \
-          kdeconnectd.service \
-          kdeconnect-indicator.service \
+          valent.service \
           fusuma.service \
           cliphist.service \
           xdg-desktop-portal.service \

@@ -1,16 +1,16 @@
 [Unit]
-Description=KDE Connect daemon
-After=network.target graphical-session.target
+Description=Valent background service
+After=network.target graphical-session.target dbus.service
 PartOf=graphical-session.target
 Requisite=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
 Type=dbus
-BusName=org.kde.kdeconnect.daemon
-Environment=QT_QPA_PLATFORM=wayland;xcb
+BusName=ca.andyholmes.Valent
+Environment=GDK_BACKEND=wayland,x11
 Environment=XDG_RUNTIME_DIR=%t
-ExecStart=%h/.local/bin/kdeconnectd-wrapper
+ExecStart=/usr/bin/valent --gapplication-service
 Restart=on-failure
 RestartSec=5
 

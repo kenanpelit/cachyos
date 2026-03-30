@@ -1,11 +1,11 @@
 [Unit]
-Description=Delayed KDE Connect daemon
+Description=Delayed Valent background service
 PartOf=graphical-session.target
 
 [Timer]
 OnActiveSec=10s
 AccuracySec=1s
-Unit=kdeconnect.service
+Unit=valent.service
 
 [Install]
 WantedBy=graphical-session.target
