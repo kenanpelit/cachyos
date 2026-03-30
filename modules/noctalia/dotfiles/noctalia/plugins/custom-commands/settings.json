@@ -11,81 +11,6 @@
       "icon": "activity"
     },
     {
-      "name": "Brave AI",
-      "command": "start-brave-ai",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave Compecta",
-      "command": "start-brave-compecta",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave Discord",
-      "command": "start-brave-discord",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave Exclude",
-      "command": "start-brave-exclude",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave Kenp",
-      "command": "start-brave-kenp",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave Nil",
-      "command": "start-brave-nil",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave Spotify",
-      "command": "start-brave-spotify",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave TikTok",
-      "command": "start-brave-tiktok",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave Whats",
-      "command": "start-brave-whats",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave WhatsApp",
-      "command": "start-brave-whatsapp",
-      "icon": "globe"
-    },
-    {
-      "name": "Brave YouTube",
-      "command": "start-brave-youtube",
-      "icon": "globe"
-    },
-    {
-      "name": "Chrome AI",
-      "command": "start-chrome-ai",
-      "icon": "globe"
-    },
-    {
-      "name": "Chrome Compecta",
-      "command": "start-chrome-compecta",
-      "icon": "globe"
-    },
-    {
-      "name": "Chrome Kenp",
-      "command": "start-chrome-kenp",
-      "icon": "globe"
-    },
-    {
-      "name": "Chrome Whats",
-      "command": "start-chrome-whats",
-      "icon": "globe"
-    },
-    {
       "name": "Discord",
       "command": "start-discord",
       "icon": "message-circle"
@@ -205,6 +130,82 @@
       "command": "start-rmpc",
       "icon": "music"
     },
+    {
+      "name": "Brave AI",
+      "command": "start-brave-ai",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave Compecta",
+      "command": "start-brave-compecta",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave Discord",
+      "command": "start-brave-discord",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave Exclude",
+      "command": "start-brave-exclude",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave Kenp",
+      "command": "start-brave-kenp",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave Nil",
+      "command": "start-brave-nil",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave Spotify",
+      "command": "start-brave-spotify",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave TikTok",
+      "command": "start-brave-tiktok",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave Whats",
+      "command": "start-brave-whats",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave WhatsApp",
+      "command": "start-brave-whatsapp",
+      "icon": "globe"
+    },
+    {
+      "name": "Brave YouTube",
+      "command": "start-brave-youtube",
+      "icon": "globe"
+    },
+    {
+      "name": "Chrome AI",
+      "command": "start-chrome-ai",
+      "icon": "globe"
+    },
+    {
+      "name": "Chrome Compecta",
+      "command": "start-chrome-compecta",
+      "icon": "globe"
+    },
+    {
+      "name": "Chrome Kenp",
+      "command": "start-chrome-kenp",
+      "icon": "globe"
+    },
+    {
+      "name": "Chrome Whats",
+      "command": "start-chrome-whats",
+      "icon": "globe"
+    },
+
     {
       "name": "ZapZap",
       "command": "start-zapzap",
