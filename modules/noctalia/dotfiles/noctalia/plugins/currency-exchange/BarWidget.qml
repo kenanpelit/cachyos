@@ -59,6 +59,8 @@ Item {
   readonly property real rate: main ? main.getRate(fromCurrency, toCurrency) : 0
   property ShellScreen screen
   property string section: ""
+  property int sectionWidgetIndex: -1
+  property int sectionWidgetsCount: 0
   readonly property string toCurrency: cfg.targetCurrency || defaults.targetCurrency || "EUR"
   readonly property string tooltipText: {
     if (loading)

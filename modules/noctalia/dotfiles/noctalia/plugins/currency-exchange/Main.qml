@@ -19,8 +19,6 @@ Item {
   property var pluginApi: null
   property int refreshInterval: parseInt(cfg.refreshInterval ?? defaults.refreshInterval ?? 5)
   property int retryDelaySeconds: 10
-  property int startupDelaySeconds: parseInt(cfg.startupDelaySeconds ?? defaults.startupDelaySeconds ?? 25)
-  property real startupReadyAt: 0
 
   // Signal emitted when rates are updated
   signal ratesUpdated
@@ -48,8 +46,6 @@ Item {
     var retryMs = retryDelaySeconds * 1000;
 
     if (loading)
-      return;
-    if (!forceRetry && !loaded && startupReadyAt > 0 && now < startupReadyAt)
       return;
     Logger.i("CurrencyEx", "Loading rates");
     if (loaded && (now - lastFetch) < cacheMs)
@@ -91,20 +87,7 @@ Item {
 
   // Initialize rates on component load
   Component.onCompleted: {
-    startupReadyAt = Date.now() + Math.max(0, startupDelaySeconds) * 1000;
-    if (startupDelaySeconds > 0) {
-      startupTimer.start();
-    } else {
-      fetchRates();
-    }
-  }
-
-  Timer {
-    id: startupTimer
-    interval: Math.max(0, startupDelaySeconds) * 1000
-    repeat: false
-    running: false
-    onTriggered: fetchRates()
+    fetchRates();
   }
 
   Process {

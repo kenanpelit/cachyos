@@ -7,6 +7,10 @@ import qs.Services.UI
 NIconButton {
     id: root
     property ShellScreen screen
+    property string widgetId: ""
+    property string section: ""
+    property int sectionWidgetIndex: -1
+    property int sectionWidgetsCount: 0
     property var pluginApi: null
     icon: "crosshair"
     tooltipText: pluginApi?.tr("widget.tooltip")

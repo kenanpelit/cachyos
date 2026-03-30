@@ -7,14 +7,6 @@ QtObject {
     id: root
 
     property var pluginApi: null
-    readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-    readonly property int pollInterval: {
-        var fallback = parseInt(defaults.pollInterval ?? 15000, 10);
-        if (isNaN(fallback) || fallback < 5000)
-            fallback = 15000;
-        var candidate = pluginApi && pluginApi.pluginSettings ? parseInt(pluginApi.pluginSettings.pollInterval, 10) : NaN;
-        return (isNaN(candidate) || candidate < 5000) ? fallback : candidate;
-    }
 
     property var vpnList: []
     property real connectedCount: 0
@@ -23,7 +15,7 @@ QtObject {
 
     // Needed only to detect disconnection not initiated by the user
     property var _pollTimer: Timer {
-        interval: root.pollInterval
+        interval: 5000
         running: true
         repeat: true
         onTriggered: root.refresh()

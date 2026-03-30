@@ -1,5 +1,6 @@
 description: System packages for hay (auto-synced by dcli merge)
 conflicts: []
+pre_install_hook: null
 post_install_hook: null
 hook_behavior: ask
 pre_hook_behavior: null

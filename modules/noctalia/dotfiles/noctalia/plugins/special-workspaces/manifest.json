@@ -1,13 +1,17 @@
 {
   "id": "special-workspaces",
   "name": "Special Workspaces (Hyprland)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.4.0",
   "author": "Qholin",
   "license": "MIT",
   "repository": "https://github.com/qholin/noctalia-special-workspaces/",
   "description": "Configurable Hyprland special workspaces indicator for the bar.",
-  "tags": ["Bar", "Productivity", "Hyprland"],
+  "tags": [
+    "Bar",
+    "Productivity",
+    "Hyprland"
+  ],
   "entryPoints": {
     "barWidget": "BarWidget.qml",
     "settings": "Settings.qml"
@@ -29,7 +33,12 @@
       "secondarySize": 0.9,
       "borderRadius": 1.0,
       "focusBorderColor": "primary",
-      "workspaces": [{ "name": "communication", "icon": "message" }]
+      "workspaces": [
+        {
+          "name": "communication",
+          "icon": "message"
+        }
+      ]
     }
   }
 }
