@@ -187,11 +187,6 @@
                 },
                 {
                     "defaultSettings": {
-                    },
-                    "id": "plugin:kde-connect"
-                },
-                {
-                    "defaultSettings": {
                         "mainDeviceId": ""
                     },
                     "id": "plugin:valent-connect"
