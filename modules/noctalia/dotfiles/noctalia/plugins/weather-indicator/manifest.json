@@ -1,12 +1,12 @@
 {
   "id": "weather-indicator",
   "name": "Weather Indicator",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "minNoctaliaVersion": "4.6.8",
   "author": "Sovereign",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
-  "description": "Shows the current weather condition and tempurature.",
+  "description": "Shows the current weather condition and temperature.",
   "tags": [
     "Bar"
   ],

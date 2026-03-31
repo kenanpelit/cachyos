@@ -79,7 +79,7 @@ ColumnLayout {
       },
       {
         "key": "highlow",
-        "name": pluginApi?.tr("settings.mode.highlow") || "High/Low tempuratures"
+        "name": pluginApi?.tr("settings.mode.highlow")
       },
       {
         "key": "sunrise",
