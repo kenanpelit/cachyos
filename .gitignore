@@ -6,6 +6,7 @@ modules/tmux/dotfiles/tmux/fzf
 modules/mpv/dotfiles/mpv/mpvHistory.log
 .DS_Store
 *.swp
+*.codex
 *.bak
 *.backup.*
 *.backup
