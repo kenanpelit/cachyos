@@ -209,8 +209,8 @@ recent-windows {
   binds {
     Mod+Tab { next-window scope="output"; }
     Mod+Shift+Tab { previous-window scope="output"; }
-    Mod+grave { next-window filter="app-id" scope="workspace"; }
-    Mod+Shift+grave { previous-window filter="app-id" scope="workspace"; }
+    Mod+Ctrl+Tab { next-window filter="app-id" scope="workspace"; }
+    Mod+Ctrl+Shift+Tab { previous-window filter="app-id" scope="workspace"; }
   }
 }
 
@@ -626,7 +626,7 @@ binds {
   Mod+1 hotkey-overlay-title="Workspace 1: Kenp" { focus-workspace "1"; }
   Mod+2 hotkey-overlay-title="Workspace 2: Term" { focus-workspace "2"; }
   Mod+3 hotkey-overlay-title="Workspace 3: AI" { focus-workspace "3"; }
-  Mod+4 hotkey-overlay-title="Workspace 4: CompecTA" { focus-workspace "4"; }
+  Mod+4 hotkey-overlay-title="Workspace 4: Work" { focus-workspace "4"; }
   Mod+5 hotkey-overlay-title="Workspace 5: Chat" { focus-workspace "5"; }
   Mod+6 hotkey-overlay-title="Workspace 6: Media" { focus-workspace "6"; }
   Mod+7 hotkey-overlay-title="Workspace 7: Utility" { focus-workspace "7"; }
@@ -637,7 +637,7 @@ binds {
   Mod+Shift+1 hotkey-overlay-title="Move To WS 1: Kenp" { move-column-to-workspace "1"; }
   Mod+Shift+2 hotkey-overlay-title="Move To WS 2: Term" { move-column-to-workspace "2"; }
   Mod+Shift+3 hotkey-overlay-title="Move To WS 3: AI" { move-column-to-workspace "3"; }
-  Mod+Shift+4 hotkey-overlay-title="Move To WS 4: CompecTA" { move-column-to-workspace "4"; }
+  Mod+Shift+4 hotkey-overlay-title="Move To WS 4: Work" { move-column-to-workspace "4"; }
   Mod+Shift+5 hotkey-overlay-title="Move To WS 5: Chat" { move-column-to-workspace "5"; }
   Mod+Shift+6 hotkey-overlay-title="Move To WS 6: Media" { move-column-to-workspace "6"; }
   Mod+Shift+7 hotkey-overlay-title="Move To WS 7: Utility" { move-column-to-workspace "7"; }

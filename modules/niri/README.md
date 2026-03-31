@@ -158,7 +158,7 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   the external `DP-3` monitor defaults to narrower working columns while the
   built-in `eDP-1` panel keeps a roomier primary column width.
 - Native Niri recent windows switching is now available on `Mod+Tab` /
-  `Mod+Shift+Tab` (output scope) and `Mod+grave` / `Mod+Shift+grave`
+  `Mod+Shift+Tab` (output scope) and `Mod+Ctrl+Tab` / `Mod+Ctrl+Shift+Tab`
   (workspace app-id scope), while the shell-owned `Alt+Tab` flow stays intact.
 - The supported entry path is now the UWSM wrapper installed by the `sessions`
   module. Legacy `niri-optimized-session` and the old `niri.service`
