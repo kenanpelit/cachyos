@@ -55,6 +55,7 @@ packages:
 - globalprotect-openconnect
 - gnome-settings-daemon
 - gnome-themes-extra
+- gp-saml-gui-git
 - grub-btrfs-support
 - grub-hook
 - gst-libav
@@ -76,13 +77,18 @@ packages:
 - haveged
 - hdparm
 - hwdetect
+- hyprland-protocols
+- hyprlang
 - hyprsunset
+- hyprutils
+- hyprwayland-scanner
 - inetutils
 - intel-media-driver
 - name: io.ente.auth
   type: flatpak
 - iwd
 - jfsutils
+- kdeconnect
 - kittyfetch
 - kora-icon-theme
 - kvantum-theme-nordic-git
