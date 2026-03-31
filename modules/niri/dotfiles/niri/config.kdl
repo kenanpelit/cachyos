@@ -190,10 +190,27 @@ layout {
 }
 
 recent-windows {
-  // Highlights used in the recent windows list (Alt+Tab).
+  // Keep the native switcher available on Mod+Tab without replacing shell Alt+Tab.
+  debounce-ms 450
+  open-delay-ms 100
+
   highlight {
     active-color "#cba6f7"
     urgent-color "#f38ba8"
+    padding 18
+    corner-radius 14
+  }
+
+  previews {
+    max-height 560
+    max-scale 0.60
+  }
+
+  binds {
+    Mod+Tab { next-window scope="output"; }
+    Mod+Shift+Tab { previous-window scope="output"; }
+    Mod+grave { next-window filter="app-id" scope="workspace"; }
+    Mod+Shift+grave { previous-window filter="app-id" scope="workspace"; }
   }
 }
 
@@ -606,26 +623,26 @@ binds {
   // ----------------------------------------------------------------------
   // Workspace Navigation (1..9)
   // ----------------------------------------------------------------------
-  Mod+1 hotkey-overlay-title="Workspace 1" { focus-workspace "1"; }
-  Mod+2 hotkey-overlay-title="Workspace 2" { focus-workspace "2"; }
-  Mod+3 hotkey-overlay-title="Workspace 3" { focus-workspace "3"; }
-  Mod+4 hotkey-overlay-title="Workspace 4" { focus-workspace "4"; }
-  Mod+5 hotkey-overlay-title="Workspace 5" { focus-workspace "5"; }
-  Mod+6 hotkey-overlay-title="Workspace 6" { focus-workspace "6"; }
-  Mod+7 hotkey-overlay-title="Workspace 7" { focus-workspace "7"; }
-  Mod+8 hotkey-overlay-title="Workspace 8" { focus-workspace "8"; }
-  Mod+9 hotkey-overlay-title="Workspace 9" { focus-workspace "9"; }
+  Mod+1 hotkey-overlay-title="Workspace 1: Kenp" { focus-workspace "1"; }
+  Mod+2 hotkey-overlay-title="Workspace 2: Term" { focus-workspace "2"; }
+  Mod+3 hotkey-overlay-title="Workspace 3: AI" { focus-workspace "3"; }
+  Mod+4 hotkey-overlay-title="Workspace 4: CompecTA" { focus-workspace "4"; }
+  Mod+5 hotkey-overlay-title="Workspace 5: Chat" { focus-workspace "5"; }
+  Mod+6 hotkey-overlay-title="Workspace 6: Media" { focus-workspace "6"; }
+  Mod+7 hotkey-overlay-title="Workspace 7: Utility" { focus-workspace "7"; }
+  Mod+8 hotkey-overlay-title="Workspace 8: Music" { focus-workspace "8"; }
+  Mod+9 hotkey-overlay-title="Workspace 9: Social" { focus-workspace "9"; }
 
   // Move current column to workspace (1..9).
-  Mod+Shift+1 hotkey-overlay-title="Move To WS 1" { move-column-to-workspace "1"; }
-  Mod+Shift+2 hotkey-overlay-title="Move To WS 2" { move-column-to-workspace "2"; }
-  Mod+Shift+3 hotkey-overlay-title="Move To WS 3" { move-column-to-workspace "3"; }
-  Mod+Shift+4 hotkey-overlay-title="Move To WS 4" { move-column-to-workspace "4"; }
-  Mod+Shift+5 hotkey-overlay-title="Move To WS 5" { move-column-to-workspace "5"; }
-  Mod+Shift+6 hotkey-overlay-title="Move To WS 6" { move-column-to-workspace "6"; }
-  Mod+Shift+7 hotkey-overlay-title="Move To WS 7" { move-column-to-workspace "7"; }
-  Mod+Shift+8 hotkey-overlay-title="Move To WS 8" { move-column-to-workspace "8"; }
-  Mod+Shift+9 hotkey-overlay-title="Move To WS 9" { move-column-to-workspace "9"; }
+  Mod+Shift+1 hotkey-overlay-title="Move To WS 1: Kenp" { move-column-to-workspace "1"; }
+  Mod+Shift+2 hotkey-overlay-title="Move To WS 2: Term" { move-column-to-workspace "2"; }
+  Mod+Shift+3 hotkey-overlay-title="Move To WS 3: AI" { move-column-to-workspace "3"; }
+  Mod+Shift+4 hotkey-overlay-title="Move To WS 4: CompecTA" { move-column-to-workspace "4"; }
+  Mod+Shift+5 hotkey-overlay-title="Move To WS 5: Chat" { move-column-to-workspace "5"; }
+  Mod+Shift+6 hotkey-overlay-title="Move To WS 6: Media" { move-column-to-workspace "6"; }
+  Mod+Shift+7 hotkey-overlay-title="Move To WS 7: Utility" { move-column-to-workspace "7"; }
+  Mod+Shift+8 hotkey-overlay-title="Move To WS 8: Music" { move-column-to-workspace "8"; }
+  Mod+Shift+9 hotkey-overlay-title="Move To WS 9: Social" { move-column-to-workspace "9"; }
 
   // ----------------------------------------------------------------------
   // "Here" Actions (Workspace shortcuts for specific apps)
@@ -976,6 +993,11 @@ gestures {
     trigger-width 30
     delay-ms 100
     max-speed 1500
+  }
+  dnd-edge-workspace-switch {
+    trigger-height 42
+    delay-ms 125
+    max-speed 1300
   }
   hot-corners {
     off

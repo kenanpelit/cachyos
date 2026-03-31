@@ -6,6 +6,20 @@ output "DP-3" {
   scale 1
   position x=0 y=0
   focus-at-startup
+  backdrop-color "#1e1e2e"
+
+  layout {
+    // External 1440p display can fit narrower columns without feeling cramped.
+    default-column-width { proportion 0.618; }
+
+    preset-column-widths {
+      proportion 0.382
+      proportion 0.500
+      proportion 0.618
+      proportion 0.750
+      proportion 1.000
+    }
+  }
 }
 
 output "eDP-1" {
@@ -13,4 +27,18 @@ output "eDP-1" {
   scale 1
   position x=320 y=1440
   variable-refresh-rate on-demand=true
+  backdrop-color "#181825"
+
+  layout {
+    // On the laptop panel, prioritize a roomier primary column.
+    default-column-width { proportion 0.900; }
+
+    preset-column-widths {
+      proportion 0.500
+      proportion 0.618
+      proportion 0.786
+      proportion 0.900
+      proportion 1.000
+    }
+  }
 }

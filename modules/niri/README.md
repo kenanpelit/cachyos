@@ -154,6 +154,12 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   output-name map, so the module keeps its own profile selector without
   depending on Hyprland-owned monitor profile assets. The selector lives in
   `modules/niri/profiles/profile.env` via `NIRI_MONITOR_PROFILE`.
+- The static output config now also uses per-output `layout {}` overrides so
+  the external `DP-3` monitor defaults to narrower working columns while the
+  built-in `eDP-1` panel keeps a roomier primary column width.
+- Native Niri recent windows switching is now available on `Mod+Tab` /
+  `Mod+Shift+Tab` (output scope) and `Mod+grave` / `Mod+Shift+grave`
+  (workspace app-id scope), while the shell-owned `Alt+Tab` flow stays intact.
 - The supported entry path is now the UWSM wrapper installed by the `sessions`
   module. Legacy `niri-optimized-session` and the old `niri.service`
   bootstrap drop-in are intentionally removed to keep session ownership in one
