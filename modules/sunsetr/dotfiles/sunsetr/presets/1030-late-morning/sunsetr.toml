@@ -9,5 +9,5 @@ shutdown_duration = 0.3
 adaptive_interval = 1
 
 #[Static config]
-static_temp = 2400
-static_gamma = 94
+static_temp = 2450
+static_gamma = 96
