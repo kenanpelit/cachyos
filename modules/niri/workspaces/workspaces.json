@@ -1,0 +1,85 @@
+{
+  "workspaces": [
+    {
+      "id": "1",
+      "name": "Kenp",
+      "hereLabel": "Kenp",
+      "hereTarget": "Kenp",
+      "focusRegex": "^Kenp$",
+      "routeAppRegex": "^Kenp$",
+      "routeTitleRegex": ""
+    },
+    {
+      "id": "2",
+      "name": "Term",
+      "hereLabel": "TmuxKenp",
+      "hereTarget": "TmuxKenp",
+      "focusRegex": "^TmuxKenp$",
+      "routeAppRegex": "^(TmuxKenp|kitty|org\\.wezfurlong\\.wezterm)$",
+      "routeTitleRegex": "^Tmux$"
+    },
+    {
+      "id": "3",
+      "name": "AI",
+      "hereLabel": "Ai",
+      "hereTarget": "Ai",
+      "focusRegex": "^Ai$",
+      "routeAppRegex": "^(Ai|Nil)$",
+      "routeTitleRegex": ""
+    },
+    {
+      "id": "4",
+      "name": "Work",
+      "hereLabel": "CompecTA",
+      "hereTarget": "CompecTA",
+      "focusRegex": "^CompecTA$",
+      "routeAppRegex": "^CompecTA$",
+      "routeTitleRegex": ""
+    },
+    {
+      "id": "5",
+      "name": "Chat",
+      "hereLabel": "WebCord",
+      "hereTarget": "WebCord",
+      "focusRegex": "^WebCord$",
+      "routeAppRegex": "^(discord|WebCord|audacious)$",
+      "routeTitleRegex": ""
+    },
+    {
+      "id": "6",
+      "name": "Media",
+      "hereLabel": "Telegram",
+      "hereTarget": "org.telegram.desktop",
+      "focusRegex": "^(org\\.telegram\\.desktop|TelegramDesktop)$",
+      "routeAppRegex": "^(Exclude|org\\.telegram\\.desktop|vlc|remote-viewer)$",
+      "routeTitleRegex": ""
+    },
+    {
+      "id": "7",
+      "name": "Utility",
+      "hereLabel": "YouTube",
+      "hereTarget": "brave-youtube.com__-Default",
+      "focusRegex": "^brave-youtube\\.com__-Default$",
+      "routeAppRegex": "^(transmission|org\\.keepassxc\\.KeePassXC|(brave-youtube|chrome-youtube)\\.com__-Default)$",
+      "routeTitleRegex": ""
+    },
+    {
+      "id": "8",
+      "name": "Music",
+      "hereLabel": "Spotify",
+      "hereTarget": "spotify",
+      "focusRegex": "^(spotify|Spotify|com\\.spotify\\.Client)$",
+      "routeAppRegex": "^(spotify|Spotify|com\\.spotify\\.Client)$",
+      "routeTitleRegex": ""
+    },
+    {
+      "id": "9",
+      "name": "Social",
+      "hereLabel": "Ferdium",
+      "hereTarget": "ferdium",
+      "focusRegex": "^(ferdium|Ferdium)$",
+      "routeAppRegex": "^(ferdium|Ferdium|com\\.rtosta\\.zapzap|(Whats|chrome-web\\.whatsapp\\.com__-Default))$",
+      "routeTitleRegex": ""
+    }
+  ]
+}

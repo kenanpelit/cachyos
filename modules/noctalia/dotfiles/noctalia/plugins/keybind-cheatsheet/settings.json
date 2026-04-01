@@ -108,6 +108,22 @@
           "desc": "Switch Windows"
         },
         {
+          "keys": "Super + Tab",
+          "desc": "Recent Windows (Output)"
+        },
+        {
+          "keys": "Super + Shift + Tab",
+          "desc": "Prev Recent Window (Output)"
+        },
+        {
+          "keys": "Super + Ctrl + Tab",
+          "desc": "Recent Windows (Same App)"
+        },
+        {
+          "keys": "Super + Ctrl + Shift + Tab",
+          "desc": "Prev Recent Window (Same App)"
+        },
+        {
           "keys": "Super + B",
           "desc": "Toggle Bar"
         },
@@ -417,39 +433,39 @@
         },
         {
           "keys": "Super + 1",
-          "desc": "Workspace 1"
+          "desc": "Workspace 1: Kenp"
         },
         {
           "keys": "Super + 2",
-          "desc": "Workspace 2"
+          "desc": "Workspace 2: Term"
         },
         {
           "keys": "Super + 3",
-          "desc": "Workspace 3"
+          "desc": "Workspace 3: AI"
         },
         {
           "keys": "Super + 4",
-          "desc": "Workspace 4"
+          "desc": "Workspace 4: Work"
         },
         {
           "keys": "Super + 5",
-          "desc": "Workspace 5"
+          "desc": "Workspace 5: Chat"
         },
         {
           "keys": "Super + 6",
-          "desc": "Workspace 6"
+          "desc": "Workspace 6: Media"
         },
         {
           "keys": "Super + 7",
-          "desc": "Workspace 7"
+          "desc": "Workspace 7: Utility"
         },
         {
           "keys": "Super + 8",
-          "desc": "Workspace 8"
+          "desc": "Workspace 8: Music"
         },
         {
           "keys": "Super + 9",
-          "desc": "Workspace 9"
+          "desc": "Workspace 9: Social"
         }
       ]
     },
@@ -474,39 +490,39 @@
         },
         {
           "keys": "Super + Shift + 1",
-          "desc": "Move To WS 1"
+          "desc": "Move To WS 1: Kenp"
         },
         {
           "keys": "Super + Shift + 2",
-          "desc": "Move To WS 2"
+          "desc": "Move To WS 2: Term"
         },
         {
           "keys": "Super + Shift + 3",
-          "desc": "Move To WS 3"
+          "desc": "Move To WS 3: AI"
         },
         {
           "keys": "Super + Shift + 4",
-          "desc": "Move To WS 4"
+          "desc": "Move To WS 4: Work"
         },
         {
           "keys": "Super + Shift + 5",
-          "desc": "Move To WS 5"
+          "desc": "Move To WS 5: Chat"
         },
         {
           "keys": "Super + Shift + 6",
-          "desc": "Move To WS 6"
+          "desc": "Move To WS 6: Media"
         },
         {
           "keys": "Super + Shift + 7",
-          "desc": "Move To WS 7"
+          "desc": "Move To WS 7: Utility"
         },
         {
           "keys": "Super + Shift + 8",
-          "desc": "Move To WS 8"
+          "desc": "Move To WS 8: Music"
         },
         {
           "keys": "Super + Shift + 9",
-          "desc": "Move To WS 9"
+          "desc": "Move To WS 9: Social"
         }
       ]
     },

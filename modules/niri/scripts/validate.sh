@@ -8,6 +8,7 @@ source "$repo_root/modules/base/lib/core.sh"
 NIRI_CONFIG="$USER_HOME/.config/niri/config.kdl"
 NIRI_RUNTIME_DIR="$USER_HOME/.config/niri/runtime"
 RENDER_PROFILE_SCRIPT="$script_dir/render-profile.sh"
+RENDER_WORKSPACE_ASSETS_SCRIPT="$script_dir/render-workspace-assets.sh"
 
 log_info "Validating Niri configuration..."
 
@@ -19,6 +20,27 @@ fi
 if ! command -v niri >/dev/null 2>&1; then
     log_warn "Niri binary not found in PATH. Cannot validate syntax."
     exit 0
+fi
+
+if [[ -x "$RENDER_WORKSPACE_ASSETS_SCRIPT" ]]; then
+    log_info "Validating generated workspace assets..."
+    if [ "$(id -u)" -eq 0 ]; then
+        if run_as_user "$RENDER_WORKSPACE_ASSETS_SCRIPT" --check --runtime-dir "$NIRI_RUNTIME_DIR" >/dev/null 2>&1; then
+            log_success "Generated workspace assets match repo/runtime files!"
+        else
+            log_error "Generated workspace assets drift detected!"
+            run_as_user "$RENDER_WORKSPACE_ASSETS_SCRIPT" --check --runtime-dir "$NIRI_RUNTIME_DIR"
+            exit 1
+        fi
+    else
+        if "$RENDER_WORKSPACE_ASSETS_SCRIPT" --check --runtime-dir "$NIRI_RUNTIME_DIR" >/dev/null 2>&1; then
+            log_success "Generated workspace assets match repo/runtime files!"
+        else
+            log_error "Generated workspace assets drift detected!"
+            "$RENDER_WORKSPACE_ASSETS_SCRIPT" --check --runtime-dir "$NIRI_RUNTIME_DIR"
+            exit 1
+        fi
+    fi
 fi
 
 if niri validate -c "$NIRI_CONFIG" >/dev/null 2>&1; then

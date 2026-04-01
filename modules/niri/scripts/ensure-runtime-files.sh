@@ -7,8 +7,14 @@ source "$repo_root/modules/base/lib/core.sh"
 
 NIRI_DIR="$USER_HOME/.config/niri"
 RUNTIME_DIR="$NIRI_DIR/runtime"
+STATIC_CONFIG_SOURCE="$repo_root/modules/niri/dotfiles/niri/config.kdl"
+STATIC_CONFIG_TARGET="$NIRI_DIR/config.kdl"
 STATIC_OUTPUTS_SOURCE="$repo_root/modules/niri/dotfiles/niri/outputs.kdl"
 STATIC_OUTPUTS_TARGET="$NIRI_DIR/outputs.kdl"
+STATIC_CONF_SOURCE="$repo_root/modules/niri/dotfiles/niri/conf"
+STATIC_CONF_TARGET="$NIRI_DIR/conf"
+STATIC_GENERATED_SOURCE="$repo_root/modules/niri/dotfiles/niri/generated"
+STATIC_GENERATED_TARGET="$NIRI_DIR/generated"
 LEGACY_ENV_FILE="$USER_HOME/.config/environment.d/10-niri-env.conf"
 LEGACY_PRIORITY_DROPIN="$USER_HOME/.config/systemd/user/niri.service.d/10-priority.conf"
 LEGACY_DESKTOP_SETTINGS_UNIT="$USER_HOME/.config/systemd/user/niri-desktop-settings.service"
@@ -26,11 +32,22 @@ else
 fi
 
 if [ -f "$STATIC_OUTPUTS_SOURCE" ]; then
+  # Keep config assets as symlinks so the repo remains the single source of truth.
+  run_as_user ln -sfnT "$STATIC_CONFIG_SOURCE" "$STATIC_CONFIG_TARGET"
   # Keep outputs.kdl as a symlink so the repo remains the single source of truth.
-  run_as_user ln -sfn "$STATIC_OUTPUTS_SOURCE" "$STATIC_OUTPUTS_TARGET"
+  run_as_user ln -sfnT "$STATIC_OUTPUTS_SOURCE" "$STATIC_OUTPUTS_TARGET"
+fi
+
+if [ -d "$STATIC_CONF_SOURCE" ]; then
+  run_as_user ln -sfnT "$STATIC_CONF_SOURCE" "$STATIC_CONF_TARGET"
+fi
+
+if [ -d "$STATIC_GENERATED_SOURCE" ]; then
+  run_as_user ln -sfnT "$STATIC_GENERATED_SOURCE" "$STATIC_GENERATED_TARGET"
 fi
 
 render_profile_script="$script_dir/render-profile.sh"
+render_workspace_assets_script="$script_dir/render-workspace-assets.sh"
 
 legacy_runtime_files=(
   "$RUNTIME_DIR/cursor.kdl"
@@ -50,6 +67,10 @@ rm -f "$LEGACY_DESKTOP_SETTINGS_WANTS_LINK" 2>/dev/null || true
 
 if [[ -x "$render_profile_script" ]]; then
   "$render_profile_script"
+fi
+
+if [[ -x "$render_workspace_assets_script" ]]; then
+  NIRI_RUNTIME_DIR="$RUNTIME_DIR" "$render_workspace_assets_script" --runtime-dir "$RUNTIME_DIR"
 fi
 
 # Run health check validation

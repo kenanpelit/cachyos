@@ -1,0 +1,28 @@
+window-rule {
+  match app-id=r#"^(org\.keepassxc\.KeePassXC|io\.ente\.auth|clipse|copyq|gcr-prompter|polkit-gnome-authentication-agent-1)$"#
+  block-out-from "screencast"
+}
+
+window-rule {
+  match app-id=r#"^(org\.keepassxc\.KeePassXC|io\.ente\.auth|clipse|copyq|gcr-prompter|polkit-gnome-authentication-agent-1)$"#
+  block-out-from "screen-capture"
+}
+
+window-rule {
+  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|org\.telegram\.desktop|Signal|Slack)$"#
+  block-out-from "screencast"
+}
+
+window-rule {
+  match app-id=r#"^(discord|WebCord|ferdium|Ferdium|org\.telegram\.desktop|Signal|Slack)$"#
+  block-out-from "screen-capture"
+}
+
+window-rule {
+  match is-window-cast-target=true
+  focus-ring {
+    active-color "#f38ba8"
+    inactive-color "#7d0d2d"
+  }
+  opacity 1.0
+}

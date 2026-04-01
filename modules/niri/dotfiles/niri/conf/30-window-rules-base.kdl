@@ -1,0 +1,159 @@
+window-rule {
+  geometry-corner-radius 12
+  clip-to-geometry true
+}
+
+window-rule {
+  match is-floating=true
+  shadow {
+    on
+  }
+}
+
+window-rule {
+  match is-floating=false
+  shadow {
+    on
+    color "#00000060"
+    offset x=0 y=4
+    spread 0
+    softness 16
+  }
+}
+
+window-rule {
+  match app-id=r#"^org\.quickshell$"#
+  open-floating true
+}
+
+window-rule {
+  match app-id=r#"^steam_app_\d+$"#
+  variable-refresh-rate true
+}
+
+window-rule {
+  match app-id="xwaylandvideobridge"
+  open-floating true
+  open-focused false
+  opacity 0.0
+  default-column-width { fixed 1; }
+  default-window-height { fixed 1; }
+}
+
+window-rule {
+  match title=r#"(?i)^picture[- ]in[- ]picture( - mpv)?$"#
+  open-floating true
+  default-column-width { fixed 640; }
+  default-window-height { fixed 360; }
+  default-floating-position x=32 y=96 relative-to="top-right"
+  opacity 1.0
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^mpv$"#
+  exclude title=r#"^Picture-in-Picture( - mpv)?$"#
+  variable-refresh-rate true
+  open-floating true
+  default-column-width { fixed 640; }
+  default-window-height { fixed 360; }
+  default-floating-position x=32 y=96 relative-to="top-right"
+  min-width 640
+  max-width 640
+  min-height 360
+  max-height 360
+  opacity 1.0
+  open-focused true
+}
+
+window-rule {
+  match title=r#"^(Open File|Choose (File|Folder)|Save As|Confirm to replace files|File Operation Progress|Extract archive|Compress\.\.\.)$"#
+  open-floating true
+  default-column-width { proportion 0.50; }
+  default-window-height { proportion 0.75; }
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^xdg-desktop-portal-(wlr|gnome|gtk)$"#
+  exclude app-id=r#"^Kenp$"#
+  open-floating true
+  default-column-width { proportion 0.50; }
+  default-window-height { proportion 0.75; }
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^(org\.gnome\.Calculator|kcalc|qalculate-gtk|org\.gnome\.Characters)$"#
+  open-floating true
+  default-column-width { fixed 540; }
+  default-window-height { fixed 640; }
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^(polkit-gnome-authentication-agent-1|gcr-prompter)$"#
+  open-floating true
+  default-column-width { fixed 600; }
+  default-window-height { fixed 240; }
+  open-focused true
+}
+
+window-rule {
+  match title=r#"^(Authentication Required|Unlock Keyring|OpenSSH Authentication Passphrase)$"#
+  open-floating true
+  default-column-width { fixed 640; }
+  default-window-height { fixed 260; }
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^(blueman-manager|nm-connection-editor|org\.gnome\.Settings|gnome-disks|pavucontrol|pwvucontrol|virt-manager)$"#
+  open-floating true
+  default-column-width { fixed 900; }
+  default-window-height { fixed 650; }
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^(org\.gnome\.FileRoller|file-roller|org\.gnome\.Loupe|loupe)$"#
+  open-floating true
+  default-column-width { fixed 960; }
+  default-window-height { fixed 720; }
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^(clipse|clipse-gui|wiremix|org\.pulseaudio\.pavucontrol|io\.ente\.auth|com\.github\.hluk\.copyq|copyq)$"#
+  open-floating true
+  default-column-width { proportion 0.25; }
+  default-window-height { proportion 0.80; }
+  default-floating-position x=32 y=144 relative-to="top-right"
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^scrcpy$"#
+  open-floating true
+  default-column-width { fixed 432; }
+  default-window-height { fixed 960; }
+  default-floating-position x=32 y=144 relative-to="top-right"
+  open-focused true
+}
+
+window-rule {
+  match app-id="dropdown-terminal"
+  open-floating true
+  default-column-width { proportion 0.8; }
+  default-window-height { fixed 600; }
+  default-floating-position x=0 y=20 relative-to="top"
+  border {
+    off
+  }
+  shadow {
+    on
+    spread 10
+    softness 40
+    color "#00000080"
+  }
+}

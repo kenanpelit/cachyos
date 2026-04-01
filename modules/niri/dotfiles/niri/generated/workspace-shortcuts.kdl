@@ -1,0 +1,46 @@
+// Generated from modules/niri/workspaces/workspaces.json.
+// Edit the source workspace map instead of hand-editing these shortcuts.
+binds {
+// BEGIN OSC_NIRI_WORKSPACE_SHORTCUTS
+  // ----------------------------------------------------------------------
+  // Workspace Navigation (1..9)
+  // ----------------------------------------------------------------------
+  Mod+1 hotkey-overlay-title="Workspace 1: Kenp" { focus-workspace "1"; }
+  Mod+2 hotkey-overlay-title="Workspace 2: Term" { focus-workspace "2"; }
+  Mod+3 hotkey-overlay-title="Workspace 3: AI" { focus-workspace "3"; }
+  Mod+4 hotkey-overlay-title="Workspace 4: Work" { focus-workspace "4"; }
+  Mod+5 hotkey-overlay-title="Workspace 5: Chat" { focus-workspace "5"; }
+  Mod+6 hotkey-overlay-title="Workspace 6: Media" { focus-workspace "6"; }
+  Mod+7 hotkey-overlay-title="Workspace 7: Utility" { focus-workspace "7"; }
+  Mod+8 hotkey-overlay-title="Workspace 8: Music" { focus-workspace "8"; }
+  Mod+9 hotkey-overlay-title="Workspace 9: Social" { focus-workspace "9"; }
+
+  // Move current column to workspace (1..9).
+  Mod+Shift+1 hotkey-overlay-title="Move To WS 1: Kenp" { move-column-to-workspace "1"; }
+  Mod+Shift+2 hotkey-overlay-title="Move To WS 2: Term" { move-column-to-workspace "2"; }
+  Mod+Shift+3 hotkey-overlay-title="Move To WS 3: AI" { move-column-to-workspace "3"; }
+  Mod+Shift+4 hotkey-overlay-title="Move To WS 4: Work" { move-column-to-workspace "4"; }
+  Mod+Shift+5 hotkey-overlay-title="Move To WS 5: Chat" { move-column-to-workspace "5"; }
+  Mod+Shift+6 hotkey-overlay-title="Move To WS 6: Media" { move-column-to-workspace "6"; }
+  Mod+Shift+7 hotkey-overlay-title="Move To WS 7: Utility" { move-column-to-workspace "7"; }
+  Mod+Shift+8 hotkey-overlay-title="Move To WS 8: Music" { move-column-to-workspace "8"; }
+  Mod+Shift+9 hotkey-overlay-title="Move To WS 9: Social" { move-column-to-workspace "9"; }
+
+  // ----------------------------------------------------------------------
+  // "Here" Actions (Workspace shortcuts for specific apps)
+  // ----------------------------------------------------------------------
+  Alt+1 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Kenp" { spawn "niri-osc" "set" "here" "Kenp"; }
+  Alt+2 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: TmuxKenp" { spawn "niri-osc" "set" "here" "TmuxKenp"; }
+  Alt+3 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ai" { spawn "niri-osc" "set" "here" "Ai"; }
+  Alt+4 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: CompecTA" { spawn "niri-osc" "set" "here" "CompecTA"; }
+  Alt+5 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: WebCord" { spawn "niri-osc" "set" "here" "WebCord"; }
+  Alt+6 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Telegram" { spawn "niri-osc" "set" "here" "org.telegram.desktop"; }
+  Alt+7 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: YouTube" { spawn "niri-osc" "set" "here" "brave-youtube.com__-Default"; }
+  Alt+8 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Spotify" { spawn "niri-osc" "set" "here" "spotify"; }
+  Alt+9 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ferdium" { spawn "niri-osc" "set" "here" "ferdium"; }
+  Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-osc" "set" "here" "all"; }
+
+  // Global window rearrangement.
+  Mod+Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "niri-osc" "set" "go"; }
+// END OSC_NIRI_WORKSPACE_SHORTCUTS
+}

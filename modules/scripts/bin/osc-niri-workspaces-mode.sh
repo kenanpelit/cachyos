@@ -6,9 +6,11 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 TARGET_RUNTIME_DIR="${NIRI_RUNTIME_DIR:-${XDG_CONFIG_HOME}/niri/runtime}"
 TARGET_FILE="${TARGET_RUNTIME_DIR}/workspaces-auto.kdl"
 CONFIG_FILE_DEFAULT="${NIRI_CONFIG_FILE:-${XDG_CONFIG_HOME}/niri/config.kdl}"
+RUNTIME_RULES_FILE="${TARGET_RUNTIME_DIR}/workspace-rules.tsv"
+RUNTIME_HERE_FILE="${TARGET_RUNTIME_DIR}/workspace-here.tsv"
 
-BEGIN_SHORTCUTS='  // BEGIN OSC_NIRI_WORKSPACE_SHORTCUTS'
-END_SHORTCUTS='  // END OSC_NIRI_WORKSPACE_SHORTCUTS'
+BEGIN_SHORTCUTS='// BEGIN OSC_NIRI_WORKSPACE_SHORTCUTS'
+END_SHORTCUTS='// END OSC_NIRI_WORKSPACE_SHORTCUTS'
 BEGIN_RULES='// BEGIN OSC_NIRI_WORKSPACE_RULES'
 END_RULES='// END OSC_NIRI_WORKSPACE_RULES'
 
@@ -38,6 +40,24 @@ find_repo_root() {
 
 resolve_config_file() {
   readlink -f "${CONFIG_FILE_DEFAULT}" 2>/dev/null || printf '%s\n' "${CONFIG_FILE_DEFAULT}"
+}
+
+generated_shortcuts_file() {
+  local repo_root
+  repo_root="$(find_repo_root)" || return 1
+  printf '%s\n' "${repo_root}/modules/niri/dotfiles/niri/generated/workspace-shortcuts.kdl"
+}
+
+generated_rules_file() {
+  local repo_root
+  repo_root="$(find_repo_root)" || return 1
+  printf '%s\n' "${repo_root}/modules/niri/dotfiles/niri/generated/workspace-rules.kdl"
+}
+
+workspace_assets_script() {
+  local repo_root
+  repo_root="$(find_repo_root)" || return 1
+  printf '%s\n' "${repo_root}/modules/niri/scripts/render-workspace-assets.sh"
 }
 
 usage() {
@@ -89,8 +109,8 @@ block_contains() {
 }
 
 shortcuts_mode() {
-  local config_file="$1"
-  if block_contains "${config_file}" "${BEGIN_SHORTCUTS}" "${END_SHORTCUTS}" 'focus-workspace "1"'; then
+  local shortcuts_file="$1"
+  if block_contains "${shortcuts_file}" "${BEGIN_SHORTCUTS}" "${END_SHORTCUTS}" 'focus-workspace "1"'; then
     printf 'managed\n'
   else
     printf 'natural\n'
@@ -98,8 +118,8 @@ shortcuts_mode() {
 }
 
 rules_mode() {
-  local config_file="$1"
-  if block_contains "${config_file}" "${BEGIN_RULES}" "${END_RULES}" 'open-on-workspace "1"'; then
+  local rules_file="$1"
+  if block_contains "${rules_file}" "${BEGIN_RULES}" "${END_RULES}" 'open-on-workspace "1"'; then
     printf 'managed\n'
   else
     printf 'natural\n'
@@ -107,13 +127,14 @@ rules_mode() {
 }
 
 overall_mode() {
-  local config_file="$1"
+  local shortcuts_file="$1"
+  local rules_file="$2"
   local file_mode shortcut_mode_value rules_mode_value
 
   file_mode="natural"
   [[ "$(workspace_count)" -gt 0 ]] && file_mode="managed"
-  shortcut_mode_value="$(shortcuts_mode "${config_file}")"
-  rules_mode_value="$(rules_mode "${config_file}")"
+  shortcut_mode_value="$(shortcuts_mode "${shortcuts_file}")"
+  rules_mode_value="$(rules_mode "${rules_file}")"
 
   if [[ "${file_mode}" == "managed" && "${shortcut_mode_value}" == "managed" && "${rules_mode_value}" == "managed" ]]; then
     printf 'managed\n'
@@ -145,51 +166,6 @@ write_natural_file() {
 EOF
 }
 
-managed_shortcuts_content() {
-  cat <<'EOF'
-  // ----------------------------------------------------------------------
-  // Workspace Navigation (1..9)
-  // ----------------------------------------------------------------------
-  Mod+1 hotkey-overlay-title="Workspace 1" { focus-workspace "1"; }
-  Mod+2 hotkey-overlay-title="Workspace 2" { focus-workspace "2"; }
-  Mod+3 hotkey-overlay-title="Workspace 3" { focus-workspace "3"; }
-  Mod+4 hotkey-overlay-title="Workspace 4" { focus-workspace "4"; }
-  Mod+5 hotkey-overlay-title="Workspace 5" { focus-workspace "5"; }
-  Mod+6 hotkey-overlay-title="Workspace 6" { focus-workspace "6"; }
-  Mod+7 hotkey-overlay-title="Workspace 7" { focus-workspace "7"; }
-  Mod+8 hotkey-overlay-title="Workspace 8" { focus-workspace "8"; }
-  Mod+9 hotkey-overlay-title="Workspace 9" { focus-workspace "9"; }
-
-  // Move current column to workspace (1..9).
-  Mod+Shift+1 hotkey-overlay-title="Move To WS 1" { move-column-to-workspace "1"; }
-  Mod+Shift+2 hotkey-overlay-title="Move To WS 2" { move-column-to-workspace "2"; }
-  Mod+Shift+3 hotkey-overlay-title="Move To WS 3" { move-column-to-workspace "3"; }
-  Mod+Shift+4 hotkey-overlay-title="Move To WS 4" { move-column-to-workspace "4"; }
-  Mod+Shift+5 hotkey-overlay-title="Move To WS 5" { move-column-to-workspace "5"; }
-  Mod+Shift+6 hotkey-overlay-title="Move To WS 6" { move-column-to-workspace "6"; }
-  Mod+Shift+7 hotkey-overlay-title="Move To WS 7" { move-column-to-workspace "7"; }
-  Mod+Shift+8 hotkey-overlay-title="Move To WS 8" { move-column-to-workspace "8"; }
-  Mod+Shift+9 hotkey-overlay-title="Move To WS 9" { move-column-to-workspace "9"; }
-
-  // ----------------------------------------------------------------------
-  // "Here" Actions (Workspace shortcuts for specific apps)
-  // ----------------------------------------------------------------------
-  Alt+1 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Kenp" { spawn "niri-osc" "set" "here" "Kenp"; }
-  Alt+2 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: TmuxKenp" { spawn "niri-osc" "set" "here" "TmuxKenp"; }
-  Alt+3 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ai" { spawn "niri-osc" "set" "here" "Ai"; }
-  Alt+4 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: CompecTA" { spawn "niri-osc" "set" "here" "CompecTA"; }
-  Alt+5 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: WebCord" { spawn "niri-osc" "set" "here" "WebCord"; }
-  Alt+6 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Telegram" { spawn "niri-osc" "set" "here" "org.telegram.desktop"; }
-  Alt+7 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: YouTube" { spawn "niri-osc" "set" "here" "brave-youtube.com__-Default"; }
-  Alt+8 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Spotify" { spawn "niri-osc" "set" "here" "spotify"; }
-  Alt+9 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ferdium" { spawn "niri-osc" "set" "here" "ferdium"; }
-  Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-osc" "set" "here" "all"; }
-
-  // Global window rearrangement.
-  Mod+Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "niri-osc" "set" "go"; }
-EOF
-}
-
 natural_shortcuts_content() {
   cat <<'EOF'
   // Static workspace shortcuts disabled.
@@ -197,52 +173,18 @@ natural_shortcuts_content() {
 EOF
 }
 
-managed_rules_content() {
-  cat <<'EOF'
-// Default Workspace placements by application ID.
-window-rule {
-  match app-id=r#"^Kenp$"#
-  open-on-workspace "1"
-}
-window-rule {
-  match app-id=r#"^(TmuxKenp|kitty|org\.wezfurlong\.wezterm)$"#
-  open-on-workspace "2"
-}
-window-rule {
-  match app-id=r#"^(Ai|Nil)$"#
-  open-on-workspace "3"
-}
-window-rule {
-  match app-id=r#"^CompecTA$"#
-  open-on-workspace "4"
-}
-window-rule {
-  match app-id=r#"^(discord|WebCord|audacious)$"#
-  open-on-workspace "5"
-}
-window-rule {
-  match app-id=r#"^(Exclude|org\.telegram\.desktop|vlc|remote-viewer)$"#
-  open-on-workspace "6"
-}
-window-rule {
-  match app-id=r#"^(transmission|org\.keepassxc\.KeePassXC|(brave-youtube|chrome-youtube)\.com__-Default)$"#
-  open-on-workspace "7"
-}
-window-rule {
-  match app-id=r#"^(spotify|Spotify|com\.spotify\.Client)$"#
-  open-on-workspace "8"
-}
-window-rule {
-  match app-id=r#"^(ferdium|Ferdium|com\.rtosta\.zapzap|(Whats|chrome-web\.whatsapp\.com__-Default))$"#
-  open-on-workspace "9"
-}
-EOF
-}
-
 natural_rules_content() {
   cat <<'EOF'
 // Static app-to-workspace placement disabled.
 // Applications will open according to Niri's natural/dynamic workspace behavior.
+EOF
+}
+
+write_natural_runtime_rules() {
+  ensure_target_dir
+  cat > "${RUNTIME_RULES_FILE}" <<'EOF'
+# Natural workspace mode enabled by osc-niri-workspaces-mode.
+# This file is intentionally empty so arrange helpers skip static app routing.
 EOF
 }
 
@@ -373,6 +315,32 @@ managed_workspace_targets() {
   ' "${TARGET_FILE}" 2>/dev/null || true
 }
 
+RULES_LOADED=0
+declare -a RULE_PATTERNS=()
+declare -a RULE_WORKSPACES=()
+declare -a RULE_TITLE_PATTERNS=()
+
+load_runtime_workspace_rules() {
+  [[ "${RULES_LOADED}" -eq 1 ]] && return 0
+  RULES_LOADED=1
+  RULE_PATTERNS=()
+  RULE_WORKSPACES=()
+  RULE_TITLE_PATTERNS=()
+
+  [[ -f "${RUNTIME_RULES_FILE}" ]] || return 1
+
+  while IFS=$'\t' read -r pattern ws title; do
+    [[ -z "${pattern//[[:space:]]/}" ]] && continue
+    [[ "${pattern:0:1}" == "#" ]] && continue
+    [[ -z "${ws//[[:space:]]/}" ]] && continue
+    RULE_PATTERNS+=("${pattern}")
+    RULE_WORKSPACES+=("${ws}")
+    RULE_TITLE_PATTERNS+=("${title:-}")
+  done < "${RUNTIME_RULES_FILE}"
+
+  [[ "${#RULE_PATTERNS[@]}" -gt 0 ]]
+}
+
 cleanup_osc_workspace_names() {
   local workspaces_json workspace_name
 
@@ -471,6 +439,21 @@ focus_window_id() {
 managed_target_workspace_for_window() {
   local app_id="${1:-}"
   local title="${2:-}"
+  local i=""
+  local title_pattern=""
+
+  if load_runtime_workspace_rules; then
+    for i in "${!RULE_PATTERNS[@]}"; do
+      if [[ "${app_id}" =~ ${RULE_PATTERNS[$i]} ]]; then
+        title_pattern="${RULE_TITLE_PATTERNS[$i]:-}"
+        if [[ -n "${title_pattern//[[:space:]]/}" ]] && [[ ! "${title}" =~ ${title_pattern} ]]; then
+          continue
+        fi
+        printf '%s\n' "${RULE_WORKSPACES[$i]}"
+        return 0
+      fi
+    done
+  fi
 
   if [[ "${app_id}" =~ ^Kenp$ ]]; then
     printf '1\n'
@@ -641,16 +624,20 @@ rearrange_live_windows_natural() {
 }
 
 show_status() {
-  local config_file mode count shortcut_mode_value rules_mode_value
+  local config_file shortcuts_file rules_file mode count shortcut_mode_value rules_mode_value
   config_file="$(resolve_config_file)"
-  mode="$(overall_mode "${config_file}")"
+  shortcuts_file="$(generated_shortcuts_file)"
+  rules_file="$(generated_rules_file)"
+  mode="$(overall_mode "${shortcuts_file}" "${rules_file}")"
   count="$(workspace_count)"
-  shortcut_mode_value="$(shortcuts_mode "${config_file}")"
-  rules_mode_value="$(rules_mode "${config_file}")"
+  shortcut_mode_value="$(shortcuts_mode "${shortcuts_file}")"
+  rules_mode_value="$(rules_mode "${rules_file}")"
 
   printf 'Niri workspace mode\n'
   printf '  overall mode: %s\n' "${mode}"
   printf '  config: %s\n' "${config_file}"
+  printf '  generated shortcuts: %s\n' "${shortcuts_file}"
+  printf '  generated rules: %s\n' "${rules_file}"
   printf '  workspace file: %s\n' "${TARGET_FILE}"
   printf '  static workspace blocks: %s\n' "${count}"
   printf '  shortcuts: %s\n' "${shortcut_mode_value}"
@@ -671,17 +658,16 @@ show_status() {
 }
 
 apply_managed() {
-  local repo_root render_script config_file
-  config_file="$(resolve_config_file)"
+  local repo_root render_script assets_script
   repo_root="$(find_repo_root)" || {
     echo "ERROR: repo root not found; cannot render managed workspaces" >&2
     exit 1
   }
 
-  replace_marked_block "${config_file}" "${BEGIN_SHORTCUTS}" "${END_SHORTCUTS}" managed_shortcuts_content
-  replace_marked_block "${config_file}" "${BEGIN_RULES}" "${END_RULES}" managed_rules_content
-
+  assets_script="${repo_root}/modules/niri/scripts/render-workspace-assets.sh"
   render_script="${repo_root}/modules/niri/scripts/render-profile.sh"
+
+  NIRI_RUNTIME_DIR="${TARGET_RUNTIME_DIR}" bash "${assets_script}" --runtime-dir "${TARGET_RUNTIME_DIR}"
   NIRI_RUNTIME_DIR="${TARGET_RUNTIME_DIR}" bash "${render_script}"
   prime_managed_live_workspaces
   reload_niri_config
@@ -692,12 +678,14 @@ apply_managed() {
 }
 
 apply_natural() {
-  local config_file
-  config_file="$(resolve_config_file)"
+  local shortcuts_file rules_file
+  shortcuts_file="$(generated_shortcuts_file)"
+  rules_file="$(generated_rules_file)"
 
-  replace_marked_block "${config_file}" "${BEGIN_SHORTCUTS}" "${END_SHORTCUTS}" natural_shortcuts_content
-  replace_marked_block "${config_file}" "${BEGIN_RULES}" "${END_RULES}" natural_rules_content
+  replace_marked_block "${shortcuts_file}" "${BEGIN_SHORTCUTS}" "${END_SHORTCUTS}" natural_shortcuts_content
+  replace_marked_block "${rules_file}" "${BEGIN_RULES}" "${END_RULES}" natural_rules_content
   write_natural_file
+  write_natural_runtime_rules
   reload_niri_config
   rearrange_live_windows_natural
   refresh_noctalia_if_running

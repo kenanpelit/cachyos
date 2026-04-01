@@ -137,7 +137,7 @@
             "compact": true,
             "followFocusedOutput": true,
             "hideEmpty": true,
-            "labelMode": "index",
+            "labelMode": "index+name",
             "maxPreviewDots": 4,
             "showOutputName": false,
             "showPreviewDots": false,

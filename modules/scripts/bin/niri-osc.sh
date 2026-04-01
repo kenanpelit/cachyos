@@ -686,9 +686,70 @@ here)
       "spotify"
       "ferdium"
     )
+    HERE_MAP_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/workspace-here.tsv"
+    declare -a HERE_IDS=()
+    declare -a HERE_NAMES=()
+    declare -a HERE_LABELS=()
+    declare -a HERE_TARGETS=()
+    declare -a HERE_REGEXES=()
+    HERE_MAP_LOADED=0
+
+    load_here_map() {
+      [[ "$HERE_MAP_LOADED" -eq 1 ]] && return 0
+      HERE_MAP_LOADED=1
+      HERE_IDS=()
+      HERE_NAMES=()
+      HERE_LABELS=()
+      HERE_TARGETS=()
+      HERE_REGEXES=()
+
+      [[ -f "$HERE_MAP_FILE" ]] || return 1
+
+      while IFS=$'\t' read -r ws_id ws_name here_label here_target focus_regex; do
+        [[ -z "${ws_id//[[:space:]]/}" ]] && continue
+        [[ "${ws_id:0:1}" == "#" ]] && continue
+        HERE_IDS+=("${ws_id}")
+        HERE_NAMES+=("${ws_name:-}")
+        HERE_LABELS+=("${here_label:-}")
+        HERE_TARGETS+=("${here_target:-}")
+        HERE_REGEXES+=("${focus_regex:-}")
+      done < "$HERE_MAP_FILE"
+
+      if [[ "${#HERE_TARGETS[@]}" -gt 0 ]]; then
+        DEFAULT_APPS=("${HERE_TARGETS[@]}")
+      fi
+      [[ "${#HERE_TARGETS[@]}" -gt 0 ]]
+    }
+
+    here_regex_from_map() {
+      local app_id="$1"
+      local i=""
+
+      load_here_map >/dev/null 2>&1 || return 1
+
+      for i in "${!HERE_TARGETS[@]}"; do
+        if [[ "$app_id" == "${HERE_TARGETS[$i]}" ]] ||
+          [[ "$app_id" == "${HERE_LABELS[$i]}" ]] ||
+          [[ "$app_id" == "${HERE_NAMES[$i]}" ]] ||
+          [[ "$app_id" == "${HERE_IDS[$i]}" ]]; then
+          [[ -n "${HERE_REGEXES[$i]}" ]] || return 1
+          printf '%s\n' "${HERE_REGEXES[$i]}"
+          return 0
+        fi
+      done
+
+      return 1
+    }
 
     app_id_regex() {
       local app_id="$1"
+      local mapped_regex=""
+
+      if mapped_regex="$(here_regex_from_map "$app_id" 2>/dev/null)" && [[ -n "$mapped_regex" ]]; then
+        printf '%s\n' "$mapped_regex"
+        return 0
+      fi
+
       case "$app_id" in
       "Kenp") echo '^Kenp$' ;;
       "TmuxKenp") echo '^TmuxKenp$' ;;
@@ -906,6 +967,8 @@ here)
 
     APP_ID="${1:-}"
     LIST="${2:-}"
+
+    load_here_map >/dev/null 2>&1 || true
 
     if [[ -z "$APP_ID" ]]; then
       echo "Error: App ID is required."

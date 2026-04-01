@@ -157,9 +157,21 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
 - The static output config now also uses per-output `layout {}` overrides so
   the external `DP-3` monitor defaults to narrower working columns while the
   built-in `eDP-1` panel keeps a roomier primary column width.
+- Workspace metadata now has a single source of truth at
+  `modules/niri/workspaces/workspaces.json`. The helper
+  `modules/niri/scripts/render-workspace-assets.sh` generates:
+  `generated/workspace-shortcuts.kdl`, `generated/workspace-rules.kdl`, the
+  Noctalia `nworkspace` alias map, and the runtime TSV files consumed by
+  `niri-osc`/`osc-niri-workspaces-mode`.
+- `config.kdl` is now split with top-level `include` files under
+  `modules/niri/dotfiles/niri/conf/`, so layout, binds, rules, gestures, and
+  animations can evolve independently without turning `config.kdl` back into a
+  monolith.
 - Native Niri recent windows switching is now available on `Mod+Tab` /
   `Mod+Shift+Tab` (output scope) and `Mod+Ctrl+Tab` / `Mod+Ctrl+Shift+Tab`
   (workspace app-id scope), while the shell-owned `Alt+Tab` flow stays intact.
+- `lid-open` now re-triggers `niri-arrange.service` so dock/undock wakeups
+  rebalance the session automatically after the panel comes back.
 - The supported entry path is now the UWSM wrapper installed by the `sessions`
   module. Legacy `niri-optimized-session` and the old `niri.service`
   bootstrap drop-in are intentionally removed to keep session ownership in one
