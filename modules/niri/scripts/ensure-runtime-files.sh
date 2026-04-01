@@ -31,6 +31,13 @@ else
   mkdir -p "$NIRI_DIR"
 fi
 
+if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
+  install -d -m0755 -o "$REAL_USER" -g "$USER_GROUP" "$RUNTIME_DIR"
+  chown -R "$REAL_USER:$USER_GROUP" "$RUNTIME_DIR" 2>/dev/null || true
+else
+  mkdir -p "$RUNTIME_DIR"
+fi
+
 if [ -f "$STATIC_OUTPUTS_SOURCE" ]; then
   # Keep config assets as symlinks so the repo remains the single source of truth.
   run_as_user ln -sfnT "$STATIC_CONFIG_SOURCE" "$STATIC_CONFIG_TARGET"
@@ -66,11 +73,23 @@ rm -f "$LEGACY_DESKTOP_SETTINGS_UNIT" 2>/dev/null || true
 rm -f "$LEGACY_DESKTOP_SETTINGS_WANTS_LINK" 2>/dev/null || true
 
 if [[ -x "$render_profile_script" ]]; then
-  "$render_profile_script"
+  if [ "$(id -u)" -eq 0 ]; then
+    run_as_user "$render_profile_script"
+  else
+    "$render_profile_script"
+  fi
 fi
 
 if [[ -x "$render_workspace_assets_script" ]]; then
-  NIRI_RUNTIME_DIR="$RUNTIME_DIR" "$render_workspace_assets_script" --runtime-dir "$RUNTIME_DIR"
+  if [ "$(id -u)" -eq 0 ]; then
+    run_as_user env NIRI_RUNTIME_DIR="$RUNTIME_DIR" "$render_workspace_assets_script" --runtime-dir "$RUNTIME_DIR"
+  else
+    NIRI_RUNTIME_DIR="$RUNTIME_DIR" "$render_workspace_assets_script" --runtime-dir "$RUNTIME_DIR"
+  fi
+fi
+
+if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
+  chown -R "$REAL_USER:$USER_GROUP" "$RUNTIME_DIR" 2>/dev/null || true
 fi
 
 # Run health check validation
