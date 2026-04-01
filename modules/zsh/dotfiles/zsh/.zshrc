@@ -58,14 +58,16 @@ path=(
   $path
 )
 
-# Prefer kitty terminfo locally; fall back on SSH sessions.
-if [[ -n "${SSH_CONNECTION:-}" ]]; then
-  export TERM=xterm-256color
-else
-  export TERM=xterm-kitty
-fi
+# Do not force kitty-specific TERM from the shell.
+# - kitty.conf already declares a portable terminal type
+# - SSH should always advertise a broadly available TERM
+case "${TERM:-}" in
+  ""|dumb|xterm-kitty)
+    export TERM=xterm-256color
+    ;;
+esac
 
-# Ensure remote hosts always get a safe TERM.
+# Ensure outgoing SSH sessions always negotiate a safe TERM.
 ssh() { TERM=xterm-256color command ssh "$@"; }
 
 # ----------------------------------------------------------------------
