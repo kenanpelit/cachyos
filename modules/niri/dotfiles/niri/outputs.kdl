@@ -13,10 +13,10 @@ output "DP-3" {
     default-column-width { proportion 0.786; }
 
     preset-column-widths {
-      proportion 0.382
       proportion 0.500
       proportion 0.618
-      proportion 0.750
+      proportion 0.786
+      proportion 0.900
       proportion 1.000
     }
   }
