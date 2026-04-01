@@ -217,7 +217,7 @@ local o = {
 local utils = require 'mp.utils'
 local msg = require 'mp.msg'
 
-o.history_blacklist = utils.parse_json(o.history_blacklist)
+o.history_blacklist = utils.parse_json(o.history_blacklist) or { "" }
 o.history_incognito_mode_keybind = utils.parse_json(o.history_incognito_mode_keybind)
 o.filters_and_sequence = utils.parse_json(o.filters_and_sequence)
 o.keywords_filter_list = utils.parse_json(o.keywords_filter_list)
@@ -1958,7 +1958,11 @@ end
 ---------End of LogManager---------
 
 function history_blacklist_check()
-	if not o.history_blacklist[1] or #o.history_blacklist == 1 and o.history_blacklist[1] == "" then return false end
+	local history_blacklist = o.history_blacklist or { "" }
+	if type(history_blacklist) ~= "table" then
+		history_blacklist = { "" }
+	end
+	if not history_blacklist[1] or #history_blacklist == 1 and history_blacklist[1] == "" then return false end
 	local invertable_return = {true, false}
 	local blacklist_msg = 'File was not added to history because of blacklist'
 	if o.invert_history_blacklist then 
@@ -1966,30 +1970,30 @@ function history_blacklist_check()
 		blacklist_msg = 'File was added to history because of whitelist'
 	end
 	
-	if has_value(o.history_blacklist, filePath, nil) then
+	if has_value(history_blacklist, filePath, nil) then
 		msg.info(blacklist_msg)
 		return invertable_return[1]
 	elseif not starts_protocol(protocols, filePath) then
-		if has_value(o.history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'), nil) or 
-		has_value(o.history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'):gsub('\\$', ''), nil) then
+		if has_value(history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'), nil) or 
+		has_value(history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'):gsub('\\$', ''), nil) then
 			msg.info(blacklist_msg)
 			return invertable_return[1]
-		elseif has_value(o.history_blacklist, filePath:match('%.([^%.]+)$'), nil) or
-		has_value(o.history_blacklist, "."..filePath:match('%.([^%.]+)$'), nil) then
+		elseif has_value(history_blacklist, filePath:match('%.([^%.]+)$'), nil) or
+		has_value(history_blacklist, "."..filePath:match('%.([^%.]+)$'), nil) then
 			msg.info(blacklist_msg)
 			return invertable_return[1]
 		else --1.1.2# check to add any subfolder after /* to blacklist. issue #70
-			for i=1, #o.history_blacklist do --1.1.2# loop through blacklisted items, if the blacklist ends with * and it is a match after subbing of the current filePath then log it. #and additionally if it is the exact same path then ignore it.
-				if string.lower(filePath):match(string.lower(o.history_blacklist[i])) and o.history_blacklist[i]:sub(-1,#o.history_blacklist[i]) == '*' and string.lower(o.history_blacklist[i]:sub(1,-2)) ~= string.lower(filePath):match("(.*[\\/])") then
+			for i=1, #history_blacklist do --1.1.2# loop through blacklisted items, if the blacklist ends with * and it is a match after subbing of the current filePath then log it. #and additionally if it is the exact same path then ignore it.
+				if string.lower(filePath):match(string.lower(history_blacklist[i])) and history_blacklist[i]:sub(-1,#history_blacklist[i]) == '*' and string.lower(history_blacklist[i]:sub(1,-2)) ~= string.lower(filePath):match("(.*[\\/])") then
 					msg.info(blacklist_msg)
 					return invertable_return[1]
 				end
 			end
 		end
 	elseif starts_protocol(protocols, filePath) then
-		if has_value(o.history_blacklist, filePath:match('(.-)(:)'), nil) or
-		has_value(o.history_blacklist, filePath:match('(.-:)'), nil) or
-		has_value(o.history_blacklist, filePath:match('(.-:/?/?)'), nil) then
+		if has_value(history_blacklist, filePath:match('(.-)(:)'), nil) or
+		has_value(history_blacklist, filePath:match('(.-:)'), nil) or
+		has_value(history_blacklist, filePath:match('(.-:/?/?)'), nil) then
 			msg.info(blacklist_msg)
 			return invertable_return[1]
 		elseif filePath:find('https?://') == 1 then
@@ -1997,8 +2001,8 @@ function history_blacklist_check()
 			local different_check_temp = difchk_1..difchk_2
 			local different_checks = {different_check_temp, filePath:match("https?://w?w?w?%.?([%w%.%:]*)"), filePath:match("https?://([%w%.%:]*)"), filePath:match("(https?://[%w%.%:]*)") }
 			for i = 1, #different_checks do
-				if different_checks[i] and has_value(o.history_blacklist, different_checks[i], nil)
-				or different_checks[i]..'/' and has_value(o.history_blacklist, different_checks[i]..'/', nil) then
+				if different_checks[i] and has_value(history_blacklist, different_checks[i], nil)
+				or different_checks[i]..'/' and has_value(history_blacklist, different_checks[i]..'/', nil) then
 					msg.info(blacklist_msg)
 					return invertable_return[1]
 				end

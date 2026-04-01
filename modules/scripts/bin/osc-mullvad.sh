@@ -1012,6 +1012,7 @@ favorites_upsert() {
 		END { if (!updated) print r "|" p }
 	' "$FAVORITES_FILE" >"$tmp_file"
 	mv "$tmp_file" "$FAVORITES_FILE"
+	favorites_sort_file "$FAVORITES_FILE"
 }
 
 favorite_ping_sort_key() {
@@ -1022,6 +1023,50 @@ favorite_ping_sort_key() {
 	else
 		printf '999999'
 	fi
+}
+
+favorites_sort_stream() {
+	awk -F'|' '
+		function trim(value) {
+			sub(/^[[:space:]]+/, "", value)
+			sub(/[[:space:]]+$/, "", value)
+			return value
+		}
+
+		{
+			relay = trim($1)
+			ping = trim($2)
+			if (relay == "") next
+			if (ping == "") ping = "N/A"
+			sort_key = (ping ~ /^[0-9]+([.][0-9]+)?$/) ? ping : 999999
+			printf "%s\t%s|%s\n", sort_key, relay, ping
+		}
+	' | sort -n -k1,1 | cut -f2-
+}
+
+favorites_sort_file() {
+	local target_file="${1:-$FAVORITES_FILE}"
+	local tmp_file="${target_file}.tmp"
+
+	if [[ ! -e "$target_file" ]]; then
+		: >"$target_file"
+	fi
+
+	favorites_sort_stream <"$target_file" >"$tmp_file"
+	mv "$tmp_file" "$target_file"
+}
+
+favorites_write_sorted_lines() {
+	local target_file="$1"
+	shift || true
+
+	local tmp_file="${target_file}.tmp"
+	if (($# == 0)); then
+		: >"$tmp_file"
+	else
+		printf '%s\n' "$@" | favorites_sort_stream >"$tmp_file"
+	fi
+	mv "$tmp_file" "$target_file"
 }
 
 favorite_refresh() {
@@ -1137,23 +1182,21 @@ favorite_refresh() {
 	IFS=$'\n' read -r -d '' -a sorted_rows < <(printf '%b\n' "${refreshed_rows[@]}" | sort -n && printf '\0')
 	unset IFS
 
-	local tmp_file="${FAVORITES_FILE}.tmp"
-	: >"$tmp_file"
-
+	local -a combined_lines=()
 	local row
 	for row in "${sorted_rows[@]}"; do
 		local rest="${row#*$'\t'}"
 		local ping_value="${rest%%$'\t'*}"
 		local sorted_relay="${rest#*$'\t'}"
-		printf '%s|%s\n' "$sorted_relay" "$ping_value" >>"$tmp_file"
+		combined_lines+=("${sorted_relay}|${ping_value}")
 	done
 
 	local line
 	for line in "${untouched_lines[@]}"; do
-		printf '%s\n' "$line" >>"$tmp_file"
+		combined_lines+=("$line")
 	done
 
-	mv "$tmp_file" "$FAVORITES_FILE"
+	favorites_write_sorted_lines "$FAVORITES_FILE" "${combined_lines[@]}"
 
 	local best_row="${sorted_rows[0]}"
 	local best_rest="${best_row#*$'\t'}"
@@ -1431,6 +1474,8 @@ manage_favorites() {
 			return 1
 		fi
 
+		favorites_sort_file "$FAVORITES_FILE"
+
 		echo -e "${CYAN}Select relay to remove:${NC}"
 		local i=1
 		while IFS="|" read -r relay ping_time; do
@@ -1472,6 +1517,8 @@ manage_favorites() {
 			return 1
 		fi
 
+		favorites_sort_file "$FAVORITES_FILE"
+
 		echo -e "${CYAN}Favorite relays:${NC}"
 		local i=1
 		while IFS="|" read -r relay ping_time; do
@@ -1497,6 +1544,8 @@ manage_favorites() {
 			notify "ℹ️ MULLVAD VPN" "Favorites list is empty" "security-medium"
 			return 1
 		fi
+
+		favorites_sort_file "$FAVORITES_FILE"
 
 		local was_connected="false"
 		local previous_relay=""
@@ -1584,9 +1633,17 @@ manage_favorites() {
 				fi
 			fi
 
+			local fresh_ping="N/A"
+			local relay_ip=""
+			relay_ip="$(get_relay_ipv4 "$candidate")"
+			if [[ -n "$relay_ip" ]]; then
+				fresh_ping="$(ping_avg_ms "$relay_ip" 3 2)"
+			fi
+			favorites_upsert "$candidate" "$fresh_ping"
+
 			OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
-			log "Favorite connect: connected to ${candidate}"
-			notify "🔒 MULLVAD VPN" "Connected (favorite): ${candidate}" "security-high"
+			log "Favorite connect: connected to ${candidate} (ping: ${fresh_ping} ms)"
+			notify "🔒 MULLVAD VPN" "Connected (favorite): ${candidate} (${fresh_ping} ms)" "security-high"
 			return 0
 		done
 
@@ -2751,6 +2808,19 @@ find_fastest_relay() {
 				break
 			fi
 		else
+			local existed="false"
+			if grep -q "^${candidate}|" "$FAVORITES_FILE"; then
+				existed="true"
+			fi
+
+			favorites_upsert "$candidate" "$ping_avg"
+
+			if [[ "$existed" == "true" ]]; then
+				log "Updated favorite ping time (${ping_avg} ms): ${candidate}"
+			else
+				log "Added fastest relay to favorites (${ping_avg} ms): ${candidate}"
+			fi
+
 			# Not favoriting: stop at the first verified candidate.
 			break
 		fi
@@ -2804,8 +2874,8 @@ show_help() {
 	echo -e "    ${GREEN}<country> <city>${NC}  Switch to a random relay in a specific city (e.g., us nyc, de fra)"
 	echo -e ""
 	echo -e "${YELLOW}Advanced Selection:${NC}"
-	echo -e "    ${GREEN}fastest${NC} [country]            Find and connect to the fastest relay (optionally in a specific country)"
-	echo -e "    ${GREEN}fastest-fav${NC} [country]       Find fastest relay, connect and add to favorites"
+	echo -e "    ${GREEN}fastest${NC} [country]            Find fastest relay, connect and sync it into favorites"
+	echo -e "    ${GREEN}fastest-fav${NC} [country]       Legacy alias: find fastest relay, connect and add to favorites"
 	echo -e "    ${GREEN}fastest-fav-many${NC} [country] [count]  Add multiple working relays to favorites"
 	echo -e "    ${GREEN}fastest-fav-sweep${NC} <group|cc...> [count]  Sweep countries and seed favorites"
 	echo -e "    ${GREEN}owned${NC} [country]              Connect to a Mullvad-owned relay (not rented)"
@@ -2842,8 +2912,8 @@ show_help() {
 	echo -e "    ${GREEN}$SCRIPT_NAME random${NC}            # Switch to any random relay"
 	echo -e "    ${GREEN}$SCRIPT_NAME fr${NC}                # Switch to French relay"
 	echo -e "    ${GREEN}$SCRIPT_NAME us nyc${NC}            # Switch to a New York relay"
-	echo -e "    ${GREEN}$SCRIPT_NAME fastest de${NC}        # Find fastest German relay"
-	echo -e "    ${GREEN}$SCRIPT_NAME fastest-fav${NC}       # Find fastest relay and add to favorites"
+	echo -e "    ${GREEN}$SCRIPT_NAME fastest de${NC}        # Find fastest German relay and sync favorites"
+	echo -e "    ${GREEN}$SCRIPT_NAME fastest-fav${NC}       # Legacy alias for fastest"
 	echo -e "    ${GREEN}$SCRIPT_NAME favorite refresh nl${NC}  # Re-test NL favorites and sort them by speed"
 	echo -e "    ${GREEN}$SCRIPT_NAME favorite add${NC}      # Add current relay to favorites"
 	echo -e "    ${GREEN}$SCRIPT_NAME timer 30${NC}          # Change relay every 30 minutes"
