@@ -1,6 +1,7 @@
 # -----------------------------------------------------------------------------
-# Ghostty config (Kitty-parity profile)
-# Mirrors the core ergonomics and visuals used in modules/kitty.
+# Ghostty config
+# Kitty-like ergonomics with Ghostty-native split/tab features.
+# Keep font-size at 13.5 unless there is an explicit user request otherwise.
 # -----------------------------------------------------------------------------
 
 # Typography
@@ -11,17 +12,43 @@ font-family = "FiraCode Nerd Font"
 font-size = 13.5
 font-feature = liga,clig,calt
 
-# Window
-window-decoration = false
+# Shell and session flow
+command = "zsh"
+working-directory = inherit
+shell-integration = zsh
+shell-integration-features = cursor,title,path,no-sudo,no-ssh-env,no-ssh-terminfo
+
+# Window and rendering
+window-decoration = none
+window-theme = ghostty
 window-padding-x = 8
 window-padding-y = 8
-background-opacity = 1.0
+window-padding-balance = true
+window-padding-color = background
 window-show-tab-bar = auto
+window-new-tab-position = current
+window-vsync = true
+background-opacity = 1.0
+gtk-single-instance = false
 
-# Colors (Catppuccin Mocha, aligned with kitty theme)
+# Terminal behavior
+copy-on-select = clipboard
+clipboard-read = ask
+clipboard-write = allow
+clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = true
+confirm-close-surface = false
+scrollback-limit = 10485760
+mouse-hide-while-typing = true
+focus-follows-mouse = false
+link-url = true
+link-previews = true
+
+# Colors
 background = "#1e1e2e"
 foreground = "#cdd6f4"
 cursor-color = "#f5e0dc"
+cursor-text = "#1e1e2e"
 selection-background = "#f5e0dc"
 selection-foreground = "#1e1e2e"
 
@@ -42,17 +69,67 @@ palette = 13=#f5c2e7
 palette = 14=#94e2d5
 palette = 15=#a6adc8
 
-# Behavior
-copy-on-select = true
-confirm-close-surface = false
-scrollback-limit = 10485760
-command = "zsh"
+# Cursor
+cursor-style = block
 
-# Keybindings (kitty-like essentials)
-keybind = ctrl+shift+c=copy_to_clipboard
+# Core shortcuts
+keybind = ctrl+shift+c=copy_to_clipboard:mixed
 keybind = ctrl+shift+v=paste_from_clipboard
 keybind = ctrl+shift+t=new_tab
 keybind = ctrl+shift+w=close_surface
 keybind = ctrl+shift+enter=new_window
 keybind = ctrl+shift+tab=previous_tab
 keybind = ctrl+tab=next_tab
+
+# Kitty-like local workflow layer
+# Uses ctrl+alt as the main modifier to mirror kitty_mod.
+keybind = ctrl+alt+y=copy_to_clipboard:mixed
+keybind = ctrl+alt+p=paste_from_clipboard
+keybind = ctrl+alt+f=start_search
+keybind = ctrl+alt+g=jump_to_prompt:-1
+keybind = ctrl+alt+shift+g=jump_to_prompt:1
+
+keybind = ctrl+alt+v=new_split:right
+keybind = ctrl+alt+s=new_split:down
+keybind = ctrl+alt+enter=new_window
+keybind = ctrl+alt+h=goto_split:previous
+keybind = ctrl+alt+l=goto_split:next
+keybind = ctrl+alt+x=close_surface
+keybind = ctrl+alt+equal=equalize_splits
+
+keybind = ctrl+alt+c=new_tab
+keybind = ctrl+alt+j=next_tab
+keybind = ctrl+alt+k=previous_tab
+keybind = ctrl+alt+comma=move_tab:-1
+keybind = ctrl+alt+period=move_tab:1
+keybind = ctrl+alt+q=close_tab
+
+keybind = ctrl+alt+1=goto_tab:1
+keybind = ctrl+alt+2=goto_tab:2
+keybind = ctrl+alt+3=goto_tab:3
+keybind = ctrl+alt+4=goto_tab:4
+keybind = ctrl+alt+5=goto_tab:5
+keybind = ctrl+alt+6=goto_tab:6
+keybind = ctrl+alt+7=goto_tab:7
+keybind = ctrl+alt+8=goto_tab:8
+keybind = ctrl+alt+9=goto_tab:9
+keybind = ctrl+alt+0=goto_tab:10
+
+keybind = ctrl+alt+z=toggle_split_zoom
+keybind = ctrl+alt+t=toggle_tab_overview
+keybind = ctrl+alt+escape=toggle_command_palette
+keybind = ctrl+alt+f5=reload_config
+
+# Modal resize table: more ergonomic than one-off resize chords.
+keybind = resize/
+keybind = ctrl+alt+r=activate_key_table:resize
+keybind = resize/escape=deactivate_key_table
+keybind = resize/enter=deactivate_key_table
+keybind = resize/h=resize_split:left,20
+keybind = resize/j=resize_split:down,20
+keybind = resize/k=resize_split:up,20
+keybind = resize/l=resize_split:right,20
+keybind = resize/left=resize_split:left,20
+keybind = resize/down=resize_split:down,20
+keybind = resize/up=resize_split:up,20
+keybind = resize/right=resize_split:right,20
