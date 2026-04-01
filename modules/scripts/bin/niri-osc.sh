@@ -1967,13 +1967,48 @@ EOF
     WORKSPACES_JSON=""
 
     rules_file="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/workspace-rules.tsv"
+    here_file="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/workspace-here.tsv"
     declare -a RULE_PATTERNS=()
     declare -a RULE_WORKSPACES=()
     declare -a RULE_TITLE_PATTERNS=()
 
+    workspace_name_from_slot() {
+      local workspace_ref="${1:-}"
+      [[ -n "${workspace_ref}" ]] || return 1
+      [[ -f "${here_file}" ]] || return 1
+
+      awk -F '\t' -v slot="${workspace_ref}" '
+        BEGIN { found = 0 }
+        /^[[:space:]]*#/ { next }
+        $1 == slot && $2 != "" {
+          print $2
+          found = 1
+          exit 0
+        }
+        END { exit found ? 0 : 1 }
+      ' "${here_file}"
+    }
+
+    canonical_workspace_ref() {
+      local workspace_ref="${1:-}"
+      local mapped_name=""
+
+      [[ -n "${workspace_ref}" ]] || return 1
+      if [[ "${workspace_ref}" =~ ^[0-9]+$ ]]; then
+        mapped_name="$(workspace_name_from_slot "${workspace_ref}" 2>/dev/null || true)"
+        if [[ -n "${mapped_name}" ]]; then
+          printf '%s\n' "${mapped_name}"
+          return 0
+        fi
+      fi
+
+      printf '%s\n' "${workspace_ref}"
+    }
+
     resolve_workspace_ref() {
       local want_ref="${1:-}"
       [[ -n "$want_ref" ]] || return 1
+      want_ref="$(canonical_workspace_ref "${want_ref}")"
 
       [[ -n "$WORKSPACES_JSON" ]] || WORKSPACES_JSON="$("${NIRI[@]}" -j workspaces 2>/dev/null || echo '[]')"
       jq -n --argjson wss "${WORKSPACES_JSON:-[]}" --arg want "$want_ref" -r '
@@ -2456,6 +2491,7 @@ flow-legacy)
     readonly CACHE_DIR="$cache_dir_candidate"
     readonly PREVIOUS_WS_FILE="$CACHE_DIR/previous_workspace"
     readonly MONITOR_STATE_FILE="$CACHE_DIR/monitor_state"
+    readonly HERE_MAP_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/workspace-here.tsv"
 
     init_environment() {
       mkdir -p "$CACHE_DIR" 2>/dev/null || true
@@ -2603,13 +2639,45 @@ flow-legacy)
       echo "$current" >"$PREVIOUS_WS_FILE"
     }
 
+    workspace_ref_from_slot() {
+      local workspace_ref="${1:-}"
+      local workspace_name=""
+
+      [[ -n "$workspace_ref" ]] || return 1
+      if ! is_int "$workspace_ref"; then
+        printf '%s\n' "$workspace_ref"
+        return 0
+      fi
+
+      workspace_ref="$(normalize_workspace_index "$workspace_ref")"
+      if [[ -f "$HERE_MAP_FILE" ]]; then
+        workspace_name="$(
+          awk -F '\t' -v slot="$workspace_ref" '
+            BEGIN { found = 0 }
+            /^[[:space:]]*#/ { next }
+            $1 == slot && $2 != "" {
+              print $2
+              found = 1
+              exit 0
+            }
+            END { exit found ? 0 : 1 }
+          ' "$HERE_MAP_FILE" 2>/dev/null || true
+        )"
+      fi
+
+      if [[ -n "$workspace_name" ]]; then
+        printf '%s\n' "$workspace_name"
+      else
+        printf '%s\n' "$workspace_ref"
+      fi
+    }
+
     switch_to_workspace() {
       local index="${1:-$WS_MIN}"
-      if is_int "$index"; then
-        index="$(normalize_workspace_index "$index")"
-      fi
+      local target_ref
+      target_ref="$(workspace_ref_from_slot "$index")"
       save_current_as_previous
-      niri_action focus-workspace "$index"
+      niri_action focus-workspace "$target_ref"
     }
 
     toggle_workspace() {
@@ -2644,10 +2712,9 @@ flow-legacy)
 
     move_window_to_workspace() {
       local index="${1:-$WS_MIN}"
-      if is_int "$index"; then
-        index="$(normalize_workspace_index "$index")"
-      fi
-      niri_action move-column-to-workspace "$index"
+      local target_ref
+      target_ref="$(workspace_ref_from_slot "$index")"
+      niri_action move-column-to-workspace "$target_ref"
     }
 
     move_window_relative_workspace() {

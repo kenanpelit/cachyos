@@ -40,14 +40,14 @@ binds {
   // ----------------------------------------------------------------------
 EOF
 
-  jq -r '.workspaces[] | "  Mod+\(.id) hotkey-overlay-title=\"Workspace \(.id): \(.name)\" { focus-workspace \"\(.id)\"; }"' "${SOURCE_FILE}"
+  jq -r '.workspaces[] | "  Mod+\(.id) hotkey-overlay-title=\"Workspace \(.id): \(.name)\" { focus-workspace \"\(.name)\"; }"' "${SOURCE_FILE}"
 
   cat <<'EOF'
 
   // Move current column to workspace (1..9).
 EOF
 
-  jq -r '.workspaces[] | "  Mod+Shift+\(.id) hotkey-overlay-title=\"Move To WS \(.id): \(.name)\" { move-column-to-workspace \"\(.id)\"; }"' "${SOURCE_FILE}"
+  jq -r '.workspaces[] | "  Mod+Shift+\(.id) hotkey-overlay-title=\"Move To WS \(.id): \(.name)\" { move-column-to-workspace \"\(.name)\"; }"' "${SOURCE_FILE}"
 
   cat <<'EOF'
 
@@ -79,7 +79,7 @@ EOF
   jq -r '.workspaces[] |
     "window-rule {\n" +
     "  match app-id=r#\"\(.routeAppRegex)\"#\n" +
-    "  open-on-workspace \"\(.id)\"\n" +
+    "  open-on-workspace \"\(.name)\"\n" +
     "}\n"
   ' "${SOURCE_FILE}"
 
@@ -110,7 +110,7 @@ emit_runtime_rules() {
 # Format: APP_ID_REGEX<TAB>WORKSPACE<TAB>TITLE_REGEX
 EOF
 
-  jq -r '.workspaces[] | [.routeAppRegex, .id, .routeTitleRegex] | @tsv' "${SOURCE_FILE}"
+  jq -r '.workspaces[] | [.routeAppRegex, .name, .routeTitleRegex] | @tsv' "${SOURCE_FILE}"
 }
 
 emit_runtime_here() {

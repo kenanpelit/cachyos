@@ -4,47 +4,47 @@
 // Default workspace placements by application ID.
 window-rule {
   match app-id=r#"^Kenp$"#
-  open-on-workspace "1"
+  open-on-workspace "Kenp"
 }
 
 window-rule {
   match app-id=r#"^(TmuxKenp|kitty)$"#
-  open-on-workspace "2"
+  open-on-workspace "Term"
 }
 
 window-rule {
   match app-id=r#"^(Ai|Nil)$"#
-  open-on-workspace "3"
+  open-on-workspace "AI"
 }
 
 window-rule {
   match app-id=r#"^CompecTA$"#
-  open-on-workspace "4"
+  open-on-workspace "Work"
 }
 
 window-rule {
   match app-id=r#"^(discord|WebCord|audacious)$"#
-  open-on-workspace "5"
+  open-on-workspace "Chat"
 }
 
 window-rule {
   match app-id=r#"^(Exclude|org\.telegram\.desktop|vlc|remote-viewer)$"#
-  open-on-workspace "6"
+  open-on-workspace "Media"
 }
 
 window-rule {
   match app-id=r#"^(transmission|org\.keepassxc\.KeePassXC|(brave-youtube|chrome-youtube)\.com__-Default)$"#
-  open-on-workspace "7"
+  open-on-workspace "Utility"
 }
 
 window-rule {
   match app-id=r#"^(spotify|Spotify|com\.spotify\.Client)$"#
-  open-on-workspace "8"
+  open-on-workspace "Music"
 }
 
 window-rule {
   match app-id=r#"^(ferdium|Ferdium|com\.rtosta\.zapzap|(Whats|chrome-web\.whatsapp\.com__-Default))$"#
-  open-on-workspace "9"
+  open-on-workspace "Social"
 }
 
 // END OSC_NIRI_WORKSPACE_RULES

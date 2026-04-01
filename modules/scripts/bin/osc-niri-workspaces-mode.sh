@@ -110,7 +110,7 @@ block_contains() {
 
 shortcuts_mode() {
   local shortcuts_file="$1"
-  if block_contains "${shortcuts_file}" "${BEGIN_SHORTCUTS}" "${END_SHORTCUTS}" 'focus-workspace "1"'; then
+  if block_contains "${shortcuts_file}" "${BEGIN_SHORTCUTS}" "${END_SHORTCUTS}" 'focus-workspace "'; then
     printf 'managed\n'
   else
     printf 'natural\n'
@@ -119,7 +119,7 @@ shortcuts_mode() {
 
 rules_mode() {
   local rules_file="$1"
-  if block_contains "${rules_file}" "${BEGIN_RULES}" "${END_RULES}" 'open-on-workspace "1"'; then
+  if block_contains "${rules_file}" "${BEGIN_RULES}" "${END_RULES}" 'open-on-workspace "'; then
     printf 'managed\n'
   else
     printf 'natural\n'
@@ -359,6 +359,23 @@ cleanup_osc_workspace_names() {
   )
 }
 
+workspace_name_from_slot() {
+  local workspace_ref="${1:-}"
+  [[ -n "${workspace_ref}" ]] || return 1
+  [[ -f "${RUNTIME_HERE_FILE}" ]] || return 1
+
+  awk -F '\t' -v slot="${workspace_ref}" '
+    BEGIN { found = 0 }
+    /^[[:space:]]*#/ { next }
+    $1 == slot && $2 != "" {
+      print $2
+      found = 1
+      exit 0
+    }
+    END { exit found ? 0 : 1 }
+  ' "${RUNTIME_HERE_FILE}"
+}
+
 prime_managed_live_workspaces() {
   local workspaces_json output_name workspace_idx target_slot
   local target_output target_name
@@ -376,7 +393,7 @@ prime_managed_live_workspaces() {
     jq -r '
       .[]?
       | (.name // "")
-      | select(test("^[0-9]+$"))
+      | select(. != "")
     ' <<<"${workspaces_json}" 2>/dev/null
   )
 
@@ -456,23 +473,23 @@ managed_target_workspace_for_window() {
   fi
 
   if [[ "${app_id}" =~ ^Kenp$ ]]; then
-    printf '1\n'
+    workspace_name_from_slot "1" || printf 'Kenp\n'
   elif [[ "${app_id}" == "TmuxKenp" ]] || [[ "${app_id}" =~ ^(kitty)$ && "${title}" =~ ^Tmux$ ]]; then
-    printf '2\n'
+    workspace_name_from_slot "2" || printf 'Term\n'
   elif [[ "${app_id}" =~ ^(Ai|Nil)$ ]]; then
-    printf '3\n'
+    workspace_name_from_slot "3" || printf 'AI\n'
   elif [[ "${app_id}" =~ ^CompecTA$ ]]; then
-    printf '4\n'
+    workspace_name_from_slot "4" || printf 'Work\n'
   elif [[ "${app_id}" =~ ^(discord|WebCord|audacious)$ ]]; then
-    printf '5\n'
+    workspace_name_from_slot "5" || printf 'Chat\n'
   elif [[ "${app_id}" =~ ^(Exclude|org\.telegram\.desktop|vlc|remote-viewer)$ ]]; then
-    printf '6\n'
+    workspace_name_from_slot "6" || printf 'Media\n'
   elif [[ "${app_id}" =~ ^(transmission|org\.keepassxc\.KeePassXC|(brave-youtube|chrome-youtube)\.com__-Default)$ ]]; then
-    printf '7\n'
+    workspace_name_from_slot "7" || printf 'Utility\n'
   elif [[ "${app_id}" =~ ^(spotify|Spotify|com\.spotify\.Client)$ ]]; then
-    printf '8\n'
+    workspace_name_from_slot "8" || printf 'Music\n'
   elif [[ "${app_id}" =~ ^(ferdium|Ferdium|com\.rtosta\.zapzap|Whats|chrome-web\.whatsapp\.com__-Default)$ ]]; then
-    printf '9\n'
+    workspace_name_from_slot "9" || printf 'Social\n'
   else
     printf '\n'
   fi
@@ -480,7 +497,7 @@ managed_target_workspace_for_window() {
 
 rearrange_live_windows_managed() {
   local windows_json workspaces_json focused_id
-  local window_id app_id title target_slot target_ref focused_target_ref
+  local window_id app_id title target_name target_ref focused_target_ref
   local output_name workspace_idx temp_ref
   declare -A target_refs=()
   declare -A focus_refs_by_output=()
@@ -492,34 +509,35 @@ rearrange_live_windows_managed() {
 
   focused_id="$(focused_window_id "${windows_json}")"
 
-  for target_slot in 1 2 3 4 5 6 7 8 9; do
+  while IFS= read -r target_name; do
+    [[ -n "${target_name}" ]] || continue
     workspaces_json="$(live_workspaces_json || true)"
     read -r output_name workspace_idx < <(
-      jq -r --arg slot "${target_slot}" '
+      jq -r --arg target "${target_name}" '
         first(
           .[]?
-          | select((.name // "") == $slot)
+          | select((.name // "") == $target)
           | [(.output // ""), (.idx | tostring)]
           | @tsv
         ) // ""
       ' <<<"${workspaces_json}" 2>/dev/null
     )
-    [[ -n "${target_slot}" && -n "${output_name}" && -n "${workspace_idx}" ]] || continue
-    temp_ref="__osc_managed_${BASHPID}_${target_slot}"
+    [[ -n "${target_name}" && -n "${output_name}" && -n "${workspace_idx}" ]] || continue
+    temp_ref="__osc_managed_${BASHPID}_$(sanitize_token "${target_name}")"
     focus_monitor_name "${output_name}"
     set_workspace_name_ref "${workspace_idx}" "${temp_ref}"
-    target_refs["${target_slot}"]="${temp_ref}"
+    target_refs["${target_name}"]="${temp_ref}"
     if [[ -z "${focus_refs_by_output[${output_name}]:-}" ]]; then
       focus_refs_by_output["${output_name}"]="${temp_ref}"
     fi
-  done
+  done < <(managed_workspace_targets | awk -F '\t' '{print $2}' | awk 'NF {print $0}' | sort -u)
 
   windows_json="$(live_windows_json || true)"
 
   while IFS=$'\t' read -r window_id app_id title; do
     [[ -n "${window_id}" ]] || continue
-    target_slot="$(managed_target_workspace_for_window "${app_id}" "${title}")"
-    target_ref="${target_refs[${target_slot}]:-}"
+    target_name="$(managed_target_workspace_for_window "${app_id}" "${title}")"
+    target_ref="${target_refs[${target_name}]:-}"
     [[ -n "${target_ref}" ]] || continue
     if [[ "${window_id}" == "${focused_id}" ]]; then
       focused_target_ref="${target_ref}"
@@ -539,11 +557,12 @@ rearrange_live_windows_managed() {
     move_window_to_workspace_ref "${focused_id}" "${focused_target_ref}" true
   fi
 
-  for target_slot in 1 2 3 4 5 6 7 8 9; do
-    target_ref="${target_refs[${target_slot}]:-}"
+  while IFS= read -r target_name; do
+    [[ -n "${target_name}" ]] || continue
+    target_ref="${target_refs[${target_name}]:-}"
     [[ -n "${target_ref}" ]] || continue
-    set_workspace_name_ref "${target_ref}" "${target_slot}"
-  done
+    set_workspace_name_ref "${target_ref}" "${target_name}"
+  done < <(managed_workspace_targets | awk -F '\t' '{print $2}' | awk 'NF {print $0}' | sort -u)
 
   focus_window_id "${focused_id}"
 }

@@ -20,6 +20,32 @@ warn() { printf '[%s] WARN: %s\n' "$LOG_TAG" "$*" >&2; }
 
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 
+workspace_name_from_slot() {
+  local workspace_ref="${1:-}"
+  local here_file="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/workspace-here.tsv"
+
+  [[ -n "${workspace_ref}" ]] || return 1
+  [[ "${workspace_ref}" =~ ^[0-9]+$ ]] || {
+    printf '%s\n' "${workspace_ref}"
+    return 0
+  }
+  [[ -f "${here_file}" ]] || {
+    printf '%s\n' "${workspace_ref}"
+    return 0
+  }
+
+  awk -F '\t' -v slot="${workspace_ref}" '
+    BEGIN { found = 0 }
+    /^[[:space:]]*#/ { next }
+    $1 == slot && $2 != "" {
+      print $2
+      found = 1
+      exit 0
+    }
+    END { exit found ? 0 : 1 }
+  ' "${here_file}" 2>/dev/null || printf '%s\n' "${workspace_ref}"
+}
+
 ensure_niri_env() {
   niri_ensure_runtime_dir
   niri_ensure_session_identity
@@ -44,6 +70,7 @@ main() {
     if [[ "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
       local focus_ws
       focus_ws="${NIRI_INIT_FOCUS_WORKSPACE:-2}"
+      focus_ws="$(workspace_name_from_slot "${focus_ws}")"
       if niri-osc set go --focus "ws:${focus_ws}"; then
         log "arranged windows and focused ws:${focus_ws}"
       else
@@ -62,6 +89,7 @@ main() {
   if [[ "${NIRI_INIT_SKIP_FOCUS_WORKSPACE:-0}" != "1" ]]; then
     local focus_ws
     focus_ws="${NIRI_INIT_FOCUS_WORKSPACE:-2}"
+    focus_ws="$(workspace_name_from_slot "${focus_ws}")"
     if niri msg action focus-workspace "${focus_ws}" >/dev/null 2>&1; then
       log "focused workspace ${focus_ws}"
     else

@@ -335,7 +335,11 @@ switch_workspace() {
   niri)
     if command -v niri >/dev/null 2>&1; then
       log "INFO" "WORKSPACE" "Switching to workspace $workspace (Niri)"
-      niri msg action focus-workspace "$workspace"
+      if command -v niri-osc >/dev/null 2>&1; then
+        niri-osc flow legacy -wn "$workspace"
+      else
+        niri msg action focus-workspace "$workspace"
+      fi
       sleep 1
     fi
     ;;
