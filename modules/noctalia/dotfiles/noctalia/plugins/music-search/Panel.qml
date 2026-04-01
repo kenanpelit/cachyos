@@ -608,8 +608,20 @@ Item {
     });
   }
 
+  function resolvePlaylistEntry(playlist) {
+    var playlistId = String(playlist?.id || "").trim();
+    if (playlistId.length > 0) {
+      var resolved = mainInstance?.findPlaylistById(playlistId);
+      if (resolved) {
+        return resolved;
+      }
+    }
+    return playlist || null;
+  }
+
   function playlistEntryCount(playlist) {
-    return Array.isArray(playlist?.entryIds) ? playlist.entryIds.length : 0;
+    var resolved = resolvePlaylistEntry(playlist);
+    return Array.isArray(resolved?.entryIds) ? resolved.entryIds.length : 0;
   }
 
   function playlistDetailEntries(playlistId) {
@@ -618,14 +630,7 @@ Item {
       return [];
     }
 
-    var playlists = mainInstance?.playlistEntries || [];
-    var targetPlaylist = null;
-    for (var i = 0; i < playlists.length; i++) {
-      if (String(playlists[i]?.id || "") === targetId) {
-        targetPlaylist = playlists[i];
-        break;
-      }
-    }
+    var targetPlaylist = resolvePlaylistEntry({"id": targetId});
 
     if (!targetPlaylist) {
       return [];

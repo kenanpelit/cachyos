@@ -1,7 +1,7 @@
 {
   "id": "music-search",
   "name": "Music Search",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "minNoctaliaVersion": "4.6.6",
   "author": "kevichi7",
   "license": "MIT",
