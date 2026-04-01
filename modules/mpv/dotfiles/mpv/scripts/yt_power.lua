@@ -181,7 +181,20 @@ local function fetch_formats_with_ytdlp(url)
 		ytdlp_path = found
 	end
 
-	local status, out = exec({ ytdlp_path, "--no-warnings", "--no-playlist", "-J", url })
+	local status, out = exec({
+		ytdlp_path,
+		"--ignore-config",
+		"--no-warnings",
+		"--no-playlist",
+		"--extractor-args", "youtube:player_client=web_safari,web,android_sdkless",
+		"--js-runtimes", "deno",
+		"--remote-components", "ejs:github",
+		"--extractor-retries", "1",
+		"--retries", "1",
+		"--socket-timeout", "15",
+		"-J",
+		url,
+	})
 	if status ~= 0 or out == "" then
 		mp.osd_message("yt-dlp başarısız", 2)
 		msg.error("yt-dlp JSON alınamadı; status=" .. tostring(status))

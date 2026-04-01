@@ -2,56 +2,104 @@
 set -euo pipefail
 
 cookie_file="${XDG_CONFIG_HOME:-$HOME/.config}/yt-dlp/cookies-youtube.txt"
-cookie_helper="${YT_COOKIES_HELPER:-yt-cookies-youtube}"
 ytdlp="yt-dlp"
+browser_cookie_timeout_s="${YT_DLP_BROWSER_COOKIE_TIMEOUT:-7}"
 
 extra_args=(
-  --extractor-args "youtube:player_client=android_sdkless,web_safari"
+  --ignore-config
+  --extractor-args "youtube:player_client=web_safari,web,android_sdkless"
   --js-runtimes "deno"
+  --remote-components "ejs:github"
+  --extractor-retries "1"
+  --retries "1"
+  --fragment-retries "1"
+  --socket-timeout "15"
 )
 
-resolve_cookie_helper() {
-  local candidate
+ytdlp_args=()
+antibot_args=(
+  --ignore-config
+  --extractor-args "youtube:player_client=tv_simply,web"
+  --js-runtimes "deno"
+  --remote-components "ejs:github"
+  --extractor-retries "1"
+  --retries "1"
+  --fragment-retries "1"
+  --socket-timeout "15"
+)
 
-  if command -v "$cookie_helper" >/dev/null 2>&1; then
-    command -v "$cookie_helper"
+resolve_browser_user_agent() {
+  local version_output chromium_version
+
+  if [[ -n "${YT_DLP_BROWSER_USER_AGENT:-}" ]]; then
+    printf '%s\n' "$YT_DLP_BROWSER_USER_AGENT"
     return 0
   fi
 
-  for candidate in \
-    "$HOME/.config/arch-config/modules/scripts/bin/yt-cookies-youtube.sh" \
-    "$HOME/.cachy/modules/scripts/bin/yt-cookies-youtube.sh"
-  do
-    [[ -x "$candidate" ]] || continue
-    printf '%s\n' "$candidate"
-    return 0
-  done
+  if command -v helium-browser >/dev/null 2>&1; then
+    version_output="$(helium-browser --version 2>/dev/null || true)"
+    chromium_version="$(sed -nE 's/.*Chromium ([0-9.]+).*/\1/p' <<<"$version_output" | head -n1)"
+    if [[ -n "$chromium_version" ]]; then
+      printf 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36\n' "$chromium_version"
+      return 0
+    fi
+  fi
 
   return 1
 }
 
-refresh_cookie_file() {
-  local helper_bin
-  helper_bin="$(resolve_cookie_helper)" || return 1
-  echo "[yt-dlp-mpv] refreshing cookies via $helper_bin..." >&2
-  "$helper_bin" --quiet --force --output "$cookie_file"
+build_ytdlp_args() {
+  local browser_ua
+  ytdlp_args=("${extra_args[@]}")
+
+  browser_ua="$(resolve_browser_user_agent || true)"
+  if [[ -n "$browser_ua" ]]; then
+    ytdlp_args+=(--user-agent "$browser_ua")
+  fi
+}
+
+is_antibot_error() {
+  local err_file="$1"
+  grep -Eq \
+    "Sign in to confirm you.?re not a bot|captcha challenge before playback|HTTP Error 429|Precondition check failed" \
+    "$err_file"
+}
+
+try_with_antibot_client() {
+  local err
+
+  err="$(mktemp)"
+  echo "[yt-dlp-mpv] anti-bot fallback: trying youtube client tv_simply,web" >&2
+
+  if timeout "$browser_cookie_timeout_s" "$ytdlp" "${antibot_args[@]}" "$@" 2>"$err"; then
+    rm -f "$err"
+    return 0
+  fi
+
+  cat "$err" >&2
+  rm -f "$err"
+
+  return 1
 }
 
 try_with_cookie_file_then_browser_fallback() {
   local err
   err="$(mktemp)"
 
-  if "$ytdlp" "${extra_args[@]}" --cookies "$cookie_file" "$@" 2>"$err"; then
+  if "$ytdlp" "${ytdlp_args[@]}" --cookies "$cookie_file" "$@" 2>"$err"; then
     rm -f "$err"
     return 0
   fi
 
-  if grep -Fq "Sign in to confirm you’re not a bot" "$err"; then
-    echo "[yt-dlp-mpv] bot-check: cookie dosyasını Helium'dan yenilemeyi deniyorum..." >&2
+  if is_antibot_error "$err"; then
+    echo "[yt-dlp-mpv] bot-check: cookie file path blocked, trying anti-bot client..." >&2
     rm -f "$err"
-    if refresh_cookie_file; then
-      exec "$ytdlp" "${extra_args[@]}" --cookies "$cookie_file" "$@"
+
+    if try_with_antibot_client "$@"; then
+      return 0
     fi
+
+    echo "[yt-dlp-mpv] anti-bot challenge persists; refresh with 'yt-cookies-youtube --force' after solving it in Helium if needed" >&2
     return 1
   fi
 
@@ -60,16 +108,17 @@ try_with_cookie_file_then_browser_fallback() {
   return 1
 }
 
+build_ytdlp_args
+
 if [[ -r "$cookie_file" ]]; then
   echo "[yt-dlp-mpv] using cookies file: $cookie_file" >&2
   try_with_cookie_file_then_browser_fallback "$@" || exit $?
   exit 0
 fi
 
-if refresh_cookie_file && [[ -r "$cookie_file" ]]; then
-  echo "[yt-dlp-mpv] using refreshed cookies file: $cookie_file" >&2
-  exec "$ytdlp" "${extra_args[@]}" --cookies "$cookie_file" "$@"
+if try_with_antibot_client "$@"; then
+  exit 0
 fi
 
 echo "[yt-dlp-mpv] no cookies available; proceeding without auth" >&2
-exec "$ytdlp" "${extra_args[@]}" "$@"
+exec "$ytdlp" "${ytdlp_args[@]}" "$@"

@@ -8,6 +8,7 @@ set -euo pipefail
 DEFAULT_OUTPUT="${XDG_CONFIG_HOME:-$HOME/.config}/yt-dlp/cookies-youtube.txt"
 DEFAULT_TEST_URL="${YT_COOKIES_TEST_URL:-https://www.youtube.com/watch?v=dQw4w9WgXcQ}"
 YTDLP_BIN="${YTDLP_BIN:-yt-dlp}"
+TRY_EXPORT_TIMEOUT="${YT_COOKIES_TRY_TIMEOUT:-8}"
 
 quiet=false
 mode="export"
@@ -36,6 +37,8 @@ Options:
   --output PATH   Write cookies to PATH
   --url URL       Test URL used during extraction
   --check         Validate an existing cookies file instead of exporting
+  --print-source  Print the first working browser cookie source and exit
+  --print-sources Print all working browser cookie sources and exit
   --force         Refresh even if the target file already looks valid
   --quiet         Reduce log output
   -h, --help      Show this help
@@ -61,6 +64,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --check)
       mode="check"
+      shift
+      ;;
+    --print-source)
+      mode="source"
+      shift
+      ;;
+    --print-sources)
+      mode="sources"
       shift
       ;;
     --force)
@@ -118,15 +129,54 @@ try_export() {
 
   rm -f "$tmp"
   log "Trying ${browser}+${keyring}:$root"
-  "$YTDLP_BIN" \
-    --ignore-config \
-    --cookies-from-browser "${browser}+${keyring}:${root}" \
-    --cookies "$tmp" \
-    --skip-download \
-    --playlist-end 1 \
-    "$test_url" >/dev/null 2>&1 || true
+  timeout "$TRY_EXPORT_TIMEOUT" \
+    "$YTDLP_BIN" \
+      --ignore-config \
+      --cookies-from-browser "${browser}+${keyring}:${root}" \
+      --cookies "$tmp" \
+      --skip-download \
+      --playlist-end 1 \
+      "$test_url" >/dev/null 2>&1 || true
 
   have_youtube_login_cookies "$tmp"
+}
+
+find_browser_source() {
+  local candidate browser root keyring
+
+  for candidate in "${CANDIDATES[@]}"; do
+    browser="${candidate%%:*}"
+    root="${candidate#*:}"
+    [[ -d "$root" ]] || continue
+    has_browser_root "$root" || continue
+
+    for keyring in "${KEYRINGS[@]}"; do
+      if try_export "$browser" "$keyring" "$root" "$tmp_cookie"; then
+        printf '%s\n' "${browser}+${keyring}:${root}"
+        return 0
+      fi
+    done
+  done
+
+  return 1
+}
+
+find_browser_sources() {
+  local candidate browser root keyring
+
+  for candidate in "${CANDIDATES[@]}"; do
+    browser="${candidate%%:*}"
+    root="${candidate#*:}"
+    [[ -d "$root" ]] || continue
+    has_browser_root "$root" || continue
+
+    for keyring in "${KEYRINGS[@]}"; do
+      if try_export "$browser" "$keyring" "$root" "$tmp_cookie"; then
+        printf '%s\n' "${browser}+${keyring}:${root}"
+        break
+      fi
+    done
+  done
 }
 
 declare -a CANDIDATES=(
@@ -153,7 +203,7 @@ fi
 command -v "$YTDLP_BIN" >/dev/null 2>&1 || die "yt-dlp not found"
 command -v rg >/dev/null 2>&1 || die "rg not found"
 
-if [[ -f "$output_file" ]] && ! $force; then
+if [[ "$mode" != "source" && "$mode" != "sources" && -f "$output_file" ]] && ! $force; then
   if check_cookie_file "$output_file"; then
     log "Keeping existing cookies file. Use --force to refresh."
     exit 0
@@ -170,21 +220,20 @@ tmp_cookie="$(mktemp /tmp/yt-cookies-youtube.XXXXXX.txt)"
 trap 'rm -f "$tmp_cookie"' EXIT
 
 selected=""
-for candidate in "${CANDIDATES[@]}"; do
-  browser="${candidate%%:*}"
-  root="${candidate#*:}"
-  [[ -d "$root" ]] || continue
-  has_browser_root "$root" || continue
-
-  for keyring in "${KEYRINGS[@]}"; do
-    if try_export "$browser" "$keyring" "$root" "$tmp_cookie"; then
-      selected="${browser}+${keyring}:${root}"
-      break 2
-    fi
-  done
-done
+selected="$(find_browser_source || true)"
 
 [[ -n "$selected" ]] || die "could not extract valid YouTube cookies from Helium/Brave profiles"
+
+if [[ "$mode" == "source" ]]; then
+  printf '%s\n' "$selected"
+  exit 0
+fi
+
+if [[ "$mode" == "sources" ]]; then
+  printf '%s\n' "$selected"
+  find_browser_sources | awk '!seen[$0]++ && $0 != first' first="$selected"
+  exit 0
+fi
 
 mkdir -p "$(dirname "$output_file")"
 chmod 700 "$(dirname "$output_file")" 2>/dev/null || true
