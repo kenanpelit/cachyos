@@ -1014,6 +1014,157 @@ favorites_upsert() {
 	mv "$tmp_file" "$FAVORITES_FILE"
 }
 
+favorite_ping_sort_key() {
+	local ping_avg="${1:-N/A}"
+
+	if [[ "$ping_avg" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+		printf '%s' "$ping_avg"
+	else
+		printf '999999'
+	fi
+}
+
+favorite_refresh() {
+	local country_filter="${1:-}"
+	local ping_timeout="${OSC_MULLVAD_FAVORITE_REFRESH_PING_TIMEOUT:-2}"
+	local ping_iterations="${OSC_MULLVAD_FAVORITE_REFRESH_PING_COUNT:-3}"
+	local require_internet="${OSC_MULLVAD_FAVORITE_REFRESH_REQUIRE_INTERNET:-1}"
+	local connect_timeout_s="${OSC_MULLVAD_FAVORITE_REFRESH_CONNECT_TIMEOUT:-10}"
+	local connect_retries="${OSC_MULLVAD_FAVORITE_REFRESH_CONNECT_RETRIES:-1}"
+	local restore_at_end="${OSC_MULLVAD_FAVORITE_REFRESH_RESTORE:-1}"
+
+	if [[ ! -s "$FAVORITES_FILE" ]]; then
+		log "Favorites list is empty"
+		notify "ℹ️ MULLVAD VPN" "Favorites list is empty" "security-medium"
+		return 1
+	fi
+
+	local -a target_relays=()
+	local -a untouched_lines=()
+	local relay ping_time
+
+	while IFS="|" read -r relay ping_time; do
+		relay="$(echo "${relay:-}" | xargs)"
+		[[ -n "$relay" ]] || continue
+
+		if [[ -n "$country_filter" && "$relay" != "${country_filter}-"* ]]; then
+			untouched_lines+=("${relay}|${ping_time:-N/A}")
+			continue
+		fi
+
+		target_relays+=("$relay")
+	done <"$FAVORITES_FILE"
+
+	if (( ${#target_relays[@]} == 0 )); then
+		log "No favorite relays matched refresh filter: ${country_filter:-all}"
+		notify "ℹ️ MULLVAD VPN" "No favorites matched ${country_filter:-all}" "security-medium"
+		return 1
+	fi
+
+	local was_connected="false"
+	local previous_relay=""
+	if mullvad_is_connected; then
+		was_connected="true"
+		previous_relay="$(get_current_relay)"
+	fi
+
+	local saved_no_notify="${OSC_MULLVAD_NO_NOTIFY:-0}"
+	OSC_MULLVAD_NO_NOTIFY=1
+
+	local -a refreshed_rows=()
+	local passed=0
+	local failed=0
+
+	echo -e "${CYAN}Refreshing favorite relays${country_filter:+ for ${country_filter}}...${NC}"
+
+	for relay in "${target_relays[@]}"; do
+		local ip=""
+		local ping_avg="N/A"
+		local current_relay=""
+
+		ip="$(get_relay_ipv4 "$relay")"
+		if [[ -n "$ip" ]]; then
+			ping_avg="$(ping_avg_ms "$ip" "$ping_iterations" "$ping_timeout")"
+		fi
+
+		echo -en "${CYAN}Testing favorite ${YELLOW}${relay}${CYAN}...${NC} "
+
+		if ! connect_to_relay "$relay" "$connect_timeout_s" "$connect_retries" "0"; then
+			echo -e "${RED}connect failed${NC}"
+			((failed++))
+			continue
+		fi
+
+		current_relay="$(get_current_relay)"
+		if [[ -z "$current_relay" || "$current_relay" != "$relay" ]]; then
+			echo -e "${RED}relay mismatch${NC}"
+			((failed++))
+			continue
+		fi
+
+		if [[ "$require_internet" == "1" ]] && ! mullvad_internet_ok; then
+			echo -e "${RED}no internet${NC}"
+			((failed++))
+			continue
+		fi
+
+		local sort_key
+		sort_key="$(favorite_ping_sort_key "$ping_avg")"
+		refreshed_rows+=("${sort_key}"$'\t'"${ping_avg}"$'\t'"${relay}")
+		((passed++))
+
+		if [[ "$ping_avg" == "N/A" ]]; then
+			echo -e "${YELLOW}working${NC}"
+		else
+			echo -e "${GREEN}${ping_avg} ms${NC}"
+		fi
+	done
+
+	OSC_MULLVAD_NO_NOTIFY="$saved_no_notify"
+
+	if [[ "$restore_at_end" == "1" && "$was_connected" == "true" && -n "$previous_relay" ]]; then
+		log "Favorite refresh: restoring previous relay: ${previous_relay}"
+		connect_to_relay "$previous_relay" "$connect_timeout_s" "$connect_retries" "1" >/dev/null 2>&1 || true
+	fi
+
+	if (( passed == 0 )); then
+		log "Favorite refresh: no relays passed validation"
+		notify "❌ MULLVAD VPN" "Favorite refresh failed; no relay passed validation" "security-low"
+		return 1
+	fi
+
+	local -a sorted_rows=()
+	IFS=$'\n' read -r -d '' -a sorted_rows < <(printf '%b\n' "${refreshed_rows[@]}" | sort -n && printf '\0')
+	unset IFS
+
+	local tmp_file="${FAVORITES_FILE}.tmp"
+	: >"$tmp_file"
+
+	local row
+	for row in "${sorted_rows[@]}"; do
+		local rest="${row#*$'\t'}"
+		local ping_value="${rest%%$'\t'*}"
+		local sorted_relay="${rest#*$'\t'}"
+		printf '%s|%s\n' "$sorted_relay" "$ping_value" >>"$tmp_file"
+	done
+
+	local line
+	for line in "${untouched_lines[@]}"; do
+		printf '%s\n' "$line" >>"$tmp_file"
+	done
+
+	mv "$tmp_file" "$FAVORITES_FILE"
+
+	local best_row="${sorted_rows[0]}"
+	local best_rest="${best_row#*$'\t'}"
+	local best_ping="${best_rest%%$'\t'*}"
+	local best_relay="${best_rest#*$'\t'}"
+
+	log "Favorite refresh complete: ${passed} passed, ${failed} removed"
+	notify "⭐ MULLVAD VPN" "Favorites refreshed (${passed} ok, ${failed} removed), fastest: ${best_relay} (${best_ping} ms)" "security-high"
+	echo -e "${GREEN}Favorites refreshed.${NC} ${passed} working, ${failed} removed. Fastest: ${best_relay} (${best_ping} ms)"
+}
+
 is_number() {
 	[[ "${1:-}" =~ ^[0-9]+$ ]]
 }
@@ -1451,9 +1602,13 @@ manage_favorites() {
 		return 1
 		;;
 
+	"refresh")
+		favorite_refresh "$2"
+		;;
+
 	*)
 		echo -e "${RED}Unknown favorites action: $action${NC}"
-		echo -e "${YELLOW}Available actions: add, remove, list, connect${NC}"
+		echo -e "${YELLOW}Available actions: add, remove, list, connect, refresh${NC}"
 		;;
 	esac
 }
@@ -2661,6 +2816,7 @@ show_help() {
 	echo -e "    ${GREEN}favorite remove${NC}    Remove a relay from favorites (interactive)"
 	echo -e "    ${GREEN}favorite list${NC}      List all favorite relays"
 	echo -e "    ${GREEN}favorite connect${NC}   Connect to a favorite relay (interactive)"
+	echo -e "    ${GREEN}favorite refresh${NC} [country]  Re-test favorites, drop dead relays and sort fastest-first"
 	echo -e ""
 	echo -e "${YELLOW}Device Slot (multi-machine):${NC}"
 	echo -e "    ${GREEN}slot recycle${NC}       Revoke other machine device(s) -> login -> connect -> record self"
@@ -2688,6 +2844,7 @@ show_help() {
 	echo -e "    ${GREEN}$SCRIPT_NAME us nyc${NC}            # Switch to a New York relay"
 	echo -e "    ${GREEN}$SCRIPT_NAME fastest de${NC}        # Find fastest German relay"
 	echo -e "    ${GREEN}$SCRIPT_NAME fastest-fav${NC}       # Find fastest relay and add to favorites"
+	echo -e "    ${GREEN}$SCRIPT_NAME favorite refresh nl${NC}  # Re-test NL favorites and sort them by speed"
 	echo -e "    ${GREEN}$SCRIPT_NAME favorite add${NC}      # Add current relay to favorites"
 	echo -e "    ${GREEN}$SCRIPT_NAME timer 30${NC}          # Change relay every 30 minutes"
 	echo -e ""
@@ -2823,10 +2980,10 @@ main() {
 	"favorite")
 		if [[ -z "$2" ]]; then
 			echo -e "${RED}Error: Missing favorite action${NC}"
-			echo -e "${YELLOW}Available actions: add, remove, list, connect${NC}"
+			echo -e "${YELLOW}Available actions: add, remove, list, connect, refresh${NC}"
 			exit 1
 		fi
-		manage_favorites "$2"
+		manage_favorites "${@:2}"
 		;;
 
 	# Advanced selection

@@ -186,6 +186,7 @@ _osc_mullvad() {
         'remove:remove a relay from favorites'
         'list:list favorite relays'
         'connect:connect to a favorite relay'
+        'refresh:re-test favorites, remove dead relays and sort by speed'
       )
 
       if (( CURRENT == 3 )); then
@@ -201,6 +202,13 @@ _osc_mullvad() {
             compadd -- "${favorites[@]}"
           else
             _message 'favorite relay'
+          fi
+          ;;
+        refresh)
+          if (( CURRENT == 4 )); then
+            compadd -- "${countries[@]}"
+          else
+            _message 'country code (optional)'
           fi
           ;;
         add|list)
