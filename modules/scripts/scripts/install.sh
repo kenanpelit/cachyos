@@ -173,8 +173,6 @@ cleanup_legacy_bins() {
     niri-keybinds
     osc-perf-mode
     rofi-performance
-    start-wezterm
-    start-wezterm-rmpc
     start-wkenp
     start-zen-compecta
     start-zen-discord

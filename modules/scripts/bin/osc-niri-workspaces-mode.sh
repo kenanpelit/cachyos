@@ -457,7 +457,7 @@ managed_target_workspace_for_window() {
 
   if [[ "${app_id}" =~ ^Kenp$ ]]; then
     printf '1\n'
-  elif [[ "${app_id}" == "TmuxKenp" ]] || [[ "${app_id}" =~ ^(kitty|org\.wezfurlong\.wezterm)$ && "${title}" =~ ^Tmux$ ]]; then
+  elif [[ "${app_id}" == "TmuxKenp" ]] || [[ "${app_id}" =~ ^(kitty)$ && "${title}" =~ ^Tmux$ ]]; then
     printf '2\n'
   elif [[ "${app_id}" =~ ^(Ai|Nil)$ ]]; then
     printf '3\n'

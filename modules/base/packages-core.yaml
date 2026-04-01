@@ -62,7 +62,7 @@ packages:
   - podman-compose
   - qemu-full
 
-  # Terminals / UX (moved to own modules: tmux, wezterm, kitty, starship, fastfetch, btop, bat)
+  # Terminals / UX (moved to own modules: tmux, kitty, starship, fastfetch, btop, bat)
   - neofetch
   - htop
   - procs

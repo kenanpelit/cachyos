@@ -8,7 +8,7 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^(TmuxKenp|kitty|org\.wezfurlong\.wezterm)$"#
+  match app-id=r#"^(TmuxKenp|kitty)$"#
   open-on-workspace "2"
 }
 

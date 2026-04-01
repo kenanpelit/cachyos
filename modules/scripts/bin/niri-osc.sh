@@ -2048,7 +2048,7 @@ EOF
       RULE_PATTERNS+=("^TmuxKenp$")
       RULE_WORKSPACES+=("2")
       RULE_TITLE_PATTERNS+=("^Tmux$")
-      RULE_PATTERNS+=("^(kitty|org\\.wezfurlong\\.wezterm)$")
+      RULE_PATTERNS+=("^(kitty)$")
       RULE_WORKSPACES+=("2")
       RULE_TITLE_PATTERNS+=("^Tmux$")
       RULE_PATTERNS+=("^Kenp$")

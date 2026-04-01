@@ -31,7 +31,7 @@
 #
 # - Yapılandırma:
 #   - Yapılandırma yedekleme ve geri yükleme
-#   - Terminal entegrasyonu (kitty/wezterm/alacritty)
+#   - Terminal entegrasyonu (kitty/alacritty)
 #
 # License: MIT
 #
@@ -364,8 +364,6 @@ check_requirements() {
 detect_terminal() {
 	if [[ -n "${KITTY_WINDOW_ID:-}" ]] || command -v kitty >/dev/null 2>&1; then
 		echo "kitty"
-	elif [[ -n "${WEZTERM_EXECUTABLE:-}" ]] || command -v wezterm >/dev/null 2>&1; then
-		echo "wezterm"
 	elif command -v alacritty >/dev/null 2>&1; then
 		echo "alacritty"
 	elif command -v foot >/dev/null 2>&1; then
@@ -536,16 +534,6 @@ open_session_in_terminal() {
 			--directory="$PWD" \
 			-e bash -c "$script_path session create \"$session_name\" $layout" &
 		;;
-	wezterm)
-		if ! cmd_exists wezterm; then
-			error "WezTerm terminal kurulu değil!"
-			return 1
-		fi
-		# WezTerm için sadece class kullan, title'ı tmux içinde ayarla
-		wezterm start \
-			--class "$class_name" \
-			-- bash -c "cd '$PWD' && $script_path session create \"$session_name\" $layout" &
-		;;
 	alacritty)
 		if ! cmd_exists alacritty; then
 			error "Alacritty terminal kurulu değil!"
@@ -558,7 +546,7 @@ open_session_in_terminal() {
 		;;
 	*)
 		error "Desteklenmeyen terminal türü: $terminal_type"
-		info "Desteklenen terminaller: kitty, wezterm, alacritty"
+		info "Desteklenen terminaller: kitty, alacritty"
 		return 1
 		;;
 	esac
@@ -1380,7 +1368,7 @@ Komutlar:
     kill <ad>            Oturumu sonlandır
     attach <ad>          Oturuma bağlan
     layout <ad> <no>     Belirtilen düzeni uygula (1-5)
-    term <tip> <ad> [düzen]  Yeni terminalde oturum aç (kitty/wezterm/alacritty)
+    term <tip> <ad> [düzen]  Yeni terminalde oturum aç (kitty/alacritty)
 
 Düzenler:
     1: Tek panel
@@ -1394,7 +1382,7 @@ Düzenler:
     $SCRIPT_NAME session list
     $SCRIPT_NAME session kill myproject
     $SCRIPT_NAME session term kitty dev 2
-    $SCRIPT_NAME session term wezterm myproject 3
+    $SCRIPT_NAME session term alacritty myproject 3
 
 Notlar:
     • Parametre verilmezse, mevcut dizin adıyla oturum oluşturulur
@@ -1703,7 +1691,7 @@ $(echo -e "${GREEN}")Ortam Değişkenleri:$(echo -e "${NC}")
 
 $(echo -e "${GREEN}")Gereksinimler:$(echo -e "${NC}")
     $(echo -e "${CYAN}")Temel:$(echo -e "${NC}") tmux, bash, fzf
-    $(echo -e "${CYAN}")İsteğe Bağlı:$(echo -e "${NC}") git, cliphist, wl-clipboard, kitty/wezterm/alacritty
+    $(echo -e "${CYAN}")İsteğe Bağlı:$(echo -e "${NC}") git, cliphist, wl-clipboard, kitty/alacritty
 
 $(echo -e "${GREEN}")Yapılandırma:$(echo -e "${NC}")
     $(echo -e "${CYAN}")Ana Dizin:$(echo -e "${NC}")       ~/.config/tmux
@@ -1801,7 +1789,7 @@ process_session_commands() {
 	"term" | "t")
 		if [[ -z "${1:-}" ]] || [[ -z "${2:-}" ]]; then
 			error "Terminal türü ve oturum adı gerekli"
-			info "Desteklenen terminaller: kitty, wezterm, alacritty"
+			info "Desteklenen terminaller: kitty, alacritty"
 			return 1
 		fi
 		local layout="${3:-1}"

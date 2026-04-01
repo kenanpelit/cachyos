@@ -12,7 +12,7 @@
 set -euo pipefail
 
 # Niri/DM launches may provide a minimal PATH; normalize it so helper binaries
-# (anote, kitty/wezterm/alacritty/foot, etc.) are always discoverable.
+# (anote, kitty/alacritty/foot, etc.) are always discoverable.
 case ":${PATH:-}:" in
 *":$HOME/.local/bin:"*) ;;
 *) PATH="$HOME/.local/bin:${PATH:-}" ;;
@@ -99,7 +99,6 @@ EOF
 detect_terminal() {
   local terminals=(
     "kitty:kitty --class $ANOTE_WINDOW_CLASS -T $ANOTE_WINDOW_TITLE --single-instance"
-    "wezterm:wezterm start --class $ANOTE_WINDOW_CLASS"
     "alacritty:alacritty --class $ANOTE_WINDOW_CLASS -t $ANOTE_WINDOW_TITLE"
     "foot:foot --app-id=$ANOTE_WINDOW_CLASS --title=$ANOTE_WINDOW_TITLE"
   )
@@ -127,7 +126,7 @@ detect_terminal() {
     fi
   done
 
-  echo "⚠ Desteklenen GUI terminal bulunamadı (kitty, wezterm, alacritty, foot)" >&2
+  echo "⚠ Desteklenen GUI terminal bulunamadı (kitty, alacritty, foot)" >&2
   return 1
 }
 
@@ -158,7 +157,7 @@ ANOTE_CMD="$ANOTE_CMD"
 ANOTE_WINDOW_TITLE="$ANOTE_WINDOW_TITLE"
 ANOTE_WINDOW_CLASS="$ANOTE_WINDOW_CLASS"
 
-# Terminal seçimi (auto, kitty, wezterm, alacritty, foot)
+# Terminal seçimi (auto, kitty, alacritty, foot)
 PREFERRED_TERMINAL="auto"
 
 # Ek özellikler

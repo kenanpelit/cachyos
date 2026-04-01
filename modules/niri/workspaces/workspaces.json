@@ -15,7 +15,7 @@
       "hereLabel": "TmuxKenp",
       "hereTarget": "TmuxKenp",
       "focusRegex": "^TmuxKenp$",
-      "routeAppRegex": "^(TmuxKenp|kitty|org\\.wezfurlong\\.wezterm)$",
+      "routeAppRegex": "^(TmuxKenp|kitty)$",
       "routeTitleRegex": "^Tmux$"
     },
     {

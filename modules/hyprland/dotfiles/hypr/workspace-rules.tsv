@@ -16,7 +16,7 @@
 ^((brave|chrome)-youtube\.com__-Default)$	7
 ^(Brave-browser)$	8	^(Spotify - Web Player).*
 ^(Tmux)$	2	^(Tmux)$
-^(kitty|org\.wezfurlong\.wezterm)$	2	^(Tmux)$
+^(kitty)$	2	^(Tmux)$
 ^(TmuxKenp)$	2
 ^(Ai)$	3
 ^(Nil)$	3
