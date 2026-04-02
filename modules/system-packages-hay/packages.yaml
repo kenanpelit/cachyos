@@ -185,6 +185,7 @@ packages:
 - upower
 - usb_modeswitch
 - vlc
+- vlc-gui-skins2
 - vlc-plugins-all
 - vpl-gpu-rt
 - vulkan-intel

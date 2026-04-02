@@ -1,3 +1,4 @@
 description: VLC packages
 packages:
   - vlc
+  - vlc-gui-skins2
