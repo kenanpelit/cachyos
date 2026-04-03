@@ -6,6 +6,7 @@ import qs.Services.UI
 import qs.Services.System
 import qs.Services.Compositor
 import qs.Widgets
+import Quickshell.Io
 
 NIconButton {
     id: root
@@ -35,35 +36,38 @@ NIconButton {
         pluginApi?.manifest?.metadata?.defaultSettings?.mode || 
         "region"
 
+    Process {
+        id: screenshotProcess
+        onExited: code => {
+            if (code === 0) {
+                ToastService.showNotice(pluginApi?.tr("notification.title"), pluginApi?.tr("notification.success"), "camera", 3000);
+            }
+        }
+    }
+
     function takeScreenshot() {
+        if (screenshotProcess.running) return;
+
+        var args = [];
         if (CompositorService.isHyprland) {
-            var args = ["hyprshot", "--freeze", "--clipboard-only", "--mode", screenshotMode, "--silent"];
-            Quickshell.execDetached(args);
+            args = ["hyprshot", "--freeze", "--clipboard-only", "--mode", screenshotMode, "--silent"];
         } else if (CompositorService.isNiri) {
-            Quickshell.execDetached(["niri", "msg", "action", "screenshot"]);
+            args = ["niri", "msg", "action", "screenshot"];
         } else if (CompositorService.isSway) {
-            var args = ["grimshot", "copy", "area"];
+            args = ["grimshot", "copy", "area"];
 
             if (screenshotMode === "screen" || screenshotMode === "fullscreen") {
                 args = ["grimshot", "copy", "output"];
             } else if (screenshotMode === "window") {
                 args = ["grimshot", "copy", "window"];
             }
-
-            var started = Quickshell.execDetached(args);
-            if (!started) {
-                UIService.showNotification({
-                    title: "Screenshot Error",
-                    message: "Failed to run grimshot. Please ensure grimshot is installed and in PATH.",
-                    icon: "alert",
-                    timeout: 3000
-                });
-            }
         } else {
             // Fallback to hyprshot for other compositors
-            var args = ["hyprshot", "--freeze", "--clipboard-only", "--mode", screenshotMode, "--silent"];
-            Quickshell.execDetached(args);
+            args = ["hyprshot", "--freeze", "--clipboard-only", "--mode", screenshotMode, "--silent"];
         }
+
+        screenshotProcess.command = args;
+        screenshotProcess.running = true;
     }
 
     onClicked: {
