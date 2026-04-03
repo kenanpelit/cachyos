@@ -1,6 +1,6 @@
 [Unit]
 Description=Niri session (user services)
-Wants=graphical-session.target xdg-desktop-autostart.target niri-session-env.service niri-bootstrap.service niri-audio-init.service niri-arrange.service niri-shell-ensure.service niri-daemons.target niri-post-daemons.target niri-session-ready.target
+Wants=graphical-session.target xdg-desktop-autostart.target niri-session-env.service niri-bootstrap.service niri-audio-init.service niri-arrange.service niri-shell-ensure.service niri-lid-switch-inhibit.service niri-daemons.target niri-post-daemons.target niri-session-ready.target
 After=graphical-session.target dbus.service
 BindsTo=graphical-session.target
 PartOf=graphical-session.target

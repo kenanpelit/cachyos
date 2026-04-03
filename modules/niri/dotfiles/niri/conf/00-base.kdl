@@ -91,7 +91,7 @@ debug {
 
 switch-events {
   lid-close {
-    spawn "niri-osc" "set" "lock" "--logind"
+    spawn "niri-osc" "set" "lock-and-suspend"
   }
 
   // Re-run layout arrangement after dock/undock events caused by opening the lid.

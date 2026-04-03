@@ -1,11 +1,11 @@
 {
   "id": "special-workspaces",
   "name": "Special Workspaces (Hyprland)",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.4.0",
   "author": "Qholin",
   "license": "MIT",
-  "repository": "https://github.com/qholin/noctalia-special-workspaces/",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "description": "Configurable Hyprland special workspaces indicator for the bar.",
   "tags": [
     "Bar",
@@ -38,7 +38,9 @@
           "name": "communication",
           "icon": "message"
         }
-      ]
+      ],
+      "drawer": true,
+      "hideEmptyWorkspaces": true
     }
   }
 }

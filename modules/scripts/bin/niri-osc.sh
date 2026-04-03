@@ -242,6 +242,7 @@ Commands:
   start              Daily semsumo startup helper
   init               Bootstrap session (was: niri-init)
   lock               Lock session via logind or the active shell backend
+  lock-and-suspend   Lock session first, then suspend the machine
   size               Set explicit column width and window height
   go                 Move windows to target workspaces (was: niri-arrange-windows)
   here               Bring window here (or launch); `all` gathers a set
@@ -257,6 +258,7 @@ Examples:
   niri-osc set env
   niri-osc set bootstrap
   niri-osc set lock
+  niri-osc set lock-and-suspend
   niri-osc set zen
   niri-osc set pin
 EOF
@@ -1835,24 +1837,60 @@ lock)
   (
     set -euo pipefail
 
+    prefer_logind=0
     if [[ "${1:-}" == "--logind" ]]; then
+      prefer_logind=1
       shift || true
     fi
 
-    if command -v loginctl >/dev/null 2>&1; then
-      exec loginctl lock-session
-    fi
+    try_shell_lock() {
+      if command -v osc-shell >/dev/null 2>&1; then
+        osc-shell ipc call lockScreen lock
+        return $?
+      fi
 
-    if command -v osc-shell >/dev/null 2>&1; then
-      exec osc-shell ipc call lockScreen lock
-    fi
+      if [[ -x "${HOME}/.local/bin/osc-shell" ]]; then
+        "${HOME}/.local/bin/osc-shell" ipc call lockScreen lock
+        return $?
+      fi
 
-    if [[ -x "${HOME}/.local/bin/osc-shell" ]]; then
-      exec "${HOME}/.local/bin/osc-shell" ipc call lockScreen lock
+      return 1
+    }
+
+    try_logind_lock() {
+      command -v loginctl >/dev/null 2>&1 || return 1
+      loginctl lock-session >/dev/null 2>&1 || loginctl lock-sessions >/dev/null 2>&1
+    }
+
+    if [[ "$prefer_logind" -eq 1 ]]; then
+      try_logind_lock && exit 0
+      try_shell_lock && exit 0
+    else
+      try_shell_lock && exit 0
+      try_logind_lock && exit 0
     fi
 
     echo "No lock backend available." >&2
     exit 1
+  )
+  ;;
+
+lock-and-suspend)
+  # ----------------------------------------------------------------------------
+  # Lock the current session, let the lock surface appear, then suspend.
+  # Lid-close should use this path instead of racing logind suspend vs lock.
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    if "${NIRI_OSC_BIN:-${HOME}/.local/bin/niri-osc}" set lock >/dev/null 2>&1; then
+      sleep "${NIRI_LOCK_BEFORE_SUSPEND_DELAY_SEC:-1}"
+    else
+      echo "warn: lock backend unavailable; suspending anyway" >&2
+      sleep 0.2
+    fi
+
+    exec systemctl suspend
   )
   ;;
 

@@ -54,6 +54,8 @@ dotfiles:
   target: ~/.config/systemd/user/niri-session-env.service
 - source: dotfiles/systemd/user/niri-shell-ensure.service
   target: ~/.config/systemd/user/niri-shell-ensure.service
+- source: dotfiles/systemd/user/niri-lid-switch-inhibit.service
+  target: ~/.config/systemd/user/niri-lid-switch-inhibit.service
 - source: dotfiles/systemd/user/niri-desktop-settings.service
   target: ~/.config/systemd/user/niri-desktop-settings.service
 - source: dotfiles/systemd/user/niri-post-bootstrap.service

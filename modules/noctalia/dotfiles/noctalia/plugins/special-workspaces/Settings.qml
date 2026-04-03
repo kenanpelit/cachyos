@@ -13,6 +13,8 @@ ColumnLayout {
 
     property string mainIcon: cfg.mainIcon ?? defaults.mainIcon
     property string expandDirection: cfg.expandDirection ?? defaults.expandDirection
+    property bool   drawer: cfg.drawer ?? defaults.drawer
+    property bool   hideEmpty: cfg.hideEmptyWorkspaces ?? defaults.hideEmptyWorkspaces
 
     property bool primaryShowPill: cfg.primaryShowPill ?? defaults.primaryShowPill
     property string primarySymbolColor: cfg.primarySymbolColor ?? defaults.primarySymbolColor
@@ -63,6 +65,8 @@ ColumnLayout {
 
         pluginApi.pluginSettings.mainIcon = root.mainIcon;
         pluginApi.pluginSettings.expandDirection = root.expandDirection;
+        pluginApi.pluginSettings.drawer = root.drawer;
+        pluginApi.pluginSettings.hideEmptyWorkspaces = root.hideEmpty;
         pluginApi.pluginSettings.primaryShowPill = root.primaryShowPill;
         pluginApi.pluginSettings.primarySymbolColor = root.primarySymbolColor;
         pluginApi.pluginSettings.primaryPillColor = root.primaryPillColor;
@@ -130,7 +134,23 @@ ColumnLayout {
         }
     }
 
+    NToggle {
+      Layout.fillWidth: true
+      label: "Show drawer"
+      description: "Hide workspaces in drawer when not focused/active"
+      checked: root.drawer
+      onToggled: checked => root.drawer = checked
+    }
+
+    NToggle {
+      Layout.fillWidth: true
+      label: "Hide empty workspaces"
+      checked: root.hideEmpty
+      onToggled: checked => root.hideEmpty = checked
+    }
+
     NComboBox {
+        visible: root.drawer
         Layout.fillWidth: true
         label: "Expand Direction"
         description: "Which direction the workspace pills expand from the main button."

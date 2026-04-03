@@ -1,0 +1,16 @@
+[Unit]
+Description=Niri lid switch inhibitor
+After=graphical-session.target wayland-wm@niri\x2dsession.service dbus.service
+PartOf=niri-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/systemd-inhibit --what=handle-lid-switch --who=Niri --why=lock-before-suspend-on-lid-close /usr/bin/sleep infinity
+Restart=on-failure
+RestartSec=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=niri-session.target
