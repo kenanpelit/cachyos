@@ -32,6 +32,8 @@ packages:
 - cachyos-wallpapers
 - cantarell-fonts
 - capitaine-cursors
+- chaotic-keyring
+- chaotic-mirrorlist
 - chwd
 - cryptsetup
 - dcli-arch-git
@@ -74,6 +76,7 @@ packages:
 - gvfs-onedrive
 - gvfs-smb
 - gvfs-wsdd
+- handy
 - haveged
 - hdparm
 - hwdetect
