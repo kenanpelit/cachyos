@@ -74,7 +74,10 @@ binds {
   Mod+Space repeat=false hotkey-overlay-title="Launcher" { spawn "osc-shell" "ipc" "call" "launcher" "toggle"; }
   Mod+Ctrl+D repeat=false hotkey-overlay-title="Settings" { spawn "osc-shell" "ipc" "call" "settings" "toggle"; }
   Mod+D repeat=false hotkey-overlay-title="Control Center" { spawn "osc-shell" "ipc" "call" "control-center" "toggle"; }
-  Mod+Alt+D repeat=false hotkey-overlay-title="Dash Center" { spawn "osc-shell" "ipc" "call" "dash" "toggle" "overview"; }
+  Mod+Alt+S repeat=false hotkey-overlay-title="Dash Center" { spawn "osc-shell" "ipc" "call" "dash" "toggle" "overview"; }
+  Mod+Alt+D repeat=false hotkey-overlay-title="Handy: Toggle Recording" { spawn "handyctl" "toggle"; }
+  Mod+Alt+Shift+D repeat=false hotkey-overlay-title="Handy: Post-Process Recording" { spawn "handyctl" "post"; }
+  Mod+Alt+X repeat=false hotkey-overlay-title="Handy: Cancel Recording" { spawn "handyctl" "cancel"; }
   Mod+N repeat=false hotkey-overlay-title="Notifications" { spawn "osc-shell" "ipc" "call" "notifications" "toggleHistory"; }
 
   Mod+V repeat=false hotkey-overlay-title="CopyQ Toggle" { spawn "copyq" "toggle"; }

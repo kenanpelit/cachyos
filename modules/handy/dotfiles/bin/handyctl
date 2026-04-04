@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: handyctl <command>
+
+Commands:
+  start     Start the hidden tray service
+  stop      Stop the user service
+  restart   Restart the user service
+  status    Show service status
+  logs      Follow service logs
+  open      Open/focus Handy UI
+  hidden    Launch Handy hidden for the current session
+  toggle    Toggle transcription
+  post      Toggle transcription with post-processing
+  cancel    Cancel the active recording/transcription
+EOF
+}
+
+cmd="${1:-status}"
+shift || true
+
+case "$cmd" in
+  start)
+    exec systemctl --user start handy.service
+    ;;
+  stop)
+    exec systemctl --user stop handy.service
+    ;;
+  restart)
+    exec systemctl --user restart handy.service
+    ;;
+  status)
+    exec systemctl --user status --no-pager handy.service
+    ;;
+  logs)
+    exec journalctl --user -u handy.service -f
+    ;;
+  open)
+    exec /usr/bin/handy "$@"
+    ;;
+  hidden)
+    exec /usr/bin/handy --start-hidden "$@"
+    ;;
+  toggle)
+    exec /usr/bin/handy --toggle-transcription "$@"
+    ;;
+  post)
+    exec /usr/bin/handy --toggle-post-process "$@"
+    ;;
+  cancel)
+    exec /usr/bin/handy --cancel "$@"
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    echo "unknown command: $cmd" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

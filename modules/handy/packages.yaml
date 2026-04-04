@@ -1,0 +1,4 @@
+description: Handy speech-to-text packages
+packages:
+  - handy
+  - wtype

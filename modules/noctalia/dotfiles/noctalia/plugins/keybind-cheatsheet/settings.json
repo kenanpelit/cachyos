@@ -72,8 +72,20 @@
           "desc": "Control Center"
         },
         {
-          "keys": "Super + Alt + D",
+          "keys": "Super + Alt + S",
           "desc": "Dash Center"
+        },
+        {
+          "keys": "Super + Alt + D",
+          "desc": "Handy: Toggle Recording"
+        },
+        {
+          "keys": "Super + Alt + Shift + D",
+          "desc": "Handy: Post-Process Recording"
+        },
+        {
+          "keys": "Super + Alt + X",
+          "desc": "Handy: Cancel Recording"
         },
         {
           "keys": "Super + N",

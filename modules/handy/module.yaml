@@ -1,0 +1,14 @@
+tags:
+- ai
+- tool
+- accessibility
+description: Handy offline speech-to-text integration
+depends_on:
+- base
+dotfiles:
+- source: dotfiles/systemd/user/handy.service
+  target: ~/.config/systemd/user/handy.service
+- source: dotfiles/bin/handyctl
+  target: ~/.local/bin/handyctl
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

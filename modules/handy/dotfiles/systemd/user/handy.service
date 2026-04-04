@@ -1,0 +1,17 @@
+[Unit]
+Description=Handy offline speech-to-text
+After=graphical-session.target dbus.service niri-status-notifier-ready.service hypr-status-notifier-ready.service
+PartOf=graphical-session.target
+ConditionPathExists=/usr/bin/handy
+
+[Service]
+Type=simple
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=/usr/bin/handy --start-hidden
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical-session.target
