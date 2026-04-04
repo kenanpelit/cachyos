@@ -18,6 +18,7 @@ PARU_CONF="${PARU_DIR}/paru.conf"
 PARU_CONF_CONTENT="# See paru.conf(5)
 [options]
 UseAsk
+BottomUp
 
 [bin]
 Sudo = /usr/bin/sudo
