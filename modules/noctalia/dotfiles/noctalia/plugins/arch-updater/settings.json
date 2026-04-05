@@ -1,0 +1,13 @@
+{
+  "nameCmd": "(checkupdates; paru -Qua;) | awk '{print $1}'",
+  "oldVerCmd": "(checkupdates; paru -Qua;) | awk '{print $2}'",
+  "newVerCmd": "(checkupdates; paru -Qua;) | awk '{print $4}'",
+  "updateCmd": "ghostty -e bash -c 'echo \"Updating System...\";paru; flatpak update; read -n 1 -p \"Press any key to exit...\"'",
+  "flatpak": true,
+  "noctalia": true,
+  "toast": true,
+  "desktopTip": false,
+  "hideOnEmpty": false,
+  "refreshTimer": true,
+  "refreshInterval": 120
+}

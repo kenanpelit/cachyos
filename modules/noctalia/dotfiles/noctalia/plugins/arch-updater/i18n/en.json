@@ -1,0 +1,64 @@
+{
+    "tooltip": {
+        "availableUpdates": "Available Updates",
+        "noctaliaUpdates": "Noctalia Updates available"
+    },
+    "context": {
+        "refresh": "Refresh",
+        "update": "Update",
+        "settings": "Settings"
+    },
+    "panel": {
+        "name": "Name",
+        "oldVer": "Old Version",
+        "newVer": "New Version",
+        "refresh": "Refresh",
+        "update": "Update",
+        "settings": "Settings"
+    },
+    "toast": {
+        "refreshed": "Available updates refreshed!"
+    },
+    "settings": {
+        "commands": "Commands",
+        "nameCmd": "Name Command",
+        "nameCmdDesc": "Command to get the name of programs with updates",
+        "oldVerCmd": "Old Version Command",
+        "oldVerCmdDesc": "Command to get the current version of programs with updates",
+        "newVerCmd": "New Version Command",
+        "newVerCmdDesc": "Command to get the new version of programs with updates",
+        "updateCmd": "Update Command",
+        "updateCmdDesc": "Command to update",
+        "flatpak": "Flatpak",
+        "flatpakDesc": "Enable Flatpak update checking",
+        "noctalia": "Noctalia",
+        "noctaliaDesc": "Enable highlighting if Noctalia components have an update",
+        "toast": "Toast",
+        "toastDesc": "Enable updates refreshed toast",
+        "desktopTip": "Desktop Hover Tip",
+        "desktopTipDesc": "Enable hover tip for desktop widget",
+        "hideOnEmpty": "Hide on empty",
+        "hideOnEmptyDesc": "Hide if no updates are available",
+        "refreshTimer": "Refresh timer",
+        "refreshTimerDesc": "Refresh on a timer",
+        "interval": "Refresh interval",
+        "intervalDesc": "Update refresh interval in minutes: "
+    },
+    "launcher": {
+        "refreshDesc": "Refresh available updates",
+        "updateDesc": "Update system"
+    },
+    "ccw": {
+        "tooltip": "Open Updates panel"
+    },
+    "desktop": {
+        "header": "update available",
+        "header-plural": "updates available",
+        "name": "Name",
+        "oldVer": "Old Version",
+        "newVer": "New Version",
+        "tipLeft": "Left click to refresh",
+        "tipMiddle": "Middle click to update",
+        "tipRight": "Right click to open settings"
+    }
+}
