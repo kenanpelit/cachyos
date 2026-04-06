@@ -1,0 +1,10 @@
+{
+  "widget": {
+    "distribution": "Distribution",
+    "kernel": "Kernel",
+    "uptime": "Betriebszeit",
+    "ipaddress": "IP Adresse",
+    "lanaddress": "LAN Adresse",
+    "loading": "Wird geladen..."
+  }
+}

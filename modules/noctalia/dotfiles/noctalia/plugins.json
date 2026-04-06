@@ -1,153 +1,153 @@
 {
-    "sources": [
-        {
-            "enabled": true,
-            "name": "Noctalia Plugins",
-            "url": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        {
-            "enabled": true,
-            "name": "Nplugins",
-            "url": "https://github.com/kenanpelit/noctalia-nplugins"
-        }
-    ],
-    "states": {
-        "6ee06e:ndns": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:network": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:nip": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:notes": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:npodman": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:npower": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:nsunsetr": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:nufw": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "6ee06e:nworkspace": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
-        },
-        "arch-updater": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "assistant-panel": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "clipper": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "currency-exchange": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "custom-commands": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "file-search": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "hot-corners": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "keybind-cheatsheet": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "mpd": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "music-search": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "network-manager-vpn": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "niri-overview-launcher": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "privacy-indicator": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "screen-recorder": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "screen-shot-and-record": {
-            "enabled": false,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "screen-toolkit": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "screenshot": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "special-workspaces": {
-            "enabled": false,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "sys-info-widget": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "timer": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "translator": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "update-count": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "valent-connect": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "weather-indicator": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        },
-        "web-search": {
-            "enabled": true,
-            "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-        }
+  "sources": [
+    {
+      "enabled": true,
+      "name": "Noctalia Plugins",
+      "url": "https://github.com/noctalia-dev/noctalia-plugins"
     },
-    "version": 2
+    {
+      "enabled": true,
+      "name": "Nplugins",
+      "url": "https://github.com/kenanpelit/noctalia-nplugins"
+    }
+  ],
+  "states": {
+    "6ee06e:ndns": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:network": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:nip": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:notes": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:npodman": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:npower": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:nsunsetr": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:nufw": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "6ee06e:nworkspace": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/kenanpelit/noctalia-nplugins"
+    },
+    "arch-updater": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "assistant-panel": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "clipper": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "currency-exchange": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "custom-commands": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "file-search": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "hot-corners": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "keybind-cheatsheet": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "mpd": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "music-search": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "network-manager-vpn": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "niri-overview-launcher": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "privacy-indicator": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "screen-recorder": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "screen-shot-and-record": {
+      "enabled": false,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "screen-toolkit": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "screenshot": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "special-workspaces": {
+      "enabled": false,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "sys-info-widget": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "timer": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "translator": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "update-count": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "valent-connect": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "weather-indicator": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    },
+    "web-search": {
+      "enabled": true,
+      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
+    }
+  },
+  "version": 2
 }

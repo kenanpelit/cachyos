@@ -10,7 +10,7 @@ output "DP-3" {
 
   layout {
     // External 1440p display can fit narrower columns without feeling cramped.
-    default-column-width { proportion 0.786; }
+    default-column-width { proportion 0.900; }
 
     preset-column-widths {
       proportion 0.500
