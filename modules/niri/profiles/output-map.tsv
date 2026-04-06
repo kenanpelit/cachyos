@@ -1,4 +1,4 @@
 # Map monitor profile selectors to Niri output names.
 # Format: <monitor selector>\t<niri output name>
-desc:Dell Inc. DELL UP2716D KRXTR88N909L	DP-3
-desc:Chimei Innolux Corporation 0x143F	eDP-1
+desc:Dell Inc. DELL UP2716D KRXTR88N909L	Dell Inc. DELL UP2716D KRXTR88N909L
+desc:Chimei Innolux Corporation 0x143F	Chimei Innolux Corporation 0x143F

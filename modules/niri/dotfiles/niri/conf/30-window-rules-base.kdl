@@ -94,6 +94,17 @@ window-rule {
 window-rule {
   match app-id=r#"^(ferdium|Ferdium)$"#
   default-column-width { proportion 0.900; }
+  default-column-display "tabbed"
+}
+
+window-rule {
+  match app-id=r#"^(org\.telegram\.desktop|TelegramDesktop|ferdium|Ferdium|discord|WebCord|Signal|Slack)$"#
+  default-column-display "tabbed"
+}
+
+window-rule {
+  match app-id=r#"^(firefox|zen.*|brave.*|chrome.*|chromium.*)$"#
+  open-maximized true
 }
 
 window-rule {
@@ -121,11 +132,18 @@ window-rule {
 }
 
 window-rule {
-  match app-id=r#"^(org\.gnome\.FileRoller|file-roller|org\.gnome\.Loupe|loupe)$"#
+  match app-id=r#"^(org\.gnome\.FileRoller|file-roller)$"#
   open-floating true
   default-column-width { fixed 960; }
   default-window-height { fixed 720; }
   open-focused true
+}
+
+window-rule {
+  match app-id=r#"^(org\.gnome\.Loupe|loupe|org\.gnome\.Evince|evince|org\.pwmt\.zathura|zathura|okular)$"#
+  open-maximized true
+  open-maximized-to-edges true
+  draw-border-with-background false
 }
 
 window-rule {

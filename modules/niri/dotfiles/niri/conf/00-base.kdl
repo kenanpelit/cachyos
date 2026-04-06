@@ -1,3 +1,6 @@
+// Keep native niri screenshots deterministic even when shell helpers are bypassed.
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
 cursor {
   // Apply the system-wide cursor theme directly in the compositor, not just via env.
   xcursor-theme "capitaine-cursors"
@@ -36,6 +39,11 @@ layer-rule {
   place-within-backdrop true
 }
 
+clipboard {
+  // Avoid primary-selection surprises when middle-clicking in mixed Wayland/Xwayland apps.
+  disable-primary
+}
+
 input {
   // Cycle workspaces automatically when reaching the boundaries.
   workspace-auto-back-and-forth
@@ -63,6 +71,8 @@ input {
     tap-button-map "left-right-middle"
     middle-emulation
     click-method "clickfinger"
+    // When docked, let the external mouse fully own pointer input.
+    disabled-on-external-mouse
     accel-profile "adaptive"
     accel-speed 1.0
     scroll-method "two-finger"
@@ -83,10 +93,6 @@ input {
     scroll-button 273
     scroll-button-lock
   }
-}
-
-debug {
-  deactivate-unfocused-windows
 }
 
 switch-events {

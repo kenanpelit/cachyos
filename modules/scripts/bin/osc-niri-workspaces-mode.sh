@@ -298,14 +298,16 @@ sanitize_token() {
 
 managed_workspace_targets() {
   awk '
-    /^workspace "/ {
-      name = $2
-      gsub(/"/, "", name)
+    /^[[:space:]]*workspace "/ {
+      name = $0
+      sub(/^[[:space:]]*workspace "/, "", name)
+      sub(/".*$/, "", name)
       next
     }
     /open-on-output "/ {
-      output = $2
-      gsub(/"|;/, "", output)
+      output = $0
+      sub(/^[[:space:]]*open-on-output "/, "", output)
+      sub(/"[[:space:]]*;?[[:space:]]*$/, "", output)
       if (name != "" && output != "") {
         print output "\t" name
       }

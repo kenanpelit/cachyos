@@ -154,19 +154,26 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   output-name map, so the module keeps its own profile selector without
   depending on Hyprland-owned monitor profile assets. The selector lives in
   `modules/niri/profiles/profile.env` via `NIRI_MONITOR_PROFILE`.
-- The static output config now also uses per-output `layout {}` overrides so
-  the external `DP-3` monitor defaults to narrower working columns while the
-  built-in `eDP-1` panel keeps a roomier primary column width.
+- The static output config now matches monitors by stable make/model/serial
+  identity rather than transient connector names, and still uses per-output
+  `layout {}` overrides so the external Dell panel defaults to narrower
+  working columns while the built-in panel keeps a roomier primary column
+  width.
 - Workspace metadata now has a single source of truth at
   `modules/niri/workspaces/workspaces.json`. The helper
   `modules/niri/scripts/render-workspace-assets.sh` generates:
   `generated/workspace-shortcuts.kdl`, `generated/workspace-rules.kdl`, the
   Noctalia `nworkspace` alias map, and the runtime TSV files consumed by
-  `niri-osc`/`osc-niri-workspaces-mode`.
+  `niri-osc`/`osc-niri-workspaces-mode`, while
+  `modules/niri/scripts/render-profile.sh` now also emits optional per-workspace
+  native `layout {}` overrides into `runtime/workspaces-auto.kdl`.
 - `config.kdl` is now split with top-level `include` files under
   `modules/niri/dotfiles/niri/conf/`, so layout, binds, rules, gestures, and
   animations can evolve independently without turning `config.kdl` back into a
   monolith.
+- Experimental Niri `debug {}` toggles are now loaded from an optional
+  `~/.config/niri/runtime/debug.kdl` include instead of being baked into the
+  base module profile.
 - Native Niri recent windows switching is now available on `Mod+Tab` /
   `Mod+Shift+Tab` (output scope) and `Mod+Ctrl+Tab` / `Mod+Ctrl+Shift+Tab`
   (workspace app-id scope), while the shell-owned `Alt+Tab` flow stays intact.

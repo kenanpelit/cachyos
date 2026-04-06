@@ -10,6 +10,8 @@ include "conf/00-base.kdl"
 include "outputs.kdl"
 // Workspace placement stays runtime-managed so workspace-mode toggles still work.
 include optional=true "runtime/workspaces-auto.kdl"
+// Experimental debug toggles stay user/runtime-owned instead of living in the base profile.
+include optional=true "runtime/debug.kdl"
 
 include "conf/10-layout.kdl"
 include optional=true "runtime/zen.kdl"

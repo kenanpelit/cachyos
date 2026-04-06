@@ -32,6 +32,16 @@ trim() {
   printf '%s\n' "$value"
 }
 
+workspace_layout_lines() {
+  local workspace_id="$1"
+  jq -r --arg workspace_id "${workspace_id}" '
+    .workspaces[]
+    | select(.id == $workspace_id)
+    | (.layout // [])
+    | if type == "array" then .[] else empty end
+  ' "${WORKSPACE_MAP_FILE}"
+}
+
 mode="write"
 while (($#)); do
   case "$1" in
@@ -130,10 +140,19 @@ while IFS= read -r line || [[ -n "$line" ]]; do
       [[ -n "${workspace_name}" ]] || die "Missing Niri workspace name mapping for slot: ${workspace_id}"
       [[ -z "${seen_workspaces[${workspace_id}]:-}" ]] || die "Duplicate workspace mapping in profile: ${workspace_id}"
       seen_workspaces["${workspace_id}"]=1
+      workspace_layout="$(workspace_layout_lines "${workspace_id}")"
 
       {
         printf 'workspace "%s" {\n' "${workspace_name}"
         printf '  open-on-output "%s"\n' "${output_name}"
+        if [[ -n "${workspace_layout}" ]]; then
+          printf '  layout {\n'
+          while IFS= read -r layout_line; do
+            [[ -n "${layout_line}" ]] || continue
+            printf '    %s\n' "${layout_line}"
+          done <<< "${workspace_layout}"
+          printf '  }\n'
+        fi
         printf '}\n\n'
       } >> "${tmp_workspaces}"
       ;;

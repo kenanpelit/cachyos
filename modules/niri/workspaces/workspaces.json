@@ -16,7 +16,10 @@
       "hereTarget": "TmuxKenp",
       "focusRegex": "^TmuxKenp$",
       "routeAppRegex": "^(TmuxKenp|kitty)$",
-      "routeTitleRegex": "^Tmux$"
+      "routeTitleRegex": "^Tmux$",
+      "layout": [
+        "default-column-display \"tabbed\""
+      ]
     },
     {
       "id": "3",
@@ -25,7 +28,10 @@
       "hereTarget": "Ai",
       "focusRegex": "^Ai$",
       "routeAppRegex": "^(Ai|Nil)$",
-      "routeTitleRegex": ""
+      "routeTitleRegex": "",
+      "layout": [
+        "default-column-width { proportion 1.000; }"
+      ]
     },
     {
       "id": "4",
@@ -34,7 +40,10 @@
       "hereTarget": "CompecTA",
       "focusRegex": "^CompecTA$",
       "routeAppRegex": "^CompecTA$",
-      "routeTitleRegex": ""
+      "routeTitleRegex": "",
+      "layout": [
+        "default-column-width { proportion 1.000; }"
+      ]
     },
     {
       "id": "5",
@@ -52,7 +61,11 @@
       "hereTarget": "org.telegram.desktop",
       "focusRegex": "^(org\\.telegram\\.desktop|TelegramDesktop)$",
       "routeAppRegex": "^(Exclude|org\\.telegram\\.desktop|vlc|remote-viewer)$",
-      "routeTitleRegex": ""
+      "routeTitleRegex": "",
+      "layout": [
+        "default-column-width { proportion 1.000; }",
+        "center-focused-column \"always\""
+      ]
     },
     {
       "id": "7",
