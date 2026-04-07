@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Quickshell.Io
 import Quickshell.Widgets
 import qs.Commons
 import qs.Widgets
@@ -10,18 +9,18 @@ import qs.Services.UI
 Item {
     id: root
 
-    // Plugin API (injected by PluginPanelSlot)
     property var pluginApi: null
 
-    // SmartPanel properties (required for panel behavior)
     readonly property var geometryPlaceholder: panelContainer
     readonly property bool allowAttach: true
 
-    // Preferred dimensions
     property real contentPreferredWidth: 500 * Style.uiScaleRatio
     property real contentPreferredHeight: 340 * Style.uiScaleRatio
 
     anchors.fill: parent
+
+    // Shared column width reference (content area minus outer margins and table inner margins)
+    readonly property real tableContentWidth: panelContainer.width - 2 * Style.marginL - 2 * Style.marginS
 
     Rectangle {
         id: panelContainer
@@ -35,187 +34,118 @@ Item {
             }
             spacing: Style.marginL
 
-            Rectangle { // Content area
-                id: table
+            // Header
+            RowLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: "transparent"
-                
-                Column {
-                    spacing: Style.marginL
-                    Row { // Headers
-                        spacing: Style.marginL
+                Layout.leftMargin: Style.marginS
+                Layout.rightMargin: Style.marginS
+                spacing: Style.marginS
 
-                        Rectangle {
-                            width: (table.width - 2 * Style.marginL) / 3
-                            height: Style.fontSizeL
-                            color: "transparent"
-                            NText {
-                                text: pluginApi.tr("panel.name")
-                                pointSize: Style.fontSizeL
-                                font.weight: Font.Bold
-                                color: Color.mOnSurface
-                                anchors.centerIn: parent
-                            }
-                        }
-                        Rectangle {
-                            width: (table.width - 2 * Style.marginL) / 3
-                            height: Style.fontSizeL
-                            color: "transparent"
-                            NText {
-                                text: pluginApi.tr("panel.oldVer")
-                                pointSize: Style.fontSizeL
-                                font.weight: Font.Bold
-                                color: Color.mOnSurface
-                                anchors.centerIn: parent
-                            }
-                        }
-                        Rectangle {
-                            width: (table.width - 2 * Style.marginL) / 3
-                            height: Style.fontSizeL
-                            color: "transparent"
-                            NText {
-                                text: pluginApi.tr("panel.newVer")
-                                pointSize: Style.fontSizeL
-                                font.weight: Font.Bold
-                                color: Color.mOnSurface
-                                anchors.centerIn: parent
-                            }
-                        }
-                    }
-                    Row { // Tables
-                        spacing: Style.marginL
-
-                        ClippingRectangle {
-                            width: (table.width - 2 * Style.marginL) / 3
-                            height: table.height - 2 * Style.fontSizeL
-                            color: Color.mSurfaceVariant
-                            radius: Style.radiusL
-
-                            ScrollView {
-                                anchors.fill: parent
-
-                                ScrollBar.vertical{
-                                    id: scrollOne
-                                    onPositionChanged: {
-                                        // Sync up scrolling
-                                        scrollTwo.position = scrollOne.position
-                                        scrollThree.position = scrollOne.position
-                                    }
-                                }
-                                Column  {
-                                    NText {
-                                        text: root.pluginApi.mainInstance.nameStr
-                                        pointSize: Style.fontSizeM
-                                        color: Color.mSecondary
-                                        padding: Style.marginM
-                                    }
-                                    NText {
-                                        text: root.pluginApi.mainInstance.flatpakNameStr + " "
-                                        pointSize: Style.fontSizeM
-                                        color: Color.mTertiary
-                                        padding: Style.marginM
-                                    }
-                                }
-                            }
-                        }
-
-                        ClippingRectangle {
-                            width: (table.width - 2 * Style.marginL) / 3
-                            height: table.height - 2 * Style.fontSizeL
-                            color: Color.mSurfaceVariant
-                            radius: Style.radiusL
-
-                            ScrollView {
-                                anchors.fill: parent
-                                ScrollBar.vertical{
-                                    id: scrollTwo
-                                    onPositionChanged: {
-                                        // Sync up scrolling
-                                        scrollOne.position = scrollTwo.position
-                                        scrollThree.position = scrollTwo.position
-                                    }
-                                }
-                                Column  {
-                                    NText {
-                                        text: root.pluginApi.mainInstance.oldVerStr
-                                        pointSize: Style.fontSizeM
-                                        color: Color.mSecondary
-                                        padding: Style.marginM
-                                    }
-                                    NText {
-                                        text: root.pluginApi.mainInstance.flatpakOldVerStr + " "
-                                        pointSize: Style.fontSizeM
-                                        color: Color.mTertiary
-                                        padding: Style.marginM
-                                    }
-                                }
-                            }
-                        }
-
-                        ClippingRectangle {
-                            width: (table.width - 2 * Style.marginL) / 3
-                            height: table.height - 2 * Style.fontSizeL
-                            color: Color.mSurfaceVariant
-                            radius: Style.radiusL
-
-                            ScrollView {
-                                anchors.fill: parent
-                                ScrollBar.vertical{
-                                    id: scrollThree
-                                    onPositionChanged: {
-                                        // Sync up scrolling
-                                        scrollOne.position = scrollThree.position
-                                        scrollTwo.position = scrollThree.position
-                                    }
-                                }
-                                Column  {
-                                    NText {
-                                        text: root.pluginApi.mainInstance.newVerStr
-                                        pointSize: Style.fontSizeM
-                                        color: Color.mSecondary
-                                        padding: Style.marginM
-                                    }
-                                    NText {
-                                        text: root.pluginApi.mainInstance.flatpakNewVerStr + " "
-                                        pointSize: Style.fontSizeM
-                                        color: Color.mTertiary
-                                        padding: Style.marginM
-                                    }
-                                }
-                                
-                            }
-                        }
-                    }
+                NText {
+                    Layout.preferredWidth: 0.4 * root.tableContentWidth
+                    text: pluginApi?.tr("panel.name")
+                    pointSize: Style.fontSizeL
+                    font.weight: Font.Bold
+                    color: Color.mOnSurface
+                    horizontalAlignment: Text.AlignLeft
+                }
+                NText {
+                    Layout.preferredWidth: 0.3 * root.tableContentWidth
+                    text: pluginApi?.tr("panel.oldVer")
+                    pointSize: Style.fontSizeL
+                    font.weight: Font.Bold
+                    color: Color.mOnSurface
+                    horizontalAlignment: Text.AlignHCenter
+                }
+                NText {
+                    Layout.preferredWidth: 0.3 * root.tableContentWidth
+                    text: pluginApi?.tr("panel.newVer")
+                    pointSize: Style.fontSizeL
+                    font.weight: Font.Bold
+                    color: Color.mOnSurface
+                    horizontalAlignment: Text.AlignHCenter
                 }
             }
 
-            RowLayout { // Footer
+            // Table
+            ClippingRectangle {
                 Layout.fillWidth: true
-                NButton { // Refresh Button
+                Layout.fillHeight: true
+                color: Color.mSurfaceVariant
+                radius: Style.radiusL
+
+                NListView {
+                    id: tableView
+                    anchors.fill: parent
+                    anchors.margins: Style.marginS
+                    model: root.pluginApi?.mainInstance?.updates ?? []
+                    clip: true
+                    spacing: Style.marginXS
+
+                    delegate: RowLayout {
+                        required property var modelData
+                        width: tableView.width
+                        spacing: Style.marginS
+
+                        NText {
+                            Layout.preferredWidth: 0.4 * root.tableContentWidth
+                            text: modelData.name
+                            pointSize: Style.fontSizeM
+                            color: modelData.isFlatpak ? Color.mTertiary : Color.mSecondary
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                        }
+                        NText {
+                            Layout.preferredWidth: 0.3 * root.tableContentWidth
+                            text: modelData.oldVer
+                            pointSize: Style.fontSizeM
+                            color: modelData.isFlatpak ? Color.mTertiary : Color.mSecondary
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                        }
+                        NText {
+                            Layout.preferredWidth: 0.3 * root.tableContentWidth
+                            text: modelData.newVer
+                            pointSize: Style.fontSizeM
+                            color: modelData.isFlatpak ? Color.mTertiary : Color.mSecondary
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                        }
+                    }
+
+                    ScrollBar.vertical: ScrollBar {}
+                }
+            }
+
+            // Footer
+            RowLayout {
+                Layout.fillWidth: true
+                NButton {
                     Layout.fillWidth: true
-                    text: pluginApi.tr("panel.refresh")
+                    text: pluginApi?.tr("panel.refresh")
                     onClicked: {
                         Logger.d("Update Widget", "Refreshing from panel...")
                         root.pluginApi.mainInstance.refresh()
                     }
                 }
-                Item {width: Style.marginM} // Spacer
-                NButton { // Update Button
+                Item { width: Style.marginM }
+                NButton {
                     Layout.fillWidth: true
-                    text: pluginApi.tr("panel.update")
+                    text: pluginApi?.tr("panel.update")
                     onClicked: {
                         Logger.d("Update Widget", "Updating from panel...")
                         root.pluginApi.mainInstance.update()
                         pluginApi.closePanel(pluginApi.panelOpenScreen)
                     }
                 }
-                Item {width: Style.marginM} // Spacer
-                NIconButton { // Update Button
+                Item { width: Style.marginM }
+                NIconButton {
                     icon: "settings"
                     onClicked: {
                         Logger.d("Update Widget", "Opening settings from panel...")
-                        BarService.openPluginSettings(screen, pluginApi.manifest)
+                        BarService.openPluginSettings(pluginApi.panelOpenScreen, pluginApi.manifest)
                         pluginApi.closePanel(pluginApi.panelOpenScreen)
                     }
                 }

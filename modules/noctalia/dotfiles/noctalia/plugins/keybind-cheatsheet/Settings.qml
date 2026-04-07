@@ -568,7 +568,7 @@ Item {
       NText {
         Layout.fillWidth: true
         text: rootItem.pluginApi?.tr("keybind-cheatsheet.settings.keybind-example-niri") ||
-          "Niri example: Super+F1 { spawn \"qs\" \"-c\" \"noctalia-shell\" \"ipc\" \"call\" \"plugin:keybind-cheatsheet\" \"toggle\"; }"
+          "Niri example: Super+F1 { spawn-sh \"qs\" \"-c\" \"noctalia-shell\" \"ipc\" \"call\" \"plugin:keybind-cheatsheet\" \"toggle\"; }"
         color: Color.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
         wrapMode: Text.WordWrap

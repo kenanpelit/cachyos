@@ -450,7 +450,7 @@ Item {
 
   function finalizeNiriBinds() {
     var categoryOrder = [
-      "Applications", "Window Management", "Column Navigation",
+      "Noctalia", "Applications", "Window Management", "Column Navigation",
       "Window Focus", "Workspace Navigation", "Workspace Management",
       "Move Columns", "Move Windows", "Column Management", "Column Width",
       "Window Size", "Screenshots", "Power", "System", "Animations"
@@ -666,11 +666,14 @@ Item {
 
     var actionCategories = {
       "spawn": "Applications",
+      "spawn-sh": "Applications",
       "focus-column": "Column Navigation",
       "focus-window": "Window Focus",
       "focus-workspace": "Workspace Navigation",
       "move-column": "Move Columns",
+      "move-column-to-workspace": "Workspace Management",
       "move-window": "Move Windows",
+      "move-window-to-workspace": "Workspace Management",
       "consume-window": "Window Management",
       "expel-window": "Window Management",
       "close-window": "Window Management",
@@ -744,9 +747,9 @@ Item {
 
     // Convert to array
     var categoryOrder = [
-      "Applications", "Window Management", "Column Navigation",
-      "Window Focus", "Workspace Navigation", "Move Columns",
-      "Move Windows", "Column Management", "Column Width",
+      "Noctalia", "Applications", "Window Management", "Column Navigation",
+      "Window Focus", "Workspace Navigation", "Workspace Management",
+      "Move Columns", "Move Windows", "Column Management", "Column Width",
       "Window Size", "Screenshots", "Power", "System", "Animations"
     ];
 
@@ -859,17 +862,89 @@ Item {
     return formattedParts.join(" + ");
   }
 
+  // Map Noctalia IPC target+function to human-readable descriptions
+  property var noctaliaIpcLabels: ({
+    "launcher toggle": "Launcher",
+    "launcher clipboard": "Clipboard History",
+    "launcher command": "Command Palette",
+    "launcher emoji": "Emoji Picker",
+    "launcher windows": "Window Switcher",
+    "launcher settings": "Launcher Settings",
+    "controlCenter toggle": "Control Center",
+    "settings toggle": "Settings",
+    "settings open": "Open Settings",
+    "sessionMenu toggle": "Session Menu",
+    "sessionMenu lock": "Lock & Session Menu",
+    "lockScreen lock": "Lock Screen",
+    "volume increase": "Volume Up",
+    "volume decrease": "Volume Down",
+    "volume muteOutput": "Mute Output",
+    "volume muteInput": "Mute Input",
+    "volume increaseInput": "Input Volume Up",
+    "volume decreaseInput": "Input Volume Down",
+    "brightness increase": "Brightness Up",
+    "brightness decrease": "Brightness Down",
+    "media playPause": "Play / Pause",
+    "media next": "Next Track",
+    "media previous": "Previous Track",
+    "media play": "Play",
+    "media pause": "Pause",
+    "media stop": "Stop",
+    "media toggle": "Media Panel",
+    "notifications toggleDND": "Do Not Disturb",
+    "notifications toggleHistory": "Notification History",
+    "notifications clear": "Clear Notifications",
+    "notifications dismissAll": "Dismiss All",
+    "wallpaper refresh": "Refresh Wallpaper",
+    "wallpaper toggle": "Wallpaper Panel",
+    "wallpaper toggleAutomation": "Toggle Wallpaper Automation",
+    "darkMode toggle": "Toggle Dark Mode",
+    "darkMode setDark": "Dark Mode",
+    "darkMode setLight": "Light Mode",
+    "nightLight toggle": "Toggle Night Light",
+    "dock toggle": "Toggle Dock",
+    "bar toggle": "Toggle Bar",
+    "desktopWidgets toggle": "Toggle Desktop Widgets",
+    "desktopWidgets edit": "Edit Desktop Widgets",
+    "calendar toggle": "Calendar",
+    "systemMonitor toggle": "System Monitor",
+    "idleInhibitor toggle": "Toggle Idle Inhibitor",
+    "monitors off": "Monitors Off",
+    "monitors on": "Monitors On",
+    "wifi toggle": "Toggle WiFi",
+    "bluetooth toggle": "Toggle Bluetooth",
+    "airplaneMode toggle": "Toggle Airplane Mode",
+    "powerProfile cycle": "Cycle Power Profile",
+    "battery togglePanel": "Battery Panel",
+    "network togglePanel": "Network Panel"
+  })
+
   function formatNiriAction(action) {
+    // Detect Noctalia IPC commands in two formats:
+    // 1. spawn-sh "qs -c noctalia-shell ipc call target function"
+    // 2. spawn "qs" "-c" "noctalia-shell" "ipc" "call" "target" "function"
+    if (action.indexOf("noctalia-shell") !== -1 && action.indexOf("ipc") !== -1) {
+      // Extract target and function from either format:
+      // spawn-sh: ipc call target function (words separated by spaces)
+      // spawn multi-arg: "ipc" "call" "target" "function" (words wrapped in quotes)
+      var ipcMatch = action.match(/ipc\s+call\s+(\w+)\s+(\w+)/) ||
+                     action.match(/"ipc"\s+"call"\s+"(\w+)"\s+"(\w+)"/);
+      if (ipcMatch) {
+        var ipcKey = ipcMatch[1] + " " + ipcMatch[2];
+        if (noctaliaIpcLabels[ipcKey]) {
+          return noctaliaIpcLabels[ipcKey];
+        }
+        // Fallback: format target + function nicely
+        return ipcMatch[1].replace(/([A-Z])/g, ' $1').trim() + ": " +
+               ipcMatch[2].replace(/([A-Z])/g, ' $1').trim();
+      }
+    }
+
     // Handle spawn and spawn-sh commands
     if (action.startsWith("spawn")) {
       var spawnMatch = action.match(/spawn(?:-sh)?\s+"([^"]+)"/);
       if (spawnMatch) {
         return "Run: " + spawnMatch[1];
-      }
-      // Handle spawn with multiple arguments: spawn "cmd" "arg1" "arg2"
-      var multiArgMatch = action.match(/spawn(?:-sh)?\s+"([^"]+)"/);
-      if (multiArgMatch) {
-        return "Run: " + multiArgMatch[1];
       }
       return action;
     }
@@ -878,6 +953,10 @@ Item {
   }
 
   function getNiriCategory(action, actionCategories) {
+    // Noctalia IPC commands get their own category
+    if (action.indexOf("noctalia-shell") !== -1 && action.indexOf("ipc") !== -1) {
+      return "Noctalia";
+    }
     for (var prefix in actionCategories) {
       if (action.startsWith(prefix)) {
         return actionCategories[prefix];

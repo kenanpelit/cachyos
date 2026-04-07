@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs.Commons
+import qs.Services.UI
 import qs.Widgets
 
 ColumnLayout {
@@ -9,9 +11,7 @@ ColumnLayout {
     property var pluginApi: null
 
     // Commands
-    property string nameCmd: pluginApi.pluginSettings.nameCmd || pluginApi.manifest.metadata.defaultSettings.nameCmd
-    property string oldVerCmd: pluginApi.pluginSettings.oldVerCmd || pluginApi.manifest.metadata.defaultSettings.oldVerCmd
-    property string newVerCmd: pluginApi.pluginSettings.newVerCmd || pluginApi.manifest.metadata.defaultSettings.newVerCmd
+    property string checkCmd: pluginApi.pluginSettings.checkCmd || pluginApi.manifest.metadata.defaultSettings.checkCmd
     property string updateCmd: pluginApi.pluginSettings.updateCmd || pluginApi.manifest.metadata.defaultSettings.updateCmd
 
     // Show toast on refresh
@@ -31,9 +31,17 @@ ColumnLayout {
 
     // Refresh after time intervals
     property bool refreshTimer: pluginApi.pluginSettings.refreshTimer ?? pluginApi.manifest.metadata.defaultSettings.refreshTimer
-    
+
     // The time interval between available update refreshes
     property int refreshInterval: pluginApi.pluginSettings.refreshInterval || pluginApi.manifest.metadata.defaultSettings.refreshInterval
+
+    // Appearance
+    property bool boldText: pluginApi.pluginSettings.boldText ?? pluginApi.manifest.metadata.defaultSettings.boldText
+    property string iconName: pluginApi.pluginSettings.iconName || pluginApi.manifest.metadata.defaultSettings.iconName
+    property bool useDistroLogo: pluginApi.pluginSettings.useDistroLogo ?? pluginApi.manifest.metadata.defaultSettings.useDistroLogo
+    property string customIconPath: pluginApi.pluginSettings.customIconPath ?? pluginApi.manifest.metadata.defaultSettings.customIconPath
+    property bool enableColorization: pluginApi.pluginSettings.enableColorization ?? pluginApi.manifest.metadata.defaultSettings.enableColorization
+    property string iconColor: pluginApi.pluginSettings.iconColor ?? pluginApi.manifest.metadata.defaultSettings.iconColor ?? "none"
 
     spacing: Style.marginM
 
@@ -51,39 +59,15 @@ ColumnLayout {
 
     // Commands
 
-    NTextInput { // Name Command
+    NTextInput { // Check Command
         Layout.fillWidth: true
-        label: pluginApi.tr("settings.nameCmd")
-        description: pluginApi.tr("settings.nameCmdDesc")
-        placeholderText: pluginApi.manifest.metadata.defaultSettings.nameCmd
-        text: root.nameCmd
+        label: pluginApi.tr("settings.checkCmd")
+        description: pluginApi.tr("settings.checkCmdDesc")
+        placeholderText: pluginApi.manifest.metadata.defaultSettings.checkCmd
+        text: root.checkCmd
         onTextChanged: {
-            root.nameCmd = text
-            Logger.d("Update Widget", "Name command set to: " + root.nameCmd)
-        }
-    }
-
-    NTextInput { // Old Version Command
-        Layout.fillWidth: true
-        label: pluginApi.tr("settings.oldVerCmd")
-        description: pluginApi.tr("settings.oldVerCmdDesc")
-        placeholderText: pluginApi.manifest.metadata.defaultSettings.oldVerCmd
-        text: root.oldVerCmd
-        onTextChanged: {
-            root.oldVerCmd = text
-            Logger.d("Update Widget", "Name command set to: " + root.oldVerCmd)
-        }
-    }
-
-    NTextInput { // New Version Command
-        Layout.fillWidth: true
-        label: pluginApi.tr("settings.newVerCmd")
-        description: pluginApi.tr("settings.newVerCmdDesc")
-        placeholderText: pluginApi.manifest.metadata.defaultSettings.newVerCmd
-        text: root.newVerCmd
-        onTextChanged: {
-            root.newVerCmd = text
-            Logger.d("Update Widget", "Name command set to: " + root.newVerCmd)
+            root.checkCmd = text
+            Logger.d("Update Widget", "Check command set to: " + root.checkCmd)
         }
     }
 
@@ -249,6 +233,150 @@ ColumnLayout {
         Layout.bottomMargin: Style.marginS
     }
 
+    NText {
+        text: pluginApi.tr("settings.appearance")
+        pointSize: Style.fontSizeXL
+        font.weight: Font.Bold
+        color: Color.mOnSurface
+    }
+
+    // Bold Text Toggle
+    Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: boldTextToggle.implicitHeight
+        NToggle {
+            id: boldTextToggle
+            anchors.fill: parent
+            label: pluginApi.tr("settings.boldText")
+            description: pluginApi.tr("settings.boldTextDesc")
+            checked: root.boldText
+            onToggled: checked => root.boldText = checked
+        }
+    }
+
+    NDivider {
+        Layout.fillWidth: true
+        Layout.topMargin: Style.marginS
+        Layout.bottomMargin: Style.marginS
+    }
+
+    // Use Distro Logo Toggle
+    Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: distroLogoToggle.implicitHeight
+        NToggle {
+            id: distroLogoToggle
+            anchors.fill: parent
+            label: pluginApi.tr("settings.useDistroLogo")
+            description: pluginApi.tr("settings.useDistroLogoDesc")
+            checked: root.useDistroLogo
+            onToggled: checked => root.useDistroLogo = checked
+        }
+    }
+
+    NDivider {
+        Layout.fillWidth: true
+        Layout.topMargin: Style.marginS
+        Layout.bottomMargin: Style.marginS
+    }
+
+    // Enable Colorization Toggle
+    Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: colorizeToggle.implicitHeight
+        NToggle {
+            id: colorizeToggle
+            anchors.fill: parent
+            label: pluginApi.tr("settings.enableColorization")
+            description: pluginApi.tr("settings.enableColorizationDesc")
+            checked: root.enableColorization
+            onToggled: checked => root.enableColorization = checked
+        }
+    }
+
+    // Icon Color (only visible when colorization is enabled)
+    NColorChoice {
+        visible: root.enableColorization
+        label: pluginApi.tr("settings.iconColor")
+        description: pluginApi.tr("settings.iconColorDesc")
+        currentKey: root.iconColor
+        onSelected: key => root.iconColor = key
+    }
+
+    NDivider {
+        Layout.fillWidth: true
+        Layout.topMargin: Style.marginS
+        Layout.bottomMargin: Style.marginS
+    }
+
+    // Icon preview and selection
+    RowLayout {
+        spacing: Style.marginM
+
+        NLabel {
+            label: pluginApi.tr("settings.iconName")
+            description: pluginApi.tr("settings.iconNameDesc")
+        }
+
+        NImageRounded {
+            Layout.preferredWidth: Style.fontSizeXL * 2
+            Layout.preferredHeight: Style.fontSizeXL * 2
+            Layout.alignment: Qt.AlignVCenter
+            radius: Math.min(Style.radiusL, Layout.preferredWidth / 2)
+            imagePath: root.customIconPath
+            visible: root.customIconPath !== "" && !root.useDistroLogo
+        }
+
+        NIcon {
+            Layout.alignment: Qt.AlignVCenter
+            icon: root.iconName
+            pointSize: Style.fontSizeXXL * 1.5
+            visible: root.iconName !== "" && root.customIconPath === "" && !root.useDistroLogo
+        }
+    }
+
+    RowLayout {
+        spacing: Style.marginM
+        NButton {
+            enabled: !root.useDistroLogo
+            text: pluginApi.tr("settings.browseLibrary")
+            onClicked: iconPicker.open()
+        }
+        NButton {
+            enabled: !root.useDistroLogo
+            text: pluginApi.tr("settings.browseFile")
+            onClicked: imagePicker.openFilePicker()
+        }
+    }
+
+    NIconPicker {
+        id: iconPicker
+        initialIcon: root.iconName
+        onIconSelected: iconName => {
+            root.iconName = iconName
+            root.customIconPath = ""
+        }
+    }
+
+    NFilePicker {
+        id: imagePicker
+        title: pluginApi.tr("settings.selectCustomIcon")
+        selectionMode: "files"
+        nameFilters: ImageCacheService.basicImageFilters.concat(["*.svg"])
+        initialPath: Quickshell.env("HOME")
+        onAccepted: paths => {
+            if (paths.length > 0) {
+                root.customIconPath = paths[0]
+            }
+        }
+    }
+
+    NDivider {
+        Layout.fillWidth: true
+        Layout.topMargin: Style.marginS
+        Layout.bottomMargin: Style.marginS
+    }
+
     // Save function - called by the dialog
     function saveSettings() {
         if (!pluginApi) {
@@ -256,9 +384,7 @@ ColumnLayout {
             return
         }
 
-        pluginApi.pluginSettings.nameCmd = root.nameCmd
-        pluginApi.pluginSettings.oldVerCmd = root.oldVerCmd
-        pluginApi.pluginSettings.newVerCmd = root.newVerCmd
+        pluginApi.pluginSettings.checkCmd = root.checkCmd
         pluginApi.pluginSettings.updateCmd = root.updateCmd
 
         pluginApi.pluginSettings.flatpak = root.flatpak
@@ -269,6 +395,13 @@ ColumnLayout {
         pluginApi.pluginSettings.refreshTimer = root.refreshTimer
 
         pluginApi.pluginSettings.refreshInterval = root.refreshInterval
+
+        pluginApi.pluginSettings.boldText = root.boldText
+        pluginApi.pluginSettings.iconName = root.iconName
+        pluginApi.pluginSettings.useDistroLogo = root.useDistroLogo
+        pluginApi.pluginSettings.customIconPath = root.customIconPath
+        pluginApi.pluginSettings.enableColorization = root.enableColorization
+        pluginApi.pluginSettings.iconColor = root.iconColor
 
         pluginApi.saveSettings()
         root.pluginApi.mainInstance.refresh()

@@ -120,22 +120,6 @@
           "desc": "Switch Windows"
         },
         {
-          "keys": "Super + Tab",
-          "desc": "Recent Windows (Output)"
-        },
-        {
-          "keys": "Super + Shift + Tab",
-          "desc": "Prev Recent Window (Output)"
-        },
-        {
-          "keys": "Super + Ctrl + Tab",
-          "desc": "Recent Windows (Same App)"
-        },
-        {
-          "keys": "Super + Ctrl + Shift + Tab",
-          "desc": "Prev Recent Window (Same App)"
-        },
-        {
           "keys": "Super + B",
           "desc": "Toggle Bar"
         },
@@ -317,6 +301,10 @@
         },
         {
           "keys": "Alt + Space",
+          "desc": "Custom Commands"
+        },
+        {
+          "keys": "Super + Alt + Space",
           "desc": "Rofi Launcher"
         },
         {
@@ -366,6 +354,18 @@
         {
           "keys": "Ctrl + Alt + M",
           "desc": "Wiremix"
+        },
+        {
+          "keys": "Super + A",
+          "desc": "Focus Next Monitor"
+        },
+        {
+          "keys": "Super + Ctrl + A",
+          "desc": "Move Window Next Monitor"
+        },
+        {
+          "keys": "Super + Escape",
+          "desc": "Move Window Next Monitor"
         }
       ]
     },
@@ -408,6 +408,14 @@
         {
           "keys": "Super + L",
           "desc": "Focus Right"
+        },
+        {
+          "keys": "Super + WheelScrollRight",
+          "desc": "Focus Right"
+        },
+        {
+          "keys": "Super + WheelScrollLeft",
+          "desc": "Focus Left"
         }
       ]
     },
@@ -442,6 +450,14 @@
         {
           "keys": "Super + J",
           "desc": "Focus Down"
+        },
+        {
+          "keys": "Super + WheelScrollDown",
+          "desc": "WS Down"
+        },
+        {
+          "keys": "Super + WheelScrollUp",
+          "desc": "WS Up"
         },
         {
           "keys": "Super + 1",
@@ -501,6 +517,22 @@
           "desc": "Move Right"
         },
         {
+          "keys": "Super + Alt + Shift + Left",
+          "desc": "Move to Monitor Left"
+        },
+        {
+          "keys": "Super + Alt + Shift + Right",
+          "desc": "Move to Monitor Right"
+        },
+        {
+          "keys": "Super + Ctrl + Up",
+          "desc": "Move to Monitor Up"
+        },
+        {
+          "keys": "Super + Ctrl + Down",
+          "desc": "Move to Monitor Down"
+        },
+        {
           "keys": "Super + Shift + 1",
           "desc": "Move To WS 1: Kenp"
         },
@@ -556,6 +588,18 @@
         {
           "keys": "Super + Shift + J",
           "desc": "Move Down"
+        },
+        {
+          "keys": "Super + Ctrl + C",
+          "desc": "Move to Empty WS"
+        },
+        {
+          "keys": "Super + Page_Up",
+          "desc": "Move Win WS Up"
+        },
+        {
+          "keys": "Super + Page_Down",
+          "desc": "Move Win WS Down"
         }
       ]
     },
@@ -601,6 +645,22 @@
     {
       "title": "Other",
       "binds": [
+        {
+          "keys": "Super + Tab",
+          "desc": "Next Window Scope=\"Output\""
+        },
+        {
+          "keys": "Super + Shift + Tab",
+          "desc": "Previous Window Scope=\"Output\""
+        },
+        {
+          "keys": "Super + Ctrl + Tab",
+          "desc": "Next Window Filter=\"App Id\" Scope=\"Workspace\""
+        },
+        {
+          "keys": "Super + Ctrl + Shift + Tab",
+          "desc": "Previous Window Filter=\"App Id\" Scope=\"Workspace\""
+        },
         {
           "keys": "Super + C",
           "desc": "Center Column"
@@ -684,6 +744,22 @@
         {
           "keys": "Super + Ctrl + Escape",
           "desc": "Toggle Shortcut Inhibit"
+        },
+        {
+          "keys": "Super + Alt + H",
+          "desc": "Monitor Left"
+        },
+        {
+          "keys": "Super + Alt + L",
+          "desc": "Monitor Right"
+        },
+        {
+          "keys": "Super + Alt + K",
+          "desc": "Monitor Up"
+        },
+        {
+          "keys": "Super + Alt + J",
+          "desc": "Monitor Down"
         }
       ]
     },
@@ -733,87 +809,16 @@
         {
           "keys": "Super + Alt + 0",
           "desc": "Go (Arrange Windows)"
-        },
-        {
-          "keys": "Super + Ctrl + C",
-          "desc": "Move to Empty WS"
-        },
-        {
-          "keys": "Super + Page_Up",
-          "desc": "Move Win WS Up"
-        },
-        {
-          "keys": "Super + Page_Down",
-          "desc": "Move Win WS Down"
-        },
-        {
-          "keys": "Super + WheelScrollDown",
-          "desc": "WS Down"
-        },
-        {
-          "keys": "Super + WheelScrollUp",
-          "desc": "WS Up"
-        },
-        {
-          "keys": "Super + WheelScrollRight",
-          "desc": "Focus Right"
-        },
-        {
-          "keys": "Super + WheelScrollLeft",
-          "desc": "Focus Left"
-        },
-        {
-          "keys": "Super + A",
-          "desc": "Focus Next Monitor"
-        },
-        {
-          "keys": "Super + Alt + H",
-          "desc": "Monitor Left"
-        },
-        {
-          "keys": "Super + Alt + L",
-          "desc": "Monitor Right"
-        },
-        {
-          "keys": "Super + Alt + K",
-          "desc": "Monitor Up"
-        },
-        {
-          "keys": "Super + Alt + J",
-          "desc": "Monitor Down"
-        },
-        {
-          "keys": "Super + Ctrl + A",
-          "desc": "Move Window Next Monitor"
-        },
-        {
-          "keys": "Super + Escape",
-          "desc": "Move Window Next Monitor"
-        },
-        {
-          "keys": "Super + Alt + Shift + Left",
-          "desc": "Move to Monitor Left"
-        },
-        {
-          "keys": "Super + Alt + Shift + Right",
-          "desc": "Move to Monitor Right"
-        },
-        {
-          "keys": "Super + Ctrl + Up",
-          "desc": "Move to Monitor Up"
-        },
-        {
-          "keys": "Super + Ctrl + Down",
-          "desc": "Move to Monitor Down"
         }
       ]
     }
   ],
   "detectedCompositor": "niri",
-  "niriConfigPath": "~/.config/niri/config.kdl",
-  "hyprlandConfigPath": "~/.config/hypr/conf.d/40-binds.conf",
-  "modKeyVariable": "$mod",
-  "windowHeight": 850,
   "windowWidth": 1440,
-  "columnCount": 3
+  "windowHeight": 850,
+  "autoHeight": true,
+  "columnCount": 3,
+  "modKeyVariable": "$mod",
+  "hyprlandConfigPath": "~/.config/hypr/conf.d/40-binds.conf",
+  "niriConfigPath": "~/.config/niri/config.kdl"
 }
