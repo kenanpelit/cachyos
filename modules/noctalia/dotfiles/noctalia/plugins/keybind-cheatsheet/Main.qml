@@ -53,20 +53,20 @@ Item {
   function getUnsupportedCompositorMessage(compositor) {
     var messages = {
       "sway": {
-        short: pluginApi?.tr("keybind-cheatsheet.error.sway-not-supported") || "Sway is not yet supported",
-        detail: pluginApi?.tr("keybind-cheatsheet.error.sway-detail") || "Sway support may be added in a future update (similar format to Hyprland)"
+        short: pluginApi?.tr("error.sway-not-supported"),
+        detail: pluginApi?.tr("error.sway-detail")
       },
       "labwc": {
-        short: pluginApi?.tr("keybind-cheatsheet.error.labwc-not-supported") || "LabWC is not supported",
-        detail: pluginApi?.tr("keybind-cheatsheet.error.labwc-detail") || "LabWC uses XML config format which is incompatible with this plugin"
+        short: pluginApi?.tr("error.labwc-not-supported"),
+        detail: pluginApi?.tr("error.labwc-detail")
       },
       "mango": {
-        short: pluginApi?.tr("keybind-cheatsheet.error.mango-not-supported") || "MangoWC is not supported",
-        detail: pluginApi?.tr("keybind-cheatsheet.error.mango-detail") || "MangoWC config format is not compatible with this plugin"
+        short: pluginApi?.tr("error.mango-not-supported"),
+        detail: pluginApi?.tr("error.mango-detail")
       },
       "unknown": {
-        short: pluginApi?.tr("keybind-cheatsheet.error.unknown-compositor") || "Unknown compositor detected",
-        detail: pluginApi?.tr("keybind-cheatsheet.error.unknown-detail") || "This plugin only supports Hyprland and Niri compositors"
+        short: pluginApi?.tr("error.unknown-compositor"),
+        detail: pluginApi?.tr("error.unknown-detail")
       }
     };
 
@@ -144,7 +144,7 @@ Item {
 
       var unsupportedMsg = getUnsupportedCompositorMessage(compositorName);
       saveToDb([{
-        "title": pluginApi?.tr("keybind-cheatsheet.error.unsupported-compositor") || "Unsupported Compositor",
+        "title": pluginApi?.tr("error.unsupported-compositor"),
         "binds": [
           { "keys": compositorName.toUpperCase(), "desc": unsupportedMsg.short },
           { "keys": "INFO", "desc": unsupportedMsg.detail }
@@ -222,7 +222,7 @@ Item {
     // Handle glob patterns
     if (isGlobPattern(nextFile)) {
       niriGlobProcess.expandedFiles = []; // Clear previous results
-      niriGlobProcess.command = ["sh", "-c", "for f in " + nextFile + "; do [ -f \"$f\" ] && echo \"$f\"; done"];
+      niriGlobProcess.command = ["sh", "-c", 'for f in $1; do [ -f "$f" ] && echo "$f"; done', "sh", nextFile];
       niriGlobProcess.running = true;
       return;
     }
@@ -499,7 +499,7 @@ Item {
     // Handle glob patterns
     if (isGlobPattern(nextFile)) {
       hyprGlobProcess.expandedFiles = []; // Clear previous results
-      hyprGlobProcess.command = ["sh", "-c", "for f in " + nextFile + "; do [ -f \"$f\" ] && echo \"$f\"; done"];
+      hyprGlobProcess.command = ["sh", "-c", 'for f in $1; do [ -f "$f" ] && echo "$f"; done', "sh", nextFile];
       hyprGlobProcess.running = true;
       return;
     }
@@ -588,7 +588,6 @@ Item {
     var currentCategory = null;
     var hasCategories = false; // Track if we found any category headers
 
-    // TUTAJ ZMIANA: Pobierz ustawioną zmienną (domyślnie $mod) i zamień na wielkie litery
     var modVar = pluginApi?.pluginSettings?.modKeyVariable || "$mod";
     var modVarUpper = modVar.toUpperCase();
 
@@ -608,7 +607,7 @@ Item {
       else if (line.includes("bind") && line.includes('#"')) {
         // If no categories found yet, create default category
         if (!currentCategory && !hasCategories) {
-          var defaultCategoryName = pluginApi?.tr("keybind-cheatsheet.default-category") || "Keybinds";
+          var defaultCategoryName = pluginApi?.tr("default-category");
           currentCategory = { "title": defaultCategoryName, "binds": [] };
         }
 
@@ -624,7 +623,6 @@ Item {
 
             // Build modifiers list properly
             var mods = [];
-            // TUTAJ ZMIANA: Sprawdzamy czy to ustawiony mod (np. $MAINMOD) albo SUPER
             if (modPart.includes(modVarUpper) || modPart.includes("SUPER")) mods.push("Super");
 
             if (modPart.includes("SHIFT")) mods.push("Shift");
@@ -655,126 +653,6 @@ Item {
     saveToDb(categories);
     isCurrentlyParsing = false;
     clearParsingData();
-  }
-
-  // ========== NIRI PARSER ==========
-  function parseNiriConfig(text) {
-    var lines = text.split('\n');
-    var inBindsBlock = false;
-    var braceDepth = 0;
-    var currentCategory = null;
-
-    var actionCategories = {
-      "spawn": "Applications",
-      "spawn-sh": "Applications",
-      "focus-column": "Column Navigation",
-      "focus-window": "Window Focus",
-      "focus-workspace": "Workspace Navigation",
-      "move-column": "Move Columns",
-      "move-column-to-workspace": "Workspace Management",
-      "move-window": "Move Windows",
-      "move-window-to-workspace": "Workspace Management",
-      "consume-window": "Window Management",
-      "expel-window": "Window Management",
-      "close-window": "Window Management",
-      "fullscreen-window": "Window Management",
-      "maximize-column": "Column Management",
-      "set-column-width": "Column Width",
-      "switch-preset-column-width": "Column Width",
-      "reset-window-height": "Window Size",
-      "screenshot": "Screenshots",
-      "power-off-monitors": "Power",
-      "quit": "System",
-      "toggle-animation": "Animations"
-    };
-
-    var categorizedBinds = {};
-
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i].trim();
-
-      // Find binds block
-      if (line.startsWith("binds") && line.includes("{")) {
-        inBindsBlock = true;
-        braceDepth = 1;
-        continue;
-      }
-
-      if (!inBindsBlock) continue;
-
-      // Track brace depth
-      for (var j = 0; j < line.length; j++) {
-        if (line[j] === '{') braceDepth++;
-        else if (line[j] === '}') braceDepth--;
-      }
-
-      if (braceDepth <= 0) {
-        inBindsBlock = false;
-        break;
-      }
-
-      // Category markers: // #"Category Name" - only these create categories
-      if (line.startsWith("//")) {
-        var categoryMatch = line.match(/\/\/\s*#"([^"]+)"/);
-        if (categoryMatch) {
-          currentCategory = categoryMatch[1];
-        }
-        continue;
-      }
-
-      if (line.length === 0) continue;
-
-      // Parse: Mod+Key { action; }
-      var bindMatch = line.match(/^([A-Za-z0-9_+]+)\s*(?:[a-z\-]+=\S+\s*)*\{\s*([^}]+)\s*\}/);
-
-      if (bindMatch) {
-        var keyCombo = bindMatch[1];
-        var action = bindMatch[2].trim().replace(/;$/, '');
-
-        var formattedKeys = formatNiriKeyCombo(keyCombo);
-        var category = currentCategory || getNiriCategory(action, actionCategories);
-
-        if (!categorizedBinds[category]) {
-          categorizedBinds[category] = [];
-        }
-
-        categorizedBinds[category].push({
-          "keys": formattedKeys,
-          "desc": formatNiriAction(action)
-        });
-      }
-    }
-
-    // Convert to array
-    var categoryOrder = [
-      "Noctalia", "Applications", "Window Management", "Column Navigation",
-      "Window Focus", "Workspace Navigation", "Workspace Management",
-      "Move Columns", "Move Windows", "Column Management", "Column Width",
-      "Window Size", "Screenshots", "Power", "System", "Animations"
-    ];
-
-    var categories = [];
-    for (var k = 0; k < categoryOrder.length; k++) {
-      var catName = categoryOrder[k];
-      if (categorizedBinds[catName] && categorizedBinds[catName].length > 0) {
-        categories.push({
-          "title": catName,
-          "binds": categorizedBinds[catName]
-        });
-      }
-    }
-
-    // Add remaining categories
-    for (var cat in categorizedBinds) {
-      if (categoryOrder.indexOf(cat) === -1 && categorizedBinds[cat].length > 0) {
-        categories.push({
-          "title": cat,
-          "binds": categorizedBinds[cat]
-        });
-      }
-    }
-
-    saveToDb(categories);
   }
 
   function formatSpecialKey(key) {

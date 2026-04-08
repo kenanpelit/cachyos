@@ -42,4 +42,4 @@ Settings UI allows for editing commands and changing toggles
 - CPU (Optional)
 
 ### Note:
-This is my first QML project so I apologize for any sloppy code
+This is my first QML project, so I apologize for any sloppy code

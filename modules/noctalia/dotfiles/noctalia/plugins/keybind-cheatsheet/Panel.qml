@@ -101,6 +101,13 @@ Item {
   readonly property bool panelAnchorVerticalCenter: true
   anchors.fill: parent
 
+  // Key badge colors
+  readonly property color keyColorAlt:     "#FF6B6B"
+  readonly property color keyColorXF86:    "#4ECDC4"
+  readonly property color keyColorPrint:   "#95E1D3"
+  readonly property color keyColorNumeric: "#A8DADC"
+  readonly property color keyColorMouse:   "#F38181"
+
   // Data is loaded by Main.qml, we just display it
   property bool isLoading: rawCategories.length === 0
 
@@ -174,15 +181,9 @@ Item {
           color: Color.mPrimary
         }
         NText {
-          text: {
-            if (CompositorService.isHyprland) {
-              return "Hyprland Keymap";
-            } else if (CompositorService.isNiri) {
-              return "Niri Keymap";
-            } else {
-              return "Keymap";
-            }
-          }
+          text: CompositorService.isHyprland ? pluginApi?.tr("panel.title-hyprland") :
+                CompositorService.isNiri     ? pluginApi?.tr("panel.title-niri") :
+                                               pluginApi?.tr("panel.title")
           font.pointSize: Style.fontSizeM
           font.weight: Font.Bold
           color: Color.mPrimary
@@ -204,6 +205,7 @@ Item {
           onClicked: {
             var screen = pluginApi?.panelOpenScreen;
             if (screen && pluginApi?.manifest) {
+              pluginApi.closePanel(screen);
               BarService.openPluginSettings(screen, pluginApi.manifest);
             }
           }
@@ -214,7 +216,7 @@ Item {
     NText {
       id: loadingText
       anchors.centerIn: parent
-      text: pluginApi?.tr("keybind-cheatsheet.panel.loading") || "Loading..."
+      text: pluginApi?.tr("panel.loading")
       visible: root.isLoading
       font.pointSize: Style.fontSizeL
       color: Color.mOnSurface
@@ -344,12 +346,12 @@ Item {
     if (keyName === "Super") return Color.mPrimary;
     if (keyName === "Ctrl") return Color.mSecondary;
     if (keyName === "Shift") return Color.mTertiary;
-    if (keyName === "Alt") return "#FF6B6B";
-    if (keyName.startsWith("XF86")) return "#4ECDC4";
-    if (keyName === "PRINT" || keyName === "Print") return "#95E1D3";
-    if (keyName.match(/^[0-9]$/)) return "#A8DADC";
-    if (keyName.includes("MOUSE") || keyName.includes("Wheel")) return "#F38181";
-    return Color.mPrimaryContainer || "#6C757D";
+    if (keyName === "Alt") return root.keyColorAlt;
+    if (keyName.startsWith("XF86")) return root.keyColorXF86;
+    if (keyName === "PRINT" || keyName === "Print") return root.keyColorPrint;
+    if (keyName.match(/^[0-9]$/)) return root.keyColorNumeric;
+    if (keyName.includes("MOUSE") || keyName.includes("Wheel")) return root.keyColorMouse;
+    return Color.mPrimaryContainer ?? "#6C757D";
   }
 
   function buildColumnItems(categoryIndices) {
@@ -401,9 +403,9 @@ Item {
             }
           }
 
-          if (switching.length > 0) result.push({ title: pluginApi?.tr("keybind-cheatsheet.panel.workspace-switching") || "WORKSPACES - SWITCHING", binds: switching });
-          if (moving.length > 0) result.push({ title: pluginApi?.tr("keybind-cheatsheet.panel.workspace-moving") || "WORKSPACES - MOVING", binds: moving });
-          if (mouse.length > 0) result.push({ title: pluginApi?.tr("keybind-cheatsheet.panel.workspace-mouse") || "WORKSPACES - MOUSE", binds: mouse });
+          if (switching.length > 0) result.push({ title: pluginApi?.tr("panel.workspace-switching"), binds: switching });
+          if (moving.length > 0) result.push({ title: pluginApi?.tr("panel.workspace-moving"), binds: moving });
+          if (mouse.length > 0) result.push({ title: pluginApi?.tr("panel.workspace-mouse"), binds: mouse });
         } else {
           result.push(cat);
         }
