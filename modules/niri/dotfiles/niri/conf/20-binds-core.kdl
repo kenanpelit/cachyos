@@ -37,6 +37,7 @@ binds {
   Mod+0 hotkey-overlay-title="Size: 960x540 (Half)" { spawn "niri-osc" "set" "size" "960" "540"; }
   Mod+Shift+0 hotkey-overlay-title="Size: 1280x720 (HD)" { spawn "niri-osc" "set" "size" "1280" "720"; }
   Mod+Ctrl+0 hotkey-overlay-title="Size: 1920x1080 (FHD)" { spawn "niri-osc" "set" "size" "1920" "1080"; }
+  Mod+Alt+9 hotkey-overlay-title="Layout: 65/35" { spawn "niri-two-column-layout"; }
 
   Mod+Minus hotkey-overlay-title="Width -5%" { set-column-width "-5%"; }
   Mod+Equal hotkey-overlay-title="Width +5%" { set-column-width "+5%"; }
