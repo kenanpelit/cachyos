@@ -694,7 +694,7 @@ Usage:
 Notes:
   - Uses workspace rules from (first found):
       - ~/.config/hypr/workspace-rules.tsv
-  - TSV format: <class_regex>\t<workspace_id>\t<title_regex?>
+  - TSV format: <class_regex>\t<workspace_id>\t<title_regex?>\t<mode?>
 EOF
       }
 
@@ -724,17 +724,28 @@ EOF
       declare -a RULE_WORKSPACES=()
       declare -a RULE_TITLE_PATTERNS=()
 
+      parse_rule_line() {
+        local line="$1"
+
+        RULE_PATTERN="$(awk -F $'\t' '{print $1}' <<<"${line}")"
+        RULE_WORKSPACE="$(awk -F $'\t' '{print $2}' <<<"${line}")"
+        RULE_TITLE="$(awk -F $'\t' '{print $3}' <<<"${line}")"
+      }
+
       load_rules() {
         local file="$1"
         [[ -f "$file" ]] || return 1
 
-        while IFS=$'\t' read -r pattern ws title; do
-          [[ -z "${pattern//[[:space:]]/}" ]] && continue
-          [[ "${pattern:0:1}" == "#" ]] && continue
-          [[ -z "${ws//[[:space:]]/}" ]] && continue
-          RULE_PATTERNS+=("$pattern")
-          RULE_WORKSPACES+=("$ws")
-          RULE_TITLE_PATTERNS+=("${title:-}")
+        local raw
+        while IFS= read -r raw; do
+          [[ -z "${raw//[[:space:]]/}" ]] && continue
+          [[ "${raw:0:1}" == "#" ]] && continue
+          parse_rule_line "${raw}"
+          [[ -z "${RULE_PATTERN//[[:space:]]/}" ]] && continue
+          [[ -z "${RULE_WORKSPACE//[[:space:]]/}" ]] && continue
+          RULE_PATTERNS+=("${RULE_PATTERN}")
+          RULE_WORKSPACES+=("${RULE_WORKSPACE}")
+          RULE_TITLE_PATTERNS+=("${RULE_TITLE:-}")
         done <"$file"
       }
 

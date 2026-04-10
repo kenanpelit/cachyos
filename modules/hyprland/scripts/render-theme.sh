@@ -54,6 +54,20 @@ trap cleanup EXIT
 : "${THEME_BORDER_SIZE:=3}"
 : "${THEME_ROUNDING:=8}"
 : "${THEME_FLOATING_ROUNDING:=10}"
+: "${THEME_ACTIVE_BORDER_FROM_HEX:=bd8ff5}"
+: "${THEME_BLUR_ENABLED:=1}"
+: "${THEME_BLUR_SIZE:=5}"
+: "${THEME_BLUR_PASSES:=1}"
+: "${THEME_BLUR_VIBRANCY:=0.000}"
+: "${THEME_SHADOW_HEX:=4411111b}"
+: "${THEME_SHADOW_RANGE:=18}"
+: "${THEME_SHADOW_RENDER_POWER:=3}"
+: "${THEME_SHADOW_SCALE:=1.000}"
+: "${THEME_INACTIVE_OPACITY:=0.94}"
+: "${THEME_DIM_STRENGTH:=0.06}"
+: "${THEME_GROUPBAR_FONT_SIZE:=10}"
+: "${THEME_GROUPBAR_HEIGHT:=18}"
+: "${THEME_GROUPBAR_INDICATOR_HEIGHT:=4}"
 
 if [[ "${CATPPUCCIN_FLAVOR}" != "mocha" ]]; then
   printf 'Unsupported CATPPUCCIN_FLAVOR: %s\n' "${CATPPUCCIN_FLAVOR}" >&2
@@ -221,57 +235,67 @@ cat >"${tmp_theme}" <<EOF
 
 general {
   border_size=\$themeBorderSize
-  col.active_border=rgba(\$accentAlphaff)
-  col.inactive_border=rgba(\$baseAlphaff)
+  col.active_border=rgba(${THEME_ACTIVE_BORDER_FROM_HEX}ff) rgba(\$accentAlphaff) 45deg
+  col.inactive_border=rgba(\$surface0Alphaff)
+  col.nogroup_border=rgba(\$surface0Alphaff)
+  col.nogroup_border_active=rgba(${THEME_ACTIVE_BORDER_FROM_HEX}ff) rgba(\$accentAlphaff) 45deg
 }
 
 decoration {
   blur {
-    enabled=true
+    enabled=${THEME_BLUR_ENABLED}
     ignore_opacity=true
     new_optimizations=true
-    passes=2
+    passes=${THEME_BLUR_PASSES}
     popups=true
-    popups_ignorealpha=0.2
-    size=9
+    popups_ignorealpha=0.3
+    size=${THEME_BLUR_SIZE}
     special=false
-    vibrancy=0.155
+    vibrancy=${THEME_BLUR_VIBRANCY}
     vibrancy_darkness=0.0
-    xray=true
+    xray=false
   }
 
   shadow {
-    color=0x66000000
+    color=0x${THEME_SHADOW_HEX}
     enabled=true
     ignore_window=true
-    offset=0 4
-    range=27
-    render_power=4
-    scale=0.975
+    offset=0 8
+    range=${THEME_SHADOW_RANGE}
+    render_power=${THEME_SHADOW_RENDER_POWER}
+    scale=${THEME_SHADOW_SCALE}
   }
 
   active_opacity=1.0
   dim_inactive=true
-  dim_strength=0.12
+  dim_strength=${THEME_DIM_STRENGTH}
   fullscreen_opacity=1.0
-  inactive_opacity=0.88
+  inactive_opacity=${THEME_INACTIVE_OPACITY}
   rounding=\$themeRounding
 }
 
 group {
   groupbar {
-    col.active=rgba(\$blueAlphaed)
-    col.inactive=rgba(\$overlay0Alphaa8)
-    col.locked_active=rgba(\$accentAlphaed)
-    col.locked_inactive=rgba(\$surface1Alphaa8)
-    font_size=10
-    gradients=false
+    col.active=rgba(\$accentAlphae6)
+    col.inactive=rgba(\$surface0Alphacc)
+    col.locked_active=rgba(\$lavenderAlphae6)
+    col.locked_inactive=rgba(\$surface1Alphacc)
+    font_size=${THEME_GROUPBAR_FONT_SIZE}
+    gradients=true
+    height=${THEME_GROUPBAR_HEIGHT}
+    indicator_height=${THEME_GROUPBAR_INDICATOR_HEIGHT}
+    gaps_in=4
+    gaps_out=4
+    keep_upper_gap=false
     render_titles=false
+    rounding=\$themeRounding
+    scrolling=true
+    blur=false
   }
-  col.border_active=rgba(\$accentAlphaff)
-  col.border_inactive=rgba(\$baseAlphaff)
-  col.border_locked_active=rgba(\$accentAlphaff)
-  col.border_locked_inactive=rgba(\$baseAlphaff)
+  col.border_active=rgba(${THEME_ACTIVE_BORDER_FROM_HEX}ff) rgba(\$accentAlphaff) 45deg
+  col.border_inactive=rgba(\$surface0Alphaff)
+  col.border_locked_active=rgba(\$lavenderAlphaff) rgba(\$accentAlphaff) 45deg
+  col.border_locked_inactive=rgba(\$surface1Alphaff)
 }
 
 misc {

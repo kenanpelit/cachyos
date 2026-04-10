@@ -12,6 +12,7 @@ LEGACY_ENV_FILE="${USER_HOME}/.config/environment.d/10-hyprland.conf"
 
 "${MODULE_DIR}/scripts/render-theme.sh"
 "${MODULE_DIR}/scripts/render-monitors.sh"
+"${MODULE_DIR}/scripts/render-workspace-routing.sh"
 
 run_as_user rm -f "${LEGACY_ENV_FILE}" 2>/dev/null || true
 

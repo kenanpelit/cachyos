@@ -150,8 +150,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   groupbars, compositor background, workspace chrome exceptions, and Hyprland
   theme string values used by binds.
 - `dotfiles/hypr/conf.d/rules/*.conf`
-  Window rules are split by concern (`core`, `workspace-routing`, `floating`,
-  `dialogs`, `theme-overrides`) and indexed by `40-rules.conf`.
+  Window rules are split by concern (`core`, generated
+  `workspace-routing`, `floating`, `layout-behavior`, `dialogs`,
+  `theme-overrides`) and indexed by `40-rules.conf`.
 - `dotfiles/hypr/conf.d/binds/*.conf`
   Keybinds are split by concern (`navigation`, `shell-session`, `apps`,
   `workspaces`, `monitors-hardware`) and indexed by `50-binds.conf`.
@@ -184,8 +185,13 @@ Daemon-stage units started by `hypr-daemons.target`:
   profile. `render-monitors.sh --check` verifies that the generated file is in
   sync with the manifest and selected profile.
 - `dotfiles/hypr/workspace-rules.tsv`
-  Canonical window-to-workspace arranger rules consumed by `hypr-osc
-  arrange-windows`.
+  Canonical window-to-workspace routing table consumed by both
+  `hypr-osc arrange-windows` and the generated
+  `conf.d/rules/20-workspace-routing.conf`.
+- `scripts/render-workspace-routing.sh`
+  Renderer that regenerates `conf.d/rules/20-workspace-routing.conf` from
+  `workspace-rules.tsv`. `render-workspace-routing.sh --check` verifies that
+  the generated rules still match the canonical TSV.
 - `modules/sessions/dotfiles/hyprland-uwsm-session`
   UWSM-first wrapper. Loads the repo-managed shared `environment.d` stack
   including `00-wayland.conf`, plus the Hyprland-only session file, normalizes
@@ -199,8 +205,9 @@ Daemon-stage units started by `hypr-daemons.target`:
   Hyprland-only keyring override, re-enables the stock
   `gnome-keyring-daemon` units, and persists the Blueman plugin mask.
 - `scripts/validate.sh`
-  Repo-side validation helper that runs the generator drift checks and shell
-  syntax checks together in one command.
+  Repo-side validation helper that runs the generator drift checks, shell
+  syntax checks, installed Hyprland config verification, and live
+  `hyprctl configerrors` checks together in one command.
 - `dotfiles/hypr/conf.d/70-monitors.conf`
   Generated monitor layout and workspace routing for the selected monitor
   profile.
