@@ -19,8 +19,8 @@ Item {
 
     anchors.fill: parent
 
-    // Shared column width reference (content area minus outer margins and table inner margins)
-    readonly property real tableContentWidth: panelContainer.width - 2 * Style.marginL - 2 * Style.marginS
+    // Shared column width reference (content area minus outer margins, table inner margins, and column spacing)
+    readonly property real tableContentWidth: panelContainer.width - 2 * Style.marginL - 2 * Style.marginS - 2 * Style.marginS
 
     Rectangle {
         id: panelContainer

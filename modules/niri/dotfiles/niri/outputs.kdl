@@ -14,7 +14,7 @@ output "DP-3" {
 
   layout {
     // External 1440p display can fit narrower columns without feeling cramped.
-    default-column-width { proportion 0.900; }
+    default-column-width { proportion 0.786; }
 
     preset-column-widths {
       proportion 0.500
@@ -39,7 +39,7 @@ output "eDP-1" {
 
   layout {
     // On the laptop panel, prioritize a roomier primary column.
-    default-column-width { proportion 0.900; }
+    default-column-width { proportion 0.786; }
 
     preset-column-widths {
       proportion 0.500

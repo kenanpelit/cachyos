@@ -222,12 +222,6 @@
                     "id": "plugin:screen-toolkit"
                 },
                 {
-                    "defaultSettings": {
-                        "mode": "region"
-                    },
-                    "id": "plugin:screenshot"
-                },
-                {
                     "commandPrefix": "music-search",
                     "defaultSettings": {
                         "autoSaveMp3AfterPlayback": false,
@@ -616,7 +610,7 @@
         "firstDayOfWeek": -1,
         "hideWeatherCityName": false,
         "hideWeatherTimezone": false,
-        "name": "Malmo",
+        "name": "Istanbul",
         "showCalendarEvents": true,
         "showCalendarWeather": true,
         "showWeekNumberInCalendar": false,
@@ -696,7 +690,7 @@
         "overlayLayer": true
     },
     "plugins": {
-        "autoUpdate": false,
+        "autoUpdate": true,
         "notifyUpdates": true
     },
     "sessionMenu": {
