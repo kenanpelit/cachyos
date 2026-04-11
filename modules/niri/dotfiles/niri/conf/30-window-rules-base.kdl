@@ -70,7 +70,7 @@ window-rule {
 
 window-rule {
   match app-id=r#"^(ferdium|Ferdium)$"#
-  default-column-width { proportion 0.900; }
+  default-column-width { proportion 0.786; }
   default-column-display "tabbed"
 }
 
