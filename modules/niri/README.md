@@ -171,9 +171,6 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   `modules/niri/dotfiles/niri/conf/`, so layout, binds, rules, gestures, and
   animations can evolve independently without turning `config.kdl` back into a
   monolith.
-- Experimental Niri `debug {}` toggles are now loaded from an optional
-  `~/.config/niri/runtime/debug.kdl` include instead of being baked into the
-  base module profile.
 - Native Niri recent windows switching is now available on `Mod+Tab` /
   `Mod+Shift+Tab` (output scope) and `Mod+Ctrl+Tab` / `Mod+Ctrl+Shift+Tab`
   (workspace app-id scope), while the shell-owned `Alt+Tab` flow stays intact.
