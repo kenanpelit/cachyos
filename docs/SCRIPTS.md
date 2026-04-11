@@ -381,6 +381,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-two-column-layout`
+**Description:** Apply a fixed two-column split on the focused Niri workspace.
+
+**Usage:** `niri-two-column-layout [--left 65] [--right 35] [--dry-run]`
+
+---
+
 ### 📂 `noctalia-launch`
 **Description:** Prepare session-specific Noctalia state and launch the shell.
 
