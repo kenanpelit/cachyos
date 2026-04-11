@@ -2,9 +2,6 @@
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 cursor {
-  // Apply the system-wide cursor theme directly in the compositor, not just via env.
-  xcursor-theme "capitaine-cursors"
-  xcursor-size 24
   // Hide cursor during keyboard input for better focus.
   hide-when-typing
   // Auto-hide after 1 second of inactivity to keep workspace clean.
@@ -24,13 +21,6 @@ hotkey-overlay {
 overview {
   // Zoom level for the workspace overview.
   zoom 0.25
-  backdrop-color "#313244"
-  workspace-shadow {
-    softness 40
-    spread 12
-    offset x=0 y=12
-    color "#00000050"
-  }
 }
 
 // Integrate wallpaper surfaces into the overview backdrop for visual depth.

@@ -1,5 +1,6 @@
-// Declarative output layout owned by the Niri module.
-// Keep this file static; do not generate monitor routing at runtime.
+// Generated from shared/wm/monitors.yaml.
+// Update the shared manifest and rerun shared/wm/render-monitor-assets.sh.
+// Source checksum: 63d5025b033e7bfb4d680a0d1020c0edeb03ea27cc8ad0c6a92d14c2efe75ca7
 
 output "DP-3" {
   mode "2560x1440@59"
@@ -13,7 +14,6 @@ output "DP-3" {
   }
 
   layout {
-    // External 1440p display can fit narrower columns without feeling cramped.
     default-column-width { proportion 0.786; }
 
     preset-column-widths {
@@ -38,7 +38,6 @@ output "eDP-1" {
   }
 
   layout {
-    // On the laptop panel, prioritize a roomier primary column.
     default-column-width { proportion 0.786; }
 
     preset-column-widths {

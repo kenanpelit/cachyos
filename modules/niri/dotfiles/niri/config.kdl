@@ -14,6 +14,7 @@ include optional=true "runtime/workspaces-auto.kdl"
 include optional=true "runtime/debug.kdl"
 
 include "conf/10-layout.kdl"
+include "generated/theme.kdl"
 include optional=true "runtime/zen.kdl"
 include "conf/20-binds-core.kdl"
 include "generated/workspace-shortcuts.kdl"

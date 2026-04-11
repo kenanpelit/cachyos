@@ -3,9 +3,11 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
 PROFILE_MANIFEST="${MODULE_DIR}/monitors/profile.env"
 PROFILES_DIR="${MODULE_DIR}/monitors/profiles"
 MONITORS_OUT="${MODULE_DIR}/dotfiles/hypr/conf.d/70-monitors.conf"
+SHARED_MONITOR_ASSETS_SCRIPT="${REPO_ROOT}/shared/wm/render-monitor-assets.sh"
 
 usage() {
   cat <<'EOF'
@@ -32,6 +34,10 @@ case "${1:-}" in
     exit 2
     ;;
 esac
+
+if [[ -x "${SHARED_MONITOR_ASSETS_SCRIPT}" ]]; then
+  "${SHARED_MONITOR_ASSETS_SCRIPT}" $([[ "${mode}" == "check" ]] && printf '%s' '--check')
+fi
 
 # shellcheck source=/dev/null
 source "${PROFILE_MANIFEST}"

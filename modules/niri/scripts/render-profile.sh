@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
+SHARED_MONITOR_ASSETS_SCRIPT="${REPO_ROOT}/shared/wm/render-monitor-assets.sh"
 
 # shellcheck source=/dev/null
 source "${REPO_ROOT}/modules/base/lib/core.sh"
@@ -64,6 +65,10 @@ while (($#)); do
       ;;
   esac
 done
+
+if [[ -x "${SHARED_MONITOR_ASSETS_SCRIPT}" ]]; then
+  "${SHARED_MONITOR_ASSETS_SCRIPT}" $([[ "${mode}" == "check" ]] && printf '%s' '--check')
+fi
 
 [[ -r "${PROFILE_MANIFEST}" ]] || die "Profile manifest not found: ${PROFILE_MANIFEST}"
 [[ -r "${OUTPUT_MAP_FILE}" ]] || die "Output map not found: ${OUTPUT_MAP_FILE}"

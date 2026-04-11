@@ -4,21 +4,6 @@ layer-rule {
 }
 
 layer-rule {
-  match namespace=r#"(^|.*[:\-])(launcher|osd|popup).*$"#
-  shadow {
-    on
-    color "#00000060"
-    spread 2
-    softness 12
-  }
-}
-
-layer-rule {
-  match namespace="^notifications$"
-  geometry-corner-radius 12
-}
-
-layer-rule {
   match namespace="^notifications$"
   block-out-from "screencast"
 }

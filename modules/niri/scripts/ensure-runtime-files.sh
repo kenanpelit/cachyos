@@ -55,6 +55,8 @@ fi
 
 render_profile_script="$script_dir/render-profile.sh"
 render_workspace_assets_script="$script_dir/render-workspace-assets.sh"
+render_theme_script="$script_dir/render-theme.sh"
+shared_monitor_assets_script="$repo_root/shared/wm/render-monitor-assets.sh"
 
 legacy_runtime_files=(
   "$RUNTIME_DIR/cursor.kdl"
@@ -71,6 +73,22 @@ rm -f "$LEGACY_ENV_FILE" 2>/dev/null || true
 rm -f "$LEGACY_PRIORITY_DROPIN" 2>/dev/null || true
 rm -f "$LEGACY_DESKTOP_SETTINGS_UNIT" 2>/dev/null || true
 rm -f "$LEGACY_DESKTOP_SETTINGS_WANTS_LINK" 2>/dev/null || true
+
+if [[ -x "$shared_monitor_assets_script" ]]; then
+  if [ "$(id -u)" -eq 0 ]; then
+    run_as_user "$shared_monitor_assets_script"
+  else
+    "$shared_monitor_assets_script"
+  fi
+fi
+
+if [[ -x "$render_theme_script" ]]; then
+  if [ "$(id -u)" -eq 0 ]; then
+    run_as_user "$render_theme_script"
+  else
+    "$render_theme_script"
+  fi
+fi
 
 if [[ -x "$render_profile_script" ]]; then
   if [ "$(id -u)" -eq 0 ]; then

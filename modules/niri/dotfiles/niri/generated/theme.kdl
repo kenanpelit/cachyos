@@ -1,0 +1,113 @@
+// Generated from modules/niri/theme/theme.env.
+// Update the manifest and rerun modules/niri/scripts/render-theme.sh.
+// Source checksum: 0dd699ff63f99e1f009c3b369058f6a77d5013120bc8d35b953f821e75e3c099
+
+cursor {
+  xcursor-theme "capitaine-cursors"
+  xcursor-size 24
+}
+
+overview {
+  backdrop-color "#313244"
+  workspace-shadow {
+    softness 40
+    spread 12
+    offset x=0 y=12
+    color "#00000050"
+  }
+}
+
+layout {
+  background-color "#00000000"
+
+  focus-ring {
+    on
+    width 3
+    active-gradient from="#bd8ff5" to="#cba6f7" angle=45 relative-to="workspace-view" in="oklch shorter hue"
+    inactive-color "#313244"
+    urgent-color "#f38ba8"
+  }
+
+  shadow {
+    color "#11111b70"
+  }
+
+  tab-indicator {
+    hide-when-single-tab
+    place-within-column
+    width 4
+    gap 6
+    length total-proportion=0.9
+    position "top"
+    gaps-between-tabs 4
+    corner-radius 8
+    active-color "#cba6f7"
+    inactive-color "#6b02e9"
+    urgent-color "#f38ba8"
+  }
+
+  insert-hint {
+    color "#cba6f780"
+  }
+}
+
+recent-windows {
+  highlight {
+    active-color "#cba6f7"
+    urgent-color "#f38ba8"
+    padding 18
+    corner-radius 14
+  }
+
+  previews {
+    max-height 560
+    max-scale 0.60
+  }
+}
+
+window-rule {
+  geometry-corner-radius 12
+  clip-to-geometry true
+}
+
+window-rule {
+  match is-floating=true
+  shadow {
+    on
+  }
+}
+
+window-rule {
+  match is-floating=false
+  shadow {
+    on
+    color "#00000060"
+    offset x=0 y=4
+    spread 0
+    softness 16
+  }
+}
+
+window-rule {
+  match is-window-cast-target=true
+  focus-ring {
+    active-color "#f38ba8"
+    inactive-color "#7d0d2d"
+  }
+  opacity 1.0
+}
+
+layer-rule {
+  match namespace=r#"(^|.*[:\-])(launcher|osd|popup).*$"#
+  shadow {
+    on
+    color "#00000060"
+    spread 2
+    softness 12
+  }
+}
+
+layer-rule {
+  match namespace="^notifications$"
+  geometry-corner-radius 12
+}

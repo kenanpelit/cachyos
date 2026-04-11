@@ -1,0 +1,158 @@
+version: 1
+
+monitors:
+  - id: dell_up2716d
+    selector: "desc:Dell Inc. DELL UP2716D KRXTR88N909L"
+    niri_name: "DP-3"
+    mode: "2560x1440@59"
+    scale: 1
+    position:
+      x: 0
+      y: 0
+    focus_at_startup: true
+    backdrop_color: "#1e1e2e"
+    hot_corners:
+      - bottom-right
+    layout:
+      default_column_width: 0.786
+      preset_column_widths:
+        - 0.500
+        - 0.618
+        - 0.786
+        - 0.900
+        - 1.000
+
+  - id: laptop_panel
+    selector: "desc:Chimei Innolux Corporation 0x143F"
+    niri_name: "eDP-1"
+    mode: "1920x1200@60"
+    scale: 1
+    position:
+      x: 320
+      y: 1440
+    variable_refresh_rate: on-demand
+    backdrop_color: "#181825"
+    hot_corners: []
+    layout:
+      default_column_width: 0.786
+      preset_column_widths:
+        - 0.500
+        - 0.618
+        - 0.786
+        - 0.900
+        - 1.000
+
+profiles:
+  desk:
+    outputs:
+      - monitor: dell_up2716d
+      - monitor: laptop_panel
+      - selector: ""
+        mode: preferred
+        position: auto
+        scale: 1
+    workspaces:
+      - id: 1
+        monitor: dell_up2716d
+        default: true
+        persistent: true
+      - id: 2
+        monitor: dell_up2716d
+        persistent: true
+      - id: 3
+        monitor: dell_up2716d
+        persistent: true
+      - id: 4
+        monitor: dell_up2716d
+        persistent: true
+      - id: 5
+        monitor: dell_up2716d
+        persistent: true
+      - id: 6
+        monitor: dell_up2716d
+        persistent: true
+      - id: 7
+        monitor: laptop_panel
+        default: true
+        persistent: true
+      - id: 8
+        monitor: laptop_panel
+        persistent: true
+      - id: 9
+        monitor: laptop_panel
+        persistent: true
+
+  mobile:
+    outputs:
+      - monitor: laptop_panel
+        position: "0x0"
+      - selector: ""
+        mode: preferred
+        position: auto
+        scale: 1
+    workspaces:
+      - id: 1
+        monitor: laptop_panel
+        default: true
+        persistent: true
+      - id: 2
+        monitor: laptop_panel
+        persistent: true
+      - id: 3
+        monitor: laptop_panel
+        persistent: true
+      - id: 4
+        monitor: laptop_panel
+        persistent: true
+      - id: 5
+        monitor: laptop_panel
+        persistent: true
+      - id: 6
+        monitor: laptop_panel
+        persistent: true
+      - id: 7
+        monitor: laptop_panel
+        persistent: true
+      - id: 8
+        monitor: laptop_panel
+        persistent: true
+      - id: 9
+        monitor: laptop_panel
+        persistent: true
+
+  single-external:
+    outputs:
+      - monitor: dell_up2716d
+      - selector: ""
+        mode: preferred
+        position: auto
+        scale: 1
+    workspaces:
+      - id: 1
+        monitor: dell_up2716d
+        default: true
+        persistent: true
+      - id: 2
+        monitor: dell_up2716d
+        persistent: true
+      - id: 3
+        monitor: dell_up2716d
+        persistent: true
+      - id: 4
+        monitor: dell_up2716d
+        persistent: true
+      - id: 5
+        monitor: dell_up2716d
+        persistent: true
+      - id: 6
+        monitor: dell_up2716d
+        persistent: true
+      - id: 7
+        monitor: dell_up2716d
+        persistent: true
+      - id: 8
+        monitor: dell_up2716d
+        persistent: true
+      - id: 9
+        monitor: dell_up2716d
+        persistent: true

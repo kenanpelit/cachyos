@@ -1,27 +1,4 @@
 window-rule {
-  geometry-corner-radius 12
-  clip-to-geometry true
-}
-
-window-rule {
-  match is-floating=true
-  shadow {
-    on
-  }
-}
-
-window-rule {
-  match is-floating=false
-  shadow {
-    on
-    color "#00000060"
-    offset x=0 y=4
-    spread 0
-    softness 16
-  }
-}
-
-window-rule {
   match app-id=r#"^org\.quickshell$"#
   open-floating true
 }
