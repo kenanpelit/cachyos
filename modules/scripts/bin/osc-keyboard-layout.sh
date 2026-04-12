@@ -75,7 +75,7 @@ find_repo_root() {
 
 REPO_ROOT="$(find_repo_root)" || die "Unable to locate repo root. Set DCLI_REPO_ROOT or install the repo under ~/.cachy."
 readonly REPO_ROOT
-readonly NIRI_CFG="${REPO_ROOT}/modules/niri/dotfiles/niri/config.kdl"
+readonly NIRI_CFG="${REPO_ROOT}/modules/niri/dotfiles/niri/conf/00-base.kdl"
 readonly HYPR_CFG="${REPO_ROOT}/modules/hyprland/dotfiles/hypr/conf.d/30-input.conf"
 
 usage() {
@@ -92,7 +92,7 @@ Usage:
 
 Notes:
   - Repo scope updates:
-      modules/niri/dotfiles/niri/config.kdl
+      modules/niri/dotfiles/niri/conf/00-base.kdl
       modules/hyprland/dotfiles/hypr/conf.d/30-input.conf
   - Live scope updates:
       /etc/vconsole.conf
@@ -131,7 +131,7 @@ set_preset() {
       ;;
     trq)
       LAYOUT="tr"
-      VARIANT="q"
+      VARIANT=""
       TTY_KEYMAP="trq"
       ;;
     *)
@@ -191,15 +191,72 @@ update_repo_niri() {
   local tmp
   tmp="$(mktemp)"
 
-  LAYOUT="$LAYOUT" VARIANT="$VARIANT" OPTIONS="$OPTIONS" perl -0pe '
-    my $layout = $ENV{LAYOUT};
-    my $variant = $ENV{VARIANT};
-    my $options = $ENV{OPTIONS};
-    my $count = 0;
-    $count += s/(keyboard\s*\{\s*xkb\s*\{.*?\blayout\s+")([^"]*)(")/$1.$layout.$3/se;
-    $count += s/(keyboard\s*\{\s*xkb\s*\{.*?\bvariant\s+")([^"]*)(")/$1.$variant.$3/se;
-    $count += s/(keyboard\s*\{\s*xkb\s*\{.*?\boptions\s+")([^"]*)(")/$1.$options.$3/se;
-    END { exit($count >= 3 ? 0 : 1) }
+  awk -v layout="$LAYOUT" -v variant="$VARIANT" -v options="$OPTIONS" '
+    BEGIN {
+      in_keyboard = 0
+      in_xkb = 0
+      has_layout = 0
+      has_variant = 0
+      has_options = 0
+    }
+
+    /^[[:space:]]*keyboard[[:space:]]*\{/ {
+      in_keyboard = 1
+      print
+      next
+    }
+
+    in_keyboard && /^[[:space:]]*xkb[[:space:]]*\{/ {
+      in_xkb = 1
+      print
+      next
+    }
+
+    in_xkb && /^[[:space:]]*layout[[:space:]]+"/ {
+      sub(/layout[[:space:]]+".*"/, "layout \"" layout "\"")
+      has_layout = 1
+      print
+      next
+    }
+
+    in_xkb && /^[[:space:]]*([/][/][[:space:]]*)?variant[[:space:]]+"/ {
+      match($0, /^[[:space:]]*/)
+      indent = substr($0, RSTART, RLENGTH)
+      if (variant == "") {
+        print indent "// variant \"f\""
+      } else {
+        print indent "variant \"" variant "\""
+      }
+      has_variant = 1
+      next
+    }
+
+    in_xkb && /^[[:space:]]*options[[:space:]]+"/ {
+      sub(/options[[:space:]]+".*"/, "options \"" options "\"")
+      has_options = 1
+      print
+      next
+    }
+
+    in_xkb && /^[[:space:]]*\}[[:space:]]*$/ {
+      in_xkb = 0
+      print
+      next
+    }
+
+    in_keyboard && !in_xkb && /^[[:space:]]*\}[[:space:]]*$/ {
+      in_keyboard = 0
+      print
+      next
+    }
+
+    { print }
+
+    END {
+      if (!(has_layout && has_variant && has_options)) {
+        exit 1
+      }
+    }
   ' "$NIRI_CFG" >"$tmp" || die "Failed to update Niri keyboard block"
 
   write_if_changed "$tmp" "$NIRI_CFG" 644
