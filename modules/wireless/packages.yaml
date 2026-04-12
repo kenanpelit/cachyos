@@ -1,2 +1,3 @@
-description: wireless regulatory domain packages
-packages: []
+description: wireless regulatory domain tooling
+packages:
+  - iw
