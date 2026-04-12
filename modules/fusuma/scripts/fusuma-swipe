@@ -47,6 +47,17 @@ detect_compositor() {
   return 1
 }
 
+niri_action() {
+  local action="$1"
+
+  if command -v niri >/dev/null 2>&1; then
+    exec niri msg action "$action"
+  fi
+
+  log_error "fusuma-swipe: niri not found in PATH"
+  exit 127
+}
+
 fingers="${1:-}"
 direction="${2:-}"
 
@@ -61,6 +72,14 @@ esac
 compositor="$(detect_compositor || true)"
 case "$fingers" in
   4)
+    if [[ "$compositor" == "niri" ]]; then
+      case "$direction" in
+        left) niri_action focus-monitor-previous ;;
+        right) niri_action focus-monitor-next ;;
+        up|down) exec fusuma-overview ;;
+      esac
+    fi
+
     if [[ "$compositor" == "hyprland" ]]; then
       case "$direction" in
         up) exec hypr-osc window-move monitor up ;;
