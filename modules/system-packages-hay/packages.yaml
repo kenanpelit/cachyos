@@ -69,7 +69,7 @@ packages:
   - gvfs-afc
   - gvfs-dnssd
   - gvfs-goa
-  - gvfs-google-git
+  #- gvfs-google-git
   - gvfs-gphoto2
   - gvfs-mtp
   - gvfs-nfs
