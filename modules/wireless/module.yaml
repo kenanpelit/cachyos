@@ -1,0 +1,8 @@
+tags:
+- network
+- system
+description: Explicit wireless regulatory domain configuration
+depends_on:
+- base
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

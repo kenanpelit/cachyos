@@ -1,0 +1,5 @@
+#
+# Wireless regulatory domain configuration
+#
+
+WIRELESS_REGDOM="TR"
