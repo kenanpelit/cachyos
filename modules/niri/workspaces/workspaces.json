@@ -3,90 +3,158 @@
     {
       "id": "1",
       "name": "Kenp",
-      "hereLabel": "Kenp",
-      "hereTarget": "Kenp",
-      "focusRegex": "^Kenp$",
-      "routeAppRegex": "^Kenp$",
-      "routeTitleRegex": ""
+      "here": {
+        "label": "Kenp",
+        "target": "Kenp"
+      },
+      "focus": {
+        "regex": "^Kenp$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^Kenp$"
+        }
+      ]
     },
     {
       "id": "2",
       "name": "Term",
-      "hereLabel": "TmuxKenp",
-      "hereTarget": "TmuxKenp",
-      "focusRegex": "^TmuxKenp$",
-      "routeAppRegex": "^(TmuxKenp|kitty)$",
-      "routeTitleRegex": "^Tmux$",
-      "layout": [
-        "default-column-display \"tabbed\""
-      ]
+      "here": {
+        "label": "TmuxKenp",
+        "target": "TmuxKenp"
+      },
+      "focus": {
+        "regex": "^TmuxKenp$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^(TmuxKenp|kitty)$",
+          "titleRegex": "^Tmux$"
+        }
+      ],
+      "layout": {
+        "lines": [
+          "default-column-display \"tabbed\""
+        ]
+      }
     },
     {
       "id": "3",
       "name": "AI",
-      "hereLabel": "Ai",
-      "hereTarget": "Ai",
-      "focusRegex": "^Ai$",
-      "routeAppRegex": "^(Ai|Nil)$",
-      "routeTitleRegex": ""
+      "here": {
+        "label": "Ai",
+        "target": "Ai"
+      },
+      "focus": {
+        "regex": "^Ai$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^(Ai|Nil)$"
+        }
+      ]
     },
     {
       "id": "4",
       "name": "Work",
-      "hereLabel": "CompecTA",
-      "hereTarget": "CompecTA",
-      "focusRegex": "^CompecTA$",
-      "routeAppRegex": "^CompecTA$",
-      "routeTitleRegex": ""
+      "here": {
+        "label": "CompecTA",
+        "target": "CompecTA"
+      },
+      "focus": {
+        "regex": "^CompecTA$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^CompecTA$"
+        }
+      ]
     },
     {
       "id": "5",
       "name": "Chat",
-      "hereLabel": "WebCord",
-      "hereTarget": "WebCord",
-      "focusRegex": "^WebCord$",
-      "routeAppRegex": "^(discord|WebCord|audacious)$",
-      "routeTitleRegex": ""
+      "here": {
+        "label": "WebCord",
+        "target": "WebCord"
+      },
+      "focus": {
+        "regex": "^WebCord$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^(discord|WebCord|audacious)$"
+        }
+      ]
     },
     {
       "id": "6",
       "name": "Media",
-      "hereLabel": "Telegram",
-      "hereTarget": "org.telegram.desktop",
-      "focusRegex": "^(org\\.telegram\\.desktop|TelegramDesktop)$",
-      "routeAppRegex": "^(Exclude|org\\.telegram\\.desktop|vlc|remote-viewer)$",
-      "routeTitleRegex": "",
-      "layout": [
-        "default-column-width { proportion 1.000; }",
-        "center-focused-column \"always\""
-      ]
+      "here": {
+        "label": "Telegram",
+        "target": "org.telegram.desktop"
+      },
+      "focus": {
+        "regex": "^(org\\.telegram\\.desktop|TelegramDesktop)$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^(Exclude|org\\.telegram\\.desktop|vlc|remote-viewer)$"
+        }
+      ],
+      "layout": {
+        "lines": [
+          "default-column-width { proportion 1.000; }",
+          "center-focused-column \"always\""
+        ]
+      }
     },
     {
       "id": "7",
       "name": "Utility",
-      "hereLabel": "YouTube",
-      "hereTarget": "brave-youtube.com__-Default",
-      "focusRegex": "^brave-youtube\\.com__-Default$",
-      "routeAppRegex": "^(transmission|org\\.keepassxc\\.KeePassXC|(brave-youtube|chrome-youtube)\\.com__-Default)$",
-      "routeTitleRegex": ""
+      "here": {
+        "label": "YouTube",
+        "target": "brave-youtube.com__-Default"
+      },
+      "focus": {
+        "regex": "^brave-youtube\\.com__-Default$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^(transmission|org\\.keepassxc\\.KeePassXC|(brave-youtube|chrome-youtube)\\.com__-Default)$"
+        }
+      ]
     },
     {
       "id": "8",
       "name": "Music",
-      "hereLabel": "Spotify",
-      "hereTarget": "spotify",
-      "focusRegex": "^(spotify|Spotify|com\\.spotify\\.Client)$",
-      "routeAppRegex": "^(spotify|Spotify|com\\.spotify\\.Client)$",
-      "routeTitleRegex": ""
+      "here": {
+        "label": "Spotify",
+        "target": "spotify"
+      },
+      "focus": {
+        "regex": "^(spotify|Spotify|com\\.spotify\\.Client)$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^(spotify|Spotify|com\\.spotify\\.Client)$"
+        }
+      ]
     },
     {
       "id": "9",
       "name": "Social",
-      "hereLabel": "Ferdium",
-      "hereTarget": "ferdium",
-      "focusRegex": "^(ferdium|Ferdium)$",
-      "routeAppRegex": "^(ferdium|Ferdium|com\\.rtosta\\.zapzap|(Whats|chrome-web\\.whatsapp\\.com__-Default))$",
-      "routeTitleRegex": ""
+      "here": {
+        "label": "Ferdium",
+        "target": "ferdium"
+      },
+      "focus": {
+        "regex": "^(ferdium|Ferdium)$"
+      },
+      "routes": [
+        {
+          "appIdRegex": "^(ferdium|Ferdium|com\\.rtosta\\.zapzap|(Whats|chrome-web\\.whatsapp\\.com__-Default))$"
+        }
+      ]
     }
   ]
 }

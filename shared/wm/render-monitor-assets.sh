@@ -5,11 +5,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 MANIFEST="${SCRIPT_DIR}/monitors.yaml"
 
-NIRI_OUTPUTS_OUT="${REPO_ROOT}/modules/niri/dotfiles/niri/outputs.kdl"
-NIRI_OUTPUT_MAP_OUT="${REPO_ROOT}/modules/niri/profiles/output-map.tsv"
-NIRI_PROFILES_DIR="${REPO_ROOT}/modules/niri/profiles/profiles"
-HYPR_PROFILES_DIR="${REPO_ROOT}/modules/hyprland/monitors/profiles"
-
 usage() {
   cat <<'EOF'
 Usage: render-monitor-assets.sh [--check]
@@ -46,6 +41,7 @@ trap cleanup EXIT
 
 python3 - "${MANIFEST}" "${tmp_dir}" <<'PY'
 import hashlib
+import json
 import sys
 from pathlib import Path
 
@@ -63,7 +59,13 @@ profiles = data.get("profiles")
 if not isinstance(monitors, list) or not isinstance(profiles, dict):
     raise SystemExit("shared/wm/monitors.yaml must contain 'monitors' and 'profiles'")
 
-checksum = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+checksum_payload = {
+    "monitors": monitors,
+    "profiles": profiles,
+}
+checksum = hashlib.sha256(
+    json.dumps(checksum_payload, sort_keys=True, separators=(",", ":")).encode()
+).hexdigest()
 
 
 def niri_name_for_selector(selector: str) -> str:
@@ -159,19 +161,6 @@ for monitor in monitors:
 
 write_file("modules/niri/dotfiles/niri/outputs.kdl", "\n".join(outputs_lines).rstrip() + "\n")
 
-output_map_lines = [
-    "# Generated from shared/wm/monitors.yaml.",
-    "# Format: <monitor selector><TAB><niri stable output name>",
-]
-for monitor in monitors:
-    monitor = monitors_by_id[monitor["id"]]
-    output_map_lines.append(f'{monitor["selector"]}\t{monitor["niri_name"]}')
-
-write_file(
-    "modules/niri/profiles/output-map.tsv",
-    "\n".join(output_map_lines).rstrip() + "\n",
-)
-
 for profile_name, profile in profiles.items():
     if not isinstance(profile, dict):
         raise SystemExit(f"Profile '{profile_name}' must be a mapping")
@@ -243,7 +232,6 @@ PY
 
 targets=(
   "modules/niri/dotfiles/niri/outputs.kdl"
-  "modules/niri/profiles/output-map.tsv"
   "modules/niri/profiles/profiles/desk.conf"
   "modules/niri/profiles/profiles/mobile.conf"
   "modules/niri/profiles/profiles/single-external.conf"

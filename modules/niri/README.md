@@ -97,8 +97,6 @@ session once the environment conditions are satisfied:
   Runs the snapshot boot check for `snapper-tools`.
 - `niri-sticky.service`
   Runs `niri-float-sticky daemon` for floating sticky windows across workspaces.
-- `niri-niriswitcher.service`
-  Runs `niriswitcher`.
 - Niri-only daemon-stage services are now lifecycle-bound directly to
   `wayland-wm@niri\x2dsession.service` via `BindsTo=`/`After=` so they stop
   immediately if the compositor dies unexpectedly.
@@ -149,22 +147,25 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
   and `RemoteDesktop` stays on GNOME as the only installed backend in this
   repo that actually advertises that interface.
 - Static Niri outputs are now declared directly in
-  `modules/niri/dotfiles/niri/outputs.kdl`. Workspace placement remains
-  runtime-rendered from the selected Niri monitor profile plus the Niri
-  output-name map, so the module keeps its own profile selector without
-  depending on Hyprland-owned monitor profile assets. The selector lives in
+  `modules/niri/dotfiles/niri/outputs.kdl`, but that file is generated from
+  `shared/wm/monitors.yaml`. Workspace placement remains runtime-rendered from
+  the selected Niri monitor profile plus the same shared monitor manifest, so
+  the module keeps its own profile selector without depending on
+  Hyprland-owned monitor profile assets. The selector lives in
   `modules/niri/profiles/profile.env` via `NIRI_MONITOR_PROFILE`.
-- The static output config now matches monitors by stable make/model/serial
-  identity rather than transient connector names, and still uses per-output
-  `layout {}` overrides so the external Dell panel defaults to narrower
-  working columns while the built-in panel keeps a roomier primary column
-  width.
+- The static output config intentionally uses the connector names chosen in
+  `shared/wm/monitors.yaml` (`DP-3`, `eDP-1`) rather than monitor descriptors,
+  while the shared manifest still keeps the underlying stable selectors for
+  profile generation and future monitor matching logic.
 - Workspace metadata now has a single source of truth at
-  `modules/niri/workspaces/workspaces.json`. The helper
+  `modules/niri/workspaces/workspaces.json`. The manifest is now structured
+  around `here`, `focus`, `routes`, and optional `layout.lines`. The helper
   `modules/niri/scripts/render-workspace-assets.sh` generates:
   `generated/workspace-shortcuts.kdl`, `generated/workspace-rules.kdl`, the
   Noctalia `nworkspace` alias map, and the runtime TSV files consumed by
-  `niri-osc`/`osc-niri-workspaces-mode`, while
+  `niri-osc`/`osc-niri-workspaces-mode`. Native `generated/workspace-rules.kdl`
+  is now title-aware as well, so app-id and title routing stay aligned between
+  helper-driven arrange flows and Niri's own `window-rule` placement. Meanwhile
   `modules/niri/scripts/render-profile.sh` now also emits optional per-workspace
   native `layout {}` overrides into `runtime/workspaces-auto.kdl`.
 - `config.kdl` is now split with top-level `include` files under
@@ -174,6 +175,9 @@ graphical-session-scoped helpers rather than Niri-specific daemons:
 - Native Niri recent windows switching is now available on `Mod+Tab` /
   `Mod+Shift+Tab` (output scope) and `Mod+Ctrl+Tab` / `Mod+Ctrl+Shift+Tab`
   (workspace app-id scope), while the shell-owned `Alt+Tab` flow stays intact.
+  The old `niriswitcher` daemon is intentionally removed from the session
+  graph because this module now relies on native Niri recent-window behavior
+  instead of a parallel switcher service.
 - `lid-open` now re-triggers `niri-arrange.service` so dock/undock wakeups
   rebalance the session automatically after the panel comes back.
 - The supported entry path is now the UWSM wrapper installed by the `sessions`

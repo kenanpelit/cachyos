@@ -15,4 +15,3 @@ packages:
   # - waybar (removed)
   - brightnessctl
   - wtype
-  - niriswitcher

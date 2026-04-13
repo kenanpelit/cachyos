@@ -1,14 +1,14 @@
 // Generated from modules/niri/workspaces/workspaces.json.
 // Edit the source workspace map instead of hand-editing these rules.
 // BEGIN OSC_NIRI_WORKSPACE_RULES
-// Default workspace placements by application ID.
+// Default workspace placements by application metadata.
 window-rule {
   match app-id=r#"^Kenp$"#
   open-on-workspace "Kenp"
 }
 
 window-rule {
-  match app-id=r#"^(TmuxKenp|kitty)$"#
+  match app-id=r#"^(TmuxKenp|kitty)$"# title=r#"^Tmux$"#
   open-on-workspace "Term"
 }
 

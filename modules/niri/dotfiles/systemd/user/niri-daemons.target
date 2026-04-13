@@ -1,6 +1,6 @@
 [Unit]
 Description=Niri session daemons stage
-Wants=niri-polkit-agent.service niri-nm-applet.service niri-blueman-applet.service niri-snapper-tools-check.service niri-sticky.service niri-niriswitcher.service
+Wants=niri-polkit-agent.service niri-nm-applet.service niri-blueman-applet.service niri-snapper-tools-check.service niri-sticky.service
 After=graphical-session.target niri-bootstrap.service
 BindsTo=graphical-session.target
 PartOf=niri-session.target graphical-session.target

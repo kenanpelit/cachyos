@@ -56,7 +56,10 @@ EOF
   // ----------------------------------------------------------------------
 EOF
 
-  jq -r '.workspaces[] | "  Alt+\(.id) allow-inhibiting=false repeat=false hotkey-overlay-title=\"Here: \(.hereLabel)\" { spawn \"niri-osc\" \"set\" \"here\" \"\(.hereTarget)\"; }"' "${SOURCE_FILE}"
+  jq -r '
+    .workspaces[]
+    | "  Alt+\(.id) allow-inhibiting=false repeat=false hotkey-overlay-title=\"Here: \(.here.label // .hereLabel)\" { spawn \"niri-osc\" \"set\" \"here\" \"\(.here.target // .hereTarget)\"; }"
+  ' "${SOURCE_FILE}"
 
   cat <<'EOF'
   Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-osc" "set" "here" "all"; }
@@ -73,14 +76,33 @@ emit_rules() {
 // Generated from modules/niri/workspaces/workspaces.json.
 // Edit the source workspace map instead of hand-editing these rules.
 // BEGIN OSC_NIRI_WORKSPACE_RULES
-// Default workspace placements by application ID.
+// Default workspace placements by application metadata.
 EOF
 
-  jq -r '.workspaces[] |
-    "window-rule {\n" +
-    "  match app-id=r#\"\(.routeAppRegex)\"#\n" +
-    "  open-on-workspace \"\(.name)\"\n" +
-    "}\n"
+  jq -r '
+    def normalized_routes($ws):
+      if ($ws.routes // null) != null then
+        $ws.routes
+      elif (($ws.routeAppRegex // "") != "" or ($ws.routeTitleRegex // "") != "") then
+        [{
+          appIdRegex: ($ws.routeAppRegex // ""),
+          titleRegex: ($ws.routeTitleRegex // "")
+        }]
+      else
+        []
+      end;
+
+    .workspaces[] as $ws
+    | normalized_routes($ws)[]
+    | [
+        (if (.appIdRegex // "") != "" then "app-id=r#\"\(.appIdRegex)\"#" else empty end),
+        (if (.titleRegex // "") != "" then "title=r#\"\(.titleRegex)\"#" else empty end)
+      ]
+      | map(select(length > 0))
+      | "window-rule {\n" +
+        "  match " + (join(" ")) + "\n" +
+        "  open-on-workspace \"\($ws.name)\"\n" +
+        "}\n"
   ' "${SOURCE_FILE}"
 
   cat <<'EOF'
@@ -91,7 +113,7 @@ EOF
 emit_noctalia_meta() {
   local aliases_json items_json
   aliases_json="$(jq '{aliases: (reduce .workspaces[] as $ws ({}; .[$ws.id] = $ws.name))} | .aliases' "${SOURCE_FILE}")"
-  items_json="$(jq '[.workspaces[] | {id, name, hereLabel, hereTarget}]' "${SOURCE_FILE}")"
+  items_json="$(jq '[.workspaces[] | {id, name, hereLabel: (.here.label // .hereLabel), hereTarget: (.here.target // .hereTarget)}]' "${SOURCE_FILE}")"
 
   cat <<EOF
 .pragma library
@@ -110,7 +132,23 @@ emit_runtime_rules() {
 # Format: APP_ID_REGEX<TAB>WORKSPACE<TAB>TITLE_REGEX
 EOF
 
-  jq -r '.workspaces[] | [.routeAppRegex, .name, .routeTitleRegex] | @tsv' "${SOURCE_FILE}"
+  jq -r '
+    def normalized_routes($ws):
+      if ($ws.routes // null) != null then
+        $ws.routes
+      elif (($ws.routeAppRegex // "") != "" or ($ws.routeTitleRegex // "") != "") then
+        [{
+          appIdRegex: ($ws.routeAppRegex // ""),
+          titleRegex: ($ws.routeTitleRegex // "")
+        }]
+      else
+        []
+      end;
+
+    .workspaces[] as $ws
+    | normalized_routes($ws)[]
+    | [(.appIdRegex // ""), $ws.name, (.titleRegex // "")] | @tsv
+  ' "${SOURCE_FILE}"
 }
 
 emit_runtime_here() {
@@ -119,7 +157,17 @@ emit_runtime_here() {
 # Format: WORKSPACE<TAB>NAME<TAB>HERE_LABEL<TAB>HERE_TARGET<TAB>FOCUS_REGEX
 EOF
 
-  jq -r '.workspaces[] | [.id, .name, .hereLabel, .hereTarget, .focusRegex] | @tsv' "${SOURCE_FILE}"
+  jq -r '
+    .workspaces[]
+    | [
+        .id,
+        .name,
+        (.here.label // .hereLabel),
+        (.here.target // .hereTarget),
+        (.focus.regex // .focusRegex)
+      ]
+    | @tsv
+  ' "${SOURCE_FILE}"
 }
 
 write_if_changed() {

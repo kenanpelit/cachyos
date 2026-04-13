@@ -7,6 +7,8 @@ source "$repo_root/modules/base/lib/core.sh"
 
 NIRI_CONFIG="$USER_HOME/.config/niri/config.kdl"
 NIRI_RUNTIME_DIR="$USER_HOME/.config/niri/runtime"
+WORKSPACE_SOURCE_FILE="$script_dir/../workspaces/workspaces.json"
+WORKSPACE_RULES_FILE="$script_dir/../dotfiles/niri/generated/workspace-rules.kdl"
 RENDER_PROFILE_SCRIPT="$script_dir/render-profile.sh"
 RENDER_WORKSPACE_ASSETS_SCRIPT="$script_dir/render-workspace-assets.sh"
 RENDER_THEME_SCRIPT="$script_dir/render-theme.sh"
@@ -65,6 +67,50 @@ if [[ -x "$RENDER_WORKSPACE_ASSETS_SCRIPT" ]]; then
             exit 1
         fi
     fi
+fi
+
+if [[ -r "$WORKSPACE_SOURCE_FILE" && -r "$WORKSPACE_RULES_FILE" ]] && command -v jq >/dev/null 2>&1; then
+    log_info "Validating title-aware native workspace rules..."
+    semantic_failure=0
+    while IFS=$'\t' read -r workspace_name app_regex title_regex; do
+        [[ -n "${title_regex//[[:space:]]/}" ]] || continue
+
+        expected_match="  match"
+        if [[ -n "${app_regex//[[:space:]]/}" ]]; then
+            expected_match+=" app-id=r#\"${app_regex}\"#"
+        fi
+        expected_match+=" title=r#\"${title_regex}\"#"
+
+        if ! grep -Fqx "$expected_match" "$WORKSPACE_RULES_FILE"; then
+            log_error "Missing native title-aware rule for workspace '${workspace_name}'"
+            semantic_failure=1
+        fi
+    done < <(
+        jq -r '
+          def normalized_routes($ws):
+            if ($ws.routes // null) != null then
+              $ws.routes
+            elif (($ws.routeAppRegex // "") != "" or ($ws.routeTitleRegex // "") != "") then
+              [{
+                appIdRegex: ($ws.routeAppRegex // ""),
+                titleRegex: ($ws.routeTitleRegex // "")
+              }]
+            else
+              []
+            end;
+
+          .workspaces[] as $ws
+          | normalized_routes($ws)[]
+          | select((.titleRegex // "") != "")
+          | [$ws.name, (.appIdRegex // ""), (.titleRegex // "")] | @tsv
+        ' "$WORKSPACE_SOURCE_FILE"
+    )
+
+    if [[ "$semantic_failure" -ne 0 ]]; then
+        exit 1
+    fi
+
+    log_success "Title-aware native workspace rules are in sync!"
 fi
 
 if niri validate -c "$NIRI_CONFIG" >/dev/null 2>&1; then
