@@ -1,0 +1,19 @@
+{
+  "activeBackend": "qt6-multimedia",
+  "automationMode": "random",
+  "automationTime": 300,
+  "fillMode": "fit",
+  "mpvSocket": "/tmp/mpv-socket",
+  "profile": "default",
+  "volume": 1,
+  "wallpapersFolder": "/home/kenan/Videos/arda",
+  "thumbCacheReady": true,
+  "eDP-1": {
+    "currentWallpaper": "/home/kenan/Videos/arda/4saat_video.mp4",
+    "isPlaying": false
+  },
+  "DP-3": {
+    "currentWallpaper": "/home/kenan/Videos/arda/4saat_video.mp4",
+    "isPlaying": false
+  }
+}

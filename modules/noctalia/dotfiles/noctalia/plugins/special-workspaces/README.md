@@ -1,6 +1,6 @@
 # Special Workspaces (Hyprland)
 
-A simple widget that shows Hyprland special workspaces.
+A widget to track Hyprland special workspaces.
 
 ### Requirements
 
@@ -9,24 +9,23 @@ A simple widget that shows Hyprland special workspaces.
 
 ## Features
 
-- The widget appears as a single dimmed button while any special workspace isn't active. It restores its opacity when a special workspace is active, focused or not.
+- The widget appears as a single dimmed button (Drawer) while no special workspace is active. It restores its opacity when any special workspace is active, focused or not.
 - It expands and shows special workspaces when a special workspace is focused.
 - Inactive special workspaces are shown dimmed.
-- Fully customizable. Options are still WIP, they'll contain these:
- * Expanding direction (top/down for vertical, left/right for horizontal)
- * Pill toggle
- * Symbol color (Primary/Secondary)
- * Symbol size (Primary/Secondary)
- * Pill color (Primary/Secondary)
- * Pill size (Primary/Secondary)
- * Add/remove special workspaces
- * Assign different symbols to special workspaces
- 
-**The widget doesn't actually add/remove special workspaces to Hyprland. The add/remove function only changes if a special workspace has a button on the widget or not. The widget expands even if a special workspace isn't added to it but is focused. I recommend adding all of the special workspaces defined in Hyprland config to the widget to avoid any confusion.**
- 
-*Primary button: The main that's shown at the bar at all times.*
-*Secondary button: The special workspace buttons shown when the widget is expanded.*
+- When the expand direction is perpendicular to the bar (e.g. left/right on a vertical bar), the workspaces open in a floating panel instead of expanding inline. The panel also auto-opens and closes as you switch in and out of special workspaces.
+- Fully customizable:
+  * Drawer toggle, hide the workspace buttons until a special workspace is active
+  * Hide empty workspaces, only show buttons for workspaces that currently exist in Hyprland
+  * Expanding direction (up/down/left/right)
+  * Panel background toggle and color (panel mode only)
+  * Pill toggles, color and size (independent for drawer/workspace buttons)
+  * Icon color (independent for drawer/workspace buttons)
+  * Focus button color
+  * Border radius
+  * Add/remove workspace entries and assign icons to them
+
+**The widget doesn't actually add/remove special workspaces to Hyprland. The add/remove function only changes if a special workspace has a button on the widget or not. The widget expands even if a special workspace isn't added to it but is focused. I recommend adding all of the special workspaces defined in your Hyprland config to the widget to make full use of this plugin.**
 
 ### Usage
 
-The widget expands when a special workspace is focused. The buttons also function as special workspace focus toggles.
+The widget expands when a special workspace is focused. The workspace buttons also function as toggle shortcuts, e.g. clicking one switches to that workspace or hides it if it's already focused.

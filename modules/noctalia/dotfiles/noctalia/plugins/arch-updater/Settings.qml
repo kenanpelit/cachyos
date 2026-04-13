@@ -26,6 +26,9 @@ ColumnLayout {
     // Noctalia update highlighting
     property bool noctalia: pluginApi.pluginSettings.noctalia ?? pluginApi.manifest.metadata.defaultSettings.noctalia
 
+    // Noctalia update highlighting
+    property bool boldVer: pluginApi.pluginSettings.boldVer ?? pluginApi.manifest.metadata.defaultSettings.boldVer
+
     // Hide the bar widget when there are no updates
     property bool hideOnEmpty: pluginApi.pluginSettings.hideOnEmpty ?? pluginApi.manifest.metadata.defaultSettings.hideOnEmpty
 
@@ -36,6 +39,7 @@ ColumnLayout {
     property int refreshInterval: pluginApi.pluginSettings.refreshInterval || pluginApi.manifest.metadata.defaultSettings.refreshInterval
 
     // Appearance
+    property bool tooltip: pluginApi.pluginSettings.tooltip ?? pluginApi.manifest.metadata.defaultSettings.tooltip
     property bool boldText: pluginApi.pluginSettings.boldText ?? pluginApi.manifest.metadata.defaultSettings.boldText
     property string iconName: pluginApi.pluginSettings.iconName || pluginApi.manifest.metadata.defaultSettings.iconName
     property bool useDistroLogo: pluginApi.pluginSettings.useDistroLogo ?? pluginApi.manifest.metadata.defaultSettings.useDistroLogo
@@ -151,6 +155,26 @@ ColumnLayout {
         Layout.bottomMargin: Style.marginS
     }
 
+    // Bold New Version Number Toggle
+    Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: boldVerToggle.implicitHeight
+        NToggle {
+            id: boldVerToggle
+            anchors.fill: parent
+            label: pluginApi.tr("settings.boldVer")
+            description: pluginApi.tr("settings.boldVerDesc")
+            checked: root.boldVer
+            onToggled: checked => root.boldVer = checked
+        }
+    }
+
+    NDivider {
+        Layout.fillWidth: true
+        Layout.topMargin: Style.marginS
+        Layout.bottomMargin: Style.marginS
+    }
+
      // Hide On Empty Toggle
     Item {
         Layout.fillWidth: true
@@ -211,7 +235,6 @@ ColumnLayout {
         spacing: Style.marginS
         visible: root.refreshTimer
         NLabel {
-            //label: pluginApi.tr("settings.interval")
             description: pluginApi.tr("settings.intervalDesc") + root.refreshInterval
         }
         NSlider {
@@ -233,6 +256,8 @@ ColumnLayout {
         Layout.bottomMargin: Style.marginS
     }
 
+    // Bar Appearance
+
     NText {
         text: pluginApi.tr("settings.appearance")
         pointSize: Style.fontSizeXL
@@ -251,6 +276,26 @@ ColumnLayout {
             description: pluginApi.tr("settings.boldTextDesc")
             checked: root.boldText
             onToggled: checked => root.boldText = checked
+        }
+    }
+
+    NDivider {
+        Layout.fillWidth: true
+        Layout.topMargin: Style.marginS
+        Layout.bottomMargin: Style.marginS
+    }
+
+    // Tooltip Toggle
+    Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: tooltipToggle.implicitHeight
+        NToggle {
+            id: tooltipToggle
+            anchors.fill: parent
+            label: pluginApi.tr("settings.tooltip")
+            description: pluginApi.tr("settings.tooltipDesc")
+            checked: root.tooltip
+            onToggled: checked => root.tooltip = checked
         }
     }
 
@@ -389,6 +434,7 @@ ColumnLayout {
 
         pluginApi.pluginSettings.flatpak = root.flatpak
         pluginApi.pluginSettings.noctalia = root.noctalia
+        pluginApi.pluginSettings.boldVer = root.boldVer
         pluginApi.pluginSettings.toast = root.toast
         pluginApi.pluginSettings.desktopTip = root.desktopTip
         pluginApi.pluginSettings.hideOnEmpty = root.hideOnEmpty
@@ -396,6 +442,7 @@ ColumnLayout {
 
         pluginApi.pluginSettings.refreshInterval = root.refreshInterval
 
+        pluginApi.pluginSettings.tooltip = root.tooltip
         pluginApi.pluginSettings.boldText = root.boldText
         pluginApi.pluginSettings.iconName = root.iconName
         pluginApi.pluginSettings.useDistroLogo = root.useDistroLogo

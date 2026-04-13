@@ -92,7 +92,7 @@ DraggableDesktopWidget {
                 width: tableView.width
                 spacing: Style.marginS
 
-                NText {
+                NText { // Name
                     Layout.preferredWidth: 0.4 * root.tableContentWidth
                     text: modelData.name
                     pointSize: Style.fontSizeM
@@ -100,7 +100,7 @@ DraggableDesktopWidget {
                     elide: Text.ElideRight
                     maximumLineCount: 1
                 }
-                NText {
+                NText { // Old Version
                     Layout.preferredWidth: 0.3 * root.tableContentWidth
                     text: modelData.oldVer
                     pointSize: Style.fontSizeM
@@ -109,18 +109,17 @@ DraggableDesktopWidget {
                     elide: Text.ElideRight
                     maximumLineCount: 1
                 }
-                NText {
+                NText { // New Version
                     Layout.preferredWidth: 0.3 * root.tableContentWidth
                     text: modelData.newVer
                     pointSize: Style.fontSizeM
+                    font.weight: (pluginApi.pluginSettings.boldVer ?? pluginApi.manifest.metadata.defaultSettings.boldVer) ? Font.Bold : Font.Normal
                     color: modelData.isFlatpak ? Color.mTertiary : Color.mSecondary
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
                     maximumLineCount: 1
                 }
             }
-
-            ScrollBar.vertical: ScrollBar {}
         }
     }
 
@@ -164,6 +163,7 @@ DraggableDesktopWidget {
         onClicked: (mouse) => {
             if (mouse.button === Qt.LeftButton) {
                 Logger.d("Update Widget", "Refreshing from desktop widget...")
+                mouseArea.visible = false
                 root.pluginApi.mainInstance.refresh()
             }
             else if (mouse.button === Qt.MiddleButton) {

@@ -104,12 +104,19 @@
     "error": "Übersetzungsfehler",
     "targetLanguage": "Zielsprache: {code}",
     "translating": "Wird übersetzt...",
-    "translation": "Übersetzung ({code})"
+    "translation": "Übersetzung ({code})",
+    "missingApiKey": "API-Schlüssel fehlt",
+    "invalidApiKey": "Ungültiger API-Schlüssel",
+    "pressEnter": "Zum Übersetzen Enter drücken"
   },
   "settings": {
-    "backend": {
-      "description": "Wählen Sie den zu verwendenden Übersetzungsdienst",
-      "label": "Übersetzungsdienst"
-    }
+    "backend-description": "Wählen Sie den zu verwendenden Übersetzungsdienst",
+    "backend-label": "Übersetzungsdienst",
+    "realTime-label": "Echtzeitübersetzung",
+    "realTime-description": "Während der Eingabe übersetzen (kann zu einem erheblichen Token-Verbrauch führen)",
+    "apiKey-placeholder": "Gib deinen API-Schlüssel hier ein",
+    "apiKey-label": "API Schlüssel",
+    "showPreview-label": "Übersetzungsvorschau",
+    "showPreview-description": "Das Übersetzungsergebnis im Vorschaufenster anzeigen"
   }
 }

@@ -117,6 +117,6 @@
       "apiKey-placeholder": "Enter your API key here",
       "apiKey-label": "API Key",
       "showPreview-label": "Translation Preview",
-      "showPreview-description": "Show the translation result in the preview pane"
+      "showPreview-description": "Show the translation result in the preview panel"
   }
 }
