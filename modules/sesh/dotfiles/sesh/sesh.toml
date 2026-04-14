@@ -1,8 +1,18 @@
 # ---------------------------------------------------------------------------
+# Global Settings
+# ---------------------------------------------------------------------------
+strict_mode = true
+cache = true
+dir_length = 2
+separator_aware = true
+sort_order = ["config", "tmux", "zoxide", "tmuxinator"]
+
+# ---------------------------------------------------------------------------
 # Default Session Settings
 # ---------------------------------------------------------------------------
 [default_session]
-startup_command = "lsd"
+startup_command = "lsd -la --group-dirs=first"
+preview_command = "lsd -la --group-dirs=first {}"
 
 # ---------------------------------------------------------------------------
 # SSH Sessions
@@ -34,16 +44,20 @@ startup_command = "tunnelshow"
 name = "Podman-Tui 󱘖 "
 path = "~/"
 startup_command = "podman-tui"
+preview_command = "podman ps -a"
 
 [[session]]
 name = "System Monitor 󰘳 "
 path = "~/"
 startup_command = "btop"
+preview_command = "fastfetch"
 
 [[session]]
 name = "Logs 󰌱 "
 path = "/var/log"
 startup_command = "sudo journalctl -f"
+preview_command = "journalctl -n 40 --no-pager"
+windows = ["logs-shell"]
 
 # ---------------------------------------------------------------------------
 # File Management
@@ -52,6 +66,7 @@ startup_command = "sudo journalctl -f"
 name = "Downloads 󰇚 "
 path = "~/Downloads"
 startup_command = "ranger"
+preview_command = "lsd -la --group-dirs=first ~/Downloads"
 
 [[session]]
 name = "Yazi 󱂵 "
@@ -67,6 +82,7 @@ startup_command = "lsd -la"
 name = "Documents 󰉖 "
 path = "~/Documents"
 startup_command = "lsd -la"
+preview_command = "lsd -la --group-dirs=first ~/Documents"
 
 # ---------------------------------------------------------------------------
 # Development & Configuration
@@ -75,21 +91,27 @@ startup_command = "lsd -la"
 name = "TmuxConfig 󰆍 "
 path = "~/.config/tmux"
 startup_command = "vim ~/.config/tmux/tmux.conf.local"
+preview_command = "bat --color=always ~/.config/tmux/tmux.conf.local"
+windows = ["shell"]
 
 [[session]]
 name = "Project 󱌢 "
 path = "~/Work/projects"
 startup_command = "tm tmx --layout 3"
+preview_command = "lsd -la --group-dirs=first ~/Work/projects"
 
 [[session]]
 name = "Cachy Config 󰆍 "
 path = "~/.cachy"
 startup_command = "nvim ."
+preview_command = "git -C ~/.cachy status --short --branch"
+windows = ["git", "shell"]
 
 [[session]]
 name = "Git Status 󰊢 "
 path = "~/.cachy"
 startup_command = "command lazygit"
+preview_command = "git -C ~/.cachy status --short --branch"
 
 [[session]]
 name = "Neovim 󰆦 "
@@ -103,11 +125,13 @@ startup_command = "nvim"
 name = "Music 󰎈 "
 path = "~/Music"
 startup_command = "rmpc"
+preview_command = "lsd -la --group-dirs=first ~/Music"
 
 [[session]]
 name = "MPV Player 󰦝 "
 path = "~/Videos"
 startup_command = "yazi"
+preview_command = "lsd -la --group-dirs=first ~/Videos"
 
 [[session]]
 name = "Radio 󱉺 "
@@ -118,6 +142,7 @@ startup_command = "radio-cli"
 name = "YouTube 󰗃 "
 path = "~/Downloads"
 startup_command = "yt-dlp --help"
+preview_command = "lsd -la --group-dirs=first ~/Downloads"
 
 # ---------------------------------------------------------------------------
 # Network & Security
@@ -126,6 +151,7 @@ startup_command = "yt-dlp --help"
 name = "Tor 󰖟 "
 path = "/repo/tor"
 startup_command = "tm tmx --layout 3"
+preview_command = "lsd -la --group-dirs=first /repo/tor"
 
 [[session]]
 name = "Network Monitor 󰛳 "
@@ -136,6 +162,7 @@ startup_command = "nethogs"
 name = "WiFi Scanner 󰀂 "
 path = "~/"
 startup_command = "nmcli dev wifi"
+preview_command = "nmcli device wifi list"
 
 [[session]]
 name = "Firewall 󰓾 "
@@ -154,11 +181,14 @@ startup_command = "anote"
 name = "Notes 󰠮 "
 path = "~/Notes"
 startup_command = "vim ."
+preview_command = "lsd -la --group-dirs=first ~/Notes"
+windows = ["shell"]
 
 [[session]]
 name = "Obsidian 󰈙 "
 path = "~/.anotes/obsi"
 startup_command = "obsidian"
+preview_command = "lsd -la --group-dirs=first ~/.anotes/obsi"
 
 [[session]]
 name = "Calendar 󰃭 "
@@ -169,6 +199,7 @@ startup_command = "cal -y"
 name = "Tasks 󰄬 "
 path = "~/"
 startup_command = "task"
+preview_command = "task next"
 
 # ---------------------------------------------------------------------------
 # System Information
@@ -177,11 +208,13 @@ startup_command = "task"
 name = "System Info 󰘳 "
 path = "~/"
 startup_command = "fastfetch"
+preview_command = "fastfetch"
 
 [[session]]
 name = "Hardware 󰇄 "
 path = "~/"
 startup_command = "lscpu && echo && lsmem && echo && lsblk"
+preview_command = "lscpu"
 
 [[session]]
 name = "Disk Usage 󰋊 "
@@ -200,6 +233,7 @@ startup_command = "htop"
 name = "Podman 󰡨 "
 path = "~/"
 startup_command = "podman ps -a"
+preview_command = "podman ps -a"
 
 [[session]]
 name = "API Test 󰜏 "
@@ -213,6 +247,7 @@ startup_command = "curl --help"
 name = "Games 󰊖 "
 path = "~/.steam"
 startup_command = "steam"
+preview_command = "lsd -la --group-dirs=first ~/.steam"
 
 [[session]]
 name = "Terminal Games 󰮂 "
@@ -231,3 +266,47 @@ startup_command = "rsync --help"
 name = "Cloud Sync ☁️ "
 path = "~/"
 startup_command = "rclone listremotes"
+preview_command = "rclone listremotes"
+
+# ---------------------------------------------------------------------------
+# Reusable Window Presets
+# ---------------------------------------------------------------------------
+[[window]]
+name = "git"
+startup_script = "git status --short --branch || lazygit"
+
+[[window]]
+name = "shell"
+startup_script = "$SHELL"
+
+[[window]]
+name = "logs-shell"
+startup_script = "$SHELL"
+path = "/var/log"
+
+# ---------------------------------------------------------------------------
+# Wildcard Project Sessions
+# ---------------------------------------------------------------------------
+[[wildcard]]
+pattern = "~/.kod/*"
+startup_command = "nvim ."
+preview_command = "lsd -la --group-dirs=first {}"
+windows = ["git", "shell"]
+
+[[wildcard]]
+pattern = "~/Work/projects/*"
+startup_command = "nvim ."
+preview_command = "lsd -la --group-dirs=first {}"
+windows = ["git", "shell"]
+
+[[wildcard]]
+pattern = "~/Work/projects/**"
+startup_command = "nvim ."
+preview_command = "lsd -la --group-dirs=first {}"
+windows = ["git", "shell"]
+
+[[wildcard]]
+pattern = "~/Notes/**"
+startup_command = "nvim ."
+preview_command = "lsd -la --group-dirs=first {}"
+windows = ["shell"]
