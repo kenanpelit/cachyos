@@ -552,6 +552,14 @@ autoload -Uz _osc-media 2>/dev/null || true
 autoload -Uz _osc-mullvad 2>/dev/null || true
 (( $+functions[_osc-mullvad] )) && compdef _osc-mullvad osc-mullvad osc-mullvad.sh
 
+# Bind pass completion for alternate password stores backed by aliases.
+# The upstream _pass completion supports per-command store prefixes via zstyle.
+autoload -Uz _pass 2>/dev/null || true
+if (( $+functions[_pass] )); then
+  compdef _pass passh
+  zstyle ':completion::complete:passh::' prefix "$HOME/.passh"
+fi
+
 # --------------------------------------------------------------------
 # Completion System Styles
 # 
@@ -1153,7 +1161,6 @@ alias -- nowtime='date +'\''%d-%m-%Y %T'\'''
 alias -- open=xdg-open
 alias -- osc='cd ~/.cachy'
 alias -- p=pass
-alias -- passh='PASSWORD_STORE_DIR=$HOME/.passh pass'
 alias -- paste='xclip -selection clipboard -o'
 alias -- path='echo -e ${PATH//:/\\n}'
 alias -- paudit='pass audit'
@@ -1537,6 +1544,13 @@ compdef _tsm_completions tsm
 # =============================================================================
 # File Manager Functions (Yazi Integration)
 # =============================================================================
+# Alternate pass store wrapper.
+# Use a function rather than an alias so zsh completion can treat `passh` as a
+# real command context while `_pass` reads the per-command prefix zstyle.
+passh() {
+  PASSWORD_STORE_DIR="$HOME/.passh" pass "$@"
+}
+
 # Main Yazi wrapper function with directory change support
 function y() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
