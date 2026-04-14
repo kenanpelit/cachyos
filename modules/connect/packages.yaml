@@ -1,4 +1,4 @@
 description: Valent integration packages
 packages:
-  - valent-git
+  - valent
   - walbottle-git
