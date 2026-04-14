@@ -13,16 +13,17 @@ STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/mango-view-smart"
 mkdir -p "${STATE_DIR}"
 
 # 1. Identify the focused monitor
-# MangoWM (dwl-based) mmsg output usually starts with monitor name.
-# mango-monitor-smart.sh uses: mmsg -g -o | awk '$2 == "selmon" && $3 == "1" { print $1; exit }'
-CURRENT_MONITOR="$(mmsg -g -o 2>/dev/null | awk '$2 == "selmon" && $3 == "1" { print $1; exit }')"
+# mmsg -g output:
+# eDP-1 selmon 0
+# DP-3 selmon 1
+CURRENT_MONITOR="$(mmsg -g 2>/dev/null | awk '$2 == "selmon" && $3 == "1" { print $1; exit }')"
 [[ -n "${CURRENT_MONITOR}" ]] || CURRENT_MONITOR="0"
 
 # 2. Get the current tag for this monitor
-# Assuming mmsg -g -o output format: "<monitor> tag <id>"
-# We use grep to find the tag line for the current monitor.
-# If it's a bitmask, we'll need more complex logic, but binds use 1,2,3...
-CURRENT_TAG="$(mmsg -g -o 2>/dev/null | grep "^${CURRENT_MONITOR} tag " | awk '{print $3}' | head -n1)"
+# mmsg -g output format for tags:
+# <monitor> tag <id> <is_visible> <is_selected> <has_urgent>
+# We want the tag where <is_selected> (the 4th column) is 1.
+CURRENT_TAG="$(mmsg -g 2>/dev/null | grep "^${CURRENT_MONITOR} tag " | awk '$4 == "1" {print $3}' | head -n1)"
 
 # 3. Handle state and toggle
 LAST_TAG_FILE="${STATE_DIR}/last-tag-${CURRENT_MONITOR}"
