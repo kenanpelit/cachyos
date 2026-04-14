@@ -54,6 +54,9 @@ cleanup_legacy_noctalia_wants
 
 if command -v systemctl >/dev/null 2>&1; then
   run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
+  if ! run_as_user systemctl --user is-enabled noctalia.service >/dev/null 2>&1; then
+    run_as_user systemctl --user enable noctalia.service >/dev/null 2>&1 || true
+  fi
   if run_as_user systemctl --user is-active noctalia.service >/dev/null 2>&1; then
     run_as_user systemctl --user try-restart noctalia.service >/dev/null 2>&1 || true
   fi
