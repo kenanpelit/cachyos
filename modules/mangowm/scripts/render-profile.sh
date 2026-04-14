@@ -188,7 +188,7 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     monitor_name = monitor.get("niri_name", monitor["id"])
     bind_lines.append(f"# Tag {workspace_id}: {workspace['name']} ({monitor_name})")
     bind_lines.append(
-        f"bind=SUPER,{workspace_id},viewcrossmon,{workspace_id},{monitor_name}"
+        f"bind=SUPER,{workspace_id},spawn,mango-workspace-smart {workspace_id} {monitor_name}"
     )
     bind_lines.append(
         f"bind=SUPER+SHIFT,{workspace_id},tagcrossmon,{workspace_id},{monitor_name}"

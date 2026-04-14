@@ -229,8 +229,9 @@ collect_portal_backends() {
         gsub(/[[:space:]]/, "", value)
         count = split(value, backends, /;/)
         for (i = 1; i <= count; i++) {
-          if (backends[i] != "") {
-            print tolower(backends[i])
+          backend = tolower(backends[i])
+          if (backend == "gtk" || backend == "gnome" || backend == "wlr" || backend == "hyprland" || backend == "kde") {
+            print backend
           }
         }
       }

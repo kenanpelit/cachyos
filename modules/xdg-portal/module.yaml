@@ -5,6 +5,8 @@ depends_on:
 - base
 dotfiles:
 - source: dotfiles/xdg-desktop-portal/portals.conf
+  target: ~/.config/xdg-desktop-portal/portals.conf
+- source: dotfiles/xdg-desktop-portal/portals.conf
   target: ~/.config/xdg-desktop-portal/niri-portals.conf
 
 post_install_hook: scripts/install.sh
