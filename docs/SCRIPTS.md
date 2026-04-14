@@ -304,6 +304,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-monitor-smart`
+**Description:** No description provided.
+
+**Usage:** `mango-monitor-smart`
+
+---
+
 ### 📂 `mango-post-bootstrap`
 **Description:** Late MangoWM session polish and ready notification.
 
