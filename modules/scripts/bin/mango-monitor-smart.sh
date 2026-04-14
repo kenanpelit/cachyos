@@ -5,12 +5,10 @@ PROFILE_FILE="${MANGO_PROFILE_FILE:-$HOME/.config/mango/generated/profile.conf}"
 
 usage() {
   cat <<'EOF'
-Usage: mango-monitor-smart {focus-next|focus-prev|move-next|move-prev}
+Usage: mango-monitor-smart {focus-next|move-next}
 
 focus-next  Focus the next monitor in the active MangoWM profile order.
-focus-prev  Focus the previous monitor in the active MangoWM profile order.
 move-next   Move the focused window to the next monitor and keep its tag.
-move-prev   Move the focused window to the previous monitor and keep its tag.
 EOF
 }
 
@@ -56,11 +54,9 @@ current_monitor="$(
 [[ -n "${current_monitor}" ]] || current_monitor="${monitors[0]}"
 
 next_monitor="${monitors[0]}"
-prev_monitor="${monitors[0]}"
 for i in "${!monitors[@]}"; do
   if [[ "${monitors[$i]}" == "${current_monitor}" ]]; then
     next_monitor="${monitors[$(( (i + 1) % ${#monitors[@]} ))]}"
-    prev_monitor="${monitors[$(( (i - 1 + ${#monitors[@]}) % ${#monitors[@]} ))]}"
     break
   fi
 done
@@ -69,14 +65,8 @@ case "$1" in
   focus-next)
     exec mmsg -d "focusmon,${next_monitor}"
     ;;
-  focus-prev)
-    exec mmsg -d "focusmon,${prev_monitor}"
-    ;;
   move-next)
     exec mmsg -d "tagmon,${next_monitor},1"
-    ;;
-  move-prev)
-    exec mmsg -d "tagmon,${prev_monitor},1"
     ;;
   *)
     usage >&2
