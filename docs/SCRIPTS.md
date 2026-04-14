@@ -354,9 +354,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `mango-view-smart`
-**Description:** Workspace back-and-forth for MangoWM (like i3/sway/niri)
+**Description:** Use absolute path for mmsg to be safe in compositor environment
 
-**Usage:** `mango-view-smart.sh <target_tag> [monitor_id]`
+**Usage:** `mango-view-smart`
 
 ---
 
