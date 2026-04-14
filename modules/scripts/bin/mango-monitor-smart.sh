@@ -48,7 +48,7 @@ mapfile -t monitors < <(
 }
 
 current_monitor="$(
-  mmsg -O -g 2>/dev/null | awk '$2 == "selmon" && $3 == "1" { print $1; exit }'
+  mmsg -g -o 2>/dev/null | awk '$2 == "selmon" && $3 == "1" { print $1; exit }'
 )"
 
 [[ -n "${current_monitor}" ]] || current_monitor="${monitors[0]}"
