@@ -63,10 +63,22 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}"
 fi
 
-config_file="${HOME}/.config/mango/config.conf"
+session_cmd="mango-session"
 
 if command -v uwsm >/dev/null 2>&1; then
-  exec uwsm start -D mango -e -- mango -c "${config_file}"
+  if ! command -v "${session_cmd}" >/dev/null 2>&1; then
+    session_cmd="mango"
+  fi
+
+  if [[ "${session_cmd}" == "mango-session" ]]; then
+    exec uwsm start -D mango -e -- "${session_cmd}"
+  fi
+
+  exec uwsm start -D mango -e -- mango -c "${HOME}/.config/mango/config.conf"
 fi
 
-exec mango -c "${config_file}"
+if command -v "${session_cmd}" >/dev/null 2>&1; then
+  exec "${session_cmd}"
+fi
+
+exec mango -c "${HOME}/.config/mango/config.conf"

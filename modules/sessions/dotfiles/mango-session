@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# MangoWM compositor entrypoint with the repo-managed config path.
+set -euo pipefail
+
+config_file="${HOME}/.config/mango/config.conf"
+
+exec mango -c "${config_file}" "$@"

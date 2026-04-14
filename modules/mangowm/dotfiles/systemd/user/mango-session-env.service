@@ -1,6 +1,6 @@
 [Unit]
 Description=MangoWM session runtime environment sync
-After=graphical-session.target wayland-wm@mango.service wayland-session-waitenv.service dbus.service
+After=graphical-session.target wayland-wm@mango-session.service wayland-session-waitenv.service dbus.service
 Before=mango-bootstrap.service mango-audio-init.service mango-shell-ensure.service mango-daemons.target mango-post-daemons.target
 PartOf=mangowm-session.target
 ConditionEnvironment=XDG_CURRENT_DESKTOP=mango

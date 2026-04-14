@@ -30,6 +30,7 @@ scripts=(
   "${REPO_ROOT}/modules/scripts/bin/mango-post-bootstrap.sh"
   "${REPO_ROOT}/modules/scripts/bin/mango-desktop-settings.sh"
   "${REPO_ROOT}/modules/scripts/bin/mango-status-notifier-ready.sh"
+  "${REPO_ROOT}/modules/sessions/dotfiles/mango-session"
   "${REPO_ROOT}/modules/sessions/dotfiles/mango-uwsm-session"
 )
 

@@ -1,7 +1,7 @@
 [Unit]
 Description=MangoWM bootstrap (init)
 Wants=pipewire.service wireplumber.service
-After=graphical-session.target wayland-wm@mango.service wayland-session-waitenv.service mango-session-env.service pipewire.service wireplumber.service
+After=graphical-session.target wayland-wm@mango-session.service wayland-session-waitenv.service mango-session-env.service pipewire.service wireplumber.service
 Before=mango-audio-init.service mango-shell-ensure.service mango-daemons.target
 PartOf=mangowm-session.target
 ConditionEnvironment=XDG_CURRENT_DESKTOP=mango

@@ -92,6 +92,7 @@ install_session "${DOTFILES_DIR}/mango-uwsm.desktop" "MangoWM (UWSM)"
 
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
+install_wrapper "${DOTFILES_DIR}/mango-session" "mango-session"
 install_wrapper "${DOTFILES_DIR}/mango-uwsm-session" "mango-uwsm-session"
 
 run_root rm -f "${LOCAL_BIN_DIR}/niri-optimized-session"
