@@ -209,20 +209,6 @@
                 },
                 {
                     "defaultSettings": {
-                        "colorHistory": [
-                        ],
-                        "installedLangs": [
-                            "eng"
-                        ],
-                        "paletteColors": [
-                        ],
-                        "selectedOcrLang": "eng",
-                        "transAvailable": false
-                    },
-                    "id": "plugin:screen-toolkit"
-                },
-                {
-                    "defaultSettings": {
                         "activeBackend": "qt6-multimedia",
                         "automationMode": "random",
                         "automationTime": 300,
