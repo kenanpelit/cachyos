@@ -21,6 +21,7 @@ scripts=(
   "${MODULE_DIR}/scripts/render-profile.sh"
   "${MODULE_DIR}/scripts/render-workspace-assets.sh"
   "${MODULE_DIR}/scripts/validate.sh"
+  "${REPO_ROOT}/modules/scripts/bin/mango-monitor-smart.sh"
   "${REPO_ROOT}/modules/scripts/bin/mango-session-common.sh"
   "${REPO_ROOT}/modules/scripts/bin/mango-session-init.sh"
   "${REPO_ROOT}/modules/scripts/bin/mango-bootstrap.sh"
