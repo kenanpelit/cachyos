@@ -373,6 +373,9 @@
                         "successIcon": "network"
                     },
                     "id": "plugin:6ee06e:nip"
+                },
+                {
+                    "id": "plugin:mangowc-layout-switcher"
                 }
             ]
         }
@@ -609,7 +612,7 @@
         "firstDayOfWeek": -1,
         "hideWeatherCityName": false,
         "hideWeatherTimezone": false,
-        "name": "Berlin",
+        "name": "Istanbul",
         "showCalendarEvents": true,
         "showCalendarWeather": true,
         "showWeekNumberInCalendar": false,
