@@ -3,7 +3,7 @@ Description=MangoWM post-bootstrap polish
 After=mango-bootstrap.service mango-audio-init.service mango-daemons.target mango-desktop-settings.service mango-shell-ensure.service dbus.service
 PartOf=mangowm-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+ConditionEnvironment=XDG_SESSION_DESKTOP=mango
 ConditionPathExists=%h/.local/bin/mango-post-bootstrap
 
 [Service]

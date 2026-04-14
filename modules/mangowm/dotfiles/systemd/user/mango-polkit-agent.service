@@ -3,7 +3,7 @@ Description=Polkit authentication agent (polkit-gnome)
 After=graphical-session.target mango-bootstrap.service dbus.service
 PartOf=mango-daemons.target graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+ConditionEnvironment=XDG_SESSION_DESKTOP=mango
 
 [Service]
 NoNewPrivileges=yes

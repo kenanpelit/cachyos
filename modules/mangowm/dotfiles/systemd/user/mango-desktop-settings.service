@@ -3,7 +3,7 @@ Description=MangoWM desktop settings sync
 After=mango-daemons.target mango-audio-init.service dbus.service
 PartOf=mangowm-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+ConditionEnvironment=XDG_SESSION_DESKTOP=mango
 ConditionPathExists=%h/.local/bin/mango-desktop-settings
 
 [Service]

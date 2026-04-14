@@ -3,7 +3,7 @@ Description=MangoWM status notifier watcher readiness gate
 After=graphical-session.target mango-bootstrap.service mango-shell-ensure.service dbus.service
 PartOf=mangowm-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+ConditionEnvironment=XDG_SESSION_DESKTOP=mango
 ConditionPathExists=%h/.local/bin/status-notifier-ready
 
 [Service]

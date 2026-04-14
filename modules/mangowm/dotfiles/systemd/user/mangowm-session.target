@@ -5,4 +5,4 @@ Wants=graphical-session.target xdg-desktop-autostart.target mango-session-env.se
 After=graphical-session.target dbus.service
 BindsTo=graphical-session.target
 PartOf=graphical-session.target
-ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+ConditionEnvironment=XDG_SESSION_DESKTOP=mango

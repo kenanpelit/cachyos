@@ -52,9 +52,7 @@ dotfiles:
   target: ~/.config/systemd/user/mango-desktop-settings.service
 - source: dotfiles/systemd/user/mango-post-bootstrap.service
   target: ~/.config/systemd/user/mango-post-bootstrap.service
-- source: dotfiles/systemd/user/wayland-wm@mango-session.service.d/10-session-lifecycle.conf
-  target: ~/.config/systemd/user/wayland-wm@mango-session.service.d/10-session-lifecycle.conf
-- source: dotfiles/systemd/user/wayland-wm@mango-session.desktop.service.d/10-session-lifecycle.conf
-  target: ~/.config/systemd/user/wayland-wm@mango-session.desktop.service.d/10-session-lifecycle.conf
+- source: dotfiles/systemd/user/wayland-wm@mango\x2dsession.service.d/10-session-lifecycle.conf
+  target: ~/.config/systemd/user/wayland-wm@mango\x2dsession.service.d/10-session-lifecycle.conf
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

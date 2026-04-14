@@ -4,7 +4,7 @@ After=mango-bootstrap.service dbus.service
 Before=mango-status-notifier-ready.service
 PartOf=mangowm-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+ConditionEnvironment=XDG_SESSION_DESKTOP=mango
 ConditionPathExists=%h/.local/bin/osc-shell
 
 [Service]
