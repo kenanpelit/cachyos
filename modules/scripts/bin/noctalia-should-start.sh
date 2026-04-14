@@ -5,8 +5,8 @@
 # ==============================================================================
 set -euo pipefail
 
-case "${XDG_CURRENT_DESKTOP:-}" in
-  niri|Niri|Hyprland|hyprland)
+case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}" in
+  niri|Niri|Hyprland|hyprland|mango|Mango|mangowm|MangoWM)
     ;;
   *)
     exit 1

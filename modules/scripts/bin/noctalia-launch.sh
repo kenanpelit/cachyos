@@ -104,9 +104,6 @@ apply_noctalia_plugin_overrides() {
     niri)
       enable_niri_plugins="true"
       ;;
-    *)
-      return 0
-      ;;
   esac
 
   command -v jq >/dev/null 2>&1 || return 0
@@ -194,9 +191,23 @@ load_niri_env() {
   niri_detect_socket || true
 }
 
-session_backend=""
+load_mango_env() {
+  local helper="${SCRIPT_DIR}/mango-session-common.sh"
+  [[ -r "$helper" ]] || helper="${SCRIPT_DIR}/mango-session-common"
+  # shellcheck source=mango-session-common.sh
+  source "$helper"
+  mango_clear_foreign_session_env
+  mango_load_session_env
+  mango_normalize_session_paths
+  mango_ensure_runtime_dir
+  mango_ensure_session_identity
+  export DESKTOP_SESSION="${DESKTOP_SESSION:-mango-uwsm}"
+  mango_detect_wayland_display || true
+}
 
-case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-}}" in
+session_backend="mango"
+
+case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}" in
   Hyprland|hyprland)
     load_hypr_env
     session_backend="hyprland"
@@ -204,6 +215,10 @@ case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-}}" in
   niri|Niri)
     load_niri_env
     session_backend="niri"
+    ;;
+  mango|Mango|mangowm|MangoWM)
+    load_mango_env
+    session_backend="mango"
     ;;
 esac
 

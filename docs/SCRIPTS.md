@@ -290,6 +290,48 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-bootstrap`
+**Description:** Early MangoWM bootstrap stage.
+
+**Usage:** `mango-bootstrap`
+
+---
+
+### 📂 `mango-desktop-settings`
+**Description:** Apply GTK, icon, and cursor settings after MangoWM startup.
+
+**Usage:** `mango-desktop-settings`
+
+---
+
+### 📂 `mango-post-bootstrap`
+**Description:** Late MangoWM session polish and ready notification.
+
+**Usage:** `mango-post-bootstrap`
+
+---
+
+### 📂 `mango-session-common`
+**Description:** Shared environment/bootstrap helpers for MangoWM session scripts.
+
+**Usage:** `mango-session-common`
+
+---
+
+### 📂 `mango-session-init`
+**Description:** Compatibility helper for manual/MangoWM fallback startup and
+
+**Usage:** `mango-session-init [--no-start-target]`
+
+---
+
+### 📂 `mango-status-notifier-ready`
+**Description:** Wait for StatusNotifierWatcher before MangoWM tray applets start.
+
+**Usage:** `mango-status-notifier-ready`
+
+---
+
 ### 📂 `monitor_brightness`
 **Description:** External monitor brightness control using ddcutil (auto-detect).
 
