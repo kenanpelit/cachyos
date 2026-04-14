@@ -138,6 +138,9 @@ session_common_backfill_visual_env() {
     env_dir="${config_home}/environment.d"
 
     case "${XDG_CURRENT_DESKTOP:-}" in
+    *[Mm]ango*)
+      session_env_file="${config_home}/session-env/mangowm/10-mangowm.conf"
+      ;;
     *[Nn]iri*)
       session_env_file="${config_home}/session-env/niri/10-niri-env.conf"
       ;;
@@ -149,6 +152,8 @@ session_common_backfill_visual_env() {
         session_env_file="${config_home}/session-env/niri/10-niri-env.conf"
       elif [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
         session_env_file="${config_home}/session-env/hyprland/10-hyprland.conf"
+      elif command -v mmsg >/dev/null 2>&1 && mmsg -g >/dev/null 2>&1; then
+        session_env_file="${config_home}/session-env/mangowm/10-mangowm.conf"
       fi
       ;;
     esac

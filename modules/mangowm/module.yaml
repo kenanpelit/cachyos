@@ -1,0 +1,60 @@
+tags:
+- wm
+- desktop
+description: MangoWM config (UWSM-first)
+depends_on:
+- base
+- wayland-env
+- gtk
+- qt
+- xdg-dirs
+- scripts
+- fonts
+- wayland-autostart
+- xdg-portal
+- user-services
+dotfiles:
+- source: dotfiles/mango/config.conf
+  target: ~/.config/mango/config.conf
+- source: dotfiles/mango/conf.d
+  target: ~/.config/mango/conf.d
+- source: dotfiles/mango/generated
+  target: ~/.config/mango/generated
+- source: dotfiles/environment.d/10-mangowm.conf
+  target: ~/.config/session-env/mangowm/10-mangowm.conf
+- source: dotfiles/environment.d/mangowm-session.envlist
+  target: ~/.config/environment.d/mangowm-session.envlist
+- source: dotfiles/portals.conf
+  target: ~/.config/xdg-desktop-portal/mango-portals.conf
+- source: dotfiles/systemd/user/mangowm-session.target
+  target: ~/.config/systemd/user/mangowm-session.target
+- source: dotfiles/systemd/user/mango-daemons.target
+  target: ~/.config/systemd/user/mango-daemons.target
+- source: dotfiles/systemd/user/mango-post-daemons.target
+  target: ~/.config/systemd/user/mango-post-daemons.target
+- source: dotfiles/systemd/user/mango-session-env.service
+  target: ~/.config/systemd/user/mango-session-env.service
+- source: dotfiles/systemd/user/mango-bootstrap.service
+  target: ~/.config/systemd/user/mango-bootstrap.service
+- source: dotfiles/systemd/user/mango-audio-init.service
+  target: ~/.config/systemd/user/mango-audio-init.service
+- source: dotfiles/systemd/user/mango-shell-ensure.service
+  target: ~/.config/systemd/user/mango-shell-ensure.service
+- source: dotfiles/systemd/user/mango-status-notifier-ready.service
+  target: ~/.config/systemd/user/mango-status-notifier-ready.service
+- source: dotfiles/systemd/user/mango-polkit-agent.service
+  target: ~/.config/systemd/user/mango-polkit-agent.service
+- source: dotfiles/systemd/user/mango-nm-applet.service
+  target: ~/.config/systemd/user/mango-nm-applet.service
+- source: dotfiles/systemd/user/mango-blueman-applet.service
+  target: ~/.config/systemd/user/mango-blueman-applet.service
+- source: dotfiles/systemd/user/mango-desktop-settings.service
+  target: ~/.config/systemd/user/mango-desktop-settings.service
+- source: dotfiles/systemd/user/mango-post-bootstrap.service
+  target: ~/.config/systemd/user/mango-post-bootstrap.service
+- source: dotfiles/systemd/user/wayland-wm@mango.service.d/10-session-lifecycle.conf
+  target: ~/.config/systemd/user/wayland-wm@mango.service.d/10-session-lifecycle.conf
+- source: dotfiles/systemd/user/wayland-wm@mango.desktop.service.d/10-session-lifecycle.conf
+  target: ~/.config/systemd/user/wayland-wm@mango.desktop.service.d/10-session-lifecycle.conf
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

@@ -1,0 +1,5 @@
+[Unit]
+Description=MangoWM session post-daemons stage
+After=graphical-session.target mango-daemons.target
+BindsTo=graphical-session.target
+PartOf=mangowm-session.target graphical-session.target

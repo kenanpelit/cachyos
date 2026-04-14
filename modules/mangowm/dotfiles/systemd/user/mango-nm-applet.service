@@ -1,0 +1,22 @@
+[Unit]
+Description=NetworkManager applet (MangoWM)
+Wants=mango-status-notifier-ready.service
+After=graphical-session.target mango-bootstrap.service mango-status-notifier-ready.service dbus.service
+PartOf=mango-daemons.target graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+
+[Service]
+Type=simple
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+Environment=GDK_BACKEND=wayland,x11
+ExecStart=/usr/bin/nm-applet --indicator
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=mango-daemons.target

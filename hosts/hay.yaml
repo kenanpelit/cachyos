@@ -47,6 +47,7 @@ enabled_modules:
 - pipewire-rt
 - niri
 - hyprland
+- mangowm
 - sessions
 - sway
 - xdg-portal

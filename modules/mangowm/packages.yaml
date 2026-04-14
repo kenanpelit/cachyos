@@ -1,0 +1,13 @@
+description: MangoWM packages
+
+packages:
+  - mangowm-git
+  - uwsm
+  - polkit-gnome
+  - network-manager-applet
+  - xdg-desktop-portal-wlr
+  - wl-clipboard
+  - wl-clip-persist
+  - cliphist
+  - brightnessctl
+  - jq

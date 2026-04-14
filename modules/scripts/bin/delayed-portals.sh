@@ -11,9 +11,11 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"
 HYPR_HELPER="${SCRIPT_DIR}/hypr-session-common.sh"
 NIRI_HELPER="${SCRIPT_DIR}/niri-session-common.sh"
+MANGO_HELPER="${SCRIPT_DIR}/mango-session-common.sh"
 [[ -r "${COMMON_HELPER}" ]] || COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common"
 [[ -r "${HYPR_HELPER}" ]] || HYPR_HELPER="${SCRIPT_DIR}/hypr-session-common"
 [[ -r "${NIRI_HELPER}" ]] || NIRI_HELPER="${SCRIPT_DIR}/niri-session-common"
+[[ -r "${MANGO_HELPER}" ]] || MANGO_HELPER="${SCRIPT_DIR}/mango-session-common"
 
 # shellcheck source=wayland-session-common.sh
 source "${COMMON_HELPER}"
@@ -21,6 +23,8 @@ source "${COMMON_HELPER}"
 source "${HYPR_HELPER}"
 # shellcheck source=niri-session-common.sh
 source "${NIRI_HELPER}"
+# shellcheck source=mango-session-common.sh
+source "${MANGO_HELPER}"
 
 DELAY="${1:-8}"
 if ! [[ "$DELAY" =~ ^[0-9]+$ ]]; then
@@ -56,6 +60,8 @@ detect_desktop_name() {
             desktop="Hyprland"
         elif [[ -n "${NIRI_SOCKET:-}" ]]; then
             desktop="niri"
+        elif command -v mmsg >/dev/null 2>&1 && mmsg -g >/dev/null 2>&1; then
+            desktop="mango"
         fi
     fi
 
@@ -124,6 +130,9 @@ load_session_layer() {
             ;;
         niri)
             niri_load_session_env
+            ;;
+        mango)
+            mango_load_session_env
             ;;
     esac
 

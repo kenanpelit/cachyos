@@ -1,0 +1,19 @@
+[Unit]
+Description=MangoWM post-bootstrap polish
+After=mango-bootstrap.service mango-audio-init.service mango-daemons.target mango-desktop-settings.service mango-shell-ensure.service dbus.service
+PartOf=mangowm-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_CURRENT_DESKTOP=mango
+ConditionPathExists=%h/.local/bin/mango-post-bootstrap
+
+[Service]
+Type=oneshot
+TimeoutStartSec=20
+RemainAfterExit=yes
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=%h/.local/bin/mango-post-bootstrap
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=mango-post-daemons.target
