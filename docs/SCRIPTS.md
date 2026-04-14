@@ -353,13 +353,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `mango-view-smart`
-**Description:** 1. Odaklanmış monitörü bul (eDP-1 veya DP-3 gibi)
-
-**Usage:** `mango-view-smart`
-
----
-
 ### 📂 `monitor_brightness`
 **Description:** External monitor brightness control using ddcutil (auto-detect).
 
