@@ -115,16 +115,6 @@ def parse_position(raw_position, monitor):
 
 
 def layout_name_for_workspace(workspace):
-    layout = workspace.get("layout", {})
-    if isinstance(layout, list):
-        lines = layout
-    else:
-        lines = layout.get("lines", [])
-    joined = "\n".join(lines)
-    if 'default-column-display "tabbed"' in joined:
-        return "deck"
-    if 'center-focused-column "always"' in joined and 'default-column-width { proportion 1.000; }' in joined:
-        return "monocle"
     return "scroller"
 
 
