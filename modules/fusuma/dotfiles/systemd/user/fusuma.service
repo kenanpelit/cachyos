@@ -1,7 +1,7 @@
 [Unit]
 Description=Fusuma gesture recognizer
-After=hyprland-session.target niri-session.target
-PartOf=hyprland-session.target niri-session.target
+After=hyprland-session.target niri-session.target mangowm-session.target
+PartOf=hyprland-session.target niri-session.target mangowm-session.target
 
 [Service]
 Type=simple
@@ -13,4 +13,4 @@ Restart=on-failure
 RestartSec=2
 
 [Install]
-WantedBy=hyprland-session.target niri-session.target
+WantedBy=hyprland-session.target niri-session.target mangowm-session.target
