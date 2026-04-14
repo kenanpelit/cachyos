@@ -8,13 +8,15 @@ PROFILE_MANIFEST="${MANGO_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
 SHARED_MONITOR_MANIFEST="${MANGO_SHARED_MONITOR_MANIFEST:-${REPO_ROOT}/shared/wm/monitors.yaml}"
 WORKSPACE_MAP_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/modules/niri/workspaces/workspaces.json}"
 PROFILE_OUT="${MANGO_PROFILE_OUT:-${MODULE_DIR}/dotfiles/mango/generated/profile.conf}"
+WORKSPACE_BINDS_OUT="${MANGO_WORKSPACE_BINDS_OUT:-${MODULE_DIR}/dotfiles/mango/generated/workspace-binds.conf}"
 
 usage() {
   cat <<'EOF'
 Usage: render-profile.sh [--check]
 
-Without arguments, renders the selected MangoWM monitor/tag profile.
-With --check, verifies that generated/profile.conf matches the manifests.
+Without arguments, renders the selected MangoWM monitor/tag profile and
+profile-aware workspace bindings.
+With --check, verifies that the generated files match the manifests.
 EOF
 }
 
@@ -46,12 +48,13 @@ source "${PROFILE_MANIFEST}"
 : "${MANGO_MONITOR_PROFILE:=desk}"
 
 tmp_profile="$(mktemp)"
+tmp_binds="$(mktemp)"
 cleanup() {
-  rm -f "${tmp_profile}"
+  rm -f "${tmp_profile}" "${tmp_binds}"
 }
 trap cleanup EXIT
 
-python3 - "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${MANGO_MONITOR_PROFILE}" "${tmp_profile}" <<'PY'
+python3 - "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${MANGO_MONITOR_PROFILE}" "${tmp_profile}" "${tmp_binds}" <<'PY'
 import hashlib
 import json
 import re
@@ -64,6 +67,7 @@ manifest_path = Path(sys.argv[1])
 workspace_path = Path(sys.argv[2])
 profile_name = sys.argv[3]
 out_path = Path(sys.argv[4])
+binds_out_path = Path(sys.argv[5])
 
 manifest = yaml.safe_load(manifest_path.read_text())
 workspace_data = json.loads(workspace_path.read_text())
@@ -166,11 +170,39 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
 
 lines.append("")
 out_path.write_text("\n".join(lines))
+
+bind_lines = [
+    "# Generated from shared/wm/monitors.yaml and modules/niri/workspaces/workspaces.json.",
+    "# Update the shared manifests and rerun modules/mangowm/scripts/render-profile.sh.",
+    f"# Source checksum: {checksum}",
+    "",
+    f"# Active monitor profile: {profile_name}",
+    "# Profile-aware workspace binds: switch and move follow the target monitor.",
+    "",
+]
+
+for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(item["id"])):
+    workspace_id = str(workspace_ref["id"])
+    workspace = workspaces_by_id[workspace_id]
+    monitor = monitors_by_id[workspace_ref["monitor"]]
+    monitor_name = monitor.get("niri_name", monitor["id"])
+    bind_lines.append(f"# Tag {workspace_id}: {workspace['name']} ({monitor_name})")
+    bind_lines.append(
+        f"bind=SUPER,{workspace_id},viewcrossmon,{workspace_id},{monitor_name}"
+    )
+    bind_lines.append(
+        f"bind=SUPER+SHIFT,{workspace_id},tagcrossmon,{workspace_id},{monitor_name}"
+    )
+    bind_lines.append("")
+
+binds_out_path.write_text("\n".join(bind_lines).rstrip() + "\n")
 PY
 
 if [[ "${mode}" == "check" ]]; then
   diff -u "${PROFILE_OUT}" "${tmp_profile}"
+  diff -u "${WORKSPACE_BINDS_OUT}" "${tmp_binds}"
   exit 0
 fi
 
 install -D -m 644 "${tmp_profile}" "${PROFILE_OUT}"
+install -D -m 644 "${tmp_binds}" "${WORKSPACE_BINDS_OUT}"
