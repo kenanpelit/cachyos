@@ -29,6 +29,14 @@ LAST_TAG_FILE="${STATE_DIR}/last-tag-${CURRENT_MONITOR}"
 PREV_TAG=""
 [[ -f "${LAST_TAG_FILE}" ]] && PREV_TAG="$(cat "${LAST_TAG_FILE}")"
 
+if [[ "${TARGET_TAG}" == "prev" ]]; then
+    if [[ -n "${PREV_TAG}" ]]; then
+        mmsg -d "view,${PREV_TAG},${MONITOR_ID}"
+        echo "${CURRENT_TAG}" > "${LAST_TAG_FILE}"
+    fi
+    exit 0
+fi
+
 if [[ "${CURRENT_TAG}" == "${TARGET_TAG}" ]]; then
     # We are already on the target tag, so toggle back to previous
     if [[ -n "${PREV_TAG}" && "${PREV_TAG}" != "${CURRENT_TAG}" ]]; then

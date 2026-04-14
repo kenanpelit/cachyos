@@ -11,11 +11,16 @@ log_error() {
 
 detect_compositor() {
   case "${FUSUMA_COMPOSITOR:-}" in
-    niri|hyprland)
+    niri|hyprland|mangowm)
       echo "${FUSUMA_COMPOSITOR}"
       return 0
       ;;
   esac
+
+  if [[ "${XDG_CURRENT_DESKTOP:-}" == *"mango"* || "${XDG_SESSION_DESKTOP:-}" == *"mango"* ]]; then
+    echo "mangowm"
+    return 0
+  fi
 
   # Prefer explicit Niri markers first to avoid stale Hyprland envs.
   if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
@@ -72,6 +77,14 @@ esac
 compositor="$(detect_compositor || true)"
 case "$fingers" in
   4)
+    if [[ "$compositor" == "mangowm" ]]; then
+      case "$direction" in
+        left) exec mmsg -d "focusmon,left" ;;
+        right) exec mmsg -d "focusmon,right" ;;
+        up|down) exec fusuma-overview ;;
+      esac
+    fi
+
     if [[ "$compositor" == "niri" ]]; then
       case "$direction" in
         left) niri_action focus-monitor-previous ;;
@@ -96,6 +109,15 @@ case "$fingers" in
     esac
     ;;
   3)
+    if [[ "$compositor" == "mangowm" ]]; then
+      case "$direction" in
+        up) exec mmsg -d "viewtoleft,0" ;;
+        down) exec mmsg -d "viewtoright,0" ;;
+        left) exec mmsg -d "focusdir,left" ;;
+        right) exec mmsg -d "focusdir,right" ;;
+      esac
+    fi
+
     if [[ "$compositor" == "niri" ]]; then
       # Niri already has native workspace/overview swipe gestures.
       exit 0

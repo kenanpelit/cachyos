@@ -11,11 +11,16 @@ log_error() {
 
 detect_compositor() {
   case "${FUSUMA_COMPOSITOR:-}" in
-    niri|hyprland)
+    niri|hyprland|mangowm)
       echo "${FUSUMA_COMPOSITOR}"
       return 0
       ;;
   esac
+
+  if [[ "${XDG_CURRENT_DESKTOP:-}" == *"mango"* || "${XDG_SESSION_DESKTOP:-}" == *"mango"* ]]; then
+    echo "mangowm"
+    return 0
+  fi
 
   if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
     echo "niri"
@@ -47,6 +52,10 @@ detect_compositor() {
 }
 
 compositor="$(detect_compositor || true)"
+
+if [[ "$compositor" == "mangowm" ]]; then
+  exec mmsg -d "toggleoverview,0"
+fi
 
 if [[ "$compositor" == "hyprland" ]]; then
   if command -v hypr-expo >/dev/null 2>&1; then

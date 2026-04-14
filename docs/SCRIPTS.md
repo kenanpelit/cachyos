@@ -325,6 +325,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-session-doctor`
+**Description:** Print a compact MangoWM session diagnostics report.
+
+**Usage:** `mango-session-doctor`
+
+---
+
 ### 📂 `mango-session-init`
 **Description:** Compatibility helper for manual/MangoWM fallback startup and
 
@@ -332,10 +339,24 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-session-refresh`
+**Description:** Refresh MangoWM session environment and rerun bootstrap hooks.
+
+**Usage:** `mango-session-refresh`
+
+---
+
 ### 📂 `mango-status-notifier-ready`
 **Description:** Wait for StatusNotifierWatcher before MangoWM tray applets start.
 
 **Usage:** `mango-status-notifier-ready`
+
+---
+
+### 📂 `mango-view-smart`
+**Description:** Workspace back-and-forth for MangoWM (like i3/sway/niri)
+
+**Usage:** `mango-view-smart.sh <target_tag> [monitor_id]`
 
 ---
 
