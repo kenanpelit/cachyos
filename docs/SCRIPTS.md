@@ -354,7 +354,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `mango-view-smart`
-**Description:** Use absolute path for mmsg to be safe in compositor environment
+**Description:** mango-view-smart
 
 **Usage:** `mango-view-smart`
 
