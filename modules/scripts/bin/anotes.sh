@@ -38,6 +38,7 @@ export PATH
 readonly ANOTE_CMD="${ANOTE_CMD:-anote}"
 readonly ANOTE_WINDOW_TITLE="${ANOTE_WINDOW_TITLE:-Anote}"
 readonly ANOTE_WINDOW_CLASS="${ANOTE_WINDOW_CLASS:-anote}"
+readonly ANOTE_INSTANCE_GROUP="${ANOTE_INSTANCE_GROUP:-anote}"
 readonly ANOTE_DIR="${ANOTE_DIR:-$HOME/.anote}"
 readonly CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/anotes/config"
 
@@ -98,7 +99,7 @@ EOF
 
 detect_terminal() {
   local terminals=(
-    "kitty:kitty --class $ANOTE_WINDOW_CLASS -T $ANOTE_WINDOW_TITLE --single-instance"
+    "kitty:kitty --class $ANOTE_WINDOW_CLASS --instance-group $ANOTE_INSTANCE_GROUP -T $ANOTE_WINDOW_TITLE --single-instance"
     "alacritty:alacritty --class $ANOTE_WINDOW_CLASS -t $ANOTE_WINDOW_TITLE"
     "foot:foot --app-id=$ANOTE_WINDOW_CLASS --title=$ANOTE_WINDOW_TITLE"
   )
@@ -156,6 +157,7 @@ ensure_config() {
 ANOTE_CMD="$ANOTE_CMD"
 ANOTE_WINDOW_TITLE="$ANOTE_WINDOW_TITLE"
 ANOTE_WINDOW_CLASS="$ANOTE_WINDOW_CLASS"
+ANOTE_INSTANCE_GROUP="$ANOTE_INSTANCE_GROUP"
 
 # Terminal seçimi (auto, kitty, alacritty, foot)
 PREFERRED_TERMINAL="auto"
