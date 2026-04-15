@@ -156,13 +156,6 @@
                 },
                 {
                     "defaultSettings": {
-                        "monitorOrder": [
-                        ]
-                    },
-                    "id": "plugin:mangowc-layout-switcher"
-                },
-                {
-                    "defaultSettings": {
                         "desktopTip": true,
                         "flatpak": true,
                         "hideOnEmpty": false,

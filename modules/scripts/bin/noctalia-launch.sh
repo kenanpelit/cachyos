@@ -79,8 +79,10 @@ prune_removed_noctalia_plugin_state() {
   if [[ -f "${NOCTALIA_SETTINGS_STATE}" ]]; then
     tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-prune-settings.XXXXXX")"
     if jq --arg widget_id "${NOCTALIA_REMOVED_PLUGIN_WIDGET_ID}" '
-      if .bar?.right?.widgets then
-        .bar.right.widgets |= map(select((.id // "") != $widget_id))
+      if .bar?.widgets then
+        .bar.widgets.left |= map(select((.id // "") != $widget_id))
+        | .bar.widgets.center |= map(select((.id // "") != $widget_id))
+        | .bar.widgets.right |= map(select((.id // "") != $widget_id))
       else
         .
       end
@@ -169,8 +171,10 @@ apply_noctalia_settings_overrides() {
     --argjson mango_widget "${NOCTALIA_MANGO_LAYOUT_WIDGET_JSON}" \
     '
     def remove_widget($id):
-      if .bar?.right?.widgets then
-        .bar.right.widgets |= map(select((.id // "") != $id))
+      if .bar?.widgets then
+        .bar.widgets.left |= map(select((.id // "") != $id))
+        | .bar.widgets.center |= map(select((.id // "") != $id))
+        | .bar.widgets.right |= map(select((.id // "") != $id))
       else
         .
       end;
@@ -178,11 +182,11 @@ apply_noctalia_settings_overrides() {
     def ensure_widget($widget):
       if $widget == null then
         .
-      elif .bar?.right?.widgets then
-        if any(.bar.right.widgets[]?; (.id // "") == ($widget.id // "")) then
+      elif .bar?.widgets?.left then
+        if any(.bar.widgets.left[]?; (.id // "") == ($widget.id // "")) then
           .
         else
-          .bar.right.widgets += [$widget]
+          .bar.widgets.left += [$widget]
         end
       else
         .
