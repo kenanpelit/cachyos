@@ -81,7 +81,7 @@
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "mangowc-layout-switcher": {
-      "enabled": true,
+      "enabled": false,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "mpd": {

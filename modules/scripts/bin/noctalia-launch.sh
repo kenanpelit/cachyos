@@ -18,6 +18,7 @@ NOCTALIA_PLUGIN_SOURCE_URL="https://github.com/noctalia-dev/noctalia-plugins"
 NOCTALIA_REMOVED_PLUGIN_ID="niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_WIDGET_ID="plugin:niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_DIR="${NOCTALIA_CONFIG_DIR}/plugins/${NOCTALIA_REMOVED_PLUGIN_ID}"
+NOCTALIA_MANGO_LAYOUT_WIDGET_JSON='{"defaultSettings":{"monitorOrder":[]},"id":"plugin:mangowc-layout-switcher"}'
 
 replace_file_if_changed() {
   local source_file="$1"
@@ -95,6 +96,7 @@ apply_noctalia_plugin_overrides() {
   local session_name="${1:-}"
   local enable_niri_plugins="false"
   local enable_hypr_plugins="false"
+  local enable_mango_plugins="false"
   local tmp
 
   case "${session_name}" in
@@ -103,6 +105,9 @@ apply_noctalia_plugin_overrides() {
       ;;
     niri)
       enable_niri_plugins="true"
+      ;;
+    mango)
+      enable_mango_plugins="true"
       ;;
   esac
 
@@ -114,6 +119,7 @@ apply_noctalia_plugin_overrides() {
   if jq \
     --argjson enable_niri "${enable_niri_plugins}" \
     --argjson enable_hypr "${enable_hypr_plugins}" \
+    --argjson enable_mango "${enable_mango_plugins}" \
     --arg source_url "${NOCTALIA_PLUGIN_SOURCE_URL}" \
     '
       def set_state($container; $id; $enabled):
@@ -124,15 +130,18 @@ apply_noctalia_plugin_overrides() {
         set_state("states"; "niri-overview-launcher"; $enable_niri)
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
+        | set_state("states"; "mangowc-layout-switcher"; $enable_mango)
       elif has("plugins") then
         set_state("plugins"; "niri-overview-launcher"; $enable_niri)
         | set_state("plugins"; "screen-shot-and-record"; $enable_hypr)
         | set_state("plugins"; "special-workspaces"; $enable_hypr)
+        | set_state("plugins"; "mangowc-layout-switcher"; $enable_mango)
       else
         . + {states: {}}
         | set_state("states"; "niri-overview-launcher"; $enable_niri)
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
+        | set_state("states"; "mangowc-layout-switcher"; $enable_mango)
       end
     ' "${NOCTALIA_PLUGIN_STATE}" > "${tmp}"; then
     replace_file_if_changed "${tmp}" "${NOCTALIA_PLUGIN_STATE}" || true
@@ -142,16 +151,47 @@ apply_noctalia_plugin_overrides() {
 }
 
 apply_noctalia_settings_overrides() {
+  local session_name="${1:-}"
   local tmp
+  local enable_mango_widget="false"
 
   command -v jq >/dev/null 2>&1 || return 0
   ensure_noctalia_settings_state
   [[ -f "${NOCTALIA_SETTINGS_STATE}" ]] || return 0
 
+  if [[ "${session_name}" == "mango" ]]; then
+    enable_mango_widget="true"
+  fi
+
   tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-settings.XXXXXX")"
-  if jq '
+  if jq \
+    --argjson enable_mango_widget "${enable_mango_widget}" \
+    --argjson mango_widget "${NOCTALIA_MANGO_LAYOUT_WIDGET_JSON}" \
+    '
+    def remove_widget($id):
+      if .bar?.right?.widgets then
+        .bar.right.widgets |= map(select((.id // "") != $id))
+      else
+        .
+      end;
+
+    def ensure_widget($widget):
+      if $widget == null then
+        .
+      elif .bar?.right?.widgets then
+        if any(.bar.right.widgets[]?; (.id // "") == ($widget.id // "")) then
+          .
+        else
+          .bar.right.widgets += [$widget]
+        end
+      else
+        .
+      end;
+
     .general.enableBlurBehind = false
     | .wallpaper.overviewBlur = 0
+    | remove_widget("plugin:mangowc-layout-switcher")
+    | if $enable_mango_widget then ensure_widget($mango_widget) else . end
   ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
     replace_file_if_changed "${tmp}" "${NOCTALIA_SETTINGS_STATE}" || true
   else
@@ -205,7 +245,7 @@ load_mango_env() {
   mango_detect_wayland_display || true
 }
 
-session_backend="mango"
+session_backend="generic"
 
 case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}" in
   Hyprland|hyprland)
@@ -222,7 +262,7 @@ case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}" in
     ;;
 esac
 
-apply_noctalia_settings_overrides
+apply_noctalia_settings_overrides "${session_backend}"
 apply_noctalia_plugin_overrides "${session_backend}"
 prune_removed_noctalia_plugin_state
 
