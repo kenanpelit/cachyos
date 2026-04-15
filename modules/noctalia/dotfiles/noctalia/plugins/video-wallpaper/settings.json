@@ -10,10 +10,15 @@
   "thumbCacheReady": true,
   "eDP-1": {
     "currentWallpaper": "/home/kenan/Videos/arda/4saat_video.mp4",
-    "isPlaying": false
+    "isPlaying": false,
+    "noctaliaWallpaper": "/home/kenan/Pictures/wallpapers/others/22.jpg",
+    "isMuted": false
   },
   "DP-3": {
     "currentWallpaper": "/home/kenan/Videos/arda/4saat_video.mp4",
-    "isPlaying": false
-  }
+    "isPlaying": false,
+    "noctaliaWallpaper": "/home/kenan/Pictures/wallpapers/others/22.jpg"
+  },
+  "monitorSpecific": true,
+  "enabled": false
 }

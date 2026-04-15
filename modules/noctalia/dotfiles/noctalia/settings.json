@@ -192,6 +192,9 @@
                     "id": "plugin:6ee06e:npodman"
                 },
                 {
+                    "id": "plugin:ssh-sessions"
+                },
+                {
                     "defaultSettings": {
                         "gammaStep": 2,
                         "iconOnlyInBar": false,
@@ -609,7 +612,7 @@
         "firstDayOfWeek": -1,
         "hideWeatherCityName": false,
         "hideWeatherTimezone": false,
-        "name": "Atasehir",
+        "name": "Berlin",
         "showCalendarEvents": true,
         "showCalendarWeather": true,
         "showWeekNumberInCalendar": false,
