@@ -191,13 +191,13 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     here_target = here.get("target") or workspace.get("hereTarget") or workspace["name"]
     bind_lines.append(f"# Tag {workspace_id}: {workspace['name']} ({monitor_name})")
     bind_lines.append(
-        f"bind=SUPER,{workspace_id},spawn,mango-workspace-smart {workspace_id} {monitor_name}"
+        f"binds=SUPER,{workspace_id},spawn,mango-workspace-smart {workspace_id} {monitor_name}"
     )
     bind_lines.append(
-        f"bind=SUPER+SHIFT,{workspace_id},tagcrossmon,{workspace_id},{monitor_name}"
+        f"binds=SUPER+SHIFT,{workspace_id},tagcrossmon,{workspace_id},{monitor_name}"
     )
     bind_lines.append(
-        f"bind=ALT,{workspace_id},spawn,mango-here {workspace_id} {monitor_name} {here_target}"
+        f"binds=ALT,{workspace_id},spawn,mango-here {workspace_id} {monitor_name} {here_target}"
     )
     bind_lines.append("")
 
