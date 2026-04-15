@@ -16,5 +16,7 @@ dotfiles:
   target: ~/.local/bin/fusuma-fullscreen
 - source: scripts/fusuma-overview
   target: ~/.local/bin/fusuma-overview
+- source: scripts/fusuma-should-start
+  target: ~/.local/bin/fusuma-should-start
 post_install_hook: scripts/install.sh
 post_hook_behavior: ask

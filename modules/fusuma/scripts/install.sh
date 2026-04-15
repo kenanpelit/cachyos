@@ -8,7 +8,7 @@ udev_dst="/etc/udev/rules.d/90-fusuma.rules"
 
 mkdir -p "$bin_dir"
 
-for name in fusuma-workspace-monitor fusuma-swipe fusuma-fullscreen fusuma-overview; do
+for name in fusuma-workspace-monitor fusuma-swipe fusuma-fullscreen fusuma-overview fusuma-should-start; do
   chmod +x "$module_root/scripts/$name" || true
   ln -sf "$module_root/scripts/$name" "$bin_dir/$name"
 done
@@ -43,6 +43,13 @@ if [ -f "$udev_src" ]; then
 fi
 
 if command -v systemctl >/dev/null 2>&1; then
+  rm -f "$HOME/.config/systemd/user/mangowm-session.target.wants/fusuma.service"
   systemctl --user daemon-reload >/dev/null 2>&1 || true
-  systemctl --user enable --now fusuma.service >/dev/null 2>&1 || true
+  systemctl --user enable fusuma.service >/dev/null 2>&1 || true
+
+  if "$bin_dir/fusuma-should-start" >/dev/null 2>&1; then
+    systemctl --user restart fusuma.service >/dev/null 2>&1 || systemctl --user start fusuma.service >/dev/null 2>&1 || true
+  else
+    systemctl --user stop fusuma.service >/dev/null 2>&1 || true
+  fi
 fi

@@ -3,7 +3,7 @@ Description=Sunsetr preset scheduler
 Requires=sunsetr.service
 After=sunsetr.service
 BindsTo=graphical-session.target
-PartOf=graphical-session.target niri-session.target hyprland-session.target sunsetr.service
+PartOf=graphical-session.target niri-session.target hyprland-session.target mangowm-session.target sunsetr.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionPathExists=%h/.local/bin/sunsetr-scheduler-loop
 
@@ -19,3 +19,4 @@ Slice=background.slice
 [Install]
 WantedBy=niri-session.target
 WantedBy=hyprland-session.target
+WantedBy=mangowm-session.target

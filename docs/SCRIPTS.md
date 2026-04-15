@@ -353,6 +353,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-workspace-smart`
+**Description:** No description provided.
+
+**Usage:** `mango-workspace-smart`
+
+---
+
 ### 📂 `monitor_brightness`
 **Description:** External monitor brightness control using ddcutil (auto-detect).
 

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+session_name="${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}"
+
+case "${session_name}" in
+  *mango*|*Mango*|*mangowm*|*MangoWM*)
+    exit 1
+    ;;
+  *niri*|*Niri*|*hyprland*|*Hyprland*)
+    exit 0
+    ;;
+  *)
+    exit 1
+    ;;
+esac
