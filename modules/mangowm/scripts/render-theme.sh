@@ -37,7 +37,7 @@ source "${MANIFEST}"
 
 manifest_checksum="$(sha256sum "${MANIFEST}" | awk '{print $1}')"
 tmp_theme="$(mktemp)"
-package_variant="${MANGO_PACKAGE_VARIANT:-wlonly}"
+package_variant="${MANGO_PACKAGE_VARIANT:-full}"
 
 cleanup() {
   rm -f "${tmp_theme}"

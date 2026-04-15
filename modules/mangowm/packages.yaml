@@ -1,7 +1,7 @@
 description: MangoWM packages
 
 packages:
-  - mangowm-wlonly-git
+  - mangowm
   - uwsm
   - polkit-gnome
   - network-manager-applet

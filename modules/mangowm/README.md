@@ -17,8 +17,8 @@ workspace routing generated from the canonical Niri workspace manifest.
 
 - `generated/theme.conf`
   - Rendered from `theme/theme.env`
-  - Current default assumes `mangowm-wlonly-git`, so scenefx-only keys
-    like blur, shadows, and border radius are omitted on purpose
+  - Current default assumes `mangowm`, so scenefx keys like blur,
+    shadows, and border radius are rendered as configured
 - `generated/profile.conf`
   - Rendered from `shared/wm/monitors.yaml` and `profiles/profile.env`
 - `generated/workspace-rules.conf`
