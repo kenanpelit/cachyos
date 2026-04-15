@@ -20,11 +20,14 @@ DEFAULT_APPS=(
   "Ai"
   "CompecTA"
   "WebCord"
-  #"org.telegram.desktop"
   "brave-youtube.com__-Default"
   "spotify"
   "ferdium"
 )
+
+if command -v osc-workspace-launch >/dev/null 2>&1; then
+  mapfile -t DEFAULT_APPS < <(osc-workspace-launch gather-targets 2>/dev/null || true)
+fi
 
 if [[ -z "${APP_ID}" ]]; then
   echo "Error: App ID is required." >&2
@@ -81,49 +84,29 @@ ensure_hypr_env() {
 launch_app() {
   send_notify "Launching <b>${APP_ID}</b>..."
 
-  case "$APP_ID" in
-    "Kenp")
-      start-helium-kenp &
-      ;;
-    "TmuxKenp")
-      start-kkenp &
-      ;;
-    "Ai")
-      start-brave-ai &
-      ;;
-    "CompecTA")
-      start-brave-compecta &
-      ;;
-    "WebCord")
-      start-webcord &
-      ;;
-    "org.telegram.desktop")
-      Telegram &
-      ;;
-    "brave-youtube.com__-Default")
-      start-brave-youtube &
-      ;;
-    "spotify")
-      start-spotify &
-      ;;
-    "ferdium")
-      start-ferdium &
-      ;;
-    "discord")
-      start-discord &
-      ;;
-    "kitty")
-      kitty &
-      ;;
-    *)
-      if command -v "$APP_ID" >/dev/null 2>&1; then
-        "$APP_ID" &
-      else
-        send_notify "Error: No start command found for <b>${APP_ID}</b>" "critical"
-        exit 1
-      fi
-      ;;
-  esac
+  local launch_cmd=""
+  if command -v osc-workspace-launch >/dev/null 2>&1; then
+    launch_cmd="$(osc-workspace-launch first-existing "${APP_ID}" 2>/dev/null || true)"
+  fi
+
+  if [[ -z "${launch_cmd}" ]]; then
+    case "${APP_ID}" in
+      discord) launch_cmd="start-discord" ;;
+      kitty) launch_cmd="kitty" ;;
+      *)
+        if command -v "${APP_ID}" >/dev/null 2>&1; then
+          launch_cmd="${APP_ID}"
+        fi
+        ;;
+    esac
+  fi
+
+  if [[ -z "${launch_cmd}" ]]; then
+    send_notify "Error: No start command found for <b>${APP_ID}</b>" "critical"
+    exit 1
+  fi
+
+  "${launch_cmd}" &
 }
 
 ensure_hypr_env || true

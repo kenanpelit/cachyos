@@ -7,6 +7,14 @@
         "label": "Kenp",
         "target": "Kenp"
       },
+      "launch": {
+        "commands": [
+          "start-{browser}-kenp",
+          "start-helium-kenp",
+          "start-brave-kenp"
+        ],
+        "includeInAll": true
+      },
       "focus": {
         "regex": "^Kenp$"
       },
@@ -22,6 +30,12 @@
       "here": {
         "label": "TmuxKenp",
         "target": "TmuxKenp"
+      },
+      "launch": {
+        "commands": [
+          "start-kkenp"
+        ],
+        "includeInAll": true
       },
       "focus": {
         "regex": "^TmuxKenp$"
@@ -45,6 +59,14 @@
         "label": "Ai",
         "target": "Ai"
       },
+      "launch": {
+        "commands": [
+          "start-{browser}-ai",
+          "start-brave-ai",
+          "start-helium-ai"
+        ],
+        "includeInAll": true
+      },
       "focus": {
         "regex": "^Ai$"
       },
@@ -60,6 +82,14 @@
       "here": {
         "label": "CompecTA",
         "target": "CompecTA"
+      },
+      "launch": {
+        "commands": [
+          "start-{browser}-compecta",
+          "start-brave-compecta",
+          "start-helium-compecta"
+        ],
+        "includeInAll": true
       },
       "focus": {
         "regex": "^CompecTA$"
@@ -77,6 +107,13 @@
         "label": "WebCord",
         "target": "WebCord"
       },
+      "launch": {
+        "commands": [
+          "start-webcord",
+          "webcord"
+        ],
+        "includeInAll": true
+      },
       "focus": {
         "regex": "^WebCord$"
       },
@@ -92,6 +129,14 @@
       "here": {
         "label": "Telegram",
         "target": "org.telegram.desktop"
+      },
+      "launch": {
+        "commands": [
+          "telegram-desktop",
+          "Telegram",
+          "telegram"
+        ],
+        "includeInAll": false
       },
       "focus": {
         "regex": "^(org\\.telegram\\.desktop|TelegramDesktop)$"
@@ -115,6 +160,14 @@
         "label": "YouTube",
         "target": "brave-youtube.com__-Default"
       },
+      "launch": {
+        "commands": [
+          "start-{browser}-youtube",
+          "start-brave-youtube",
+          "start-helium-youtube"
+        ],
+        "includeInAll": true
+      },
       "focus": {
         "regex": "^brave-youtube\\.com__-Default$"
       },
@@ -131,6 +184,13 @@
         "label": "Spotify",
         "target": "spotify"
       },
+      "launch": {
+        "commands": [
+          "start-spotify",
+          "spotify"
+        ],
+        "includeInAll": true
+      },
       "focus": {
         "regex": "^(spotify|Spotify|com\\.spotify\\.Client)$"
       },
@@ -146,6 +206,13 @@
       "here": {
         "label": "Ferdium",
         "target": "ferdium"
+      },
+      "launch": {
+        "commands": [
+          "start-ferdium",
+          "ferdium"
+        ],
+        "includeInAll": true
       },
       "focus": {
         "regex": "^(ferdium|Ferdium)$"

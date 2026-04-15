@@ -8,7 +8,6 @@ REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
 SOURCE_FILE="${NIRI_WORKSPACE_MAP_FILE:-${MODULE_DIR}/workspaces/workspaces.json}"
 SHORTCUTS_OUT="${NIRI_WORKSPACE_SHORTCUTS_OUT:-${MODULE_DIR}/dotfiles/niri/generated/workspace-shortcuts.kdl}"
 RULES_OUT="${NIRI_WORKSPACE_RULES_OUT:-${MODULE_DIR}/dotfiles/niri/generated/workspace-rules.kdl}"
-NOCTALIA_META_OUT="${NIRI_NOCTALIA_WORKSPACE_META_OUT:-${REPO_ROOT}/modules/noctalia/dotfiles/noctalia/plugins/6ee06e:nworkspace/WorkspaceMeta.js}"
 RUNTIME_DIR="${NIRI_RUNTIME_DIR:-}"
 RUNTIME_RULES_BASENAME="workspace-rules.tsv"
 RUNTIME_HERE_BASENAME="workspace-here.tsv"
@@ -16,9 +15,9 @@ RUNTIME_HERE_BASENAME="workspace-here.tsv"
 usage() {
   cat <<'EOF'
 Usage: render-workspace-assets.sh [--check] [--runtime-dir DIR]
-                                 [--stdout shortcuts|rules|noctalia-meta|runtime-rules|runtime-here]
+                                 [--stdout shortcuts|rules|runtime-rules|runtime-here]
 
-Render generated Niri/Noctalia workspace assets from modules/niri/workspaces/workspaces.json.
+Render generated Niri workspace assets from modules/niri/workspaces/workspaces.json.
 EOF
 }
 
@@ -110,22 +109,6 @@ EOF
 EOF
 }
 
-emit_noctalia_meta() {
-  local aliases_json items_json
-  aliases_json="$(jq '{aliases: (reduce .workspaces[] as $ws ({}; .[$ws.id] = $ws.name))} | .aliases' "${SOURCE_FILE}")"
-  items_json="$(jq '[.workspaces[] | {id, name, hereLabel: (.here.label // .hereLabel), hereTarget: (.here.target // .hereTarget)}]' "${SOURCE_FILE}")"
-
-  cat <<EOF
-.pragma library
-
-// Generated from modules/niri/workspaces/workspaces.json.
-// Edit the source workspace map instead of hand-editing this file.
-
-var aliases = ${aliases_json};
-var items = ${items_json};
-EOF
-}
-
 emit_runtime_rules() {
   cat <<'EOF'
 # Generated from modules/niri/workspaces/workspaces.json.
@@ -154,7 +137,7 @@ EOF
 emit_runtime_here() {
   cat <<'EOF'
 # Generated from modules/niri/workspaces/workspaces.json.
-# Format: WORKSPACE<TAB>NAME<TAB>HERE_LABEL<TAB>HERE_TARGET<TAB>FOCUS_REGEX
+# Format: WORKSPACE<TAB>NAME<TAB>HERE_LABEL<TAB>HERE_TARGET<TAB>FOCUS_REGEX<TAB>INCLUDE_IN_ALL
 EOF
 
   jq -r '
@@ -164,7 +147,14 @@ EOF
         .name,
         (.here.label // .hereLabel),
         (.here.target // .hereTarget),
-        (.focus.regex // .focusRegex)
+        (.focus.regex // .focusRegex),
+        (
+          if (.launch | has("includeInAll")) then
+            (.launch.includeInAll | tostring)
+          else
+            "true"
+          end
+        )
       ]
     | @tsv
   ' "${SOURCE_FILE}"
@@ -225,7 +215,6 @@ if [[ -n "${stdout_kind}" ]]; then
   case "${stdout_kind}" in
     shortcuts) emit_shortcuts ;;
     rules) emit_rules ;;
-    noctalia-meta) emit_noctalia_meta ;;
     runtime-rules) emit_runtime_rules ;;
     runtime-here) emit_runtime_here ;;
     *)
@@ -238,12 +227,10 @@ fi
 
 tmp_shortcuts="$(mktemp)"
 tmp_rules="$(mktemp)"
-tmp_noctalia_meta="$(mktemp)"
-trap 'rm -f "${tmp_shortcuts}" "${tmp_rules}" "${tmp_noctalia_meta}" "${tmp_runtime_rules:-}" "${tmp_runtime_here:-}"' EXIT
+trap 'rm -f "${tmp_shortcuts}" "${tmp_rules}" "${tmp_runtime_rules:-}" "${tmp_runtime_here:-}"' EXIT
 
 emit_shortcuts > "${tmp_shortcuts}"
 emit_rules > "${tmp_rules}"
-emit_noctalia_meta > "${tmp_noctalia_meta}"
 
 if [[ -n "${RUNTIME_DIR}" ]]; then
   tmp_runtime_rules="$(mktemp)"
@@ -255,7 +242,6 @@ fi
 if [[ "${mode}" == "check" ]]; then
   check_file_matches "${SHORTCUTS_OUT}" "${tmp_shortcuts}"
   check_file_matches "${RULES_OUT}" "${tmp_rules}"
-  check_file_matches "${NOCTALIA_META_OUT}" "${tmp_noctalia_meta}"
   if [[ -n "${RUNTIME_DIR}" ]]; then
     check_file_matches "${RUNTIME_DIR}/${RUNTIME_RULES_BASENAME}" "${tmp_runtime_rules}"
     check_file_matches "${RUNTIME_DIR}/${RUNTIME_HERE_BASENAME}" "${tmp_runtime_here}"
@@ -265,7 +251,6 @@ fi
 
 write_if_changed "${SHORTCUTS_OUT}" "${tmp_shortcuts}"
 write_if_changed "${RULES_OUT}" "${tmp_rules}"
-write_if_changed "${NOCTALIA_META_OUT}" "${tmp_noctalia_meta}"
 
 if [[ -n "${RUNTIME_DIR}" ]]; then
   mkdir -p "${RUNTIME_DIR}"

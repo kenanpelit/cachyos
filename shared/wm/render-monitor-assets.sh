@@ -226,15 +226,11 @@ for profile_name, profile in profiles.items():
         )
 
     content = "\n".join(profile_lines).rstrip() + "\n"
-    write_file(f"modules/niri/profiles/profiles/{profile_name}.conf", content)
     write_file(f"modules/hyprland/monitors/profiles/{profile_name}.conf", content)
 PY
 
 targets=(
   "modules/niri/dotfiles/niri/outputs.kdl"
-  "modules/niri/profiles/profiles/desk.conf"
-  "modules/niri/profiles/profiles/mobile.conf"
-  "modules/niri/profiles/profiles/single-external.conf"
   "modules/hyprland/monitors/profiles/desk.conf"
   "modules/hyprland/monitors/profiles/mobile.conf"
   "modules/hyprland/monitors/profiles/single-external.conf"

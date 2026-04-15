@@ -10,6 +10,7 @@ noctalia_template_dir="$MODULE_DIR/dotfiles/noctalia"
 noctalia_config_dir="$USER_HOME/.config/noctalia"
 noctalia_backup_root="$USER_HOME/.local/state/cachy/backups/noctalia"
 user_systemd_dir="$USER_HOME/.config/systemd/user"
+render_workspace_meta_script="$MODULE_DIR/scripts/render-workspace-meta.sh"
 
 cleanup_legacy_noctalia_wants() {
   run_as_user rm -f \
@@ -49,6 +50,9 @@ ensure_symlinked_config() {
 }
 
 sync_existing_config_into_repo
+if [[ -x "$render_workspace_meta_script" ]]; then
+  run_as_user "$render_workspace_meta_script"
+fi
 ensure_symlinked_config
 cleanup_legacy_noctalia_wants
 

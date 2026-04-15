@@ -301,62 +301,25 @@ preferred_browser_prefix() {
 
 launch_here_app() {
   local app_id="$1"
-  local browser_prefix="${2:-$(preferred_browser_prefix)}"
+  local -a candidates=()
+  local _browser_prefix="${2:-$(preferred_browser_prefix)}"
 
-  case "$app_id" in
-    "Kenp")
-      if [[ "$browser_prefix" == "helium" ]]; then
-        launch_from_candidates start-helium-kenp start-brave-kenp
-      else
-        launch_from_candidates start-brave-kenp start-helium-kenp
-      fi
-      ;;
-    "TmuxKenp")
-      launch_from_candidates start-kkenp
-      ;;
-    "Ai")
-      if [[ "$browser_prefix" == "helium" ]]; then
-        launch_from_candidates start-helium-ai start-brave-ai
-      else
-        launch_from_candidates start-brave-ai start-helium-ai
-      fi
-      ;;
-    "CompecTA")
-      if [[ "$browser_prefix" == "helium" ]]; then
-        launch_from_candidates start-helium-compecta start-brave-compecta
-      else
-        launch_from_candidates start-brave-compecta start-helium-compecta
-      fi
-      ;;
-    "WebCord")
-      launch_from_candidates start-webcord webcord
-      ;;
-    "org.telegram.desktop")
-      launch_from_candidates telegram-desktop Telegram telegram
-      ;;
-    "brave-youtube.com__-Default")
-      if [[ "$browser_prefix" == "helium" ]]; then
-        launch_from_candidates start-helium-youtube start-brave-youtube
-      else
-        launch_from_candidates start-brave-youtube start-helium-youtube
-      fi
-      ;;
-    "spotify")
-      launch_from_candidates start-spotify spotify
-      ;;
-    "ferdium")
-      launch_from_candidates start-ferdium ferdium
-      ;;
-    "discord")
-      launch_from_candidates start-discord discord
-      ;;
-    "kitty")
-      launch_from_candidates kitty
-      ;;
-    *)
-      launch_from_candidates "$app_id"
-      ;;
-  esac
+  if command -v osc-workspace-launch >/dev/null 2>&1; then
+    while IFS= read -r candidate; do
+      [[ -n "$candidate" ]] || continue
+      candidates+=("$candidate")
+    done < <(BROWSER="start-${_browser_prefix}-placeholder" osc-workspace-launch candidates "$app_id" 2>/dev/null || true)
+  fi
+
+  if [[ "${#candidates[@]}" -eq 0 ]]; then
+    case "$app_id" in
+      "discord") candidates=(start-discord discord) ;;
+      "kitty") candidates=(kitty) ;;
+      *) candidates=("$app_id") ;;
+    esac
+  fi
+
+  launch_from_candidates "${candidates[@]}"
 }
 
 usage() {
@@ -535,6 +498,10 @@ case "${cmd}" in
         "spotify"
         "ferdium"
       )
+
+      if command -v osc-workspace-launch >/dev/null 2>&1; then
+        mapfile -t DEFAULT_APPS < <(osc-workspace-launch gather-targets 2>/dev/null || true)
+      fi
 
       notify() {
         command -v notify-send >/dev/null 2>&1 || return 0

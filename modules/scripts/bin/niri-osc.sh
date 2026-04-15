@@ -683,7 +683,6 @@ here)
       "Ai"
       "CompecTA"
       "WebCord"
-      "org.telegram.desktop"
       "brave-youtube.com__-Default"
       "spotify"
       "ferdium"
@@ -694,6 +693,7 @@ here)
     declare -a HERE_LABELS=()
     declare -a HERE_TARGETS=()
     declare -a HERE_REGEXES=()
+    declare -a HERE_INCLUDE_IN_ALL=()
     HERE_MAP_LOADED=0
 
     load_here_map() {
@@ -704,10 +704,11 @@ here)
       HERE_LABELS=()
       HERE_TARGETS=()
       HERE_REGEXES=()
+      HERE_INCLUDE_IN_ALL=()
 
       [[ -f "$HERE_MAP_FILE" ]] || return 1
 
-      while IFS=$'\t' read -r ws_id ws_name here_label here_target focus_regex; do
+      while IFS=$'\t' read -r ws_id ws_name here_label here_target focus_regex include_in_all; do
         [[ -z "${ws_id//[[:space:]]/}" ]] && continue
         [[ "${ws_id:0:1}" == "#" ]] && continue
         HERE_IDS+=("${ws_id}")
@@ -715,10 +716,16 @@ here)
         HERE_LABELS+=("${here_label:-}")
         HERE_TARGETS+=("${here_target:-}")
         HERE_REGEXES+=("${focus_regex:-}")
+        HERE_INCLUDE_IN_ALL+=("${include_in_all:-true}")
       done < "$HERE_MAP_FILE"
 
       if [[ "${#HERE_TARGETS[@]}" -gt 0 ]]; then
-        DEFAULT_APPS=("${HERE_TARGETS[@]}")
+        DEFAULT_APPS=()
+        local i
+        for i in "${!HERE_TARGETS[@]}"; do
+          [[ "${HERE_INCLUDE_IN_ALL[$i]:-true}" == "true" ]] || continue
+          DEFAULT_APPS+=("${HERE_TARGETS[$i]}")
+        done
       fi
       [[ "${#HERE_TARGETS[@]}" -gt 0 ]]
     }
@@ -750,6 +757,14 @@ here)
       if mapped_regex="$(here_regex_from_map "$app_id" 2>/dev/null)" && [[ -n "$mapped_regex" ]]; then
         printf '%s\n' "$mapped_regex"
         return 0
+      fi
+
+      if command -v osc-workspace-launch >/dev/null 2>&1; then
+        mapped_regex="$(osc-workspace-launch focus-regex "$app_id" 2>/dev/null || true)"
+        if [[ -n "$mapped_regex" ]]; then
+          printf '%s\n' "$mapped_regex"
+          return 0
+        fi
       fi
 
       case "$app_id" in
@@ -942,26 +957,23 @@ here)
 
       send_notify "Launching <b>$APP_ID</b>..."
 
-      # Determine preferred browser prefix
-      local browser_prefix="brave"
-      if [[ "${BROWSER:-}" == *"helium"* ]]; then
-        browser_prefix="helium"
+      local -a launch_candidates=()
+      if command -v osc-workspace-launch >/dev/null 2>&1; then
+        while IFS= read -r candidate; do
+          [[ -n "$candidate" ]] || continue
+          launch_candidates+=("$candidate")
+        done < <(osc-workspace-launch candidates "$APP_ID" 2>/dev/null || true)
       fi
 
-      if ! case "$APP_ID" in
-      "Kenp") launch_from_candidates start-${browser_prefix}-kenp start-helium-kenp start-brave-kenp ;;
-      "Ai") launch_from_candidates start-${browser_prefix}-ai start-brave-ai start-helium-ai ;;
-      "CompecTA") launch_from_candidates start-${browser_prefix}-compecta start-brave-compecta start-helium-compecta ;;
-      "TmuxKenp") launch_from_candidates start-kkenp ;;
-      "WebCord") launch_from_candidates start-webcord ;;
-      "org.telegram.desktop") launch_from_candidates telegram-desktop Telegram telegram ;;
-      "brave-youtube.com__-Default") launch_from_candidates start-${browser_prefix}-youtube start-brave-youtube start-helium-youtube ;;
-      "spotify") launch_from_candidates start-spotify ;;
-      "ferdium") launch_from_candidates start-ferdium ;;
-      "discord") launch_from_candidates start-discord ;;
-      "kitty") launch_from_candidates kitty ;;
-      *) launch_from_candidates "$APP_ID" ;;
-      esac; then
+      if [[ "${#launch_candidates[@]}" -eq 0 ]]; then
+        case "$APP_ID" in
+        "discord") launch_candidates=(start-discord) ;;
+        "kitty") launch_candidates=(kitty) ;;
+        *) launch_candidates=("$APP_ID") ;;
+        esac
+      fi
+
+      if ! launch_from_candidates "${launch_candidates[@]}"; then
         send_notify "Error: No start command found for <b>$APP_ID</b>" "critical"
         return 1
       fi

@@ -5,6 +5,29 @@ script_dir="$(cd "$(dirname "$0")" && pwd)"
 repo_root="$(cd "$script_dir/../../.." && pwd)"
 source "$repo_root/modules/base/lib/core.sh"
 
+mode="fast"
+case "${1:-}" in
+  ""|--fast)
+    ;;
+  --strict)
+    mode="strict"
+    ;;
+  -h|--help)
+    cat <<'EOF'
+Usage: validate.sh [--fast|--strict]
+
+--fast   Validate Niri-owned scripts plus the small set of shared helpers that
+         the Niri session directly executes. This is the default.
+--strict Validate the same set plus every shell helper under modules/scripts/bin.
+EOF
+    exit 0
+    ;;
+  *)
+    echo "Unknown argument: ${1}" >&2
+    exit 2
+    ;;
+esac
+
 NIRI_CONFIG="$USER_HOME/.config/niri/config.kdl"
 NIRI_RUNTIME_DIR="$USER_HOME/.config/niri/runtime"
 WORKSPACE_SOURCE_FILE="$script_dir/../workspaces/workspaces.json"
@@ -144,19 +167,52 @@ fi
 
 log_info "Validating Niri helper shell syntax..."
 helper_failure=0
+helper_candidates=()
+
+while IFS= read -r helper_script; do
+    [[ -n "$helper_script" ]] || continue
+    helper_candidates+=("$helper_script")
+done < <(
+    find \
+        "$repo_root/modules/niri/scripts" \
+        "$repo_root/shared/wm" \
+        -maxdepth 1 -type f -name '*.sh' | sort
+)
+
+for helper_script in \
+    "$repo_root/modules/scripts/bin/niri-arrange.sh" \
+    "$repo_root/modules/scripts/bin/niri-bootstrap.sh" \
+    "$repo_root/modules/scripts/bin/niri-desktop-settings.sh" \
+    "$repo_root/modules/scripts/bin/niri-osc.sh" \
+    "$repo_root/modules/scripts/bin/niri-post-bootstrap.sh" \
+    "$repo_root/modules/scripts/bin/niri-session-common.sh" \
+    "$repo_root/modules/scripts/bin/niri-session-init.sh" \
+    "$repo_root/modules/scripts/bin/niri-status-notifier-ready.sh" \
+    "$repo_root/modules/scripts/bin/osc-niri-workspaces-mode.sh" \
+    "$repo_root/modules/scripts/bin/osc-shell.sh" \
+    "$repo_root/modules/scripts/bin/osc-tty-launcher.sh" \
+    "$repo_root/modules/scripts/bin/osc-workspace-launch.sh"
+do
+    [[ -f "$helper_script" ]] || continue
+    helper_candidates+=("$helper_script")
+done
+
+if [[ "$mode" == "strict" ]]; then
+    while IFS= read -r helper_script; do
+        [[ -n "$helper_script" ]] || continue
+        helper_candidates+=("$helper_script")
+    done < <(
+        find "$repo_root/modules/scripts/bin" -maxdepth 1 -type f -name '*.sh' | sort
+    )
+fi
+
 while IFS= read -r helper_script; do
     [[ -n "$helper_script" ]] || continue
     if ! bash -n "$helper_script"; then
         log_error "Shell syntax check failed: $helper_script"
         helper_failure=1
     fi
-done < <(
-    find \
-        "$repo_root/modules/niri/scripts" \
-        "$repo_root/modules/scripts/bin" \
-        "$repo_root/shared/wm" \
-        -maxdepth 1 -type f -name '*.sh' | sort
-)
+done < <(printf '%s\n' "${helper_candidates[@]}" | sort -u)
 
 if [[ "$helper_failure" -ne 0 ]]; then
     exit 1
