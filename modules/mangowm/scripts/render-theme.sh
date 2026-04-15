@@ -37,6 +37,7 @@ source "${MANIFEST}"
 
 manifest_checksum="$(sha256sum "${MANIFEST}" | awk '{print $1}')"
 tmp_theme="$(mktemp)"
+package_variant="${MANGO_PACKAGE_VARIANT:-wlonly}"
 
 cleanup() {
   rm -f "${tmp_theme}"
@@ -47,7 +48,12 @@ cat >"${tmp_theme}" <<EOF
 # Generated from modules/mangowm/theme/theme.env.
 # Update the manifest and rerun modules/mangowm/scripts/render-theme.sh.
 # Source checksum: ${manifest_checksum}
+# Package variant: ${package_variant}
 
+EOF
+
+if [[ "${package_variant}" != "wlonly" ]]; then
+cat >>"${tmp_theme}" <<EOF
 blur=${MANGO_BLUR}
 blur_layer=${MANGO_BLUR_LAYER}
 blur_optimized=${MANGO_BLUR_OPTIMIZED}
@@ -69,6 +75,16 @@ shadowscolor=${MANGO_SHADOW_COLOR}
 
 border_radius=${MANGO_BORDER_RADIUS}
 no_radius_when_single=${MANGO_NO_RADIUS_WHEN_SINGLE}
+EOF
+else
+cat >>"${tmp_theme}" <<'EOF'
+# wlonly build: scenefx-dependent effects are intentionally omitted.
+# Unsupported here: blur, shadows, border radius.
+EOF
+fi
+
+cat >>"${tmp_theme}" <<EOF
+
 focused_opacity=${MANGO_FOCUSED_OPACITY}
 unfocused_opacity=${MANGO_UNFOCUSED_OPACITY}
 

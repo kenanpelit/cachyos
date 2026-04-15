@@ -178,6 +178,7 @@ bind_lines = [
     "",
     f"# Active monitor profile: {profile_name}",
     "# Profile-aware workspace binds: switch and move follow the target monitor.",
+    "# Alt binds jump to the app's home tag and spawn it only when that tag is empty.",
     "",
 ]
 
@@ -186,12 +187,17 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     workspace = workspaces_by_id[workspace_id]
     monitor = monitors_by_id[workspace_ref["monitor"]]
     monitor_name = monitor.get("niri_name", monitor["id"])
+    here = workspace.get("here", {})
+    here_target = here.get("target") or workspace.get("hereTarget") or workspace["name"]
     bind_lines.append(f"# Tag {workspace_id}: {workspace['name']} ({monitor_name})")
     bind_lines.append(
         f"bind=SUPER,{workspace_id},spawn,mango-workspace-smart {workspace_id} {monitor_name}"
     )
     bind_lines.append(
         f"bind=SUPER+SHIFT,{workspace_id},tagcrossmon,{workspace_id},{monitor_name}"
+    )
+    bind_lines.append(
+        f"bind=ALT,{workspace_id},spawn,mango-here {workspace_id} {monitor_name} {here_target}"
     )
     bind_lines.append("")
 
