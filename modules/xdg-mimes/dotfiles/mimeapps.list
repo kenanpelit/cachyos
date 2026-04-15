@@ -121,5 +121,6 @@ x-scheme-handler/terminal=kitty.desktop
 x-scheme-handler/ferdium=ferdium.desktop
 x-scheme-handler/magnet=transmission-gtk.desktop
 x-scheme-handler/mailto=helium.desktop
+x-scheme-handler/webcal=helium.desktop
 
 [Removed Associations]
