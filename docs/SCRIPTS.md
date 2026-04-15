@@ -759,6 +759,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-workspace-launch`
+**Description:** No description provided.
+
+**Usage:** `osc-workspace-launch`
+
+---
+
 ### 📂 `pdfkes`
 **Description:** Advanced PDF file management and splitting utility (OSC PDF Splitter)
 
