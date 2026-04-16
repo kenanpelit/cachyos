@@ -8,7 +8,7 @@ set -euo pipefail
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/hypr-scroll"
 STATE_FILE="${CACHE_DIR}/state"
-CONF_RATIOS=(0.30 0.45 0.60 0.75 1.0)
+CONF_RATIOS=(0.333 0.50 0.667 0.800 1.0)
 
 usage() {
   cat <<'EOF'
