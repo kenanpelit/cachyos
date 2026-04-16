@@ -11,14 +11,24 @@
   "eDP-1": {
     "currentWallpaper": "/home/kenan/Videos/arda/4saat_video.mp4",
     "isPlaying": false,
-    "noctaliaWallpaper": "/home/kenan/Pictures/wallpapers/others/22.jpg",
-    "isMuted": false
+    "noctaliaWallpaper": "/home/kenan/Pictures/wallpapers/others/52.jpg",
+    "isMuted": false,
+    "volume": 1,
+    "automation": false,
+    "automationMode": "random",
+    "automationTime": 300,
+    "hardwareAcceleration": false,
+    "profile": "default",
+    "fillMode": "",
+    "orientation": 0
   },
   "DP-3": {
     "currentWallpaper": "/home/kenan/Videos/arda/4saat_video.mp4",
     "isPlaying": false,
-    "noctaliaWallpaper": "/home/kenan/Pictures/wallpapers/others/22.jpg"
+    "noctaliaWallpaper": "/home/kenan/Pictures/wallpapers/others/52.jpg",
+    "isMuted": false
   },
-  "monitorSpecific": true,
-  "enabled": false
+  "monitorSpecific": false,
+  "enabled": false,
+  "automationCustomTime": []
 }

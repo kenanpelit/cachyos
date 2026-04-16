@@ -192,6 +192,12 @@
                     "id": "plugin:6ee06e:npodman"
                 },
                 {
+                    "commandPrefix": "ssh",
+                    "defaultSettings": {
+                        "pollInterval": 10,
+                        "showInactiveHosts": true,
+                        "terminalCommand": ""
+                    },
                     "id": "plugin:ssh-sessions"
                 },
                 {
@@ -612,7 +618,7 @@
         "firstDayOfWeek": -1,
         "hideWeatherCityName": false,
         "hideWeatherTimezone": false,
-        "name": "Berlin",
+        "name": "Istanbul",
         "showCalendarEvents": true,
         "showCalendarWeather": true,
         "showWeekNumberInCalendar": false,
