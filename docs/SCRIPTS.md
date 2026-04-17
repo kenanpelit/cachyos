@@ -760,7 +760,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-workspace-launch`
-**Description:** No description provided.
+**Description:** Try to find REPO_ROOT relative to script, or fallback to known location
 
 **Usage:** `osc-workspace-launch`
 
