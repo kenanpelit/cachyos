@@ -35,6 +35,7 @@ packages:
 - chaotic-keyring
 - chaotic-mirrorlist
 - chwd
+- cpio
 - cryptsetup
 - dcli-arch-git
 - device-mapper
@@ -111,6 +112,8 @@ packages:
 - linux-cachyos-bore
 - linux-cachyos-bore-headers
 - linux-cachyos-headers
+- linux-meteor-lto
+- linux-meteor-lto-headers
 - logrotate
 - lsscsi
 - lvm2
@@ -120,6 +123,7 @@ packages:
 - mesa-utils
 - micro
 - modemmanager
+- mpvpaper
 - mtools
 - mullvad-browser-bin
 - nano
@@ -166,6 +170,7 @@ packages:
 - python-packaging
 - qt6-wayland
 - rtkit
+- rust-bindgen
 - s-nail
 - sddm
 - sesh-bin

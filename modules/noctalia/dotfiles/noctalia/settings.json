@@ -156,22 +156,6 @@
                 },
                 {
                     "defaultSettings": {
-                        "desktopTip": true,
-                        "flatpak": true,
-                        "hideOnEmpty": false,
-                        "nameCmd": "(checkupdates; paru -Qua;) | awk '{print $1}'",
-                        "newVerCmd": "(checkupdates; paru -Qua;) | awk '{print $4}'",
-                        "noctalia": true,
-                        "oldVerCmd": "(checkupdates; paru -Qua;) | awk '{print $2}'",
-                        "refreshInterval": 120,
-                        "refreshTimer": true,
-                        "toast": true,
-                        "updateCmd": "ghostty -e bash -c 'echo \"Updating System...\";paru; flatpak update; read -n 1 -p \"Press any key to exit...\"'"
-                    },
-                    "id": "plugin:arch-updater"
-                },
-                {
-                    "defaultSettings": {
                         "activeTodoCount": 0,
                         "autosaveDelay": 700,
                         "count": 0,
@@ -618,7 +602,7 @@
         "firstDayOfWeek": -1,
         "hideWeatherCityName": false,
         "hideWeatherTimezone": false,
-        "name": "Barcelona",
+        "name": "Istanbul",
         "showCalendarEvents": true,
         "showCalendarWeather": true,
         "showWeekNumberInCalendar": false,

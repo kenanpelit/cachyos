@@ -1,8 +1,0 @@
-{
-  "updateIntervalMinutes": 180,
-  "updateTerminalCommand": "kitty -e",
-  "currentIconName": "pacman",
-  "hideOnZero": false,
-  "customCmdGetNumUpdates": "",
-  "customCmdDoSystemUpdate": ""
-}
