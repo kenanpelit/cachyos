@@ -2,7 +2,14 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
+# Try to find REPO_ROOT relative to script, or fallback to known location
+if [[ -f "${SCRIPT_DIR}/../../../modules/niri/workspaces/workspaces.json" ]]; then
+  REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
+elif [[ -f "${HOME}/.cachy/modules/niri/workspaces/workspaces.json" ]]; then
+  REPO_ROOT="${HOME}/.cachy"
+else
+  REPO_ROOT="${SCRIPT_DIR}/../../.."
+fi
 WORKSPACE_MANIFEST="${OSC_WORKSPACE_MANIFEST:-${REPO_ROOT}/modules/niri/workspaces/workspaces.json}"
 
 usage() {
@@ -53,7 +60,11 @@ case "${subcommand}" in
     [[ -n "${target}" ]] || die "target is required"
     jq -r --arg target "${target}" '
       .workspaces[]
-      | select((.here.target // .hereTarget // "") == $target)
+      | select(
+          ((.here.target // .hereTarget // "") | ascii_downcase) == ($target | ascii_downcase) or
+          ((.here.label // .hereLabel // "") | ascii_downcase) == ($target | ascii_downcase) or
+          ((.name // "") | ascii_downcase) == ($target | ascii_downcase)
+        )
       | (.launch.commands // [])[]
     ' "${WORKSPACE_MANIFEST}" | while IFS= read -r candidate; do
       [[ -n "${candidate}" ]] || continue

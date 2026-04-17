@@ -8,6 +8,8 @@
 
 set -euo pipefail
 
+#set -x
+
 NIRI_OSC_VERSION="2.1.0"
 NIRI_OSC_SELF="${BASH_SOURCE[0]}"
 
@@ -154,7 +156,9 @@ niri_osc_run_scope() {
         niri_osc_write_scope_cache "$scope" "$cache_file" "$stamp"
       fi
     fi
-    NIRI_OSC_BIN="$NIRI_OSC_SELF" exec bash "$cache_file" "$@"
+    local absolute_self
+    absolute_self="$(readlink -f "$NIRI_OSC_SELF" 2>/dev/null || echo "$NIRI_OSC_SELF")"
+    NIRI_OSC_BIN="$absolute_self" exec bash "$cache_file" "$@"
   fi
 
   local tmp_file
@@ -162,7 +166,9 @@ niri_osc_run_scope() {
   niri_osc_payload_for_scope "$scope" >"$tmp_file"
   chmod 700 "$tmp_file"
   local rc=0
-  if ! NIRI_OSC_BIN="$NIRI_OSC_SELF" bash "$tmp_file" "$@"; then
+  local absolute_self
+  absolute_self="$(readlink -f "$NIRI_OSC_SELF" 2>/dev/null || echo "$NIRI_OSC_SELF")"
+  if ! NIRI_OSC_BIN="$absolute_self" bash "$tmp_file" "$@"; then
     rc=$?
   fi
   rm -f "$tmp_file"
@@ -267,6 +273,20 @@ EOF
 niri_osc_set_script_dir() {
   local source_path="${NIRI_OSC_BIN:-${BASH_SOURCE[0]}}"
   local resolved=""
+
+  # If we are running from cache, NIRI_OSC_BIN should point to the real script.
+  # If it's not set or points to a cache file, we need to be careful.
+  if [[ "$source_path" == *"/niri-osc/"* ]] || [[ "$source_path" == *".cache"* ]]; then
+    # Fallback: if we're in cache but don't know where the real bin is, 
+    # try to find it in the expected repo location if NIRI_OSC_BIN is missing.
+    if [[ -z "${NIRI_OSC_BIN:-}" ]]; then
+      # This is a bit of a hack but helps when the environment is lost.
+      local repo_bin="$HOME/.cachy/modules/scripts/bin/niri-osc.sh"
+      if [[ -x "$repo_bin" ]]; then
+        source_path="$repo_bin"
+      fi
+    fi
+  fi
 
   if command -v readlink >/dev/null 2>&1; then
     resolved="$(readlink -f "$source_path" 2>/dev/null || true)"
@@ -673,6 +693,12 @@ here)
   (
     set -euo pipefail
 
+    # Ensure helper scripts in the same directory are available via absolute path
+    SCRIPT_DIR="$(niri_osc_set_script_dir)"
+    export PATH="${SCRIPT_DIR}:${PATH:-}"
+    OSC_LAUNCH_BIN="${SCRIPT_DIR}/osc-workspace-launch.sh"
+    [[ -x "$OSC_LAUNCH_BIN" ]] || OSC_LAUNCH_BIN="osc-workspace-launch"
+
     # Notification setting: 0 (off), 1 (on)
     NOTIFY_ENABLED="${OSC_HERE_NOTIFY:-0}"
 
@@ -759,8 +785,8 @@ here)
         return 0
       fi
 
-      if command -v osc-workspace-launch >/dev/null 2>&1; then
-        mapped_regex="$(osc-workspace-launch focus-regex "$app_id" 2>/dev/null || true)"
+      if [[ -n "$OSC_LAUNCH_BIN" ]]; then
+        mapped_regex="$("$OSC_LAUNCH_BIN" focus-regex "$app_id" 2>/dev/null || true)"
         if [[ -n "$mapped_regex" ]]; then
           printf '%s\n' "$mapped_regex"
           return 0
@@ -868,10 +894,16 @@ here)
       target_id="$(
         echo "$windows_json" \
           | jq -r --arg app_re "$app_re" --arg ws "$current_ws_id" \
-            'first(.[] | select((((.app_id // "") | tostring) | test($app_re)) and ((.workspace_id | tostring) != $ws)) | .id) // empty' \
+            'first(.[] | select(
+              (
+                ((.app_id // "") | tostring | test($app_re)) or
+                ((.class // "") | tostring | test($app_re)) or
+                ((.title // "") | tostring | test($app_re))
+              ) and ((.workspace_id | tostring) != $ws)
+            ) | .id) // ""' \
               2>/dev/null || true
       )"
-      [[ -n "$target_id" ]] || return 1
+      [[ -n "${target_id:-}" ]] || return 1
 
       niri msg action move-window-to-workspace --window-id "$target_id" --focus false "$current_ws_idx" >/dev/null 2>&1 || return 1
       if [[ "$focus_after" == "1" ]]; then
@@ -897,16 +929,21 @@ here)
         windows_json="$(niri msg -j windows 2>/dev/null || true)"
         workspaces_json="$(niri msg -j workspaces 2>/dev/null || true)"
 
+        # Improved detection: check app_id, class, and title
         any_window_id="$(
           echo "$windows_json" \
             | jq -r --arg app_re "$app_re" \
-              'first(.[] | select(((.app_id // "") | tostring) | test($app_re)) | .id) // empty' \
+              'first(.[] | select(
+                ((.app_id // "") | tostring | test($app_re)) or
+                ((.class // "") | tostring | test($app_re)) or
+                ((.title // "") | tostring | test($app_re))
+              ) | .id) // ""' \
                 2>/dev/null || true
         )"
       fi
 
       # --- 1. If a window exists, NEVER launch. Move/focus only. ---
-      if [[ -n "$any_window_id" ]]; then
+      if [[ -n "${any_window_id:-}" ]]; then
         if move_existing_window_here "$APP_ID" "$app_re" "$focus_after"; then
           send_notify "<b>$APP_ID</b> moved to current workspace."
           return 0
@@ -928,12 +965,18 @@ here)
           window_id="$(
             echo "$windows_json" \
               | jq -r --arg app_re "$app_re" --arg ws "$current_ws_id" \
-                'first(.[] | select((((.app_id // "") | tostring) | test($app_re)) and ((.workspace_id|tostring) == $ws)) | .id) // empty' \
+                'first(.[] | select(
+                  (
+                    ((.app_id // "") | tostring | test($app_re)) or
+                    ((.class // "") | tostring | test($app_re)) or
+                    ((.title // "") | tostring | test($app_re))
+                  ) and ((.workspace_id|tostring) == $ws)
+                ) | .id) // ""' \
                   2>/dev/null || true
           )"
         fi
 
-        if [[ -n "$window_id" ]]; then
+        if [[ -n "${window_id:-}" ]]; then
           if [[ "$focus_after" == "1" ]]; then
             niri msg action focus-window --id "$window_id" >/dev/null 2>&1 || true
             send_notify "<b>$APP_ID</b> focused."
@@ -958,11 +1001,11 @@ here)
       send_notify "Launching <b>$APP_ID</b>..."
 
       local -a launch_candidates=()
-      if command -v osc-workspace-launch >/dev/null 2>&1; then
+      if [[ -n "$OSC_LAUNCH_BIN" ]]; then
         while IFS= read -r candidate; do
           [[ -n "$candidate" ]] || continue
           launch_candidates+=("$candidate")
-        done < <(osc-workspace-launch candidates "$APP_ID" 2>/dev/null || true)
+        done < <("$OSC_LAUNCH_BIN" candidates "$APP_ID" 2>/dev/null || true)
       fi
 
       if [[ "${#launch_candidates[@]}" -eq 0 ]]; then
