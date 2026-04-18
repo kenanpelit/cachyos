@@ -19,6 +19,7 @@ NOCTALIA_REMOVED_PLUGIN_ID="niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_WIDGET_ID="plugin:niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_DIR="${NOCTALIA_CONFIG_DIR}/plugins/${NOCTALIA_REMOVED_PLUGIN_ID}"
 NOCTALIA_MANGO_LAYOUT_WIDGET_JSON='{"defaultSettings":{"monitorOrder":[]},"id":"plugin:mangowc-layout-switcher"}'
+NOCTALIA_MANGO_LAYOUT_WIDGET_ANCHOR_ID="Spacer"
 
 replace_file_if_changed() {
   local source_file="$1"
@@ -169,6 +170,7 @@ apply_noctalia_settings_overrides() {
   if jq \
     --argjson enable_mango_widget "${enable_mango_widget}" \
     --argjson mango_widget "${NOCTALIA_MANGO_LAYOUT_WIDGET_JSON}" \
+    --arg mango_widget_anchor_id "${NOCTALIA_MANGO_LAYOUT_WIDGET_ANCHOR_ID}" \
     '
     def remove_widget($id):
       if .bar?.widgets then
@@ -179,15 +181,21 @@ apply_noctalia_settings_overrides() {
         .
       end;
 
-    def ensure_widget($widget):
+    def ensure_widget_after($widget; $anchor_id):
       if $widget == null then
         .
       elif .bar?.widgets?.left then
-        if any(.bar.widgets.left[]?; (.id // "") == ($widget.id // "")) then
-          .
-        else
-          .bar.widgets.left += [$widget]
-        end
+        .bar.widgets.left = (
+          reduce .bar.widgets.left[]? as $item (
+            {items: [], inserted: false};
+            if (.inserted | not) and (($item.id // "") == $anchor_id) then
+              {items: (.items + [$item, $widget]), inserted: true}
+            else
+              {items: (.items + [$item]), inserted: .inserted}
+            end
+          )
+          | if .inserted then .items else .items + [$widget] end
+        )
       else
         .
       end;
@@ -195,7 +203,7 @@ apply_noctalia_settings_overrides() {
     .general.enableBlurBehind = false
     | .wallpaper.overviewBlur = 0
     | remove_widget("plugin:mangowc-layout-switcher")
-    | if $enable_mango_widget then ensure_widget($mango_widget) else . end
+    | if $enable_mango_widget then ensure_widget_after($mango_widget; $mango_widget_anchor_id) else . end
   ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
     replace_file_if_changed "${tmp}" "${NOCTALIA_SETTINGS_STATE}" || true
   else
