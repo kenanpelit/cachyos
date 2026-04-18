@@ -11,6 +11,9 @@ SOCKET_PATH="/tmp/mpvsocket"
 DOWNLOADS_DIR="${HOME}/Downloads"
 NOTIFICATION_TIMEOUT=1200
 NIRI_MPV_STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/mpv-manager-niri-mpv.state"
+declare -A MANGO_VIEW_PRIMARY=()
+declare -A MANGO_VIEW_ADDITIONAL=()
+MANGO_SELECTED_MONITOR=""
 
 compositor() {
   if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
@@ -21,9 +24,10 @@ compositor() {
     echo "niri"
     return
   fi
-  case "${XDG_CURRENT_DESKTOP:-}${XDG_SESSION_DESKTOP:-}" in
+  case "${XDG_CURRENT_DESKTOP:-}:${XDG_SESSION_DESKTOP:-}:${DESKTOP_SESSION:-}" in
     *Hyprland*|*hyprland*) echo "hyprland" ;;
     *niri*|*Niri*) echo "niri" ;;
+    *mango*|*Mango*) echo "mango" ;;
     *) echo "unknown" ;;
   esac
 }
@@ -383,6 +387,285 @@ hypr_wallpaper() {
 
   mpvpaper "$output" "$source" >/dev/null 2>&1 || die "mpvpaper başarısız oldu (output=$output)"
   notify "mpv-manager" "Wallpaper ayarlandı ($output)"
+}
+
+mango_require() {
+  command -v mmsg >/dev/null 2>&1 || die "mmsg not found"
+  command -v jq >/dev/null 2>&1 || die "jq not found"
+  mmsg -g -c >/dev/null 2>&1 || die "mango IPC erişilemiyor"
+}
+
+mango_focus_sleep() {
+  sleep 0.03
+}
+
+mango_abs() {
+  local n="$1"
+  if [[ "$n" -lt 0 ]]; then
+    echo $(( -n ))
+  else
+    echo "$n"
+  fi
+}
+
+mango_clamp() {
+  local n="$1"
+  local min="$2"
+  local max="$3"
+  if [[ "$max" -lt "$min" ]]; then
+    max="$min"
+  fi
+  if [[ "$n" -lt "$min" ]]; then
+    echo "$min"
+  elif [[ "$n" -gt "$max" ]]; then
+    echo "$max"
+  else
+    echo "$n"
+  fi
+}
+
+mango_selected_monitor() {
+  mmsg -g -o 2>/dev/null | awk '$2 == "selmon" && $3 == "1" { print $1; exit }'
+}
+
+mango_snapshot_views() {
+  local monitor tag
+
+  MANGO_VIEW_PRIMARY=()
+  MANGO_VIEW_ADDITIONAL=()
+  MANGO_SELECTED_MONITOR="$(mango_selected_monitor 2>/dev/null || true)"
+
+  while read -r monitor tag; do
+    [[ -n "$monitor" && -n "$tag" ]] || continue
+    if [[ -z "${MANGO_VIEW_PRIMARY[$monitor]+x}" ]]; then
+      MANGO_VIEW_PRIMARY[$monitor]="$tag"
+    else
+      MANGO_VIEW_ADDITIONAL[$monitor]="${MANGO_VIEW_ADDITIONAL[$monitor]:-} $tag"
+    fi
+  done < <(
+    mmsg -g -t 2>/dev/null | awk '$2 == "tag" && $4 == "1" { print $1, $3 }'
+  )
+}
+
+mango_restore_views() {
+  local monitor tag
+
+  for monitor in "${!MANGO_VIEW_PRIMARY[@]}"; do
+    mmsg -s -o "$monitor" -t "${MANGO_VIEW_PRIMARY[$monitor]}" >/dev/null 2>&1 || true
+    for tag in ${MANGO_VIEW_ADDITIONAL[$monitor]:-}; do
+      mmsg -s -o "$monitor" -t "${tag}+" >/dev/null 2>&1 || true
+    done
+  done
+
+  if [[ -n "${MANGO_SELECTED_MONITOR:-}" ]]; then
+    mmsg -d "focusmon,${MANGO_SELECTED_MONITOR}" >/dev/null 2>&1 || true
+  fi
+}
+
+mango_restore_and_die() {
+  local message="$1"
+  mango_restore_views
+  die "$message"
+}
+
+mango_monitor_with_focused_appid() {
+  local appid="$1"
+  mmsg -g -c 2>/dev/null | awk -v appid="$appid" '$2 == "appid" && $3 == appid { print $1; exit }'
+}
+
+mango_focused_appid_on_monitor() {
+  local monitor="$1"
+  mmsg -g -c 2>/dev/null | awk -v monitor="$monitor" '$1 == monitor && $2 == "appid" { print $3; exit }'
+}
+
+mango_focused_xywh_on_monitor() {
+  local monitor="$1"
+  local x y w h
+
+  x="$(mmsg -g -x 2>/dev/null | awk -v monitor="$monitor" '$1 == monitor && $2 == "x" { print $3; exit }')"
+  y="$(mmsg -g -x 2>/dev/null | awk -v monitor="$monitor" '$1 == monitor && $2 == "y" { print $3; exit }')"
+  w="$(mmsg -g -x 2>/dev/null | awk -v monitor="$monitor" '$1 == monitor && $2 == "width" { print $3; exit }')"
+  h="$(mmsg -g -x 2>/dev/null | awk -v monitor="$monitor" '$1 == monitor && $2 == "height" { print $3; exit }')"
+
+  [[ -n "$x" && -n "$y" && -n "$w" && -n "$h" ]] || return 1
+  echo "$x $y $w $h"
+}
+
+mango_focused_floating_on_monitor() {
+  local monitor="$1"
+  mmsg -g -f 2>/dev/null | awk -v monitor="$monitor" '$1 == monitor { print $NF; exit }'
+}
+
+mango_output_geometry() {
+  local monitor="$1"
+
+  command -v wlr-randr >/dev/null 2>&1 || die "wlr-randr not found"
+  wlr-randr --json 2>/dev/null | jq -r --arg monitor "$monitor" '
+    def outputs:
+      if type == "array" then .
+      elif has("outputs") then .outputs
+      else []
+      end;
+    outputs[]
+    | select(.name == $monitor)
+    | [
+        (.position.x // 0),
+        (.position.y // 0),
+        ((.modes[] | select(.current == true) | .width) // 0),
+        ((.modes[] | select(.current == true) | .height) // 0)
+      ]
+    | @tsv
+  ' | head -n1 | tr '\t' ' '
+}
+
+mango_focus_mpv() {
+  local monitor appid tag clients count
+
+  monitor="$(mango_monitor_with_focused_appid "mpv" 2>/dev/null || true)"
+  if [[ -n "$monitor" ]]; then
+    mmsg -d "focusmon,${monitor}" >/dev/null 2>&1 || true
+    appid="$(mango_focused_appid_on_monitor "$monitor" 2>/dev/null || true)"
+    if [[ "$appid" == "mpv" ]]; then
+      echo "$monitor"
+      return 0
+    fi
+  fi
+
+  while read -r monitor tag clients; do
+    [[ -n "$monitor" && -n "$tag" && -n "$clients" ]] || continue
+    mmsg -d "focusmon,${monitor}" >/dev/null 2>&1 || true
+    mmsg -s -o "$monitor" -t "$tag" >/dev/null 2>&1 || true
+    mango_focus_sleep
+
+    count="$clients"
+    if [[ "$count" -lt 1 ]]; then
+      count=1
+    fi
+
+    while [[ "$count" -gt 0 ]]; do
+      appid="$(mango_focused_appid_on_monitor "$monitor" 2>/dev/null || true)"
+      if [[ "$appid" == "mpv" ]]; then
+        echo "$monitor"
+        return 0
+      fi
+      count=$((count - 1))
+      if [[ "$count" -gt 0 ]]; then
+        mmsg -d "focusstack,next" >/dev/null 2>&1 || true
+        mango_focus_sleep
+      fi
+    done
+  done < <(
+    mmsg -g -t 2>/dev/null | awk '$2 == "tag" && $5 > 0 { print $1, $3, $5 }'
+  )
+
+  return 1
+}
+
+mango_prepare_floating_mpv() {
+  local monitor="$1"
+  local floating x y w h
+  local target_w="${MPV_MANGO_WIDTH:-640}"
+  local target_h="${MPV_MANGO_HEIGHT:-360}"
+
+  floating="$(mango_focused_floating_on_monitor "$monitor" 2>/dev/null || true)"
+  if [[ "$floating" != "1" ]]; then
+    mmsg -d "togglefloating" >/dev/null 2>&1 || true
+    mango_focus_sleep
+  fi
+
+  read -r x y w h <<<"$(mango_focused_xywh_on_monitor "$monitor" 2>/dev/null || true)" || return 0
+  if [[ "$w" -gt 700 || "$h" -gt 500 ]]; then
+    mmsg -d "resizewin,${target_w},${target_h}" >/dev/null 2>&1 || true
+    mango_focus_sleep
+  fi
+}
+
+mango_move_cycle_corners() {
+  mango_require
+
+  local monitor=""
+  local x y w h mon_x mon_y mon_w mon_h
+  local margin_x margin_y max_x max_y
+  local tl_x tl_y tr_x tr_y br_x br_y bl_x bl_y
+  local d_tl d_tr d_br d_bl current next tx ty
+
+  mango_snapshot_views
+  monitor="$(mango_focus_mpv 2>/dev/null || true)"
+  [[ -n "$monitor" ]] || mango_restore_and_die "MPV penceresi bulunamadı"
+
+  mango_prepare_floating_mpv "$monitor"
+
+  read -r x y w h <<<"$(mango_focused_xywh_on_monitor "$monitor" 2>/dev/null || true)" \
+    || mango_restore_and_die "Mango: mpv geometry okunamadı"
+  read -r mon_x mon_y mon_w mon_h <<<"$(mango_output_geometry "$monitor" 2>/dev/null || true)" \
+    || mango_restore_and_die "Mango: output boyutu okunamadı"
+
+  margin_x="${MPV_MANGO_MARGIN_X:-32}"
+  margin_y="${MPV_MANGO_MARGIN_Y:-96}"
+  max_x=$((mon_x + mon_w - w))
+  max_y=$((mon_y + mon_h - h))
+
+  tl_x="$(mango_clamp $((mon_x + margin_x)) "$mon_x" "$max_x")"
+  tl_y="$(mango_clamp $((mon_y + margin_y)) "$mon_y" "$max_y")"
+  tr_x="$(mango_clamp $((mon_x + mon_w - w - margin_x)) "$mon_x" "$max_x")"
+  tr_y="$tl_y"
+  br_x="$tr_x"
+  br_y="$(mango_clamp $((mon_y + mon_h - h - margin_y)) "$mon_y" "$max_y")"
+  bl_x="$tl_x"
+  bl_y="$br_y"
+
+  d_tl=$(( $(mango_abs $((x - tl_x))) + $(mango_abs $((y - tl_y))) ))
+  d_tr=$(( $(mango_abs $((x - tr_x))) + $(mango_abs $((y - tr_y))) ))
+  d_br=$(( $(mango_abs $((x - br_x))) + $(mango_abs $((y - br_y))) ))
+  d_bl=$(( $(mango_abs $((x - bl_x))) + $(mango_abs $((y - bl_y))) ))
+
+  current="tl"
+  if [[ "$d_tr" -le "$d_tl" && "$d_tr" -le "$d_br" && "$d_tr" -le "$d_bl" ]]; then
+    current="tr"
+  elif [[ "$d_br" -le "$d_tl" && "$d_br" -le "$d_tr" && "$d_br" -le "$d_bl" ]]; then
+    current="br"
+  elif [[ "$d_bl" -le "$d_tl" && "$d_bl" -le "$d_tr" && "$d_bl" -le "$d_br" ]]; then
+    current="bl"
+  fi
+
+  case "$current" in
+    tl) next="tr"; tx="$tr_x"; ty="$tr_y" ;;
+    tr) next="br"; tx="$br_x"; ty="$br_y" ;;
+    br) next="bl"; tx="$bl_x"; ty="$bl_y" ;;
+    *)  next="tl"; tx="$tl_x"; ty="$tl_y" ;;
+  esac
+
+  mmsg -d "movewin,${tx},${ty}" >/dev/null 2>&1 \
+    || mango_restore_and_die "Mango: movewin başarısız"
+
+  mango_restore_views
+  notify "mpv-manager" "Mango: ${current} -> ${next}"
+}
+
+mango_toggle_stick() {
+  mango_require
+
+  local monitor=""
+  mango_snapshot_views
+  monitor="$(mango_focus_mpv 2>/dev/null || true)"
+  [[ -n "$monitor" ]] || mango_restore_and_die "MPV penceresi bulunamadı"
+
+  mango_prepare_floating_mpv "$monitor"
+  mmsg -d "toggleglobal" >/dev/null 2>&1 \
+    || mango_restore_and_die "Mango: toggleglobal başarısız"
+
+  mango_restore_views
+  notify "mpv-manager" "Mango: mpv sabitleme değiştirildi"
+}
+
+mango_raise_mpv() {
+  mango_require
+  local monitor=""
+
+  monitor="$(mango_focus_mpv 2>/dev/null || true)"
+  [[ -n "$monitor" ]] || die "MPV penceresi bulunamadı"
+  mango_prepare_floating_mpv "$monitor"
+  notify "mpv-manager" "Mango: mpv odaklandı"
 }
 
 niri_require() {
@@ -1005,6 +1288,16 @@ main() {
             top) niri_raise_mpv ;;
             *)
               die "Bu komut Niri'de desteklenmiyor: $cmd"
+              ;;
+          esac
+          ;;
+        mango)
+          case "$cmd" in
+            move) mango_move_cycle_corners ;;
+            stick) mango_toggle_stick ;;
+            top) mango_raise_mpv ;;
+            *)
+              die "Bu komut MangoWM'de desteklenmiyor: $cmd"
               ;;
           esac
           ;;
