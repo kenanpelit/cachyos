@@ -179,7 +179,7 @@ bind_lines = [
     f"# Active monitor profile: {profile_name}",
     "# Profile-aware workspace binds: switch follows the target monitor.",
     "# Shift-number moves are defined in conf.d/50-binds.conf via mango-tag-smart.",
-    "# Alt binds jump to the app's home tag and spawn it only when that tag is empty.",
+    "# Alt binds focus the mapped app on the current tag, move it here if already open elsewhere, or launch it.",
     "",
 ]
 
