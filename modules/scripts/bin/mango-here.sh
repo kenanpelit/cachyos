@@ -61,7 +61,7 @@ snapshot_views() {
       VIEW_ADDITIONAL[$mon]="${VIEW_ADDITIONAL[$mon]:-} $active_tag"
     fi
   done < <(
-    mmsg -g -t 2>/dev/null | awk '$2 == "tag" && $4 == "1" { print $1, $3 }'
+    mmsg -g -t 2>/dev/null | awk '$2 == "tag" && (($4 + 0) % 2) == 1 { print $1, $3 }'
   )
 }
 
@@ -254,6 +254,7 @@ if [[ -n "${current_monitor:-}" && -n "${current_tag:-}" ]]; then
   if [[ "$found" -eq 1 ]]; then
     mmsg -d "tagcrossmon,${current_tag},${current_monitor}" >/dev/null 2>&1 || true
     restore_views "$current_monitor"
+    mmsg -d "focusmon,${current_monitor}" >/dev/null 2>&1 || true
     exit 0
   fi
 
