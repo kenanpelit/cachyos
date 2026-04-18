@@ -115,7 +115,11 @@ for workspace in workspace_data.get("workspaces", []):
         parts = [f"windowrule=tags:{workspace_id}"]
         if monitor_name:
             parts.append(f"monitor:{monitor_name}")
-        parts.append("istagsilent:1")
+        tag_silent = route.get("tagSilent")
+        if tag_silent is None:
+            tag_silent = workspace.get("tagSilent", False)
+        if tag_silent:
+            parts.append("istagsilent:1")
 
         app_id_regex = route.get("appIdRegex", "")
         title_regex = route.get("titleRegex", "")
