@@ -177,7 +177,8 @@ bind_lines = [
     f"# Source checksum: {checksum}",
     "",
     f"# Active monitor profile: {profile_name}",
-    "# Profile-aware workspace binds: switch and move follow the target monitor.",
+    "# Profile-aware workspace binds: switch follows the target monitor.",
+    "# Shift-number moves are defined in conf.d/50-binds.conf via mango-tag-smart.",
     "# Alt binds jump to the app's home tag and spawn it only when that tag is empty.",
     "",
 ]
@@ -192,9 +193,6 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     bind_lines.append(f"# Tag {workspace_id}: {workspace['name']} ({monitor_name})")
     bind_lines.append(
         f"binds=SUPER,{workspace_id},spawn,mango-workspace-smart {workspace_id} {monitor_name}"
-    )
-    bind_lines.append(
-        f"binds=SUPER+SHIFT,{workspace_id},tagcrossmon,{workspace_id},{monitor_name}"
     )
     bind_lines.append(
         f"binds=ALT,{workspace_id},spawn,mango-here {workspace_id} {monitor_name} {here_target}"
