@@ -360,6 +360,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-tag-smart`
+**Description:** No description provided.
+
+**Usage:** `mango-tag-smart`
+
+---
+
 ### 📂 `mango-workspace-smart`
 **Description:** No description provided.
 
