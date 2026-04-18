@@ -249,20 +249,42 @@ load_mango_env() {
   mango_detect_wayland_display || true
 }
 
-session_backend="generic"
+detect_session_backend() {
+  local combined
 
-case "${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}" in
-  Hyprland|hyprland)
+  combined="$(printf '%s %s %s' \
+    "${XDG_CURRENT_DESKTOP:-}" \
+    "${XDG_SESSION_DESKTOP:-}" \
+    "${DESKTOP_SESSION:-}" \
+    | tr '[:upper:]' '[:lower:]')"
+
+  case "${combined}" in
+    *hyprland*)
+      printf '%s\n' "hyprland"
+      ;;
+    *niri*)
+      printf '%s\n' "niri"
+      ;;
+    *mangowm*|*mango*)
+      printf '%s\n' "mango"
+      ;;
+    *)
+      printf '%s\n' "generic"
+      ;;
+  esac
+}
+
+session_backend="$(detect_session_backend)"
+
+case "${session_backend}" in
+  hyprland)
     load_hypr_env
-    session_backend="hyprland"
     ;;
-  niri|Niri)
+  niri)
     load_niri_env
-    session_backend="niri"
     ;;
-  mango|Mango|mangowm|MangoWM)
+  mango)
     load_mango_env
-    session_backend="mango"
     ;;
 esac
 
