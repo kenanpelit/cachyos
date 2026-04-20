@@ -32,12 +32,16 @@ dotfiles:
   target: ~/.config/systemd/user/mango-daemons.target
 - source: dotfiles/systemd/user/mango-post-daemons.target
   target: ~/.config/systemd/user/mango-post-daemons.target
+- source: dotfiles/systemd/user/mango-session-ready.target
+  target: ~/.config/systemd/user/mango-session-ready.target
 - source: dotfiles/systemd/user/mango-session-env.service
   target: ~/.config/systemd/user/mango-session-env.service
 - source: dotfiles/systemd/user/mango-bootstrap.service
   target: ~/.config/systemd/user/mango-bootstrap.service
 - source: dotfiles/systemd/user/mango-audio-init.service
   target: ~/.config/systemd/user/mango-audio-init.service
+- source: dotfiles/systemd/user/mango-arrange.service
+  target: ~/.config/systemd/user/mango-arrange.service
 - source: dotfiles/systemd/user/mango-shell-ensure.service
   target: ~/.config/systemd/user/mango-shell-ensure.service
 - source: dotfiles/systemd/user/mango-status-notifier-ready.service
@@ -54,5 +58,5 @@ dotfiles:
   target: ~/.config/systemd/user/mango-post-bootstrap.service
 - source: dotfiles/systemd/user/wayland-wm@mango\x2dsession.service.d/10-session-lifecycle.conf
   target: ~/.config/systemd/user/wayland-wm@mango\x2dsession.service.d/10-session-lifecycle.conf
-post_install_hook: scripts/install.sh
+post_install_hook: scripts/ensure-runtime-files.sh
 post_hook_behavior: always

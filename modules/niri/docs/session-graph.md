@@ -93,7 +93,7 @@ These are shared, graphical-session-scoped helpers rather than Niri-only units:
 
 - `outputs.kdl` is generated from `shared/wm/monitors.yaml`.
 - `runtime/workspaces-auto.kdl` is rendered from the shared monitor manifest,
-  the selected `NIRI_MONITOR_PROFILE`, and `workspaces/workspaces.json`.
+  the selected `NIRI_MONITOR_PROFILE`, and `shared/wm/workspaces.json`.
 - `config.kdl` is intentionally split into top-level includes under
   `dotfiles/niri/conf/`.
 - Long-lived GUI launch keybinds prefer `uwsm app --` so app scopes stay

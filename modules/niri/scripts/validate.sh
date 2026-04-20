@@ -30,7 +30,7 @@ esac
 
 NIRI_CONFIG="$USER_HOME/.config/niri/config.kdl"
 NIRI_RUNTIME_DIR="$USER_HOME/.config/niri/runtime"
-WORKSPACE_SOURCE_FILE="$script_dir/../workspaces/workspaces.json"
+WORKSPACE_SOURCE_FILE="$repo_root/shared/wm/workspaces.json"
 WORKSPACE_RULES_FILE="$script_dir/../dotfiles/niri/generated/workspace-rules.kdl"
 RENDER_PROFILE_SCRIPT="$script_dir/render-profile.sh"
 RENDER_WORKSPACE_ASSETS_SCRIPT="$script_dir/render-workspace-assets.sh"

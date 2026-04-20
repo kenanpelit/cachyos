@@ -4,14 +4,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
-SOURCE_FILE="${NOCTALIA_WORKSPACE_SOURCE_FILE:-${REPO_ROOT}/modules/niri/workspaces/workspaces.json}"
+SOURCE_FILE="${NOCTALIA_WORKSPACE_SOURCE_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
 TARGET_FILE="${NOCTALIA_WORKSPACE_META_OUT:-${MODULE_DIR}/dotfiles/noctalia/plugins/6ee06e:nworkspace/WorkspaceMeta.js}"
 
 usage() {
   cat <<'EOF'
 Usage: render-workspace-meta.sh [--check]
 
-Render Noctalia workspace metadata from modules/niri/workspaces/workspaces.json.
+Render Noctalia workspace metadata from shared/wm/workspaces.json.
 EOF
 }
 
@@ -50,7 +50,7 @@ items_json="$(jq '[.workspaces[] | {id, name, hereLabel: (.here.label // .hereLa
 cat <<EOF > "${tmp_file}"
 .pragma library
 
-// Generated from modules/niri/workspaces/workspaces.json.
+// Generated from shared/wm/workspaces.json.
 // Edit the source workspace map instead of hand-editing this file.
 
 var aliases = ${aliases_json};

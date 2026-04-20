@@ -3,14 +3,14 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # Try to find REPO_ROOT relative to script, or fallback to known location
-if [[ -f "${SCRIPT_DIR}/../../../modules/niri/workspaces/workspaces.json" ]]; then
+if [[ -f "${SCRIPT_DIR}/../../../shared/wm/workspaces.json" ]]; then
   REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
-elif [[ -f "${HOME}/.cachy/modules/niri/workspaces/workspaces.json" ]]; then
+elif [[ -f "${HOME}/.cachy/shared/wm/workspaces.json" ]]; then
   REPO_ROOT="${HOME}/.cachy"
 else
   REPO_ROOT="${SCRIPT_DIR}/../../.."
 fi
-WORKSPACE_MANIFEST="${OSC_WORKSPACE_MANIFEST:-${REPO_ROOT}/modules/niri/workspaces/workspaces.json}"
+WORKSPACE_MANIFEST="${OSC_WORKSPACE_MANIFEST:-${REPO_ROOT}/shared/wm/workspaces.json}"
 
 usage() {
   cat <<'EOF'
@@ -20,7 +20,7 @@ Usage:
   osc-workspace-launch focus-regex <target>
   osc-workspace-launch gather-targets
 
-Reads launch metadata from modules/niri/workspaces/workspaces.json.
+Reads launch metadata from shared/wm/workspaces.json.
 EOF
 }
 

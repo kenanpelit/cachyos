@@ -28,7 +28,9 @@ command -v mmsg >/dev/null 2>&1 || {
 }
 
 profile_candidates=(
+  "${XDG_CONFIG_HOME:-${HOME}/.config}/mango/runtime/profile.conf"
   "${XDG_CONFIG_HOME:-${HOME}/.config}/mango/generated/profile.conf"
+  "/etc/xdg/mango/runtime/profile.conf"
   "/etc/xdg/mango/generated/profile.conf"
 )
 
@@ -41,7 +43,7 @@ for candidate in "${profile_candidates[@]}"; do
 done
 
 [[ -n "${profile_file}" ]] || {
-  echo "unable to locate Mango generated profile.conf" >&2
+  echo "unable to locate Mango runtime profile.conf" >&2
   exit 1
 }
 

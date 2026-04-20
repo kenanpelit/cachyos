@@ -27,6 +27,7 @@ main() {
     systemctl --user start --no-block \
       mango-session-env.service \
       mango-bootstrap.service \
+      mango-arrange.service \
       mango-post-bootstrap.service >/dev/null 2>&1 || true
   fi
 }

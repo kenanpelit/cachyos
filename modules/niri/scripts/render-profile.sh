@@ -11,7 +11,7 @@ SHARED_MONITOR_MANIFEST="${NIRI_SHARED_MONITOR_MANIFEST:-${REPO_ROOT}/shared/wm/
 source "${REPO_ROOT}/modules/base/lib/core.sh"
 
 PROFILE_MANIFEST="${NIRI_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
-WORKSPACE_MAP_FILE="${NIRI_WORKSPACE_MAP_FILE:-${MODULE_DIR}/workspaces/workspaces.json}"
+WORKSPACE_MAP_FILE="${NIRI_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
 TARGET_RUNTIME_DIR="${NIRI_RUNTIME_DIR:-${USER_HOME}/.config/niri/runtime}"
 WORKSPACES_OUT="${TARGET_RUNTIME_DIR}/workspaces-auto.kdl"
 
@@ -152,7 +152,7 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
         )
 
     workspace_name = workspace["name"]
-    output_name = monitor.get("niri_name", monitor["id"])
+    output_name = monitor.get("wayland_name", monitor.get("niri_name", monitor["id"]))
     layout = workspace.get("layout", {})
     layout_lines = []
     if isinstance(layout, list):

@@ -4,38 +4,51 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
+source "${REPO_ROOT}/modules/base/lib/core.sh"
+
 PROFILE_MANIFEST="${MANGO_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
 SHARED_MONITOR_MANIFEST="${MANGO_SHARED_MONITOR_MANIFEST:-${REPO_ROOT}/shared/wm/monitors.yaml}"
-WORKSPACE_MAP_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/modules/niri/workspaces/workspaces.json}"
-PROFILE_OUT="${MANGO_PROFILE_OUT:-${MODULE_DIR}/dotfiles/mango/generated/profile.conf}"
-WORKSPACE_BINDS_OUT="${MANGO_WORKSPACE_BINDS_OUT:-${MODULE_DIR}/dotfiles/mango/generated/workspace-binds.conf}"
+WORKSPACE_MAP_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
+RUNTIME_DIR="${MANGO_RUNTIME_DIR:-${USER_HOME}/.config/mango/runtime}"
+PROFILE_OUT="${MANGO_PROFILE_OUT:-${RUNTIME_DIR}/profile.conf}"
+WORKSPACE_BINDS_OUT="${MANGO_WORKSPACE_BINDS_OUT:-${RUNTIME_DIR}/workspace-binds.conf}"
 
 usage() {
   cat <<'EOF'
-Usage: render-profile.sh [--check]
+Usage: render-profile.sh [--check] [--out-dir DIR]
 
 Without arguments, renders the selected MangoWM monitor/tag profile and
-profile-aware workspace bindings.
-With --check, verifies that the generated files match the manifests.
+profile-aware workspace bindings into the Mango runtime directory.
+With --check, verifies that the generated files match the target outputs.
 EOF
 }
 
 mode="write"
-case "${1:-}" in
-  ""|--write)
-    ;;
-  --check)
-    mode="check"
-    ;;
-  -h|--help)
-    usage
-    exit 0
-    ;;
-  *)
-    usage >&2
-    exit 2
-    ;;
-esac
+while (($#)); do
+  case "$1" in
+    --check)
+      mode="check"
+      shift
+      ;;
+    --out-dir)
+      RUNTIME_DIR="$2"
+      PROFILE_OUT="${RUNTIME_DIR}/profile.conf"
+      WORKSPACE_BINDS_OUT="${RUNTIME_DIR}/workspace-binds.conf"
+      shift 2
+      ;;
+    --write)
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
 
 [[ -r "${PROFILE_MANIFEST}" ]] || { echo "Profile manifest not found: ${PROFILE_MANIFEST}" >&2; exit 1; }
 [[ -r "${SHARED_MONITOR_MANIFEST}" ]] || { echo "Shared monitor manifest not found: ${SHARED_MONITOR_MANIFEST}" >&2; exit 1; }
@@ -118,12 +131,16 @@ def parse_position(raw_position, monitor):
     return int(position.get("x", 0)), int(position.get("y", 0))
 
 
+def monitor_name_for_mango(monitor):
+    return monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
+
+
 def layout_name_for_workspace(workspace):
     return "scroller"
 
 
 lines = [
-    "# Generated from shared/wm/monitors.yaml and modules/niri/workspaces/workspaces.json.",
+    "# Generated from shared/wm/monitors.yaml and shared/wm/workspaces.json.",
     "# Update the shared manifests and rerun modules/mangowm/scripts/render-profile.sh.",
     f"# Source checksum: {checksum}",
     "",
@@ -137,7 +154,7 @@ for output in profile.get("outputs", []):
     if not monitor_id:
         continue
     monitor = monitors_by_id[monitor_id]
-    monitor_name = monitor.get("niri_name", monitor_id)
+    monitor_name = monitor_name_for_mango(monitor)
     if monitor_name in seen_monitor_names:
         continue
     seen_monitor_names.add(monitor_name)
@@ -161,7 +178,7 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     workspace_id = str(workspace_ref["id"])
     workspace = workspaces_by_id[workspace_id]
     monitor = monitors_by_id[workspace_ref["monitor"]]
-    monitor_name = monitor.get("niri_name", monitor["id"])
+    monitor_name = monitor_name_for_mango(monitor)
     layout_name = layout_name_for_workspace(workspace)
     lines.append(f"# Tag {workspace_id}: {workspace['name']}")
     lines.append(
@@ -172,7 +189,7 @@ lines.append("")
 out_path.write_text("\n".join(lines))
 
 bind_lines = [
-    "# Generated from shared/wm/monitors.yaml and modules/niri/workspaces/workspaces.json.",
+    "# Generated from shared/wm/monitors.yaml and shared/wm/workspaces.json.",
     "# Update the shared manifests and rerun modules/mangowm/scripts/render-profile.sh.",
     f"# Source checksum: {checksum}",
     "",
@@ -187,10 +204,12 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     workspace_id = str(workspace_ref["id"])
     workspace = workspaces_by_id[workspace_id]
     monitor = monitors_by_id[workspace_ref["monitor"]]
-    monitor_name = monitor.get("niri_name", monitor["id"])
+    monitor_name = monitor_name_for_mango(monitor)
     here = workspace.get("here", {})
     here_target = here.get("target") or workspace.get("hereTarget") or workspace["name"]
+    here_label = here.get("label") or workspace.get("hereLabel") or workspace["name"]
     bind_lines.append(f"# Tag {workspace_id}: {workspace['name']} ({monitor_name})")
+    bind_lines.append(f"# Here label: {here_label}")
     bind_lines.append(
         f"binds=SUPER,{workspace_id},spawn,mango-workspace-smart {workspace_id} {monitor_name}"
     )
@@ -208,5 +227,5 @@ if [[ "${mode}" == "check" ]]; then
   exit 0
 fi
 
-install -D -m 644 "${tmp_profile}" "${PROFILE_OUT}"
-install -D -m 644 "${tmp_binds}" "${WORKSPACE_BINDS_OUT}"
+run_as_user install -D -m 644 "${tmp_profile}" "${PROFILE_OUT}"
+run_as_user install -D -m 644 "${tmp_binds}" "${WORKSPACE_BINDS_OUT}"

@@ -1,6 +1,6 @@
 [Unit]
 Description=MangoWM post-bootstrap polish
-After=mango-bootstrap.service mango-audio-init.service mango-daemons.target mango-desktop-settings.service mango-shell-ensure.service dbus.service
+After=mango-bootstrap.service mango-audio-init.service mango-arrange.service mango-daemons.target mango-desktop-settings.service mango-shell-ensure.service mango-status-notifier-ready.service mango-polkit-agent.service mango-nm-applet.service mango-blueman-applet.service dbus.service
 PartOf=mangowm-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_SESSION_DESKTOP=mango

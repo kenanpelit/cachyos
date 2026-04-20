@@ -13,6 +13,7 @@ layout_presets:
 monitors:
   - id: dell_up2716d
     selector: "desc:Dell Inc. DELL UP2716D KRXTR88N909L"
+    wayland_name: "DP-3"
     niri_name: "DP-3"
     mode: "2560x1440@59"
     scale: 1
@@ -27,6 +28,7 @@ monitors:
 
   - id: laptop_panel
     selector: "desc:Chimei Innolux Corporation 0x143F"
+    wayland_name: "eDP-1"
     niri_name: "eDP-1"
     mode: "1920x1200@60"
     scale: 1

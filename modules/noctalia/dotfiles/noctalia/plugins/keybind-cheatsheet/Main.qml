@@ -31,7 +31,7 @@ Item {
     // Re-parse if:
     // 1. No data cached yet, OR
     // 2. Compositor changed since last parse
-    if (!hasData || currentCompositor !== savedCompositor) {
+    if (!hasData || currentCompositor !== savedCompositor || currentCompositor === "mango") {
       parserStarted = true;
       runParser();
     } else {
@@ -139,7 +139,7 @@ Item {
 
     // Detect compositor using CompositorService
     var compositorName = getCurrentCompositor();
-    if (!CompositorService.isHyprland && !CompositorService.isNiri) {
+    if (!CompositorService.isHyprland && !CompositorService.isNiri && !CompositorService.isMango) {
       isCurrentlyParsing = false;
 
       var unsupportedMsg = getUnsupportedCompositorMessage(compositorName);
@@ -176,11 +176,13 @@ Item {
     } else if (CompositorService.isNiri) {
       filePath = pluginApi?.pluginSettings?.niriConfigPath || (homeDir + "/.config/niri/config.kdl");
       filePath = filePath.replace(/^~/, homeDir);
+    } else if (CompositorService.isMango) {
+      filePath = homeDir + "/.config/mango/runtime/keybind-cheatsheet.conf";
     }
 
     filesToParse = [filePath];
 
-    if (CompositorService.isHyprland) {
+    if (CompositorService.isHyprland || CompositorService.isMango) {
       parseNextHyprlandFile();
     } else {
       parseNextNiriFile();

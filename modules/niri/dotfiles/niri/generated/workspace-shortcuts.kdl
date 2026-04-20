@@ -1,4 +1,4 @@
-// Generated from modules/niri/workspaces/workspaces.json.
+// Generated from shared/wm/workspaces.json.
 // Edit the source workspace map instead of hand-editing these shortcuts.
 binds {
 // BEGIN OSC_NIRI_WORKSPACE_SHORTCUTS

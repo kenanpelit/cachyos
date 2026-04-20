@@ -4,37 +4,48 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
+source "${REPO_ROOT}/modules/base/lib/core.sh"
 
-SOURCE_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/modules/niri/workspaces/workspaces.json}"
+SOURCE_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
 PROFILE_MANIFEST="${MANGO_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
 SHARED_MONITOR_MANIFEST="${MANGO_SHARED_MONITOR_MANIFEST:-${REPO_ROOT}/shared/wm/monitors.yaml}"
-RULES_OUT="${MANGO_WORKSPACE_RULES_OUT:-${MODULE_DIR}/dotfiles/mango/generated/workspace-rules.conf}"
+RUNTIME_DIR="${MANGO_RUNTIME_DIR:-${USER_HOME}/.config/mango/runtime}"
+RULES_OUT="${MANGO_WORKSPACE_RULES_OUT:-${RUNTIME_DIR}/workspace-rules.conf}"
 
 usage() {
   cat <<'EOF'
-Usage: render-workspace-assets.sh [--check]
+Usage: render-workspace-assets.sh [--check] [--runtime-dir DIR]
 
 Render generated MangoWM workspace routing rules from
-modules/niri/workspaces/workspaces.json plus the active monitor profile.
+shared/wm/workspaces.json plus the active monitor profile.
 EOF
 }
 
 mode="write"
-case "${1:-}" in
-  ""|--write)
-    ;;
-  --check)
-    mode="check"
-    ;;
-  -h|--help)
-    usage
-    exit 0
-    ;;
-  *)
-    usage >&2
-    exit 2
-    ;;
-esac
+while (($#)); do
+  case "$1" in
+    --check)
+      mode="check"
+      shift
+      ;;
+    --runtime-dir)
+      RUNTIME_DIR="$2"
+      RULES_OUT="${RUNTIME_DIR}/workspace-rules.conf"
+      shift 2
+      ;;
+    --write)
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
 
 [[ -r "${SOURCE_FILE}" ]] || { echo "Workspace source file not found: ${SOURCE_FILE}" >&2; exit 1; }
 [[ -r "${PROFILE_MANIFEST}" ]] || { echo "Profile manifest not found: ${PROFILE_MANIFEST}" >&2; exit 1; }
@@ -55,7 +66,6 @@ trap cleanup EXIT
 
 python3 - "${SOURCE_FILE}" "${SHARED_MONITOR_MANIFEST}" "${MANGO_MONITOR_PROFILE}" "${tmp_rules}" <<'PY'
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -84,7 +94,7 @@ for workspace_ref in profile.get("workspaces", []):
     if monitor is None:
         continue
     workspace_monitor_map[str(workspace_ref["id"])] = monitor.get(
-        "niri_name", monitor["id"]
+        "mango_name", monitor.get("wayland_name", monitor["id"])
     )
 
 
@@ -101,7 +111,7 @@ def normalized_routes(workspace):
 
 
 lines = [
-    "# Generated from modules/niri/workspaces/workspaces.json.",
+    "# Generated from shared/wm/workspaces.json.",
     "# Edit the canonical workspace map instead of hand-editing these rules.",
     f"# Active monitor profile: {profile_name}",
 ]
@@ -140,4 +150,4 @@ if [[ "${mode}" == "check" ]]; then
   exit 0
 fi
 
-install -D -m 644 "${tmp_rules}" "${RULES_OUT}"
+run_as_user install -D -m 644 "${tmp_rules}" "${RULES_OUT}"

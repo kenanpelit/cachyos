@@ -1,6 +1,6 @@
 // Generated from shared/wm/monitors.yaml.
 // Update the shared manifest and rerun shared/wm/render-monitor-assets.sh.
-// Source checksum: b1591b2f859371d99fcffb801ceab9be5cde380d14422f3de6c66f1c8cd7273d
+// Source checksum: 5ed56354054f2353d89730fd8924fc74b9ca99a1759d3290ba83eb60e90a5b50
 
 output "DP-3" {
   mode "2560x1440@59"

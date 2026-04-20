@@ -104,7 +104,10 @@ for monitor in monitors:
     if monitor_id in monitors_by_id:
         raise SystemExit(f"Duplicate monitor id: {monitor_id}")
     monitor = dict(monitor)
-    monitor["niri_name"] = monitor.get("niri_name", niri_name_for_selector(selector))
+    monitor["wayland_name"] = monitor.get(
+        "wayland_name", monitor.get("niri_name", niri_name_for_selector(selector))
+    )
+    monitor["niri_name"] = monitor.get("niri_name", monitor["wayland_name"])
     monitors_by_id[monitor_id] = monitor
 
 

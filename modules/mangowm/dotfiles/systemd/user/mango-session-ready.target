@@ -1,0 +1,9 @@
+[Unit]
+Description=MangoWM session ready stage
+Requires=mango-post-daemons.target mango-arrange.service mango-desktop-settings.service mango-post-bootstrap.service
+After=mango-post-daemons.target mango-arrange.service mango-desktop-settings.service mango-post-bootstrap.service
+BindsTo=graphical-session.target
+PartOf=mangowm-session.target graphical-session.target
+
+[Install]
+WantedBy=mangowm-session.target

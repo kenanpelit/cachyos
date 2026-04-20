@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROFILE_FILE="${MANGO_PROFILE_FILE:-$HOME/.config/mango/generated/profile.conf}"
+PROFILE_FILE="${MANGO_PROFILE_FILE:-$HOME/.config/mango/runtime/profile.conf}"
 
 usage() {
   cat <<'EOF'

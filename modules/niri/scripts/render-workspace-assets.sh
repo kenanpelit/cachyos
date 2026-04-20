@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODULE_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="$(cd -- "${MODULE_DIR}/../.." && pwd)"
 
-SOURCE_FILE="${NIRI_WORKSPACE_MAP_FILE:-${MODULE_DIR}/workspaces/workspaces.json}"
+SOURCE_FILE="${NIRI_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
 SHORTCUTS_OUT="${NIRI_WORKSPACE_SHORTCUTS_OUT:-${MODULE_DIR}/dotfiles/niri/generated/workspace-shortcuts.kdl}"
 RULES_OUT="${NIRI_WORKSPACE_RULES_OUT:-${MODULE_DIR}/dotfiles/niri/generated/workspace-rules.kdl}"
 RUNTIME_DIR="${NIRI_RUNTIME_DIR:-}"
@@ -17,7 +17,7 @@ usage() {
 Usage: render-workspace-assets.sh [--check] [--runtime-dir DIR]
                                  [--stdout shortcuts|rules|runtime-rules|runtime-here]
 
-Render generated Niri workspace assets from modules/niri/workspaces/workspaces.json.
+Render generated Niri workspace assets from shared/wm/workspaces.json.
 EOF
 }
 
@@ -30,7 +30,7 @@ require_jq() {
 
 emit_shortcuts() {
   cat <<'EOF'
-// Generated from modules/niri/workspaces/workspaces.json.
+// Generated from shared/wm/workspaces.json.
 // Edit the source workspace map instead of hand-editing these shortcuts.
 binds {
 // BEGIN OSC_NIRI_WORKSPACE_SHORTCUTS
@@ -72,7 +72,7 @@ EOF
 
 emit_rules() {
   cat <<'EOF'
-// Generated from modules/niri/workspaces/workspaces.json.
+// Generated from shared/wm/workspaces.json.
 // Edit the source workspace map instead of hand-editing these rules.
 // BEGIN OSC_NIRI_WORKSPACE_RULES
 // Default workspace placements by application metadata.
@@ -111,7 +111,7 @@ EOF
 
 emit_runtime_rules() {
   cat <<'EOF'
-# Generated from modules/niri/workspaces/workspaces.json.
+# Generated from shared/wm/workspaces.json.
 # Format: APP_ID_REGEX<TAB>WORKSPACE<TAB>TITLE_REGEX
 EOF
 
@@ -136,7 +136,7 @@ EOF
 
 emit_runtime_here() {
   cat <<'EOF'
-# Generated from modules/niri/workspaces/workspaces.json.
+# Generated from shared/wm/workspaces.json.
 # Format: WORKSPACE<TAB>NAME<TAB>HERE_LABEL<TAB>HERE_TARGET<TAB>FOCUS_REGEX<TAB>INCLUDE_IN_ALL
 EOF
 
