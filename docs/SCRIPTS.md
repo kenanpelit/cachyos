@@ -290,6 +290,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-arrange`
+**Description:** Profile-aware initial tag arrangement for MangoWM.
+
+**Usage:** `mango-arrange`
+
+---
+
 ### 📂 `mango-bootstrap`
 **Description:** Early MangoWM bootstrap stage.
 
