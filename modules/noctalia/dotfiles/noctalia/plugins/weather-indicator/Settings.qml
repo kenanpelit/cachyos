@@ -24,8 +24,8 @@ ColumnLayout {
   }
 
   NColorChoice {
-    label: pluginApi?.tr("settings.customColor.label") || "customColor"
-    description: pluginApi?.tr("settings.customColor.desc") || "Choose what color you would like the icon and text to be."
+    label: pluginApi?.tr("settings.customColor.label")
+    description: pluginApi?.tr("settings.customColor.desc")
     currentKey: root.customColor
     onSelected: key => {
                   root.customColor = key;
@@ -34,8 +34,8 @@ ColumnLayout {
 
   NToggle {
     id: toggleIcon
-    label: pluginApi?.tr("settings.showConditionIcon.label") || "showConditionIcon"
-    description: pluginApi?.tr("settings.showConditionIcon.desc") || "Show the condition icon"
+    label: pluginApi?.tr("settings.showConditionIcon.label")
+    description: pluginApi?.tr("settings.showConditionIcon.desc")
     checked: root.showConditionIcon
     onToggled: checked => {
       root.showConditionIcon = checked;
@@ -46,8 +46,8 @@ ColumnLayout {
 
   NToggle {
     id: toggleTempText
-    label: pluginApi?.tr("settings.showTempValue.label") || "showTempValue"
-    description: pluginApi?.tr("settings.showTempValue.desc") || "Show the temperature"
+    label: pluginApi?.tr("settings.showTempValue.label")
+    description: pluginApi?.tr("settings.showTempValue.desc")
     checked: root.showTempValue
     onToggled: checked => {
       root.showTempValue = checked;
@@ -58,8 +58,8 @@ ColumnLayout {
 
   NToggle {
     id: toggleTempLetter
-    label: pluginApi?.tr("settings.showTempUnit.label") || "showTempUnit"
-    description: pluginApi?.tr("settings.showTempUnit.desc") || "Show temperature letter (°F or °C)"
+    label: pluginApi?.tr("settings.showTempUnit.label")
+    description: pluginApi?.tr("settings.showTempUnit.desc")
     checked: root.showTempUnit
     visible: root.showTempValue
     onToggled: checked => {
@@ -70,12 +70,12 @@ ColumnLayout {
 
   NComboBox {
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.tooltipOption.label") || "Tooltip options"
-    description: pluginApi?.tr("settings.tooltipOption.desc") || "Choose what you would like the tooltip to display."
+    label: pluginApi?.tr("settings.tooltipOption.label")
+    description: pluginApi?.tr("settings.tooltipOption.desc")
     model: [
       {
         "key": "disable",
-        "name": pluginApi?.tr("settings.mode.disable") || "Disable the Tooltip"
+        "name": pluginApi?.tr("settings.mode.disable")
       },
       {
         "key": "highlow",
@@ -83,11 +83,11 @@ ColumnLayout {
       },
       {
         "key": "sunrise",
-        "name": pluginApi?.tr("settings.mode.sunrise") || "Sunrise and Sunset times"
+        "name": pluginApi?.tr("settings.mode.sunrise")
       },
       {
         "key": "everything",
-        "name": pluginApi?.tr("settings.mode.everything") || "Show all weather information"
+        "name": pluginApi?.tr("settings.mode.everything")
       }
     ]
     currentKey: root.tooltipOption

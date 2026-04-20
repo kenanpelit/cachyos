@@ -144,12 +144,12 @@ MouseArea {
 
     model: [
       {
-        "label": pluginApi?.tr("menu.openPanel") || "Open Weather",
+        "label": pluginApi?.tr("menu.openPanel"),
         "action": "open",
         "icon": "calendar"
       },
       {
-        "label": pluginApi?.tr("menu.settings") || "Widget Settings",
+        "label": pluginApi?.tr("menu.settings"),
         "action": "settings",
         "icon": "settings"
       }
