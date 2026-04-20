@@ -18,6 +18,8 @@ NOCTALIA_PLUGIN_SOURCE_URL="https://github.com/noctalia-dev/noctalia-plugins"
 NOCTALIA_REMOVED_PLUGIN_ID="niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_WIDGET_ID="plugin:niri-auto-tile"
 NOCTALIA_REMOVED_PLUGIN_DIR="${NOCTALIA_CONFIG_DIR}/plugins/${NOCTALIA_REMOVED_PLUGIN_ID}"
+NOCTALIA_HYPR_WORKSPACE_OVERVIEW_WIDGET_JSON='{"id":"plugin:workspace-overview"}'
+NOCTALIA_HYPR_WORKSPACE_OVERVIEW_WIDGET_ANCHOR_ID="Spacer"
 NOCTALIA_MANGO_LAYOUT_WIDGET_JSON='{"defaultSettings":{"monitorOrder":[]},"id":"plugin:mangowc-layout-switcher"}'
 NOCTALIA_MANGO_LAYOUT_WIDGET_ANCHOR_ID="Spacer"
 
@@ -131,17 +133,20 @@ apply_noctalia_plugin_overrides() {
 
       if has("states") then
         set_state("states"; "niri-overview-launcher"; $enable_niri)
+        | set_state("states"; "workspace-overview"; $enable_hypr)
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
         | set_state("states"; "mangowc-layout-switcher"; $enable_mango)
       elif has("plugins") then
         set_state("plugins"; "niri-overview-launcher"; $enable_niri)
+        | set_state("plugins"; "workspace-overview"; $enable_hypr)
         | set_state("plugins"; "screen-shot-and-record"; $enable_hypr)
         | set_state("plugins"; "special-workspaces"; $enable_hypr)
         | set_state("plugins"; "mangowc-layout-switcher"; $enable_mango)
       else
         . + {states: {}}
         | set_state("states"; "niri-overview-launcher"; $enable_niri)
+        | set_state("states"; "workspace-overview"; $enable_hypr)
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
         | set_state("states"; "mangowc-layout-switcher"; $enable_mango)
@@ -156,11 +161,16 @@ apply_noctalia_plugin_overrides() {
 apply_noctalia_settings_overrides() {
   local session_name="${1:-}"
   local tmp
+  local enable_hypr_overview_widget="false"
   local enable_mango_widget="false"
 
   command -v jq >/dev/null 2>&1 || return 0
   ensure_noctalia_settings_state
   [[ -f "${NOCTALIA_SETTINGS_STATE}" ]] || return 0
+
+  if [[ "${session_name}" == "hyprland" ]]; then
+    enable_hypr_overview_widget="true"
+  fi
 
   if [[ "${session_name}" == "mango" ]]; then
     enable_mango_widget="true"
@@ -168,6 +178,9 @@ apply_noctalia_settings_overrides() {
 
   tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-settings.XXXXXX")"
   if jq \
+    --argjson enable_hypr_overview_widget "${enable_hypr_overview_widget}" \
+    --argjson hypr_overview_widget "${NOCTALIA_HYPR_WORKSPACE_OVERVIEW_WIDGET_JSON}" \
+    --arg hypr_overview_widget_anchor_id "${NOCTALIA_HYPR_WORKSPACE_OVERVIEW_WIDGET_ANCHOR_ID}" \
     --argjson enable_mango_widget "${enable_mango_widget}" \
     --argjson mango_widget "${NOCTALIA_MANGO_LAYOUT_WIDGET_JSON}" \
     --arg mango_widget_anchor_id "${NOCTALIA_MANGO_LAYOUT_WIDGET_ANCHOR_ID}" \
@@ -202,7 +215,9 @@ apply_noctalia_settings_overrides() {
 
     .general.enableBlurBehind = false
     | .wallpaper.overviewBlur = 0
+    | remove_widget("plugin:workspace-overview")
     | remove_widget("plugin:mangowc-layout-switcher")
+    | if $enable_hypr_overview_widget then ensure_widget_after($hypr_overview_widget; $hypr_overview_widget_anchor_id) else . end
     | if $enable_mango_widget then ensure_widget_after($mango_widget; $mango_widget_anchor_id) else . end
   ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
     replace_file_if_changed "${tmp}" "${NOCTALIA_SETTINGS_STATE}" || true
