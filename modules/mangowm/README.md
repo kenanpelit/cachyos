@@ -97,12 +97,12 @@ The important consequence is:
   Owns the global scroller-biased layout policy, including width presets and
   centering behavior.
 - [dotfiles/mango/conf.d/30-window-rules.conf](./dotfiles/mango/conf.d/30-window-rules.conf)
-  Indexes the hand-maintained app/window exceptions under
-  `conf.d/window-rules/` so portals, dialogs, utilities, and media rules stay
-  reviewable as separate layers.
+  Owns the hand-maintained app/window exceptions directly in one file so
+  portals, dialogs, utilities, and media rules stay easy to scan at Mango's
+  current size.
 - [dotfiles/mango/conf.d/40-layer-rules.conf](./dotfiles/mango/conf.d/40-layer-rules.conf)
-  Indexes the layer-shell rules under `conf.d/layer-rules/` for capture,
-  launcher, shell-surface, and notification-specific behavior.
+  Owns the layer-shell rules directly in one file for capture, launcher,
+  shell-surface, and notification-specific behavior.
 - [dotfiles/mango/conf.d/50-binds.conf](./dotfiles/mango/conf.d/50-binds.conf)
   Owns the core Mango keybind layer. It is now explicitly split into
   `keymode=common`, `keymode=default`, `keymode=layout`, and
