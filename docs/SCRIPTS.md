@@ -297,6 +297,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-blueman-applet`
+**Description:** Wayland-safe Blueman applet wrapper for Mango sessions.
+
+**Usage:** `mango-blueman-applet`
+
+---
+
 ### 📂 `mango-bootstrap`
 **Description:** Early MangoWM bootstrap stage.
 
