@@ -1,5 +1,30 @@
 # Clipper Plugin - Comprehensive Changelog
 
+## Version 2.4.0 (2026-04-20)
+
+### Live-Preview Settings, Panel Size Controls, i18n Cleanup
+
+**Settings live-preview with revert-on-cancel:**
+- All settings changes apply immediately as a live preview via `_applyPreview()`
+- Snapshot taken on `Component.onCompleted`; reverted on `Component.onDestruction` if user cancels (Apply not clicked)
+- `saveSettings()` sets `_applied = true` to suppress revert
+
+**New panel size controls (Appearance tab):**
+- `NSpinBox` for panel width (400–3840 px, step 50) — hidden in fullscreen mode
+- `NSpinBox` for panel height (0–2160 px, step 50, 0 = auto) — hidden in fullscreen mode
+- `Panel.qml` now reads `panelWidth`/`panelHeight` from settings instead of hardcoded 1450
+
+**Hide Panel Background gating:**
+- "Hide Panel Background" toggle and its divider are now hidden when NoteCards are enabled
+
+**i18n cleanup:**
+- Removed all `|| "fallback"` suffixes from `pluginApi?.tr()` calls across all 11 QML files
+- Added 4 new translation keys (`panel-width`, `panel-width-desc`, `panel-height`, `panel-height-desc`) to all 17 language files
+
+**manifest.json:**
+- Version bumped to `2.4.0`
+- Added `defaultSettings`: `fullscreenMode`, `hidePanelBackground`, `autoPaste`, `autoPasteOnRightClick`, `autoPasteDelay`, `panelWidth`, `panelHeight`, `cardColors`, `customColors`
+
 ## Version 1.4.0 (2026-02-04)
 
 ### NoteCards / Sticky Notes Feature 🎉

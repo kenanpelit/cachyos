@@ -1,6 +1,19 @@
 {
   "cheatsheetData": [
     {
+      "title": "Modes",
+      "binds": [
+        {
+          "keys": "Super + S",
+          "desc": "Enter Layout Mode"
+        },
+        {
+          "keys": "Super + Alt + M",
+          "desc": "Enter Monitor Mode"
+        }
+      ]
+    },
+    {
       "title": "Workspaces",
       "binds": [
         {
@@ -321,8 +334,97 @@
       ]
     },
     {
+      "title": "Layout Mode",
+      "binds": [
+        {
+          "keys": "H",
+          "desc": "Adjust Master Width -0.05"
+        },
+        {
+          "keys": "L",
+          "desc": "Adjust Master Width +0.05"
+        },
+        {
+          "keys": "J",
+          "desc": "Adjust Master Count -1"
+        },
+        {
+          "keys": "K",
+          "desc": "Adjust Master Count +1"
+        },
+        {
+          "keys": "R",
+          "desc": "Next Proportion Preset"
+        },
+        {
+          "keys": "Shift + R",
+          "desc": "Set Proportion 0.500"
+        },
+        {
+          "keys": "E",
+          "desc": "Set Proportion 1.0"
+        },
+        {
+          "keys": "T",
+          "desc": "Layout: Tile"
+        },
+        {
+          "keys": "V",
+          "desc": "Layout: Vertical Grid"
+        },
+        {
+          "keys": "C",
+          "desc": "Layout: Center Tile"
+        },
+        {
+          "keys": "X",
+          "desc": "Layout: Scroller"
+        },
+        {
+          "keys": "W",
+          "desc": "Next Layout"
+        },
+        {
+          "keys": "G",
+          "desc": "Toggle Gaps"
+        },
+        {
+          "keys": "0",
+          "desc": "Resize Window 960x540"
+        },
+        {
+          "keys": "Shift + 0",
+          "desc": "Resize Window 1280x720"
+        },
+        {
+          "keys": "Ctrl + 0",
+          "desc": "Resize Window 1920x1080"
+        },
+        {
+          "keys": "ESC",
+          "desc": "Return to Default Mode"
+        },
+        {
+          "keys": "ENTER",
+          "desc": "Return to Default Mode"
+        }
+      ]
+    },
+    {
       "title": "Noctalia",
       "binds": [
+        {
+          "keys": "Super + Alt + /",
+          "desc": "Keybind Cheatsheet"
+        },
+        {
+          "keys": "Super + F1",
+          "desc": "Keybind Cheatsheet"
+        },
+        {
+          "keys": "Alt + F1",
+          "desc": "Keybind Cheatsheet"
+        },
         {
           "keys": "Super + SPACE",
           "desc": "Launcher"
@@ -392,11 +494,11 @@
           "desc": "Bar Auto-Hide"
         },
         {
-          "keys": "Super + DELETE",
+          "keys": "Super + DEL",
           "desc": "Session Menu"
         },
         {
-          "keys": "Super + Shift + DELETE",
+          "keys": "Super + Shift + DEL",
           "desc": "Idle Inhibitor"
         },
         {
@@ -426,18 +528,6 @@
         {
           "keys": "Super + Shift + N",
           "desc": "Toggle Night Light"
-        },
-        {
-          "keys": "Super + Alt + /",
-          "desc": "Keybind Cheatsheet"
-        },
-        {
-          "keys": "Super + F1",
-          "desc": "Keybind Cheatsheet"
-        },
-        {
-          "keys": "Alt + F1",
-          "desc": "Keybind Cheatsheet"
         },
         {
           "keys": "Super + Shift + Ctrl + V",
@@ -518,7 +608,7 @@
           "desc": "Move Window to Next Monitor"
         },
         {
-          "keys": "Super + ESCAPE",
+          "keys": "Super + ESC",
           "desc": "Move Window to Next Monitor"
         },
         {
@@ -540,8 +630,77 @@
       ]
     },
     {
+      "title": "Monitor Mode",
+      "binds": [
+        {
+          "keys": "H",
+          "desc": "Focus Monitor Left"
+        },
+        {
+          "keys": "L",
+          "desc": "Focus Monitor Right"
+        },
+        {
+          "keys": "K",
+          "desc": "Focus Monitor Up"
+        },
+        {
+          "keys": "J",
+          "desc": "Focus Monitor Down"
+        },
+        {
+          "keys": "Shift + H",
+          "desc": "Move to Monitor Left"
+        },
+        {
+          "keys": "Shift + L",
+          "desc": "Move to Monitor Right"
+        },
+        {
+          "keys": "Shift + K",
+          "desc": "Move to Monitor Up"
+        },
+        {
+          "keys": "Shift + J",
+          "desc": "Move to Monitor Down"
+        },
+        {
+          "keys": "A",
+          "desc": "Focus Next Monitor"
+        },
+        {
+          "keys": "M",
+          "desc": "Move Window to Next Monitor"
+        },
+        {
+          "keys": "ESC",
+          "desc": "Return to Default Mode"
+        },
+        {
+          "keys": "ENTER",
+          "desc": "Return to Default Mode"
+        }
+      ]
+    },
+    {
       "title": "Media",
       "binds": [
+        {
+          "keys": "Vol Up",
+          "desc": "Volume Up"
+        },
+        {
+          "keys": "Vol Down",
+          "desc": "Volume Down"
+        },
+        {
+          "keys": "Mute",
+          "desc": "Mute Output"
+        },
+        {
+          "keys": "Mic Mute",
+          "desc": "Mute Input"
+        },
         {
           "keys": "Alt + A",
           "desc": "Switch Audio Output"
@@ -597,32 +756,12 @@
         {
           "keys": "Ctrl + Alt + M",
           "desc": "Wiremix"
-        },
-        {
-          "keys": "Vol Up",
-          "desc": "Volume Up"
-        },
-        {
-          "keys": "Vol Down",
-          "desc": "Volume Down"
-        },
-        {
-          "keys": "Mute",
-          "desc": "Mute Output"
-        },
-        {
-          "keys": "Mic Mute",
-          "desc": "Mute Input"
         }
       ]
     },
     {
       "title": "Screenshots",
       "binds": [
-        {
-          "keys": "Super + Shift + C",
-          "desc": "Color Picker"
-        },
         {
           "keys": "PrtSc",
           "desc": "Screenshot Recorder"
@@ -638,6 +777,10 @@
         {
           "keys": "Alt + PrtSc",
           "desc": "Screenshot Window"
+        },
+        {
+          "keys": "Super + Shift + C",
+          "desc": "Color Picker"
         }
       ]
     },
@@ -649,28 +792,12 @@
           "desc": "Reload Mango Config"
         },
         {
-          "keys": "Ctrl + Alt + BACKSPACE",
-          "desc": "Stop UWSM Session"
-        },
-        {
-          "keys": "Ctrl + Alt + P",
-          "desc": "Cycle Power Profile"
-        },
-        {
-          "keys": "F10",
-          "desc": "Bluetooth Toggle"
-        },
-        {
-          "keys": "Alt + F12",
-          "desc": "VPN Toggle"
-        },
-        {
-          "keys": "Super + Alt + F12",
-          "desc": "VPN Slot Recycle"
-        },
-        {
           "keys": "Super + Ctrl + Alt + R",
           "desc": "Reload Mango Config"
+        },
+        {
+          "keys": "Ctrl + Alt + BACKSPACE",
+          "desc": "Stop UWSM Session"
         },
         {
           "keys": "Super + Ctrl + Alt + S",
@@ -691,6 +818,22 @@
         {
           "keys": "Bright Down",
           "desc": "Brightness Down"
+        },
+        {
+          "keys": "Ctrl + Alt + P",
+          "desc": "Cycle Power Profile"
+        },
+        {
+          "keys": "F10",
+          "desc": "Bluetooth Toggle"
+        },
+        {
+          "keys": "Alt + F12",
+          "desc": "VPN Toggle"
+        },
+        {
+          "keys": "Super + Alt + F12",
+          "desc": "VPN Slot Recycle"
         }
       ]
     }

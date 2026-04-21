@@ -93,13 +93,16 @@ workspaces_by_id = {
 }
 
 category_order = [
+    "Modes",
     "Workspaces",
     "Navigation",
     "Window Management",
     "Layout",
+    "Layout Mode",
     "Noctalia",
     "Applications",
     "Monitors",
+    "Monitor Mode",
     "Media",
     "Screenshots",
     "System",
@@ -126,6 +129,8 @@ def display_key(key: str) -> str:
         "space": "SPACE",
         "Return": "ENTER",
         "BackSpace": "BACKSPACE",
+        "Escape": "ESC",
+        "Delete": "DEL",
         "Page_Up": "PRIOR",
         "Page_Down": "NEXT",
         "shift_l": "SHIFT",
@@ -133,10 +138,27 @@ def display_key(key: str) -> str:
     return code_map.get(key, key)
 
 
-def add_entry(category: str, mods: str, key: str, description: str) -> None:
+def normalize_mode(mode: str) -> str:
+    normalized = (mode or "default").strip().lower()
+    return normalized or "default"
+
+
+def format_mode_name(mode: str) -> str:
+    return mode.replace("_", " ").title()
+
+
+def scoped_category(category: str, mode: str) -> str:
+    normalized_mode = normalize_mode(mode)
+    if normalized_mode in {"default", "common"}:
+        return category
+    mode_category = f"{format_mode_name(normalized_mode)} Mode"
+    return mode_category if mode_category in sections else "Other"
+
+
+def add_entry(category: str, mods: str, key: str, description: str, mode: str = "default") -> None:
     category = category if category in sections else "Other"
     rendered_key = display_key(key)
-    normalized = (mods.upper(), rendered_key.upper())
+    normalized = (normalize_mode(mode).upper(), mods.upper(), rendered_key.upper())
     if normalized in seen_entries:
         return
     seen_entries.add(normalized)
@@ -283,10 +305,19 @@ def label_for_action(action, args):
         return "Layout", "Next Proportion Preset"
     if action == "set_proportion":
         return "Layout", f"Set Proportion {args[0]}"
+    if action == "setmfact":
+        return "Layout", f"Adjust Master Width {args[0]}"
+    if action == "incnmaster":
+        return "Layout", f"Adjust Master Count {args[0]}"
     if action == "setlayout":
         return "Layout", f"Layout: {args[0].replace('_', ' ').title()}"
     if action == "switch_layout":
         return "Layout", "Next Layout"
+    if action == "setkeymode":
+        target = args[0].replace("_", " ").title() if args else "Default"
+        if args and args[0] == "default":
+            return "Modes", "Return to Default Mode"
+        return "Modes", f"Enter {target} Mode"
     if action == "togglegaps":
         return "Layout", "Toggle Gaps"
     if action == "resizewin":
@@ -318,9 +349,15 @@ def label_for_action(action, args):
     return "Other", action.replace("_", " ").title()
 
 
+current_mode = "default"
+
 for raw_line in binds_path.read_text().splitlines():
     line = raw_line.strip()
     if not line or line.startswith("#") or "=" not in line:
+        continue
+
+    if line.startswith("keymode="):
+        current_mode = normalize_mode(line.split("=", 1)[1])
         continue
 
     kind, payload = line.split("=", 1)
@@ -336,7 +373,7 @@ for raw_line in binds_path.read_text().splitlines():
     action = parts[2]
     args = parts[3:]
     category, description = label_for_action(action, args)
-    add_entry(category, mods, key, description)
+    add_entry(scoped_category(category, current_mode), mods, key, description, current_mode)
 
 
 lines = [

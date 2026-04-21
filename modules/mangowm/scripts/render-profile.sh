@@ -72,6 +72,7 @@ import hashlib
 import json
 import re
 import sys
+from collections import OrderedDict
 from pathlib import Path
 
 import yaml
@@ -89,6 +90,21 @@ monitors = manifest.get("monitors", [])
 profiles = manifest.get("profiles", {})
 workspaces = workspace_data.get("workspaces", [])
 profile = profiles.get(profile_name)
+
+SUPPORTED_LAYOUTS = {
+    "tile",
+    "scroller",
+    "monocle",
+    "grid",
+    "deck",
+    "center_tile",
+    "vertical_tile",
+    "right_tile",
+    "vertical_scroller",
+    "vertical_grid",
+    "vertical_deck",
+    "tgmix",
+}
 
 if profile is None:
     raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
@@ -135,8 +151,88 @@ def monitor_name_for_mango(monitor):
     return monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
 
 
-def layout_name_for_workspace(workspace):
-    return "scroller"
+def normalize_binary(value, field_name: str) -> int:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int) and value in (0, 1):
+        return value
+    raise SystemExit(f"{field_name} must be 0/1 or boolean, got {value!r}")
+
+
+def normalize_layout_name(value, workspace_id: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise SystemExit(f"workspace {workspace_id} layout.mango.layoutName must be a non-empty string")
+    normalized = value.strip()
+    if normalized not in SUPPORTED_LAYOUTS:
+        raise SystemExit(
+            f"workspace {workspace_id} layout.mango.layoutName must be one of "
+            f"{', '.join(sorted(SUPPORTED_LAYOUTS))}; got {normalized!r}"
+        )
+    return normalized
+
+
+def normalize_nmaster(value, workspace_id: str) -> int:
+    if not isinstance(value, int):
+        raise SystemExit(f"workspace {workspace_id} layout.mango.nmaster must be an integer")
+    if not 0 <= value <= 99:
+        raise SystemExit(f"workspace {workspace_id} layout.mango.nmaster must be between 0 and 99")
+    return value
+
+
+def normalize_mfact(value, workspace_id: str) -> str:
+    if not isinstance(value, (int, float)):
+        raise SystemExit(f"workspace {workspace_id} layout.mango.mfact must be numeric")
+    numeric = float(value)
+    if not 0.1 <= numeric <= 0.9:
+        raise SystemExit(f"workspace {workspace_id} layout.mango.mfact must be between 0.1 and 0.9")
+    return f"{numeric:.2f}".rstrip("0").rstrip(".")
+
+
+def mango_layout_config_for_workspace(workspace):
+    workspace_id = str(workspace["id"])
+    layout = workspace.get("layout", {})
+    if layout is None:
+        layout = {}
+    if isinstance(layout, list):
+        mango_layout = {}
+    elif isinstance(layout, dict):
+        mango_layout = layout.get("mango", {})
+        if mango_layout is None:
+            mango_layout = {}
+        if not isinstance(mango_layout, dict):
+            raise SystemExit(f"workspace {workspace_id} layout.mango must be an object")
+    else:
+        raise SystemExit(f"workspace {workspace_id} layout must be an object or list")
+
+    fields = OrderedDict()
+    fields["no_hide"] = str(
+        normalize_binary(mango_layout.get("noHide", 1), f"workspace {workspace_id} layout.mango.noHide")
+    )
+    fields["layout_name"] = normalize_layout_name(
+        mango_layout.get("layoutName", "scroller"),
+        workspace_id,
+    )
+
+    if "openAsFloating" in mango_layout:
+        fields["open_as_floating"] = str(
+            normalize_binary(
+                mango_layout["openAsFloating"],
+                f"workspace {workspace_id} layout.mango.openAsFloating",
+            )
+        )
+    if "noRenderBorder" in mango_layout:
+        fields["no_render_border"] = str(
+            normalize_binary(
+                mango_layout["noRenderBorder"],
+                f"workspace {workspace_id} layout.mango.noRenderBorder",
+            )
+        )
+    if "nmaster" in mango_layout:
+        fields["nmaster"] = str(normalize_nmaster(mango_layout["nmaster"], workspace_id))
+    if "mfact" in mango_layout:
+        fields["mfact"] = normalize_mfact(mango_layout["mfact"], workspace_id)
+
+    return fields
 
 
 lines = [
@@ -174,19 +270,36 @@ for output in profile.get("outputs", []):
 lines.append("")
 lines.append("# Tag placement for the selected profile.")
 
+seen_workspaces = set()
 for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(item["id"])):
     workspace_id = str(workspace_ref["id"])
-    workspace = workspaces_by_id[workspace_id]
-    monitor = monitors_by_id[workspace_ref["monitor"]]
+    if workspace_id in seen_workspaces:
+        raise SystemExit(f"Duplicate workspace mapping in profile '{profile_name}': {workspace_id}")
+    seen_workspaces.add(workspace_id)
+
+    workspace = workspaces_by_id.get(workspace_id)
+    if workspace is None:
+        raise SystemExit(f"Unknown workspace id '{workspace_id}' in profile '{profile_name}'")
+
+    monitor = monitors_by_id.get(workspace_ref["monitor"])
+    if monitor is None:
+        raise SystemExit(
+            f"Unknown monitor '{workspace_ref['monitor']}' in workspace for profile '{profile_name}'"
+        )
+
     monitor_name = monitor_name_for_mango(monitor)
-    layout_name = layout_name_for_workspace(workspace)
-    lines.append(f"# Tag {workspace_id}: {workspace['name']}")
-    lines.append(
-        f"tagrule=id:{workspace_id},monitor_name:{monitor_name},no_hide:1,layout_name:{layout_name}"
+    tag_fields = OrderedDict(
+        [
+            ("id", workspace_id),
+            ("monitor_name", monitor_name),
+        ]
     )
+    tag_fields.update(mango_layout_config_for_workspace(workspace))
+    lines.append(f"# Tag {workspace_id}: {workspace['name']}")
+    lines.append("tagrule=" + ",".join(f"{key}:{value}" for key, value in tag_fields.items()))
 
 lines.append("")
-out_path.write_text("\n".join(lines))
+out_path.write_text("\n".join(lines).rstrip() + "\n")
 
 bind_lines = [
     "# Generated from shared/wm/monitors.yaml and shared/wm/workspaces.json.",

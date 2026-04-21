@@ -339,6 +339,24 @@
             "successIcon": "network"
           },
           "id": "plugin:6ee06e:nip"
+        },
+        {
+          "defaultSettings": {
+            "autoPaste": false,
+            "autoPasteDelay": 300,
+            "autoPasteOnRightClick": false,
+            "cardColors": {},
+            "customColors": {},
+            "enableTodoIntegration": false,
+            "fullscreenMode": false,
+            "hidePanelBackground": false,
+            "notecardsEnabled": true,
+            "panelHeight": 0,
+            "panelWidth": 1450,
+            "pincardsEnabled": true,
+            "showCloseButton": true
+          },
+          "id": "plugin:clipper"
         }
       ]
     }

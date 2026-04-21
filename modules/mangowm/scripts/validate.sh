@@ -36,12 +36,19 @@ command -v python3 >/dev/null 2>&1 || die "python3 is required"
 
 MANGO_RUNTIME_DIR="${MANGO_RUNTIME_DIR:-${USER_HOME}/.config/mango/runtime}"
 CONFIG_FILE="${MODULE_DIR}/dotfiles/mango/config.conf"
+PROFILE_MANIFEST="${MODULE_DIR}/profiles/profile.env"
 WORKSPACE_SOURCE_FILE="${REPO_ROOT}/shared/wm/workspaces.json"
+SHARED_MONITOR_MANIFEST="${REPO_ROOT}/shared/wm/monitors.yaml"
 SHARED_MONITOR_ASSETS_SCRIPT="${REPO_ROOT}/shared/wm/render-monitor-assets.sh"
 RENDER_THEME_SCRIPT="${MODULE_DIR}/scripts/render-theme.sh"
 RENDER_PROFILE_SCRIPT="${MODULE_DIR}/scripts/render-profile.sh"
 RENDER_WORKSPACE_ASSETS_SCRIPT="${MODULE_DIR}/scripts/render-workspace-assets.sh"
 RENDER_KEYBIND_CHEATSHEET_SCRIPT="${MODULE_DIR}/scripts/render-keybind-cheatsheet.sh"
+
+# shellcheck source=/dev/null
+source "${PROFILE_MANIFEST}"
+
+: "${MANGO_MONITOR_PROFILE:=desk}"
 
 log_info "Validating MangoWM configuration..."
 
@@ -54,6 +61,120 @@ fi
 log_info "Validating shared workspace manifest..."
 jq empty "${WORKSPACE_SOURCE_FILE}" >/dev/null
 log_success "Shared workspace manifest is valid JSON!"
+
+log_info "Validating shared workspace manifest semantics..."
+python3 - "${WORKSPACE_SOURCE_FILE}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+SUPPORTED_LAYOUTS = {
+    "tile",
+    "scroller",
+    "monocle",
+    "grid",
+    "deck",
+    "center_tile",
+    "vertical_tile",
+    "right_tile",
+    "vertical_scroller",
+    "vertical_grid",
+    "vertical_deck",
+    "tgmix",
+}
+ALLOWED_MANGO_KEYS = {
+    "layoutName",
+    "mfact",
+    "nmaster",
+    "noHide",
+    "openAsFloating",
+    "noRenderBorder",
+}
+
+workspace_file = Path(sys.argv[1])
+data = json.loads(workspace_file.read_text())
+workspaces = data.get("workspaces")
+if not isinstance(workspaces, list):
+    raise SystemExit("shared/wm/workspaces.json must contain a top-level 'workspaces' array")
+
+seen_ids = set()
+errors = []
+
+
+def normalize_binary(value, field_name):
+    if isinstance(value, bool):
+        return
+    if isinstance(value, int) and value in (0, 1):
+        return
+    errors.append(f"{field_name} must be 0/1 or boolean, got {value!r}")
+
+
+for index, workspace in enumerate(workspaces, start=1):
+    workspace_id = str(workspace.get("id", ""))
+    if not workspace_id:
+        errors.append(f"workspace[{index}] is missing id")
+        continue
+    if workspace_id in seen_ids:
+        errors.append(f"duplicate workspace id {workspace_id}")
+    seen_ids.add(workspace_id)
+
+    layout = workspace.get("layout")
+    if layout is None:
+        continue
+
+    if isinstance(layout, list):
+        if not all(isinstance(line, str) for line in layout):
+            errors.append(f"workspace {workspace_id} layout list must only contain strings")
+        continue
+
+    if not isinstance(layout, dict):
+        errors.append(f"workspace {workspace_id} layout must be an object or list")
+        continue
+
+    layout_lines = layout.get("lines", [])
+    if layout_lines is None:
+        layout_lines = []
+    if not isinstance(layout_lines, list) or not all(isinstance(line, str) for line in layout_lines):
+        errors.append(f"workspace {workspace_id} layout.lines must be an array of strings")
+
+    mango = layout.get("mango")
+    if mango is None:
+        continue
+    if not isinstance(mango, dict):
+        errors.append(f"workspace {workspace_id} layout.mango must be an object")
+        continue
+
+    unknown_keys = sorted(set(mango) - ALLOWED_MANGO_KEYS)
+    if unknown_keys:
+        errors.append(
+            f"workspace {workspace_id} layout.mango has unknown keys: {', '.join(unknown_keys)}"
+        )
+
+    if "layoutName" in mango:
+        value = mango["layoutName"]
+        if not isinstance(value, str) or value not in SUPPORTED_LAYOUTS:
+            errors.append(
+                f"workspace {workspace_id} layout.mango.layoutName must be one of "
+                f"{', '.join(sorted(SUPPORTED_LAYOUTS))}"
+            )
+    if "mfact" in mango:
+        value = mango["mfact"]
+        if not isinstance(value, (int, float)) or not 0.1 <= float(value) <= 0.9:
+            errors.append(f"workspace {workspace_id} layout.mango.mfact must be between 0.1 and 0.9")
+    if "nmaster" in mango:
+        value = mango["nmaster"]
+        if not isinstance(value, int) or not 0 <= value <= 99:
+            errors.append(f"workspace {workspace_id} layout.mango.nmaster must be an integer between 0 and 99")
+    for field in ("noHide", "openAsFloating", "noRenderBorder"):
+        if field in mango:
+            normalize_binary(mango[field], f"workspace {workspace_id} layout.mango.{field}")
+
+if errors:
+    for error in errors:
+        print(error, file=sys.stderr)
+    raise SystemExit(1)
+PY
+log_success "Shared workspace manifest semantics are valid!"
 
 log_info "Validating generated Mango theme..."
 "${RENDER_THEME_SCRIPT}" --check >/dev/null
@@ -83,10 +204,17 @@ from pathlib import Path
 binds_file = Path(sys.argv[1])
 seen = {}
 duplicates = []
+declared_modes = {"default"}
+keymode_targets = []
+current_mode = "default"
 
 for lineno, raw_line in enumerate(binds_file.read_text().splitlines(), start=1):
     line = raw_line.strip()
     if not line or line.startswith("#") or "=" not in line:
+        continue
+    if line.startswith("keymode="):
+        current_mode = line.split("=", 1)[1].strip().lower() or "default"
+        declared_modes.add(current_mode)
         continue
     kind, payload = line.split("=", 1)
     if kind not in {"bind", "binds"}:
@@ -94,18 +222,30 @@ for lineno, raw_line in enumerate(binds_file.read_text().splitlines(), start=1):
     parts = [part.strip() for part in payload.split(",")]
     if len(parts) < 3:
         continue
-    key = (parts[0].upper(), parts[1].upper())
+    key = (current_mode.upper(), parts[0].upper(), parts[1].upper())
     if key in seen:
         duplicates.append((key, seen[key], lineno))
     else:
         seen[key] = lineno
+    if parts[2] == "setkeymode" and len(parts) >= 4:
+        keymode_targets.append((parts[3].strip().lower(), lineno))
 
 if duplicates:
-    for (mods, key), first, second in duplicates:
+    for (mode, mods, key), first, second in duplicates:
         print(
-            f"Duplicate Mango bind for {mods},{key} at lines {first} and {second}",
+            f"Duplicate Mango bind for mode={mode} {mods},{key} at lines {first} and {second}",
             file=sys.stderr,
         )
+    raise SystemExit(1)
+
+unknown_targets = [
+    (target, lineno)
+    for target, lineno in keymode_targets
+    if target and target not in declared_modes and target not in {"default", "common"}
+]
+if unknown_targets:
+    for target, lineno in unknown_targets:
+        print(f"Unknown Mango keymode target {target!r} at line {lineno}", file=sys.stderr)
     raise SystemExit(1)
 PY
 log_success "No duplicate Mango binds detected!"
@@ -127,6 +267,101 @@ ln -s "${tmp_runtime}" "${tmp_mango_dir}/runtime"
 "${RENDER_PROFILE_SCRIPT}" --out-dir "${tmp_runtime}" >/dev/null
 "${RENDER_WORKSPACE_ASSETS_SCRIPT}" --runtime-dir "${tmp_runtime}" >/dev/null
 "${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --runtime-dir "${tmp_runtime}" >/dev/null
+
+log_info "Validating Mango tagrule contract..."
+python3 - "${WORKSPACE_SOURCE_FILE}" "${SHARED_MONITOR_MANIFEST}" "${MANGO_MONITOR_PROFILE}" "${tmp_runtime}/profile.conf" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+import yaml
+
+workspace_file = Path(sys.argv[1])
+monitor_file = Path(sys.argv[2])
+profile_name = sys.argv[3]
+profile_file = Path(sys.argv[4])
+
+workspace_data = json.loads(workspace_file.read_text())
+monitor_data = yaml.safe_load(monitor_file.read_text())
+
+workspaces = {
+    str(workspace["id"]): workspace for workspace in workspace_data.get("workspaces", [])
+}
+monitors = {
+    monitor["id"]: monitor for monitor in monitor_data.get("monitors", [])
+}
+profile = monitor_data.get("profiles", {}).get(profile_name)
+if profile is None:
+    raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
+
+
+def normalize_binary(value):
+    if isinstance(value, bool):
+        return str(int(value))
+    return str(value)
+
+
+def monitor_name_for_mango(monitor):
+    return monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
+
+
+expected = {}
+for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(item["id"])):
+    workspace_id = str(workspace_ref["id"])
+    workspace = workspaces[workspace_id]
+    monitor = monitors[workspace_ref["monitor"]]
+    layout = workspace.get("layout", {})
+    mango = layout.get("mango", {}) if isinstance(layout, dict) else {}
+    expected_fields = {
+        "id": workspace_id,
+        "monitor_name": monitor_name_for_mango(monitor),
+        "no_hide": normalize_binary(mango.get("noHide", 1)),
+        "layout_name": mango.get("layoutName", "scroller"),
+    }
+    if "openAsFloating" in mango:
+        expected_fields["open_as_floating"] = normalize_binary(mango["openAsFloating"])
+    if "noRenderBorder" in mango:
+        expected_fields["no_render_border"] = normalize_binary(mango["noRenderBorder"])
+    if "nmaster" in mango:
+        expected_fields["nmaster"] = str(mango["nmaster"])
+    if "mfact" in mango:
+        expected_fields["mfact"] = f"{float(mango['mfact']):.2f}".rstrip("0").rstrip(".")
+    expected[workspace_id] = expected_fields
+
+actual = {}
+for raw_line in profile_file.read_text().splitlines():
+    line = raw_line.strip()
+    if not line.startswith("tagrule="):
+        continue
+    fields = {}
+    for token in line[len("tagrule="):].split(","):
+        if ":" not in token:
+            continue
+        key, value = token.split(":", 1)
+        fields[key.strip()] = value.strip()
+    workspace_id = fields.get("id")
+    if workspace_id:
+        actual[workspace_id] = fields
+
+errors = []
+for workspace_id, expected_fields in expected.items():
+    actual_fields = actual.get(workspace_id)
+    if actual_fields is None:
+        errors.append(f"workspace {workspace_id} is missing from rendered profile.conf")
+        continue
+    for key, value in expected_fields.items():
+        if actual_fields.get(key) != value:
+            errors.append(
+                f"workspace {workspace_id} rendered tagrule mismatch for {key}: "
+                f"expected {value!r}, got {actual_fields.get(key)!r}"
+            )
+
+if errors:
+    for error in errors:
+        print(error, file=sys.stderr)
+    raise SystemExit(1)
+PY
+log_success "Rendered Mango tagrule contract matches workspace manifest!"
 
 log_info "Validating Mango config parse against temporary runtime..."
 mango -c "${tmp_mango_dir}/config.conf" -p >/dev/null

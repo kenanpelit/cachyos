@@ -86,7 +86,10 @@ The important consequence is:
   Owns the hand-maintained app/window exceptions that are not generated from
   the shared workspace manifest.
 - [dotfiles/mango/conf.d/50-binds.conf](./dotfiles/mango/conf.d/50-binds.conf)
-  Owns the core Mango keybind layer.
+  Owns the core Mango keybind layer. It is now explicitly split into
+  `keymode=common`, `keymode=default`, `keymode=layout`, and
+  `keymode=monitor` sections so advanced layout/monitor controls do not need
+  to live only in global chords.
 
 ## Workspace Semantics
 
@@ -104,7 +107,13 @@ That manifest can describe:
 - `routes[]`
 - `launch.commands`
 - optional `tagSilent`
-- optional `layout.lines`
+- optional `layout.lines` for the shared Niri-facing layout hints
+- optional `layout.mango.layoutName`
+- optional `layout.mango.mfact`
+- optional `layout.mango.nmaster`
+- optional `layout.mango.noHide`
+- optional `layout.mango.openAsFloating`
+- optional `layout.mango.noRenderBorder`
 
 The important Mango helpers are:
 
@@ -146,9 +155,10 @@ Core session units:
   `modules/scripts/bin`.
 - Validation includes:
   - shared monitor asset drift
-  - shared workspace manifest syntax
+  - shared workspace manifest syntax and semantic validation
   - theme/runtime drift
-  - duplicate keybind detection
+  - duplicate keybind detection with keymode awareness
+  - rendered Mango `tagrule=` contract checks against `layout.mango`
   - temporary runtime render + `mango -p` parse validation
 
 Run it directly with:
