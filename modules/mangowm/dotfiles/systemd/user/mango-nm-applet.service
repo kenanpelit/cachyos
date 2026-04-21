@@ -1,8 +1,9 @@
 [Unit]
 Description=NetworkManager applet (MangoWM)
+BindsTo=wayland-wm@mango\x2dsession.service
 Wants=mango-status-notifier-ready.service
-After=graphical-session.target mango-bootstrap.service mango-status-notifier-ready.service dbus.service
-PartOf=mango-daemons.target graphical-session.target
+After=graphical-session.target wayland-wm@mango\x2dsession.service mango-bootstrap.service mango-status-notifier-ready.service dbus.service
+PartOf=mango-daemons.target graphical-session.target wayland-wm@mango\x2dsession.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_SESSION_DESKTOP=mango
 

@@ -58,5 +58,5 @@ dotfiles:
   target: ~/.config/systemd/user/mango-post-bootstrap.service
 - source: dotfiles/systemd/user/wayland-wm@mango\x2dsession.service.d/10-session-lifecycle.conf
   target: ~/.config/systemd/user/wayland-wm@mango\x2dsession.service.d/10-session-lifecycle.conf
-post_install_hook: scripts/ensure-runtime-files.sh
+post_install_hook: scripts/install.sh
 post_hook_behavior: always

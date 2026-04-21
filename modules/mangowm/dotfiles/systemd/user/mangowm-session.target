@@ -2,7 +2,7 @@
 Description=MangoWM session (user services)
 Documentation=man:systemd.special(7)
 Wants=graphical-session.target xdg-desktop-autostart.target mango-session-env.service mango-bootstrap.service mango-audio-init.service mango-arrange.service mango-shell-ensure.service mango-daemons.target mango-post-daemons.target mango-session-ready.target
-After=graphical-session.target dbus.service
-BindsTo=graphical-session.target
-PartOf=graphical-session.target
+After=graphical-session.target wayland-wm@mango\x2dsession.service dbus.service
+BindsTo=graphical-session.target wayland-wm@mango\x2dsession.service
+PartOf=graphical-session.target wayland-wm@mango\x2dsession.service
 ConditionEnvironment=XDG_SESSION_DESKTOP=mango

@@ -7,7 +7,7 @@ MANIFEST="${MODULE_DIR}/theme/theme.env"
 THEME_OUT="${MODULE_DIR}/dotfiles/mango/generated/theme.conf"
 
 usage() {
-  cat <<'EOF'
+	cat <<'EOF'
 Usage: render-theme.sh [--check]
 
 Without arguments, regenerates the derived MangoWM theme file.
@@ -17,19 +17,19 @@ EOF
 
 mode="write"
 case "${1:-}" in
-  ""|--write)
-    ;;
-  --check)
-    mode="check"
-    ;;
-  -h|--help)
-    usage
-    exit 0
-    ;;
-  *)
-    usage >&2
-    exit 2
-    ;;
+"" | --write)
+	;;
+--check)
+	mode="check"
+	;;
+-h | --help)
+	usage
+	exit 0
+	;;
+*)
+	usage >&2
+	exit 2
+	;;
 esac
 
 # shellcheck source=/dev/null
@@ -39,8 +39,21 @@ manifest_checksum="$(sha256sum "${MANIFEST}" | awk '{print $1}')"
 tmp_theme="$(mktemp)"
 package_variant="${MANGO_PACKAGE_VARIANT:-full}"
 
+case "${package_variant}" in
+full)
+	preferred_package="mangowm-git"
+	;;
+wlonly)
+	preferred_package="mangowm-wlonly-git"
+	;;
+*)
+	echo "Unknown MANGO_PACKAGE_VARIANT: ${package_variant}" >&2
+	exit 1
+	;;
+esac
+
 cleanup() {
-  rm -f "${tmp_theme}"
+	rm -f "${tmp_theme}"
 }
 trap cleanup EXIT
 
@@ -49,11 +62,12 @@ cat >"${tmp_theme}" <<EOF
 # Update the manifest and rerun modules/mangowm/scripts/render-theme.sh.
 # Source checksum: ${manifest_checksum}
 # Package variant: ${package_variant}
+# Preferred compositor package: ${preferred_package}
 
 EOF
 
 if [[ "${package_variant}" != "wlonly" ]]; then
-cat >>"${tmp_theme}" <<EOF
+	cat >>"${tmp_theme}" <<EOF
 blur=${MANGO_BLUR}
 blur_layer=${MANGO_BLUR_LAYER}
 blur_optimized=${MANGO_BLUR_OPTIMIZED}
@@ -77,7 +91,7 @@ border_radius=${MANGO_BORDER_RADIUS}
 no_radius_when_single=${MANGO_NO_RADIUS_WHEN_SINGLE}
 EOF
 else
-cat >>"${tmp_theme}" <<'EOF'
+	cat >>"${tmp_theme}" <<'EOF'
 # wlonly build: scenefx-dependent effects are intentionally omitted.
 # Unsupported here: blur, shadows, border radius.
 EOF
@@ -132,8 +146,8 @@ overlaycolor=${MANGO_OVERLAY_COLOR}
 EOF
 
 if [[ "${mode}" == "check" ]]; then
-  diff -u "${THEME_OUT}" "${tmp_theme}"
-  exit 0
+	diff -u "${THEME_OUT}" "${tmp_theme}"
+	exit 0
 fi
 
 install -D -m 644 "${tmp_theme}" "${THEME_OUT}"

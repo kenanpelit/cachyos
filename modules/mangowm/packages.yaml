@@ -1,3 +1,8 @@
+# Generated from modules/mangowm/theme/theme.env.
+# Update the manifest and rerun modules/mangowm/scripts/render-packages.sh.
+# Source checksum: b6a93a5457169c3dfe986731044a9a2709c12b0caa7f95007a013eef858ccb8d
+# Package variant: full
+
 description: MangoWM packages
 
 packages:
@@ -6,6 +11,8 @@ packages:
   - polkit-gnome
   - network-manager-applet
   - xdg-desktop-portal-wlr
+  # portals.conf routes Secret to gnome-keyring.
+  - gnome-keyring
   - wl-clipboard
   - wl-clip-persist
   - cliphist

@@ -9,51 +9,69 @@ source "${REPO_ROOT}/modules/base/lib/core.sh"
 PROFILE_MANIFEST="${MANGO_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
 SHARED_MONITOR_MANIFEST="${MANGO_SHARED_MONITOR_MANIFEST:-${REPO_ROOT}/shared/wm/monitors.yaml}"
 WORKSPACE_MAP_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
-RUNTIME_DIR="${MANGO_RUNTIME_DIR:-${USER_HOME}/.config/mango/runtime}"
-PROFILE_OUT="${MANGO_PROFILE_OUT:-${RUNTIME_DIR}/profile.conf}"
-WORKSPACE_BINDS_OUT="${MANGO_WORKSPACE_BINDS_OUT:-${RUNTIME_DIR}/workspace-binds.conf}"
+OUTPUT_DIR="${MANGO_OUTPUT_DIR:-${MODULE_DIR}/dotfiles/mango/generated}"
+PROFILE_OUT="${MANGO_PROFILE_OUT:-${OUTPUT_DIR}/profile.conf}"
+WORKSPACE_BINDS_OUT="${MANGO_WORKSPACE_BINDS_OUT:-${OUTPUT_DIR}/workspace-binds.conf}"
 
 usage() {
-  cat <<'EOF'
+	cat <<'EOF'
 Usage: render-profile.sh [--check] [--out-dir DIR]
 
 Without arguments, renders the selected MangoWM monitor/tag profile and
-profile-aware workspace bindings into the Mango runtime directory.
+profile-aware workspace bindings into the Mango generated directory.
 With --check, verifies that the generated files match the target outputs.
 EOF
 }
 
 mode="write"
 while (($#)); do
-  case "$1" in
-    --check)
-      mode="check"
-      shift
-      ;;
-    --out-dir)
-      RUNTIME_DIR="$2"
-      PROFILE_OUT="${RUNTIME_DIR}/profile.conf"
-      WORKSPACE_BINDS_OUT="${RUNTIME_DIR}/workspace-binds.conf"
-      shift 2
-      ;;
-    --write)
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      usage >&2
-      exit 2
-      ;;
-  esac
+	case "$1" in
+	--check)
+		mode="check"
+		shift
+		;;
+	--out-dir)
+		OUTPUT_DIR="$2"
+		PROFILE_OUT="${OUTPUT_DIR}/profile.conf"
+		WORKSPACE_BINDS_OUT="${OUTPUT_DIR}/workspace-binds.conf"
+		shift 2
+		;;
+	--runtime-dir)
+		OUTPUT_DIR="$2"
+		PROFILE_OUT="${OUTPUT_DIR}/profile.conf"
+		WORKSPACE_BINDS_OUT="${OUTPUT_DIR}/workspace-binds.conf"
+		shift 2
+		;;
+	--write)
+		shift
+		;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		exit 2
+		;;
+	esac
 done
 
-[[ -r "${PROFILE_MANIFEST}" ]] || { echo "Profile manifest not found: ${PROFILE_MANIFEST}" >&2; exit 1; }
-[[ -r "${SHARED_MONITOR_MANIFEST}" ]] || { echo "Shared monitor manifest not found: ${SHARED_MONITOR_MANIFEST}" >&2; exit 1; }
-[[ -r "${WORKSPACE_MAP_FILE}" ]] || { echo "Workspace map not found: ${WORKSPACE_MAP_FILE}" >&2; exit 1; }
-command -v python3 >/dev/null 2>&1 || { echo "python3 is required" >&2; exit 1; }
+[[ -r "${PROFILE_MANIFEST}" ]] || {
+	echo "Profile manifest not found: ${PROFILE_MANIFEST}" >&2
+	exit 1
+}
+[[ -r "${SHARED_MONITOR_MANIFEST}" ]] || {
+	echo "Shared monitor manifest not found: ${SHARED_MONITOR_MANIFEST}" >&2
+	exit 1
+}
+[[ -r "${WORKSPACE_MAP_FILE}" ]] || {
+	echo "Workspace map not found: ${WORKSPACE_MAP_FILE}" >&2
+	exit 1
+}
+command -v python3 >/dev/null 2>&1 || {
+	echo "python3 is required" >&2
+	exit 1
+}
 
 # shellcheck source=/dev/null
 source "${PROFILE_MANIFEST}"
@@ -63,7 +81,7 @@ source "${PROFILE_MANIFEST}"
 tmp_profile="$(mktemp)"
 tmp_binds="$(mktemp)"
 cleanup() {
-  rm -f "${tmp_profile}" "${tmp_binds}"
+	rm -f "${tmp_profile}" "${tmp_binds}"
 }
 trap cleanup EXIT
 
@@ -335,9 +353,9 @@ binds_out_path.write_text("\n".join(bind_lines).rstrip() + "\n")
 PY
 
 if [[ "${mode}" == "check" ]]; then
-  diff -u "${PROFILE_OUT}" "${tmp_profile}"
-  diff -u "${WORKSPACE_BINDS_OUT}" "${tmp_binds}"
-  exit 0
+	diff -u "${PROFILE_OUT}" "${tmp_profile}"
+	diff -u "${WORKSPACE_BINDS_OUT}" "${tmp_binds}"
+	exit 0
 fi
 
 run_as_user install -D -m 644 "${tmp_profile}" "${PROFILE_OUT}"

@@ -10,12 +10,12 @@ BINDS_FILE="${MANGO_BINDS_FILE:-${MODULE_DIR}/dotfiles/mango/conf.d/50-binds.con
 PROFILE_MANIFEST="${MANGO_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
 SHARED_MONITOR_MANIFEST="${MANGO_SHARED_MONITOR_MANIFEST:-${REPO_ROOT}/shared/wm/monitors.yaml}"
 WORKSPACE_MAP_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
-RUNTIME_DIR="${MANGO_RUNTIME_DIR:-${USER_HOME}/.config/mango/runtime}"
-CHEATSHEET_OUT="${MANGO_KEYBIND_CHEATSHEET_OUT:-${RUNTIME_DIR}/keybind-cheatsheet.conf}"
+OUTPUT_DIR="${MANGO_OUTPUT_DIR:-${MODULE_DIR}/dotfiles/mango/generated}"
+CHEATSHEET_OUT="${MANGO_KEYBIND_CHEATSHEET_OUT:-${OUTPUT_DIR}/keybind-cheatsheet.conf}"
 
 usage() {
-  cat <<'EOF'
-Usage: render-keybind-cheatsheet.sh [--check] [--runtime-dir DIR]
+	cat <<'EOF'
+Usage: render-keybind-cheatsheet.sh [--check] [--out-dir DIR]
 
 Render a MangoWM keybind cheatsheet in a Hyprland-style format that the
 Noctalia keybind-cheatsheet plugin can parse while running under Mango.
@@ -24,28 +24,33 @@ EOF
 
 mode="write"
 while (($#)); do
-  case "$1" in
-    --check)
-      mode="check"
-      shift
-      ;;
-    --runtime-dir)
-      RUNTIME_DIR="$2"
-      CHEATSHEET_OUT="${RUNTIME_DIR}/keybind-cheatsheet.conf"
-      shift 2
-      ;;
-    --write)
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      usage >&2
-      exit 2
-      ;;
-  esac
+	case "$1" in
+	--check)
+		mode="check"
+		shift
+		;;
+	--out-dir)
+		OUTPUT_DIR="$2"
+		CHEATSHEET_OUT="${OUTPUT_DIR}/keybind-cheatsheet.conf"
+		shift 2
+		;;
+	--runtime-dir)
+		OUTPUT_DIR="$2"
+		CHEATSHEET_OUT="${OUTPUT_DIR}/keybind-cheatsheet.conf"
+		shift 2
+		;;
+	--write)
+		shift
+		;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		exit 2
+		;;
+	esac
 done
 
 [[ -r "${BINDS_FILE}" ]] || die "Bind file not found: ${BINDS_FILE}"
@@ -61,7 +66,7 @@ source "${PROFILE_MANIFEST}"
 
 tmp_cheatsheet="$(mktemp)"
 cleanup() {
-  rm -f "${tmp_cheatsheet}"
+	rm -f "${tmp_cheatsheet}"
 }
 trap cleanup EXIT
 
@@ -213,13 +218,20 @@ spawn_map = {
     "osc-shell ipc call idleInhibitor toggle": ("Noctalia", "Idle Inhibitor"),
     "osc-shell ipc call lockScreen lock": ("Noctalia", "Lock Screen"),
     "kitty": ("Applications", "Terminal"),
+    "uwsm app -a kitty -- /usr/bin/kitty": ("Applications", "Terminal"),
     "semsumo-daily": ("Applications", "SemsuMo Daily"),
+    "uwsm app -a semsumo-daily -- semsumo-daily": ("Applications", "SemsuMo Daily"),
     "nemo": ("Applications", "File Manager"),
+    "uwsm app -a nemo -- /usr/bin/nemo": ("Applications", "File Manager"),
     "kitty -e yazi": ("Applications", "Yazi"),
+    "uwsm app -a yazi -- /usr/bin/kitty -e yazi": ("Applications", "Yazi"),
     "rofi-launcher": ("Applications", "Rofi Launcher"),
+    "uwsm app -a rofi-launcher -- rofi-launcher": ("Applications", "Rofi Launcher"),
     "osc-shell ipc call plugin:custom-commands toggle": ("Noctalia", "Custom Commands"),
     "start-kkenp": ("Applications", "Start KKENP"),
+    "uwsm app -a start-kkenp -- start-kkenp": ("Applications", "Start KKENP"),
     "anotes": ("Applications", "Anotes"),
+    "uwsm app -a anotes -- anotes": ("Applications", "Anotes"),
     "osc-shell ipc call wallpaper toggle": ("Noctalia", "Wallpaper Panel"),
     "osc-shell ipc call wallpaper next": ("Noctalia", "Next Wallpaper"),
     "osc-shell ipc call wallpaper prev": ("Noctalia", "Previous Wallpaper"),
@@ -397,8 +409,8 @@ out_path.write_text("\n".join(lines).rstrip() + "\n")
 PY
 
 if [[ "${mode}" == "check" ]]; then
-  diff -u "${CHEATSHEET_OUT}" "${tmp_cheatsheet}"
-  exit 0
+	diff -u "${CHEATSHEET_OUT}" "${tmp_cheatsheet}"
+	exit 0
 fi
 
 run_as_user install -D -m 644 "${tmp_cheatsheet}" "${CHEATSHEET_OUT}"

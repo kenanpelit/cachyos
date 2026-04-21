@@ -8,25 +8,26 @@ source "${REPO_ROOT}/modules/base/lib/core.sh"
 
 mode="fast"
 case "${1:-}" in
-  ""|--fast)
-    ;;
-  --strict)
-    mode="strict"
-    ;;
-  -h|--help)
-    cat <<'EOF'
+"" | --fast)
+	;;
+--strict)
+	mode="strict"
+	;;
+-h | --help)
+	cat <<'EOF'
 Usage: validate.sh [--fast|--strict]
 
---fast   Validate Mango-owned scripts, shared manifests, generated runtime drift,
-         and parse the config through a temporary runtime tree.
+--fast   Validate Mango-owned scripts, shared manifests, generated asset drift,
+         runtime compatibility links, and parse the config through a temporary
+         generated/runtime tree.
 --strict Validate the same set plus every shell helper under modules/scripts/bin.
 EOF
-    exit 0
-    ;;
-  *)
-    echo "Unknown argument: ${1}" >&2
-    exit 2
-    ;;
+	exit 0
+	;;
+*)
+	echo "Unknown argument: ${1}" >&2
+	exit 2
+	;;
 esac
 
 command -v bash >/dev/null 2>&1 || die "bash is required"
@@ -35,11 +36,14 @@ command -v jq >/dev/null 2>&1 || die "jq is required"
 command -v python3 >/dev/null 2>&1 || die "python3 is required"
 
 MANGO_RUNTIME_DIR="${MANGO_RUNTIME_DIR:-${USER_HOME}/.config/mango/runtime}"
+MANGO_GENERATED_DIR="${MANGO_GENERATED_DIR:-${MODULE_DIR}/dotfiles/mango/generated}"
 CONFIG_FILE="${MODULE_DIR}/dotfiles/mango/config.conf"
 PROFILE_MANIFEST="${MODULE_DIR}/profiles/profile.env"
+THEME_MANIFEST="${MODULE_DIR}/theme/theme.env"
 WORKSPACE_SOURCE_FILE="${REPO_ROOT}/shared/wm/workspaces.json"
 SHARED_MONITOR_MANIFEST="${REPO_ROOT}/shared/wm/monitors.yaml"
 SHARED_MONITOR_ASSETS_SCRIPT="${REPO_ROOT}/shared/wm/render-monitor-assets.sh"
+RENDER_PACKAGES_SCRIPT="${MODULE_DIR}/scripts/render-packages.sh"
 RENDER_THEME_SCRIPT="${MODULE_DIR}/scripts/render-theme.sh"
 RENDER_PROFILE_SCRIPT="${MODULE_DIR}/scripts/render-profile.sh"
 RENDER_WORKSPACE_ASSETS_SCRIPT="${MODULE_DIR}/scripts/render-workspace-assets.sh"
@@ -47,15 +51,17 @@ RENDER_KEYBIND_CHEATSHEET_SCRIPT="${MODULE_DIR}/scripts/render-keybind-cheatshee
 
 # shellcheck source=/dev/null
 source "${PROFILE_MANIFEST}"
+# shellcheck source=/dev/null
+source "${THEME_MANIFEST}"
 
 : "${MANGO_MONITOR_PROFILE:=desk}"
 
 log_info "Validating MangoWM configuration..."
 
 if [[ -x "${SHARED_MONITOR_ASSETS_SCRIPT}" ]]; then
-  log_info "Validating shared monitor assets..."
-  "${SHARED_MONITOR_ASSETS_SCRIPT}" --check >/dev/null
-  log_success "Shared monitor assets match generated outputs!"
+	log_info "Validating shared monitor assets..."
+	"${SHARED_MONITOR_ASSETS_SCRIPT}" --check >/dev/null
+	log_success "Shared monitor assets match generated outputs!"
 fi
 
 log_info "Validating shared workspace manifest..."
@@ -176,24 +182,90 @@ if errors:
 PY
 log_success "Shared workspace manifest semantics are valid!"
 
+log_info "Validating generated Mango package manifest..."
+"${RENDER_PACKAGES_SCRIPT}" --check >/dev/null
+log_success "Generated Mango package manifest matches theme variant!"
+
 log_info "Validating generated Mango theme..."
 "${RENDER_THEME_SCRIPT}" --check >/dev/null
 log_success "Generated Mango theme matches theme manifest!"
 
+case "${MANGO_PACKAGE_VARIANT}" in
+full)
+	expected_family=(mangowm mangowm-git)
+	other_family=(mangowm-wlonly mangowm-wlonly-git)
+	;;
+wlonly)
+	expected_family=(mangowm-wlonly mangowm-wlonly-git)
+	other_family=(mangowm mangowm-git)
+	;;
+*)
+	die "Unknown MANGO_PACKAGE_VARIANT: ${MANGO_PACKAGE_VARIANT}"
+	;;
+esac
+
+if command -v pacman >/dev/null 2>&1; then
+	log_info "Checking installed Mango package family..."
+	selected_installed=""
+	other_installed=""
+	for candidate in "${expected_family[@]}"; do
+		if pacman -Qq "${candidate}" >/dev/null 2>&1; then
+			selected_installed="${candidate}"
+			break
+		fi
+	done
+	for candidate in "${other_family[@]}"; do
+		if pacman -Qq "${candidate}" >/dev/null 2>&1; then
+			other_installed="${candidate}"
+			break
+		fi
+	done
+
+	if [[ -n "${selected_installed}" ]]; then
+		log_success "Installed Mango package family matches theme variant (${selected_installed})!"
+	elif [[ -n "${other_installed}" ]]; then
+		die "theme/theme.env selects '${MANGO_PACKAGE_VARIANT}', but installed Mango package is ${other_installed}"
+	else
+		log_warn "Could not confirm an installed Mango package via pacman. Skipping backend-family check."
+	fi
+fi
+
+log_info "Validating generated Mango workspace/profile assets..."
+"${RENDER_PROFILE_SCRIPT}" --check >/dev/null
+"${RENDER_WORKSPACE_ASSETS_SCRIPT}" --check >/dev/null
+"${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --check >/dev/null
+log_success "Generated Mango profile, workspace, and cheatsheet assets are in sync!"
+
 if [[ -d "${MANGO_RUNTIME_DIR}" ]]; then
-  log_info "Validating Mango runtime drift..."
-  if [ "$(id -u)" -eq 0 ]; then
-    run_as_user "${RENDER_PROFILE_SCRIPT}" --check --out-dir "${MANGO_RUNTIME_DIR}" >/dev/null
-    run_as_user "${RENDER_WORKSPACE_ASSETS_SCRIPT}" --check --runtime-dir "${MANGO_RUNTIME_DIR}" >/dev/null
-    run_as_user "${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --check --runtime-dir "${MANGO_RUNTIME_DIR}" >/dev/null
-  else
-    "${RENDER_PROFILE_SCRIPT}" --check --out-dir "${MANGO_RUNTIME_DIR}" >/dev/null
-    "${RENDER_WORKSPACE_ASSETS_SCRIPT}" --check --runtime-dir "${MANGO_RUNTIME_DIR}" >/dev/null
-    "${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --check --runtime-dir "${MANGO_RUNTIME_DIR}" >/dev/null
-  fi
-  log_success "Mango runtime outputs are in sync!"
+	log_info "Validating Mango runtime compatibility mirror..."
+	runtime_warning=0
+	for runtime_asset in \
+		profile.conf \
+		workspace-binds.conf \
+		workspace-rules.conf \
+		keybind-cheatsheet.conf; do
+		generated_file="${MANGO_GENERATED_DIR}/${runtime_asset}"
+		runtime_file="${MANGO_RUNTIME_DIR}/${runtime_asset}"
+
+		if [[ ! -e "${runtime_file}" ]]; then
+			die "Missing Mango runtime compatibility file: ${runtime_file}"
+		fi
+
+		diff -u "${generated_file}" "${runtime_file}" >/dev/null
+
+		if [[ ! -L "${runtime_file}" ]]; then
+			log_warn "Runtime file is not a symlink: ${runtime_file}"
+			runtime_warning=1
+		fi
+	done
+
+	if [[ "${runtime_warning}" -eq 0 ]]; then
+		log_success "Mango runtime compatibility files are symlinked and in sync!"
+	else
+		log_success "Mango runtime compatibility files match generated outputs."
+	fi
 else
-  log_warn "Mango runtime directory not found yet. Skipping installed-runtime drift check."
+	log_warn "Mango runtime directory not found yet. Skipping runtime compatibility check."
 fi
 
 log_info "Checking Mango bind semantics..."
@@ -252,21 +324,27 @@ log_success "No duplicate Mango binds detected!"
 
 tmp_root="$(mktemp -d)"
 cleanup() {
-  rm -rf "${tmp_root}"
+	rm -rf "${tmp_root}"
 }
 trap cleanup EXIT
 
 tmp_runtime="${tmp_root}/runtime"
 tmp_mango_dir="${tmp_root}/mango"
-mkdir -p "${tmp_runtime}" "${tmp_mango_dir}/generated"
+tmp_generated="${tmp_mango_dir}/generated"
+mkdir -p "${tmp_runtime}" "${tmp_generated}"
 ln -s "${MODULE_DIR}/dotfiles/mango/conf.d" "${tmp_mango_dir}/conf.d"
 ln -s "${CONFIG_FILE}" "${tmp_mango_dir}/config.conf"
-ln -s "${MODULE_DIR}/dotfiles/mango/generated/theme.conf" "${tmp_mango_dir}/generated/theme.conf"
+ln -s "${MODULE_DIR}/dotfiles/mango/generated/theme.conf" "${tmp_generated}/theme.conf"
 ln -s "${tmp_runtime}" "${tmp_mango_dir}/runtime"
 
-"${RENDER_PROFILE_SCRIPT}" --out-dir "${tmp_runtime}" >/dev/null
-"${RENDER_WORKSPACE_ASSETS_SCRIPT}" --runtime-dir "${tmp_runtime}" >/dev/null
-"${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --runtime-dir "${tmp_runtime}" >/dev/null
+"${RENDER_PROFILE_SCRIPT}" --out-dir "${tmp_generated}" >/dev/null
+"${RENDER_WORKSPACE_ASSETS_SCRIPT}" --out-dir "${tmp_generated}" >/dev/null
+"${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --out-dir "${tmp_generated}" >/dev/null
+
+ln -s "${tmp_generated}/profile.conf" "${tmp_runtime}/profile.conf"
+ln -s "${tmp_generated}/workspace-binds.conf" "${tmp_runtime}/workspace-binds.conf"
+ln -s "${tmp_generated}/workspace-rules.conf" "${tmp_runtime}/workspace-rules.conf"
+ln -s "${tmp_generated}/keybind-cheatsheet.conf" "${tmp_runtime}/keybind-cheatsheet.conf"
 
 log_info "Validating Mango tagrule contract..."
 python3 - "${WORKSPACE_SOURCE_FILE}" "${SHARED_MONITOR_MANIFEST}" "${MANGO_MONITOR_PROFILE}" "${tmp_runtime}/profile.conf" <<'PY'
@@ -369,50 +447,52 @@ log_success "Mango config parses successfully with rendered runtime files!"
 
 helper_failure=0
 helper_candidates=(
-  "${MODULE_DIR}/scripts/install.sh"
-  "${MODULE_DIR}/scripts/ensure-runtime-files.sh"
-  "${MODULE_DIR}/scripts/render-theme.sh"
-  "${MODULE_DIR}/scripts/render-profile.sh"
-  "${MODULE_DIR}/scripts/render-workspace-assets.sh"
-  "${MODULE_DIR}/scripts/render-keybind-cheatsheet.sh"
-  "${MODULE_DIR}/scripts/validate.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-arrange.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-monitor-smart.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-here.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-tag-smart.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-workspace-smart.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-session-common.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-session-refresh.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-session-doctor.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-session-init.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-bootstrap.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-post-bootstrap.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-desktop-settings.sh"
-  "${REPO_ROOT}/modules/scripts/bin/mango-status-notifier-ready.sh"
-  "${REPO_ROOT}/modules/sessions/dotfiles/mango-session"
-  "${REPO_ROOT}/modules/sessions/dotfiles/mango-uwsm-session"
+	"${MODULE_DIR}/scripts/install.sh"
+	"${MODULE_DIR}/scripts/ensure-runtime-files.sh"
+	"${MODULE_DIR}/scripts/render-packages.sh"
+	"${MODULE_DIR}/scripts/render-theme.sh"
+	"${MODULE_DIR}/scripts/render-profile.sh"
+	"${MODULE_DIR}/scripts/render-workspace-assets.sh"
+	"${MODULE_DIR}/scripts/render-keybind-cheatsheet.sh"
+	"${MODULE_DIR}/scripts/validate.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-arrange.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-monitor-smart.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-here.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-tag-smart.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-workspace-smart.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-session-common.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-session-refresh.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-session-doctor.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-session-init.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-bootstrap.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-post-bootstrap.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-desktop-settings.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-status-notifier-ready.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-blueman-applet.sh"
+	"${REPO_ROOT}/modules/sessions/dotfiles/mango-session"
+	"${REPO_ROOT}/modules/sessions/dotfiles/mango-uwsm-session"
 )
 
 if [[ "${mode}" == "strict" ]]; then
-  while IFS= read -r helper_script; do
-    [[ -n "${helper_script}" ]] || continue
-    helper_candidates+=("${helper_script}")
-  done < <(
-    find "${REPO_ROOT}/modules/scripts/bin" -maxdepth 1 -type f -name '*.sh' | sort
-  )
+	while IFS= read -r helper_script; do
+		[[ -n "${helper_script}" ]] || continue
+		helper_candidates+=("${helper_script}")
+	done < <(
+		find "${REPO_ROOT}/modules/scripts/bin" -maxdepth 1 -type f -name '*.sh' | sort
+	)
 fi
 
 log_info "Validating Mango helper shell syntax..."
 while IFS= read -r helper_script; do
-  [[ -n "${helper_script}" ]] || continue
-  if ! bash -n "${helper_script}"; then
-    log_error "Shell syntax check failed: ${helper_script}"
-    helper_failure=1
-  fi
+	[[ -n "${helper_script}" ]] || continue
+	if ! bash -n "${helper_script}"; then
+		log_error "Shell syntax check failed: ${helper_script}"
+		helper_failure=1
+	fi
 done < <(printf '%s\n' "${helper_candidates[@]}" | sort -u)
 
 if [[ "${helper_failure}" -ne 0 ]]; then
-  exit 1
+	exit 1
 fi
 
 log_success "Mango helper shell syntax is valid!"
