@@ -128,6 +128,24 @@
             }
           },
           "id": "plugin:assistant-panel"
+        },
+        {
+          "defaultSettings": {
+            "autoPaste": false,
+            "autoPasteDelay": 300,
+            "autoPasteOnRightClick": false,
+            "cardColors": {},
+            "customColors": {},
+            "enableTodoIntegration": false,
+            "fullscreenMode": false,
+            "hidePanelBackground": false,
+            "notecardsEnabled": true,
+            "panelHeight": 0,
+            "panelWidth": 1450,
+            "pincardsEnabled": true,
+            "showCloseButton": true
+          },
+          "id": "plugin:clipper"
         }
       ],
       "left": [
@@ -154,6 +172,13 @@
             "monitorOrder": []
           },
           "id": "plugin:mangowc-layout-switcher"
+        },
+        {
+          "defaultSettings": {
+            "showToasts": true,
+            "toastDuration": 1400
+          },
+          "id": "plugin:mango-keymode-indicator"
         },
         {
           "defaultSettings": {
@@ -339,24 +364,6 @@
             "successIcon": "network"
           },
           "id": "plugin:6ee06e:nip"
-        },
-        {
-          "defaultSettings": {
-            "autoPaste": false,
-            "autoPasteDelay": 300,
-            "autoPasteOnRightClick": false,
-            "cardColors": {},
-            "customColors": {},
-            "enableTodoIntegration": false,
-            "fullscreenMode": false,
-            "hidePanelBackground": false,
-            "notecardsEnabled": true,
-            "panelHeight": 0,
-            "panelWidth": 1450,
-            "pincardsEnabled": true,
-            "showCloseButton": true
-          },
-          "id": "plugin:clipper"
         }
       ]
     }

@@ -22,6 +22,8 @@ NOCTALIA_HYPR_WORKSPACE_OVERVIEW_WIDGET_JSON='{"id":"plugin:workspace-overview"}
 NOCTALIA_HYPR_WORKSPACE_OVERVIEW_WIDGET_ANCHOR_ID="Spacer"
 NOCTALIA_MANGO_LAYOUT_WIDGET_JSON='{"defaultSettings":{"monitorOrder":[]},"id":"plugin:mangowc-layout-switcher"}'
 NOCTALIA_MANGO_LAYOUT_WIDGET_ANCHOR_ID="Spacer"
+NOCTALIA_MANGO_KEYMODE_WIDGET_JSON='{"id":"plugin:mango-keymode-indicator"}'
+NOCTALIA_MANGO_KEYMODE_WIDGET_ANCHOR_ID="plugin:mangowc-layout-switcher"
 
 replace_file_if_changed() {
   local source_file="$1"
@@ -137,12 +139,14 @@ apply_noctalia_plugin_overrides() {
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
         | set_state("states"; "mangowc-layout-switcher"; $enable_mango)
+        | set_state("states"; "mango-keymode-indicator"; $enable_mango)
       elif has("plugins") then
         set_state("plugins"; "niri-overview-launcher"; $enable_niri)
         | set_state("plugins"; "workspace-overview"; $enable_hypr)
         | set_state("plugins"; "screen-shot-and-record"; $enable_hypr)
         | set_state("plugins"; "special-workspaces"; $enable_hypr)
         | set_state("plugins"; "mangowc-layout-switcher"; $enable_mango)
+        | set_state("plugins"; "mango-keymode-indicator"; $enable_mango)
       else
         . + {states: {}}
         | set_state("states"; "niri-overview-launcher"; $enable_niri)
@@ -150,6 +154,7 @@ apply_noctalia_plugin_overrides() {
         | set_state("states"; "screen-shot-and-record"; $enable_hypr)
         | set_state("states"; "special-workspaces"; $enable_hypr)
         | set_state("states"; "mangowc-layout-switcher"; $enable_mango)
+        | set_state("states"; "mango-keymode-indicator"; $enable_mango)
       end
     ' "${NOCTALIA_PLUGIN_STATE}" > "${tmp}"; then
     replace_file_if_changed "${tmp}" "${NOCTALIA_PLUGIN_STATE}" || true
@@ -163,6 +168,7 @@ apply_noctalia_settings_overrides() {
   local tmp
   local enable_hypr_overview_widget="false"
   local enable_mango_widget="false"
+  local enable_mango_keymode_widget="false"
 
   command -v jq >/dev/null 2>&1 || return 0
   ensure_noctalia_settings_state
@@ -174,6 +180,7 @@ apply_noctalia_settings_overrides() {
 
   if [[ "${session_name}" == "mango" ]]; then
     enable_mango_widget="true"
+    enable_mango_keymode_widget="true"
   fi
 
   tmp="$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/noctalia-settings.XXXXXX")"
@@ -184,6 +191,9 @@ apply_noctalia_settings_overrides() {
     --argjson enable_mango_widget "${enable_mango_widget}" \
     --argjson mango_widget "${NOCTALIA_MANGO_LAYOUT_WIDGET_JSON}" \
     --arg mango_widget_anchor_id "${NOCTALIA_MANGO_LAYOUT_WIDGET_ANCHOR_ID}" \
+    --argjson enable_mango_keymode_widget "${enable_mango_keymode_widget}" \
+    --argjson mango_keymode_widget "${NOCTALIA_MANGO_KEYMODE_WIDGET_JSON}" \
+    --arg mango_keymode_widget_anchor_id "${NOCTALIA_MANGO_KEYMODE_WIDGET_ANCHOR_ID}" \
     '
     def remove_widget($id):
       if .bar?.widgets then
@@ -217,8 +227,10 @@ apply_noctalia_settings_overrides() {
     | .wallpaper.overviewBlur = 0
     | remove_widget("plugin:workspace-overview")
     | remove_widget("plugin:mangowc-layout-switcher")
+    | remove_widget("plugin:mango-keymode-indicator")
     | if $enable_hypr_overview_widget then ensure_widget_after($hypr_overview_widget; $hypr_overview_widget_anchor_id) else . end
     | if $enable_mango_widget then ensure_widget_after($mango_widget; $mango_widget_anchor_id) else . end
+    | if $enable_mango_keymode_widget then ensure_widget_after($mango_keymode_widget; $mango_keymode_widget_anchor_id) else . end
   ' "${NOCTALIA_SETTINGS_STATE}" > "${tmp}"; then
     replace_file_if_changed "${tmp}" "${NOCTALIA_SETTINGS_STATE}" || true
   else
