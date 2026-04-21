@@ -77,7 +77,7 @@
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "mangowc-layout-switcher": {
-      "enabled": false,
+      "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "mpd": {
@@ -93,7 +93,7 @@
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "niri-overview-launcher": {
-      "enabled": true,
+      "enabled": false,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "privacy-indicator": {

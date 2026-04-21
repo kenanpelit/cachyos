@@ -151,6 +151,12 @@
         },
         {
           "defaultSettings": {
+            "monitorOrder": []
+          },
+          "id": "plugin:mangowc-layout-switcher"
+        },
+        {
+          "defaultSettings": {
             "activeTodoCount": 0,
             "autosaveDelay": 700,
             "count": 0,
