@@ -340,9 +340,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `mango-session-doctor`
-**Description:** Print a compact MangoWM session diagnostics report.
+**Description:** Print MangoWM session diagnostics, runtime state, and unit graph.
 
-**Usage:** `mango-session-doctor`
+**Usage:** `mango-session-doctor [--tree] [--logs] [--all]`
 
 ---
 
