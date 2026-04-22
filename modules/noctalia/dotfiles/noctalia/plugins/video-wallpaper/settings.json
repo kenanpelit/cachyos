@@ -7,7 +7,7 @@
   "profile": "default",
   "volume": 1,
   "wallpapersFolder": "/home/kenan/Videos/arda",
-  "thumbCacheReady": false,
+  "thumbCacheReady": true,
   "eDP-1": {
     "currentWallpaper": "/home/kenan/Videos/arda/4saat_video.mp4",
     "isPlaying": false,

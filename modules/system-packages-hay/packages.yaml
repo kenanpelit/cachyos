@@ -133,6 +133,7 @@ packages:
 - networkmanager-openvpn
 - nfs-utils
 - nilfs-utils
+- nirimod-git
 - noto-color-emoji-fontconfig
 - nss-mdns
 - ntp
