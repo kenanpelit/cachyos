@@ -172,6 +172,7 @@ show_help() {
 	echo -e "${Green}list${Color_Off}, ${Green}l${Color_Off} [seçenekler]  Torrent listesini göster"
 	echo -e "${Green}list --sort-by=[name|size|status|progress]${Color_Off}  Sıralama ile listele"
 	echo -e "${Green}list --filter=\"[kriter]\"${Color_Off}  Filtre ile listele (ör: --filter=\"size>1GB\")"
+	echo -e "${Green}list --show-bars${Color_Off}  İsteğe bağlı ilerleme çubuklarını göster"
 	echo -e "${Green}start${Color_Off} [id]          Torrenti başlat"
 	echo -e "${Green}stop${Color_Off} [id]           Torrenti durdur"
 	echo -e "${Green}remove${Color_Off} [id]         Torrenti sil"
@@ -203,6 +204,7 @@ show_list() {
 	check_transmission
 	local sort_by=""
 	local filter=""
+	local show_bars=0
 
 	# Parametreleri işle
 	while [[ $# -gt 0 ]]; do
@@ -213,6 +215,10 @@ show_list() {
 			;;
 		--filter=*)
 			filter="${1#*=}"
+			shift
+			;;
+		--show-bars|--bars)
+			show_bars=1
 			shift
 			;;
 		*)
@@ -262,17 +268,18 @@ show_list() {
 	# Standart liste çıktısını göster
 	transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -l
 
-	# İlerleme çubuklarını göster
-	echo -e "\n${Blue}İlerleme Çubukları:${Color_Off}"
-	transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -l | grep -v "Sum\|ID" | while read -r line; do
-		id=$(echo "$line" | awk '{print $1}' | sed 's/[*]//g')
-		name=$(echo "$line" | awk '{for(i=9;i<=NF;i++) printf "%s ", $i; printf "\n"}' | sed 's/^ *//;s/ *$//')
-		percent=$(echo "$line" | awk '{print $2}' | sed 's/%//')
+	if [ "$show_bars" -eq 1 ]; then
+		echo -e "\n${Blue}İlerleme Çubukları:${Color_Off}"
+		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -l | grep -v "Sum\|ID" | while read -r line; do
+			id=$(echo "$line" | awk '{print $1}' | sed 's/[*]//g')
+			name=$(echo "$line" | awk '{for(i=9;i<=NF;i++) printf "%s ", $i; printf "\n"}' | sed 's/^ *//;s/ *$//')
+			percent=$(echo "$line" | awk '{print $2}' | sed 's/%//')
 
-		echo -e "${Cyan}[$id] ${Yellow}$name${Color_Off}"
-		progress_bar "$percent"
-		echo ""
-	done
+			echo -e "${Cyan}[$id] ${Yellow}$name${Color_Off}"
+			progress_bar "$percent"
+			echo ""
+		done
+	fi
 }
 
 # Öncelik ayarlama fonksiyonu
