@@ -130,14 +130,29 @@ progress_bar() {
 	local percent=$1
 
 	# N/A veya sayı olmayanlar için kontrol
-	if [[ ! "$percent" =~ ^[0-9]+$ ]]; then
+	if [[ ! "$percent" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
 		echo -e "  N/A |${Yellow}░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░${Color_Off}|"
 		return
 	fi
 
 	local width=50
-	local num_blocks=$(((percent * width) / 100))
 	local progress=""
+	local num_blocks
+	local display_percent
+
+	num_blocks=$(awk -v p="$percent" -v w="$width" 'BEGIN {
+		if (p < 0) p = 0
+		if (p > 100) p = 100
+		printf "%d", (p * w / 100) + 0.5
+	}')
+
+	display_percent=$(awk -v p="$percent" 'BEGIN {
+		if (p == int(p)) {
+			printf "%d", p
+		} else {
+			printf "%.1f", p
+		}
+	}')
 
 	for ((i = 0; i < num_blocks; i++)); do
 		progress+="█"
@@ -147,12 +162,12 @@ progress_bar() {
 		progress+="░"
 	done
 
-	if [ "$percent" -lt 10 ]; then
-		echo -e "  $percent% |${Purple}$progress${Color_Off}|"
-	elif [ "$percent" -lt 100 ]; then
-		echo -e " $percent% |${Purple}$progress${Color_Off}|"
+	if awk -v p="$percent" 'BEGIN { exit !(p < 10) }'; then
+		echo -e "  ${display_percent}% |${Purple}$progress${Color_Off}|"
+	elif awk -v p="$percent" 'BEGIN { exit !(p < 100) }'; then
+		echo -e " ${display_percent}% |${Purple}$progress${Color_Off}|"
 	else
-		echo -e "$percent% |${Green}$progress${Color_Off}|"
+		echo -e "${display_percent}% |${Green}$progress${Color_Off}|"
 	fi
 }
 
@@ -172,7 +187,6 @@ show_help() {
 	echo -e "${Green}list${Color_Off}, ${Green}l${Color_Off} [seçenekler]  Torrent listesini göster"
 	echo -e "${Green}list --sort-by=[name|size|status|progress]${Color_Off}  Sıralama ile listele"
 	echo -e "${Green}list --filter=\"[kriter]\"${Color_Off}  Filtre ile listele (ör: --filter=\"size>1GB\")"
-	echo -e "${Green}list --show-bars${Color_Off}  İsteğe bağlı ilerleme çubuklarını göster"
 	echo -e "${Green}start${Color_Off} [id]          Torrenti başlat"
 	echo -e "${Green}stop${Color_Off} [id]           Torrenti durdur"
 	echo -e "${Green}remove${Color_Off} [id]         Torrenti sil"
@@ -204,7 +218,6 @@ show_list() {
 	check_transmission
 	local sort_by=""
 	local filter=""
-	local show_bars=0
 
 	# Parametreleri işle
 	while [[ $# -gt 0 ]]; do
@@ -215,10 +228,6 @@ show_list() {
 			;;
 		--filter=*)
 			filter="${1#*=}"
-			shift
-			;;
-		--show-bars|--bars)
-			show_bars=1
 			shift
 			;;
 		*)
@@ -267,19 +276,6 @@ show_list() {
 
 	# Standart liste çıktısını göster
 	transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -l
-
-	if [ "$show_bars" -eq 1 ]; then
-		echo -e "\n${Blue}İlerleme Çubukları:${Color_Off}"
-		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -l | grep -v "Sum\|ID" | while read -r line; do
-			id=$(echo "$line" | awk '{print $1}' | sed 's/[*]//g')
-			name=$(echo "$line" | awk '{for(i=9;i<=NF;i++) printf "%s ", $i; printf "\n"}' | sed 's/^ *//;s/ *$//')
-			percent=$(echo "$line" | awk '{print $2}' | sed 's/%//')
-
-			echo -e "${Cyan}[$id] ${Yellow}$name${Color_Off}"
-			progress_bar "$percent"
-			echo ""
-		done
-	fi
 }
 
 # Öncelik ayarlama fonksiyonu
