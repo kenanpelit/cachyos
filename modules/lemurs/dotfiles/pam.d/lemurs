@@ -1,0 +1,7 @@
+#%PAM-1.0
+# Keep Lemurs aligned with upstream's login-based PAM stack.
+# This makes the effective policy repo-owned instead of package-owned.
+auth        include    login
+account     include    login
+session     include    login
+password    include    login
