@@ -18,16 +18,54 @@ HELP
   exit 0
 fi
 
-brave_bin="${BRAVE_BIN:-}"
-if [[ -z "$brave_bin" ]]; then
-  if command -v brave >/dev/null 2>&1; then
-    brave_bin="brave"
-  elif command -v brave-browser >/dev/null 2>&1; then
-    brave_bin="brave-browser"
+resolve_brave_bin() {
+  local requested="${BRAVE_BIN:-}"
+  local preference="${BRAVE_VARIANT_PREFERENCE:-origin}"
+  local candidate
+  local -a candidates=()
+
+  add_candidate() {
+    local value="$1"
+    local existing
+    [[ -n "$value" ]] || return 0
+    for existing in "${candidates[@]}"; do
+      [[ "$existing" == "$value" ]] && return 0
+    done
+    candidates+=("$value")
+  }
+
+  case "${requested:-}" in
+    ""|auto|brave|brave-browser|brave-bin)
+      ;;
+    *)
+      add_candidate "$requested"
+      ;;
+  esac
+
+  if [[ "$preference" == "browser" ]]; then
+    add_candidate "brave"
+    add_candidate "brave-browser"
+    add_candidate "brave-origin"
+    add_candidate "brave-origin-beta"
   else
-    brave_bin="brave"
+    add_candidate "brave-origin"
+    add_candidate "brave-origin-beta"
+    add_candidate "brave"
+    add_candidate "brave-browser"
   fi
-fi
+
+  for candidate in "${candidates[@]}"; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      command -v "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+brave_bin="$(resolve_brave_bin 2>/dev/null || true)"
+[[ -n "$brave_bin" ]] || brave_bin="brave-origin-beta"
 
 flags=(
   --disable-extensions-http-throttling

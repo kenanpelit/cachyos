@@ -46,13 +46,19 @@ readonly CONFIG_FILE="${HOME}/.config/brave-launcher/config.conf"
 readonly LOG_FILE="${HOME}/.config/brave-launcher/brave-launcher.log"
 
 	# Varsayılan konfigürasyon
-	BRAVE_CMD="brave"
+	# "auto" ve generic Brave selector'ları (brave/brave-browser/brave-bin)
+	# brave-origin* kanallarını da kapsayacak şekilde çözülür.
+	BRAVE_CMD="${BRAVE_CMD:-auto}"
+	BRAVE_VARIANT_PREFERENCE="${BRAVE_VARIANT_PREFERENCE:-origin}"
 	# Brave'in varsayılan user-data-dir'i (profil/Local State burada)
-	LOCAL_STATE_PATH="${HOME}/.config/BraveSoftware/Brave-Browser/Local State"
-	BRAVE_PROFILES_DIR="${HOME}/.config/BraveSoftware/Brave-Browser"
+	BRAVE_PROFILES_DIR="${BRAVE_PROFILES_DIR:-}"
+	LOCAL_STATE_PATH="${LOCAL_STATE_PATH:-}"
 	# Niri/Hyprland'da farklı profilleri ayrı process + ayrı app-id ile açabilmek için
 	# profile bazlı ayrı user-data-dir kullanırız; profil dizinini symlink'leyerek veri çoğaltmayız.
-	ISOLATED_ROOT="${HOME}/.brave/isolated"
+	ISOLATED_ROOT="${ISOLATED_ROOT:-${HOME}/.brave/isolated}"
+	# Eksik Brave profillerini istenirse Helium'dan donor olarak seed ederiz.
+	BRAVE_FALLBACK_PROFILES_DIR="${BRAVE_FALLBACK_PROFILES_DIR:-${HOME}/.config/net.imput.helium}"
+	BRAVE_FALLBACK_ISOLATED_ROOT="${BRAVE_FALLBACK_ISOLATED_ROOT:-${HOME}/.helium/isolated}"
 
 # Wayland ve dokunmatik yüzey için varsayılan bayraklar
 	DEFAULT_FLAGS=(
@@ -133,8 +139,11 @@ create_default_config() {
 	cat >"$CONFIG_FILE" <<'EOF'
 # Brave Launcher Konfigürasyonu
 
-# Brave komutu
-BRAVE_CMD="brave"
+# Brave komutu (auto, brave-origin, brave-origin-beta, brave-browser, /tam/yol)
+BRAVE_CMD="auto"
+
+# Variant tercihi (origin veya browser)
+BRAVE_VARIANT_PREFERENCE="origin"
 
 # Proxy ayarları
 PROXY_HOST="127.0.0.1"
@@ -158,6 +167,196 @@ debug() {
 	[[ "${DEBUG_MODE:-false}" == "true" ]] && log "DEBUG" "$*"
 }
 
+resolve_executable_candidate() {
+	local candidate="$1"
+
+	[[ -n "$candidate" ]] || return 1
+
+	if [[ "$candidate" == */* ]]; then
+		[[ -x "$candidate" ]] || return 1
+		printf '%s\n' "$candidate"
+		return 0
+	fi
+
+	command -v "$candidate" 2>/dev/null || return 1
+}
+
+append_unique() {
+	local -n arr_ref="$1"
+	local value="$2"
+	local existing=""
+
+	[[ -n "$value" ]] || return 0
+
+	for existing in "${arr_ref[@]}"; do
+		[[ "$existing" == "$value" ]] && return 0
+	done
+
+	arr_ref+=("$value")
+}
+
+is_generic_brave_selector() {
+	case "${1:-}" in
+	"" | auto | brave | brave-browser | brave-bin)
+		return 0
+		;;
+	*)
+		return 1
+		;;
+	esac
+}
+
+build_brave_command_candidates() {
+	local requested_cmd="$1"
+	local -n out_ref="$2"
+	local preference="${BRAVE_VARIANT_PREFERENCE:-origin}"
+	local candidate=""
+	local -a origin_candidates=(
+		"brave-origin"
+		"brave-origin-beta"
+		"/usr/bin/brave-origin"
+		"/usr/bin/brave-origin-beta"
+	)
+	local -a browser_candidates=(
+		"brave"
+		"brave-browser"
+		"brave-bin"
+		"/usr/bin/brave"
+		"/usr/bin/brave-browser"
+	)
+
+	out_ref=()
+
+	if ! is_generic_brave_selector "$requested_cmd"; then
+		append_unique out_ref "$requested_cmd"
+	fi
+
+	if [[ "$preference" == "browser" ]]; then
+		for candidate in "${browser_candidates[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+		for candidate in "${origin_candidates[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+	else
+		for candidate in "${origin_candidates[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+		for candidate in "${browser_candidates[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+	fi
+}
+
+build_brave_profile_root_candidates() {
+	local brave_cmd="$1"
+	local -n out_ref="$2"
+	local preference="${BRAVE_VARIANT_PREFERENCE:-origin}"
+	local cmd_name="${brave_cmd##*/}"
+	local candidate=""
+	local -a pinned_candidates=()
+	local -a origin_roots=(
+		"${HOME}/.config/BraveSoftware/Brave-Origin"
+		"${HOME}/.config/BraveSoftware/Brave-Origin-Beta"
+	)
+	local -a browser_roots=(
+		"${HOME}/.config/BraveSoftware/Brave-Browser"
+	)
+
+	out_ref=()
+
+	case "$cmd_name" in
+	brave-origin)
+		pinned_candidates=(
+			"${HOME}/.config/BraveSoftware/Brave-Origin"
+			"${HOME}/.config/BraveSoftware/Brave-Origin-Beta"
+		)
+		;;
+	brave-origin-beta)
+		pinned_candidates=(
+			"${HOME}/.config/BraveSoftware/Brave-Origin-Beta"
+			"${HOME}/.config/BraveSoftware/Brave-Origin"
+		)
+		;;
+	brave | brave-browser | brave-bin)
+		pinned_candidates=(
+			"${HOME}/.config/BraveSoftware/Brave-Browser"
+		)
+		;;
+	esac
+
+	for candidate in "${pinned_candidates[@]}"; do
+		append_unique out_ref "$candidate"
+	done
+
+	if [[ "$preference" == "browser" ]]; then
+		for candidate in "${browser_roots[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+		for candidate in "${origin_roots[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+	else
+		for candidate in "${origin_roots[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+		for candidate in "${browser_roots[@]}"; do
+			append_unique out_ref "$candidate"
+		done
+	fi
+}
+
+select_brave_profile_root() {
+	local -n candidates_ref="$1"
+	local candidate=""
+
+	for candidate in "${candidates_ref[@]}"; do
+		if [[ -d "$candidate" || -f "$candidate/Local State" ]]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+
+	if [[ ${#candidates_ref[@]} -gt 0 ]]; then
+		printf '%s\n' "${candidates_ref[0]}"
+		return 0
+	fi
+
+	return 1
+}
+
+configure_brave_runtime() {
+	local requested_cmd="${BRAVE_CMD:-auto}"
+	local resolved_cmd=""
+	local candidate=""
+	local -a command_candidates=()
+	local -a profile_root_candidates=()
+
+	build_brave_command_candidates "$requested_cmd" command_candidates
+
+	for candidate in "${command_candidates[@]}"; do
+		if resolved_cmd="$(resolve_executable_candidate "$candidate")"; then
+			BRAVE_CMD="$resolved_cmd"
+			break
+		fi
+	done
+
+	if [[ -z "$resolved_cmd" ]]; then
+		return 1
+	fi
+
+	if [[ -z "${BRAVE_PROFILES_DIR:-}" ]]; then
+		build_brave_profile_root_candidates "$BRAVE_CMD" profile_root_candidates
+		BRAVE_PROFILES_DIR="$(select_brave_profile_root profile_root_candidates)"
+	fi
+
+	if [[ -z "${LOCAL_STATE_PATH:-}" ]]; then
+		LOCAL_STATE_PATH="${BRAVE_PROFILES_DIR}/Local State"
+	fi
+
+	return 0
+}
+
 # Gerekli bağımlılıkları kontrol et
 check_dependencies() {
 	local deps=("jq")
@@ -169,21 +368,11 @@ check_dependencies() {
 		fi
 	done
 
-	# Brave komutunu kontrol et - farklı isimler dene
-	local brave_found=false
-	local brave_commands=("brave" "brave-browser" "brave-bin" "/usr/bin/brave" "/usr/bin/brave-browser")
-
-	for brave_cmd in "${brave_commands[@]}"; do
-		if command -v "$brave_cmd" &>/dev/null; then
-			BRAVE_CMD="$brave_cmd"
-			brave_found=true
-			log "INFO" "Brave bulundu: $brave_cmd"
-			break
-		fi
-	done
-
-	if [[ "$brave_found" == false ]]; then
-		missing+=("brave")
+	if ! configure_brave_runtime; then
+		missing+=("brave-origin/brave")
+	else
+		log "INFO" "Brave bulundu: $BRAVE_CMD"
+		log "INFO" "Brave profile root: $BRAVE_PROFILES_DIR"
 	fi
 
 	if [[ ${#missing[@]} -gt 0 ]]; then
@@ -334,6 +523,14 @@ iter_local_state_files() {
 	if [[ -d "$ISOLATED_ROOT" ]]; then
 		find "$ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort
 	fi
+
+	if [[ -f "${BRAVE_FALLBACK_PROFILES_DIR}/Local State" ]]; then
+		printf '%s\n' "${BRAVE_FALLBACK_PROFILES_DIR}/Local State"
+	fi
+
+	if [[ -d "$BRAVE_FALLBACK_ISOLATED_ROOT" ]]; then
+		find "$BRAVE_FALLBACK_ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort
+	fi
 }
 
 profile_key_from_state() {
@@ -374,6 +571,9 @@ resolve_profile_source() {
 	local preferred_local_state="${ISOLATED_ROOT}/${profile_name}/Local State"
 	local kenp_local_state="${ISOLATED_ROOT}/Kenp/Local State"
 	local default_local_state="$LOCAL_STATE_PATH"
+	local fallback_preferred_local_state="${BRAVE_FALLBACK_ISOLATED_ROOT}/${profile_name}/Local State"
+	local fallback_kenp_local_state="${BRAVE_FALLBACK_ISOLATED_ROOT}/Kenp/Local State"
+	local fallback_default_local_state="${BRAVE_FALLBACK_PROFILES_DIR}/Local State"
 
 	add_candidate_unique() {
 		local path="$1"
@@ -389,7 +589,11 @@ resolve_profile_source() {
 	# 1) same-profile isolated Local State (most deterministic)
 	# 2) default Brave Local State
 	# 3) Kenp isolated Local State as canonical donor
-	# 4) all other isolated Local State files (fallback)
+	# 4) all other Brave isolated Local State files
+	# 5) same-profile Helium isolated Local State (donor fallback)
+	# 6) default Helium Local State
+	# 7) Kenp Helium isolated Local State
+	# 8) all other Helium isolated Local State files
 	add_candidate_unique "$preferred_local_state"
 	add_candidate_unique "$default_local_state"
 	if [[ "${profile_name,,}" != "kenp" ]]; then
@@ -402,9 +606,24 @@ resolve_profile_source() {
 		done < <(find "$ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort)
 	fi
 
+	add_candidate_unique "$fallback_preferred_local_state"
+	add_candidate_unique "$fallback_default_local_state"
+	if [[ "${profile_name,,}" != "kenp" ]]; then
+		add_candidate_unique "$fallback_kenp_local_state"
+	fi
+
+	if [[ -d "$BRAVE_FALLBACK_ISOLATED_ROOT" ]]; then
+		while IFS= read -r local_state_path; do
+			add_candidate_unique "$local_state_path"
+		done < <(find "$BRAVE_FALLBACK_ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort)
+	fi
+
 	for candidate in "${candidates[@]}"; do
 		if profile_key=$(profile_key_from_state "$profile_name" "$candidate"); then
 			local_state_path="$candidate"
+			if [[ "$candidate" == "$fallback_default_local_state" || "$candidate" == "$BRAVE_FALLBACK_ISOLATED_ROOT/"* ]]; then
+				log "INFO" "Helium donor profili kullanılacak: $profile_name"
+			fi
 			printf '%s\t%s\n' "$local_state_path" "$profile_key"
 			return 0
 		fi

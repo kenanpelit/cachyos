@@ -7,6 +7,52 @@
 
 set -euo pipefail
 
+resolve_brave_binary() {
+  local requested="${BRAVE_BIN:-}"
+  local preference="${BRAVE_VARIANT_PREFERENCE:-origin}"
+  local candidate
+  local -a candidates=()
+
+  append_candidate() {
+    local value="$1"
+    local existing
+    [[ -n "$value" ]] || return 0
+    for existing in "${candidates[@]}"; do
+      [[ "$existing" == "$value" ]] && return 0
+    done
+    candidates+=("$value")
+  }
+
+  case "${requested:-}" in
+    ""|auto|brave|brave-browser|brave-bin)
+      ;;
+    *)
+      append_candidate "$requested"
+      ;;
+  esac
+
+  if [[ "$preference" == "browser" ]]; then
+    append_candidate "brave"
+    append_candidate "brave-browser"
+    append_candidate "brave-origin"
+    append_candidate "brave-origin-beta"
+  else
+    append_candidate "brave-origin"
+    append_candidate "brave-origin-beta"
+    append_candidate "brave"
+    append_candidate "brave-browser"
+  fi
+
+  for candidate in "${candidates[@]}"; do
+    if command -v "${candidate}" >/dev/null 2>&1; then
+      command -v "${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 resolve_profile_brave() {
   local script_dir candidate
   script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -69,12 +115,8 @@ if profile_brave_cmd="$(resolve_profile_brave 2>/dev/null)"; then
   exit 0
 fi
 
-if command -v brave >/dev/null 2>&1; then
-  exec brave --profile-directory=Default "$@"
-fi
-
-if command -v brave-browser >/dev/null 2>&1; then
-  exec brave-browser --profile-directory=Default "$@"
+if brave_bin="$(resolve_brave_binary 2>/dev/null)"; then
+  exec "${brave_bin}" --profile-directory=Default "$@"
 fi
 
 echo "brave-kenp-default: brave not found" >&2

@@ -132,6 +132,8 @@ fix_profile_files_in_dir() {
 fix_browser_flags() {
   # Brave - ana dizin
   fix_profile_files_in_dir "$HOME/.config/BraveSoftware/Brave-Browser"
+  fix_profile_files_in_dir "$HOME/.config/BraveSoftware/Brave-Origin"
+  fix_profile_files_in_dir "$HOME/.config/BraveSoftware/Brave-Origin-Beta"
 
   # Brave isolated (profile_brave --separate ile)
   # ~/.brave/isolated/<Class>/Local State + Profile*/Default

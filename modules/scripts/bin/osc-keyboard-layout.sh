@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-keyboard-layout.sh
-# Description: Inspect or update the shared keyboard layout for TTY, Niri, and Hyprland.
+# Description: Inspect or update the shared keyboard layout for TTY, MangoWM, Niri, and Hyprland.
 # Usage: osc-keyboard-layout.sh status | set [preset|--layout L --variant V --tty-keymap K]
 # ==============================================================================
 set -euo pipefail
@@ -75,6 +75,7 @@ find_repo_root() {
 
 REPO_ROOT="$(find_repo_root)" || die "Unable to locate repo root. Set DCLI_REPO_ROOT or install the repo under ~/.cachy."
 readonly REPO_ROOT
+readonly MANGO_CFG="${REPO_ROOT}/modules/mangowm/dotfiles/mango/conf.d/10-input.conf"
 readonly NIRI_CFG="${REPO_ROOT}/modules/niri/dotfiles/niri/conf/00-base.kdl"
 readonly HYPR_CFG="${REPO_ROOT}/modules/hyprland/dotfiles/hypr/conf.d/30-input.conf"
 
@@ -92,6 +93,7 @@ Usage:
 
 Notes:
   - Repo scope updates:
+      modules/mangowm/dotfiles/mango/conf.d/10-input.conf
       modules/niri/dotfiles/niri/conf/00-base.kdl
       modules/hyprland/dotfiles/hypr/conf.d/30-input.conf
   - Live scope updates:
@@ -103,6 +105,7 @@ EOF
 }
 
 require_repo_files() {
+  [[ -f "$MANGO_CFG" ]] || die "Mango config not found: $MANGO_CFG"
   [[ -f "$NIRI_CFG" ]] || die "Niri config not found: $NIRI_CFG"
   [[ -f "$HYPR_CFG" ]] || die "Hyprland input config not found: $HYPR_CFG"
 }
@@ -143,11 +146,16 @@ set_preset() {
 }
 
 show_status() {
+  local mango_layout="" mango_variant="" mango_options=""
   local niri_layout="" niri_variant="" niri_options=""
   local hypr_layout="" hypr_variant="" hypr_options=""
   local vc_layout="" vc_variant="" vc_keymap=""
 
   require_repo_files
+
+  mango_layout="$(awk -F= '/^[[:space:]]*xkb_rules_layout=/{print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
+  mango_variant="$(awk -F= '/^[[:space:]]*xkb_rules_variant=/{print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
+  mango_options="$(awk -F= '/^[[:space:]]*xkb_rules_options=/{print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
 
   niri_layout="$(awk '/^[[:space:]]*layout "/ {gsub(/.*layout "|".*/,""); print; exit}' "$NIRI_CFG" 2>/dev/null || true)"
   niri_variant="$(awk '/^[[:space:]]*variant "/ {gsub(/.*variant "|".*/,""); print; exit}' "$NIRI_CFG" 2>/dev/null || true)"
@@ -165,6 +173,7 @@ show_status() {
 
   cat <<EOF
 Repo-managed layout
+  MangoWM:   layout=${mango_layout:-<unset>} variant=${mango_variant:-<unset>} options=${mango_options:-<unset>}
   Niri:      layout=${niri_layout:-<unset>} variant=${niri_variant:-<unset>} options=${niri_options:-<unset>}
   Hyprland:  layout=${hypr_layout:-<unset>} variant=${hypr_variant:-<unset>} options=${hypr_options:-<unset>}
 
@@ -262,6 +271,19 @@ update_repo_niri() {
   write_if_changed "$tmp" "$NIRI_CFG" 644
 }
 
+update_repo_mango() {
+  local tmp
+  tmp="$(mktemp)"
+
+  sed -E \
+    -e "s/^([[:space:]]*xkb_rules_layout=).*/\1${LAYOUT}/" \
+    -e "s/^([[:space:]]*xkb_rules_variant=).*/\1${VARIANT}/" \
+    -e "s/^([[:space:]]*xkb_rules_options=).*/\1${OPTIONS}/" \
+    "$MANGO_CFG" >"$tmp"
+
+  write_if_changed "$tmp" "$MANGO_CFG" 644
+}
+
 update_repo_hyprland() {
   local tmp
   tmp="$(mktemp)"
@@ -331,15 +353,23 @@ update_live_vconsole() {
   run_root systemctl restart systemd-vconsole-setup.service >/dev/null 2>&1 || true
 }
 
+reload_live_mango() {
+  command -v mmsg >/dev/null 2>&1 || return 0
+  mmsg -g >/dev/null 2>&1 || return 0
+  mmsg -d reload_config >/dev/null 2>&1 || true
+}
+
 apply_set() {
   [[ -n "$LAYOUT" ]] || die "--layout is required (or use a preset like: trf, trq, us)"
   [[ -n "$TTY_KEYMAP" ]] || TTY_KEYMAP="$(infer_default_keymap)"
   require_repo_files
 
   if [[ "$SCOPE" != "live" ]]; then
-    log "Updating repo-managed Niri and Hyprland keyboard layout"
+    log "Updating repo-managed MangoWM, Niri, and Hyprland keyboard layout"
+    update_repo_mango
     update_repo_niri
     update_repo_hyprland
+    reload_live_mango
   fi
 
   if [[ "$SCOPE" != "repo" ]]; then

@@ -123,7 +123,7 @@ declare -A BRAVE_BROWSERS=(
   ["brave-ai"]="profile_brave|Ai --separate --restore-last-session|3|secure|2|false"
   ["brave-compecta"]="profile_brave|CompecTA --separate --restore-last-session|4|secure|2|false"
   ["brave-whats"]="profile_brave|Whats --separate --restore-last-session|9|secure|1|false"
-  ["brave-exclude"]="profile_brave|Exclude --separate --restore-last-session|6|bypass|1|false"
+  ["brave-exclude"]="profile_brave|Kenp --separate --class=Exclude --title=Exclude --restore-last-session|6|bypass|1|false"
   ["brave-youtube"]="profile_brave|--youtube --separate --class brave-youtube.com__-Default|7|secure|1|false"
   ["brave-tiktok"]="profile_brave|--tiktok --separate --class tiktok --title tiktok|6|secure|1|true"
   ["brave-spotify"]="profile_brave|--spotify --separate --class spotify --title spotify|8|secure|1|true"
