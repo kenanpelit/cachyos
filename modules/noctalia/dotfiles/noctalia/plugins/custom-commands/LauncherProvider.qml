@@ -22,6 +22,7 @@ Item {
 
     // Command database
     property var commandList: []
+    readonly property string shellBootstrap: 'export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"; '
 
     function init() {
         loadCommands();
@@ -103,7 +104,7 @@ Item {
             "singleLine": false,
             "provider": root,
             "onActivate": function() {
-                Quickshell.execDetached(["sh", "-lc", cmd.command]);
+                Quickshell.execDetached(["sh", "-lc", root.shellBootstrap + cmd.command]);
                 launcher.close();
             }
         };

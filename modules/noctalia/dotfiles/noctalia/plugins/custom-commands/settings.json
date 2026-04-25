@@ -12,203 +12,203 @@
     },
     {
       "name": "Helium AI",
-      "command": "start-helium-ai",
+      "command": "~/.local/bin/start-helium-ai",
       "icon": "globe"
     },
     {
       "name": "Helium Compecta",
-      "command": "start-helium-compecta",
+      "command": "~/.local/bin/start-helium-compecta",
       "icon": "globe"
     },
     {
       "name": "Helium Discord",
-      "command": "start-helium-discord",
+      "command": "~/.local/bin/start-helium-discord",
       "icon": "globe"
     },
     {
       "name": "Helium Exclude",
-      "command": "start-helium-exclude",
+      "command": "~/.local/bin/start-helium-exclude",
       "icon": "globe"
     },
     {
       "name": "Helium Kenp",
-      "command": "start-helium-kenp",
+      "command": "~/.local/bin/start-helium-kenp",
       "icon": "globe"
     },
     {
       "name": "Helium Nil",
-      "command": "start-helium-nil",
+      "command": "~/.local/bin/start-helium-nil",
       "icon": "globe"
     },
     {
       "name": "Helium Spotify",
-      "command": "start-helium-spotify",
+      "command": "~/.local/bin/start-helium-spotify",
       "icon": "globe"
     },
     {
       "name": "Helium TikTok",
-      "command": "start-helium-tiktok",
+      "command": "~/.local/bin/start-helium-tiktok",
       "icon": "globe"
     },
     {
       "name": "Helium Whats",
-      "command": "start-helium-whats",
+      "command": "~/.local/bin/start-helium-whats",
       "icon": "globe"
     },
     {
       "name": "Helium WhatsApp",
-      "command": "start-helium-whatsapp",
+      "command": "~/.local/bin/start-helium-whatsapp",
       "icon": "globe"
     },
     {
       "name": "Helium YouTube",
-      "command": "start-helium-youtube",
+      "command": "~/.local/bin/start-helium-youtube",
       "icon": "globe"
     },
     {
       "name": "Kitty Single",
-      "command": "start-kitty-single",
+      "command": "~/.local/bin/start-kitty-single",
       "icon": "terminal-2"
     },
     {
       "name": "Kkenp",
-      "command": "start-kkenp",
+      "command": "~/.local/bin/start-kkenp",
       "icon": "terminal-2"
     },
     {
       "name": "Mkenp",
-      "command": "start-mkenp",
+      "command": "~/.local/bin/start-mkenp",
       "icon": "terminal-2"
     },
     {
       "name": "MPV",
-      "command": "start-mpv",
+      "command": "~/.local/bin/start-mpv",
       "icon": "music"
     },
     {
       "name": "Spotify",
-      "command": "start-spotify",
+      "command": "~/.local/bin/start-spotify",
       "icon": "music"
     },
     {
       "name": "Telegram",
-      "command": "start-telegram",
+      "command": "~/.local/bin/start-telegram",
       "icon": "message-circle"
     },
     {
       "name": "WebCord",
-      "command": "start-webcord",
+      "command": "~/.local/bin/start-webcord",
       "icon": "message-circle"
     },
     {
       "name": "RMPC",
-      "command": "start-rmpc",
+      "command": "~/.local/bin/start-rmpc",
       "icon": "music"
     },
     {
       "name": "Discord",
-      "command": "start-discord",
+      "command": "~/.local/bin/start-discord",
       "icon": "message-circle"
     },
     {
       "name": "Ferdium",
-      "command": "start-ferdium",
+      "command": "~/.local/bin/start-ferdium",
       "icon": "message-circle"
     },
     {
       "name": "Firefox Compecta",
-      "command": "start-firefox-compecta",
+      "command": "~/.local/bin/start-firefox-compecta",
       "icon": "globe"
     },
     {
       "name": "Firefox Kenp",
-      "command": "start-firefox-kenp",
+      "command": "~/.local/bin/start-firefox-kenp",
       "icon": "globe"
     },
     {
       "name": "Firefox Proxy",
-      "command": "start-firefox-proxy",
+      "command": "~/.local/bin/start-firefox-proxy",
       "icon": "globe"
     },
     {
       "name": "Brave AI",
-      "command": "start-brave-ai",
+      "command": "~/.local/bin/start-brave-ai",
       "icon": "globe"
     },
     {
       "name": "Brave Compecta",
-      "command": "start-brave-compecta",
+      "command": "~/.local/bin/start-brave-compecta",
       "icon": "globe"
     },
     {
       "name": "Brave Discord",
-      "command": "start-brave-discord",
+      "command": "~/.local/bin/start-brave-discord",
       "icon": "globe"
     },
     {
       "name": "Brave Exclude",
-      "command": "start-brave-exclude",
+      "command": "~/.local/bin/start-brave-exclude",
       "icon": "globe"
     },
     {
       "name": "Brave Kenp",
-      "command": "start-brave-kenp",
+      "command": "~/.local/bin/start-brave-kenp",
       "icon": "globe"
     },
     {
       "name": "Brave Nil",
-      "command": "start-brave-nil",
+      "command": "~/.local/bin/start-brave-nil",
       "icon": "globe"
     },
     {
       "name": "Brave Spotify",
-      "command": "start-brave-spotify",
+      "command": "~/.local/bin/start-brave-spotify",
       "icon": "globe"
     },
     {
       "name": "Brave TikTok",
-      "command": "start-brave-tiktok",
+      "command": "~/.local/bin/start-brave-tiktok",
       "icon": "globe"
     },
     {
       "name": "Brave Whats",
-      "command": "start-brave-whats",
+      "command": "~/.local/bin/start-brave-whats",
       "icon": "globe"
     },
     {
       "name": "Brave WhatsApp",
-      "command": "start-brave-whatsapp",
+      "command": "~/.local/bin/start-brave-whatsapp",
       "icon": "globe"
     },
     {
       "name": "Brave YouTube",
-      "command": "start-brave-youtube",
+      "command": "~/.local/bin/start-brave-youtube",
       "icon": "globe"
     },
     {
       "name": "Chrome AI",
-      "command": "start-chrome-ai",
+      "command": "~/.local/bin/start-chrome-ai",
       "icon": "globe"
     },
     {
       "name": "Chrome Compecta",
-      "command": "start-chrome-compecta",
+      "command": "~/.local/bin/start-chrome-compecta",
       "icon": "globe"
     },
     {
       "name": "Chrome Kenp",
-      "command": "start-chrome-kenp",
+      "command": "~/.local/bin/start-chrome-kenp",
       "icon": "globe"
     },
     {
       "name": "Chrome Whats",
-      "command": "start-chrome-whats",
+      "command": "~/.local/bin/start-chrome-whats",
       "icon": "globe"
     },
 
     {
       "name": "ZapZap",
-      "command": "start-zapzap",
+      "command": "~/.local/bin/start-zapzap",
       "icon": "message-circle"
     }
   ]

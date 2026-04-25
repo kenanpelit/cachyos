@@ -14,6 +14,8 @@ if [[ -r "${COMMON_HELPER}" ]]; then
     session_common_backfill_visual_env
 fi
 
+export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
 readonly APP_TIMEOUT=4
 readonly CHECK_INTERVAL=1
 readonly WORKSPACE=7

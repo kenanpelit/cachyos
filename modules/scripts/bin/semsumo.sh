@@ -696,6 +696,8 @@ if [[ -r "${COMMON_HELPER}" ]]; then
     session_common_backfill_visual_env
 fi
 
+export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
 readonly APP_TIMEOUT=APP_TIMEOUT_VALUE
 readonly CHECK_INTERVAL=CHECK_INTERVAL_VALUE
 readonly WORKSPACE=WORKSPACE_VALUE
