@@ -197,7 +197,7 @@ append_unique() {
 
 is_generic_brave_selector() {
 	case "${1:-}" in
-	"" | auto | brave | brave-browser | brave-bin)
+	"" | auto | brave | brave-browser | brave-bin | brave-launcher)
 		return 0
 		;;
 	*)
@@ -209,7 +209,6 @@ is_generic_brave_selector() {
 build_brave_command_candidates() {
 	local requested_cmd="$1"
 	local -n out_ref="$2"
-	local preference="${BRAVE_VARIANT_PREFERENCE:-origin}"
 	local candidate=""
 	local -a origin_candidates=(
 		"brave-origin"
@@ -218,10 +217,7 @@ build_brave_command_candidates() {
 		"/usr/bin/brave-origin-beta"
 	)
 	local -a browser_candidates=(
-		"brave"
 		"brave-browser"
-		"brave-bin"
-		"/usr/bin/brave"
 		"/usr/bin/brave-browser"
 	)
 
@@ -231,21 +227,12 @@ build_brave_command_candidates() {
 		append_unique out_ref "$requested_cmd"
 	fi
 
-	if [[ "$preference" == "browser" ]]; then
-		for candidate in "${browser_candidates[@]}"; do
-			append_unique out_ref "$candidate"
-		done
-		for candidate in "${origin_candidates[@]}"; do
-			append_unique out_ref "$candidate"
-		done
-	else
-		for candidate in "${origin_candidates[@]}"; do
-			append_unique out_ref "$candidate"
-		done
-		for candidate in "${browser_candidates[@]}"; do
-			append_unique out_ref "$candidate"
-		done
-	fi
+	for candidate in "${origin_candidates[@]}"; do
+		append_unique out_ref "$candidate"
+	done
+	for candidate in "${browser_candidates[@]}"; do
+		append_unique out_ref "$candidate"
+	done
 }
 
 build_brave_profile_root_candidates() {

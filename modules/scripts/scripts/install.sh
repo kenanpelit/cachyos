@@ -135,6 +135,16 @@ install_from_dir() {
   done
 }
 
+install_named_script() {
+  local src="$1"
+  local dst_name="$2"
+  local dst="$bin_dir/$dst_name"
+
+  [[ -f "$src" ]] || return 0
+  chmod +x "$src" || true
+  atomic_install "$src" "$dst"
+}
+
 install_privileged_system_bins() {
   local privileged_bins=(
     cachy-mount
@@ -196,6 +206,8 @@ main() {
 
   install_from_dir "$module_root/bin"
   install_from_dir "$module_root/start"
+  install_named_script "$repo_root/modules/brave/scripts/brave-launcher" "brave"
+  install_named_script "$repo_root/modules/brave/scripts/brave-launcher" "brave-launcher"
   install_privileged_system_bins
   cleanup_legacy_bins
 

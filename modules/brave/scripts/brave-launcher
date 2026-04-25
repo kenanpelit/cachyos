@@ -2,12 +2,14 @@
 set -euo pipefail
 
 # Brave Browser Launcher (portable)
+readonly SCRIPT_NAME="$(basename "$0")"
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   cat <<'HELP'
 Brave Launcher
 
 Usage:
+  brave [extra Brave flags...] [URL...]
   brave-launcher [extra Brave flags...] [URL...]
 
 This wrapper always adds a fixed set of flags:
@@ -20,7 +22,6 @@ fi
 
 resolve_brave_bin() {
   local requested="${BRAVE_BIN:-}"
-  local preference="${BRAVE_VARIANT_PREFERENCE:-origin}"
   local candidate
   local -a candidates=()
 
@@ -35,24 +36,20 @@ resolve_brave_bin() {
   }
 
   case "${requested:-}" in
-    ""|auto|brave|brave-browser|brave-bin)
+    ""|auto|brave|brave-browser|brave-bin|brave-launcher)
       ;;
     *)
       add_candidate "$requested"
       ;;
   esac
 
-  if [[ "$preference" == "browser" ]]; then
-    add_candidate "brave"
-    add_candidate "brave-browser"
-    add_candidate "brave-origin"
-    add_candidate "brave-origin-beta"
-  else
-    add_candidate "brave-origin"
-    add_candidate "brave-origin-beta"
-    add_candidate "brave"
-    add_candidate "brave-browser"
-  fi
+  # Canonical resolution order for generic `brave` launch requests.
+  add_candidate "brave-origin"
+  add_candidate "brave-origin-beta"
+  add_candidate "brave-browser"
+  add_candidate "/usr/bin/brave-origin"
+  add_candidate "/usr/bin/brave-origin-beta"
+  add_candidate "/usr/bin/brave-browser"
 
   for candidate in "${candidates[@]}"; do
     if command -v "$candidate" >/dev/null 2>&1; then

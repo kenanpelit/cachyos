@@ -897,17 +897,16 @@ fi
 if command -v ai-gemini >/dev/null 2>&1; then
   alias -- gemini=ai-gemini
 fi
-alias -- brave=brave-launcher
 alias -- brave-backup='brave-setup backup'
-alias -- brave-clean='brave-launcher --disable-extensions --incognito'
-alias -- brave-debug='brave-launcher --enable-logging --v=1'
-alias -- brave-dev='brave-launcher --disable-web-security --user-data-dir=/tmp/brave-dev'
+alias -- brave-clean='brave --disable-extensions --incognito'
+alias -- brave-debug='brave --enable-logging --v=1'
+alias -- brave-dev='brave --disable-web-security --user-data-dir=/tmp/brave-dev'
 alias -- brave-ext-clean='rm -rf ~/.config/BraveSoftware/Brave-Browser/Default/Extensions/'
 alias -- brave-ext-list='ls -la ~/.config/BraveSoftware/Brave-Browser/Default/Extensions/ 2>/dev/null || echo '\''No Extensions directory found'\'''
 alias -- brave-extensions=brave-install-extensions
-alias -- brave-profile='brave-launcher --profile-directory='\''Default'\'''
+alias -- brave-profile='brave --profile-directory='\''Default'\'''
 alias -- brave-reset-cache='find ~/.cache/BraveSoftware -type f \( -name '\''*.tmp'\'' -o -name '\''*.lock'\'' \) -delete 2>/dev/null || true'
-alias -- brave-safe='brave-launcher --disable-extensions --disable-gpu'
+alias -- brave-safe='brave --disable-extensions --disable-gpu'
 alias -- brave-setup=brave-setup
 alias -- brave-status='brave-setup status'
 alias -- brave-theme=brave-apply-theme

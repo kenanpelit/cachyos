@@ -20,9 +20,6 @@ RECORDING_DIR="$HOME/Videos"
 getdate() {
     date '+%Y-%m-%d_%H.%M.%S'
 }
-getaudiooutput() {
-    pactl list sources | grep 'Name' | grep 'monitor' | cut -d ' ' -f2
-}
 
 # parse --region <value> without modifying $@ so other flags like --fullscreen still work
 ARGS=("$@")
@@ -134,7 +131,7 @@ else
         fi
     fi
     if [[ $SOUND_FLAG -eq 1 ]]; then
-        wf-recorder --pixel-format yuv420p -f './recording_'"$(getdate)"'.mp4' -t --geometry "$MANUAL_REGION" "${FILTER_ARGS[@]}" --audio="$(getaudiooutput)"
+        wf-recorder --pixel-format yuv420p -f './recording_'"$(getdate)"'.mp4' -t --geometry "$MANUAL_REGION" "${FILTER_ARGS[@]}" --audio"
     else
         wf-recorder --pixel-format yuv420p -f './recording_'"$(getdate)"'.mp4' -t --geometry "$MANUAL_REGION" "${FILTER_ARGS[@]}"
     fi

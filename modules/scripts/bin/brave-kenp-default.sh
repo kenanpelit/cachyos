@@ -9,7 +9,6 @@ set -euo pipefail
 
 resolve_brave_binary() {
   local requested="${BRAVE_BIN:-}"
-  local preference="${BRAVE_VARIANT_PREFERENCE:-origin}"
   local candidate
   local -a candidates=()
 
@@ -24,24 +23,19 @@ resolve_brave_binary() {
   }
 
   case "${requested:-}" in
-    ""|auto|brave|brave-browser|brave-bin)
+    ""|auto|brave|brave-browser|brave-bin|brave-launcher)
       ;;
     *)
       append_candidate "$requested"
       ;;
   esac
 
-  if [[ "$preference" == "browser" ]]; then
-    append_candidate "brave"
-    append_candidate "brave-browser"
-    append_candidate "brave-origin"
-    append_candidate "brave-origin-beta"
-  else
-    append_candidate "brave-origin"
-    append_candidate "brave-origin-beta"
-    append_candidate "brave"
-    append_candidate "brave-browser"
-  fi
+  append_candidate "brave-origin"
+  append_candidate "brave-origin-beta"
+  append_candidate "brave-browser"
+  append_candidate "/usr/bin/brave-origin"
+  append_candidate "/usr/bin/brave-origin-beta"
+  append_candidate "/usr/bin/brave-browser"
 
   for candidate in "${candidates[@]}"; do
     if command -v "${candidate}" >/dev/null 2>&1; then

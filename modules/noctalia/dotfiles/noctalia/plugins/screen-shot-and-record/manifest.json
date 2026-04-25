@@ -1,7 +1,7 @@
 {
   "id": "screen-shot-and-record",
   "name": "ScreenShot & Record",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minNoctaliaVersion": "3.6.0",
   "author": "Pulsar",
   "license": "GPL-3.0-or-later",
