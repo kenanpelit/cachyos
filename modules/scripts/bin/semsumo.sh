@@ -168,6 +168,9 @@ detect_window_manager() {
   elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
     WM_TYPE="niri"
     log "INFO" "DETECT" "Detected Niri window manager"
+  elif [[ "${XDG_CURRENT_DESKTOP:-}" == *mango* ]] || (command -v mmsg &>/dev/null && mmsg -g >/dev/null 2>&1); then
+    WM_TYPE="mango"
+    log "INFO" "DETECT" "Detected Mango window manager"
   elif [[ -n "$WAYLAND_DISPLAY" ]]; then
     WM_TYPE="wayland"
     log "INFO" "DETECT" "Detected generic Wayland session"
@@ -336,18 +339,28 @@ switch_workspace() {
     if command -v niri >/dev/null 2>&1; then
       log "INFO" "WORKSPACE" "Switching to workspace $workspace (Niri)"
       if command -v niri-osc >/dev/null 2>&1; then
-        niri-osc flow legacy -wn "$workspace"
+        niri-osc flow legacy -wn "$workspace" || log "WARN" "WORKSPACE" "Niri workspace switch failed"
       else
-        niri msg action focus-workspace "$workspace"
+        niri msg action focus-workspace "$workspace" || log "WARN" "WORKSPACE" "Niri workspace switch failed"
       fi
       sleep 1
     fi
     ;;
-  *)
-    if command -v wmctrl >/dev/null 2>&1; then
+  mango)
+    if command -v mmsg >/dev/null 2>&1; then
+      log "INFO" "WORKSPACE" "Switching to workspace $workspace (Mango)"
+      mmsg -s -t "$workspace" || log "WARN" "WORKSPACE" "Mango workspace switch failed"
+      sleep 1
+    fi
+    ;;
+  wayland)
+    log "INFO" "WORKSPACE" "Skipping workspace switch on generic Wayland session"
+    ;;
+  x11 | *)
+    if [[ -n "${DISPLAY:-}" ]] && command -v wmctrl >/dev/null 2>&1; then
       local target_workspace=$((workspace - 1))
       log "INFO" "WORKSPACE" "Switching to workspace $workspace (wmctrl)"
-      wmctrl -s "$target_workspace"
+      wmctrl -s "$target_workspace" || log "WARN" "WORKSPACE" "wmctrl workspace switch failed"
       sleep 1
     fi
     ;;
@@ -713,8 +726,12 @@ if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
     WM_TYPE="hyprland"
 elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
     WM_TYPE="niri"
+elif [[ "${XDG_CURRENT_DESKTOP:-}" == *mango* ]] || (command -v mmsg &>/dev/null && mmsg -g >/dev/null 2>&1); then
+    WM_TYPE="mango"
+elif [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
+    WM_TYPE="wayland"
 else
-    WM_TYPE="generic"
+    WM_TYPE="x11"
 fi
 
 echo "Initializing PROFILE_NAME on $WM_TYPE..."
@@ -744,18 +761,28 @@ if [[ "$WORKSPACE" != "0" ]]; then
         if command -v niri >/dev/null 2>&1; then
             echo "Switching to workspace $WORKSPACE..."
             if [[ -x "$HOME/.local/bin/niri-osc" ]]; then
-                "$HOME/.local/bin/niri-osc" flow legacy -wn "$WORKSPACE"
+                "$HOME/.local/bin/niri-osc" flow legacy -wn "$WORKSPACE" || echo "WARNING: Niri workspace switch failed"
             else
-                niri msg action focus-workspace "$WORKSPACE"
+                niri msg action focus-workspace "$WORKSPACE" || echo "WARNING: Niri workspace switch failed"
             fi
             sleep 1
         fi
         ;;
-    *)
-        if command -v wmctrl >/dev/null 2>&1; then
+    mango)
+        if command -v mmsg >/dev/null 2>&1; then
+            echo "Switching to workspace $WORKSPACE..."
+            mmsg -s -t "$WORKSPACE" || echo "WARNING: Mango workspace switch failed"
+            sleep 1
+        fi
+        ;;
+    wayland)
+        echo "Skipping workspace switch on generic Wayland session..."
+        ;;
+    x11|*)
+        if [[ -n "${DISPLAY:-}" ]] && command -v wmctrl >/dev/null 2>&1; then
             TARGET=$((WORKSPACE - 1))
             echo "Switching to workspace $WORKSPACE..."
-            wmctrl -s "$TARGET"
+            wmctrl -s "$TARGET" || echo "WARNING: wmctrl workspace switch failed"
             sleep 1
         fi
         ;;
