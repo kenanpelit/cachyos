@@ -1,0 +1,32 @@
+{
+    "settings": {
+        "engine": {
+            "label": "Arama Motoru",
+            "description": "İnternette arama yapılacakken kullanılacak varsayılan arama motoru"
+        },
+        "directUrl": {
+            "label": "Doğrudan URL Açma",
+            "description": "URLleri aramak yerine direkt aç"
+        },
+        "suggestions": {
+            "label": "Arama Önerilerini Göster",
+            "description": "Yazarken gerçek zamanlı önerileri çek"
+        },
+        "maxResults": {
+            "label": "Maksimim Sonuç",
+            "description": "Gösterilecek öneri sınırı"
+        }
+    },
+    "launcher": {
+        "typeSomething": "Bir Şeyler Yaz...",
+        "searchInternet": "{engine} ile internette ara",
+        "search": "\"{query}\" ara",
+        "openIn": "{engine} ile aç",
+        "openUrl": "{url} aç",
+        "openUrlDescription": "URLi direkt tarayıcıda aç",
+        "suggestion": "{engine} tarafından öneri",
+        "command": {
+            "description": "İnterntten bir şeyler ara"
+        }
+    }
+}

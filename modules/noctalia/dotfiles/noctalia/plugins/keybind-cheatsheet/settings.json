@@ -170,6 +170,14 @@
           "desc": "Focus Down"
         },
         {
+          "keys": "Super + TAB",
+          "desc": "Cycle Window Next"
+        },
+        {
+          "keys": "Super + Shift + TAB",
+          "desc": "Cycle Window Prev"
+        },
+        {
           "keys": "Super + LEFT",
           "desc": "Focus Left"
         },
