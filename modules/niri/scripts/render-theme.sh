@@ -45,6 +45,7 @@ trap cleanup EXIT
 
 : "${NIRI_CURSOR_THEME:=capitaine-cursors}"
 : "${NIRI_CURSOR_SIZE:=24}"
+: "${NIRI_OVERVIEW_ZOOM:=0.62}"
 : "${NIRI_OVERVIEW_BACKDROP_HEX:=313244}"
 : "${NIRI_OVERVIEW_SHADOW_HEX:=00000050}"
 : "${NIRI_OVERVIEW_SHADOW_SOFTNESS:=40}"
@@ -97,6 +98,7 @@ cursor {
 }
 
 overview {
+  zoom ${NIRI_OVERVIEW_ZOOM}
   backdrop-color "#${NIRI_OVERVIEW_BACKDROP_HEX}"
   workspace-shadow {
     softness ${NIRI_OVERVIEW_SHADOW_SOFTNESS}

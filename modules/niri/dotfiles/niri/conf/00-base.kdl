@@ -18,11 +18,6 @@ hotkey-overlay {
   hide-not-bound
 }
 
-overview {
-  // Zoom level for the workspace overview.
-  zoom 0.25
-}
-
 clipboard {
   // Avoid primary-selection surprises when middle-clicking in mixed Wayland/Xwayland apps.
   disable-primary

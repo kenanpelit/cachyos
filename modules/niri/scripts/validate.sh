@@ -36,6 +36,8 @@ RENDER_PROFILE_SCRIPT="$script_dir/render-profile.sh"
 RENDER_WORKSPACE_ASSETS_SCRIPT="$script_dir/render-workspace-assets.sh"
 RENDER_THEME_SCRIPT="$script_dir/render-theme.sh"
 SHARED_MONITOR_ASSETS_SCRIPT="$repo_root/shared/wm/render-monitor-assets.sh"
+THEME_FILE="$script_dir/../dotfiles/niri/generated/theme.kdl"
+BACKGROUND_EFFECTS_FILE="$script_dir/../dotfiles/niri/conf/41-background-effects.kdl"
 
 log_info "Validating Niri configuration..."
 
@@ -81,6 +83,49 @@ if [[ -x "$RENDER_THEME_SCRIPT" ]]; then
         "$RENDER_THEME_SCRIPT" --check
         exit 1
     fi
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+    log_info "Validating Niri overview readability and blur guardrails..."
+    python3 - "$THEME_FILE" "$BACKGROUND_EFFECTS_FILE" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+theme_file = Path(sys.argv[1])
+effects_file = Path(sys.argv[2])
+theme = theme_file.read_text()
+effects = effects_file.read_text()
+
+zoom_match = re.search(r"(?m)^\s*zoom\s+([0-9.]+)\s*$", theme)
+if not zoom_match:
+    raise SystemExit("generated/theme.kdl must define overview zoom")
+
+zoom = float(zoom_match.group(1))
+if not 0.30 <= zoom <= 0.75:
+    raise SystemExit(
+        f"NIRI_OVERVIEW_ZOOM must stay readable for touchpad overview gestures; got {zoom}"
+    )
+
+guarded_surfaces = ("niri-overview-launcher", "launcher-overlay")
+for surface in guarded_surfaces:
+    if surface not in effects:
+        raise SystemExit(f"41-background-effects.kdl must explicitly guard {surface}")
+
+overview_mentions = []
+for surface in guarded_surfaces:
+    overview_mentions.extend(match.start() for match in re.finditer(surface, effects))
+
+for pos in overview_mentions:
+    block_start = effects.rfind("layer-rule", 0, pos)
+    block_end = effects.find("layer-rule", pos + 1)
+    block = effects[block_start:block_end if block_end != -1 else len(effects)]
+    if "blur true" in block:
+        raise SystemExit("overview/launcher surfaces must not be in a blur true layer-rule")
+    if "blur false" not in block:
+        raise SystemExit("overview/launcher surfaces must force blur false")
+PY
+    log_success "Niri overview readability and blur guardrails are valid!"
 fi
 
 if [[ -x "$RENDER_WORKSPACE_ASSETS_SCRIPT" ]]; then

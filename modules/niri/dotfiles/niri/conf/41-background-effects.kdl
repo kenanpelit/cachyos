@@ -2,10 +2,10 @@
 // while non-xray blur is still experimental and intentionally not enabled.
 
 blur {
-  passes 3
+  passes 2
   offset 3
-  noise 0.02
-  saturation 1.35
+  noise 0.01
+  saturation 1.15
 }
 
 // Integrate static and Noctalia-backed wallpapers into the overview backdrop.
@@ -16,9 +16,11 @@ layer-rule {
 
 // Noctalia shell surfaces already use compositor blur where supported. These
 // rules cover panels/popups that rely on the compositor-side background effect.
+// Keep overview/launcher overlays out of this set: when opened from the
+// four-finger overview gesture they can cover the visible workspaces and make
+// the whole overview look like a blurred blank layer.
 layer-rule {
-  match namespace=r#"^noctalia-(launcher-overlay|popup|popupmenu|control|control-center|settings|session-menu|osd|niri-overview-launcher|selection-menu).*$"#
-  match namespace=r#"^noctalia:(niri-overview-launcher).*$"#
+  match namespace=r#"^noctalia-(popup|popupmenu|control|control-center|settings|session-menu|osd|selection-menu).*$"#
 
   geometry-corner-radius 14
 
@@ -31,6 +33,24 @@ layer-rule {
 
     background-effect {
       blur true
+    }
+  }
+}
+
+// The native Niri overview should stay inspectable. Disable blur explicitly for
+// companion overview/launcher surfaces even if they request it themselves.
+layer-rule {
+  match namespace=r#"^noctalia[-:]niri-overview-launcher.*$"#
+  match namespace=r#"^noctalia:(niri-overview-launcher).*$"#
+  match namespace=r#"^noctalia-launcher-overlay.*$"#
+
+  background-effect {
+    blur false
+  }
+
+  popups {
+    background-effect {
+      blur false
     }
   }
 }

@@ -1,6 +1,6 @@
 // Generated from modules/niri/theme/theme.env.
 // Update the manifest and rerun modules/niri/scripts/render-theme.sh.
-// Source checksum: 0dd699ff63f99e1f009c3b369058f6a77d5013120bc8d35b953f821e75e3c099
+// Source checksum: 99c431b1216a304c8d2f8503c1ce8b41c9e18efe91da65b62f94820f61af8b72
 
 cursor {
   xcursor-theme "capitaine-cursors"
@@ -8,6 +8,7 @@ cursor {
 }
 
 overview {
+  zoom 0.30
   backdrop-color "#313244"
   workspace-shadow {
     softness 40

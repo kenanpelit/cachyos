@@ -268,12 +268,16 @@
           "desc": "Screenshot Screen"
         },
         {
-          "keys": "Alt + PrtSc",
-          "desc": "Screenshot Window"
-        },
-        {
           "keys": "Super + Ctrl + Alt + W",
           "desc": "Pick Cast Window"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + C",
+          "desc": "Cast Status"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + X",
+          "desc": "Stop PipeWire Casts"
         },
         {
           "keys": "Super + Ctrl + Alt + R",
@@ -628,6 +632,10 @@
           "desc": "Width 50%"
         },
         {
+          "keys": "Super + Ctrl + Shift + R",
+          "desc": "Prev Preset Width"
+        },
+        {
           "keys": "Super + Minus",
           "desc": "Width -5%"
         },
@@ -643,6 +651,15 @@
         {
           "keys": "Super + Alt + R",
           "desc": "Reset Window Height"
+        }
+      ]
+    },
+    {
+      "title": "Screenshots",
+      "binds": [
+        {
+          "keys": "Alt + PrtSc",
+          "desc": "Screenshot Window + Pointer"
         }
       ]
     },
