@@ -1,7 +1,161 @@
 #!/usr/bin/env bash
+set -u
+
+# Suspend ile lock yüzeyi arasında yarış olmaması için aktif session'ı önce
+# Noctalia/logind üzerinden kilitleyip kısa süre doğrulama bekleriz.
+
+session_prop() {
+  local session_id="$1"
+  local property="$2"
+
+  loginctl show-session "$session_id" -p "$property" --value 2>/dev/null || true
+}
+
+detect_wayland_display() {
+  local runtime_dir="$1"
+  local display=""
+
+  for display in wayland-0 wayland-1; do
+    if [[ -S "$runtime_dir/$display" ]]; then
+      printf '%s\n' "$display"
+      return 0
+    fi
+  done
+
+  display="$(
+    find "$runtime_dir" -maxdepth 1 -type s -name 'wayland-*' -printf '%f\n' 2>/dev/null \
+      | sort \
+      | head -n 1
+  )"
+  [[ -n "$display" ]] || return 1
+
+  printf '%s\n' "$display"
+}
+
+lock_via_noctalia() {
+  local session_id="$1"
+  local user_id="$2"
+  local user_name="$3"
+  local session_type="$4"
+  local user_home=""
+  local runtime_dir=""
+  local bus_address=""
+  local wayland_display=""
+  local osc_shell=""
+
+  [[ "$session_type" == "wayland" ]] || return 1
+
+  runtime_dir="/run/user/${user_id}"
+  [[ -d "$runtime_dir" ]] || return 1
+
+  bus_address="unix:path=${runtime_dir}/bus"
+  [[ -S "${runtime_dir}/bus" ]] || return 1
+
+  wayland_display="$(detect_wayland_display "$runtime_dir")" || return 1
+  user_home="$(getent passwd "$user_id" | cut -d: -f6)"
+  [[ -n "$user_home" ]] || return 1
+
+  if [[ -x "${user_home}/.local/bin/osc-shell" ]]; then
+    osc_shell="${user_home}/.local/bin/osc-shell"
+  elif command -v osc-shell >/dev/null 2>&1; then
+    osc_shell="$(command -v osc-shell)"
+  else
+    return 1
+  fi
+
+  if command -v runuser >/dev/null 2>&1; then
+    runuser -u "$user_name" -- env \
+      XDG_RUNTIME_DIR="$runtime_dir" \
+      DBUS_SESSION_BUS_ADDRESS="$bus_address" \
+      WAYLAND_DISPLAY="$wayland_display" \
+      XDG_SESSION_TYPE=wayland \
+      "$osc_shell" ipc call lockScreen lock >/dev/null 2>&1
+    return $?
+  fi
+
+  if command -v sudo >/dev/null 2>&1; then
+    sudo -u "$user_name" env \
+      XDG_RUNTIME_DIR="$runtime_dir" \
+      DBUS_SESSION_BUS_ADDRESS="$bus_address" \
+      WAYLAND_DISPLAY="$wayland_display" \
+      XDG_SESSION_TYPE=wayland \
+      "$osc_shell" ipc call lockScreen lock >/dev/null 2>&1
+    return $?
+  fi
+
+  return 1
+}
+
+wait_for_locked_sessions() {
+  local max_wait_tenths="${LOCK_BEFORE_SLEEP_MAX_WAIT_TENTHS:-20}"
+  local attempt=""
+  local session_id=""
+  local locked=""
+  local all_locked=""
+
+  for ((attempt = 0; attempt < max_wait_tenths; attempt++)); do
+    all_locked=1
+    for session_id in "$@"; do
+      locked="$(session_prop "$session_id" LockedHint)"
+      if [[ "$locked" != "yes" ]]; then
+        all_locked=0
+        break
+      fi
+    done
+
+    if [[ "$all_locked" -eq 1 ]]; then
+      return 0
+    fi
+
+    sleep 0.1
+  done
+
+  return 1
+}
+
+lock_active_sessions() {
+  local session_id=""
+  local user_id=""
+  local user_name=""
+  local session_type=""
+  local active=""
+  local remote=""
+  local state=""
+  local session_ids=()
+
+  while read -r session_id _; do
+    [[ -n "$session_id" ]] || continue
+
+    active="$(session_prop "$session_id" Active)"
+    remote="$(session_prop "$session_id" Remote)"
+    state="$(session_prop "$session_id" State)"
+    session_type="$(session_prop "$session_id" Type)"
+    user_id="$(session_prop "$session_id" User)"
+    user_name="$(session_prop "$session_id" Name)"
+
+    [[ "$active" == "yes" ]] || continue
+    [[ "$remote" == "no" ]] || continue
+    [[ "$state" == "active" ]] || continue
+    [[ -n "$user_id" && -n "$user_name" ]] || continue
+
+    session_ids+=("$session_id")
+    loginctl lock-session "$session_id" >/dev/null 2>&1 || true
+    lock_via_noctalia "$session_id" "$user_id" "$user_name" "$session_type" || true
+  done < <(loginctl list-sessions --no-legend 2>/dev/null)
+
+  if ((${#session_ids[@]} == 0)); then
+    loginctl lock-sessions >/dev/null 2>&1 || true
+    sleep "${LOCK_BEFORE_SLEEP_FALLBACK_DELAY_SEC:-0.5}"
+    return 0
+  fi
+
+  wait_for_locked_sessions "${session_ids[@]}" || true
+  sleep "${LOCK_BEFORE_SLEEP_DELAY_SEC:-0.5}"
+}
+
 case "${1:-}" in
   pre)
-    loginctl lock-sessions >/dev/null 2>&1 || true
+    lock_active_sessions
     ;;
   *)
     ;;

@@ -289,6 +289,9 @@ def label_for_action(action, args):
 
     if action == "focusdir":
         return "Navigation", f"Focus {args[0].title()}"
+    if action == "focusstack":
+        direction = args[0].title() if args else "Next"
+        return "Navigation", f"Cycle Window {direction}"
     if action == "exchange_client":
         return "Navigation", f"Swap {args[0].title()}"
     if action == "killclient":
