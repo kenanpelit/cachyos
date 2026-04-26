@@ -6,7 +6,6 @@ PartOf=mangowm-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_SESSION_DESKTOP=mango
 ConditionPathExists=%h/.local/bin/mango-lid-watch
-ConditionPathExistsGlob=/proc/acpi/button/lid/*/state
 
 [Service]
 Type=simple
