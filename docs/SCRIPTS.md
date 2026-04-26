@@ -185,6 +185,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `helium-extensions`
+**Description:** Manual Helium extension installer from a donor isolated profile.
+
+**Usage:** `helium-extensions.sh [missing|all|status|list|interactive] [options]`
+
+---
+
 ### 📂 `helium-kenp-default`
 **Description:** Default browser entry for Kenp profile with niri window focus.
 
