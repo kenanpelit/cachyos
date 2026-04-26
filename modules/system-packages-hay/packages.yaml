@@ -36,6 +36,7 @@ packages:
 - chaotic-keyring
 - chaotic-mirrorlist
 - chwd
+- cloc
 - cpio
 - cryptsetup
 - dcli-arch-git
@@ -117,6 +118,7 @@ packages:
 - lsscsi
 - lvm2
 - malcontent
+- mangowm
 - mangowm-git
 - mdadm
 - meld
@@ -186,6 +188,7 @@ packages:
 - swaylock-fancy-git
 - sysfsutils
 - texinfo
+- tokei
 - ttf-bitstream-vera
 - ttf-fantasque-nerd
 - ttf-fira-sans
