@@ -25,6 +25,7 @@ separate from the operational README.
    `xdg-desktop-autostart.target`, `mango-session-env.service`,
    `mango-bootstrap.service`, `mango-audio-init.service`,
    `mango-arrange.service`, `mango-shell-ensure.service`,
+   `mango-lid-switch-inhibit.service`, `mango-lid-switch-watch.service`,
    `mango-daemons.target`, `mango-post-daemons.target`, and
    `mango-session-ready.target`.
 6. `mango-session-env.service` publishes finalized runtime variables to
@@ -52,6 +53,10 @@ separate from the operational README.
   Profile-aware monitor/tag reconcile stage.
 - `mango-shell-ensure.service`
   Starts the shell backend.
+- `mango-lid-switch-inhibit.service`
+  Takes the user-session lid-switch inhibitor so logind does not suspend first.
+- `mango-lid-switch-watch.service`
+  Watches lid state changes and routes lid-close through Noctalia lock-and-suspend.
 - `mango-daemons.target`
   Explicit daemon stage for long-running helpers.
 - `mango-post-daemons.target`

@@ -325,6 +325,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-lid-watch`
+**Description:** No description provided.
+
+**Usage:** `mango-lid-watch`
+
+---
+
 ### 📂 `mango-monitor-smart`
 **Description:** No description provided.
 

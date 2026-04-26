@@ -44,6 +44,10 @@ dotfiles:
   target: ~/.config/systemd/user/mango-arrange.service
 - source: dotfiles/systemd/user/mango-shell-ensure.service
   target: ~/.config/systemd/user/mango-shell-ensure.service
+- source: dotfiles/systemd/user/mango-lid-switch-inhibit.service
+  target: ~/.config/systemd/user/mango-lid-switch-inhibit.service
+- source: dotfiles/systemd/user/mango-lid-switch-watch.service
+  target: ~/.config/systemd/user/mango-lid-switch-watch.service
 - source: dotfiles/systemd/user/mango-status-notifier-ready.service
   target: ~/.config/systemd/user/mango-status-notifier-ready.service
 - source: dotfiles/systemd/user/mango-polkit-agent.service

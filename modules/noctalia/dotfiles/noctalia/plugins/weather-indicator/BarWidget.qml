@@ -28,7 +28,7 @@ Item {
 
   Rectangle {
     anchors.centerIn: parent
-    width: parent.width; height: parent.height
+    width: parent.implicitWidth; height: parent.implicitHeight
     color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
     radius: Style.radiusL
     border { color: Style.capsuleBorderColor; width: Style.capsuleBorderWidth }
