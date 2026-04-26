@@ -146,20 +146,6 @@
                 },
                 {
                     "defaultSettings": {
-                        "monitorOrder": [
-                        ]
-                    },
-                    "id": "plugin:mangowc-layout-switcher"
-                },
-                {
-                    "defaultSettings": {
-                        "showToasts": true,
-                        "toastDuration": 1400
-                    },
-                    "id": "plugin:mango-keymode-indicator"
-                },
-                {
-                    "defaultSettings": {
                         "activeTodoCount": 0,
                         "autosaveDelay": 700,
                         "count": 0,

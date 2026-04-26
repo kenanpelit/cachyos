@@ -32,6 +32,7 @@ binds {
   Mod+R hotkey-overlay-title="Next Preset Width" { switch-preset-column-width; }
   Mod+Ctrl+R hotkey-overlay-title="Next Preset Height" { switch-preset-window-height; }
   Mod+Shift+R hotkey-overlay-title="Width 50%" { set-column-width "50%"; }
+  Mod+Ctrl+Shift+R hotkey-overlay-title="Prev Preset Width" { switch-preset-column-width-back; }
   Mod+Alt+R hotkey-overlay-title="Reset Window Height" { reset-window-height; }
 
   Mod+0 hotkey-overlay-title="Size: 960x540 (Half)" { spawn "niri-osc" "set" "size" "960" "540"; }
@@ -134,12 +135,14 @@ binds {
   Print repeat=false hotkey-overlay-title="Screenshot Rec" { spawn "screenshot" "rec"; }
   Shift+Print repeat=false hotkey-overlay-title="Screenshot Area" { spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "region"; }
   Ctrl+Print repeat=false hotkey-overlay-title="Screenshot Screen" { spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "output"; }
-  Alt+Print repeat=false hotkey-overlay-title="Screenshot Window" { spawn "osc-shell" "ipc" "call" "plugin:screenshot" "takeScreenshot" "window"; }
+  Alt+Print repeat=false hotkey-overlay-title="Screenshot Window + Pointer" { screenshot-window show-pointer=true; }
 
   Mod+Ctrl+Shift+W repeat=false hotkey-overlay-title="Cast Focused Window" { set-dynamic-cast-window; }
   Mod+Ctrl+Alt+W repeat=false hotkey-overlay-title="Pick Cast Window" { spawn "niri-osc" "set" "cast" "pick"; }
   Mod+Ctrl+Shift+M repeat=false hotkey-overlay-title="Cast Focused Monitor" { set-dynamic-cast-monitor; }
   Mod+Ctrl+Shift+X repeat=false hotkey-overlay-title="Clear Cast Target" { clear-dynamic-cast-target; }
+  Mod+Ctrl+Alt+C repeat=false hotkey-overlay-title="Cast Status" { spawn "niri-osc" "set" "cast" "status"; }
+  Mod+Ctrl+Alt+X repeat=false hotkey-overlay-title="Stop PipeWire Casts" { spawn "niri-osc" "set" "cast" "stop-all"; }
   Mod+Ctrl+Alt+F repeat=false hotkey-overlay-title="Windowed Fullscreen" { toggle-windowed-fullscreen; }
 
   Mod+Ctrl+Alt+R repeat=false hotkey-overlay-title="Reload Config" { spawn "niri" "msg" "action" "load-config-file"; }

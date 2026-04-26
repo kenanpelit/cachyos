@@ -12,7 +12,7 @@
   "videoPath": "",
   "filenameFormat": "",
   "detectedRecorder": "wf-recorder",
-  "detectedCompositor": "other",
+  "detectedCompositor": "niri",
   "stateIsRunning": false,
   "stateActiveTool": "",
   "stateMirrorVisible": false,

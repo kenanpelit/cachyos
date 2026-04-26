@@ -1,0 +1,45 @@
+// Niri 26.04 background effects. Keep this conservative: xray blur is cheap,
+// while non-xray blur is still experimental and intentionally not enabled.
+
+blur {
+  passes 3
+  offset 3
+  noise 0.02
+  saturation 1.35
+}
+
+// Integrate static and Noctalia-backed wallpapers into the overview backdrop.
+layer-rule {
+  match namespace=r#"^(wallpaper|noctalia-wallpaper-.+|noctalia-wallpaper-video-.+|noctalia-parallax-.+)$"#
+  place-within-backdrop true
+}
+
+// Noctalia shell surfaces already use compositor blur where supported. These
+// rules cover panels/popups that rely on the compositor-side background effect.
+layer-rule {
+  match namespace=r#"^noctalia-(launcher-overlay|popup|popupmenu|control|control-center|settings|session-menu|osd|niri-overview-launcher|selection-menu).*$"#
+  match namespace=r#"^noctalia:(niri-overview-launcher).*$"#
+
+  geometry-corner-radius 14
+
+  background-effect {
+    blur true
+  }
+
+  popups {
+    geometry-corner-radius 12
+
+    background-effect {
+      blur true
+    }
+  }
+}
+
+// Screenshot/recording overlays must stay crisp and unblurred.
+layer-rule {
+  match namespace=r#"^(noctalia-region-selector|noctalia-record|noctalia-measure|noctalia-annotate|noctalia-mirror|noctalia-pin|noctalia-shell:regionSelector)$"#
+
+  background-effect {
+    blur false
+  }
+}

@@ -49,6 +49,18 @@ if ! command -v niri >/dev/null 2>&1; then
     exit 0
 fi
 
+niri_version_raw="$(niri --version 2>/dev/null | awk '{print $2}' || true)"
+if [[ "$niri_version_raw" =~ ^([0-9]+)\.([0-9]+) ]]; then
+    niri_version_major="${BASH_REMATCH[1]}"
+    niri_version_minor="${BASH_REMATCH[2]}"
+    if (( 10#$niri_version_major < 26 || (10#$niri_version_major == 26 && 10#$niri_version_minor < 4) )); then
+        log_error "Niri ${niri_version_raw} is too old for this module; 26.04+ is required."
+        exit 1
+    fi
+else
+    log_warn "Could not parse Niri version '${niri_version_raw:-unknown}'; continuing validation."
+fi
+
 if [[ -x "$SHARED_MONITOR_ASSETS_SCRIPT" ]]; then
     log_info "Validating shared monitor assets..."
     if "$SHARED_MONITOR_ASSETS_SCRIPT" --check >/dev/null 2>&1; then

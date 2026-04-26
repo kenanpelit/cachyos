@@ -4,11 +4,11 @@ layer-rule {
 }
 
 layer-rule {
-  match namespace="^notifications$"
+  match namespace=r#"^(notifications|noctalia-notifications-.+|noctalia-toast-.+)$"#
   block-out-from "screencast"
 }
 
 layer-rule {
-  match namespace="^notifications$"
+  match namespace=r#"^(notifications|noctalia-notifications-.+|noctalia-toast-.+)$"#
   block-out-from "screen-capture"
 }

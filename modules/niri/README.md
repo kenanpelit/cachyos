@@ -96,9 +96,25 @@ That manifest feeds:
 - `scripts/validate.sh` defaults to a Niri-focused `--fast` mode.
 - `scripts/validate.sh --strict` additionally syntax-checks every helper under
   `modules/scripts/bin`.
+- The module now requires Niri 26.04+ because it uses native background effects,
+  optional home-dir includes, cast IPC, and pointer-aware window screenshots.
 
 The default fast path is intentional: unrelated helper drift elsewhere in the
 repo should not block normal Niri validation.
+
+## Niri 26.04 Integration
+
+- `dotfiles/niri/conf/41-background-effects.kdl` owns compositor-side blur,
+  xray-safe background effects, Noctalia popup rules, and wallpaper backdrop
+  placement.
+- `~/.config/niri/local.kdl` is the machine-local override file. It is created
+  by `scripts/ensure-runtime-files.sh` and included last, so private hardware or
+  test rules do not need to be committed.
+- `~/.config/niri/runtime/debug.kdl` is managed by
+  `niri-osc set debug-resume on|off` for the 26.04
+  `force-disable-connectors-on-resume` workaround.
+- `niri-osc set cast status|stop|stop-all` uses the 26.04 cast IPC to inspect
+  and stop PipeWire screencast sessions.
 
 ## Notes
 

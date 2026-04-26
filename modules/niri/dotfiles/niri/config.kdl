@@ -20,5 +20,11 @@ include "conf/30-window-rules-base.kdl"
 include "generated/workspace-rules.kdl"
 include "conf/31-window-rules-privacy.kdl"
 include "conf/40-layer-rules.kdl"
+include "conf/41-background-effects.kdl"
 include "conf/50-animations.kdl"
 include "conf/60-gestures.kdl"
+
+// Machine-local overrides are intentionally outside the repo.
+// `ensure-runtime-files.sh` creates this file to avoid optional-include log noise.
+include optional=true "runtime/debug.kdl"
+include optional=true "~/.config/niri/local.kdl"

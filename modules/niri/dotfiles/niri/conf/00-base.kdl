@@ -23,12 +23,6 @@ overview {
   zoom 0.25
 }
 
-// Integrate wallpaper surfaces into the overview backdrop for visual depth.
-layer-rule {
-  match namespace="^wallpaper$"
-  place-within-backdrop true
-}
-
 clipboard {
   // Avoid primary-selection surprises when middle-clicking in mixed Wayland/Xwayland apps.
   disable-primary

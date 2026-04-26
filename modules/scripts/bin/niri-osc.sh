@@ -4,13 +4,13 @@
 # Description: Unified single-file Niri helper multiplexer (set, flow, keybinds, drop).
 # Usage: niri-osc <scope> [args...]
 # ==============================================================================
-# Version: 2.1.0
+# Version: 2.2.0
 
 set -euo pipefail
 
 #set -x
 
-NIRI_OSC_VERSION="2.1.0"
+NIRI_OSC_VERSION="2.2.0"
 NIRI_OSC_SELF="${BASH_SOURCE[0]}"
 
 niri_osc_usage() {
@@ -249,10 +249,12 @@ Commands:
   init               Bootstrap session (was: niri-init)
   lock               Lock session via logind or the active shell backend
   lock-and-suspend   Lock session first, then suspend the machine
+  config             Reload or switch Niri config files
+  debug-resume       Toggle force-disable-connectors-on-resume runtime flag
   size               Set explicit column width and window height
   go                 Move windows to target workspaces (was: niri-arrange-windows)
   here               Bring window here (or launch); `all` gathers a set
-  cast               Dynamic screencast helpers (window/monitor/clear/pick)
+  cast               Dynamic screencast helpers (window/monitor/clear/pick/status/stop)
   flow               Legacy workspace/monitor compatibility shim
   monitor-smart-next Move focused window to next monitor and focus it
   doctor             Print session diagnostics (try: --tree, --logs)
@@ -265,6 +267,8 @@ Examples:
   niri-osc set bootstrap
   niri-osc set lock
   niri-osc set lock-and-suspend
+  niri-osc set cast status
+  niri-osc set debug-resume on
   niri-osc set zen
   niri-osc set pin
 EOF
@@ -2404,9 +2408,9 @@ EOF
 
 cast)
   # ----------------------------------------------------------------------------
-  # Dynamic screencast helper (niri "Dynamic Cast Target").
+  # Dynamic screencast helper (niri "Dynamic Cast Target" + 26.04 cast IPC).
   #
-  # Requires: niri >= 25.05
+  # Requires: niri >= 25.05 for dynamic target, niri >= 26.04 for casts/stop.
   # ----------------------------------------------------------------------------
   (
     set -euo pipefail
@@ -2418,14 +2422,58 @@ Usage:
   niri-osc set cast monitor    # cast focused monitor
   niri-osc set cast clear      # clear dynamic cast target
   niri-osc set cast pick       # interactively pick a window and cast it
+  niri-osc set cast status     # list active screencasts
+  niri-osc set cast stop ID    # stop a PipeWire screencast session
+  niri-osc set cast stop-all   # stop all PipeWire screencast sessions
 EOF
+    }
+
+    notify_cast() {
+      command -v notify-send >/dev/null 2>&1 || return 0
+      notify-send -t 2500 "Niri Cast" "${1:-}" 2>/dev/null || true
+    }
+
+    require_jq() {
+      if ! command -v jq >/dev/null 2>&1; then
+        echo "niri-osc set cast: jq is required for this action" >&2
+        exit 1
+      fi
+    }
+
+    format_casts() {
+      jq -r '
+        def target:
+          if (.target | has("Nothing")) then "nothing"
+          elif (.target | has("Output")) then "output " + .target.Output.name
+          elif (.target | has("Window")) then "window " + (.target.Window.id | tostring)
+          else "unknown"
+          end;
+
+        if length == 0 then
+          "No active casts."
+        else
+          .[]
+          | "stream " + (.stream_id | tostring)
+            + " session " + (.session_id | tostring)
+            + " " + (.kind | tostring)
+            + (if .is_active then "" else " inactive" end)
+            + " -> " + target
+            + (if .is_dynamic_target then " dynamic" else "" end)
+        end
+      '
     }
 
     action="${1:-}"
     shift || true
 
+    case "$action" in
+    "" | -h | --help | help)
+      usage_cast
+      exit 0
+      ;;
+    esac
+
     command -v niri >/dev/null 2>&1 || exit 0
-    command -v jq >/dev/null 2>&1 || exit 0
     niri msg version >/dev/null 2>&1 || exit 0
 
     case "$action" in
@@ -2439,17 +2487,179 @@ EOF
       exec niri msg action clear-dynamic-cast-target
       ;;
     pick)
+      require_jq
       win_id="$(niri msg --json pick-window 2>/dev/null | jq -r '.id // empty' || true)"
       [[ -n "$win_id" ]] || exit 0
       exec niri msg action set-dynamic-cast-window --id "$win_id"
       ;;
-    "" | -h | --help | help)
-      usage_cast
-      exit 0
+    status)
+      if command -v jq >/dev/null 2>&1; then
+        cast_summary="$(niri msg --json casts 2>/dev/null | format_casts || true)"
+        [[ -n "$cast_summary" ]] || cast_summary="No active casts."
+        printf '%s\n' "$cast_summary"
+        notify_cast "$cast_summary"
+      else
+        niri msg casts
+      fi
+      ;;
+    stop)
+      session_id="${1:-}"
+      if [[ -z "$session_id" || ! "$session_id" =~ ^[0-9]+$ ]]; then
+        echo "niri-osc set cast stop: numeric session id required" >&2
+        exit 2
+      fi
+      niri msg action stop-cast --session-id "$session_id"
+      notify_cast "Stopped PipeWire cast session ${session_id}"
+      ;;
+    stop-all)
+      require_jq
+      mapfile -t session_ids < <(
+        niri msg --json casts 2>/dev/null \
+          | jq -r '.[] | select(.kind == "PipeWire") | .session_id' \
+          | sort -n -u
+      )
+      if [[ "${#session_ids[@]}" -eq 0 ]]; then
+        notify_cast "No PipeWire casts to stop."
+        exit 0
+      fi
+      for session_id in "${session_ids[@]}"; do
+        niri msg action stop-cast --session-id "$session_id" >/dev/null 2>&1 || true
+      done
+      notify_cast "Stopped ${#session_ids[@]} PipeWire cast session(s)."
       ;;
     *)
       echo "niri-osc set cast: unknown action: $action" >&2
       usage_cast >&2
+      exit 2
+      ;;
+    esac
+  )
+  ;;
+
+config)
+  # ----------------------------------------------------------------------------
+  # Config helpers around niri 26.04 load-config-file --path.
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    usage_config() {
+      cat <<'EOF'
+Usage:
+  niri-osc set config reload       # reload current Niri config
+  niri-osc set config main         # load ~/.config/niri/config.kdl
+  niri-osc set config load PATH    # load a specific config path
+EOF
+    }
+
+    action="${1:-reload}"
+    shift || true
+
+    case "$action" in
+    "" | -h | --help | help)
+      usage_config
+      exit 0
+      ;;
+    esac
+
+    command -v niri >/dev/null 2>&1 || exit 0
+    niri msg version >/dev/null 2>&1 || exit 0
+
+    case "$action" in
+    reload)
+      exec niri msg action load-config-file
+      ;;
+    main)
+      exec niri msg action load-config-file --path "${XDG_CONFIG_HOME:-$HOME/.config}/niri/config.kdl"
+      ;;
+    load)
+      config_path="${1:-}"
+      if [[ -z "$config_path" ]]; then
+        echo "niri-osc set config load: path required" >&2
+        exit 2
+      fi
+      exec niri msg action load-config-file --path "$config_path"
+      ;;
+    *)
+      echo "niri-osc set config: unknown action: $action" >&2
+      usage_config >&2
+      exit 2
+      ;;
+    esac
+  )
+  ;;
+
+debug-resume)
+  # ----------------------------------------------------------------------------
+  # Runtime toggle for debug.force-disable-connectors-on-resume.
+  # ----------------------------------------------------------------------------
+  (
+    set -euo pipefail
+
+    DEBUG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/niri/runtime/debug.kdl"
+
+    usage_debug_resume() {
+      cat <<'EOF'
+Usage:
+  niri-osc set debug-resume on
+  niri-osc set debug-resume off
+  niri-osc set debug-resume status
+EOF
+    }
+
+    ensure_debug_file() {
+      mkdir -p "$(dirname "$DEBUG_FILE")" 2>/dev/null || true
+      if [[ -L "$DEBUG_FILE" ]]; then
+        rm -f "$DEBUG_FILE" 2>/dev/null || true
+      fi
+      [[ -f "$DEBUG_FILE" ]] || : >"$DEBUG_FILE"
+    }
+
+    reload_config() {
+      command -v niri >/dev/null 2>&1 || return 0
+      niri msg action load-config-file >/dev/null 2>&1 || true
+    }
+
+    notify_debug() {
+      command -v notify-send >/dev/null 2>&1 || return 0
+      notify-send -t 1500 "Niri Debug Resume" "${1:-}" 2>/dev/null || true
+    }
+
+    action="${1:-status}"
+    shift || true
+    case "$action" in
+    "" | -h | --help | help)
+      usage_debug_resume
+      exit 0
+      ;;
+    on | enable)
+      ensure_debug_file
+      cat >"$DEBUG_FILE" <<'EOF'
+debug {
+  force-disable-connectors-on-resume
+}
+EOF
+      reload_config
+      notify_debug "force-disable-connectors-on-resume: on"
+      echo "debug-resume: on"
+      ;;
+    off | disable)
+      ensure_debug_file
+      : >"$DEBUG_FILE"
+      reload_config
+      notify_debug "force-disable-connectors-on-resume: off"
+      echo "debug-resume: off"
+      ;;
+    status)
+      if [[ -f "$DEBUG_FILE" ]] && grep -Fq "force-disable-connectors-on-resume" "$DEBUG_FILE"; then
+        echo "debug-resume: on"
+      else
+        echo "debug-resume: off"
+      fi
+      ;;
+    *)
+      echo "niri-osc set debug-resume: unknown action: $action" >&2
+      usage_debug_resume >&2
       exit 2
       ;;
     esac
@@ -3280,6 +3490,8 @@ doctor)
     check_runtime_include_file "include:outputs.kdl" "outputs.kdl" "${niri_config_dir}/outputs.kdl"
     check_runtime_include_file "include:runtime/workspaces-auto.kdl" "runtime/workspaces-auto.kdl" "${niri_runtime_dir}/workspaces-auto.kdl"
     check_runtime_include_file "include:runtime/zen.kdl" "runtime/zen.kdl" "${niri_runtime_dir}/zen.kdl"
+    check_runtime_include_file "include:runtime/debug.kdl" "runtime/debug.kdl" "${niri_runtime_dir}/debug.kdl"
+    check_runtime_include_file "include:local.kdl" "~/.config/niri/local.kdl" "${niri_config_dir}/local.kdl"
   )
   ;;
 

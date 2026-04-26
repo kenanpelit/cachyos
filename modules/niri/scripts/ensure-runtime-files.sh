@@ -7,6 +7,8 @@ source "$repo_root/modules/base/lib/core.sh"
 
 NIRI_DIR="$USER_HOME/.config/niri"
 RUNTIME_DIR="$NIRI_DIR/runtime"
+LOCAL_CONFIG_FILE="$NIRI_DIR/local.kdl"
+RUNTIME_DEBUG_FILE="$RUNTIME_DIR/debug.kdl"
 STATIC_CONFIG_SOURCE="$repo_root/modules/niri/dotfiles/niri/config.kdl"
 STATIC_CONFIG_TARGET="$NIRI_DIR/config.kdl"
 STATIC_OUTPUTS_SOURCE="$repo_root/modules/niri/dotfiles/niri/outputs.kdl"
@@ -36,6 +38,14 @@ if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
   chown -R "$REAL_USER:$USER_GROUP" "$RUNTIME_DIR" 2>/dev/null || true
 else
   mkdir -p "$RUNTIME_DIR"
+fi
+
+# Local/debug overrides are kept as regular user files so config reloads do not
+# spam optional-include warnings, while the repo remains the source of truth.
+if [ "$(id -u)" -eq 0 ]; then
+  run_as_user touch "$LOCAL_CONFIG_FILE" "$RUNTIME_DEBUG_FILE"
+else
+  touch "$LOCAL_CONFIG_FILE" "$RUNTIME_DEBUG_FILE"
 fi
 
 if [ -f "$STATIC_OUTPUTS_SOURCE" ]; then

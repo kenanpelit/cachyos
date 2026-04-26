@@ -1,5 +1,28 @@
 # Clipper Plugin - Comprehensive Changelog
 
+## Version 2.4.4 (2026-04-26)
+
+### Critical data-loss fix: notecards never reached disk
+
+If you lost a notecard between v2.4.3 and v2.4.4 — I'm sorry. This was my fault. The "atomic write" hotfix shipped in v2.4.3 turned out to be **silently broken** on noctalia-qs and similar Quickshell builds: `Quickshell.execDetached(["sh", "-c", script, ...])` with the multi-arg shell pipeline never actually executed the script. Every `saveNoteCard()` call returned successfully, the note appeared in the panel UI, and a "Note created" toast was shown — but the file never landed in `~/.config/noctalia/plugins/clipper/notecards/`. On the next panel open, `loadNoteCards` saw nothing and the note was gone.
+
+The same path was used for `pinned.json` and notecard `.txt` exports, so those could vanish too under the same conditions.
+
+#### Root cause
+
+- `Quickshell.execDetached` with `["sh", "-c", script, "$0", "$1", "$2", "$3"]` (where `$3` was a long base64 string) silently no-ops in noctalia-qs 0.0.x. The simpler 2–3 argv calls (`mkdir -p`, `find ... -delete`) work; the long-argv save path does not. There is no error, no log, no partial file — the script never starts.
+- `loadNoteCards` used `jq -s '.' *.json 2>/dev/null || echo '[]'`, which is **all-or-nothing**: a single 0-byte or malformed file in the directory made jq exit non-zero, the fallback returned an empty array, and the in-memory `noteCards` was wiped — making every other note invisible in the UI even though it was intact on disk.
+
+#### Fix
+
+- **New atomic-write engine.** Replaced `Quickshell.execDetached` + base64 with a queued `Process` that pipes the raw payload to `sh -c 'cat > "$1.tmp" && [ -s "$1.tmp" ] && mv -f "$1.tmp" "$1" && { [ -z "$2" ] || [ "$2" = "$1" ] || rm -f "$2"; } || { rm -f "$1.tmp"; exit 1; }'` via stdin. Process gives us a real exit code and stderr, so genuine failures are now logged via `Logger.w` instead of vanishing. The queue serializes saves because Process is single-instance.
+- **Resilient loader.** `loadNoteCards` now validates each `*.json` file individually with `jq -e .` and concatenates only the valid ones into the slurp. A single corrupt or 0-byte file no longer wipes the rest. The `onExited` handler also stops blanking `noteCards` on shell errors or empty results — when the disk read gives nothing useful, in-memory state is preserved instead of cleared.
+- **No more base64.** Payload travels through stdin, so Polish / Cyrillic / emoji titles and content survive verbatim without escaping concerns. The `stringToBase64` helper and the `atomicWriteBase64` shim are gone.
+
+Applied to `savePinnedFile`, `saveNoteCard`, `updateNoteCard`, and `exportNoteCard`. Tested by reproducing the disappearing-notecard case (rename + reopen panel) on noctalia-qs 0.0.12 — pre-fix: file vanished; post-fix: file persists across restarts.
+
+If you can still reproduce a disappearance, please open an issue with `grep Clipper /run/user/$(id -u)/quickshell/by-id/*/log.log | tail -40`. The `atomicWrite FAIL` lines now carry exit code and stderr.
+
 ## Version 2.4.3 (2026-04-22)
 
 ### Data-loss hotfix: atomic writes for pinned items and notecards
