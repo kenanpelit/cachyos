@@ -57,11 +57,11 @@ EOF
 
   jq -r '
     .workspaces[]
-    | "  Alt+\(.id) allow-inhibiting=false repeat=false hotkey-overlay-title=\"Here: \(.here.label // .hereLabel)\" { spawn \"niri-osc\" \"set\" \"here\" \"\(.here.target // .hereTarget)\"; }"
+    | "  Alt+\(.id) allow-inhibiting=false repeat=false hotkey-overlay-title=\"Here: \(.here.label // .hereLabel)\" { spawn \"niri-workspace-smart\" \"here\" \"\(.here.target // .hereTarget)\"; }"
   ' "${SOURCE_FILE}"
 
   cat <<'EOF'
-  Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-osc" "set" "here" "all"; }
+  Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-workspace-smart" "all"; }
 
   // Global window rearrangement.
   Mod+Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "niri-osc" "set" "go"; }

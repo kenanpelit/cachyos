@@ -3200,6 +3200,7 @@ doctor)
 
     maybe() { command -v "$1" >/dev/null 2>&1; }
     kv() { printf '%-28s %s\n' "$1" "${2:-}"; }
+    flatten_single_line() { tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//'; }
 
     show_tree=false
     show_logs=false
@@ -3391,10 +3392,26 @@ doctor)
     echo
 
     if maybe niri; then
+      kv "niri --version" "$(niri --version 2>/dev/null | flatten_single_line || echo unknown)"
       if niri msg version >/dev/null 2>&1; then
         kv "niri msg version" "ok"
       else
         kv "niri msg version" "failed (session/env?)"
+      fi
+      if maybe jq && niri msg -j workspaces >/dev/null 2>&1; then
+        kv "niri msg workspaces" "$(niri msg -j workspaces 2>/dev/null | jq -r 'length | tostring + " workspace(s)"' 2>/dev/null || echo ok)"
+      fi
+      if maybe jq && niri msg -j windows >/dev/null 2>&1; then
+        kv "niri msg windows" "$(niri msg -j windows 2>/dev/null | jq -r 'length | tostring + " window(s)"' 2>/dev/null || echo ok)"
+      fi
+      if niri msg --json casts >/dev/null 2>&1; then
+        if maybe jq; then
+          kv "niri msg casts" "$(niri msg --json casts 2>/dev/null | jq -r 'length | tostring + " active cast(s)"' 2>/dev/null || echo ok)"
+        else
+          kv "niri msg casts" "ok"
+        fi
+      else
+        kv "niri msg casts" "unavailable"
       fi
     fi
 
@@ -3492,6 +3509,38 @@ doctor)
     check_runtime_include_file "include:runtime/zen.kdl" "runtime/zen.kdl" "${niri_runtime_dir}/zen.kdl"
     check_runtime_include_file "include:runtime/debug.kdl" "runtime/debug.kdl" "${niri_runtime_dir}/debug.kdl"
     check_runtime_include_file "include:local.kdl" "~/.config/niri/local.kdl" "${niri_config_dir}/local.kdl"
+
+    echo
+    echo "Generated contracts"
+    for generated_path in \
+      "${niri_config_dir}/generated/theme.kdl" \
+      "${niri_config_dir}/generated/workspace-rules.kdl" \
+      "${niri_config_dir}/generated/workspace-shortcuts.kdl" \
+      "${niri_config_dir}/runtime/workspace-rules.tsv" \
+      "${niri_config_dir}/runtime/workspace-here.tsv" \
+      "${niri_config_dir}/runtime/keybind-cheatsheet.conf" \
+      "${niri_config_dir}/conf/41-background-effects.kdl" \
+      "${niri_config_dir}/conf/31-window-rules-privacy.kdl"; do
+      label="file:${generated_path##*/}"
+      if [[ -e "$generated_path" ]]; then
+        if [[ -L "$generated_path" ]]; then
+          kv "$label" "symlink->$(readlink -f "$generated_path" 2>/dev/null || echo unknown)"
+        else
+          kv "$label" "ok"
+        fi
+      else
+        kv "$label" "missing"
+      fi
+    done
+
+    portal_config="${XDG_CONFIG_HOME:-$HOME/.config}/xdg-desktop-portal/niri-portals.conf"
+    [[ -f "$portal_config" ]] || portal_config="${XDG_CONFIG_HOME:-$HOME/.config}/xdg-desktop-portal/portals.conf"
+    if [[ -f "$portal_config" ]]; then
+      echo
+      echo "Portal routing"
+      kv "portal config" "$portal_config"
+      grep -E 'ScreenCast|Screenshot|RemoteDesktop|FileChooser|Settings' "$portal_config" 2>/dev/null || true
+    fi
   )
   ;;
 

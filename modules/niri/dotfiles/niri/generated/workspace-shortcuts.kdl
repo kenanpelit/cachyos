@@ -29,16 +29,16 @@ binds {
   // ----------------------------------------------------------------------
   // "Here" Actions (Workspace shortcuts for specific apps)
   // ----------------------------------------------------------------------
-  Alt+1 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Kenp" { spawn "niri-osc" "set" "here" "Kenp"; }
-  Alt+2 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: TmuxKenp" { spawn "niri-osc" "set" "here" "TmuxKenp"; }
-  Alt+3 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ai" { spawn "niri-osc" "set" "here" "Ai"; }
-  Alt+4 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: CompecTA" { spawn "niri-osc" "set" "here" "CompecTA"; }
-  Alt+5 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: WebCord" { spawn "niri-osc" "set" "here" "WebCord"; }
-  Alt+6 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Telegram" { spawn "niri-osc" "set" "here" "org.telegram.desktop"; }
-  Alt+7 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: YouTube" { spawn "niri-osc" "set" "here" "brave-youtube.com__-Default"; }
-  Alt+8 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Spotify" { spawn "niri-osc" "set" "here" "spotify"; }
-  Alt+9 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ferdium" { spawn "niri-osc" "set" "here" "ferdium"; }
-  Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-osc" "set" "here" "all"; }
+  Alt+1 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Kenp" { spawn "niri-workspace-smart" "here" "Kenp"; }
+  Alt+2 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: TmuxKenp" { spawn "niri-workspace-smart" "here" "TmuxKenp"; }
+  Alt+3 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ai" { spawn "niri-workspace-smart" "here" "Ai"; }
+  Alt+4 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: CompecTA" { spawn "niri-workspace-smart" "here" "CompecTA"; }
+  Alt+5 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: WebCord" { spawn "niri-workspace-smart" "here" "WebCord"; }
+  Alt+6 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Telegram" { spawn "niri-workspace-smart" "here" "org.telegram.desktop"; }
+  Alt+7 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: YouTube" { spawn "niri-workspace-smart" "here" "brave-youtube.com__-Default"; }
+  Alt+8 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Spotify" { spawn "niri-workspace-smart" "here" "spotify"; }
+  Alt+9 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: Ferdium" { spawn "niri-workspace-smart" "here" "ferdium"; }
+  Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Here: ALL" { spawn "niri-workspace-smart" "all"; }
 
   // Global window rearrangement.
   Mod+Alt+0 allow-inhibiting=false repeat=false hotkey-overlay-title="Go (Arrange Windows)" { spawn "niri-osc" "set" "go"; }

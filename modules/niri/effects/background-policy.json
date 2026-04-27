@@ -1,0 +1,22 @@
+{
+  "description": "Niri compositor-side background effect policy. Keep transient feedback surfaces crisp.",
+  "blur": {
+    "passes": 2,
+    "offset": 3,
+    "noise": 0.01,
+    "saturation": 1.15
+  },
+  "wallpaperBackdropNamespaces": [
+    "^(wallpaper|noctalia-wallpaper-.+|noctalia-wallpaper-video-.+|noctalia-parallax-.+)$"
+  ],
+  "blurNamespaces": [
+    "^noctalia-(popup|popupmenu|control|control-center|settings|session-menu|selection-menu).*$"
+  ],
+  "crispNamespaces": [
+    "^noctalia[-:]niri-overview-launcher.*$",
+    "^noctalia:(niri-overview-launcher).*$",
+    "^noctalia-launcher-overlay.*$",
+    "^noctalia-osd.*$",
+    "^(noctalia-region-selector|noctalia-record|noctalia-measure|noctalia-annotate|noctalia-mirror|noctalia-pin|noctalia-shell:regionSelector)$"
+  ]
+}

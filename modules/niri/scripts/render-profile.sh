@@ -12,6 +12,7 @@ source "${REPO_ROOT}/modules/base/lib/core.sh"
 
 PROFILE_MANIFEST="${NIRI_PROFILE_MANIFEST:-${MODULE_DIR}/profiles/profile.env}"
 WORKSPACE_MAP_FILE="${NIRI_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
+LAYOUT_RECIPES_FILE="${NIRI_LAYOUT_RECIPES_FILE:-${MODULE_DIR}/layouts/recipes.json}"
 TARGET_RUNTIME_DIR="${NIRI_RUNTIME_DIR:-${USER_HOME}/.config/niri/runtime}"
 WORKSPACES_OUT="${TARGET_RUNTIME_DIR}/workspaces-auto.kdl"
 
@@ -74,6 +75,7 @@ fi
 [[ -r "${PROFILE_MANIFEST}" ]] || die "Profile manifest not found: ${PROFILE_MANIFEST}"
 [[ -r "${SHARED_MONITOR_MANIFEST}" ]] || die "Shared monitor manifest not found: ${SHARED_MONITOR_MANIFEST}"
 [[ -r "${WORKSPACE_MAP_FILE}" ]] || die "Workspace map not found: ${WORKSPACE_MAP_FILE}"
+[[ -r "${LAYOUT_RECIPES_FILE}" ]] || die "Layout recipes file not found: ${LAYOUT_RECIPES_FILE}"
 command -v python3 >/dev/null 2>&1 || die "python3 is required for render-profile.sh"
 
 # shellcheck source=/dev/null
@@ -85,7 +87,7 @@ shared_monitor_checksum="$(shared_monitor_manifest_checksum)"
 manifest_checksum="$(
   {
     printf '%s  %s\n' "${shared_monitor_checksum}" "${SHARED_MONITOR_MANIFEST}"
-    sha256sum "${PROFILE_MANIFEST}" "${WORKSPACE_MAP_FILE}"
+    sha256sum "${PROFILE_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${LAYOUT_RECIPES_FILE}"
   } |
     awk '{print $1}' |
     sha256sum |
@@ -100,7 +102,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-python3 - "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${NIRI_MONITOR_PROFILE}" "${manifest_checksum}" "${tmp_workspaces}" <<'PY'
+python3 - "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${LAYOUT_RECIPES_FILE}" "${NIRI_MONITOR_PROFILE}" "${manifest_checksum}" "${tmp_workspaces}" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -109,16 +111,19 @@ import yaml
 
 manifest_path = Path(sys.argv[1])
 workspace_path = Path(sys.argv[2])
-profile_name = sys.argv[3]
-checksum = sys.argv[4]
-out_path = Path(sys.argv[5])
+recipes_path = Path(sys.argv[3])
+profile_name = sys.argv[4]
+checksum = sys.argv[5]
+out_path = Path(sys.argv[6])
 
 manifest = yaml.safe_load(manifest_path.read_text())
 workspace_data = json.loads(workspace_path.read_text())
+recipe_data = json.loads(recipes_path.read_text())
 
 monitors = manifest.get("monitors", [])
 profiles = manifest.get("profiles", {})
 workspaces = workspace_data.get("workspaces", [])
+recipes = recipe_data.get("recipes", {})
 profile = profiles.get(profile_name)
 
 if profile is None:
@@ -126,6 +131,60 @@ if profile is None:
 
 monitors_by_id = {monitor["id"]: monitor for monitor in monitors}
 workspaces_by_id = {str(workspace["id"]): workspace for workspace in workspaces}
+
+
+def normalize_recipe_names(layout):
+    if not isinstance(layout, dict):
+        return []
+    raw = (
+        layout.get("niriRecipes")
+        if "niriRecipes" in layout
+        else layout.get("niriRecipe", layout.get("recipe", []))
+    )
+    if raw in (None, ""):
+        return []
+    if isinstance(raw, str):
+        return [raw]
+    if isinstance(raw, list) and all(isinstance(item, str) and item for item in raw):
+        return raw
+    raise SystemExit("layout.niriRecipe/niriRecipes must be a string or array of strings")
+
+
+def niri_layout_lines(workspace):
+    workspace_id = str(workspace["id"])
+    layout = workspace.get("layout", {})
+    if layout is None:
+        return []
+    if isinstance(layout, list):
+        return layout
+    if not isinstance(layout, dict):
+        raise SystemExit(f"workspace {workspace_id} layout must be an object or list")
+
+    lines = []
+    for recipe_name in normalize_recipe_names(layout):
+        recipe = recipes.get(recipe_name)
+        if not isinstance(recipe, dict):
+            raise SystemExit(f"workspace {workspace_id} references unknown Niri layout recipe: {recipe_name}")
+        recipe_lines = recipe.get("lines", [])
+        if not isinstance(recipe_lines, list) or not all(isinstance(line, str) for line in recipe_lines):
+            raise SystemExit(f"Niri layout recipe {recipe_name} must contain string lines")
+        lines.extend(recipe_lines)
+
+    inline_lines = layout.get("lines", [])
+    if inline_lines is None:
+        inline_lines = []
+    if not isinstance(inline_lines, list) or not all(isinstance(line, str) for line in inline_lines):
+        raise SystemExit(f"workspace {workspace_id} layout.lines must be an array of strings")
+    lines.extend(inline_lines)
+
+    deduped = []
+    seen = set()
+    for line in lines:
+        if line in seen:
+            continue
+        seen.add(line)
+        deduped.append(line)
+    return deduped
 
 lines = [
     "// Generated from modules/niri/profiles/profile.env and shared/wm/monitors.yaml.",
@@ -153,12 +212,7 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
 
     workspace_name = workspace["name"]
     output_name = monitor.get("wayland_name", monitor.get("niri_name", monitor["id"]))
-    layout = workspace.get("layout", {})
-    layout_lines = []
-    if isinstance(layout, list):
-        layout_lines = layout
-    elif isinstance(layout, dict):
-        layout_lines = layout.get("lines", [])
+    layout_lines = niri_layout_lines(workspace)
 
     lines.append(f'workspace "{workspace_name}" {{')
     lines.append(f'  open-on-output "{output_name}"')

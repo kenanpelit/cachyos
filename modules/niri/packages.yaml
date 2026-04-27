@@ -2,6 +2,7 @@ description: Niri compositor packages
 
 packages:
   - niri-git
+  - xwayland-satellite
   - jq
   - power-profiles-daemon
   - wl-clipboard

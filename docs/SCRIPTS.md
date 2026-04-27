@@ -500,6 +500,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `niri-workspace-smart`
+**Description:** No description provided.
+
+**Usage:** `niri-workspace-smart`
+
+---
+
 ### 📂 `noctalia-launch`
 **Description:** Prepare session-specific Noctalia state and launch the shell.
 

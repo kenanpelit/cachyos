@@ -1,3 +1,7 @@
+// Generated from modules/niri/effects/background-policy.json.
+// Update the policy and rerun modules/niri/scripts/render-background-effects.sh.
+// Source checksum: dcdc4f7c17699ca4149ed2e4740c5df4f0fc51fdcdfefd2904d66abe41075152
+
 // Niri 26.04 background effects. Keep this conservative: xray blur is cheap,
 // while non-xray blur is still experimental and intentionally not enabled.
 
@@ -14,13 +18,10 @@ layer-rule {
   place-within-backdrop true
 }
 
-// Noctalia shell surfaces already use compositor blur where supported. These
-// rules cover panels/popups that rely on the compositor-side background effect.
-// Keep overview/launcher overlays out of this set: when opened from the
-// four-finger overview gesture they can cover the visible workspaces and make
-// the whole overview look like a blurred blank layer.
+// Noctalia shell surfaces that are allowed to use compositor-side blur.
+// Overview, launcher, OSD, and capture overlays are intentionally excluded.
 layer-rule {
-  match namespace=r#"^noctalia-(popup|popupmenu|control|control-center|settings|session-menu|osd|selection-menu).*$"#
+  match namespace=r#"^noctalia-(popup|popupmenu|control|control-center|settings|session-menu|selection-menu).*$"#
 
   geometry-corner-radius 14
 
@@ -37,12 +38,13 @@ layer-rule {
   }
 }
 
-// The native Niri overview should stay inspectable. Disable blur explicitly for
-// companion overview/launcher surfaces even if they request it themselves.
+// Transient feedback and capture surfaces must stay readable.
 layer-rule {
   match namespace=r#"^noctalia[-:]niri-overview-launcher.*$"#
   match namespace=r#"^noctalia:(niri-overview-launcher).*$"#
   match namespace=r#"^noctalia-launcher-overlay.*$"#
+  match namespace=r#"^noctalia-osd.*$"#
+  match namespace=r#"^(noctalia-region-selector|noctalia-record|noctalia-measure|noctalia-annotate|noctalia-mirror|noctalia-pin|noctalia-shell:regionSelector)$"#
 
   background-effect {
     blur false
@@ -52,14 +54,5 @@ layer-rule {
     background-effect {
       blur false
     }
-  }
-}
-
-// Screenshot/recording overlays must stay crisp and unblurred.
-layer-rule {
-  match namespace=r#"^(noctalia-region-selector|noctalia-record|noctalia-measure|noctalia-annotate|noctalia-mirror|noctalia-pin|noctalia-shell:regionSelector)$"#
-
-  background-effect {
-    blur false
   }
 }

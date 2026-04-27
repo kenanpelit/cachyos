@@ -66,6 +66,8 @@ fi
 render_profile_script="$script_dir/render-profile.sh"
 render_workspace_assets_script="$script_dir/render-workspace-assets.sh"
 render_theme_script="$script_dir/render-theme.sh"
+render_background_effects_script="$script_dir/render-background-effects.sh"
+render_keybind_cheatsheet_script="$script_dir/render-keybind-cheatsheet.sh"
 shared_monitor_assets_script="$repo_root/shared/wm/render-monitor-assets.sh"
 
 legacy_runtime_files=(
@@ -100,6 +102,14 @@ if [[ -x "$render_theme_script" ]]; then
   fi
 fi
 
+if [[ -x "$render_background_effects_script" ]]; then
+  if [ "$(id -u)" -eq 0 ]; then
+    run_as_user "$render_background_effects_script"
+  else
+    "$render_background_effects_script"
+  fi
+fi
+
 if [[ -x "$render_profile_script" ]]; then
   if [ "$(id -u)" -eq 0 ]; then
     run_as_user "$render_profile_script"
@@ -114,6 +124,18 @@ if [[ -x "$render_workspace_assets_script" ]]; then
   else
     NIRI_RUNTIME_DIR="$RUNTIME_DIR" "$render_workspace_assets_script" --runtime-dir "$RUNTIME_DIR"
   fi
+fi
+
+if [[ -x "$render_keybind_cheatsheet_script" ]]; then
+  if [ "$(id -u)" -eq 0 ]; then
+    run_as_user "$render_keybind_cheatsheet_script"
+  else
+    "$render_keybind_cheatsheet_script"
+  fi
+fi
+
+if [[ -f "$STATIC_GENERATED_SOURCE/keybind-cheatsheet.conf" ]]; then
+  run_as_user ln -sfnT "$STATIC_GENERATED_SOURCE/keybind-cheatsheet.conf" "$RUNTIME_DIR/keybind-cheatsheet.conf"
 fi
 
 if [ "$(id -u)" -eq 0 ] && [ -n "$USER_GROUP" ]; then
