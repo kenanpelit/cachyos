@@ -204,6 +204,7 @@ packages:
 - vlc-plugins-all
 - vpl-gpu-rt
 - vulkan-intel
+- webkit2gtk-bin
 - which
 - wireless-regdb
 - wofi
