@@ -1,0 +1,3 @@
+description: makepkg build acceleration packages
+packages:
+  - ccache

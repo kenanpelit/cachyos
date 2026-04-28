@@ -1,0 +1,11 @@
+tags:
+- tool
+- build
+description: makepkg build acceleration and compiler cache settings
+depends_on:
+- base
+- pacman
+packages:
+- packages.yaml
+post_install_hook: scripts/install.sh
+post_hook_behavior: always

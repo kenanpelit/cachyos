@@ -271,6 +271,14 @@
           "desc": "Toggle Overview"
         },
         {
+          "keys": "Super + Ctrl + O",
+          "desc": "Open Overview"
+        },
+        {
+          "keys": "Super + Shift + Ctrl + O",
+          "desc": "Close Overview"
+        },
+        {
           "keys": "Super + P",
           "desc": "Toggle Global"
         },
@@ -322,6 +330,26 @@
         {
           "keys": "Super + Ctrl + W",
           "desc": "Next Layout"
+        },
+        {
+          "keys": "Super + Ctrl + H",
+          "desc": "Scroller Stack Left"
+        },
+        {
+          "keys": "Super + Ctrl + L",
+          "desc": "Scroller Stack Right"
+        },
+        {
+          "keys": "Super + Ctrl + K",
+          "desc": "Scroller Stack Up"
+        },
+        {
+          "keys": "Super + Ctrl + J",
+          "desc": "Scroller Stack Down"
+        },
+        {
+          "keys": "Super + Z",
+          "desc": "Zoom Master"
         },
         {
           "keys": "Super + Shift + A",
@@ -391,6 +419,26 @@
         {
           "keys": "W",
           "desc": "Next Layout"
+        },
+        {
+          "keys": "Alt + H",
+          "desc": "Scroller Stack Left"
+        },
+        {
+          "keys": "Alt + L",
+          "desc": "Scroller Stack Right"
+        },
+        {
+          "keys": "Alt + K",
+          "desc": "Scroller Stack Up"
+        },
+        {
+          "keys": "Alt + J",
+          "desc": "Scroller Stack Down"
+        },
+        {
+          "keys": "Z",
+          "desc": "Zoom Master"
         },
         {
           "keys": "G",
@@ -559,6 +607,10 @@
           "desc": "Toggle Dropdown Terminal"
         },
         {
+          "keys": "Super + Alt + F",
+          "desc": "Toggle Yazi Scratchpad"
+        },
+        {
           "keys": "Super + Alt + ENTER",
           "desc": "SemsuMo Daily"
         },
@@ -584,7 +636,7 @@
         },
         {
           "keys": "Super + Alt + V",
-          "desc": "Clipse"
+          "desc": "Toggle Clipse"
         }
       ]
     },
@@ -679,6 +731,22 @@
         {
           "keys": "M",
           "desc": "Move Window to Next Monitor"
+        },
+        {
+          "keys": "P",
+          "desc": "Detect Monitor Profile"
+        },
+        {
+          "keys": "V",
+          "desc": "Start Virtual Output"
+        },
+        {
+          "keys": "Shift + V",
+          "desc": "Stop Virtual Output"
+        },
+        {
+          "keys": "S",
+          "desc": "Virtual Output Status"
         },
         {
           "keys": "ESC",
@@ -814,6 +882,10 @@
         {
           "keys": "Super + Ctrl + Alt + D",
           "desc": "Open Session Doctor"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + L",
+          "desc": "Layer Audit"
         },
         {
           "keys": "Alt + SHIFT",

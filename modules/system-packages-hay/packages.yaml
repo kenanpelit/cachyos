@@ -33,6 +33,7 @@ packages:
 - cachyos-wallpapers
 - cantarell-fonts
 - capitaine-cursors
+- ccache
 - chaotic-keyring
 - chaotic-mirrorlist
 - chwd
@@ -125,6 +126,7 @@ packages:
 - mesa-utils
 - micro
 - modemmanager
+- modprobed-db
 - mpvpaper
 - mtools
 - mullvad-browser-bin

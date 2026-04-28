@@ -4,6 +4,7 @@ enabled_modules:
 - base
 - pacman
 - paru
+- makepkg
 - xdg-dirs
 - scripts
 # - sops # disabled: requires manual creation of modules/sops/files/keys.txt.age before sync
