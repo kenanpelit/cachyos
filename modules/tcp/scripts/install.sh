@@ -16,4 +16,8 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 ${SUDO} install -m 644 "${SRC}" "${DST}"
-${SUDO} sysctl --system >/dev/null 2>&1 || true
+if command -v systemd-sysctl >/dev/null 2>&1; then
+  ${SUDO} systemd-sysctl >/dev/null 2>&1 || true
+else
+  ${SUDO} sysctl --system >/dev/null 2>&1 || true
+fi

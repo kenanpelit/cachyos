@@ -5,12 +5,15 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODS_SRC="${SCRIPT_DIR}/../dotfiles/modules-load.d/99-kernel.conf"
 TP_SRC="${SCRIPT_DIR}/../dotfiles/modprobe.d/thinkpad.conf"
 BL_SRC="${SCRIPT_DIR}/../dotfiles/modprobe.d/blacklist-kernel.conf"
-I915_SRC="${SCRIPT_DIR}/../dotfiles/modprobe.d/i915-intel-gpu.conf"
+ZRAM_SRC="${SCRIPT_DIR}/../dotfiles/zram-generator.conf"
+SYSCTL_SRC="${SCRIPT_DIR}/../dotfiles/sysctl.d/99-linux-meteor.conf"
 
 MODS_DST="/etc/modules-load.d/99-kernel.conf"
 TP_DST="/etc/modprobe.d/thinkpad.conf"
 BL_DST="/etc/modprobe.d/blacklist-kernel.conf"
-I915_DST="/etc/modprobe.d/i915-intel-gpu.conf"
+ZRAM_DST="/etc/systemd/zram-generator.conf"
+SYSCTL_DST="/etc/sysctl.d/99-linux-meteor.conf"
+I915_LEGACY_DST="/etc/modprobe.d/i915-intel-gpu.conf"
 
 SUDO=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -32,7 +35,17 @@ install_if_changed() {
 install_if_changed "${MODS_SRC}" "${MODS_DST}"
 install_if_changed "${TP_SRC}" "${TP_DST}"
 install_if_changed "${BL_SRC}" "${BL_DST}"
-install_if_changed "${I915_SRC}" "${I915_DST}"
+install_if_changed "${ZRAM_SRC}" "${ZRAM_DST}"
+install_if_changed "${SYSCTL_SRC}" "${SYSCTL_DST}"
+${SUDO} rm -f "${I915_LEGACY_DST}"
+
+if command -v systemctl >/dev/null 2>&1; then
+  ${SUDO} systemctl daemon-reload >/dev/null 2>&1 || true
+fi
+
+if command -v systemd-sysctl >/dev/null 2>&1; then
+  ${SUDO} systemd-sysctl --prefix=/net/core/default_qdisc --prefix=/net/ipv4/tcp_congestion_control >/dev/null 2>&1 || true
+fi
 
 strip_shell_quotes() {
   local value="$1"
@@ -84,10 +97,6 @@ apply_grub_cmdline() {
     "intel_pstate active"
     "intel_idle.max_cstate 7"
     "processor.ignore_ppc 1"
-    "i915.enable_guc 3"
-    "i915.enable_fbc 1"
-    "i915.enable_dc 0"
-    "i915.enable_psr 0"
     "mem_sleep_default s2idle"
   )
   local managed_keys=(

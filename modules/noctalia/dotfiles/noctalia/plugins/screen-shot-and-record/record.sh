@@ -131,7 +131,7 @@ else
         fi
     fi
     if [[ $SOUND_FLAG -eq 1 ]]; then
-        wf-recorder --pixel-format yuv420p -f './recording_'"$(getdate)"'.mp4' -t --geometry "$MANUAL_REGION" "${FILTER_ARGS[@]}" --audio"
+        wf-recorder --pixel-format yuv420p -f './recording_'"$(getdate)"'.mp4' -t --geometry "$MANUAL_REGION" "${FILTER_ARGS[@]}" --audio
     else
         wf-recorder --pixel-format yuv420p -f './recording_'"$(getdate)"'.mp4' -t --geometry "$MANUAL_REGION" "${FILTER_ARGS[@]}"
     fi

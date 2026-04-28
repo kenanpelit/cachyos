@@ -178,6 +178,10 @@
           "desc": "Cycle Window Prev"
         },
         {
+          "keys": "Super + Ctrl + TAB",
+          "desc": "Focus Last Window"
+        },
+        {
           "keys": "Super + LEFT",
           "desc": "Focus Left"
         },
@@ -257,6 +261,18 @@
         {
           "keys": "Super + O",
           "desc": "Toggle Overlay"
+        },
+        {
+          "keys": "Super + Alt + C",
+          "desc": "Center Window"
+        },
+        {
+          "keys": "Super + Shift + Ctrl + B",
+          "desc": "Toggle Border"
+        },
+        {
+          "keys": "Super + Shift + Ctrl + G",
+          "desc": "Toggle All Floating"
         },
         {
           "keys": "Super + I",
@@ -373,6 +389,10 @@
       "title": "Layout Mode",
       "binds": [
         {
+          "keys": "TAB",
+          "desc": "Focus Last Window"
+        },
+        {
           "keys": "H",
           "desc": "Adjust Master Width -0.05"
         },
@@ -387,6 +407,38 @@
         {
           "keys": "K",
           "desc": "Adjust Master Count +1"
+        },
+        {
+          "keys": "Ctrl + H",
+          "desc": "Move Floating Left"
+        },
+        {
+          "keys": "Ctrl + L",
+          "desc": "Move Floating Right"
+        },
+        {
+          "keys": "Ctrl + K",
+          "desc": "Move Floating Up"
+        },
+        {
+          "keys": "Ctrl + J",
+          "desc": "Move Floating Down"
+        },
+        {
+          "keys": "Shift + H",
+          "desc": "Resize Floating Left"
+        },
+        {
+          "keys": "Shift + L",
+          "desc": "Resize Floating Right"
+        },
+        {
+          "keys": "Shift + K",
+          "desc": "Resize Floating Up"
+        },
+        {
+          "keys": "Shift + J",
+          "desc": "Resize Floating Down"
         },
         {
           "keys": "R",
@@ -443,6 +495,26 @@
         {
           "keys": "G",
           "desc": "Toggle Gaps"
+        },
+        {
+          "keys": "-",
+          "desc": "Adjust Gaps -2"
+        },
+        {
+          "keys": "=",
+          "desc": "Adjust Gaps +2"
+        },
+        {
+          "keys": "B",
+          "desc": "Toggle Border"
+        },
+        {
+          "keys": "F",
+          "desc": "Toggle All Floating"
+        },
+        {
+          "keys": "Alt + C",
+          "desc": "Center Window"
         },
         {
           "keys": "0",
@@ -595,6 +667,10 @@
       "title": "Applications",
       "binds": [
         {
+          "keys": "Super + Ctrl + Alt + D",
+          "desc": "Toggle Mango Doctor"
+        },
+        {
           "keys": "Super + V",
           "desc": "CopyQ Toggle"
         },
@@ -633,6 +709,10 @@
         {
           "keys": "Alt + N",
           "desc": "Anotes"
+        },
+        {
+          "keys": "Super + Alt + A",
+          "desc": "Toggle Wiremix"
         },
         {
           "keys": "Super + Alt + V",
@@ -747,6 +827,18 @@
         {
           "keys": "S",
           "desc": "Virtual Output Status"
+        },
+        {
+          "keys": "T",
+          "desc": "Toggle Trackpad"
+        },
+        {
+          "keys": "D",
+          "desc": "Toggle Monitor eDP-1"
+        },
+        {
+          "keys": "E",
+          "desc": "Spawn on Empty Tag 2"
         },
         {
           "keys": "ESC",
@@ -880,12 +972,20 @@
           "desc": "Refresh Session"
         },
         {
-          "keys": "Super + Ctrl + Alt + D",
-          "desc": "Open Session Doctor"
-        },
-        {
           "keys": "Super + Ctrl + Alt + L",
           "desc": "Layer Audit"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + G",
+          "desc": "Gaming Mode"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + N",
+          "desc": "Normal Mode"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + P",
+          "desc": "Battery Mode"
         },
         {
           "keys": "Alt + SHIFT",

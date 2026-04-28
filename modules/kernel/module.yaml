@@ -1,7 +1,7 @@
 tags:
 - core
 - system
-description: Kernel modules and boot parameters (ThinkPad/Intel)
+description: Kernel modules, xe-first boot parameters, zram, and Meteor runtime overrides
 depends_on:
 - base
 post_install_hook: scripts/install.sh
