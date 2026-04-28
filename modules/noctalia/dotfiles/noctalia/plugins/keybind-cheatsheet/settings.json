@@ -708,7 +708,7 @@
         },
         {
           "keys": "Super + Ctrl + W",
-          "desc": "Toggle Tabbed Mode"
+          "desc": "Toggle Column Tabs"
         },
         {
           "keys": "Super + Ctrl + BackSpace",

@@ -47,7 +47,7 @@ binds {
 
   Alt+G repeat=false hotkey-overlay-title="Max to Edges" { maximize-window-to-edges; }
   Mod+Alt+O repeat=false hotkey-overlay-title="Overview (Niri)" { toggle-overview; }
-  Mod+Ctrl+W hotkey-overlay-title="Toggle Tabbed Mode" { toggle-column-tabbed-display; }
+  Mod+Ctrl+W hotkey-overlay-title="Toggle Column Tabs" { toggle-column-tabbed-display; }
 
   Mod+G hotkey-overlay-title="Toggle Float/Tile" { spawn "niri-osc" "set" "float"; }
   Mod+Ctrl+BackSpace hotkey-overlay-title="Focus Float/Tile" { switch-focus-between-floating-and-tiling; }
