@@ -921,7 +921,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `screenshot`
-**Description:** Screenshot helper for Hyprland, Niri, Sway, and GNOME
+**Description:** Screenshot helper for MangoWM, Hyprland, Niri, Sway, and GNOME
 
 **Usage:** `screenshot.sh [action]`
 
