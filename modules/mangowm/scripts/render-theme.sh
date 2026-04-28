@@ -40,11 +40,17 @@ tmp_theme="$(mktemp)"
 package_variant="${MANGO_PACKAGE_VARIANT:-full}"
 
 case "${package_variant}" in
-full)
+full | full-git)
 	preferred_package="mangowm-git"
 	;;
-wlonly)
+full-stable)
+	preferred_package="mangowm"
+	;;
+wlonly | wlonly-git)
 	preferred_package="mangowm-wlonly-git"
+	;;
+wlonly-stable)
+	preferred_package="mangowm-wlonly"
 	;;
 *)
 	echo "Unknown MANGO_PACKAGE_VARIANT: ${package_variant}" >&2
@@ -66,7 +72,7 @@ cat >"${tmp_theme}" <<EOF
 
 EOF
 
-if [[ "${package_variant}" != "wlonly" ]]; then
+if [[ "${package_variant}" != wlonly* ]]; then
 	cat >>"${tmp_theme}" <<EOF
 blur=${MANGO_BLUR}
 blur_layer=${MANGO_BLUR_LAYER}

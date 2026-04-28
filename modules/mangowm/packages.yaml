@@ -1,12 +1,12 @@
 # Generated from modules/mangowm/theme/theme.env.
 # Update the manifest and rerun modules/mangowm/scripts/render-packages.sh.
-# Source checksum: 87955a78ee54a01841de37e33074c6fa4a6aa72d5cb247389680c2c7e281d309
-# Package variant: full
+# Source checksum: cc6778fb55749a7a8b149860485cf8ff2b901434af4fe5d1c5a9a9df0060f450
+# Package variant: full-stable
 
 description: MangoWM packages
 
 packages:
-  - mangowm-git
+  - mangowm
   - uwsm
   - polkit-gnome
   - network-manager-applet
@@ -18,3 +18,6 @@ packages:
   - cliphist
   - brightnessctl
   - jq
+  - wlr-randr
+  - grim
+  - slurp

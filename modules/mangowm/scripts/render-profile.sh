@@ -78,6 +78,20 @@ source "${PROFILE_MANIFEST}"
 
 : "${MANGO_MONITOR_PROFILE:=desk}"
 
+connected_outputs=""
+if [[ "${MANGO_MONITOR_PROFILE}" == "auto" ]]; then
+	if command -v mmsg >/dev/null 2>&1; then
+		connected_outputs="$(mmsg -O 2>/dev/null | paste -sd, - || true)"
+	fi
+	if [[ -z "${connected_outputs}" ]] && command -v wlr-randr >/dev/null 2>&1; then
+		connected_outputs="$(
+			wlr-randr 2>/dev/null |
+				awk '/^[^[:space:]]/ { print $1 }' |
+				paste -sd, - || true
+		)"
+	fi
+fi
+
 tmp_profile="$(mktemp)"
 tmp_binds="$(mktemp)"
 cleanup() {
@@ -85,7 +99,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-python3 - "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${MANGO_MONITOR_PROFILE}" "${tmp_profile}" "${tmp_binds}" <<'PY'
+python3 - "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${MANGO_MONITOR_PROFILE}" "${connected_outputs}" "${tmp_profile}" "${tmp_binds}" <<'PY'
 import hashlib
 import json
 import re
@@ -98,8 +112,9 @@ import yaml
 manifest_path = Path(sys.argv[1])
 workspace_path = Path(sys.argv[2])
 profile_name = sys.argv[3]
-out_path = Path(sys.argv[4])
-binds_out_path = Path(sys.argv[5])
+connected_outputs = {item for item in sys.argv[4].split(",") if item}
+out_path = Path(sys.argv[5])
+binds_out_path = Path(sys.argv[6])
 
 manifest = yaml.safe_load(manifest_path.read_text())
 workspace_data = json.loads(workspace_path.read_text())
@@ -107,7 +122,6 @@ workspace_data = json.loads(workspace_path.read_text())
 monitors = manifest.get("monitors", [])
 profiles = manifest.get("profiles", {})
 workspaces = workspace_data.get("workspaces", [])
-profile = profiles.get(profile_name)
 
 SUPPORTED_LAYOUTS = {
     "tile",
@@ -124,11 +138,53 @@ SUPPORTED_LAYOUTS = {
     "tgmix",
 }
 
-if profile is None:
-    raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
-
 monitors_by_id = {monitor["id"]: monitor for monitor in monitors}
 workspaces_by_id = {str(workspace["id"]): workspace for workspace in workspaces}
+
+
+def monitor_name_for_mango(monitor):
+    return monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
+
+
+def profile_output_names(profile):
+    names = []
+    for output in profile.get("outputs", []):
+        monitor_id = output.get("monitor")
+        if not monitor_id:
+            continue
+        monitor = monitors_by_id.get(monitor_id)
+        if monitor is not None:
+            names.append(monitor_name_for_mango(monitor))
+    return names
+
+
+def resolve_profile_name(requested):
+    if requested != "auto":
+        return requested
+    if not connected_outputs:
+        return "desk" if "desk" in profiles else next(iter(profiles), "")
+
+    scored = []
+    for candidate_name, candidate_profile in profiles.items():
+        names = set(profile_output_names(candidate_profile))
+        if not names:
+            continue
+        matched = len(names & connected_outputs)
+        missing = len(names - connected_outputs)
+        extra = len(connected_outputs - names)
+        exact_subset = 1 if names <= connected_outputs else 0
+        scored.append((exact_subset, matched, -missing, -extra, candidate_name))
+
+    if not scored:
+        return "desk" if "desk" in profiles else next(iter(profiles), "")
+    scored.sort(reverse=True)
+    return scored[0][-1]
+
+
+selected_profile_name = resolve_profile_name(profile_name)
+profile = profiles.get(selected_profile_name)
+if profile is None:
+    raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
 
 checksum = hashlib.sha256(
     json.dumps(
@@ -163,10 +219,6 @@ def parse_position(raw_position, monitor):
         return int(x_raw), int(y_raw)
     position = monitor.get("position", {})
     return int(position.get("x", 0)), int(position.get("y", 0))
-
-
-def monitor_name_for_mango(monitor):
-    return monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
 
 
 def normalize_binary(value, field_name: str) -> int:
@@ -258,7 +310,7 @@ lines = [
     "# Update the shared manifests and rerun modules/mangowm/scripts/render-profile.sh.",
     f"# Source checksum: {checksum}",
     "",
-    f"# Active monitor profile: {profile_name}",
+    f"# Active monitor profile: {selected_profile_name}",
     "",
 ]
 
@@ -292,7 +344,7 @@ seen_workspaces = set()
 for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(item["id"])):
     workspace_id = str(workspace_ref["id"])
     if workspace_id in seen_workspaces:
-        raise SystemExit(f"Duplicate workspace mapping in profile '{profile_name}': {workspace_id}")
+        raise SystemExit(f"Duplicate workspace mapping in profile '{selected_profile_name}': {workspace_id}")
     seen_workspaces.add(workspace_id)
 
     workspace = workspaces_by_id.get(workspace_id)
@@ -302,7 +354,7 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     monitor = monitors_by_id.get(workspace_ref["monitor"])
     if monitor is None:
         raise SystemExit(
-            f"Unknown monitor '{workspace_ref['monitor']}' in workspace for profile '{profile_name}'"
+            f"Unknown monitor '{workspace_ref['monitor']}' in workspace for profile '{selected_profile_name}'"
         )
 
     monitor_name = monitor_name_for_mango(monitor)
@@ -324,7 +376,7 @@ bind_lines = [
     "# Update the shared manifests and rerun modules/mangowm/scripts/render-profile.sh.",
     f"# Source checksum: {checksum}",
     "",
-    f"# Active monitor profile: {profile_name}",
+    f"# Active monitor profile: {selected_profile_name}",
     "# Profile-aware workspace binds: switch follows the target monitor.",
     "# Shift-number moves are defined in conf.d/50-binds.conf via mango-tag-smart.",
     "# Alt binds focus the mapped app on the current tag, move it here if already open elsewhere, or launch it.",

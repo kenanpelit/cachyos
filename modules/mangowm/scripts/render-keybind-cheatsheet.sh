@@ -64,13 +64,27 @@ source "${PROFILE_MANIFEST}"
 
 : "${MANGO_MONITOR_PROFILE:=desk}"
 
+connected_outputs=""
+if [[ "${MANGO_MONITOR_PROFILE}" == "auto" ]]; then
+	if command -v mmsg >/dev/null 2>&1; then
+		connected_outputs="$(mmsg -O 2>/dev/null | paste -sd, - || true)"
+	fi
+	if [[ -z "${connected_outputs}" ]] && command -v wlr-randr >/dev/null 2>&1; then
+		connected_outputs="$(
+			wlr-randr 2>/dev/null |
+				awk '/^[^[:space:]]/ { print $1 }' |
+				paste -sd, - || true
+		)"
+	fi
+fi
+
 tmp_cheatsheet="$(mktemp)"
 cleanup() {
 	rm -f "${tmp_cheatsheet}"
 }
 trap cleanup EXIT
 
-python3 - "${BINDS_FILE}" "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${MANGO_MONITOR_PROFILE}" "${tmp_cheatsheet}" <<'PY'
+python3 - "${BINDS_FILE}" "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${MANGO_MONITOR_PROFILE}" "${connected_outputs}" "${tmp_cheatsheet}" <<'PY'
 import json
 import sys
 from collections import OrderedDict
@@ -82,20 +96,63 @@ binds_path = Path(sys.argv[1])
 monitors_path = Path(sys.argv[2])
 workspace_path = Path(sys.argv[3])
 profile_name = sys.argv[4]
-out_path = Path(sys.argv[5])
+connected_outputs = {item for item in sys.argv[5].split(",") if item}
+out_path = Path(sys.argv[6])
 
 monitor_manifest = yaml.safe_load(monitors_path.read_text())
 workspace_manifest = json.loads(workspace_path.read_text())
-profile = monitor_manifest.get("profiles", {}).get(profile_name)
-if profile is None:
-    raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
-
 monitors_by_id = {
     monitor["id"]: monitor for monitor in monitor_manifest.get("monitors", [])
 }
 workspaces_by_id = {
     str(workspace["id"]): workspace for workspace in workspace_manifest.get("workspaces", [])
 }
+profiles = monitor_manifest.get("profiles", {})
+
+
+def monitor_name_for_mango(monitor):
+    return monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
+
+
+def profile_output_names(profile):
+    names = []
+    for output in profile.get("outputs", []):
+        monitor_id = output.get("monitor")
+        if not monitor_id:
+            continue
+        monitor = monitors_by_id.get(monitor_id)
+        if monitor is not None:
+            names.append(monitor_name_for_mango(monitor))
+    return names
+
+
+def resolve_profile_name(requested):
+    if requested != "auto":
+        return requested
+    if not connected_outputs:
+        return "desk" if "desk" in profiles else next(iter(profiles), "")
+
+    scored = []
+    for candidate_name, candidate_profile in profiles.items():
+        names = set(profile_output_names(candidate_profile))
+        if not names:
+            continue
+        matched = len(names & connected_outputs)
+        missing = len(names - connected_outputs)
+        extra = len(connected_outputs - names)
+        exact_subset = 1 if names <= connected_outputs else 0
+        scored.append((exact_subset, matched, -missing, -extra, candidate_name))
+
+    if not scored:
+        return "desk" if "desk" in profiles else next(iter(profiles), "")
+    scored.sort(reverse=True)
+    return scored[0][-1]
+
+
+selected_profile_name = resolve_profile_name(profile_name)
+profile = profiles.get(selected_profile_name)
+if profile is None:
+    raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
 
 category_order = [
     "Modes",
@@ -176,7 +233,7 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     monitor = monitors_by_id.get(workspace_ref["monitor"])
     if workspace is None or monitor is None:
         continue
-    monitor_name = monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
+    monitor_name = monitor_name_for_mango(monitor)
     here = workspace.get("here", {})
     here_label = here.get("label") or workspace.get("hereLabel") or workspace["name"]
     add_entry(
@@ -261,6 +318,14 @@ spawn_map = {
     "osc-mullvad slot --hold recycle": ("System", "VPN Slot Recycle"),
     "mango-session-refresh": ("System", "Refresh Session"),
     "uwsm app -a mango-doctor -- /usr/bin/kitty --class mango-doctor -e mango-session-doctor": ("System", "Open Session Doctor"),
+    "mango-layer-audit --watch --duration 20": ("System", "Layer Audit"),
+    "mango-overview toggle": ("Window Management", "Toggle Overview"),
+    "mango-overview open": ("Window Management", "Open Overview"),
+    "mango-overview close": ("Window Management", "Close Overview"),
+    "mango-profile-select": ("Monitors", "Detect Monitor Profile"),
+    "mango-virtual-output start": ("Monitors", "Start Virtual Output"),
+    "mango-virtual-output stop": ("Monitors", "Stop Virtual Output"),
+    "mango-virtual-output status": ("Monitors", "Virtual Output Status"),
     "osc-shell ipc call volume increase": ("Media", "Volume Up"),
     "osc-shell ipc call volume decrease": ("Media", "Volume Down"),
     "osc-shell ipc call volume muteOutput": ("Media", "Mute Output"),
@@ -318,6 +383,11 @@ def label_for_action(action, args):
         return "Window Management", "Minimize Focused Window"
     if action == "switch_proportion_preset":
         return "Layout", "Next Proportion Preset"
+    if action == "scroller_stack":
+        direction = args[0].title() if args else "Next"
+        return "Layout", f"Scroller Stack {direction}"
+    if action == "zoom":
+        return "Layout", "Zoom Master"
     if action == "set_proportion":
         return "Layout", f"Set Proportion {args[0]}"
     if action == "setmfact":

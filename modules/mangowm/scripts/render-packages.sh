@@ -39,11 +39,17 @@ manifest_checksum="$(sha256sum "${MANIFEST}" | awk '{print $1}')"
 package_variant="${MANGO_PACKAGE_VARIANT:-full}"
 
 case "${package_variant}" in
-full)
+full | full-git)
 	compositor_package="mangowm-git"
 	;;
-wlonly)
+full-stable)
+	compositor_package="mangowm"
+	;;
+wlonly | wlonly-git)
 	compositor_package="mangowm-wlonly-git"
+	;;
+wlonly-stable)
+	compositor_package="mangowm-wlonly"
 	;;
 *)
 	echo "Unknown MANGO_PACKAGE_VARIANT: ${package_variant}" >&2
@@ -78,6 +84,9 @@ packages:
   - cliphist
   - brightnessctl
   - jq
+  - wlr-randr
+  - grim
+  - slurp
 EOF
 
 if [[ "${mode}" == "check" ]]; then

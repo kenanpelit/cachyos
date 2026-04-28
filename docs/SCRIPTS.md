@@ -332,6 +332,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-layer-audit`
+**Description:** Inspect MangoWM layer-shell names for layer rule tuning.
+
+**Usage:** `mango-layer-audit [--once|--watch] [--duration SECONDS]`
+
+---
+
 ### 📂 `mango-lid-watch`
 **Description:** No description provided.
 
@@ -346,10 +353,24 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-overview`
+**Description:** Open, close, or toggle MangoWM overview using live IPC state.
+
+**Usage:** `mango-overview {open|close|toggle|status}`
+
+---
+
 ### 📂 `mango-post-bootstrap`
 **Description:** Late MangoWM session polish and ready notification.
 
 **Usage:** `mango-post-bootstrap`
+
+---
+
+### 📂 `mango-profile-select`
+**Description:** Select the best MangoWM monitor profile from connected outputs.
+
+**Usage:** `mango-profile-select [--write]`
 
 ---
 
@@ -392,6 +413,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** No description provided.
 
 **Usage:** `mango-tag-smart`
+
+---
+
+### 📂 `mango-virtual-output`
+**Description:** Manage MangoWM headless outputs for remote desktop/screen share.
+
+**Usage:** `mango-virtual-output {start|stop|status}`
 
 ---
 

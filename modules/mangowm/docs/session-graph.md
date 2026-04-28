@@ -32,8 +32,7 @@ separate from the operational README.
    `systemd --user`.
 7. `mango-bootstrap.service` runs the early Mango bootstrap stage.
 8. `mango-arrange.service` reconciles the current monitor/tag view against
-   `~/.config/mango/generated/profile.conf` through the runtime compatibility
-   mirror.
+   the generated profile through `~/.config/mango/runtime/profile.conf`.
 9. `mango-shell-ensure.service` starts the shell backend.
 10. `mango-daemons.target` becomes the long-running daemon stage.
 11. `mango-post-daemons.target` becomes the ordered late stage.
@@ -91,14 +90,21 @@ session-side applets instead of leaving them orphaned.
   symlinks and are refreshed by `modules/mangowm/scripts/ensure-runtime-files.sh`.
 - Shared monitor/output placement lives in `shared/wm/monitors.yaml`.
 - Shared workspace semantics live in `shared/wm/workspaces.json`.
+- `MANGO_MONITOR_PROFILE=auto` resolves the active profile from live Mango IPC
+  output names when possible and falls back to `desk` for offline renders.
 
 ## Operational Notes
 
 - `packages.yaml`, `generated/theme.conf`, `generated/profile.conf`,
-  `generated/workspace-rules.conf`, `generated/workspace-binds.conf`, and
-  `generated/keybind-cheatsheet.conf` are repo-owned generated outputs.
+  `generated/workspace-rules.conf`, `generated/workspace-binds.conf`,
+  `generated/window-rules.conf`, and `generated/keybind-cheatsheet.conf` are
+  repo-owned generated outputs.
 - `runtime/profile.conf`, `runtime/workspace-rules.conf`,
-  `runtime/workspace-binds.conf`, and `runtime/keybind-cheatsheet.conf` are
-  compatibility symlinks for helper/scripts that still read the runtime tree.
+  `runtime/workspace-binds.conf`, `runtime/window-rules.conf`, and
+  `runtime/keybind-cheatsheet.conf` are compatibility symlinks for
+  helper/scripts that still read the runtime tree.
+- `modules/mangowm/scripts/validate.sh --live` verifies live Mango IPC output,
+  tag/keymode state, and failed Mango user units after the generated config
+  parse succeeds.
 - Logout flows should prefer `uwsm stop` over compositor-local quit paths so
   the compositor, session targets, and UWSM-managed units stop together.

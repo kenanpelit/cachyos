@@ -1,0 +1,196 @@
+{
+  "sections": [
+    {
+      "comment": "Scroller-biased defaults for large desktop apps.",
+      "rules": [
+        {
+          "scroller_proportion": 0.85,
+          "scroller_proportion_single": 0.90,
+          "appid": "^(brave-browser|chrome|firefox|librewolf|Chromium)$"
+        },
+        {
+          "scroller_proportion": 0.75,
+          "appid": "^(kitty|Alacritty|foot|com\\.mitchellh\\.ghostty|TmuxKenp|dropdown-terminal|yazi-scratchpad|clipse)$"
+        },
+        {
+          "scroller_proportion": 0.80,
+          "appid": "^(Code|vscodium|neovide)$"
+        }
+      ]
+    },
+    {
+      "comment": "Portal pickers, auth prompts, and file dialogs should stay floating and readable.",
+      "rules": [
+        {
+          "isfloating": 1,
+          "width": 960,
+          "height": 720,
+          "appid": "^(xdg-desktop-portal-(gtk|gnome|wlr))$"
+        },
+        {
+          "isfloating": 1,
+          "width": 600,
+          "height": 240,
+          "appid": "^(polkit-gnome-authentication-agent-1|gcr-prompter|pinentry.*)$"
+        },
+        {
+          "isfloating": 1,
+          "width": 640,
+          "height": 260,
+          "title": "^(Authentication Required|Unlock Keyring|OpenSSH Authentication Passphrase)$"
+        },
+        {
+          "isfloating": 1,
+          "width": 960,
+          "height": 720,
+          "title": "^(Open File|Choose (File|Folder)|Save As|Confirm to replace files|File Operation Progress|Extract archive|Compress\\.\\.\\.)$"
+        }
+      ]
+    },
+    {
+      "comment": "Utilities, sidepanels, and shell-adjacent windows.",
+      "rules": [
+        {
+          "isfloating": 1,
+          "width": 900,
+          "height": 650,
+          "appid": "^(blueman-manager|nm-connection-editor|org\\.gnome\\.Settings|gnome-disks|pavucontrol|pwvucontrol|virt-manager)$"
+        },
+        {
+          "isfloating": 1,
+          "width": 360,
+          "height": 440,
+          "appid": "^nm-applet$"
+        },
+        {
+          "isfloating": 1,
+          "width": 960,
+          "height": 720,
+          "appid": "^(org\\.gnome\\.FileRoller|file-roller)$"
+        },
+        {
+          "isfloating": 1,
+          "width": 540,
+          "height": 640,
+          "appid": "^(org\\.gnome\\.Calculator|kcalc|qalculate-gtk|org\\.gnome\\.Characters)$"
+        },
+        {
+          "isfloating": 1,
+          "width": 700,
+          "height": 450,
+          "title": "^Volume Control$"
+        },
+        {
+          "isfloating": 1,
+          "width": 960,
+          "height": 720,
+          "appid": "^(anote|org\\.quickshell)$"
+        },
+        {
+          "isfloating": 1,
+          "width": 600,
+          "height": 1080,
+          "offsetx": 95,
+          "offsety": -15,
+          "appid": "^(com\\.github\\.hluk\\.copyq|copyq|wiremix|org\\.pulseaudio\\.pavucontrol|io\\.ente\\.auth)$"
+        }
+      ]
+    },
+    {
+      "comment": "Named scratchpads for fast transient tools.",
+      "rules": [
+        {
+          "isnamedscratchpad": 1,
+          "width": 1980,
+          "height": 660,
+          "offsetx": 0,
+          "offsety": -100,
+          "appid": "^dropdown-terminal$"
+        },
+        {
+          "isnamedscratchpad": 1,
+          "width": 1600,
+          "height": 900,
+          "offsetx": 0,
+          "offsety": 0,
+          "appid": "^yazi-scratchpad$"
+        },
+        {
+          "isnamedscratchpad": 1,
+          "width": 760,
+          "height": 960,
+          "offsetx": 92,
+          "offsety": -8,
+          "appid": "^clipse$"
+        }
+      ]
+    },
+    {
+      "comment": "Terminal swallowing and apps that should never be swallowed.",
+      "rules": [
+        {
+          "isterm": 1,
+          "appid": "^(kitty|Alacritty|com\\.mitchellh\\.ghostty|foot|TmuxKenp|dropdown-terminal|yazi-scratchpad|clipse)$"
+        },
+        {
+          "noswallow": 1,
+          "appid": "^(mpv|org\\.telegram\\.desktop|ferdium|Ferdium|discord|WebCord|Signal|Slack)$"
+        }
+      ]
+    },
+    {
+      "comment": "Media and shell overlays that benefit from stable floating placement.",
+      "rules": [
+        {
+          "isfloating": 1,
+          "width": 640,
+          "height": 360,
+          "offsetx": 95,
+          "offsety": -80,
+          "appid": "^mpv$",
+          "title": "^(?!Picture-in-Picture).*"
+        },
+        {
+          "isfloating": 1,
+          "width": 640,
+          "height": 360,
+          "offsetx": 95,
+          "offsety": -80,
+          "title": "^(Picture-in-Picture|Picture-in-Picture - mpv|Picture in Picture)$"
+        }
+      ]
+    },
+    {
+      "comment": "Sensitive utility windows stay sharp, floating, and animation-light.",
+      "rules": [
+        {
+          "isfloating": 1,
+          "width": 960,
+          "height": 720,
+          "noblur": 1,
+          "isnoanimation": 1,
+          "appid": "^(org\\.keepassxc\\.KeePassXC|KeePassXC|com\\.bitwarden\\.desktop|Bitwarden|com\\.1password\\.1Password|1Password|org\\.gnome\\.World\\.Secrets|org\\.gnome\\.seahorse\\.Application|seahorse)$"
+        }
+      ]
+    },
+    {
+      "comment": "Gaming and remote-play windows prefer latency over visual effects.",
+      "rules": [
+        {
+          "force_tearing": 1,
+          "noblur": 1,
+          "isnoshadow": 1,
+          "isnoanimation": 1,
+          "appid": "^(gamescope|steam_app_.*|lutris|net\\.lutris\\.Lutris|com\\.heroicgameslauncher\\.hgl)$"
+        },
+        {
+          "force_tearing": 1,
+          "noblur": 1,
+          "isnoshadow": 1,
+          "isnoanimation": 1,
+          "title": "^(Counter-Strike 2|Dota 2|ELDEN RING|Cyberpunk 2077|No Man's Sky).*$"
+        }
+      ]
+    }
+  ]
+}

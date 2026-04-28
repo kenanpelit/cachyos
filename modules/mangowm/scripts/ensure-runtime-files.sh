@@ -37,12 +37,14 @@ run_module_script "${MODULE_DIR}/scripts/render-packages.sh"
 run_module_script "${MODULE_DIR}/scripts/render-theme.sh"
 run_module_script "${MODULE_DIR}/scripts/render-profile.sh"
 run_module_script "${MODULE_DIR}/scripts/render-workspace-assets.sh"
+run_module_script "${MODULE_DIR}/scripts/render-window-rules.sh"
 run_module_script "${MODULE_DIR}/scripts/render-keybind-cheatsheet.sh"
 
 for runtime_asset in \
 	profile.conf \
 	workspace-binds.conf \
 	workspace-rules.conf \
+	window-rules.conf \
 	keybind-cheatsheet.conf; do
 	link_runtime_asset "${runtime_asset}"
 done

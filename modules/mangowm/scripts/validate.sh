@@ -15,14 +15,18 @@ case "${1:-}" in
 	;;
 -h | --help)
 	cat <<'EOF'
-Usage: validate.sh [--fast|--strict]
+Usage: validate.sh [--fast|--strict|--live]
 
 --fast   Validate Mango-owned scripts, shared manifests, generated asset drift,
          runtime compatibility links, and parse the config through a temporary
          generated/runtime tree.
 --strict Validate the same set plus every shell helper under modules/scripts/bin.
+--live   Validate the same set plus the active MangoWM IPC/session state.
 EOF
 	exit 0
+	;;
+--live)
+	mode="live"
 	;;
 *)
 	echo "Unknown argument: ${1}" >&2
@@ -47,6 +51,7 @@ RENDER_PACKAGES_SCRIPT="${MODULE_DIR}/scripts/render-packages.sh"
 RENDER_THEME_SCRIPT="${MODULE_DIR}/scripts/render-theme.sh"
 RENDER_PROFILE_SCRIPT="${MODULE_DIR}/scripts/render-profile.sh"
 RENDER_WORKSPACE_ASSETS_SCRIPT="${MODULE_DIR}/scripts/render-workspace-assets.sh"
+RENDER_WINDOW_RULES_SCRIPT="${MODULE_DIR}/scripts/render-window-rules.sh"
 RENDER_KEYBIND_CHEATSHEET_SCRIPT="${MODULE_DIR}/scripts/render-keybind-cheatsheet.sh"
 
 # shellcheck source=/dev/null
@@ -191,13 +196,21 @@ log_info "Validating generated Mango theme..."
 log_success "Generated Mango theme matches theme manifest!"
 
 case "${MANGO_PACKAGE_VARIANT}" in
-full)
-	expected_family=(mangowm mangowm-git)
+full | full-git)
+	expected_family=(mangowm-git)
+	other_family=(mangowm mangowm-wlonly mangowm-wlonly-git)
+	;;
+full-stable)
+	expected_family=(mangowm)
 	other_family=(mangowm-wlonly mangowm-wlonly-git)
 	;;
-wlonly)
-	expected_family=(mangowm-wlonly mangowm-wlonly-git)
-	other_family=(mangowm mangowm-git)
+wlonly | wlonly-git)
+	expected_family=(mangowm-wlonly-git)
+	other_family=(mangowm mangowm-git mangowm-wlonly)
+	;;
+wlonly-stable)
+	expected_family=(mangowm-wlonly)
+	other_family=(mangowm mangowm-git mangowm-wlonly-git)
 	;;
 *)
 	die "Unknown MANGO_PACKAGE_VARIANT: ${MANGO_PACKAGE_VARIANT}"
@@ -233,6 +246,7 @@ fi
 log_info "Validating generated Mango workspace/profile assets..."
 "${RENDER_PROFILE_SCRIPT}" --check >/dev/null
 "${RENDER_WORKSPACE_ASSETS_SCRIPT}" --check >/dev/null
+"${RENDER_WINDOW_RULES_SCRIPT}" --check >/dev/null
 "${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --check >/dev/null
 log_success "Generated Mango profile, workspace, and cheatsheet assets are in sync!"
 
@@ -243,6 +257,7 @@ if [[ -d "${MANGO_RUNTIME_DIR}" ]]; then
 		profile.conf \
 		workspace-binds.conf \
 		workspace-rules.conf \
+		window-rules.conf \
 		keybind-cheatsheet.conf; do
 		generated_file="${MANGO_GENERATED_DIR}/${runtime_asset}"
 		runtime_file="${MANGO_RUNTIME_DIR}/${runtime_asset}"
@@ -339,11 +354,13 @@ ln -s "${tmp_runtime}" "${tmp_mango_dir}/runtime"
 
 "${RENDER_PROFILE_SCRIPT}" --out-dir "${tmp_generated}" >/dev/null
 "${RENDER_WORKSPACE_ASSETS_SCRIPT}" --out-dir "${tmp_generated}" >/dev/null
+"${RENDER_WINDOW_RULES_SCRIPT}" --out-dir "${tmp_generated}" >/dev/null
 "${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --out-dir "${tmp_generated}" >/dev/null
 
 ln -s "${tmp_generated}/profile.conf" "${tmp_runtime}/profile.conf"
 ln -s "${tmp_generated}/workspace-binds.conf" "${tmp_runtime}/workspace-binds.conf"
 ln -s "${tmp_generated}/workspace-rules.conf" "${tmp_runtime}/workspace-rules.conf"
+ln -s "${tmp_generated}/window-rules.conf" "${tmp_runtime}/window-rules.conf"
 ln -s "${tmp_generated}/keybind-cheatsheet.conf" "${tmp_runtime}/keybind-cheatsheet.conf"
 
 log_info "Validating Mango tagrule contract..."
@@ -368,6 +385,14 @@ workspaces = {
 monitors = {
     monitor["id"]: monitor for monitor in monitor_data.get("monitors", [])
 }
+if profile_name == "auto":
+    active_profile = ""
+    for raw_line in profile_file.read_text().splitlines():
+        if raw_line.startswith("# Active monitor profile: "):
+            active_profile = raw_line.split(": ", 1)[1].strip()
+            break
+    profile_name = active_profile or "desk"
+
 profile = monitor_data.get("profiles", {}).get(profile_name)
 if profile is None:
     raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
@@ -453,10 +478,15 @@ helper_candidates=(
 	"${MODULE_DIR}/scripts/render-theme.sh"
 	"${MODULE_DIR}/scripts/render-profile.sh"
 	"${MODULE_DIR}/scripts/render-workspace-assets.sh"
+	"${MODULE_DIR}/scripts/render-window-rules.sh"
 	"${MODULE_DIR}/scripts/render-keybind-cheatsheet.sh"
 	"${MODULE_DIR}/scripts/validate.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-arrange.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-monitor-smart.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-overview.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-layer-audit.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-virtual-output.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-profile-select.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-here.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-tag-smart.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-workspace-smart.sh"
@@ -496,3 +526,53 @@ if [[ "${helper_failure}" -ne 0 ]]; then
 fi
 
 log_success "Mango helper shell syntax is valid!"
+
+if [[ "${mode}" == "live" ]]; then
+	log_info "Validating live MangoWM IPC/session state..."
+
+	command -v mmsg >/dev/null 2>&1 || die "mmsg is required for --live"
+	[[ -n "${WAYLAND_DISPLAY:-}" ]] || die "--live requires WAYLAND_DISPLAY"
+
+	live_outputs="$(mmsg -O 2>/dev/null || true)"
+	[[ -n "${live_outputs}" ]] || die "mmsg -O returned no outputs"
+
+	while IFS= read -r expected_output; do
+		[[ -n "${expected_output}" ]] || continue
+		if ! grep -Fxq "${expected_output}" <<<"${live_outputs}"; then
+			die "Configured Mango output is not live: ${expected_output}"
+		fi
+	done < <(
+		awk -F',' '
+			/^monitorrule=/ {
+				for (i = 1; i <= NF; i++) {
+					if ($i ~ /^monitorrule=name:\^/) {
+						name = $i
+						sub(/^monitorrule=name:\^/, "", name)
+						sub(/\$$/, "", name)
+						gsub(/\\-/, "-", name)
+						print name
+					}
+				}
+			}
+		' "${MANGO_GENERATED_DIR}/profile.conf"
+	)
+
+	keymode_state="$(mmsg -g -b 2>/dev/null || true)"
+	[[ -n "${keymode_state}" ]] || die "mmsg -g -b returned no keymode state"
+
+	tag_state="$(mmsg -g -t 2>/dev/null || true)"
+	[[ -n "${tag_state}" ]] || die "mmsg -g -t returned no tag state"
+
+	if command -v systemctl >/dev/null 2>&1; then
+		if failed_units="$(systemctl --user --failed --plain --no-legend 2>/dev/null || true)" &&
+			grep -Eq '(^|[[:space:]])mango|(^|[[:space:]])mangowm' <<<"${failed_units}"; then
+			printf '%s\n' "${failed_units}" >&2
+			die "Failed Mango user units are present"
+		fi
+	fi
+
+	portal_file="${XDG_CONFIG_HOME:-${USER_HOME}/.config}/xdg-desktop-portal/mango-portals.conf"
+	[[ -r "${portal_file}" ]] || log_warn "Mango portal preference file not found: ${portal_file}"
+
+	log_success "Live MangoWM IPC/session state looks healthy!"
+fi
