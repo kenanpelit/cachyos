@@ -122,6 +122,22 @@
           "offsetx": 92,
           "offsety": -8,
           "appid": "^clipse$"
+        },
+        {
+          "isnamedscratchpad": 1,
+          "width": 900,
+          "height": 760,
+          "offsetx": 92,
+          "offsety": -10,
+          "appid": "^wiremix$"
+        },
+        {
+          "isnamedscratchpad": 1,
+          "width": 1120,
+          "height": 760,
+          "offsetx": 0,
+          "offsety": 0,
+          "appid": "^mango-doctor$"
         }
       ]
     },
@@ -130,7 +146,7 @@
       "rules": [
         {
           "isterm": 1,
-          "appid": "^(kitty|Alacritty|com\\.mitchellh\\.ghostty|foot|TmuxKenp|dropdown-terminal|yazi-scratchpad|clipse)$"
+          "appid": "^(kitty|Alacritty|com\\.mitchellh\\.ghostty|foot|TmuxKenp|dropdown-terminal|yazi-scratchpad|clipse|wiremix|mango-doctor)$"
         },
         {
           "noswallow": 1,

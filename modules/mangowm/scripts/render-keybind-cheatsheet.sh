@@ -12,6 +12,7 @@ SHARED_MONITOR_MANIFEST="${MANGO_SHARED_MONITOR_MANIFEST:-${REPO_ROOT}/shared/wm
 WORKSPACE_MAP_FILE="${MANGO_WORKSPACE_MAP_FILE:-${REPO_ROOT}/shared/wm/workspaces.json}"
 OUTPUT_DIR="${MANGO_OUTPUT_DIR:-${MODULE_DIR}/dotfiles/mango/generated}"
 CHEATSHEET_OUT="${MANGO_KEYBIND_CHEATSHEET_OUT:-${OUTPUT_DIR}/keybind-cheatsheet.conf}"
+PROFILE_RESOLVER="${MODULE_DIR}/scripts/profile-resolver.py"
 
 usage() {
 	cat <<'EOF'
@@ -58,25 +59,14 @@ done
 [[ -r "${SHARED_MONITOR_MANIFEST}" ]] || die "Shared monitor manifest not found: ${SHARED_MONITOR_MANIFEST}"
 [[ -r "${WORKSPACE_MAP_FILE}" ]] || die "Workspace map not found: ${WORKSPACE_MAP_FILE}"
 command -v python3 >/dev/null 2>&1 || die "python3 is required"
+[[ -x "${PROFILE_RESOLVER}" ]] || die "Profile resolver not executable: ${PROFILE_RESOLVER}"
 
 # shellcheck source=/dev/null
 source "${PROFILE_MANIFEST}"
 
 : "${MANGO_MONITOR_PROFILE:=desk}"
 
-connected_outputs=""
-if [[ "${MANGO_MONITOR_PROFILE}" == "auto" ]]; then
-	if command -v mmsg >/dev/null 2>&1; then
-		connected_outputs="$(mmsg -O 2>/dev/null | paste -sd, - || true)"
-	fi
-	if [[ -z "${connected_outputs}" ]] && command -v wlr-randr >/dev/null 2>&1; then
-		connected_outputs="$(
-			wlr-randr 2>/dev/null |
-				awk '/^[^[:space:]]/ { print $1 }' |
-				paste -sd, - || true
-		)"
-	fi
-fi
+selected_profile_name="$("${PROFILE_RESOLVER}" --manifest "${SHARED_MONITOR_MANIFEST}" --profile "${MANGO_MONITOR_PROFILE}")"
 
 tmp_cheatsheet="$(mktemp)"
 cleanup() {
@@ -84,7 +74,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-python3 - "${BINDS_FILE}" "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${MANGO_MONITOR_PROFILE}" "${connected_outputs}" "${tmp_cheatsheet}" <<'PY'
+python3 - "${BINDS_FILE}" "${SHARED_MONITOR_MANIFEST}" "${WORKSPACE_MAP_FILE}" "${selected_profile_name}" "${tmp_cheatsheet}" <<'PY'
 import json
 import sys
 from collections import OrderedDict
@@ -96,8 +86,7 @@ binds_path = Path(sys.argv[1])
 monitors_path = Path(sys.argv[2])
 workspace_path = Path(sys.argv[3])
 profile_name = sys.argv[4]
-connected_outputs = {item for item in sys.argv[5].split(",") if item}
-out_path = Path(sys.argv[6])
+out_path = Path(sys.argv[5])
 
 monitor_manifest = yaml.safe_load(monitors_path.read_text())
 workspace_manifest = json.loads(workspace_path.read_text())
@@ -114,43 +103,7 @@ def monitor_name_for_mango(monitor):
     return monitor.get("mango_name", monitor.get("wayland_name", monitor["id"]))
 
 
-def profile_output_names(profile):
-    names = []
-    for output in profile.get("outputs", []):
-        monitor_id = output.get("monitor")
-        if not monitor_id:
-            continue
-        monitor = monitors_by_id.get(monitor_id)
-        if monitor is not None:
-            names.append(monitor_name_for_mango(monitor))
-    return names
-
-
-def resolve_profile_name(requested):
-    if requested != "auto":
-        return requested
-    if not connected_outputs:
-        return "desk" if "desk" in profiles else next(iter(profiles), "")
-
-    scored = []
-    for candidate_name, candidate_profile in profiles.items():
-        names = set(profile_output_names(candidate_profile))
-        if not names:
-            continue
-        matched = len(names & connected_outputs)
-        missing = len(names - connected_outputs)
-        extra = len(connected_outputs - names)
-        exact_subset = 1 if names <= connected_outputs else 0
-        scored.append((exact_subset, matched, -missing, -extra, candidate_name))
-
-    if not scored:
-        return "desk" if "desk" in profiles else next(iter(profiles), "")
-    scored.sort(reverse=True)
-    return scored[0][-1]
-
-
-selected_profile_name = resolve_profile_name(profile_name)
-profile = profiles.get(selected_profile_name)
+profile = profiles.get(profile_name)
 if profile is None:
     raise SystemExit(f"Unknown MANGO_MONITOR_PROFILE: {profile_name}")
 
@@ -195,6 +148,9 @@ def display_key(key: str) -> str:
         "Delete": "DEL",
         "Page_Up": "PRIOR",
         "Page_Down": "NEXT",
+        "minus": "-",
+        "equal": "=",
+        "grave": "`",
         "shift_l": "SHIFT",
     }
     return code_map.get(key, key)
@@ -319,6 +275,9 @@ spawn_map = {
     "mango-session-refresh": ("System", "Refresh Session"),
     "uwsm app -a mango-doctor -- /usr/bin/kitty --class mango-doctor -e mango-session-doctor": ("System", "Open Session Doctor"),
     "mango-layer-audit --watch --duration 20": ("System", "Layer Audit"),
+    "mango-performance-mode gaming": ("System", "Gaming Mode"),
+    "mango-performance-mode normal": ("System", "Normal Mode"),
+    "mango-performance-mode battery": ("System", "Battery Mode"),
     "mango-overview toggle": ("Window Management", "Toggle Overview"),
     "mango-overview open": ("Window Management", "Open Overview"),
     "mango-overview close": ("Window Management", "Close Overview"),
@@ -357,6 +316,8 @@ def label_for_action(action, args):
     if action == "focusstack":
         direction = args[0].title() if args else "Next"
         return "Navigation", f"Cycle Window {direction}"
+    if action == "focuslast":
+        return "Navigation", "Focus Last Window"
     if action == "exchange_client":
         return "Navigation", f"Swap {args[0].title()}"
     if action == "killclient":
@@ -371,6 +332,12 @@ def label_for_action(action, args):
         return "Window Management", "Toggle Maximize"
     if action == "toggleoverlay":
         return "Window Management", "Toggle Overlay"
+    if action == "centerwin":
+        return "Window Management", "Center Window"
+    if action == "toggle_render_border":
+        return "Window Management", "Toggle Border"
+    if action == "toggle_all_floating":
+        return "Window Management", "Toggle All Floating"
     if action == "toggleoverview":
         return "Window Management", "Toggle Overview"
     if action == "toggleglobal":
@@ -383,6 +350,12 @@ def label_for_action(action, args):
         return "Window Management", "Minimize Focused Window"
     if action == "switch_proportion_preset":
         return "Layout", "Next Proportion Preset"
+    if action == "smartmovewin":
+        direction = args[0].title() if args else "Window"
+        return "Layout", f"Move Floating {direction}"
+    if action == "smartresizewin":
+        direction = args[0].title() if args else "Window"
+        return "Layout", f"Resize Floating {direction}"
     if action == "scroller_stack":
         direction = args[0].title() if args else "Next"
         return "Layout", f"Scroller Stack {direction}"
@@ -405,8 +378,13 @@ def label_for_action(action, args):
         return "Modes", f"Enter {target} Mode"
     if action == "togglegaps":
         return "Layout", "Toggle Gaps"
+    if action == "incgaps":
+        return "Layout", f"Adjust Gaps {args[0]}"
     if action == "resizewin":
         return "Layout", f"Resize Window {args[0]}x{args[1]}"
+    if action == "spawn_on_empty":
+        tag = args[1] if len(args) > 1 else "Tag"
+        return "Applications", f"Spawn on Empty Tag {tag}"
     if action == "reload_config":
         return "System", "Reload Mango Config"
     if action == "viewtoleft":
@@ -425,11 +403,16 @@ def label_for_action(action, args):
         return "Monitors", f"Focus Monitor {args[0].title()}"
     if action == "tagmon":
         return "Monitors", f"Move to Monitor {args[0].title()}"
+    if action == "toggle_monitor":
+        target = args[0] if args else "Monitor"
+        return "Monitors", f"Toggle Monitor {target}"
     if action == "toggle_named_scratchpad":
         scratchpad = args[0].replace("-", " ").title() if args else "Scratchpad"
         return "Applications", f"Toggle {scratchpad}"
     if action == "switch_keyboard_layout":
         return "System", "Switch Keyboard Layout"
+    if action == "toggle_trackpad_enable":
+        return "System", "Toggle Trackpad"
 
     return "Other", action.replace("_", " ").title()
 

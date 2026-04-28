@@ -10,6 +10,8 @@ modules/mpv/dotfiles/mpv/mpvHistory.log
 *.bak
 *.backup.*
 *.backup
+__pycache__/
+*.py[cod]
 modules/tmux/dotfiles/tmux/plugins/tpm_log.txt
 modules/qt/dotfiles/qt5ct/qt5ct.conf.backup
 modules/qt/dotfiles/qt6ct/qt6ct.conf.backup

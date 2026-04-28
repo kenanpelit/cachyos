@@ -53,6 +53,7 @@ RENDER_PROFILE_SCRIPT="${MODULE_DIR}/scripts/render-profile.sh"
 RENDER_WORKSPACE_ASSETS_SCRIPT="${MODULE_DIR}/scripts/render-workspace-assets.sh"
 RENDER_WINDOW_RULES_SCRIPT="${MODULE_DIR}/scripts/render-window-rules.sh"
 RENDER_KEYBIND_CHEATSHEET_SCRIPT="${MODULE_DIR}/scripts/render-keybind-cheatsheet.sh"
+MANGO_SOURCE_DIR="${MANGO_SOURCE_DIR:-${USER_HOME}/.kod/mango}"
 
 # shellcheck source=/dev/null
 source "${PROFILE_MANIFEST}"
@@ -249,6 +250,49 @@ log_info "Validating generated Mango workspace/profile assets..."
 "${RENDER_WINDOW_RULES_SCRIPT}" --check >/dev/null
 "${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --check >/dev/null
 log_success "Generated Mango profile, workspace, and cheatsheet assets are in sync!"
+
+source_parse_config="${MANGO_SOURCE_DIR}/src/config/parse_config.h"
+if [[ -r "${source_parse_config}" ]]; then
+	log_info "Validating Mango window-rule schema against source..."
+	python3 - "${RENDER_WINDOW_RULES_SCRIPT}" "${source_parse_config}" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+renderer = Path(sys.argv[1]).read_text()
+source = Path(sys.argv[2]).read_text()
+
+allowed_match = re.search(r"ALLOWED_KEYS = \{(?P<body>.*?)\}", renderer, re.S)
+if not allowed_match:
+    raise SystemExit("Could not find ALLOWED_KEYS in render-window-rules.sh")
+allowed = set(re.findall(r'"([^"]+)"', allowed_match.group("body")))
+
+start = source.find('} else if (strcmp(key, "windowrule") == 0)')
+if start == -1:
+    raise SystemExit("Could not find windowrule parser block in Mango source")
+end_candidates = [
+    source.find('\n\t} else if (strncmp(key, "env"', start),
+    source.find('\n\t} else if (strcmp(key, "bind")', start),
+    source.find('\n\t} else if (strncmp(key, "bind"', start),
+]
+end_candidates = [candidate for candidate in end_candidates if candidate != -1]
+end = min(end_candidates) if end_candidates else -1
+if end == -1:
+    raise SystemExit("Could not find end of windowrule parser block in Mango source")
+
+source_keys = set(re.findall(r'strcmp\(key, "([^"]+)"\)', source[start:end]))
+source_keys.discard("windowrule")
+missing = sorted(source_keys - allowed)
+if missing:
+    raise SystemExit(
+        "render-window-rules.sh is missing Mango windowrule keys: "
+        + ", ".join(missing)
+    )
+PY
+	log_success "Mango window-rule schema matches source!"
+else
+	log_warn "Mango source not found at ${source_parse_config}; skipping window-rule schema source check."
+fi
 
 if [[ -d "${MANGO_RUNTIME_DIR}" ]]; then
 	log_info "Validating Mango runtime compatibility mirror..."
@@ -487,6 +531,8 @@ helper_candidates=(
 	"${REPO_ROOT}/modules/scripts/bin/mango-layer-audit.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-virtual-output.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-profile-select.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-performance-mode.sh"
+	"${REPO_ROOT}/modules/scripts/bin/mango-state-bridge.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-here.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-tag-smart.sh"
 	"${REPO_ROOT}/modules/scripts/bin/mango-workspace-smart.sh"
@@ -563,6 +609,56 @@ if [[ "${mode}" == "live" ]]; then
 	tag_state="$(mmsg -g -t 2>/dev/null || true)"
 	[[ -n "${tag_state}" ]] || die "mmsg -g -t returned no tag state"
 
+	layer_state="$(mmsg -g -e 2>/dev/null || true)"
+	if [[ -n "${layer_state}" ]]; then
+		set +e
+		python3 - "${MODULE_DIR}/dotfiles/mango/conf.d/40-layer-rules.conf" "${layer_state}" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+rules_file = Path(sys.argv[1])
+layer_state = sys.argv[2]
+
+patterns = []
+for raw_line in rules_file.read_text().splitlines():
+    line = raw_line.strip()
+    if not line.startswith("layerrule="):
+        continue
+    for token in line[len("layerrule="):].split(","):
+        if token.startswith("layer_name:"):
+            patterns.append(token.split(":", 1)[1])
+
+unmatched = []
+for raw_line in layer_state.splitlines():
+    parts = raw_line.split(maxsplit=2)
+    if len(parts) == 3 and parts[1] == "last_layer":
+        layer_name = parts[2]
+        if layer_name and not any(re.search(pattern, layer_name) for pattern in patterns):
+            unmatched.append(layer_name)
+
+if unmatched:
+    print(
+        "Mango live layers are not covered by layerrule patterns: "
+        + ", ".join(sorted(set(unmatched))),
+        file=sys.stderr,
+    )
+    raise SystemExit(2)
+PY
+		layer_check_status="$?"
+		set -e
+		case "${layer_check_status}" in
+		0)
+			;;
+		2)
+			log_warn "Some live Mango layer names are not covered by layerrules."
+			;;
+		*)
+			die "Live Mango layer-rule coverage check failed"
+			;;
+		esac
+	fi
+
 	if command -v systemctl >/dev/null 2>&1; then
 		if failed_units="$(systemctl --user --failed --plain --no-legend 2>/dev/null || true)" &&
 			grep -Eq '(^|[[:space:]])mango|(^|[[:space:]])mangowm' <<<"${failed_units}"; then
@@ -573,6 +669,12 @@ if [[ "${mode}" == "live" ]]; then
 
 	portal_file="${XDG_CONFIG_HOME:-${USER_HOME}/.config}/xdg-desktop-portal/mango-portals.conf"
 	[[ -r "${portal_file}" ]] || log_warn "Mango portal preference file not found: ${portal_file}"
+
+	if command -v systemd-analyze >/dev/null 2>&1; then
+		if ! systemd-analyze --user verify "${MODULE_DIR}"/dotfiles/systemd/user/*.service "${MODULE_DIR}"/dotfiles/systemd/user/*.target >/dev/null 2>&1; then
+			log_warn "systemd-analyze --user verify failed or is unavailable in this environment."
+		fi
+	fi
 
 	log_success "Live MangoWM IPC/session state looks healthy!"
 fi

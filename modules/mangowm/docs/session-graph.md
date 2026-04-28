@@ -34,7 +34,8 @@ separate from the operational README.
 8. `mango-arrange.service` reconciles the current monitor/tag view against
    the generated profile through `~/.config/mango/runtime/profile.conf`.
 9. `mango-shell-ensure.service` starts the shell backend.
-10. `mango-daemons.target` becomes the long-running daemon stage.
+10. `mango-daemons.target` becomes the long-running daemon stage and starts
+    the Mango IPC state bridge when its helper is installed.
 11. `mango-post-daemons.target` becomes the ordered late stage.
 12. `mango-post-bootstrap.service` performs late desktop polish.
 13. `mango-session-ready.target` marks the session as ready once arrange,
@@ -66,6 +67,9 @@ separate from the operational README.
   Ready-stage target that binds together the last required oneshots.
 - `mango-status-notifier-ready.service`
   Readiness gate for tray-dependent applets.
+- `mango-state-bridge.service`
+  Periodically writes Mango IPC state to `~/.cache/mango/state.json` for
+  panels, shell plugins, and diagnostics.
 
 ## Daemon Stage
 
@@ -75,6 +79,7 @@ are met:
 - `mango-polkit-agent.service`
 - `mango-nm-applet.service`
 - `mango-blueman-applet.service`
+- `mango-state-bridge.service`
 
 The daemon target and each long-lived applet now also bind to
 `wayland-wm@mango\x2dsession.service` so a compositor stop/crash tears down the
@@ -104,7 +109,7 @@ session-side applets instead of leaving them orphaned.
   `runtime/keybind-cheatsheet.conf` are compatibility symlinks for
   helper/scripts that still read the runtime tree.
 - `modules/mangowm/scripts/validate.sh --live` verifies live Mango IPC output,
-  tag/keymode state, and failed Mango user units after the generated config
-  parse succeeds.
+  tag/keymode state, layer-rule coverage, systemd unit syntax, and failed
+  Mango user units after the generated config parse succeeds.
 - Logout flows should prefer `uwsm stop` over compositor-local quit paths so
   the compositor, session targets, and UWSM-managed units stop together.

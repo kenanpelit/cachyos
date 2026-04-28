@@ -90,6 +90,7 @@ ALLOWED_KEYS = {
     "offsety",
     "monitor",
     "tags",
+    "nofocus",
     "no_force_center",
     "isnosizehint",
     "noblur",

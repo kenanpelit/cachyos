@@ -56,6 +56,8 @@ dotfiles:
   target: ~/.config/systemd/user/mango-nm-applet.service
 - source: dotfiles/systemd/user/mango-blueman-applet.service
   target: ~/.config/systemd/user/mango-blueman-applet.service
+- source: dotfiles/systemd/user/mango-state-bridge.service
+  target: ~/.config/systemd/user/mango-state-bridge.service
 - source: dotfiles/systemd/user/mango-desktop-settings.service
   target: ~/.config/systemd/user/mango-desktop-settings.service
 - source: dotfiles/systemd/user/mango-post-bootstrap.service

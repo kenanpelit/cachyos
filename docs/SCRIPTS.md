@@ -360,6 +360,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `mango-performance-mode`
+**Description:** Switch MangoWM runtime visual/performance profiles.
+
+**Usage:** `mango-performance-mode {normal|gaming|battery|status}`
+
+---
+
 ### 📂 `mango-post-bootstrap`
 **Description:** Late MangoWM session polish and ready notification.
 
@@ -399,6 +406,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Refresh MangoWM session environment and rerun bootstrap hooks.
 
 **Usage:** `mango-session-refresh`
+
+---
+
+### 📂 `mango-state-bridge`
+**Description:** Export MangoWM IPC state as JSON for shell integrations.
+
+**Usage:** `mango-state-bridge [--once|--watch] [--output FILE]`
 
 ---
 
