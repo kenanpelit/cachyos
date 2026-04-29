@@ -25,6 +25,7 @@ configure_makepkg_ccache() {
 
 	local tmp
 	tmp="$(mktemp)"
+	trap 'rm -f "${tmp}"' RETURN
 	python3 - "${MAKEPKG_CONF}" "${tmp}" <<'PY'
 import re
 import sys
@@ -67,14 +68,14 @@ PY
 	if ! cmp -s "${tmp}" "${MAKEPKG_CONF}"; then
 		"${SUDO[@]}" install -m 644 "${tmp}" "${MAKEPKG_CONF}"
 	fi
-	rm -f "${tmp}"
 }
 
 configure_ccache_limit() {
 	run_as_user install -d -m 755 "${CCACHE_CONFIG_DIR}"
 
 	local tmp
-	tmp="$(mktemp)"
+	tmp="$(run_as_user mktemp "${CCACHE_CONFIG_DIR}/ccache.conf.XXXXXX")"
+	trap 'rm -f "${tmp}"' RETURN
 	python3 - "${CCACHE_CONFIG_FILE}" "${tmp}" "${CCACHE_MAX_SIZE}" <<'PY'
 import re
 import sys
@@ -106,7 +107,6 @@ target.write_text("\n".join(result).rstrip() + "\n")
 PY
 
 	run_as_user install -m 644 "${tmp}" "${CCACHE_CONFIG_FILE}"
-	rm -f "${tmp}"
 
 	if command -v ccache >/dev/null 2>&1; then
 		run_as_user ccache --max-size="${CCACHE_MAX_SIZE}" >/dev/null

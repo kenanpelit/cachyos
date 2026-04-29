@@ -298,9 +298,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `mango-arrange`
-**Description:** Profile-aware initial tag arrangement for MangoWM.
+**Description:** Profile-aware tag/window arrangement for MangoWM.
 
-**Usage:** `mango-arrange`
+**Usage:** `mango-arrange [profile|go]`
 
 ---
 

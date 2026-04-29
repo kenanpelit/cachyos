@@ -6,7 +6,7 @@
 description: MangoWM packages
 
 packages:
-  - mangowm
+  - mangowm-git
   - uwsm
   - polkit-gnome
   - network-manager-applet

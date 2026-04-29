@@ -125,6 +125,14 @@
           "desc": "Here: Ferdium"
         },
         {
+          "keys": "Alt + 0",
+          "desc": "Here: ALL"
+        },
+        {
+          "keys": "Super + Alt + 0",
+          "desc": "Go (Arrange Windows)"
+        },
+        {
           "keys": "Super + PgUp",
           "desc": "View Left"
         },
