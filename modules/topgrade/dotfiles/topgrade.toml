@@ -1,0 +1,49 @@
+# Managed by modules/topgrade.
+# Reference: topgrade --config-reference
+
+[misc]
+# Cache sudo credentials at startup so long runs do not stop halfway.
+pre_sudo = true
+
+# Firmware updates are intentionally reviewed outside Topgrade.
+# Snap is disabled because this host is Arch/CachyOS + Flatpak based.
+disable = ["firmware", "snap", "git_repos"]
+
+# Pull configured git repositories before package/application updates.
+# first = ["git_repos"]
+
+# Flatpak is kept last because app runtime updates can be slower/noisier.
+last = ["flatpak"]
+
+# Pip-managed environments are often noisy; keep the run moving.
+ignore_failures = ["pip3", "pip_review"]
+
+cleanup = true
+notify_end = "on_failure"
+
+# This binary is package-managed by CachyOS/paru.
+no_self_update = true
+show_distribution_summary = true
+
+#[git]
+#repos = [
+#    "~/.cachy",
+#    "~/.kod/*/",
+#]
+#max_concurrency = 5
+#arguments = "--rebase --autostash"
+
+[linux]
+arch_package_manager = "paru"
+yay_arguments = "--nodevel"
+
+[flatpak]
+# hosts/hay.yaml uses flatpak_scope: user, so system-wide sudo updates are off.
+use_sudo = false
+
+[python]
+enable_pip_review = true
+
+[firmware]
+# Defense in depth if the firmware step is enabled manually for a run.
+upgrade = false

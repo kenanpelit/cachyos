@@ -1,0 +1,14 @@
+tags:
+- tool
+- update
+description: Topgrade one-command system and userland update orchestrator
+depends_on:
+- base
+- paru
+- git
+- flatpak
+packages:
+- packages.yaml
+dotfiles:
+- source: dotfiles/topgrade.toml
+  target: ~/.config/topgrade.toml

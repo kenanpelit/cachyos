@@ -10,6 +10,7 @@ enabled_modules:
 # - sops # disabled: requires manual creation of modules/sops/files/keys.txt.age before sync
 - packages
 - flatpak
+- topgrade
 - system-packages-hay
 - admin
 - logind
