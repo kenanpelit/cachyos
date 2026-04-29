@@ -2,7 +2,7 @@
 Description=Bluetooth auto-connect (delayed)
 
 [Timer]
-OnStartupSec=20s
+OnStartupSec=10s
 AccuracySec=1s
 Unit=bt-autoconnect.service
 
