@@ -6,57 +6,61 @@
 # ==============================================================================
 # Authorship: Kenan Pelit
 # Repository: github.com/kenanpelit
-# Version: 1.3 (Optimized)
+# Version: 1.4 (Hardened launcher)
 # License: GPLv3
 
 set -euo pipefail
 
 # Niri/DM launches may provide a minimal PATH; normalize it so helper binaries
 # (anote, kitty/alacritty/foot, etc.) are always discoverable.
-case ":${PATH:-}:" in
-*":$HOME/.local/bin:"*) ;;
-*) PATH="$HOME/.local/bin:${PATH:-}" ;;
-esac
-case ":${PATH:-}:" in
-*":$HOME/bin:"*) ;;
-*) PATH="$HOME/bin:${PATH:-}" ;;
-esac
-case ":${PATH:-}:" in
-*":/usr/local/bin:"*) ;;
-*) PATH="/usr/local/bin:${PATH:-}" ;;
-esac
-case ":${PATH:-}:" in
-*":/usr/bin:"*) ;;
-*) PATH="/usr/bin:${PATH:-}" ;;
-esac
+for path_entry in "$HOME/.local/bin" "$HOME/bin" /usr/local/bin /usr/bin /bin; do
+  case ":${PATH:-}:" in
+  *":$path_entry:"*) ;;
+  *) PATH="$path_entry:${PATH:-}" ;;
+  esac
+done
 export PATH
 
 # =================================================================
 # KONFİGÜRASYON
 # =================================================================
 
-readonly ANOTE_CMD="${ANOTE_CMD:-anote}"
-readonly ANOTE_WINDOW_TITLE="${ANOTE_WINDOW_TITLE:-Anote}"
-readonly ANOTE_WINDOW_CLASS="${ANOTE_WINDOW_CLASS:-anote}"
-readonly ANOTE_INSTANCE_GROUP="${ANOTE_INSTANCE_GROUP:-anote}"
-readonly ANOTE_DIR="${ANOTE_DIR:-$HOME/.anote}"
-readonly CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/anotes/config"
-
-export ANOTE_DIR
-
-# EDITOR değişkeni yoksa nvim'i varsayılan yap
-: "${EDITOR:=nvim}"
-export EDITOR
+ANOTE_CMD="${ANOTE_CMD:-anote}"
+ANOTE_WINDOW_TITLE="${ANOTE_WINDOW_TITLE:-Anote}"
+ANOTE_WINDOW_CLASS="${ANOTE_WINDOW_CLASS:-anote}"
+ANOTE_INSTANCE_GROUP="${ANOTE_INSTANCE_GROUP:-anote}"
+ANOTE_DIR="${ANOTE_DIR:-$HOME/.anote}"
+CONFIG_FILE="${ANOTES_CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/anotes/config}"
+EDITOR="${EDITOR:-nvim}"
+PREFERRED_TERMINAL="${PREFERRED_TERMINAL:-auto}"
+ANOTE_USE_TMUX="${ANOTE_USE_TMUX:-false}"
+ANOTE_AUTOSTART="${ANOTE_AUTOSTART:-false}"
+ANOTE_KILL_PATTERN="${ANOTE_KILL_PATTERN:-}"
 
 # Konfigürasyon dosyası varsa yükle
 [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
 
-# Tercih edilmemişse terminal seçim modunu otomatik yap
-: "${PREFERRED_TERMINAL:=auto}"
-
 # FZF listelerinin yukarıdan aşağı görünmesi için varsayılan yerleşim
+: "${ANOTE_KILL_PATTERN:=--class[ =]${ANOTE_WINDOW_CLASS}|--app-id[ =]${ANOTE_WINDOW_CLASS}}"
 : "${FZF_DEFAULT_OPTS:=--layout=reverse}"
+
+readonly ANOTE_CMD
+readonly ANOTE_WINDOW_TITLE
+readonly ANOTE_WINDOW_CLASS
+readonly ANOTE_INSTANCE_GROUP
+readonly ANOTE_DIR
+readonly CONFIG_FILE
+readonly PREFERRED_TERMINAL
+readonly ANOTE_USE_TMUX
+readonly ANOTE_AUTOSTART
+readonly ANOTE_KILL_PATTERN
+
+export ANOTE_DIR
+export EDITOR
 export FZF_DEFAULT_OPTS
+
+TERMINAL_NAME=""
+TERMINAL_CMD=()
 
 # =================================================================
 # FONKSİYONLAR
@@ -85,6 +89,8 @@ SEÇENEKLER:
     -a, --auto METİN   Hızlı not ekle ve çık
     -S, --scratch      Doğrudan karalama defterini aç
     -k, --kill         Çalışan tüm anote örneklerini sonlandır
+        --doctor       Başlatıcı ortamını ve terminal seçimini denetle
+        --version      Sürüm bilgisini göster
     -h, --help         Bu yardım mesajını göster
 
 ÖRNEKLER:
@@ -97,38 +103,59 @@ YAPILANDIRMA DOSYASI: ~/.config/anotes/config
 EOF
 }
 
-detect_terminal() {
-  local terminals=(
-    "kitty:kitty --class $ANOTE_WINDOW_CLASS --instance-group $ANOTE_INSTANCE_GROUP -T $ANOTE_WINDOW_TITLE --single-instance"
-    "alacritty:alacritty --class $ANOTE_WINDOW_CLASS -t $ANOTE_WINDOW_TITLE"
-    "foot:foot --app-id=$ANOTE_WINDOW_CLASS --title=$ANOTE_WINDOW_TITLE"
-  )
+show_version() {
+  echo "anotes 1.4"
+}
 
-  local entry term cmd
+set_terminal_cmd() {
+  local terminal="$1"
+
+  case "$terminal" in
+  kitty)
+    TERMINAL_NAME="kitty"
+    TERMINAL_CMD=(kitty --class "$ANOTE_WINDOW_CLASS" --instance-group "$ANOTE_INSTANCE_GROUP" -T "$ANOTE_WINDOW_TITLE" --single-instance)
+    ;;
+  alacritty)
+    TERMINAL_NAME="alacritty"
+    TERMINAL_CMD=(alacritty --class "$ANOTE_WINDOW_CLASS" -t "$ANOTE_WINDOW_TITLE")
+    ;;
+  foot)
+    TERMINAL_NAME="foot"
+    TERMINAL_CMD=(foot --app-id="$ANOTE_WINDOW_CLASS" --title="$ANOTE_WINDOW_TITLE")
+    ;;
+  *)
+    return 1
+    ;;
+  esac
+}
+
+detect_terminal() {
+  local terminals=(kitty alacritty foot)
+  local term
 
   # Önce yapılandırmada belirtilen terminali dene
   if [[ "${PREFERRED_TERMINAL}" != "auto" ]]; then
-    for entry in "${terminals[@]}"; do
-      term="${entry%%:*}"
-      cmd="${entry#*:}"
-      if [[ "$term" == "$PREFERRED_TERMINAL" ]] && command -v "$term" &>/dev/null; then
-        TERMINAL_CMD="$cmd"
-        return 0
-      fi
-    done
+    if command -v "$PREFERRED_TERMINAL" &>/dev/null && set_terminal_cmd "$PREFERRED_TERMINAL"; then
+      return 0
+    fi
+    echo "⚠ Tercih edilen terminal bulunamadı veya desteklenmiyor: $PREFERRED_TERMINAL" >&2
   fi
 
-  for entry in "${terminals[@]}"; do
-    term="${entry%%:*}"
-    cmd="${entry#*:}"
+  for term in "${terminals[@]}"; do
     if command -v "$term" &>/dev/null; then
-      TERMINAL_CMD="$cmd"
+      set_terminal_cmd "$term"
       return 0
     fi
   done
 
   echo "⚠ Desteklenen GUI terminal bulunamadı (kitty, alacritty, foot)" >&2
   return 1
+}
+
+shell_join() {
+  local joined=""
+  printf -v joined '%q ' "$@"
+  printf '%s' "${joined% }"
 }
 
 check_anote() {
@@ -139,7 +166,7 @@ check_anote() {
 }
 
 kill_anote() {
-  if pkill -f "$ANOTE_WINDOW_CLASS" 2>/dev/null; then
+  if pkill -f -- "$ANOTE_KILL_PATTERN" 2>/dev/null; then
     echo "✓ Anote örnekleri sonlandırıldı"
   else
     echo "⚠ Çalışan anote örneği bulunamadı"
@@ -165,6 +192,10 @@ PREFERRED_TERMINAL="auto"
 # Ek özellikler
 ANOTE_USE_TMUX=false
 ANOTE_AUTOSTART=false
+
+# Varsayılan olarak sadece anote class/app-id ile açılmış terminal örneklerini
+# hedefler. Gerekirse regex olarak özelleştirilebilir.
+ANOTE_KILL_PATTERN="--class[ =]anote|--app-id[ =]anote"
 EOF
   echo "✓ Varsayılan yapılandırma oluşturuldu: $CONFIG_FILE"
 }
@@ -173,6 +204,27 @@ run_daemon() {
   nohup "$@" >/dev/null 2>&1 &
   disown
   echo "✓ Anote arka planda başlatıldı (PID: $!)"
+}
+
+doctor_mode() {
+  local terminal="none"
+  if detect_terminal >/dev/null 2>&1; then
+    terminal="$TERMINAL_NAME"
+  fi
+
+  cat <<EOF
+anotes doctor
+
+ANOTE_CMD:           $ANOTE_CMD
+ANOTE_DIR:           $ANOTE_DIR
+CONFIG_FILE:         $CONFIG_FILE
+EDITOR:              $EDITOR
+PREFERRED_TERMINAL:  $PREFERRED_TERMINAL
+DETECTED_TERMINAL:   $terminal
+ANOTE_USE_TMUX:      $ANOTE_USE_TMUX
+ANOTE_KILL_PATTERN:  $ANOTE_KILL_PATTERN
+FZF_DEFAULT_OPTS:    $FZF_DEFAULT_OPTS
+EOF
 }
 
 # =================================================================
@@ -238,6 +290,14 @@ main() {
       kill_anote
       exit 0
       ;;
+    --doctor)
+      doctor_mode
+      exit 0
+      ;;
+    --version)
+      show_version
+      exit 0
+      ;;
     -h | --help)
       show_help
       exit 0
@@ -254,9 +314,9 @@ main() {
 
   # TMUX içindeysek ve ANOTE_USE_TMUX true ise
   if [[ "${ANOTE_USE_TMUX:-false}" == true ]] &&
-    [[ "$TERM_PROGRAM" == "tmux" || -n "${TMUX:-}" ]]; then
-    local tmux_cmd="$ANOTE_CMD"
-    [[ ${#anote_args[@]} -gt 0 ]] && tmux_cmd+=" ${anote_args[*]}"
+    [[ "${TERM_PROGRAM:-}" == "tmux" || -n "${TMUX:-}" ]]; then
+    local tmux_cmd
+    tmux_cmd="$(shell_join "$ANOTE_CMD" "${anote_args[@]}")"
 
     if [[ "$daemon" == true ]]; then
       tmux new-window -d -n "$ANOTE_WINDOW_TITLE" "$tmux_cmd"
@@ -268,13 +328,12 @@ main() {
   fi
 
   if detect_terminal; then
-    local cmd="$TERMINAL_CMD -e $ANOTE_CMD"
-    [[ ${#anote_args[@]} -gt 0 ]] && cmd+=" ${anote_args[*]}"
+    local launch_cmd=("${TERMINAL_CMD[@]}" -e "$ANOTE_CMD" "${anote_args[@]}")
 
     if [[ "$daemon" == true ]]; then
-      run_daemon bash -c "$cmd"
+      run_daemon "${launch_cmd[@]}"
     else
-      eval "$cmd"
+      "${launch_cmd[@]}"
     fi
   else
     # GUI terminal bulunamadı; mevcut terminalde çalıştır

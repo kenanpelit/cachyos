@@ -9,37 +9,64 @@
 # Version: 3.2 (Optimized)
 # License: GPLv3
 
-# Katı mod - hataları daha iyi yakalamak için
+# Katı mod - hataları daha iyi yakalamak için.
+# `nounset` config yüklendikten sonra açılır; böylece eski config dosyaları
+# tanımsız değişken kullanıyorsa net hata verir ama varsayılanlar önce oluşur.
 set -eo pipefail
+
+# DM/UWSM/tmux popup gibi minimal ortamlarda ~/.local/bin görünmeyebiliyor.
+for path_entry in "$HOME/.local/bin" "$HOME/bin" /usr/local/bin /usr/bin /bin; do
+  case ":${PATH:-}:" in
+  *":$path_entry:"*) ;;
+  *) PATH="$path_entry:${PATH:-}" ;;
+  esac
+done
+export PATH
 
 # =================================================================
 # KONFİGÜRASYON DEĞİŞKENLERİ
 # =================================================================
 
-# Temel dizinler
-readonly ANOTE_DIR="${ANOTE_DIR:-$HOME/.anote}"
-readonly CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/anote"
-readonly CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/anote/config"
+# Temel varsayılanlar. Config dosyası bunları override edebilir.
+ANOTE_DIR="${ANOTE_DIR:-$HOME/.anote}"
+CACHE_DIR="${ANOTE_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/anote}"
+CONFIG_FILE="${ANOTE_CONFIG_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/anote/config}"
+EDITOR="${EDITOR:-nvim}"
+DATE_FORMAT="${DATE_FORMAT:-%Y-%m-%d %H:%M:%S}"
+CLEANUP_INTERVAL="${CLEANUP_INTERVAL:-604800}"
+FORCE_FULLSCREEN_FZF_IN_TMUX="${ANOTE_FORCE_FULLSCREEN_FZF_IN_TMUX:-true}"
 
-# Alt dizinler
+# Varsa konfigürasyon dosyasını yükle. Burada ANOTE_DIR, EDITOR,
+# FZF_DEFAULT_OPTS, DATE_FORMAT gibi değerler güvenli şekilde override edilir.
+[[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
+
+set -u
+
+# Türetilmiş dizinler
+readonly ANOTE_DIR
+readonly CACHE_DIR
+readonly CONFIG_FILE
 readonly CHEAT_DIR="$ANOTE_DIR/cheats"
 readonly SNIPPETS_DIR="$ANOTE_DIR/snippets"
 readonly SCRATCH_DIR="$ANOTE_DIR/scratch"
 
-# Varsayılan ayarlar
-EDITOR="${EDITOR:-nvim}"
-readonly TIMESTAMP="$(date +%Y-%m-%d\ %H:%M:%S)"
+# Runtime dosyaları
+readonly TIMESTAMP="$(date "+$DATE_FORMAT")"
 readonly SCRATCH_FILE="$SCRATCH_DIR/$(date +%Y-%m).txt"
 readonly HISTORY_FILE="$CACHE_DIR/history.json"
-readonly CLEANUP_INTERVAL=$((7 * 24 * 60 * 60)) # 7 gün
+readonly NAV_FILE="$CACHE_DIR/nav.$$"
+readonly CLEANUP_INTERVAL
 # tmux popup'larında fzf'nin tekrar bölünmemesi ve tam alanı kullanması için
-readonly FORCE_FULLSCREEN_FZF_IN_TMUX="${ANOTE_FORCE_FULLSCREEN_FZF_IN_TMUX:-true}"
-
-# Varsa konfigürasyon dosyasını yükle (burada FZF_DEFAULT_OPTS'i override edebilirsin)
-[[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
+readonly FORCE_FULLSCREEN_FZF_IN_TMUX
 
 # FZF listelerinin yukarıdan aşağı görünmesi için varsayılan yerleşim
 : "${FZF_DEFAULT_OPTS:=--layout=reverse}"
+export FZF_DEFAULT_OPTS
+
+cleanup_runtime_files() {
+  rm -f "$NAV_FILE"
+}
+trap cleanup_runtime_files EXIT
 
 # =================================================================
 # YARDIMCI FONKSİYONLAR
@@ -71,6 +98,8 @@ SEÇENEKLER:
   -s, --search [kelime]     → Tüm dosyalarda arar
   -t, --snippet             → Snippet'i panoya kopyalar ve gösterir
   -i, --info                → Bu bilgi sayfasını gösterir
+      --doctor              → Dizin, bağımlılık ve clipboard durumunu denetler
+      --version             → Sürüm bilgisini gösterir
   -h, --help                → Bu yardım sayfasını gösterir
   -S, --single-snippet      → Tek satır snippet modunu başlatır
   -M, --multi-snippet       → Çok satırlı snippet modunu başlatır
@@ -94,6 +123,56 @@ TUŞ KISAYOLLARI (FZF içinde):
   anote.sh -t                       → Snippet kopyalama modunu başlat
 
 KAYIT DİZİNİ: ~/.anote
+EOF
+}
+
+show_version() {
+  echo "anote 3.3"
+}
+
+page_output() {
+  if [[ -t 1 ]] && command -v less >/dev/null 2>&1; then
+    less -R
+  else
+    cat
+  fi
+}
+
+clipboard_status() {
+  local available=()
+  command -v wl-copy >/dev/null 2>&1 && available+=("wl-copy")
+  if command -v xclip >/dev/null 2>&1 && [[ -n "${DISPLAY:-}" ]]; then
+    available+=("xclip")
+  fi
+  command -v clipse >/dev/null 2>&1 && available+=("clipse")
+  if command -v tmux >/dev/null 2>&1 &&
+    [[ "${TERM_PROGRAM:-}" == "tmux" || -n "${TMUX:-}" ]]; then
+    available+=("tmux-buffer")
+  fi
+
+  if [[ ${#available[@]} -eq 0 ]]; then
+    echo "yok"
+  else
+    printf '%s\n' "${available[*]}"
+  fi
+}
+
+doctor_mode() {
+  create_required_directories
+
+  cat <<EOF
+anote doctor
+
+ANOTE_DIR:      $ANOTE_DIR
+SNIPPETS_DIR:   $SNIPPETS_DIR
+CHEAT_DIR:      $CHEAT_DIR
+SCRATCH_DIR:    $SCRATCH_DIR
+CACHE_DIR:      $CACHE_DIR
+CONFIG_FILE:    $CONFIG_FILE
+EDITOR:         $EDITOR
+FZF:            $(command -v fzf 2>/dev/null || echo "bulunamadı")
+BAT:            $(command -v bat 2>/dev/null || command -v batcat 2>/dev/null || echo "opsiyonel/yok")
+CLIPBOARD:      $(clipboard_status)
 EOF
 }
 
@@ -142,7 +221,7 @@ EOF
 # engelleyip mevcut terminal alanını tam kullanmasını sağla
 configure_fzf_for_tmux() {
   if [[ "$FORCE_FULLSCREEN_FZF_IN_TMUX" == "true" ]] &&
-    [[ "$TERM_PROGRAM" == "tmux" || -n "${TMUX:-}" ]]; then
+    [[ "${TERM_PROGRAM:-}" == "tmux" || -n "${TMUX:-}" ]]; then
     export FZF_TMUX=0
     if [[ -n "${FZF_DEFAULT_OPTS:-}" ]]; then
       export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --height=100%"
@@ -155,20 +234,30 @@ configure_fzf_for_tmux() {
 # Bağımlılık kontrolü
 check_dependencies() {
   local missing_deps=()
-  local required_deps=("fzf" "bat" "grep" "sed" "awk")
+  local mode="${1:-}"
+  local next_arg="${2:-}"
+  local required_deps=("grep" "sed" "awk" "find")
+
+  case "$mode" in
+  -h | --help | -i | --info | --doctor | --version | -a | --auto | -d | --dir | -l | --list | -A | --audit | --scratch | -c | --config)
+    ;;
+  -p | --print)
+    [[ -z "$next_arg" ]] && required_deps+=("fzf")
+    ;;
+  -s | --search)
+    [[ -z "$next_arg" ]] && required_deps+=("fzf")
+    ;;
+  -e | --edit | "")
+    required_deps+=("fzf")
+    ;;
+  *)
+    required_deps+=("fzf")
+    ;;
+  esac
 
   for dep in "${required_deps[@]}"; do
     command -v "$dep" &>/dev/null || missing_deps+=("$dep")
   done
-
-  # En az bir clipboard yardımcı programı gerekli:
-  # wl-copy, xclip, clipse veya tmux (buffer'a kopyalamak için)
-  if ! command -v wl-copy &>/dev/null &&
-    ! command -v xclip &>/dev/null &&
-    ! command -v clipse &>/dev/null &&
-    { ! command -v tmux &>/dev/null || [[ -z "$TMUX" && "$TERM_PROGRAM" != "tmux" ]]; }; then
-    missing_deps+=("wl-copy/xclip/clipse/tmux")
-  fi
 
   if [[ ${#missing_deps[@]} -gt 0 ]]; then
     echo "HATA: Aşağıdaki bağımlılıklar eksik:" >&2
@@ -211,6 +300,8 @@ update_history() {
   mkdir -p "$CACHE_DIR"
   local timestamp
   timestamp=$(date +%s)
+  local tmp_history
+  tmp_history="$(mktemp "$CACHE_DIR/history.XXXXXX")"
 
   # Format: "epoch<TAB>absolute_file_path"
   {
@@ -220,20 +311,26 @@ update_history() {
     fi
   } | awk -F'\t' 'NF == 2 { if (!seen[$2]++) print }' \
     | sort -r -n -k1,1 \
-    | head -n 200 >"$HISTORY_FILE.tmp" 2>/dev/null
+    | head -n 200 >"$tmp_history" 2>/dev/null
 
-  mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
+  mv "$tmp_history" "$HISTORY_FILE"
 }
 
 # Geçmiş dosyasını basitçe temizle / daralt
 clean_history() {
   [[ -f "$HISTORY_FILE" ]] || return 0
 
+  local tmp_history
+  tmp_history="$(mktemp "$CACHE_DIR/history.XXXXXX")"
+
   awk -F'\t' 'NF == 2 && $1 ~ /^[0-9]+$/ { if (!seen[$2]++) print }' "$HISTORY_FILE" 2>/dev/null \
     | sort -r -n -k1,1 \
-    | head -n 200 >"$HISTORY_FILE.tmp" 2>/dev/null || return 0
+    | head -n 200 >"$tmp_history" 2>/dev/null || {
+    rm -f "$tmp_history"
+    return 0
+  }
 
-  mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
+  mv "$tmp_history" "$HISTORY_FILE"
 }
 
 # Önbellek bakımı (geçmişi makul boyutta tut)
@@ -245,11 +342,13 @@ maintain_cache() {
 # Önbellek güncelleme (snippet kullanım geçmişi için)
 update_cache() {
   local item="$1" cache_file="$2"
+  local tmp_cache
 
   [[ ! -f "$cache_file" ]] && touch "$cache_file"
+  tmp_cache="$(mktemp "$CACHE_DIR/cache.XXXXXX")"
 
-  echo "$item" | cat - "$cache_file" | awk '!seen[$0]++' | head -n 100 >"$CACHE_DIR/temp_cache"
-  mv "$CACHE_DIR/temp_cache" "$cache_file"
+  echo "$item" | cat - "$cache_file" | awk '!seen[$0]++' | head -n 100 >"$tmp_cache"
+  mv "$tmp_cache" "$cache_file"
 }
 
 # Panoya kopyalama fonksiyonu - Optimize edilmiş + sadeleştirilmiş
@@ -261,7 +360,8 @@ copy_to_clipboard() {
   }
 
   mkdir -p "$CACHE_DIR"
-  local tmp_file="$CACHE_DIR/clipboard_content.tmp"
+  local tmp_file
+  tmp_file="$(mktemp "$CACHE_DIR/clipboard_content.XXXXXX")"
   printf '%s' "$content" >"$tmp_file"
 
   local clipboard_tools="" success=false
@@ -290,7 +390,7 @@ copy_to_clipboard() {
 
   # tmux buffer (sadece tmux çalışıyorsa ve tmux binary varsa)
   if command -v tmux &>/dev/null &&
-    [[ "$TERM_PROGRAM" == "tmux" || -n "$TMUX" ]]; then
+    [[ "${TERM_PROGRAM:-}" == "tmux" || -n "${TMUX:-}" ]]; then
     if printf '%s' "$content" | tmux load-buffer - 2>/dev/null; then
       if [[ "$success" == true ]]; then
         clipboard_tools+=", tmux buffer"
@@ -336,6 +436,8 @@ show_file_content() {
   local file="$1"
   if command -v bat &>/dev/null; then
     bat --color=always -pp "$file" 2>/dev/null || cat "$file"
+  elif command -v batcat &>/dev/null; then
+    batcat --color=always -pp "$file" 2>/dev/null || cat "$file"
   else
     cat "$file"
   fi
@@ -345,7 +447,7 @@ open_in_editor() {
   local file="$1"
   local line="${2:-}"
 
-  if [[ "$TERM_PROGRAM" == "tmux" || -n "$TMUX" ]]; then
+  if [[ "${TERM_PROGRAM:-}" == "tmux" || -n "${TMUX:-}" ]]; then
     local filename
     filename=$(basename "$file")
     if [[ -n "$line" ]]; then
@@ -372,8 +474,8 @@ ask_continue() {
 }
 
 check_navigation() {
-  if [[ -f /tmp/anote_nav ]]; then
-    rm -f /tmp/anote_nav
+  if [[ -f "$NAV_FILE" ]]; then
+    rm -f "$NAV_FILE"
     return 0
   fi
   return 1
@@ -500,7 +602,7 @@ show_anote_tui() {
   create) create_mode ;;
   search) search_mode ;;
   scratch) scratch_mode ;;
-  info) show_snippet_info | less -R ;;
+  info) show_snippet_info | page_output ;;
   esac
 }
 
@@ -513,7 +615,7 @@ snippet_mode() {
         --bind "ctrl-f:execute:$EDITOR \$(echo {} | cut -d: -f1)" \
         --bind "ctrl-e:execute:$EDITOR +\$(echo {} | cut -d: -f2) \$(echo {} | cut -d: -f1)" \
         --bind "ctrl-r:reload(grep -nrH '^####; ' $SNIPPETS_DIR/*)" \
-        --bind "esc:execute-silent(echo 'back' > /tmp/anote_nav)+abort" \
+        --bind "esc:execute-silent(echo 'back' > $NAV_FILE)+abort" \
         --header 'ESC:Geri C-e:satır-düzenle C-f:dosya-düzenle' \
         --preview-window 'down' \
         --preview '
@@ -588,7 +690,7 @@ multi_mode() {
           --preview-window='right:60%:wrap' \
           --prompt="Metin bloğu ($mode_label) > " \
           --header="ESC: Çıkış | ENTER: Kopyala | CTRL+E: Düzenle" \
-          --bind "esc:execute-silent(echo 'back' > /tmp/anote_nav)+abort" \
+          --bind "esc:execute-silent(echo 'back' > $NAV_FILE)+abort" \
           --bind "ctrl-e:execute($EDITOR {} < /dev/tty > /dev/tty)"
     )
 
@@ -624,7 +726,7 @@ cheats_mode() {
         --bind "ctrl-f:execute:$EDITOR \$(echo {} | cut -d: -f1)" \
         --bind "ctrl-e:execute:$EDITOR +\$(echo {} | cut -d: -f2) \$(echo {} | cut -d: -f1)" \
         --bind "ctrl-r:reload(grep -nrH '^####; ' $CHEAT_DIR/*)" \
-        --bind "esc:execute-silent(echo 'back' > /tmp/anote_nav)+abort" \
+        --bind "esc:execute-silent(echo 'back' > $NAV_FILE)+abort" \
         --header 'ESC:Geri C-e:satır-düzenle C-f:dosya-düzenle' \
         --preview-window 'down' \
         --preview '
@@ -653,7 +755,7 @@ copy_mode() {
     selected=$(find "$ANOTE_DIR"/ -type f -not -path "*/backups/*" 2>/dev/null | sort |
       fzf -d / --with-nth -2.. \
         --preview 'bat --color=always -pp {} 2>/dev/null || cat {}' \
-        --bind "esc:execute-silent(echo 'back' > /tmp/anote_nav)+abort" \
+        --bind "esc:execute-silent(echo 'back' > $NAV_FILE)+abort" \
         --header 'ESC:Geri ENTER:Kopyala' \
         --prompt="anote > kopyala: ")
 
@@ -681,7 +783,7 @@ copy_mode() {
 
 edit_mode() {
   while true; do
-    if [[ "$TERM_PROGRAM" == "tmux" || -n "$TMUX" ]]; then
+    if [[ "${TERM_PROGRAM:-}" == "tmux" || -n "${TMUX:-}" ]]; then
       local selected
       selected=$(find "$ANOTE_DIR"/ -type f -not -path "*/backups/*" 2>/dev/null | sort |
         fzf -m -d / --with-nth -2.. \
@@ -689,7 +791,7 @@ edit_mode() {
           --bind "shift-delete:execute:rm -i {} >/dev/tty" \
           --bind "ctrl-v:execute:qmv -f do {} >/dev/tty 2>/dev/null || echo 'qmv bulunamadı'" \
           --bind "ctrl-r:reload:find '$ANOTE_DIR'/ -type f | sort" \
-          --bind "esc:execute-silent(echo 'back' > /tmp/anote_nav)+abort" \
+          --bind "esc:execute-silent(echo 'back' > $NAV_FILE)+abort" \
           --header 'ESC:Geri C-v:yeniden-adlandır C-r:yenile S-del:sil' \
           --preview 'bat --color=always -pp {} 2>/dev/null || cat {}' \
           --prompt="anote > düzenle: ")
@@ -713,7 +815,7 @@ edit_mode() {
         selected=$(find "$file_path" -type f 2>/dev/null | sort |
           fzf -d / --with-nth -2.. \
             --preview 'bat --color=always -pp {} 2>/dev/null || cat {}' \
-            --bind "esc:execute-silent(echo 'back' > /tmp/anote_nav)+abort" \
+            --bind "esc:execute-silent(echo 'back' > $NAV_FILE)+abort" \
             --header 'ESC:Geri ENTER:Düzenle' \
             --prompt="anote > düzenle: ")
       elif [[ -f "$file_path" ]]; then
@@ -744,7 +846,7 @@ search_mode() {
     selected=$(grep -rnv '^[[:space:]]*$' --exclude-dir=backups "$ANOTE_DIR"/* 2>/dev/null |
       fzf -d : --with-nth 1,2,3 \
         --prompt="anote > ara: " \
-        --bind "esc:execute-silent(echo 'back' > /tmp/anote_nav)+abort" \
+        --bind "esc:execute-silent(echo 'back' > $NAV_FILE)+abort" \
         --header "ESC:Geri ENTER:Seç" \
         --preview '
           file=$(echo {} | cut -d: -f1)
@@ -918,27 +1020,30 @@ scratch_mode() {
   }
 
   if [[ -z "$first_line" || "$first_line" != "# Scratch Notes - $USER" ]]; then
+    local scratch_tmp
+    scratch_tmp="$(mktemp "$SCRATCH_DIR/.scratch.XXXXXX")"
     {
       echo "# Scratch Notes - $USER"
       echo "# Bu dosya $ANOTE_DIR içinde otomatik olarak oluşturulmuş karalama notları içerir."
       echo "# Her yeni giriş bir tarih/saat başlığı ile ayrılır."
       echo ""
-    } >"$SCRATCH_FILE.tmp"
+    } >"$scratch_tmp"
 
-    [[ -s "$SCRATCH_FILE" ]] && cat "$SCRATCH_FILE" >>"$SCRATCH_FILE.tmp"
-    mv "$SCRATCH_FILE.tmp" "$SCRATCH_FILE"
+    [[ -s "$SCRATCH_FILE" ]] && cat "$SCRATCH_FILE" >>"$scratch_tmp"
+    mv "$scratch_tmp" "$SCRATCH_FILE"
   fi
 
-  printf "\n#### %s\n\n" "$(date "+%Y-%m-%d %H:%M:%S")" >>"$SCRATCH_FILE"
+  printf "\n#### %s\n\n" "$(date "+$DATE_FORMAT")" >>"$SCRATCH_FILE"
 
   local backup_dir="$ANOTE_DIR/backups"
   local today
   today=$(date +%Y%m%d)
   local backup_file="$backup_dir/scratch_$today.bak"
 
-  [[ -d "$backup_dir" && ! -f "$backup_file" ]] && cp "$SCRATCH_FILE" "$backup_file"
+  mkdir -p "$backup_dir"
+  [[ ! -f "$backup_file" ]] && cp "$SCRATCH_FILE" "$backup_file"
 
-  if [[ "$TERM_PROGRAM" == "tmux" || -n "$TMUX" ]]; then
+  if [[ "${TERM_PROGRAM:-}" == "tmux" || -n "${TMUX:-}" ]]; then
     tmux new-window -n "scratch" "$EDITOR \"+normal G$\" $SCRATCH_FILE"
   else
     if [[ "$EDITOR" == *"nvim"* || "$EDITOR" == *"vim"* ]]; then
@@ -948,7 +1053,7 @@ scratch_mode() {
     fi
   fi
 
-  [[ "$1" != "direct" ]] && {
+  [[ "${1:-}" != "direct" ]] && {
     sleep 0.5
     show_anote_tui
   }
@@ -959,25 +1064,36 @@ scratch_mode() {
 # =================================================================
 
 main() {
-  check_dependencies
-  create_required_directories
-  maintain_cache
-  configure_fzf_for_tmux
-
-  case "$1" in
+  case "${1:-}" in
   -h | --help)
     show_anote_help
     exit 0
     ;;
   -i | --info)
-    show_snippet_info | less -R
+    show_snippet_info | page_output
     exit 0
     ;;
+  --doctor)
+    doctor_mode
+    exit 0
+    ;;
+  --version)
+    show_version
+    exit 0
+    ;;
+  esac
+
+  check_dependencies "${1:-}" "${2:-}"
+  create_required_directories
+  maintain_cache
+  configure_fzf_for_tmux
+
+  case "${1:-}" in
   -A | --audit | --scratch)
     scratch_mode "direct"
     ;;
   -a | --auto)
-    [[ -z "$2" ]] && {
+    [[ -z "${2:-}" ]] && {
       echo 'HATA: Not girişi eksik!' >&2
       exit 1
     }
@@ -999,7 +1115,7 @@ main() {
     find . -type f -not -path "*/\.*" -not -path "*/backups/*" -printf "%P\n" | sort
     ;;
   -e | --edit)
-    if [[ -z "$2" ]]; then
+    if [[ -z "${2:-}" ]]; then
       cd "$ANOTE_DIR" || exit 1
       local selected
       selected=$(find . -type f -not -path "*/\.*" | sort |
@@ -1023,7 +1139,7 @@ main() {
     fi
     ;;
   -s | --search)
-    if [[ -z "$2" ]]; then
+    if [[ -z "${2:-}" ]]; then
       local selected
       selected=$(grep -rnv '^[[:space:]]*$' --exclude-dir=backups "$ANOTE_DIR"/* 2>/dev/null |
         fzf -d : --with-nth 1,2,3 --prompt="anote > ara: " \
@@ -1047,7 +1163,7 @@ main() {
     fi
     ;;
   -p | --print)
-    if [[ -z "$2" ]]; then
+    if [[ -z "${2:-}" ]]; then
       local selected
       selected=$(find "$ANOTE_DIR"/ -type f -not -path "*/\.*" -not -path "*/backups/*" 2>/dev/null | sort |
         fzf -d / --with-nth -2.. \
