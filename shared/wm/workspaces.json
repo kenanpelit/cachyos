@@ -49,12 +49,7 @@
       "layout": {
         "lines": [
           "default-column-display \"tabbed\""
-        ],
-        "mango": {
-          "layoutName": "tile",
-          "mfact": 0.6,
-          "nmaster": 1
-        }
+        ]
       }
     },
     {
@@ -155,13 +150,7 @@
         "lines": [
           "default-column-width { proportion 1.000; }",
           "center-focused-column \"always\""
-        ],
-        "mango": {
-          "layoutName": "center_tile",
-          "mfact": 0.68,
-          "nmaster": 1,
-          "noRenderBorder": 1
-        }
+        ]
       }
     },
     {
