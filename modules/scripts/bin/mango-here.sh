@@ -3,30 +3,16 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: mango-here <tag> <monitor> <target>
+Usage:
+  mango-here <tag> <monitor> <target>
+  mango-here all [target,target,...]
 
 If the mapped app is already open, move/focus it on the current workspace.
 Otherwise, launch it.
+
+The `all` mode gathers every workspace target marked includeInAll in the shared
+workspace manifest, then finishes on Kenp.
 EOF
-}
-
-[[ $# -eq 3 ]] || {
-  usage >&2
-  exit 2
-}
-
-tag="$1"
-monitor="$2"
-target="$3"
-
-[[ "${tag}" =~ ^[1-9]$ ]] || {
-  echo "tag must be between 1 and 9" >&2
-  exit 2
-}
-
-command -v mmsg >/dev/null 2>&1 || {
-  echo "mmsg is required" >&2
-  exit 1
 }
 
 declare -A VIEW_PRIMARY=()
@@ -226,44 +212,136 @@ launch_target() {
   return 1
 }
 
-current_monitor="$(selected_monitor 2>/dev/null || true)"
-current_tag="$(primary_active_tag "${current_monitor:-}" 2>/dev/null || true)"
-regex="$(target_regex "${target}")"
+default_all_targets() {
+  printf '%s\n' \
+    "Kenp" \
+    "TmuxKenp" \
+    "Ai" \
+    "CompecTA" \
+    "WebCord" \
+    "brave-youtube.com__-Default" \
+    "spotify" \
+    "ferdium"
+}
 
-if [[ -n "${current_monitor:-}" && -n "${current_tag:-}" ]]; then
-  if focus_match_on_tag "$current_monitor" "$current_tag" "$regex"; then
-    exit 0
+gather_all_targets() {
+  local list="${1:-}"
+  local gathered=""
+
+  if [[ -n "${list}" ]]; then
+    printf '%s\n' "${list}" | tr ',' '\n' | awk 'NF { print }'
+    return 0
   fi
 
-  snapshot_views
-
-  found=0
-  while read -r scan_monitor scan_tag client_count; do
-    [[ -n "$scan_monitor" && -n "$scan_tag" ]] || continue
-    if [[ "$scan_monitor" == "$current_monitor" && "$scan_tag" == "$current_tag" ]]; then
-      continue
-    fi
-    if focus_match_on_tag "$scan_monitor" "$scan_tag" "$regex"; then
-      found=1
-      break
-    fi
-  done < <(
-    mmsg -g -t 2>/dev/null | awk '$2 == "tag" && $5 > 0 { print $1, $3, $5 }'
-  )
-
-  if [[ "$found" -eq 1 ]]; then
-    mmsg -d "tagcrossmon,${current_tag},${current_monitor}" >/dev/null 2>&1 || true
-    restore_views "$current_monitor"
-    mmsg -d "focusmon,${current_monitor}" >/dev/null 2>&1 || true
-    exit 0
+  if command -v osc-workspace-launch >/dev/null 2>&1; then
+    gathered="$(osc-workspace-launch gather-targets 2>/dev/null || true)"
   fi
 
-  restore_views
-fi
+  if [[ -n "${gathered//[[:space:]]/}" ]]; then
+    printf '%s\n' "${gathered}"
+  else
+    default_all_targets
+  fi
+}
 
-if launch_target; then
-  exit 0
-fi
+run_single_target() {
+  target="$1"
 
-echo "unable to find or launch target: ${target}" >&2
-exit 1
+  local current_monitor current_tag regex found scan_monitor scan_tag client_count
+
+  current_monitor="$(selected_monitor 2>/dev/null || true)"
+  current_tag="$(primary_active_tag "${current_monitor:-}" 2>/dev/null || true)"
+  regex="$(target_regex "${target}")"
+
+  if [[ -n "${current_monitor:-}" && -n "${current_tag:-}" ]]; then
+    if focus_match_on_tag "$current_monitor" "$current_tag" "$regex"; then
+      return 0
+    fi
+
+    snapshot_views
+
+    found=0
+    while read -r scan_monitor scan_tag client_count; do
+      [[ -n "$scan_monitor" && -n "$scan_tag" ]] || continue
+      if [[ "$scan_monitor" == "$current_monitor" && "$scan_tag" == "$current_tag" ]]; then
+        continue
+      fi
+      if focus_match_on_tag "$scan_monitor" "$scan_tag" "$regex"; then
+        found=1
+        break
+      fi
+    done < <(
+      mmsg -g -t 2>/dev/null | awk '$2 == "tag" && $5 > 0 { print $1, $3, $5 }'
+    )
+
+    if [[ "$found" -eq 1 ]]; then
+      mmsg -d "tagcrossmon,${current_tag},${current_monitor}" >/dev/null 2>&1 || true
+      restore_views "$current_monitor"
+      mmsg -d "focusmon,${current_monitor}" >/dev/null 2>&1 || true
+      return 0
+    fi
+
+    restore_views
+  fi
+
+  if launch_target; then
+    return 0
+  fi
+
+  echo "unable to find or launch target: ${target}" >&2
+  return 1
+}
+
+run_all_targets() {
+  local list="${1:-}"
+  local app=""
+  local status=0
+
+  while IFS= read -r app; do
+    [[ -n "${app}" ]] || continue
+    [[ "${app}" == "Kenp" ]] && continue
+    run_single_target "${app}" || status=1
+  done < <(gather_all_targets "${list}")
+
+  run_single_target "Kenp" || status=1
+  return "${status}"
+}
+
+case "${1:-}" in
+  -h|--help|help|"")
+    usage
+    ;;
+  all)
+    command -v mmsg >/dev/null 2>&1 || {
+      echo "mmsg is required" >&2
+      exit 1
+    }
+    [[ $# -le 2 ]] || {
+      usage >&2
+      exit 2
+    }
+    run_all_targets "${2:-}"
+    ;;
+  *)
+    command -v mmsg >/dev/null 2>&1 || {
+      echo "mmsg is required" >&2
+      exit 1
+    }
+    [[ $# -eq 3 ]] || {
+      usage >&2
+      exit 2
+    }
+    tag="$1"
+    monitor="$2"
+    target="$3"
+    [[ "${tag}" =~ ^[1-9]$ ]] || {
+      echo "tag must be between 1 and 9" >&2
+      exit 2
+    }
+    [[ -n "${monitor}" ]] || {
+      echo "monitor is required" >&2
+      exit 2
+    }
+    run_single_target "${target}"
+    ;;
+esac

@@ -206,9 +206,12 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     )
     add_entry("Workspaces", "ALT", workspace_id, f"Here: {here_label}")
 
+add_entry("Workspaces", "ALT", "0", "Here: ALL")
+add_entry("Workspaces", "SUPER+ALT", "0", "Go (Arrange Windows)")
 
 spawn_map = {
     "uwsm stop": ("System", "Stop UWSM Session"),
+    "mango-arrange go": ("Workspaces", "Go (Arrange Windows)"),
     "mango-monitor-smart focus-next": ("Monitors", "Focus Next Monitor"),
     "mango-monitor-smart move-next": ("Monitors", "Move Window to Next Monitor"),
     "osc-shell ipc call launcher toggle": ("Noctalia", "Launcher"),
@@ -303,6 +306,8 @@ def label_for_action(action, args):
         command = ",".join(args).strip()
         if command in spawn_map:
             return spawn_map[command]
+        if command == "mango-here all":
+            return "Workspaces", "Here: ALL"
         if command.startswith("mango-tag-smart "):
             return "Workspaces", f"Move to Tag {command.rsplit(' ', 1)[-1]}"
         if command.startswith("mango-workspace-smart "):

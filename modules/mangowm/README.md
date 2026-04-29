@@ -192,8 +192,13 @@ The important Mango helpers are:
   Used by `Super+Shift+1..9`. It moves the focused client to the requested tag
   while staying profile-aware.
 - `mango-here`
-  Used by `Alt+1..9`. It focuses the mapped app if it is already on the
-  current tag, moves it here if it is open elsewhere, or launches it.
+  Used by `Alt+1..9` and `Alt+0`. It focuses the mapped app if it is already on
+  the current tag, moves it here if it is open elsewhere, or launches it. The
+  `all` mode gathers every workspace target marked `includeInAll`, then ends on
+  Kenp.
+- `mango-arrange go`
+  Used by `Super+Alt+0`. It applies the generated workspace routing rules to
+  open windows so drifted apps return to their profile-aware tag and monitor.
 
 ## Session Graph
 

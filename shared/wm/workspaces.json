@@ -169,7 +169,7 @@
         "includeInAll": true
       },
       "focus": {
-        "regex": "^brave-youtube\\.com__-Default$"
+        "regex": "^(brave-youtube|chrome-youtube)\\.com__-Default$"
       },
       "routes": [
         {

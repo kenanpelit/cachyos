@@ -357,6 +357,11 @@ for workspace_ref in sorted(profile.get("workspaces", []), key=lambda item: int(
     )
     bind_lines.append("")
 
+bind_lines.append("# Global workspace helpers")
+bind_lines.append("binds=ALT,0,spawn,mango-here all")
+bind_lines.append("binds=SUPER+ALT,0,spawn,mango-arrange go")
+bind_lines.append("")
+
 binds_out_path.write_text("\n".join(bind_lines).rstrip() + "\n")
 PY
 
