@@ -11,7 +11,8 @@ If the mapped app is already open, move/focus it on the current workspace.
 Otherwise, launch it.
 
 The `all` mode gathers every workspace target marked includeInAll in the shared
-workspace manifest, then finishes on Kenp.
+workspace manifest, orders the gathered stack from TmuxKenp onward, then
+finishes on TmuxKenp.
 EOF
 }
 
@@ -100,6 +101,15 @@ clients_in_tag() {
   '
 }
 
+focus_tag() {
+  local mon="$1"
+  local active_tag="$2"
+
+  mmsg -d "focusmon,${mon}" >/dev/null 2>&1 || true
+  mmsg -s -o "$mon" -t "$active_tag" >/dev/null 2>&1 || true
+  focus_sleep
+}
+
 target_regex() {
   local value="$1"
   local regex=""
@@ -142,9 +152,7 @@ focus_match_on_tag() {
   local regex="$3"
   local count appid title
 
-  mmsg -d "focusmon,${mon}" >/dev/null 2>&1 || true
-  mmsg -s -o "$mon" -t "$active_tag" >/dev/null 2>&1 || true
-  focus_sleep
+  focus_tag "$mon" "$active_tag"
 
   count="$(clients_in_tag "$mon" "$active_tag" 2>/dev/null || true)"
   if [[ ! "$count" =~ ^[0-9]+$ || "$count" -lt 1 ]]; then
@@ -166,6 +174,100 @@ focus_match_on_tag() {
   done
 
   return 1
+}
+
+focus_any_target_on_tag() {
+  local mon="$1"
+  local active_tag="$2"
+  local regex="$3"
+  local count pos appid title
+
+  focus_tag "$mon" "$active_tag"
+
+  count="$(clients_in_tag "$mon" "$active_tag" 2>/dev/null || true)"
+  [[ "$count" =~ ^[0-9]+$ ]] || return 1
+  ((count > 0)) || return 1
+
+  for ((pos = 1; pos <= count; pos++)); do
+    appid="$(focused_appid_on_monitor "$mon" 2>/dev/null || true)"
+    title="$(focused_title_on_monitor "$mon" 2>/dev/null || true)"
+    if matches_target "$regex" "$appid" "$title"; then
+      return 0
+    fi
+
+    if ((pos < count)); then
+      mmsg -d "focusstack,next" >/dev/null 2>&1 || true
+      focus_sleep
+    fi
+  done
+
+  return 1
+}
+
+focus_target_after_current() {
+  local mon="$1"
+  local active_tag="$2"
+  local regex="$3"
+  local count distance appid title
+
+  count="$(clients_in_tag "$mon" "$active_tag" 2>/dev/null || true)"
+  [[ "$count" =~ ^[0-9]+$ ]] || return 1
+  ((count > 1)) || return 1
+
+  for ((distance = 1; distance <= count; distance++)); do
+    mmsg -d "focusstack,next" >/dev/null 2>&1 || true
+    focus_sleep
+    appid="$(focused_appid_on_monitor "$mon" 2>/dev/null || true)"
+    title="$(focused_title_on_monitor "$mon" 2>/dev/null || true)"
+    if matches_target "$regex" "$appid" "$title"; then
+      printf '%s\n' "$distance"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+order_current_tag_targets() {
+  local mon="$1"
+  local active_tag="$2"
+  shift 2
+
+  local target regex distance anchor_set=0
+  local -a ordered_targets=()
+  declare -A ordered_seen=()
+
+  [[ -n "$mon" && -n "$active_tag" ]] || return 0
+
+  for target in "$@"; do
+    [[ -n "$target" ]] || continue
+    [[ -z "${ordered_seen[$target]+x}" ]] || continue
+    ordered_seen[$target]=1
+    ordered_targets+=("$target")
+  done
+
+  ((${#ordered_targets[@]} > 0)) || return 0
+
+  regex="$(target_regex "${ordered_targets[0]}")"
+  focus_any_target_on_tag "$mon" "$active_tag" "$regex" || return 0
+  anchor_set=1
+
+  for target in "${ordered_targets[@]:1}"; do
+    ((anchor_set == 1)) || break
+    regex="$(target_regex "$target")"
+    distance="$(focus_target_after_current "$mon" "$active_tag" "$regex" 2>/dev/null || true)"
+    [[ "$distance" =~ ^[0-9]+$ ]] || continue
+
+    while ((distance > 1)); do
+      mmsg -d "exchange_stack_client,prev" >/dev/null 2>&1 || break
+      focus_sleep
+      distance=$((distance - 1))
+    done
+    focus_any_target_on_tag "$mon" "$active_tag" "$regex" || true
+  done
+
+  regex="$(target_regex "${ordered_targets[0]}")"
+  focus_any_target_on_tag "$mon" "$active_tag" "$regex" || true
 }
 
 launch_candidates() {
@@ -214,14 +316,14 @@ launch_target() {
 
 default_all_targets() {
   printf '%s\n' \
-    "Kenp" \
     "TmuxKenp" \
     "Ai" \
     "CompecTA" \
     "WebCord" \
     "brave-youtube.com__-Default" \
     "spotify" \
-    "ferdium"
+    "ferdium" \
+    "Kenp"
 }
 
 gather_all_targets() {
@@ -241,6 +343,37 @@ gather_all_targets() {
     printf '%s\n' "${gathered}"
   else
     default_all_targets
+  fi
+}
+
+prioritize_all_targets() {
+  local anchor="${1:-TmuxKenp}"
+  shift || true
+
+  local target=""
+  local -a before=()
+  local -a after=()
+  local found=0
+
+  for target in "$@"; do
+    if [[ "$target" == "$anchor" ]]; then
+      found=1
+      continue
+    fi
+
+    if ((found == 0)); then
+      before+=("$target")
+    else
+      after+=("$target")
+    fi
+  done
+
+  if ((found == 1)); then
+    printf '%s\n' "$anchor"
+    printf '%s\n' "${after[@]}"
+    printf '%s\n' "${before[@]}"
+  else
+    printf '%s\n' "$@"
   fi
 }
 
@@ -296,14 +429,40 @@ run_all_targets() {
   local list="${1:-}"
   local app=""
   local status=0
+  local current_monitor current_tag
+  local -a targets=()
 
-  while IFS= read -r app; do
+  current_monitor="$(selected_monitor 2>/dev/null || true)"
+  current_tag="$(primary_active_tag "${current_monitor:-}" 2>/dev/null || true)"
+
+  mapfile -t targets < <(gather_all_targets "${list}")
+  if [[ -z "$list" ]]; then
+    mapfile -t targets < <(prioritize_all_targets "${MANGO_HERE_ALL_ANCHOR:-TmuxKenp}" "${targets[@]}")
+  fi
+
+  for app in "${targets[@]}"; do
     [[ -n "${app}" ]] || continue
     [[ "${app}" == "Kenp" ]] && continue
     run_single_target "${app}" || status=1
-  done < <(gather_all_targets "${list}")
+  done
 
   run_single_target "Kenp" || status=1
+  order_current_tag_targets "${current_monitor:-}" "${current_tag:-}" "${targets[@]}"
+  if [[ -n "${targets[0]:-}" && -n "${current_monitor:-}" && -n "${current_tag:-}" ]]; then
+    sleep 0.10
+    focus_any_target_on_tag \
+      "${current_monitor}" \
+      "${current_tag}" \
+      "$(target_regex "${targets[0]}")" >/dev/null 2>&1 || true
+    (
+      sleep 0.35
+      focus_any_target_on_tag \
+        "${current_monitor}" \
+        "${current_tag}" \
+        "$(target_regex "${targets[0]}")" >/dev/null 2>&1 || true
+    ) &
+    disown || true
+  fi
   return "${status}"
 }
 
