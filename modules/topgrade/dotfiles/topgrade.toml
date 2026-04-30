@@ -7,7 +7,7 @@ pre_sudo = true
 
 # Firmware updates are intentionally reviewed outside Topgrade.
 # Snap is disabled because this host is Arch/CachyOS + Flatpak based.
-disable = ["firmware", "snap", "git_repos"]
+disable = ["firmware", "snap", "git_repos", "hyprpm"]
 
 # Pull configured git repositories before package/application updates.
 # first = ["git_repos"]
