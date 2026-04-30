@@ -18,7 +18,8 @@ last = ["flatpak"]
 # Pip-managed environments are often noisy; keep the run moving.
 ignore_failures = ["pip3", "pip_review"]
 
-cleanup = true
+# Avoid pacman -Scc-style interactive cache purges during Topgrade runs.
+cleanup = false
 notify_end = "on_failure"
 
 # This binary is package-managed by CachyOS/paru.
