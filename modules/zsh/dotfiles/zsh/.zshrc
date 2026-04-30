@@ -929,6 +929,7 @@ alias -- copy='xclip -selection clipboard'
 alias -- cp='cp -i'
 alias -- cpu=lscpu
 alias -- curl='curl -L'
+alias -- ariafast='aria2c -x16 -s16 -k1M --file-allocation=none --console-log-level=warn'
 alias -- df='df -h'
 alias -- diff='delta --side-by-side'
 alias -- disk='lsblk -f'
