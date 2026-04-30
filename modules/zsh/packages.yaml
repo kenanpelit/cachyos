@@ -4,6 +4,21 @@ packages:
   - zsh
   - git
   - fzf
+  - aria2
+  - atuin
+  - bat
+  - direnv
+  - eza
+  - fd
+  - git-delta
+  - ncdu
+  - procs
+  - ripgrep
+  - starship
+  - trash-cli
+  - xclip
+  - yazi
+  - zoxide
   - zsh-syntax-highlighting
   - zsh-autosuggestions
   - zsh-completions

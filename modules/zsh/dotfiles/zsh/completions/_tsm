@@ -1,0 +1,37 @@
+#compdef tsm
+
+local -a commands
+commands=(
+  "list:Display torrent list with status information"
+  "add:Add new torrent from file or magnet link"
+  "info:Show detailed information about specific torrent"
+  "speed:Display current download/upload speeds"
+  "files:List files contained in torrent"
+  "config:Configure authentication credentials"
+  "search:Search for torrents by keyword"
+  "search-cat:List available torrent categories"
+  "search-recent:Search in recent torrents"
+  "start:Start downloading specified torrent"
+  "stop:Stop downloading specified torrent"
+  "remove:Remove torrent from client"
+  "purge:Remove torrent and delete files"
+  "start-all:Start all torrents in queue"
+  "stop-all:Stop all active torrents"
+  "remove-all:Remove all torrents"
+  "purge-all:Remove all torrents and delete files"
+  "health:Check torrent health and connectivity"
+  "stats:Show detailed client statistics"
+  "disk:Check disk usage and available space"
+  "tracker:Display tracker information and status"
+  "limit:Set speed limits for downloads/uploads"
+  "auto-remove:Enable automatic removal of completed torrents"
+  "remove-done:Remove all completed torrents"
+  "priority:Set torrent priority"
+  "schedule:Schedule torrent start/stop times"
+  "tag:Add custom tags to torrents"
+  "auto-tag:Automatically tag torrents by content type"
+  "list-sort:Sort torrent list by criteria"
+  "list-filter:Filter torrents by conditions"
+)
+
+_describe 'tsm commands' commands

@@ -5,7 +5,8 @@
 
 # Fallback TTY autostart entry. Some TTY login paths do not end up running
 # .zprofile reliably, so interactive zsh shells also offer the same hand-off.
-if [[ -z "${WAYLAND_DISPLAY:-}" ]] && [[ -z "${DISPLAY:-}" ]]; then
+if [[ -z "${WAYLAND_DISPLAY:-}" ]] && [[ -z "${DISPLAY:-}" ]] && [[ -z "${__OSC_TTY_AUTOSTART_TRIED:-}" ]]; then
+  export __OSC_TTY_AUTOSTART_TRIED=1
   if command -v "${HOME}/.local/bin/osc-tty-autostart" >/dev/null 2>&1; then
     "${HOME}/.local/bin/osc-tty-autostart" || true
   elif command -v osc-tty-autostart >/dev/null 2>&1; then
@@ -84,64 +85,49 @@ fi
 # Use viins keymap as the default.
 bindkey -v
 
-# History options should be set in .zshrc and after oh-my-zsh sourcing.
-HISTSIZE="200000"
-SAVEHIST="150000"
-
-HISTFILE="$HOME/.config/zsh/history"
+# History options should be consistent before and after plugin loading.
+: ${HISTSIZE:=200000}
+: ${SAVEHIST:=150000}
+: ${HISTFILE:="$HOME/.config/zsh/history"}
 mkdir -p "$(dirname "$HISTFILE")"
 
 setopt HIST_FCNTL_LOCK
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_VERIFY
+setopt SHARE_HISTORY
+setopt INC_APPEND_HISTORY
+setopt autocd
+unsetopt APPEND_HISTORY
 
-# Enabled history options
-enabled_opts=(
-  EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_IGNORE_ALL_DUPS HIST_IGNORE_DUPS
-  HIST_IGNORE_SPACE SHARE_HISTORY autocd
-)
-for opt in "${enabled_opts[@]}"; do
-  setopt "$opt"
-done
-unset opt enabled_opts
+HISTORY_IGNORE="(ls|cd|pwd|exit|clear|history|cd ..|cd -|z *|zi *)"
 
-# Disabled history options
-disabled_opts=(
-  APPEND_HISTORY HIST_FIND_NO_DUPS HIST_SAVE_NO_DUPS
-)
-for opt in "${disabled_opts[@]}"; do
-  unsetopt "$opt"
-done
-unset opt disabled_opts
-
-if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh" ]]; then
+if [[ -t 0 && -t 1 && $options[zle] = on ]] && command -v fzf >/dev/null 2>&1; then
+  if fzf --zsh >/dev/null 2>&1; then
+    source <(fzf --zsh)
+  elif [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh" ]]; then
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh"
+  fi
+elif [[ -t 0 && -t 1 && -f "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh" ]]; then
   source "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh"
 fi
 
-if [[ $options[zle] = on ]] && command -v fzf >/dev/null 2>&1; then
-  source <(fzf --zsh)
-fi
-
 # Catppuccin theme for zsh-syntax-highlighting (portable)
-if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/catppuccin_mocha-zsh-syntax-highlighting.zsh" ]]; then
-  source "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/catppuccin_mocha-zsh-syntax-highlighting.zsh"
+if [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh" ]]; then
+  source "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh"
 fi
 
 # ----------------------------------------------------------------------
-# Zinit Auto-Installation (Robust)
+# Zinit Startup
 # 
-# If Zinit is not installed, try to clone it from GitHub
-# If clone fails (offline, no git, firewall), we skip plugin setup
-# but keep the shell functional
-# 
-# The 2>/dev/null suppresses git errors in offline scenarios
+# Zinit is managed outside shell startup. Interactive shells should never do
+# network work just because a terminal opened.
 # ----------------------------------------------------------------------
-if [[ ! -d "$ZINIT_HOME" ]]; then
-  mkdir -p "$(dirname "$ZINIT_HOME")"
-  if !  git clone --depth=1 \
-    https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME" 2>/dev/null; then
-    echo "WARNING: Zinit could not be installed; skipping plugin setup." >&2
-  fi
-fi
-
 # Only proceed with plugin setup if Zinit was successfully installed
 if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
   # --------------------------------------------------------------------
@@ -215,18 +201,6 @@ if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
   setopt NO_MENU_COMPLETE     # Don't insert first match immediately
   setopt LIST_PACKED          # Vary column widths for compact display
 
-  # History options
-  setopt EXTENDED_HISTORY         # Save timestamps in history
-  setopt HIST_EXPIRE_DUPS_FIRST   # Expire duplicates first when trimming
-  setopt HIST_FIND_NO_DUPS        # Don't show duplicates in search
-  setopt HIST_IGNORE_ALL_DUPS     # Remove older duplicate entries
-  setopt HIST_IGNORE_SPACE        # Don't save commands starting with space
-  setopt HIST_REDUCE_BLANKS       # Remove superfluous blanks before saving
-  setopt HIST_SAVE_NO_DUPS        # Don't write duplicates to history file
-  setopt HIST_VERIFY              # Show history expansion before running
-  setopt SHARE_HISTORY            # Share history across all sessions
-  setopt INC_APPEND_HISTORY       # Append to history immediately, not on exit
-
   # UX options
   setopt INTERACTIVE_COMMENTS     # Allow comments in interactive shell
   setopt NO_BEEP                  # Don't beep on errors
@@ -241,15 +215,6 @@ if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
   setopt CORRECT                  # Correct command spelling
 
   # --------------------------------------------------------------------
-  # History Ignore Pattern
-  # 
-  # Don't save these common commands to history
-  # Reduces clutter and improves search results
-  # Pattern uses ZSH extended glob syntax
-  # --------------------------------------------------------------------
-  HISTORY_IGNORE="(ls|cd|pwd|exit|clear|history|cd ..|cd -|z *|zi *)"
-
-  # --------------------------------------------------------------------
   # Disable Globbing for Specific Commands
   # 
   # Some commands interpret glob characters themselves
@@ -257,11 +222,8 @@ if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
   # This prevents issues with patterns in arguments
   # --------------------------------------------------------------------
   alias git='noglob git'
-  alias find='noglob find'
   alias rsync='noglob rsync'
   alias scp='noglob scp'
-  alias curl='noglob curl'
-  alias wget='noglob wget'
 
   # --------------------------------------------------------------------
   # Eza (modern ls) configuration
@@ -287,48 +249,51 @@ if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
 # Only loads when you run: nvm, node, npm, or npx
 if [[ -d "$HOME/.nvm" ]]; then
   _lazy_nvm() {
-    unset -f _lazy_nvm
+    local cmd="${1:-nvm}"
+    (( $# > 0 )) && shift
     unalias nvm node npm npx 2>/dev/null || true
     export NVM_DIR="$HOME/.nvm"
     [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
-    nvm "$@"
+    "$cmd" "$@"
   }
-  alias nvm='_lazy_nvm'
-  alias node='_lazy_nvm'
-  alias npm='_lazy_nvm'
-  alias npx='_lazy_nvm'
+  alias nvm='_lazy_nvm nvm'
+  alias node='_lazy_nvm node'
+  alias npm='_lazy_nvm npm'
+  alias npx='_lazy_nvm npx'
 fi
 
 # RVM (Ruby Version Manager)
 # Only loads when you run: rvm, ruby, gem, or bundle
 if [[ -d "$HOME/.rvm" ]]; then
   _lazy_rvm() {
-    unset -f _lazy_rvm
+    local cmd="${1:-rvm}"
+    (( $# > 0 )) && shift
     unalias rvm ruby gem bundle 2>/dev/null || true
     [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-    rvm "$@"
+    "$cmd" "$@"
   }
-  alias rvm='_lazy_rvm'
-  alias ruby='_lazy_rvm'
-  alias gem='_lazy_rvm'
-  alias bundle='_lazy_rvm'
+  alias rvm='_lazy_rvm rvm'
+  alias ruby='_lazy_rvm ruby'
+  alias gem='_lazy_rvm gem'
+  alias bundle='_lazy_rvm bundle'
 fi
 
 # pyenv (Python Version Manager)
 # Only loads when you run: pyenv, python, or pip
 if [[ -d "$HOME/.pyenv" ]]; then
   _lazy_pyenv() {
-    unset -f _lazy_pyenv
+    local cmd="${1:-pyenv}"
+    (( $# > 0 )) && shift
     unalias pyenv python pip 2>/dev/null || true
     export PYENV_ROOT="$HOME/.pyenv"
     path=("$PYENV_ROOT/bin" $path)
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
-    pyenv "$@"
+    "$cmd" "$@"
   }
-  alias pyenv='_lazy_pyenv'
-  alias python='_lazy_pyenv'
-  alias pip='_lazy_pyenv'
+  alias pyenv='_lazy_pyenv pyenv'
+  alias python='_lazy_pyenv python'
+  alias pip='_lazy_pyenv pip'
 fi
 
 # Conda (Python Environment Manager)
@@ -801,7 +766,7 @@ fi
 # Load Starship last so it doesn't interfere with plugin loading
 # Starship provides a fast, customizable prompt with git integration
 # ----------------------------------------------------------------------
-if command -v starship &>/dev/null; then
+if [[ $TERM != "dumb" ]] && command -v starship &>/dev/null; then
   eval "$(starship init zsh)"
 fi
 
@@ -849,24 +814,23 @@ export FZF_CTRL_R_OPTS="\
   --bind 'ctrl-y:execute-silent(echo -n {2..} | wl-copy)+abort' \
   --exact"
 
-function yy() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
+_zsh_yazi_cd() {
+  local tmp cwd
+  tmp="$(mktemp -t "yazi-cwd.XXXXXX")" || return 1
   yazi "$@" --cwd-file="$tmp"
-  if cwd="$(<"$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+  if cwd="$(command cat -- "$tmp")" && [[ -n "$cwd" && "$cwd" != "$PWD" ]]; then
     builtin cd -- "$cwd"
   fi
-  rm -f -- "$tmp"
+  command rm -f -- "$tmp"
 }
+
+yy() { _zsh_yazi_cd "$@"; }
 
 # WezTerm shell integration (optional)
 if [[ -f /etc/profile.d/wezterm.sh ]]; then
   source /etc/profile.d/wezterm.sh
 elif [[ -f /usr/share/wezterm/wezterm.sh ]]; then
   source /usr/share/wezterm/wezterm.sh
-fi
-
-if [[ $TERM != "dumb" ]] && command -v starship >/dev/null 2>&1; then
-  eval "$(starship init zsh)"
 fi
 
 # command-not-found integration (Arch/CachyOS: pkgfile)
@@ -887,6 +851,30 @@ export GPG_TTY=$TTY
 export PASSWORD_STORE_DIR="$HOME/.pass"
 gpg-connect-agent --quiet updatestartuptty /bye > /dev/null 2>/dev/null || true
 
+_zsh_has() { command -v "$1" >/dev/null 2>&1; }
+
+brave-ext-clean() {
+  local dir="$HOME/.config/BraveSoftware/Brave-Browser/Default/Extensions"
+  [[ -d "$dir" ]] || { print -r -- "No Extensions directory found: $dir"; return 0; }
+  print -rn -- "Delete Brave extensions directory? $dir [y/N] "
+  local reply
+  read -r reply
+  [[ "$reply" == [yY] ]] || { print -r -- "Cancelled."; return 1; }
+  command rm -rf -- "$dir"
+}
+
+brave-theme-edit() {
+  "${EDITOR:-nvim}" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Stylus/catppuccin-mocha.user.css"
+}
+
+starship-profile() {
+  if [[ "${STARSHIP_CONFIG:-}" == *"/starship-full.toml" ]]; then
+    print -r -- "Starship Mode: FULL"
+  else
+    print -r -- "Starship Mode: FAST"
+  fi
+}
+
 alias -- ..='cd ..'
 alias -- ...='cd ../..'
 alias -- ....='cd ../../..'
@@ -901,42 +889,40 @@ alias -- brave-backup='brave-setup backup'
 alias -- brave-clean='brave --disable-extensions --incognito'
 alias -- brave-debug='brave --enable-logging --v=1'
 alias -- brave-dev='brave --disable-web-security --user-data-dir=/tmp/brave-dev'
-alias -- brave-ext-clean='rm -rf ~/.config/BraveSoftware/Brave-Browser/Default/Extensions/'
 alias -- brave-ext-list='ls -la ~/.config/BraveSoftware/Brave-Browser/Default/Extensions/ 2>/dev/null || echo '\''No Extensions directory found'\'''
 alias -- brave-extensions=brave-install-extensions
 alias -- brave-profile='brave --profile-directory='\''Default'\'''
-alias -- brave-reset-cache='find ~/.cache/BraveSoftware -type f \( -name '\''*.tmp'\'' -o -name '\''*.lock'\'' \) -delete 2>/dev/null || true'
+alias -- brave-reset-cache='command find ~/.cache/BraveSoftware -type f \( -name '\''*.tmp'\'' -o -name '\''*.lock'\'' \) -delete 2>/dev/null || true'
 alias -- brave-safe='brave --disable-extensions --disable-gpu'
 alias -- brave-setup=brave-setup
 alias -- brave-status='brave-setup status'
 alias -- brave-theme=brave-apply-theme
 alias -- brave-theme-css='cat ~/.config/BraveSoftware/Brave-Browser/Default/Stylus/catppuccin-mocha.user.css'
-alias -- brave-theme-edit='EDITOR:-nvim ~/.config/BraveSoftware/Brave-Browser/Default/Stylus/catppuccin-mocha.user.css'
 alias -- c=clear
 alias -- cal='cal -3'
-alias -- cat='bat --paging=never'
+_zsh_has bat && alias -- cat='bat --paging=never'
 alias -- cava-config='cat ~/.config/cava/config | grep -A10 '\''\[color\]'\'''
 alias -- cava-theme='echo '\''Current Cava Catppuccin flavor: mocha'\'''
-alias -- cd=z
+_zsh_has zoxide && alias -- cd=z
 alias -- chrome=chrome-launcher
 alias -- chrome-clean='chrome-launcher --disable-extensions --incognito'
 alias -- chrome-debug='chrome-launcher --enable-logging --v=1'
 alias -- chrome-profile='chrome-launcher --profile-directory='\''Default'\'''
-alias -- chrome-reset-cache='find ~/.cache/google-chrome -type f \( -name '\''*.tmp'\'' -o -name '\''*.lock'\'' \) -delete 2>/dev/null || true'
+alias -- chrome-reset-cache='command find ~/.cache/google-chrome -type f \( -name '\''*.tmp'\'' -o -name '\''*.lock'\'' \) -delete 2>/dev/null || true'
 alias -- chrome-safe='chrome-launcher --disable-extensions --disable-gpu'
 alias -- compress=apack
 alias -- copy='xclip -selection clipboard'
 alias -- cp='cp -i'
 alias -- cpu=lscpu
-alias -- curl='curl -L'
+alias -- curl='noglob curl -L'
 alias -- ariafast='aria2c -x16 -s16 -k1M --file-allocation=none --console-log-level=warn'
 alias -- df='df -h'
-alias -- diff='delta --side-by-side'
+_zsh_has delta && alias -- diff='delta --side-by-side'
 alias -- disk='lsblk -f'
 alias -- dsize='du -hs'
 alias -- extract=aunpack
 alias -- fastping='ping -c 100 -s.2'
-alias -- find=fd
+_zsh_has fd && alias -- find=fd
 alias -- firefox-new='firefox -new-instance'
 alias -- firefox-profile='firefox -P'
 alias -- firefox-safe='firefox -safe-mode'
@@ -1135,18 +1121,18 @@ alias -- hw='hwinfo --short'
 alias -- ip='ip -color=auto'
 alias -- ipy=ipython
 alias -- j='jobs -l'
-alias -- l='eza --icons -a --group-directories-first -1'
-alias -- la='eza --icons -la --group-directories-first'
-alias -- ldot='eza --icons -ld .*'
-alias -- less='bat --paging=always'
+_zsh_has eza && alias -- l='eza --icons -a --group-directories-first -1'
+_zsh_has eza && alias -- la='eza --icons -la --group-directories-first'
+_zsh_has eza && alias -- ldot='eza --icons -ld .*'
+_zsh_has bat && alias -- less='bat --paging=always'
 alias -- lg=lazygit
-alias -- ll='eza --icons -la --group-directories-first --no-user'
-alias -- llt='eza --icons --tree --long --level=3 --group-directories-first'
+_zsh_has eza && alias -- ll='eza --icons -la --group-directories-first --no-user'
+_zsh_has eza && alias -- llt='eza --icons --tree --long --level=3 --group-directories-first'
 alias -- load=uptime
 alias -- localip='ip route get 8.8.8.8 | awk '\''{print $7; exit}'\'''
-alias -- ls='eza --icons --group-directories-first'
-alias -- lsize='eza --icons -la --group-directories-first --total-size'
-alias -- lt='eza --icons --tree --level=2 --group-directories-first'
+_zsh_has eza && alias -- ls='eza --icons --group-directories-first'
+_zsh_has eza && alias -- lsize='eza --icons -la --group-directories-first --total-size'
+_zsh_has eza && alias -- lt='eza --icons --tree --level=2 --group-directories-first'
 alias -- lzg=lazygit
 alias -- mem='free -h && echo && cat /proc/meminfo | grep MemTotal'
 alias -- microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
@@ -1184,7 +1170,7 @@ alias -- potpc='pass otp -c'
 alias -- ppull='pass git pull'
 alias -- ppush='pass git push'
 alias -- pr='pass rm'
-alias -- ps=procs
+_zsh_has procs && alias -- ps=procs
 alias -- psa='ps auxf'
 alias -- pscpu='ps auxf | sort -nr -k 3 | head -20'
 alias -- psgrep='ps aux | grep -v grep | grep -i'
@@ -1263,7 +1249,7 @@ alias -- pv-vinfo='pipe-viewer --video-info'
 alias -- pv-vlc='pipe-viewer --player=vlc'
 alias -- pv-week='pipe-viewer --time=week'
 alias -- py=python3
-alias -- rm='trash-put'
+_zsh_has trash-put && alias -- rm='trash-put'
 alias -- secret-get='secret-tool lookup'
 alias -- secret-list='secret-tool search --all'
 alias -- serve='python3 -m http.server 8000'
@@ -1271,21 +1257,15 @@ alias -- sesh-c='sesh connect'
 alias -- sesh-k='sesh kill'
 alias -- sesh-l='sesh list'
 alias -- sesh-r='sesh last'
-alias -- space=ncdu
+_zsh_has ncdu && alias -- space=ncdu
 alias -- starfast='export STARSHIP_CONFIG=$HOME/.config/starship/starship-fast.toml; exec zsh -l'
 alias -- starfull='export STARSHIP_CONFIG=$HOME/.config/starship/starship-full.toml; exec zsh -l'
 alias -- starship-debug='STARSHIP_LOG=debug starship module all'
-alias -- starship-profile='if [[ "${STARSHIP_CONFIG:-}" == *"/starship-full.toml" ]]; then
-  echo "Starship Mode: FULL"
-else
-  echo "Starship Mode: FAST"
-fi
-'
 alias -- starship-test='starship print-config'
 alias -- starship-timings='starship timings'
 alias -- sysactive='systemctl list-units --state=active'
 alias -- sysfailed='systemctl list-units --failed'
-alias -- tree='eza --icons --tree --group-directories-first'
+_zsh_has eza && alias -- tree='eza --icons --tree --group-directories-first'
 alias -- tsm=tsm
 alias -- tsm-add='tsm add'
 alias -- tsm-auto-remove='tsm auto-remove'
@@ -1323,7 +1303,7 @@ alias -- tsm-stop='tsm stop'
 alias -- tsm-stop-all='tsm stop all'
 alias -- tsm-tag='tsm tag'
 alias -- tsm-tracker='tsm tracker'
-alias -- tt='trash-put'
+_zsh_has trash-put && alias -- tt='trash-put'
 alias -- usage='du -h --max-depth=1 | sort -hr'
 alias -- usb=lsusb
 alias -- userlist='cut -d: -f1 /etc/passwd | sort'
@@ -1331,14 +1311,13 @@ alias -- vimrc='nvim ~/.config/nvim/init.lua'
 alias -- vulns='grep . /sys/devices/system/cpu/vulnerabilities/*'
 alias -- weather='curl wttr.in'
 alias -- week='date +%V'
-alias -- wget='wget -c'
+alias -- wget='noglob wget -c'
 alias -- youtube-dl=yt-dlp
 alias -- yt=yt-dlp
 alias -- yta='yt-dlp --extract-audio --audio-format mp3'
 alias -- ytp-mp3='yt-dlp --yes-playlist --extract-audio --audio-format mp3 -o '\''%(playlist_index)s-%(title)s.%(ext)s'\'''
 alias -- ytp-mp4='yt-dlp --yes-playlist -f '\''bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio'\'' --merge-output-format mp4 -o '\''%(playlist_index)s-%(title)s.%(ext)s'\'''
 alias -- ytv=yt-dlp
-alias -- yy=yazi
 alias -- zshrc='nvim ~/.config/zsh/.zshrc'
 # =============================================================================
 # Environment Variables and Core Setup
@@ -1459,7 +1438,6 @@ bindkey -M vicmd '^W' smart-backward-kill-word
 
 # Autosuggestion bindings
 bindkey -M viins '^F' autosuggest-accept
-bindkey -M viins '^L' autosuggest-accept
 bindkey -M viins '^[[Z' autosuggest-execute  # Shift+Tab
 
 # =============================================================================
@@ -1489,59 +1467,6 @@ bindkey -M viins '^Z' push-input
 bindkey -M vicmd '^Z' push-input
 
 # =============================================================================
-# ZSH Completion System for Transmission CLI
-# =============================================================================
-_tsm_completions() {
-    local commands=(
-        # Core transmission commands
-        "list:Display torrent list with status information"
-        "add:Add new torrent from file or magnet link"
-        "info:Show detailed information about specific torrent"
-        "speed:Display current download/upload speeds"
-        "files:List files contained in torrent"
-        "config:Configure authentication credentials"
-        
-        # Search and discovery commands
-        "search:Search for torrents by keyword"
-        "search-cat:List available torrent categories"
-        "search-recent:Search in recent torrents (last 48 hours)"
-        
-        # Individual torrent management
-        "start:Start downloading specified torrent"
-        "stop:Stop downloading specified torrent"
-        "remove:Remove torrent from client (keep files)"
-        "purge:Remove torrent and delete all files"
-        
-        # Batch operation commands
-        "start-all:Start all torrents in queue"
-        "stop-all:Stop all active torrents"
-        "remove-all:Remove all torrents (keep files)"
-        "purge-all:Remove all torrents and delete files"
-        
-        # Advanced management features
-        "health:Check torrent health and connectivity"
-        "stats:Show detailed client statistics"
-        "disk:Check disk usage and available space"
-        "tracker:Display tracker information and status"
-        "limit:Set speed limits for downloads/uploads"
-        "auto-remove:Enable automatic removal of completed torrents"
-        "remove-done:Remove all completed torrents"
-        
-        # Priority and scheduling
-        "priority:Set torrent priority (high/normal/low)"
-        "schedule:Schedule torrent start/stop times"
-        "tag:Add custom tags to torrents"
-        "auto-tag:Automatically tag torrents by content type"
-        
-        # List management and filtering
-        "list-sort:Sort torrent list by criteria"
-        "list-filter:Filter torrents by specific conditions"
-    )
-    _describe 'tsm commands' commands
-}
-compdef _tsm_completions tsm
-
-# =============================================================================
 # File Manager Functions (Yazi Integration)
 # =============================================================================
 # Alternate pass store wrapper.
@@ -1551,25 +1476,9 @@ passh() {
   PASSWORD_STORE_DIR="$HOME/.passh" pass "$@"
 }
 
-# Main Yazi wrapper function with directory change support
-function y() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
-}
-
-# Alternative Yazi function with 'k' command
-function k() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
-}
+# Yazi wrappers with directory change support
+y() { _zsh_yazi_cd "$@"; }
+k() { _zsh_yazi_cd "$@"; }
 
 # =============================================================================
 # Network Utility Functions
@@ -1578,7 +1487,7 @@ function k() {
 function wanip() {
   local ip
   # Try Mullvad first (privacy-focused)
-  ip=$(curl -s https://am.i.mullvad.net/ip 2>/dev/null) && echo "Mullvad IP: $ip" && return 0
+  ip=$(command curl -s https://am.i.mullvad.net/ip 2>/dev/null) && echo "Mullvad IP: $ip" && return 0
   # Fallback to OpenDNS
   ip=$(dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/null) && echo "OpenDNS IP: $ip" && return 0
   # Fallback to Google DNS
@@ -1588,15 +1497,19 @@ function wanip() {
 }
 
 # File transfer function using transfer.sh service
-function transfer() {  
-  if [ -z "$1" ]; then
+function transfer() {
+  if [[ -z "$1" ]]; then
     echo "Usage: transfer FILE_TO_TRANSFER"
     return 1
   fi
-  tmpfile=$(mktemp -t transferXXX)
-  curl --progress-bar --upload-file "$1" "https://transfer.sh/$(basename $1)" >> $tmpfile
-  cat $tmpfile
-  rm -f $tmpfile
+  local tmpfile base status
+  tmpfile="$(mktemp -t transfer.XXXXXX)" || return 1
+  base="$(basename -- "$1")"
+  command curl --progress-bar --upload-file "$1" "https://transfer.sh/${base}" >> "$tmpfile"
+  status=$?
+  (( status == 0 )) && command cat -- "$tmpfile"
+  command rm -f -- "$tmpfile"
+  return "$status"
 }
 
 # =============================================================================
@@ -1669,10 +1582,10 @@ pv-dlx() {
   while [ -n "$1" ] && printf "%s" "$1" | grep -qE '^--'; do
     case "$1" in
       --dir=*)
-        dldir="$(printf "%s" "$1" | sed 's/^--dir=//')"
+        dldir="${1#--dir=}"
         ;;
       --name=*)
-        namefmt="$(printf "%s" "$1" | sed 's/^--name=//')"
+        namefmt="${1#--name=}"
         ;;
       *)
         args+=( "$1" )
@@ -1686,7 +1599,7 @@ pv-dlx() {
   fi
 
   local input="$1"; shift
-  mkdir -p "$dldir"
+  command mkdir -p -- "$dldir"
 
   if printf "%s" "$input" | grep -qE '^https?://'; then
     "$PV_CMD" --no-invidious --ytdl -d --skip-if-exists --dl-in-subdir \
@@ -1777,19 +1690,19 @@ function v() {
     echo "Error: Filename required."
     return 1
   fi
-  [[ ! -f "$file" ]] && touch "$file"
-  chmod 755 "$file"
-  vim -c "set paste" "$file"
+  [[ ! -f "$file" ]] && command touch -- "$file"
+  command chmod 755 -- "$file"
+  "${EDITOR:-nvim}" -c "set paste" "$file"
 }
 
 # Edit command by path (which-edit)
 function vw() {
   local file
   if [[ -n "$1" ]]; then
-    file=$(which "$1" 2>/dev/null)
+    file=$(command -v -- "$1" 2>/dev/null)
     if [[ -n "$file" ]]; then
       echo "File found: $file"
-      vim "$file"
+      "${EDITOR:-nvim}" "$file"
     else
       echo "File not found: $1"
     fi
@@ -1803,22 +1716,22 @@ function vw() {
 # =============================================================================
 # Universal archive extraction function
 function ex() {
-  if [ -f $1 ] ; then
-    case $1 in
-      *.tar.bz2)   tar xjf $1   ;;
-      *.tar.gz)    tar xzf $1   ;;
-      *.bz2)       bunzip2 $1   ;;
-      *.rar)       unrar x $1   ;;
-      *.gz)        gunzip $1    ;;
-      *.tar)       tar xf $1    ;;
-      *.tbz2)      tar xjf $1   ;;
-      *.tgz)       tar xzf $1   ;;
-      *.zip)       unzip $1     ;;
-      *.Z)         uncompress $1;;
-      *.7z)        7z x $1      ;;
-      *.deb)       ar x $1      ;;
-      *.tar.xz)    tar xf $1    ;;
-      *.tar.zst)   tar xf $1    ;;
+  if [[ -f "$1" ]] ; then
+    case "$1" in
+      *.tar.bz2)   tar xjf "$1"   ;;
+      *.tar.gz)    tar xzf "$1"   ;;
+      *.bz2)       bunzip2 "$1"   ;;
+      *.rar)       unrar x "$1"   ;;
+      *.gz)        gunzip "$1"    ;;
+      *.tar)       tar xf "$1"    ;;
+      *.tbz2)      tar xjf "$1"   ;;
+      *.tgz)       tar xzf "$1"   ;;
+      *.zip)       unzip "$1"     ;;
+      *.Z)         uncompress "$1";;
+      *.7z)        7z x "$1"      ;;
+      *.deb)       ar x "$1"      ;;
+      *.tar.xz)    tar xf "$1"    ;;
+      *.tar.zst)   tar xf "$1"    ;;
       *)           echo "'$1' cannot be extracted with ex()" ;;
     esac
   else
@@ -1831,36 +1744,38 @@ function ex() {
 # =============================================================================
 # File content search with preview
 function fif() {
-  if [ ! "$#" -gt 0 ]; then echo "Search term required"; return 1; fi
+  if (( $# == 0 )); then echo "Search term required"; return 1; fi
+  local query="$*"
   fd --type f --hidden --follow --exclude .git \
-  | fzf -m --preview="bat --style=numbers --color=always {} 2>/dev/null | rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$1' || rg --ignore-case --pretty --context 10 '$1' {}"
+  | FIF_QUERY="$query" fzf -m --preview='bat --style=numbers --color=always {} 2>/dev/null | rg --colors "match:bg:yellow" --ignore-case --pretty --context 10 -- "$FIF_QUERY" || rg --ignore-case --pretty --context 10 -- "$FIF_QUERY" {}'
 }
 
 # Directory history search
 function fcd() {
   local dir
-  dir=$(dirs -v | fzf --height 40% --reverse | cut -f2-)
+  dir=$(dirs -v | fzf --height 40% --reverse | command cut -f2-)
   if [[ -n "$dir" ]]; then
-    cd "$dir"
+    builtin cd -- "$dir"
   fi
 }
 
 # Git commit search and checkout
 function fgco() {
-  local commits commit
+  local commits commit hash
   commits=$(git log --pretty=oneline --abbrev-commit --reverse) &&
   commit=$(echo "$commits" | fzf --tac +s +m -e) &&
-  git checkout $(echo "$commit" | sed "s/ .*//")
+  hash="${commit%% *}" &&
+  git checkout -- "$hash"
 }
 
 # Quick commit function (English single-line message)
-function gc() {
-  if [ -z "$1" ]; then
-    echo "Usage: gc <commit-message>"
-    echo "Example: gc 'fix: resolve login issue'"
+function gcm() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: gcm <commit-message>"
+    echo "Example: gcm 'fix: resolve login issue'"
     return 1
   fi
-  git add -A && git commit -m "$1"
+  git add -A && git commit -m "$*"
 }
 
 # Interactive commit message function
@@ -1868,7 +1783,7 @@ function gci() {
   git add -A
   echo "Enter commit message (English, single line):"
   read -r message
-  if [ -n "$message" ]; then
+  if [[ -n "$message" ]]; then
     git commit -m "$message"
   else
     echo "Commit cancelled: empty message"
@@ -1880,9 +1795,24 @@ function gci() {
 # History Management Function
 # =============================================================================
 function cleanhistory() {
-  print -z $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +m --height 50% --reverse --border --header="DEL key to delete selected command, ESC to exit" \
-  --bind="del:execute(sed -i '/{}/d' $HISTFILE)+reload(fc -R; ([ -n "$ZSH_NAME" ] && fc -l 1 || history))" \
-  --preview="echo {}" --preview-window=up:3:hidden:wrap --bind="?:toggle-preview")
+  local selected command_line tmpfile reply
+  [[ -f "$HISTFILE" ]] || { print -r -- "History file not found: $HISTFILE"; return 1; }
+  selected=$(fc -l 1 | fzf +m --height 50% --reverse --border \
+    --header="Select a command to remove from history, ESC to exit" \
+    --preview="echo {}" --preview-window=up:3:hidden:wrap --bind="?:toggle-preview")
+  [[ -n "$selected" ]] || return 0
+  command_line=$(print -r -- "$selected" | sed 's/^[[:space:]]*[0-9]\+[[:space:]]*//')
+  print -rn -- "Delete from history: $command_line [y/N] "
+  read -r reply
+  [[ "$reply" == [yY] ]] || { print -r -- "Cancelled."; return 1; }
+  tmpfile="$(mktemp "${HISTFILE}.XXXXXX")" || return 1
+  if command awk -v needle="$command_line" 'index($0, needle) == 0 { print }' "$HISTFILE" >| "$tmpfile"; then
+    command mv -- "$tmpfile" "$HISTFILE"
+    fc -R "$HISTFILE"
+  else
+    command rm -f -- "$tmpfile"
+    return 1
+  fi
 }
 
 # =============================================================================
@@ -1898,7 +1828,7 @@ if ! typeset -f sesh-sessions > /dev/null; then
       session=$(sesh list -t -c | fzf --height 40% --reverse --border-label ' sesh ' --border --prompt '⚡  ')
       zle reset-prompt > /dev/null 2>&1 || true
       [[ -z "$session" ]] && return
-      sesh connect $session
+      sesh connect "$session"
     }
   }
   zle -N sesh-sessions
@@ -1912,4 +1842,5 @@ bindkey -M vicmd '\es' sesh-sessions    # Alternative Alt+S binding
 
 # Go
 export GOPATH="$HOME/.local/share/go"
-export PATH="$PATH:$GOPATH/bin"
+path=("$GOPATH/bin" $path)
+export PATH
