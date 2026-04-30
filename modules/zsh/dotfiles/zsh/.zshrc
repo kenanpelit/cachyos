@@ -869,11 +869,7 @@ brave-theme-edit() {
 }
 
 starship-profile() {
-  if [[ "${STARSHIP_CONFIG:-}" == *"/starship-full.toml" ]]; then
-    print -r -- "Starship Mode: FULL"
-  else
-    print -r -- "Starship Mode: FAST"
-  fi
+  print -r -- "Starship Config: ${STARSHIP_CONFIG:-$HOME/.config/starship.toml}"
 }
 
 alias -- ..='cd ..'
@@ -1259,8 +1255,6 @@ alias -- sesh-k='sesh kill'
 alias -- sesh-l='sesh list'
 alias -- sesh-r='sesh last'
 _zsh_has ncdu && alias -- space=ncdu
-alias -- starfast='export STARSHIP_CONFIG=$HOME/.config/starship/starship-fast.toml; exec zsh -l'
-alias -- starfull='export STARSHIP_CONFIG=$HOME/.config/starship/starship-full.toml; exec zsh -l'
 alias -- starship-debug='STARSHIP_LOG=debug starship module all'
 alias -- starship-test='starship print-config'
 alias -- starship-timings='starship timings'

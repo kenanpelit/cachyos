@@ -4,6 +4,7 @@ tags:
 description: Zsh config (portable config)
 depends_on:
 - base
+- starship
 - zsh-completions
 dotfiles:
 - source: dotfiles/.zshenv
