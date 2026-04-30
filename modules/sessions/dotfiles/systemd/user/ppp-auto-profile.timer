@@ -3,10 +3,10 @@ Description=Periodic power profile chooser
 PartOf=graphical-session.target
 
 [Timer]
-# İlk çalışma: timer aktif olduktan 30 saniye sonra
-OnActiveSec=30s
-# Sonraki çalışmalar: Her 15 saniyede bir
-OnUnitActiveSec=15s
+# İlk çalışma: oturum açıldıktan kısa süre sonra
+OnActiveSec=5s
+# Sonraki çalışmalar: hızlı tepki için 5 saniyede bir
+OnUnitActiveSec=5s
 AccuracySec=1s
 Unit=ppp-auto-profile.service
 

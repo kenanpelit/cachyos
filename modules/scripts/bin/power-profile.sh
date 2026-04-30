@@ -21,9 +21,8 @@ need powerprofilesctl || die "powerprofilesctl not found (enable power-profiles-
 
 notify() {
   local icon="$1" title="$2" msg="$3"
-  if need notify-send; then
-    notify-send -t 3500 -i "$icon" "$title" "$msg" >/dev/null 2>&1 || true
-  fi
+  return 0
+  # notify-send -t 1800 -i "$icon" "$title" "$msg" >/dev/null 2>&1 || true
 }
 
 profile_notify() {
