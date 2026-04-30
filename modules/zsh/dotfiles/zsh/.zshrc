@@ -108,11 +108,13 @@ unsetopt APPEND_HISTORY
 HISTORY_IGNORE="(ls|cd|pwd|exit|clear|history|cd ..|cd -|z *|zi *)"
 
 if [[ -t 0 && -t 1 && $options[zle] = on ]] && command -v fzf >/dev/null 2>&1; then
-  if fzf --zsh >/dev/null 2>&1; then
-    source <(fzf --zsh)
+  _fzf_zsh_init="$(fzf --zsh 2>/dev/null)"
+  if [[ -n "${_fzf_zsh_init:-}" ]]; then
+    eval "$_fzf_zsh_init"
   elif [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh" ]]; then
     source "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh"
   fi
+  unset _fzf_zsh_init
 elif [[ -t 0 && -t 1 && -f "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh" ]]; then
   source "${XDG_CONFIG_HOME:-$HOME/.config}/fzf/fzf.zsh"
 fi
@@ -660,15 +662,14 @@ zinit light hlissner/zsh-autopair
 # extract: Smart archive extraction (extract <file>)
 # copypath: Copy current path to clipboard (copypath)
 # copyfile: Copy file contents to clipboard (copyfile <file>)
-# git: Extensive git aliases (gst, gco, gp, etc.)
+  # git: intentionally omitted; this file already owns git aliases directly.
 # ------------------------------------------------------------------
-zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
-zinit snippet OMZ::plugins/extract/extract.plugin.zsh
-zinit snippet OMZ::plugins/copypath/copypath.plugin.zsh
-zinit snippet OMZ::plugins/copyfile/copyfile.plugin.zsh
-zinit snippet OMZ::plugins/git/git.plugin.zsh
+  zinit snippet OMZ::plugins/sudo/sudo.plugin.zsh
+  zinit snippet OMZ::plugins/extract/extract.plugin.zsh
+  zinit snippet OMZ::plugins/copypath/copypath.plugin.zsh
+  zinit snippet OMZ::plugins/copyfile/copyfile.plugin.zsh
 
-# ------------------------------------------------------------------
+  # ------------------------------------------------------------------
 # Syntax Highlighting - MUST BE LAST
 # 
 # CRITICAL: This MUST be the last plugin loaded
