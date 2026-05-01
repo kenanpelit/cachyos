@@ -21,7 +21,10 @@ active_host_from_config() {
   local config_file="$REPO_ROOT/config.yaml"
 
   for key in DCLI_HOST DCLI_ACTIVE_HOST DCLI_TARGET_HOST; do
-    if [[ -n "${!key:-}" ]]; then host="${!key}"; break; fi
+    if [[ -n "${!key:-}" ]]; then
+      host="${!key}"
+      break
+    fi
   done
 
   if [[ -z "$host" && -f "$config_file" ]]; then
@@ -42,7 +45,7 @@ load_enabled_modules() {
   fi
 
   log_info "Parsing enabled modules from $host.yaml..."
-  
+
   # Read the list between 'enabled_modules:' and the next top-level key
   local in_list=false
   while IFS= read -r line || [[ -n "$line" ]]; do
@@ -58,7 +61,7 @@ load_enabled_modules() {
       m=$(echo "$line" | sed -E 's/^[[:space:]]*- //;s/[[:space:]]*#.*$//' | xargs)
       [[ -n "$m" ]] && enabled_modules["$m"]=1
     fi
-  done < "$host_file"
+  done <"$host_file"
 }
 
 is_module_enabled() {
@@ -71,43 +74,43 @@ skip_automanaged_unit() {
   local unit="$2"
 
   case "${module}:${unit}" in
-    connect:kdeconnect.service|connect:kdeconnect.timer|connect:kdeconnect-indicator.service|connect:valent.service|connect:valent.timer)
-      # Mobile-device integration units have compositor/session-aware enablement
-      # handled by the connect module's own install hook. Enabling them blindly
-      # here can pull graphical-session.target too early and break UWSM startup.
-      return 0
-      ;;
-    cliphist:cliphist.service)
-      # Noctalia owns the live cliphist ingestion watchers. The cliphist module
-      # only ships config and a legacy unit, so keep user-services from
-      # re-enabling the duplicate watcher.
-      return 0
-      ;;
-    xdg-portal:xdg-desktop-portal-delayed.service|xdg-portal:xdg-desktop-portal-delayed.timer)
-      # The xdg-portal module manages delayed portal orchestration itself so it
-      # can stay bound to compositor session targets instead of default.target.
-      return 0
-      ;;
-    flatpak:flatpak-managed-install.service)
-      # Flatpak managed installs are intentionally timer-driven; only the timer
-      # should be enabled.
-      return 0
-      ;;
-    sessions:geoclue-agent.service)
-      # Geoclue is started by its delayed timer, not directly by the service.
-      return 0
-      ;;
-    sessions:ppp-auto-profile.service)
-      # PPP auto-profile is intentionally timer-driven; only the timer should be
-      # enabled by the generic synchronizer.
-      return 0
-      ;;
-    sunsetr:sunsetr.service|sunsetr:sunsetr-auto-profile.timer)
-      # Sunsetr manages its own Niri-scoped enablement and reenable lifecycle in
-      # the module install hook. Letting the generic synchronizer touch these
-      # units every sync creates noisy duplicate enable passes.
-      return 0
-      ;;
+  connect:valent.service | connect:valent.timer)
+    # Mobile-device integration units have compositor/session-aware enablement
+    # handled by the connect module's own install hook. Enabling them blindly
+    # here can pull graphical-session.target too early and break UWSM startup.
+    return 0
+    ;;
+  cliphist:cliphist.service)
+    # Noctalia owns the live cliphist ingestion watchers. The cliphist module
+    # only ships config and a legacy unit, so keep user-services from
+    # re-enabling the duplicate watcher.
+    return 0
+    ;;
+  xdg-portal:xdg-desktop-portal-delayed.service | xdg-portal:xdg-desktop-portal-delayed.timer)
+    # The xdg-portal module manages delayed portal orchestration itself so it
+    # can stay bound to compositor session targets instead of default.target.
+    return 0
+    ;;
+  flatpak:flatpak-managed-install.service)
+    # Flatpak managed installs are intentionally timer-driven; only the timer
+    # should be enabled.
+    return 0
+    ;;
+  sessions:geoclue-agent.service)
+    # Geoclue is started by its delayed timer, not directly by the service.
+    return 0
+    ;;
+  sessions:ppp-auto-profile.service)
+    # PPP auto-profile is intentionally timer-driven; only the timer should be
+    # enabled by the generic synchronizer.
+    return 0
+    ;;
+  sunsetr:sunsetr.service | sunsetr:sunsetr-auto-profile.timer)
+    # Sunsetr manages its own Niri-scoped enablement and reenable lifecycle in
+    # the module install hook. Letting the generic synchronizer touch these
+    # units every sync creates noisy duplicate enable passes.
+    return 0
+    ;;
   esac
 
   return 1
@@ -120,27 +123,27 @@ unit_install_entries() {
 
   while IFS= read -r line || [[ -n "$line" ]]; do
     case "$line" in
-      "[Install]")
-        in_install=true
-        continue
-        ;;
-      \[*\])
-        $in_install && break
-        ;;
+    "[Install]")
+      in_install=true
+      continue
+      ;;
+    \[*\])
+      $in_install && break
+      ;;
     esac
 
     $in_install || continue
     [[ "${line#\#}" == "$line" ]] || continue
 
     case "$line" in
-      "${key}"=*)
-        value="${line#${key}=}"
-        for value in $value; do
-          printf '%s\n' "$value"
-        done
-        ;;
+    "${key}"=*)
+      value="${line#${key}=}"
+      for value in $value; do
+        printf '%s\n' "$value"
+      done
+      ;;
     esac
-  done < "$unit_file"
+  done <"$unit_file"
 }
 
 unit_has_install_directives() {
@@ -149,20 +152,20 @@ unit_has_install_directives() {
 
   while IFS= read -r line || [[ -n "$line" ]]; do
     case "$line" in
-      "[Install]")
-        in_install=true
-        continue
-        ;;
-      \[*\])
-        $in_install && break
-        ;;
+    "[Install]")
+      in_install=true
+      continue
+      ;;
+    \[*\])
+      $in_install && break
+      ;;
     esac
 
     $in_install || continue
     [[ -n "${line//[[:space:]]/}" ]] || continue
     [[ "${line#\#}" == "$line" ]] || continue
     return 0
-  done < "$unit_file"
+  done <"$unit_file"
 
   return 1
 }
@@ -204,14 +207,14 @@ unit_links_need_resync() {
   while IFS= read -r rel; do
     [[ -n "$rel" ]] || continue
     case "$rel" in
-      *.wants/"$unit_name")
-        target="${rel%%.wants/*}"
-        existing_wanted["$target"]=1
-        ;;
-      *.requires/"$unit_name")
-        target="${rel%%.requires/*}"
-        existing_required["$target"]=1
-        ;;
+    *.wants/"$unit_name")
+      target="${rel%%.wants/*}"
+      existing_wanted["$target"]=1
+      ;;
+    *.requires/"$unit_name")
+      target="${rel%%.requires/*}"
+      existing_required["$target"]=1
+      ;;
     esac
   done < <(find "$systemd_user_dir" -maxdepth 2 -type l \( -path "*/*.wants/$unit_name" -o -path "*/*.requires/$unit_name" \) -printf '%P\n' 2>/dev/null || true)
 
@@ -244,7 +247,7 @@ sync_user_units() {
   for module_path in "$REPO_ROOT/modules"/*; do
     [[ -d "$module_path" ]] || continue
     module_name="$(basename "$module_path")"
-    
+
     local systemd_dir="$module_path/dotfiles/systemd/user"
     [[ -d "$systemd_dir" ]] || continue
 
@@ -256,7 +259,7 @@ sync_user_units() {
       if skip_automanaged_unit "$module_name" "$unit_name"; then
         continue
       fi
-      
+
       if is_module_enabled "$module_name"; then
         if unit_has_install_directives "$unit_file"; then
           # Check if already enabled to minimize noise while still re-syncing
@@ -304,13 +307,13 @@ main() {
   local host
   host=$(active_host_from_config)
   load_enabled_modules "$host"
-  
+
   if [[ ${#enabled_modules[@]} -eq 0 ]]; then
     die "No enabled modules found for host '$host'. Check your YAML format."
   fi
 
   sync_user_units
-  
+
   log_success "All user services are now in sync with $host.yaml"
 }
 
