@@ -110,8 +110,8 @@ packages:
   - libwnck3
   - lidm-git
   - lidm-systemd-git
-  - linux-cachyos
-  - linux-cachyos-headers
+  - linux-cachyos-bore-lto
+  - linux-cachyos-bore-lto-headers
   - linux-meteor-lto
   - linux-meteor-lto-headers
   - logrotate
@@ -196,6 +196,7 @@ packages:
   - ttf-hack
   - ttf-meslo-nerd
   - unrar
+  - update-grub
   - upower
   - usb_modeswitch
   - vlc
