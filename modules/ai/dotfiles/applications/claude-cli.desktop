@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Claude Code
+Comment=Anthropic's AI coding agent
+Exec=ai-claude
+Icon=terminal
+Terminal=true
+Type=Application
+Categories=Development;ConsoleOnly;
