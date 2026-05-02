@@ -79,7 +79,7 @@ packages:
   - gvfs-onedrive
   - gvfs-smb
   - gvfs-wsdd
-  - handy
+  #- handy
   - haveged
   - hdparm
   - hwdetect
