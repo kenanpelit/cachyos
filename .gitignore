@@ -4,6 +4,7 @@ modules/zsh/dotfiles/zsh/history
 modules/zsh/dotfiles/zsh/.zcompdump
 modules/tmux/dotfiles/tmux/fzf
 modules/mpv/dotfiles/mpv/mpvHistory.log
+modules/mpv/dotfiles/mpv/chapters
 .DS_Store
 *.swp
 *.codex
