@@ -1,92 +1,92 @@
 host: hay
 description: CachyOS setup (ported from nixosc via dcli)
 enabled_modules:
-- base
-- pacman
-- paru
-- makepkg
-- xdg-dirs
-- scripts
-# - sops # disabled: requires manual creation of modules/sops/files/keys.txt.age before sync
-- packages
-- flatpak
-- topgrade
-- system-packages-hay
-- admin
-- logind
-- tty
-- logs
-- kernel
-- firewall
-- wireless
-- fail2ban
-- blocky
-- tcp
-- oomd
-- bash
-- zsh
-- starship
-- git
-- command-not-found
-- bat
-- btop
-- fastfetch
-- fzf
-- rsync
-- lazygit
-- yazi
-- nvim
-- tmux
-- sesh
-- clipse
-- cliphist
-- kitty
-- alacritty
-- ghostty
-- wayland-env
-- gtk
-- qt
-- pipewire-rt
-- niri
-- hyprland
-- mangowm
-- sessions
-- sway
-- xdg-portal
-- rofi
-# - walker
-- noctalia
-- lemurs
-- fusuma
-- bt
-- connect
-- sunsetr
-- anydesk
-- mpv
-- ytdlp
-- mpd
-- rmpc
-- cava
-- radio
-- subliminal
-- transmission
-- brave
-- browserpass
-- helium
-- handy
-- webcord
-- user-services
-- ai
-- copyq
-- xdg-mimes
+  - base
+  - pacman
+  - paru
+  - makepkg
+  - xdg-dirs
+  - scripts
+  # - sops # disabled: requires manual creation of modules/sops/files/keys.txt.age before sync
+  - packages
+  - flatpak
+  - topgrade
+  - system-packages-hay
+  - admin
+  - logind
+  - tty
+  - logs
+  - kernel
+  - firewall
+  - wireless
+  - fail2ban
+  - blocky
+  - tcp
+  - oomd
+  - bash
+  - zsh
+  - starship
+  - git
+  - command-not-found
+  - bat
+  - btop
+  - fastfetch
+  - fzf
+  - rsync
+  - lazygit
+  - yazi
+  - nvim
+  - tmux
+  - sesh
+  - clipse
+  - cliphist
+  - kitty
+  - alacritty
+  - ghostty
+  - wayland-env
+  - gtk
+  - qt
+  - pipewire-rt
+  - niri
+  - hyprland
+  - mangowm
+  - sessions
+  - sway
+  - xdg-portal
+  - rofi
+  # - walker
+  - noctalia
+  - lemurs
+  - fusuma
+  - bt
+  - connect
+  - sunsetr
+  - anydesk
+  - mpv
+  - ytdlp
+  - mpd
+  - rmpc
+  - cava
+  - radio
+  - subliminal
+  - transmission
+  - brave
+  - browserpass
+  - helium
+  #- handy
+  - webcord
+  - user-services
+  - ai
+  - copyq
+  - xdg-mimes
 module_processing: sequential
 flatpak_scope: user
 aur_helper: paru
 auto_prune: false
 services:
   enabled:
-  - bluetooth
-  - NetworkManager
+    - bluetooth
+    - NetworkManager
 config_backups:
   enabled: true
   max_backups: 5
