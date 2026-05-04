@@ -89,11 +89,14 @@ remove_user_session "gnome-optimized.desktop"
 install_session "${DOTFILES_DIR}/niri-uwsm.desktop" "Niri (UWSM)"
 install_session "${DOTFILES_DIR}/hyprland-uwsm.desktop" "Hyprland (UWSM)"
 install_session "${DOTFILES_DIR}/mango-uwsm.desktop" "MangoWM (UWSM)"
+install_session "${DOTFILES_DIR}/margo-uwsm.desktop" "Margo (UWSM)"
 
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/mango-session" "mango-session"
 install_wrapper "${DOTFILES_DIR}/mango-uwsm-session" "mango-uwsm-session"
+install_wrapper "${DOTFILES_DIR}/margo-session" "margo-session"
+install_wrapper "${DOTFILES_DIR}/margo-uwsm-session" "margo-uwsm-session"
 
 run_root rm -f "${LOCAL_BIN_DIR}/niri-optimized-session"
 remove_wrapper "gnome-optimized-session"
@@ -113,8 +116,8 @@ if command -v systemctl >/dev/null 2>&1; then
     "$user_systemd_dir/graphical-session.target.wants/geoclue-agent.timer" \
     "$user_systemd_dir/graphical-session.target.wants/geoclue-agent.service" \
     "$user_systemd_dir/graphical-session.target.wants/home-net-vpn.service" \
-    "$user_systemd_dir/graphical-session.target.wants/ppp-auto-profile.service" \
-    || true
+    "$user_systemd_dir/graphical-session.target.wants/ppp-auto-profile.service" ||
+    true
 
   run_as_user systemctl --user disable --now geoclue-agent.timer >/dev/null 2>&1 || true
 

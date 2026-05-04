@@ -1,27 +1,29 @@
 tags:
-- tool
+  - tool
 description: UWSM session entries and wrappers for Wayland compositors
 depends_on:
-- base
-- scripts
+  - base
+  - scripts
 dotfiles:
-- source: dotfiles/hyprland-uwsm.desktop
-  target: ~/.local/share/wayland-sessions/hyprland-uwsm.desktop
-- source: dotfiles/mango-uwsm.desktop
-  target: ~/.local/share/wayland-sessions/mango-uwsm.desktop
-- source: dotfiles/niri-uwsm.desktop
-  target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
-- source: dotfiles/systemd/user/geoclue-agent.service
-  target: ~/.config/systemd/user/geoclue-agent.service
-- source: dotfiles/systemd/user/geoclue-agent.timer
-  target: ~/.config/systemd/user/geoclue-agent.timer
-- source: dotfiles/systemd/user/home-net-vpn.service
-  target: ~/.config/systemd/user/home-net-vpn.service
-- source: dotfiles/systemd/user/home-net-vpn.timer
-  target: ~/.config/systemd/user/home-net-vpn.timer
-- source: dotfiles/systemd/user/ppp-auto-profile.service
-  target: ~/.config/systemd/user/ppp-auto-profile.service
-- source: dotfiles/systemd/user/ppp-auto-profile.timer
-  target: ~/.config/systemd/user/ppp-auto-profile.timer
+  - source: dotfiles/hyprland-uwsm.desktop
+    target: ~/.local/share/wayland-sessions/hyprland-uwsm.desktop
+  - source: dotfiles/mango-uwsm.desktop
+    target: ~/.local/share/wayland-sessions/mango-uwsm.desktop
+  - source: dotfiles/margo-uwsm.desktop
+    target: ~/.local/share/wayland-sessions/margo-uwsm.desktop
+  - source: dotfiles/niri-uwsm.desktop
+    target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
+  - source: dotfiles/systemd/user/geoclue-agent.service
+    target: ~/.config/systemd/user/geoclue-agent.service
+  - source: dotfiles/systemd/user/geoclue-agent.timer
+    target: ~/.config/systemd/user/geoclue-agent.timer
+  - source: dotfiles/systemd/user/home-net-vpn.service
+    target: ~/.config/systemd/user/home-net-vpn.service
+  - source: dotfiles/systemd/user/home-net-vpn.timer
+    target: ~/.config/systemd/user/home-net-vpn.timer
+  - source: dotfiles/systemd/user/ppp-auto-profile.service
+    target: ~/.config/systemd/user/ppp-auto-profile.service
+  - source: dotfiles/systemd/user/ppp-auto-profile.timer
+    target: ~/.config/systemd/user/ppp-auto-profile.timer
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

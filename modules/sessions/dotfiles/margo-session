@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Margo compositor entrypoint with the repo-managed config path.
+set -euo pipefail
+
+config_file="${HOME}/.config/margo/config.conf"
+
+exec margo -c "${config_file}" "$@"
