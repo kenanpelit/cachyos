@@ -19,6 +19,7 @@ cleanup_legacy_noctalia_wants() {
     "$user_systemd_dir/hyprland-session.target.wants/noctalia.service" \
     "$user_systemd_dir/niri-session.target.wants/noctalia.service" \
     "$user_systemd_dir/mangowm-session.target.wants/noctalia.service" \
+    "$user_systemd_dir/margo-session.target.wants/noctalia.service" \
     >/dev/null 2>&1 || true
 }
 

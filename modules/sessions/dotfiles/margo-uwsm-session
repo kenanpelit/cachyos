@@ -18,7 +18,7 @@ margo_load_session_env
 margo_normalize_session_paths
 session_common_backfill_visual_env
 
-export XDG_CURRENT_DESKTOP=margo
+export XDG_CURRENT_DESKTOP=mango:margo
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=margo
 export DESKTOP_SESSION=margo-uwsm

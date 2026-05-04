@@ -300,7 +300,7 @@ detect_session_backend() {
     *niri*)
       printf '%s\n' "niri"
       ;;
-    *mangowm*|*mango*)
+    *mangowm*|*mango*|*margo*)
       printf '%s\n' "mango"
       ;;
     *)
