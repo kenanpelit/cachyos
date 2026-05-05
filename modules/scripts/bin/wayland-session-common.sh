@@ -163,6 +163,9 @@ session_common_backfill_visual_env() {
 		env_dir="${config_home}/environment.d"
 
 		case "${XDG_CURRENT_DESKTOP:-}" in
+		*[Mm]argo*)
+			session_env_file="${config_home}/session-env/margo/10-margo.conf"
+			;;
 		*[Mm]ango*)
 			session_env_file="${config_home}/session-env/mangowm/10-mangowm.conf"
 			;;

@@ -12,10 +12,12 @@ COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common.sh"
 HYPR_HELPER="${SCRIPT_DIR}/hypr-session-common.sh"
 NIRI_HELPER="${SCRIPT_DIR}/niri-session-common.sh"
 MANGO_HELPER="${SCRIPT_DIR}/mango-session-common.sh"
+MARGO_HELPER="${SCRIPT_DIR}/margo-session-common.sh"
 [[ -r "${COMMON_HELPER}" ]] || COMMON_HELPER="${SCRIPT_DIR}/wayland-session-common"
 [[ -r "${HYPR_HELPER}" ]] || HYPR_HELPER="${SCRIPT_DIR}/hypr-session-common"
 [[ -r "${NIRI_HELPER}" ]] || NIRI_HELPER="${SCRIPT_DIR}/niri-session-common"
 [[ -r "${MANGO_HELPER}" ]] || MANGO_HELPER="${SCRIPT_DIR}/mango-session-common"
+[[ -r "${MARGO_HELPER}" ]] || MARGO_HELPER="${SCRIPT_DIR}/margo-session-common"
 
 # shellcheck source=wayland-session-common.sh
 source "${COMMON_HELPER}"
@@ -25,6 +27,8 @@ source "${HYPR_HELPER}"
 source "${NIRI_HELPER}"
 # shellcheck source=mango-session-common.sh
 source "${MANGO_HELPER}"
+# shellcheck source=margo-session-common.sh
+source "${MARGO_HELPER}"
 
 DELAY="${1:-8}"
 if ! [[ "$DELAY" =~ ^[0-9]+$ ]]; then
@@ -133,6 +137,9 @@ load_session_layer() {
             ;;
         mango)
             mango_load_session_env
+            ;;
+        margo)
+            margo_load_session_env
             ;;
     esac
 

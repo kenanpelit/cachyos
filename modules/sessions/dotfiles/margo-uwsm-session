@@ -16,14 +16,13 @@ margo_ensure_runtime_dir
 margo_clear_foreign_session_env
 margo_load_session_env
 margo_normalize_session_paths
-session_common_backfill_visual_env
-
-export XDG_CURRENT_DESKTOP=mango:margo
+export XDG_CURRENT_DESKTOP=margo
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=margo
 export DESKTOP_SESSION=margo-uwsm
 export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
 export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+session_common_backfill_visual_env
 
 if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
   session_common_unset_manager_env \

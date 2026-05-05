@@ -8,6 +8,8 @@ dotfiles:
   target: ~/.config/xdg-desktop-portal/portals.conf
 - source: dotfiles/xdg-desktop-portal/portals.conf
   target: ~/.config/xdg-desktop-portal/niri-portals.conf
+- source: dotfiles/xdg-desktop-portal/margo-portals.conf
+  target: ~/.config/xdg-desktop-portal/margo-portals.conf
 
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

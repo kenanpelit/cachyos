@@ -284,6 +284,20 @@ load_mango_env() {
   mango_detect_wayland_display || true
 }
 
+load_margo_env() {
+  local helper="${SCRIPT_DIR}/margo-session-common.sh"
+  [[ -r "$helper" ]] || helper="${SCRIPT_DIR}/margo-session-common"
+  # shellcheck source=margo-session-common.sh
+  source "$helper"
+  margo_clear_foreign_session_env
+  margo_load_session_env
+  margo_normalize_session_paths
+  margo_ensure_runtime_dir
+  margo_ensure_session_identity
+  export DESKTOP_SESSION="${DESKTOP_SESSION:-margo-uwsm}"
+  margo_detect_wayland_display || true
+}
+
 detect_session_backend() {
   local combined
 
@@ -300,7 +314,10 @@ detect_session_backend() {
     *niri*)
       printf '%s\n' "niri"
       ;;
-    *mangowm*|*mango*|*margo*)
+    *margo*)
+      printf '%s\n' "margo"
+      ;;
+    *mangowm*|*mango*)
       printf '%s\n' "mango"
       ;;
     *)
@@ -320,6 +337,9 @@ case "${session_backend}" in
     ;;
   mango)
     load_mango_env
+    ;;
+  margo)
+    load_margo_env
     ;;
 esac
 
