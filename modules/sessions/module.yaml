@@ -13,6 +13,10 @@ dotfiles:
     target: ~/.local/share/wayland-sessions/margo-uwsm.desktop
   - source: dotfiles/niri-uwsm.desktop
     target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
+  - source: dotfiles/systemd/user/margo-session.target
+    target: ~/.config/systemd/user/margo-session.target
+  - source: dotfiles/systemd/user/wayland-wm@margo\x2dsession.service.d/10-session-lifecycle.conf
+    target: ~/.config/systemd/user/wayland-wm@margo\x2dsession.service.d/10-session-lifecycle.conf
   - source: dotfiles/systemd/user/geoclue-agent.service
     target: ~/.config/systemd/user/geoclue-agent.service
   - source: dotfiles/systemd/user/geoclue-agent.timer

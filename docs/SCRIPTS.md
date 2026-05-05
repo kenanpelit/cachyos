@@ -444,6 +444,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `margo-session-common`
+**Description:** Shared environment/bootstrap helpers for Margo session scripts.
+
+**Usage:** `margo-session-common`
+
+---
+
 ### 📂 `monitor_brightness`
 **Description:** External monitor brightness control using ddcutil (auto-detect).
 
