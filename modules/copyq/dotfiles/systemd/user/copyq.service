@@ -1,7 +1,7 @@
 [Unit]
 Description=CopyQ clipboard manager daemon
-After=graphical-session.target niri-session-env.service hypr-session-env.service dbus.service
-PartOf=graphical-session.target niri-session.target hyprland-session.target
+After=graphical-session.target niri-session-env.service hypr-session-env.service margo-session-env.service dbus.service
+PartOf=graphical-session.target niri-session.target hyprland-session.target margo-session.target
 Requisite=graphical-session.target
 
 [Service]
@@ -19,3 +19,4 @@ StandardError=journal
 WantedBy=graphical-session.target
 WantedBy=niri-session.target
 WantedBy=hyprland-session.target
+WantedBy=margo-session.target

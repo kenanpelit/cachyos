@@ -1,7 +1,7 @@
 [Unit]
 Description=Margo session (user services)
 Documentation=man:systemd.special(7)
-Wants=graphical-session.target xdg-desktop-autostart.target
+Wants=graphical-session.target xdg-desktop-autostart.target margo-clip-persist.service clipse.service
 After=graphical-session.target wayland-wm@margo\x2dsession.service dbus.service
 BindsTo=graphical-session.target wayland-wm@margo\x2dsession.service
 PartOf=graphical-session.target wayland-wm@margo\x2dsession.service

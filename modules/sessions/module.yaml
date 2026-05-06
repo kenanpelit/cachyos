@@ -15,6 +15,8 @@ dotfiles:
     target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
   - source: dotfiles/systemd/user/margo-session.target
     target: ~/.config/systemd/user/margo-session.target
+  - source: dotfiles/systemd/user/margo-clip-persist.service
+    target: ~/.config/systemd/user/margo-clip-persist.service
   - source: dotfiles/systemd/user/wayland-wm@margo\x2dsession.service.d/10-session-lifecycle.conf
     target: ~/.config/systemd/user/wayland-wm@margo\x2dsession.service.d/10-session-lifecycle.conf
   - source: dotfiles/systemd/user/geoclue-agent.service

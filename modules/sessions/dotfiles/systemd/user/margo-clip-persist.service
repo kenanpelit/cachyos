@@ -1,0 +1,21 @@
+[Unit]
+Description=wl-clip-persist (margo)
+BindsTo=wayland-wm@margo\x2dsession.service
+After=graphical-session.target wayland-wm@margo\x2dsession.service
+PartOf=margo-session.target graphical-session.target wayland-wm@margo\x2dsession.service
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionPathExists=/usr/bin/wl-clip-persist
+
+[Service]
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+ExecStart=/usr/bin/wl-clip-persist --clipboard both
+SuccessExitStatus=1
+Restart=on-abnormal
+RestartSec=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=margo-session.target

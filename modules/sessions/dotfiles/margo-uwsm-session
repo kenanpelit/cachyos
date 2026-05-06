@@ -16,7 +16,7 @@ margo_ensure_runtime_dir
 margo_clear_foreign_session_env
 margo_load_session_env
 margo_normalize_session_paths
-export XDG_CURRENT_DESKTOP=margo
+export XDG_CURRENT_DESKTOP=margo:mango
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=margo
 export DESKTOP_SESSION=margo-uwsm
@@ -70,10 +70,10 @@ if command -v uwsm >/dev/null 2>&1; then
   fi
 
   if [[ "${session_cmd}" == "margo-session" ]]; then
-    exec uwsm start -D margo -e -- "${session_cmd}"
+    exec uwsm start -D margo:mango -e -- "${session_cmd}"
   fi
 
-  exec uwsm start -D margo -e -- margo -c "${HOME}/.config/margo/config.conf"
+  exec uwsm start -D margo:mango -e -- margo -c "${HOME}/.config/margo/config.conf"
 fi
 
 if command -v "${session_cmd}" >/dev/null 2>&1; then
