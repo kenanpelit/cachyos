@@ -22,6 +22,10 @@ Usage: validate.sh [--fast|--strict|--live]
          generated/runtime tree.
 --strict Validate the same set plus every shell helper under modules/scripts/bin.
 --live   Validate the same set plus the active MangoWM IPC/session state.
+
+Set MANGO_VALIDATE_SOURCE=1 to also compare generated window-rule keys against
+a local Mango source checkout. This is intentionally opt-in so dcli sync does
+not depend on or warn about developer source trees.
 EOF
 	exit 0
 	;;
@@ -251,10 +255,11 @@ log_info "Validating generated Mango workspace/profile assets..."
 "${RENDER_KEYBIND_CHEATSHEET_SCRIPT}" --check >/dev/null
 log_success "Generated Mango profile, workspace, and cheatsheet assets are in sync!"
 
-source_parse_config="${MANGO_SOURCE_DIR}/src/config/parse_config.h"
-if [[ -r "${source_parse_config}" ]]; then
-	log_info "Validating Mango window-rule schema against source..."
-	python3 - "${RENDER_WINDOW_RULES_SCRIPT}" "${source_parse_config}" <<'PY'
+if [[ "${MANGO_VALIDATE_SOURCE:-0}" == "1" ]]; then
+	source_parse_config="${MANGO_SOURCE_DIR}/src/config/parse_config.h"
+	if [[ -r "${source_parse_config}" ]]; then
+		log_info "Validating Mango window-rule schema against source..."
+		python3 - "${RENDER_WINDOW_RULES_SCRIPT}" "${source_parse_config}" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -289,9 +294,10 @@ if missing:
         + ", ".join(missing)
     )
 PY
-	log_success "Mango window-rule schema matches source!"
-else
-	log_warn "Mango source not found at ${source_parse_config}; skipping window-rule schema source check."
+		log_success "Mango window-rule schema matches source!"
+	else
+		log_warn "MANGO_VALIDATE_SOURCE=1 but Mango source was not found at ${source_parse_config}; skipping window-rule schema source check."
+	fi
 fi
 
 if [[ -d "${MANGO_RUNTIME_DIR}" ]]; then

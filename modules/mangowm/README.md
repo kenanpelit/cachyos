@@ -239,8 +239,8 @@ Core session units:
   - duplicate keybind detection with keymode awareness
   - rendered Mango `tagrule=` contract checks against `layout.mango`
   - generated window-rule manifest validation
-  - generated window-rule key drift against `~/.kod/mango` when the Mango
-    source tree is present
+  - opt-in generated window-rule key drift against a local Mango source tree
+    when `MANGO_VALIDATE_SOURCE=1` is set
   - temporary generated/runtime render + `mango -p` parse validation
   - live output/tag/keymode, layer-rule coverage, systemd unit verification,
     and failed Mango user-unit checks in `--live` mode
