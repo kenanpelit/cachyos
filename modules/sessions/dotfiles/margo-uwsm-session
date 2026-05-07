@@ -22,6 +22,20 @@ export XDG_SESSION_DESKTOP=margo
 export DESKTOP_SESSION=margo-uwsm
 export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
 export SYSTEMD_OFFLINE="${SYSTEMD_OFFLINE:-0}"
+
+# Visual / theme defaults — applied unless already set by the user's
+# environment.d/* or login profile. Kora is the cachy stack's icon
+# theme of record; matching cursor + Qt platform theme are picked here
+# so apps launched from systemd user units see consistent values.
+export XDG_ICON_THEME="${XDG_ICON_THEME:-kora}"
+export ICON_THEME="${ICON_THEME:-${XDG_ICON_THEME}}"
+export QT_ICON_THEME="${QT_ICON_THEME:-${XDG_ICON_THEME}}"
+export XCURSOR_THEME="${XCURSOR_THEME:-capitaine-cursors}"
+export XCURSOR_SIZE="${XCURSOR_SIZE:-24}"
+export GTK_THEME="${GTK_THEME:-Adwaita-dark}"
+export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-qt6ct}"
+export QT_QPA_PLATFORMTHEME_QT6="${QT_QPA_PLATFORMTHEME_QT6:-qt6ct}"
+
 session_common_backfill_visual_env
 
 if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
@@ -42,6 +56,10 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     XDG_SESSION_TYPE \
     XDG_SESSION_DESKTOP \
     DESKTOP_SESSION
+  # Defaults filled in above (kora icon theme, capitaine cursors, etc.)
+  # so the systemd manager environment ends up matching what the
+  # session itself exports — no more `echo $XDG_ICON_THEME` returning
+  # empty under noctalia / qs / GTK apps launched through user units.
   session_common_set_manager_env \
     "XDG_CURRENT_DESKTOP=${XDG_CURRENT_DESKTOP}" \
     "XDG_SESSION_TYPE=${XDG_SESSION_TYPE}" \
@@ -50,14 +68,15 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     "PATH=${PATH}" \
     "XDG_DATA_DIRS=${XDG_DATA_DIRS:-}" \
     "XDG_CONFIG_DIRS=${XDG_CONFIG_DIRS:-/etc/xdg}" \
-    "GTK_THEME=${GTK_THEME:-}" \
-    "XDG_ICON_THEME=${XDG_ICON_THEME:-}" \
-    "QT_ICON_THEME=${QT_ICON_THEME:-}" \
-    "QT_QPA_PLATFORMTHEME=${QT_QPA_PLATFORMTHEME:-}" \
-    "QT_QPA_PLATFORMTHEME_QT6=${QT_QPA_PLATFORMTHEME_QT6:-}" \
+    "GTK_THEME=${GTK_THEME}" \
+    "XDG_ICON_THEME=${XDG_ICON_THEME}" \
+    "ICON_THEME=${ICON_THEME}" \
+    "QT_ICON_THEME=${QT_ICON_THEME}" \
+    "QT_QPA_PLATFORMTHEME=${QT_QPA_PLATFORMTHEME}" \
+    "QT_QPA_PLATFORMTHEME_QT6=${QT_QPA_PLATFORMTHEME_QT6}" \
     "QT_STYLE_OVERRIDE=${QT_STYLE_OVERRIDE:-}" \
-    "XCURSOR_THEME=${XCURSOR_THEME:-capitaine-cursors}" \
-    "XCURSOR_SIZE=${XCURSOR_SIZE:-24}" \
+    "XCURSOR_THEME=${XCURSOR_THEME}" \
+    "XCURSOR_SIZE=${XCURSOR_SIZE}" \
     "GTK_USE_PORTAL=${GTK_USE_PORTAL}" \
     "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}"
 fi
