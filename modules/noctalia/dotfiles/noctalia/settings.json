@@ -132,18 +132,25 @@
       ],
       "left": [
         {
-          "defaultSettings": {
-            "characterCount": 3,
-            "compact": true,
-            "followFocusedOutput": true,
-            "hideEmpty": true,
-            "labelMode": "index+name",
-            "maxPreviewDots": 4,
-            "showOutputName": false,
-            "showPreviewDots": false,
-            "showWindowCount": false
-          },
-          "id": "plugin:6ee06e:nworkspace"
+          "characterCount": 2,
+          "colorizeIcons": false,
+          "emptyColor": "secondary",
+          "enableScrollWheel": true,
+          "focusedColor": "primary",
+          "followFocusedScreen": false,
+          "fontWeight": "bold",
+          "groupedBorderOpacity": 1,
+          "hideUnoccupied": false,
+          "iconScale": 0.8,
+          "id": "Workspace",
+          "labelMode": "index",
+          "occupiedColor": "secondary",
+          "pillSize": 0.6,
+          "showApplications": false,
+          "showApplicationsHover": false,
+          "showBadge": true,
+          "showLabelsOnlyWhenOccupied": true,
+          "unfocusedIconsOpacity": 1
         },
         {
           "id": "Spacer",

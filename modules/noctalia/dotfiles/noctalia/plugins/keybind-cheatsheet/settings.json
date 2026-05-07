@@ -1,20 +1,1032 @@
 {
   "cheatsheetData": [
     {
-      "title": "Unsupported Compositor",
+      "title": "Modes",
       "binds": [
         {
-          "keys": "UNKNOWN",
-          "desc": "Unknown compositor detected"
+          "keys": "Super + S",
+          "desc": "Enter Layout Mode"
         },
         {
-          "keys": "INFO",
-          "desc": "This plugin only supports Hyprland and Niri compositors"
+          "keys": "Super + Alt + M",
+          "desc": "Enter Monitor Mode"
+        }
+      ]
+    },
+    {
+      "title": "Workspaces",
+      "binds": [
+        {
+          "keys": "Super + 1",
+          "desc": "Switch to Tag 1: Kenp (DP-3)"
+        },
+        {
+          "keys": "Super + Shift + 1",
+          "desc": "Move to Tag 1: Kenp (DP-3)"
+        },
+        {
+          "keys": "Alt + 1",
+          "desc": "Here: Kenp"
+        },
+        {
+          "keys": "Super + 2",
+          "desc": "Switch to Tag 2: Term (DP-3)"
+        },
+        {
+          "keys": "Super + Shift + 2",
+          "desc": "Move to Tag 2: Term (DP-3)"
+        },
+        {
+          "keys": "Alt + 2",
+          "desc": "Here: TmuxKenp"
+        },
+        {
+          "keys": "Super + 3",
+          "desc": "Switch to Tag 3: AI (DP-3)"
+        },
+        {
+          "keys": "Super + Shift + 3",
+          "desc": "Move to Tag 3: AI (DP-3)"
+        },
+        {
+          "keys": "Alt + 3",
+          "desc": "Here: Ai"
+        },
+        {
+          "keys": "Super + 4",
+          "desc": "Switch to Tag 4: Work (DP-3)"
+        },
+        {
+          "keys": "Super + Shift + 4",
+          "desc": "Move to Tag 4: Work (DP-3)"
+        },
+        {
+          "keys": "Alt + 4",
+          "desc": "Here: CompecTA"
+        },
+        {
+          "keys": "Super + 5",
+          "desc": "Switch to Tag 5: Chat (DP-3)"
+        },
+        {
+          "keys": "Super + Shift + 5",
+          "desc": "Move to Tag 5: Chat (DP-3)"
+        },
+        {
+          "keys": "Alt + 5",
+          "desc": "Here: WebCord"
+        },
+        {
+          "keys": "Super + 6",
+          "desc": "Switch to Tag 6: Media (DP-3)"
+        },
+        {
+          "keys": "Super + Shift + 6",
+          "desc": "Move to Tag 6: Media (DP-3)"
+        },
+        {
+          "keys": "Alt + 6",
+          "desc": "Here: Telegram"
+        },
+        {
+          "keys": "Super + 7",
+          "desc": "Switch to Tag 7: Utility (eDP-1)"
+        },
+        {
+          "keys": "Super + Shift + 7",
+          "desc": "Move to Tag 7: Utility (eDP-1)"
+        },
+        {
+          "keys": "Alt + 7",
+          "desc": "Here: YouTube"
+        },
+        {
+          "keys": "Super + 8",
+          "desc": "Switch to Tag 8: Music (eDP-1)"
+        },
+        {
+          "keys": "Super + Shift + 8",
+          "desc": "Move to Tag 8: Music (eDP-1)"
+        },
+        {
+          "keys": "Alt + 8",
+          "desc": "Here: Spotify"
+        },
+        {
+          "keys": "Super + 9",
+          "desc": "Switch to Tag 9: Social (eDP-1)"
+        },
+        {
+          "keys": "Super + Shift + 9",
+          "desc": "Move to Tag 9: Social (eDP-1)"
+        },
+        {
+          "keys": "Alt + 9",
+          "desc": "Here: Ferdium"
+        },
+        {
+          "keys": "Alt + 0",
+          "desc": "Here: ALL"
+        },
+        {
+          "keys": "Super + Alt + 0",
+          "desc": "Go (Arrange Windows)"
+        },
+        {
+          "keys": "Super + PgUp",
+          "desc": "View Left"
+        },
+        {
+          "keys": "Super + PgDn",
+          "desc": "View Right"
+        },
+        {
+          "keys": "Ctrl + PgUp",
+          "desc": "View Left (Occupied)"
+        },
+        {
+          "keys": "Ctrl + PgDn",
+          "desc": "View Right (Occupied)"
+        },
+        {
+          "keys": "Super + Ctrl + PgUp",
+          "desc": "Move Tag Left"
+        },
+        {
+          "keys": "Super + Ctrl + PgDn",
+          "desc": "Move Tag Right"
+        }
+      ]
+    },
+    {
+      "title": "Navigation",
+      "binds": [
+        {
+          "keys": "Super + H",
+          "desc": "Focus Left"
+        },
+        {
+          "keys": "Super + L",
+          "desc": "Focus Right"
+        },
+        {
+          "keys": "Super + K",
+          "desc": "Focus Up"
+        },
+        {
+          "keys": "Super + J",
+          "desc": "Focus Down"
+        },
+        {
+          "keys": "Super + TAB",
+          "desc": "Cycle Window Next"
+        },
+        {
+          "keys": "Super + Shift + TAB",
+          "desc": "Cycle Window Prev"
+        },
+        {
+          "keys": "Super + Ctrl + TAB",
+          "desc": "Focus Last Window"
+        },
+        {
+          "keys": "Super + LEFT",
+          "desc": "Focus Left"
+        },
+        {
+          "keys": "Super + RIGHT",
+          "desc": "Focus Right"
+        },
+        {
+          "keys": "Super + UP",
+          "desc": "Focus Up"
+        },
+        {
+          "keys": "Super + DOWN",
+          "desc": "Focus Down"
+        },
+        {
+          "keys": "Super + Shift + H",
+          "desc": "Swap Left"
+        },
+        {
+          "keys": "Super + Shift + L",
+          "desc": "Swap Right"
+        },
+        {
+          "keys": "Super + Shift + K",
+          "desc": "Swap Up"
+        },
+        {
+          "keys": "Super + Shift + J",
+          "desc": "Swap Down"
+        },
+        {
+          "keys": "Super + Shift + LEFT",
+          "desc": "Swap Left"
+        },
+        {
+          "keys": "Super + Shift + RIGHT",
+          "desc": "Swap Right"
+        },
+        {
+          "keys": "Super + Shift + UP",
+          "desc": "Swap Up"
+        },
+        {
+          "keys": "Super + Shift + DOWN",
+          "desc": "Swap Down"
+        }
+      ]
+    },
+    {
+      "title": "Window Management",
+      "binds": [
+        {
+          "keys": "Super + Q",
+          "desc": "Close Window"
+        },
+        {
+          "keys": "Alt + F4",
+          "desc": "Close Window"
+        },
+        {
+          "keys": "Super + F",
+          "desc": "Toggle Fullscreen"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + F",
+          "desc": "Toggle Fake Fullscreen"
+        },
+        {
+          "keys": "Super + G",
+          "desc": "Toggle Floating"
+        },
+        {
+          "keys": "Super + M",
+          "desc": "Toggle Maximize"
+        },
+        {
+          "keys": "Super + O",
+          "desc": "Toggle Overlay"
+        },
+        {
+          "keys": "Super + Alt + C",
+          "desc": "Center Window"
+        },
+        {
+          "keys": "Super + Shift + Ctrl + B",
+          "desc": "Toggle Border"
+        },
+        {
+          "keys": "Super + Shift + Ctrl + G",
+          "desc": "Toggle All Floating"
+        },
+        {
+          "keys": "Super + I",
+          "desc": "Minimize Focused Window"
+        },
+        {
+          "keys": "Super + Shift + I",
+          "desc": "Restore Minimized"
+        },
+        {
+          "keys": "Super + Alt + O",
+          "desc": "Toggle Overview"
+        },
+        {
+          "keys": "Super + Ctrl + O",
+          "desc": "Open Overview"
+        },
+        {
+          "keys": "Super + Shift + Ctrl + O",
+          "desc": "Close Overview"
+        },
+        {
+          "keys": "Super + P",
+          "desc": "Toggle Global"
+        },
+        {
+          "keys": "Super + Shift + S",
+          "desc": "Toggle Global"
+        },
+        {
+          "keys": "Super + BACKSPACE",
+          "desc": "Toggle Scratchpad"
+        },
+        {
+          "keys": "Alt + BACKSPACE",
+          "desc": "Restore Minimized"
+        }
+      ]
+    },
+    {
+      "title": "Layout",
+      "binds": [
+        {
+          "keys": "Super + R",
+          "desc": "Next Proportion Preset"
+        },
+        {
+          "keys": "Super + Shift + R",
+          "desc": "Set Proportion 0.500"
+        },
+        {
+          "keys": "Super + E",
+          "desc": "Set Proportion 1.0"
+        },
+        {
+          "keys": "Super + Ctrl + T",
+          "desc": "Layout: Tile"
+        },
+        {
+          "keys": "Super + Ctrl + V",
+          "desc": "Layout: Vertical Grid"
+        },
+        {
+          "keys": "Super + C",
+          "desc": "Layout: Center Tile"
+        },
+        {
+          "keys": "Super + X",
+          "desc": "Layout: Scroller"
+        },
+        {
+          "keys": "Super + Ctrl + W",
+          "desc": "Next Layout"
+        },
+        {
+          "keys": "Super + Ctrl + H",
+          "desc": "Scroller Stack Left"
+        },
+        {
+          "keys": "Super + Ctrl + L",
+          "desc": "Scroller Stack Right"
+        },
+        {
+          "keys": "Super + Ctrl + K",
+          "desc": "Scroller Stack Up"
+        },
+        {
+          "keys": "Super + Ctrl + J",
+          "desc": "Scroller Stack Down"
+        },
+        {
+          "keys": "Super + Z",
+          "desc": "Zoom Master"
+        },
+        {
+          "keys": "Super + Shift + A",
+          "desc": "Toggle Gaps"
+        },
+        {
+          "keys": "Super + 0",
+          "desc": "Resize Window 960x540"
+        },
+        {
+          "keys": "Super + Shift + 0",
+          "desc": "Resize Window 1280x720"
+        },
+        {
+          "keys": "Super + Ctrl + 0",
+          "desc": "Resize Window 1920x1080"
+        }
+      ]
+    },
+    {
+      "title": "Layout Mode",
+      "binds": [
+        {
+          "keys": "TAB",
+          "desc": "Focus Last Window"
+        },
+        {
+          "keys": "H",
+          "desc": "Adjust Master Width -0.05"
+        },
+        {
+          "keys": "L",
+          "desc": "Adjust Master Width +0.05"
+        },
+        {
+          "keys": "J",
+          "desc": "Adjust Master Count -1"
+        },
+        {
+          "keys": "K",
+          "desc": "Adjust Master Count +1"
+        },
+        {
+          "keys": "Ctrl + H",
+          "desc": "Move Floating Left"
+        },
+        {
+          "keys": "Ctrl + L",
+          "desc": "Move Floating Right"
+        },
+        {
+          "keys": "Ctrl + K",
+          "desc": "Move Floating Up"
+        },
+        {
+          "keys": "Ctrl + J",
+          "desc": "Move Floating Down"
+        },
+        {
+          "keys": "Shift + H",
+          "desc": "Resize Floating Left"
+        },
+        {
+          "keys": "Shift + L",
+          "desc": "Resize Floating Right"
+        },
+        {
+          "keys": "Shift + K",
+          "desc": "Resize Floating Up"
+        },
+        {
+          "keys": "Shift + J",
+          "desc": "Resize Floating Down"
+        },
+        {
+          "keys": "R",
+          "desc": "Next Proportion Preset"
+        },
+        {
+          "keys": "Shift + R",
+          "desc": "Set Proportion 0.500"
+        },
+        {
+          "keys": "E",
+          "desc": "Set Proportion 1.0"
+        },
+        {
+          "keys": "T",
+          "desc": "Layout: Tile"
+        },
+        {
+          "keys": "V",
+          "desc": "Layout: Vertical Grid"
+        },
+        {
+          "keys": "C",
+          "desc": "Layout: Center Tile"
+        },
+        {
+          "keys": "X",
+          "desc": "Layout: Scroller"
+        },
+        {
+          "keys": "W",
+          "desc": "Next Layout"
+        },
+        {
+          "keys": "Alt + H",
+          "desc": "Scroller Stack Left"
+        },
+        {
+          "keys": "Alt + L",
+          "desc": "Scroller Stack Right"
+        },
+        {
+          "keys": "Alt + K",
+          "desc": "Scroller Stack Up"
+        },
+        {
+          "keys": "Alt + J",
+          "desc": "Scroller Stack Down"
+        },
+        {
+          "keys": "Z",
+          "desc": "Zoom Master"
+        },
+        {
+          "keys": "G",
+          "desc": "Toggle Gaps"
+        },
+        {
+          "keys": "-",
+          "desc": "Adjust Gaps -2"
+        },
+        {
+          "keys": "=",
+          "desc": "Adjust Gaps +2"
+        },
+        {
+          "keys": "B",
+          "desc": "Toggle Border"
+        },
+        {
+          "keys": "F",
+          "desc": "Toggle All Floating"
+        },
+        {
+          "keys": "Alt + C",
+          "desc": "Center Window"
+        },
+        {
+          "keys": "0",
+          "desc": "Resize Window 960x540"
+        },
+        {
+          "keys": "Shift + 0",
+          "desc": "Resize Window 1280x720"
+        },
+        {
+          "keys": "Ctrl + 0",
+          "desc": "Resize Window 1920x1080"
+        },
+        {
+          "keys": "ESC",
+          "desc": "Return to Default Mode"
+        },
+        {
+          "keys": "ENTER",
+          "desc": "Return to Default Mode"
+        }
+      ]
+    },
+    {
+      "title": "Noctalia",
+      "binds": [
+        {
+          "keys": "Super + Alt + /",
+          "desc": "Keybind Cheatsheet"
+        },
+        {
+          "keys": "Super + F1",
+          "desc": "Keybind Cheatsheet"
+        },
+        {
+          "keys": "Alt + F1",
+          "desc": "Keybind Cheatsheet"
+        },
+        {
+          "keys": "Super + SPACE",
+          "desc": "Launcher"
+        },
+        {
+          "keys": "Super + Ctrl + D",
+          "desc": "Settings"
+        },
+        {
+          "keys": "Super + D",
+          "desc": "Control Center"
+        },
+        {
+          "keys": "Super + Alt + S",
+          "desc": "Dash Overview"
+        },
+        {
+          "keys": "Super + Alt + D",
+          "desc": "Handy: Toggle Recording"
+        },
+        {
+          "keys": "Super + Shift + Alt + D",
+          "desc": "Handy: Post Process"
+        },
+        {
+          "keys": "Super + Alt + X",
+          "desc": "Handy: Cancel Recording"
+        },
+        {
+          "keys": "Super + N",
+          "desc": "Notification History"
+        },
+        {
+          "keys": "Super + Shift + D",
+          "desc": "Window Switcher"
+        },
+        {
+          "keys": "Super + Shift + P",
+          "desc": "System Monitor"
+        },
+        {
+          "keys": "Super + Ctrl + N",
+          "desc": "Notes"
+        },
+        {
+          "keys": "Super + ",
+          "desc": "Settings"
+        },
+        {
+          "keys": "Super + U",
+          "desc": "Assistant Panel"
+        },
+        {
+          "keys": "Alt + TAB",
+          "desc": "Window Switcher"
+        },
+        {
+          "keys": "Super + B",
+          "desc": "Toggle Bar"
+        },
+        {
+          "keys": "Super + Shift + B",
+          "desc": "Toggle Dock"
+        },
+        {
+          "keys": "Super + Ctrl + B",
+          "desc": "Bar Auto-Hide"
+        },
+        {
+          "keys": "Super + DEL",
+          "desc": "Session Menu"
+        },
+        {
+          "keys": "Super + Shift + DEL",
+          "desc": "Idle Inhibitor"
+        },
+        {
+          "keys": "Alt + L",
+          "desc": "Lock Screen"
+        },
+        {
+          "keys": "Alt + SPACE",
+          "desc": "Custom Commands"
+        },
+        {
+          "keys": "Super + Y",
+          "desc": "Wallpaper Panel"
+        },
+        {
+          "keys": "Super + W",
+          "desc": "Next Wallpaper"
+        },
+        {
+          "keys": "Super + Shift + W",
+          "desc": "Previous Wallpaper"
+        },
+        {
+          "keys": "Super + Shift + T",
+          "desc": "Toggle Dark Mode"
+        },
+        {
+          "keys": "Super + Shift + N",
+          "desc": "Toggle Night Light"
+        },
+        {
+          "keys": "Super + Shift + Ctrl + V",
+          "desc": "Clipboard History"
+        }
+      ]
+    },
+    {
+      "title": "Applications",
+      "binds": [
+        {
+          "keys": "Super + Ctrl + Alt + D",
+          "desc": "Toggle Mango Doctor"
+        },
+        {
+          "keys": "Super + V",
+          "desc": "CopyQ Toggle"
+        },
+        {
+          "keys": "Super + T",
+          "desc": "Terminal"
+        },
+        {
+          "keys": "Super + ENTER",
+          "desc": "Toggle Dropdown Terminal"
+        },
+        {
+          "keys": "Super + Alt + F",
+          "desc": "Toggle Yazi Scratchpad"
+        },
+        {
+          "keys": "Super + Alt + ENTER",
+          "desc": "SemsuMo Daily"
+        },
+        {
+          "keys": "Super + Ctrl + F",
+          "desc": "File Manager"
+        },
+        {
+          "keys": "Ctrl + Alt + F",
+          "desc": "Yazi"
+        },
+        {
+          "keys": "Super + Alt + SPACE",
+          "desc": "Rofi Launcher"
+        },
+        {
+          "keys": "Alt + T",
+          "desc": "Start KKENP"
+        },
+        {
+          "keys": "Alt + N",
+          "desc": "Anotes"
+        },
+        {
+          "keys": "Super + Alt + A",
+          "desc": "Toggle Wiremix"
+        },
+        {
+          "keys": "Super + Alt + V",
+          "desc": "Toggle Clipse"
+        }
+      ]
+    },
+    {
+      "title": "Monitors",
+      "binds": [
+        {
+          "keys": "Super + A",
+          "desc": "Focus Next Monitor"
+        },
+        {
+          "keys": "Super + Alt + H",
+          "desc": "Focus Monitor Left"
+        },
+        {
+          "keys": "Super + Alt + L",
+          "desc": "Focus Monitor Right"
+        },
+        {
+          "keys": "Super + Alt + K",
+          "desc": "Focus Monitor Up"
+        },
+        {
+          "keys": "Super + Alt + J",
+          "desc": "Focus Monitor Down"
+        },
+        {
+          "keys": "Super + Ctrl + A",
+          "desc": "Move Window to Next Monitor"
+        },
+        {
+          "keys": "Super + ESC",
+          "desc": "Move Window to Next Monitor"
+        },
+        {
+          "keys": "Super + Shift + Alt + LEFT",
+          "desc": "Move to Monitor Left"
+        },
+        {
+          "keys": "Super + Shift + Alt + RIGHT",
+          "desc": "Move to Monitor Right"
+        },
+        {
+          "keys": "Super + Ctrl + UP",
+          "desc": "Move to Monitor Up"
+        },
+        {
+          "keys": "Super + Ctrl + DOWN",
+          "desc": "Move to Monitor Down"
+        }
+      ]
+    },
+    {
+      "title": "Monitor Mode",
+      "binds": [
+        {
+          "keys": "H",
+          "desc": "Focus Monitor Left"
+        },
+        {
+          "keys": "L",
+          "desc": "Focus Monitor Right"
+        },
+        {
+          "keys": "K",
+          "desc": "Focus Monitor Up"
+        },
+        {
+          "keys": "J",
+          "desc": "Focus Monitor Down"
+        },
+        {
+          "keys": "Shift + H",
+          "desc": "Move to Monitor Left"
+        },
+        {
+          "keys": "Shift + L",
+          "desc": "Move to Monitor Right"
+        },
+        {
+          "keys": "Shift + K",
+          "desc": "Move to Monitor Up"
+        },
+        {
+          "keys": "Shift + J",
+          "desc": "Move to Monitor Down"
+        },
+        {
+          "keys": "A",
+          "desc": "Focus Next Monitor"
+        },
+        {
+          "keys": "M",
+          "desc": "Move Window to Next Monitor"
+        },
+        {
+          "keys": "P",
+          "desc": "Detect Monitor Profile"
+        },
+        {
+          "keys": "V",
+          "desc": "Start Virtual Output"
+        },
+        {
+          "keys": "Shift + V",
+          "desc": "Stop Virtual Output"
+        },
+        {
+          "keys": "S",
+          "desc": "Virtual Output Status"
+        },
+        {
+          "keys": "T",
+          "desc": "Toggle Trackpad"
+        },
+        {
+          "keys": "D",
+          "desc": "Toggle Monitor eDP-1"
+        },
+        {
+          "keys": "E",
+          "desc": "Spawn on Empty Tag 2"
+        },
+        {
+          "keys": "ESC",
+          "desc": "Return to Default Mode"
+        },
+        {
+          "keys": "ENTER",
+          "desc": "Return to Default Mode"
+        }
+      ]
+    },
+    {
+      "title": "Media",
+      "binds": [
+        {
+          "keys": "Vol Up",
+          "desc": "Volume Up"
+        },
+        {
+          "keys": "Vol Down",
+          "desc": "Volume Down"
+        },
+        {
+          "keys": "Mute",
+          "desc": "Mute Output"
+        },
+        {
+          "keys": "Mic Mute",
+          "desc": "Mute Input"
+        },
+        {
+          "keys": "Alt + A",
+          "desc": "Switch Audio Output"
+        },
+        {
+          "keys": "Ctrl + Alt + A",
+          "desc": "Switch Mic Input"
+        },
+        {
+          "keys": "Alt + E",
+          "desc": "Spotify Toggle"
+        },
+        {
+          "keys": "Ctrl + Alt + N",
+          "desc": "Spotify Next"
+        },
+        {
+          "keys": "Ctrl + Alt + B",
+          "desc": "Spotify Previous"
+        },
+        {
+          "keys": "Ctrl + Alt + E",
+          "desc": "MPC Toggle"
+        },
+        {
+          "keys": "Alt + I",
+          "desc": "Browser Media Toggle"
+        },
+        {
+          "keys": "Alt + U",
+          "desc": "MPV Toggle"
+        },
+        {
+          "keys": "Super + Ctrl + Y",
+          "desc": "Play YouTube in MPV"
+        },
+        {
+          "keys": "Ctrl + Alt + Y",
+          "desc": "Stick MPV"
+        },
+        {
+          "keys": "Shift + Alt + Y",
+          "desc": "Move MPV"
+        },
+        {
+          "keys": "Super + Ctrl + F11",
+          "desc": "Save YouTube to MPV"
+        },
+        {
+          "keys": "Super + Ctrl + F12",
+          "desc": "Use MPV as Wallpaper"
+        },
+        {
+          "keys": "Ctrl + Alt + M",
+          "desc": "Wiremix"
+        }
+      ]
+    },
+    {
+      "title": "Screenshots",
+      "binds": [
+        {
+          "keys": "PrtSc",
+          "desc": "Screenshot Recorder"
+        },
+        {
+          "keys": "Shift + PrtSc",
+          "desc": "Screenshot Area"
+        },
+        {
+          "keys": "Ctrl + PrtSc",
+          "desc": "Screenshot Screen"
+        },
+        {
+          "keys": "Alt + PrtSc",
+          "desc": "Screenshot Window"
+        },
+        {
+          "keys": "Super + Shift + C",
+          "desc": "Color Picker"
+        }
+      ]
+    },
+    {
+      "title": "System",
+      "binds": [
+        {
+          "keys": "Super + Ctrl + R",
+          "desc": "Reload Mango Config"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + R",
+          "desc": "Reload Mango Config"
+        },
+        {
+          "keys": "Ctrl + Alt + BACKSPACE",
+          "desc": "Stop UWSM Session"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + S",
+          "desc": "Refresh Session"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + L",
+          "desc": "Layer Audit"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + G",
+          "desc": "Gaming Mode"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + N",
+          "desc": "Normal Mode"
+        },
+        {
+          "keys": "Super + Ctrl + Alt + P",
+          "desc": "Battery Mode"
+        },
+        {
+          "keys": "Alt + SHIFT",
+          "desc": "Switch Keyboard Layout"
+        },
+        {
+          "keys": "Bright Up",
+          "desc": "Brightness Up"
+        },
+        {
+          "keys": "Bright Down",
+          "desc": "Brightness Down"
+        },
+        {
+          "keys": "Ctrl + Alt + P",
+          "desc": "Cycle Power Profile"
+        },
+        {
+          "keys": "F10",
+          "desc": "Bluetooth Toggle"
+        },
+        {
+          "keys": "Alt + F12",
+          "desc": "VPN Toggle"
+        },
+        {
+          "keys": "Super + Alt + F12",
+          "desc": "VPN Slot Recycle"
         }
       ]
     }
   ],
-  "detectedCompositor": "unknown",
+  "detectedCompositor": "mango",
   "windowWidth": 1440,
   "windowHeight": 850,
   "autoHeight": true,
