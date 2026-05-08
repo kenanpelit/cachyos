@@ -52,14 +52,17 @@ CHROME_CMD="google-chrome-stable"
 LOCAL_STATE_PATH="${HOME}/.config/google-chrome/Local State"
 CHROME_PROFILES_DIR="${HOME}/.config/google-chrome"
 
-# Varsayılan bayraklar
+# Varsayılan bayraklar.
+# Vulkan + ozone-wayland uyumsuz (Chromium 113+ bug); ANGLE/OpenGL'e
+# zorlamak için Vulkan'ı VizDisplayCompositor'la birlikte disable et.
+# VaapiVideoDecoder donanım decode'u korur, Vulkan'a bağlı değil.
 DEFAULT_FLAGS=(
 	"--restore-last-session"
-	"--enable-features=TouchpadOverscrollHistoryNavigation,UseOzonePlatform,VaapiVideoDecoder"
 	"--ozone-platform=wayland"
+	"--enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder,TouchpadOverscrollHistoryNavigation"
+	"--disable-features=Vulkan,VizDisplayCompositor"
 	"--new-window"
 	"--disable-web-security"
-	"--disable-features=VizDisplayCompositor"
 )
 
 # Proxy ayarları

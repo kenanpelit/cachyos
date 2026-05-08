@@ -60,11 +60,16 @@ readonly LOG_FILE="${HOME}/.config/brave-launcher/brave-launcher.log"
 	BRAVE_FALLBACK_PROFILES_DIR="${BRAVE_FALLBACK_PROFILES_DIR:-${HOME}/.config/net.imput.helium}"
 	BRAVE_FALLBACK_ISOLATED_ROOT="${BRAVE_FALLBACK_ISOLATED_ROOT:-${HOME}/.helium/isolated}"
 
-# Wayland ve dokunmatik yüzey için varsayılan bayraklar
+# Wayland default flags. Vulkan + ozone-wayland uyumsuz (Chromium 113+
+# bug — `'--ozone-platform=wayland' is not compatible with Vulkan`),
+# ANGLE/OpenGL render path'a düşürüyoruz. VaapiVideoDecoder Vulkan'a
+# bağlı değil, donanım decode korunur. WaylandWindowDecorations CSD
+# için (margo SSD/CSD policy ile uyumlu).
 	DEFAULT_FLAGS=(
 		"--restore-last-session"
-		"--enable-features=TouchpadOverscrollHistoryNavigation,UseOzonePlatform,VaapiVideoDecoder"
 		"--ozone-platform=wayland"
+		"--enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder,TouchpadOverscrollHistoryNavigation"
+		"--disable-features=Vulkan"
 	)
 
 # Proxy ayarları

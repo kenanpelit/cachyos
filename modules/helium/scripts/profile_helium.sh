@@ -58,12 +58,36 @@ readonly BROWSERPASS_NATIVE_HOST_NAME="com.github.browserpass.native.json"
 	# Widevine CDM yolu (gerekirse env ile override edilebilir)
 	WIDEVINE_CDM_PATH="${WIDEVINE_CDM_PATH:-/usr/lib/chromium/WidevineCdm}"
 
-# Wayland ve dokunmatik yüzey için varsayılan bayraklar
-	DEFAULT_FLAGS=(
+# Wayland ve dokunmatik yüzey için varsayılan bayraklar.
+#
+# Uyumsuzluk notları (Chromium 113+ ailesinde — Helium dahil):
+#
+#   * `--ozone-platform=wayland` + Vulkan rendering = ölümlü kombinasyon.
+#     Compositor (margo/niri/sway/hyprland) Wayland surface açar, Helium
+#     o surface'i Vulkan'la beslemeye çalışır, ozone-wayland backend'i
+#     Vulkan context'i reddeder:
+#         "'--ozone-platform=wayland' is not compatible with Vulkan.
+#          Consider switching to '--ozone-platform=x11' or disabling Vulkan"
+#     Bu durumda Helium GPU process'i ya ölü doğar (kara ekran) ya da
+#     X11 fallback dener (XWayland katmanı, kötü scale + cursor).
+#     Çözüm: Vulkan'ı disable et, ANGLE/OpenGL render path'e düş.
+#     VaapiVideoDecoder Vulkan'a bağımlı değil, donanım decode korunur.
+#
+#   * `WaylandWindowDecorations` aktif olunca Helium kendi titlebar'ını
+#     çizer (CSD); margo'nun XdgDecorationHandler'ı `allow_csd:1` rule'u
+#     varsa ClientSide'a düşürür, yoksa SSD'de tutar — her durumda
+#     sorunsuz.
+#
+#   * `UseOzonePlatform` Chromium'un Ozone abstraction'ını AÇMAK için
+#     gereken global toggle. `--ozone-platform=wayland` tek başına
+#     yetmez — feature da set edilmeli.
+#
+DEFAULT_FLAGS=(
 		"--restore-last-session"
 		"--hide-crash-restore-bubble"
-		"--enable-features=TouchpadOverscrollHistoryNavigation,UseOzonePlatform,VaapiVideoDecoder"
 		"--ozone-platform=wayland"
+		"--enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder,TouchpadOverscrollHistoryNavigation"
+		"--disable-features=Vulkan"
 	)
 
 # Proxy ayarları

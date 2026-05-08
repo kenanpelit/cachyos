@@ -53,8 +53,9 @@ if [[ "${XDG_SESSION_TYPE:-}" == "wayland" || -n "${WAYLAND_DISPLAY:-}" ]]; then
   )
 fi
 
-# Feature flags (deterministic)
+# Feature flags (deterministic). Vulkan + ozone-wayland uyumsuz —
+# Chromium 113+ bug; ANGLE/OpenGL'e zorla.
 flags+=("--enable-features=BackForwardCache,OverlayScrollbar,TabFreeze,WebUIDarkMode,AutoDarkMode,VaapiVideoDecoder,VaapiVideoEncoder,VaapiVideoDecodeLinuxGL,UseOzonePlatform,WaylandWindowDecorations")
-flags+=("--disable-features=UseChromeOSDirectVideoDecoder")
+flags+=("--disable-features=UseChromeOSDirectVideoDecoder,Vulkan")
 
 exec "$chrome_bin" "${flags[@]}" "$@"
