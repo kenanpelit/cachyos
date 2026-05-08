@@ -22,11 +22,14 @@ detect_session() {
   case "${XDG_CURRENT_DESKTOP:-}" in
   *Hyprland* | *hyprland*) printf '%s\n' "hyprland" ;;
   *niri* | *Niri*) printf '%s\n' "niri" ;;
+  *margo* | *Margo*) printf '%s\n' "margo" ;;
   *)
     if command -v hyprctl >/dev/null 2>&1 && hyprctl version >/dev/null 2>&1; then
       printf '%s\n' "hyprland"
     elif [[ -n "${NIRI_SOCKET:-}" ]]; then
       printf '%s\n' "niri"
+    elif command -v mctl >/dev/null 2>&1 && mctl status >/dev/null 2>&1; then
+      printf '%s\n' "margo"
     else
       printf '%s\n' "generic"
     fi

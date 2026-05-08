@@ -168,6 +168,18 @@ detect_window_manager() {
   elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
     WM_TYPE="niri"
     log "INFO" "DETECT" "Detected Niri window manager"
+  elif [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
+    # Margo MUST be checked before mango: the user's session sets
+    # XDG_CURRENT_DESKTOP=margo:mango (mango is listed for legacy
+    # tooling fallbacks), and both compositors speak dwl-ipc-v2 so
+    # a stray `mmsg -g` might succeed against margo. The two IPC
+    # clients differ in tag-mask semantics — `mmsg -s -t 8` sets
+    # tag bitmask 8 (= bit 3 = tag 4), while margo's dispatch
+    # convention is `mctl tags <1 << (tag - 1)>` (1<<7=128 for
+    # tag 8). Picking the wrong client here makes us silently
+    # switch to the wrong workspace.
+    WM_TYPE="margo"
+    log "INFO" "DETECT" "Detected Margo window manager"
   elif [[ "${XDG_CURRENT_DESKTOP:-}" == *mango* ]] || (command -v mmsg &>/dev/null && mmsg -g >/dev/null 2>&1); then
     WM_TYPE="mango"
     log "INFO" "DETECT" "Detected Mango window manager"
@@ -343,6 +355,14 @@ switch_workspace() {
       else
         niri msg action focus-workspace "$workspace" || log "WARN" "WORKSPACE" "Niri workspace switch failed"
       fi
+      sleep 1
+    fi
+    ;;
+  margo)
+    if command -v mctl >/dev/null 2>&1; then
+      log "INFO" "WORKSPACE" "Switching to workspace $workspace (Margo)"
+      # Margo `mctl tags` takes a tag bitmask (1<<(tag-1)).
+      mctl tags $((1 << (workspace - 1))) || log "WARN" "WORKSPACE" "Margo workspace switch failed"
       sleep 1
     fi
     ;;
@@ -726,6 +746,9 @@ if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
     WM_TYPE="hyprland"
 elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
     WM_TYPE="niri"
+elif [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
+    # Margo before mango — same protocol family, different IPC client.
+    WM_TYPE="margo"
 elif [[ "${XDG_CURRENT_DESKTOP:-}" == *mango* ]] || (command -v mmsg &>/dev/null && mmsg -g >/dev/null 2>&1); then
     WM_TYPE="mango"
 elif [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
@@ -765,6 +788,13 @@ if [[ "$WORKSPACE" != "0" ]]; then
             else
                 niri msg action focus-workspace "$WORKSPACE" || echo "WARNING: Niri workspace switch failed"
             fi
+            sleep 1
+        fi
+        ;;
+    margo)
+        if command -v mctl >/dev/null 2>&1; then
+            echo "Switching to workspace $WORKSPACE..."
+            mctl tags $((1 << (WORKSPACE - 1))) || echo "WARNING: Margo workspace switch failed"
             sleep 1
         fi
         ;;

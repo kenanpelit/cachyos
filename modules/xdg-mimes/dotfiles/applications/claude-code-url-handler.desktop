@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Claude Code URL Handler
 Comment=Handle claude-cli:// deep links for Claude Code
-Exec="/home/kenan/.cache/npm/_npx/becf7b9e49303068/node_modules/@anthropic-ai/claude-code/bin/claude.exe" --handle-uri %u
+Exec="/home/kenan/.local/bin/claude" --handle-uri %u
 Type=Application
 NoDisplay=true
 MimeType=x-scheme-handler/claude-cli;
