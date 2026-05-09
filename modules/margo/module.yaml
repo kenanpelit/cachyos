@@ -13,6 +13,7 @@ depends_on:
 - wayland-autostart
 - xdg-portal
 - user-services
+- sessions
 dotfiles:
 - source: dotfiles/margo/config.conf
   target: ~/.config/margo/config.conf
@@ -22,12 +23,6 @@ dotfiles:
   target: ~/.config/session-env/margo/10-margo.conf
 - source: dotfiles/environment.d/margo-session.envlist
   target: ~/.config/environment.d/margo-session.envlist
-- source: dotfiles/portals.conf
-  target: ~/.config/xdg-desktop-portal/margo-portals.conf
-- source: dotfiles/systemd/user/margo-session.target
-  target: ~/.config/systemd/user/margo-session.target
-- source: dotfiles/systemd/user/margo-daemons.target
-  target: ~/.config/systemd/user/margo-daemons.target
 - source: dotfiles/systemd/user/margo-audio-init.service
   target: ~/.config/systemd/user/margo-audio-init.service
 - source: dotfiles/systemd/user/margo-shell-ensure.service
@@ -40,7 +35,5 @@ dotfiles:
   target: ~/.config/systemd/user/margo-polkit-agent.service
 - source: dotfiles/systemd/user/margo-nm-applet.service
   target: ~/.config/systemd/user/margo-nm-applet.service
-- source: dotfiles/systemd/user/wayland-wm@margo\x2dsession.service.d/10-session-lifecycle.conf
-  target: ~/.config/systemd/user/wayland-wm@margo\x2dsession.service.d/10-session-lifecycle.conf
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

@@ -2,7 +2,7 @@
 Description=Polkit authentication agent (polkit-gnome)
 BindsTo=wayland-wm@margo\x2dsession.service
 After=graphical-session.target wayland-wm@margo\x2dsession.service dbus.service
-PartOf=margo-daemons.target graphical-session.target wayland-wm@margo\x2dsession.service
+PartOf=margo-session.target graphical-session.target wayland-wm@margo\x2dsession.service
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_SESSION_DESKTOP=margo
 
@@ -18,4 +18,4 @@ StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=margo-daemons.target
+WantedBy=margo-session.target
