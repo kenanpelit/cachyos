@@ -1,8 +1,8 @@
 {
   "panel": {
-    "title": "Dispositivos Conectados",
+    "title": "Dispositivos conectados",
     "signal": {
-      "very-weak": "Muito Fraco",
+      "very-weak": "Muito fraco",
       "weak": "Fraco",
       "fair": "Justo",
       "good": "Bom",
@@ -12,15 +12,15 @@
     "card": {
       "battery": "Bateria",
       "network": "Rede",
-      "signal-strength": "Intensidade do Signal",
+      "signal-strength": "Intensidade do sinal",
       "notifications": "Notificações"
     },
-    "other-devices": "Outros Dispositivos",
+    "other-devices": "Outros dispositivos",
     "send-file-picker": "Selecione o arquivo para enviar ao dispositivo",
-    "send-file": "Enviar Arquivo",
+    "send-file": "Enviar arquivo",
     "browse-device": "Navegar pelos arquivos do dispositivo",
-    "find-device": "Encontrar meu Dispositivo",
-    "pair": "Emparelhar meu Dispositivo",
+    "find-device": "Encontrar meu dispositivo",
+    "pair": "Emparelhar meu dispositivo",
     "unpair": "Desemparelhar meu dispositivo",
     "valent-error": {
       "no-devices": "Nenhum dispositivo encontrado. Verifique se o seu telefone está na mesma rede e tem a aplicação KDE Connect aberta.",
