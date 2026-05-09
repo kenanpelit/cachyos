@@ -444,6 +444,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `margo-semsumo-daily`
+**Description:** Description:
+
+**Usage:** `bind = super+alt,Return,spawn,margo-semsumo-daily`
+
+---
+
 ### 📂 `margo-session-common`
 **Description:** Shared environment/bootstrap helpers for Margo session scripts.
 

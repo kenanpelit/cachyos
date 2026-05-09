@@ -1,0 +1,7 @@
+# Ordered Margo session environment allowlist.
+# Relative entries are resolved under ~/.config/environment.d/.
+# Prefix an entry with ? to make it optional.
+00-wayland.conf
+10-gtk.conf
+20-qt.conf
+${HOME}/.config/session-env/margo/10-margo.conf

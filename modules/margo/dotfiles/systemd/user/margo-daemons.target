@@ -1,0 +1,6 @@
+[Unit]
+Description=Margo session daemons stage
+Wants=margo-status-notifier-ready.service margo-polkit-agent.service margo-nm-applet.service
+After=graphical-session.target wayland-wm@margo\x2dsession.service
+BindsTo=graphical-session.target wayland-wm@margo\x2dsession.service
+PartOf=margo-session.target graphical-session.target wayland-wm@margo\x2dsession.service

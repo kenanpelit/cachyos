@@ -1,0 +1,21 @@
+[Unit]
+Description=Polkit authentication agent (polkit-gnome)
+BindsTo=wayland-wm@margo\x2dsession.service
+After=graphical-session.target wayland-wm@margo\x2dsession.service dbus.service
+PartOf=margo-daemons.target graphical-session.target wayland-wm@margo\x2dsession.service
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_SESSION_DESKTOP=margo
+
+[Service]
+NoNewPrivileges=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+SuccessExitStatus=1
+Restart=on-abnormal
+RestartSec=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=margo-daemons.target

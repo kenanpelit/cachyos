@@ -1,0 +1,8 @@
+[Unit]
+Description=Margo session (user services)
+Documentation=man:systemd.special(7)
+Wants=graphical-session.target xdg-desktop-autostart.target margo-audio-init.service margo-shell-ensure.service margo-lid-switch-inhibit.service margo-daemons.target
+After=graphical-session.target wayland-wm@margo\x2dsession.service dbus.service
+BindsTo=graphical-session.target wayland-wm@margo\x2dsession.service
+PartOf=graphical-session.target wayland-wm@margo\x2dsession.service
+ConditionEnvironment=XDG_SESSION_DESKTOP=margo

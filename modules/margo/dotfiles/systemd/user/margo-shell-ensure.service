@@ -1,0 +1,20 @@
+[Unit]
+Description=Margo shell backend ensure
+After=dbus.service
+Before=margo-status-notifier-ready.service
+PartOf=margo-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_SESSION_DESKTOP=margo
+ConditionPathExists=%h/.local/bin/osc-shell
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+Environment=OSC_SHELL_STARTUP=1
+ExecStart=%h/.local/bin/osc-shell ensure
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=margo-session.target

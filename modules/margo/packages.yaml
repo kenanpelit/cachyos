@@ -1,0 +1,18 @@
+description: Margo compositor packages
+
+packages:
+  - margo-git
+  - uwsm
+  - polkit-gnome
+  - network-manager-applet
+  - xdg-desktop-portal-wlr
+  # portals.conf routes Secret to gnome-keyring.
+  - gnome-keyring
+  - wl-clipboard
+  - wl-clip-persist
+  - cliphist
+  - brightnessctl
+  - jq
+  - wlr-randr
+  - grim
+  - slurp
