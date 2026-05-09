@@ -50,6 +50,7 @@ enabled_modules:
   - niri
   - hyprland
   - mangowm
+  - margo
   - sessions
   - sway
   - xdg-portal
