@@ -113,7 +113,7 @@ apply_noctalia_plugin_overrides() {
     niri)
       enable_niri_plugins="true"
       ;;
-    mango)
+    mango|margo)
       enable_mango_plugins="true"
       ;;
   esac
@@ -178,7 +178,7 @@ apply_noctalia_settings_overrides() {
     enable_hypr_overview_widget="true"
   fi
 
-  if [[ "${session_name}" == "mango" ]]; then
+  if [[ "${session_name}" == "mango" || "${session_name}" == "margo" ]]; then
     enable_mango_widget="true"
     enable_mango_keymode_widget="true"
   fi
