@@ -77,11 +77,11 @@
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "mango-keymode-indicator": {
-      "enabled": false,
+      "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "mangowc-layout-switcher": {
-      "enabled": false,
+      "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "mpd": {
@@ -141,10 +141,6 @@
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
     "valent-connect": {
-      "enabled": true,
-      "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
-    },
-    "video-wallpaper": {
       "enabled": true,
       "sourceUrl": "https://github.com/noctalia-dev/noctalia-plugins"
     },
