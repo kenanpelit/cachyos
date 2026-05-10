@@ -1,11 +1,7 @@
 # Tokyo Night Theme for Yazi
 
-[manager]
+[mgr]
 cwd = { fg = "#7aa2f7" }
-
-# Hovered
-hovered         = { fg = "#15161e", bg = "#7aa2f7" }
-preview_hovered = { underline = true }
 
 # Find
 find_keyword  = { fg = "#e0af68", italic = true }
@@ -17,11 +13,6 @@ marker_cut      = { fg = "#f7768e", bg = "#f7768e" }
 marker_marked   = { fg = "#7dcfff", bg = "#7dcfff" }
 marker_selected = { fg = "#7aa2f7", bg = "#7aa2f7" }
 
-# Tab
-tab_active   = { fg = "#15161e", bg = "#7aa2f7" }
-tab_inactive = { fg = "#a9b1d6", bg = "#24283b" }
-tab_width    = 1
-
 # Count
 count_copied   = { fg = "#15161e", bg = "#9ece6a" }
 count_cut      = { fg = "#15161e", bg = "#f7768e" }
@@ -31,19 +22,30 @@ count_selected = { fg = "#15161e", bg = "#7aa2f7" }
 border_symbol = "│"
 border_style  = { fg = "#565f89" }
 
+[tabs]
+active    = { fg = "#15161e", bg = "#7aa2f7" }
+inactive  = { fg = "#a9b1d6", bg = "#24283b" }
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
+
+[indicator]
+parent  = { reversed = true }
+current = { fg = "#15161e", bg = "#7aa2f7" }
+preview = { underline = true }
+padding = { open = "", close = "" }
+
+[mode]
+normal_main = { fg = "#15161e", bg = "#7aa2f7", bold = true }
+normal_alt  = { fg = "#7aa2f7", bg = "#24283b" }
+select_main = { fg = "#15161e", bg = "#bb9af7", bold = true }
+select_alt  = { fg = "#bb9af7", bg = "#24283b" }
+unset_main  = { fg = "#15161e", bg = "#f7768e", bold = true }
+unset_alt   = { fg = "#f7768e", bg = "#24283b" }
+
 [status]
-separator_open  = ""
-separator_close = ""
-separator_style = { fg = "#24283b", bg = "#24283b" }
-
-# Mode
-mode_normal = { fg = "#15161e", bg = "#7aa2f7", bold = true }
-mode_select = { fg = "#15161e", bg = "#bb9af7", bold = true }
-mode_unset  = { fg = "#15161e", bg = "#f7768e", bold = true }
-
-progress_label  = { fg = "#ffffff", bold = true }
-progress_normal = { fg = "#7aa2f7", bg = "#24283b" }
-progress_error  = { fg = "#f7768e", bg = "#24283b" }
+overall   = {}
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
 
 # Permissions
 perm_type  = { fg = "#7aa2f7" }
@@ -52,13 +54,18 @@ perm_write = { fg = "#f7768e" }
 perm_exec  = { fg = "#9ece6a" }
 perm_sep   = { fg = "#565f89" }
 
+# Progress
+progress_label  = { fg = "#ffffff", bold = true }
+progress_normal = { fg = "#7aa2f7", bg = "#24283b" }
+progress_error  = { fg = "#f7768e", bg = "#24283b" }
+
 [input]
 border   = { fg = "#7aa2f7" }
 title    = {}
 value    = {}
 selected = { reversed = true }
 
-[select]
+[pick]
 border   = { fg = "#7aa2f7" }
 active   = { fg = "#bb9af7" }
 inactive = {}
@@ -108,6 +115,6 @@ rules = [
 	{ mime = "application/vnd.*", fg = "#9ece6a" },
 
 	# Fallback
-	{ name = "*", fg = "#a9b1d6" },
-	{ name = "*/", fg = "#7aa2f7" }
+	{ url = "*", fg = "#a9b1d6" },
+	{ url = "*/", fg = "#7aa2f7" }
 ]
