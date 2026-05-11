@@ -118,7 +118,6 @@ packages:
   - lsscsi
   - lvm2
   - malcontent
-  - mangowm
   - mangowm-git
   - mdadm
   - meld
