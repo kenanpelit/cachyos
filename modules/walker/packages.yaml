@@ -1,7 +1,9 @@
 description: Walker + Elephant packages
 
 # NOTE: likely AUR on Arch/CachyOS (auto-detected by dcli)
-packages: []
+packages:
+  - walker
+  - elephant-all-bin
 
 pre_install_hook: scripts/preinstall.sh
 pre_hook_behavior: always
