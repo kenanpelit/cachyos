@@ -55,7 +55,7 @@ enabled_modules:
   - sway
   - xdg-portal
   - rofi
-  # - walker
+  - walker
   - noctalia
   - lemurs
   - fusuma

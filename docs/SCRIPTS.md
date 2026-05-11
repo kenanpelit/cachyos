@@ -648,7 +648,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-keyboard-layout`
-**Description:** Inspect or update the shared keyboard layout for TTY, MangoWM, Niri, and Hyprland.
+**Description:** Inspect or update the shared keyboard layout for TTY, MangoWM,
 
 **Usage:** `osc-keyboard-layout.sh status | set [preset|--layout L --variant V --tty-keymap K]`
 
