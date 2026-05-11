@@ -14,6 +14,7 @@ QtObject {
 
     property var vpnList: []
     property real connectedCount: 0
+    readonly property bool isLoading: Object.keys(root._pending).length > 0
 
     property var _pending: ({})
 
@@ -82,8 +83,10 @@ QtObject {
         onExited: (exitCode) => {
             if (exitCode === 0)
                 toast?.showNotice(t("toast.connectedTo", { name: targetName }))
-            else
+            else {
+                root.stopLoading(targetUuid)
                 toast?.showError(t("toast.connectionError", { name: targetName }))
+            }
             root.refresh()
         }
     }
@@ -95,8 +98,10 @@ QtObject {
         onExited: (exitCode) => {
             if (exitCode === 0)
                 toast?.showNotice(t("toast.disconnectedFrom", { name: targetName }))
-            else
+            else {
+                root.stopLoading(targetUuid)
                 toast?.showError(t("toast.disconnectionError", { name: targetName }))
+            }
             root.refresh()
         }
     }
@@ -143,6 +148,22 @@ QtObject {
 
     function refresh() {
         _listProc.running = true
+    }
+
+    function stopLoading(uuid) {
+        if (uuid && _pending[uuid]) {
+            const p = Object.assign({}, _pending)
+            delete p[uuid]
+            _pending = p
+        }
+
+        vpnList = vpnList.map(v => {
+            if (v.uuid !== uuid) {
+                return v
+            }
+
+            return Object.assign({}, v, { isLoading: false })
+        })
     }
 
     function connectTo(uuid) {

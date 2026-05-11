@@ -17,7 +17,15 @@ ExecStop=/usr/bin/bash -lc '/usr/bin/sunsetr status >/dev/null 2>&1 && /usr/bin/
 Slice=background.slice
 
 [Install]
-WantedBy=graphical-session.target
+# Intentionally NOT WantedBy=graphical-session.target.
+# Margo (the compositor) ships its own built-in blue-light filter
+# (`mctl twilight ...`), so margo sessions must not auto-launch
+# sunsetr — two clients writing the same wlr-gamma-control ramp
+# race each other and the screen flickers between them. Wiring
+# auto-start only to the per-compositor session targets makes the
+# unit a no-op under margo: margo doesn't ship a
+# `margo-session.target`, so the WantedBy lookup never resolves
+# for it.
 WantedBy=niri-session.target
 WantedBy=hyprland-session.target
 WantedBy=mangowm-session.target

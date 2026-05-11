@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-keyboard-layout.sh
-# Description: Inspect or update the shared keyboard layout for TTY, MangoWM, Niri, and Hyprland.
+# Description: Inspect or update the shared keyboard layout for TTY, MangoWM,
+#              Margo, Niri, and Hyprland.
 # Usage: osc-keyboard-layout.sh status | set [preset|--layout L --variant V --tty-keymap K]
 # ==============================================================================
 set -euo pipefail
@@ -76,6 +77,7 @@ find_repo_root() {
 REPO_ROOT="$(find_repo_root)" || die "Unable to locate repo root. Set DCLI_REPO_ROOT or install the repo under ~/.cachy."
 readonly REPO_ROOT
 readonly MANGO_CFG="${REPO_ROOT}/modules/mangowm/dotfiles/mango/conf.d/10-input.conf"
+readonly MARGO_CFG="${REPO_ROOT}/modules/margo/dotfiles/margo/config.conf"
 readonly NIRI_CFG="${REPO_ROOT}/modules/niri/dotfiles/niri/conf/00-base.kdl"
 readonly HYPR_CFG="${REPO_ROOT}/modules/hyprland/dotfiles/hypr/conf.d/30-input.conf"
 
@@ -94,18 +96,21 @@ Usage:
 Notes:
   - Repo scope updates:
       modules/mangowm/dotfiles/mango/conf.d/10-input.conf
+      modules/margo/dotfiles/margo/config.conf
       modules/niri/dotfiles/niri/conf/00-base.kdl
       modules/hyprland/dotfiles/hypr/conf.d/30-input.conf
   - Live scope updates:
       /etc/vconsole.conf
   - If neither --repo-only nor --live-only is provided, both are updated.
-  - Niri/Hyprland changes apply on next login or after reloading the compositor config.
+  - MangoWM, Margo (mctl reload), Niri, and Hyprland changes apply on next
+    login or after reloading the compositor config.
   - TTY/login-manager changes apply immediately best-effort and definitely on next login.
 EOF
 }
 
 require_repo_files() {
   [[ -f "$MANGO_CFG" ]] || die "Mango config not found: $MANGO_CFG"
+  [[ -f "$MARGO_CFG" ]] || die "Margo config not found: $MARGO_CFG"
   [[ -f "$NIRI_CFG" ]] || die "Niri config not found: $NIRI_CFG"
   [[ -f "$HYPR_CFG" ]] || die "Hyprland input config not found: $HYPR_CFG"
 }
@@ -147,15 +152,25 @@ set_preset() {
 
 show_status() {
   local mango_layout="" mango_variant="" mango_options=""
+  local margo_layout="" margo_variant="" margo_options=""
   local niri_layout="" niri_variant="" niri_options=""
   local hypr_layout="" hypr_variant="" hypr_options=""
   local vc_layout="" vc_variant="" vc_keymap=""
 
   require_repo_files
 
-  mango_layout="$(awk -F= '/^[[:space:]]*xkb_rules_layout=/{print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
-  mango_variant="$(awk -F= '/^[[:space:]]*xkb_rules_variant=/{print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
-  mango_options="$(awk -F= '/^[[:space:]]*xkb_rules_options=/{print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
+  # MangoWM and Margo share the same flat-key shape
+  # (`xkb_rules_layout = …`); the values can drift independently
+  # though so we read each file separately. The trim-space pattern
+  # accepts `key = value` with optional whitespace around `=` so
+  # config formatters that align on `=` still parse cleanly.
+  mango_layout="$(awk -F= '/^[[:space:]]*xkb_rules_layout[[:space:]]*=/{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
+  mango_variant="$(awk -F= '/^[[:space:]]*xkb_rules_variant[[:space:]]*=/{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
+  mango_options="$(awk -F= '/^[[:space:]]*xkb_rules_options[[:space:]]*=/{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); print $2; exit}' "$MANGO_CFG" 2>/dev/null || true)"
+
+  margo_layout="$(awk -F= '/^[[:space:]]*xkb_rules_layout[[:space:]]*=/{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); print $2; exit}' "$MARGO_CFG" 2>/dev/null || true)"
+  margo_variant="$(awk -F= '/^[[:space:]]*xkb_rules_variant[[:space:]]*=/{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); print $2; exit}' "$MARGO_CFG" 2>/dev/null || true)"
+  margo_options="$(awk -F= '/^[[:space:]]*xkb_rules_options[[:space:]]*=/{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); print $2; exit}' "$MARGO_CFG" 2>/dev/null || true)"
 
   niri_layout="$(awk '/^[[:space:]]*layout "/ {gsub(/.*layout "|".*/,""); print; exit}' "$NIRI_CFG" 2>/dev/null || true)"
   niri_variant="$(awk '/^[[:space:]]*variant "/ {gsub(/.*variant "|".*/,""); print; exit}' "$NIRI_CFG" 2>/dev/null || true)"
@@ -174,6 +189,7 @@ show_status() {
   cat <<EOF
 Repo-managed layout
   MangoWM:   layout=${mango_layout:-<unset>} variant=${mango_variant:-<unset>} options=${mango_options:-<unset>}
+  Margo:     layout=${margo_layout:-<unset>} variant=${margo_variant:-<unset>} options=${margo_options:-<unset>}
   Niri:      layout=${niri_layout:-<unset>} variant=${niri_variant:-<unset>} options=${niri_options:-<unset>}
   Hyprland:  layout=${hypr_layout:-<unset>} variant=${hypr_variant:-<unset>} options=${hypr_options:-<unset>}
 
@@ -284,6 +300,23 @@ update_repo_mango() {
   write_if_changed "$tmp" "$MANGO_CFG" 644
 }
 
+# Margo's config formatter aligns `=` with surrounding spaces
+# (`xkb_rules_layout  = tr`) — `\1` here captures everything up to
+# and including the equals + trailing spaces, so we preserve the
+# user's chosen alignment instead of collapsing it.
+update_repo_margo() {
+  local tmp
+  tmp="$(mktemp)"
+
+  sed -E \
+    -e "s/^([[:space:]]*xkb_rules_layout[[:space:]]*=[[:space:]]*).*/\1${LAYOUT}/" \
+    -e "s/^([[:space:]]*xkb_rules_variant[[:space:]]*=[[:space:]]*).*/\1${VARIANT}/" \
+    -e "s/^([[:space:]]*xkb_rules_options[[:space:]]*=[[:space:]]*).*/\1${OPTIONS}/" \
+    "$MARGO_CFG" >"$tmp"
+
+  write_if_changed "$tmp" "$MARGO_CFG" 644
+}
+
 update_repo_hyprland() {
   local tmp
   tmp="$(mktemp)"
@@ -359,17 +392,31 @@ reload_live_mango() {
   mmsg -d reload_config >/dev/null 2>&1 || true
 }
 
+# Best-effort live reload of the margo compositor. `mctl` is the
+# margo CLI; `mctl status` returns non-zero when no margo session
+# is reachable, in which case there's nothing to reload (the new
+# layout will apply on next margo login from the on-disk config).
+# `--force` skips the pre-flight validator so a typo in an
+# unrelated config block doesn't block a layout swap.
+reload_live_margo() {
+  command -v mctl >/dev/null 2>&1 || return 0
+  mctl status >/dev/null 2>&1 || return 0
+  mctl reload --force >/dev/null 2>&1 || true
+}
+
 apply_set() {
   [[ -n "$LAYOUT" ]] || die "--layout is required (or use a preset like: trf, trq, us)"
   [[ -n "$TTY_KEYMAP" ]] || TTY_KEYMAP="$(infer_default_keymap)"
   require_repo_files
 
   if [[ "$SCOPE" != "live" ]]; then
-    log "Updating repo-managed MangoWM, Niri, and Hyprland keyboard layout"
+    log "Updating repo-managed MangoWM, Margo, Niri, and Hyprland keyboard layout"
     update_repo_mango
+    update_repo_margo
     update_repo_niri
     update_repo_hyprland
     reload_live_mango
+    reload_live_margo
   fi
 
   if [[ "$SCOPE" != "repo" ]]; then
