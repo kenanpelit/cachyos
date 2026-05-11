@@ -55,6 +55,7 @@ anchor_right   = true
 "symbols"             = { input = "Emoji / sembol",       list = "Sonuç yok" }
 "todo"                = { input = "Yapılacak iş",         list = "Liste boş" }
 "menus:sysops"        = { input = "Sistem işlemleri",     list = "Eşleşme yok" }
+"menus:margo"         = { input = "Margo / mshell",       list = "Eşleşme yok" }
 "menus:wallpapers"    = { input = "Duvar kâğıdı",         list = "Eşleşme yok" }
 "menus:scripts"       = { input = "Script",               list = "Eşleşme yok" }
 "menus:other"         = { input = "Hızlı işlem",          list = "Eşleşme yok" }
@@ -167,6 +168,10 @@ provider = "menus:sysops"     # T = sysoT — "sistem"
 [[providers.prefixes]]
 prefix = "mw"
 provider = "menus:wallpapers"
+
+[[providers.prefixes]]
+prefix = "mm"
+provider = "menus:margo"        # margo + mshell kontrol paneli
 
 # ── Provider-spesifik ayar ────────────────────────────────────────────────
 [providers.clipboard]
