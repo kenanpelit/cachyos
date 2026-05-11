@@ -1,0 +1,127 @@
+# margo / wlroots komut snippet'leri
+# (Eski dosya hyprctl içerikliydi → margo eşdeğerlerine güncellendi.)
+# Snippet eylemi:  Return → yapıştır,  Ctrl+C → kopyala
+# IPC client'ı:  mctl   (mmsg DEĞİL)
+
+[[snippets]]
+name    = "Margo: Reload Config"
+content = "mctl reload"
+
+[[snippets]]
+name    = "Margo: Status"
+content = "mctl status"
+
+[[snippets]]
+name    = "Margo: Watch State"
+content = "mctl watch"
+
+[[snippets]]
+name    = "Margo: List Clients"
+content = "mctl clients"
+
+[[snippets]]
+name    = "Margo: List Outputs"
+content = "mctl outputs"
+
+[[snippets]]
+name    = "Margo: Focused Client"
+content = "mctl focused"
+
+[[snippets]]
+name    = "Margo: View Tag 1"
+content = "mctl dispatch view 1"
+
+[[snippets]]
+name    = "Margo: View All Tags"
+content = "mctl dispatch tagall"
+
+[[snippets]]
+name    = "Margo: Kill Active"
+content = "mctl dispatch killclient"
+
+[[snippets]]
+name    = "Margo: Toggle Float"
+content = "mctl dispatch togglefloating"
+
+[[snippets]]
+name    = "Margo: Toggle Fullscreen"
+content = "mctl dispatch togglefullscreen"
+
+[[snippets]]
+name    = "Margo: Spawn"
+content = "mctl dispatch spawn 'kitty'"
+
+[[snippets]]
+name    = "Margo: Cycle Layout"
+content = "mctl dispatch switchlayout"
+
+[[snippets]]
+name    = "Margo: Move Win to Tag 1"
+content = "mctl dispatch tag 1"
+
+[[snippets]]
+name    = "Margo: Tag + Follow Tag 1"
+content = "mctl dispatch tagview 1"
+
+[[snippets]]
+name    = "Margo: View Left Tag"
+content = "mctl dispatch viewtoleft"
+
+[[snippets]]
+name    = "Margo: View Right Tag"
+content = "mctl dispatch viewtoright"
+
+# ── Ekran görüntüsü / kayıt ─────────────────────────────────────────────────
+[[snippets]]
+name    = "Screenshot: Full"
+content = "grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+[[snippets]]
+name    = "Screenshot: Area"
+content = "grim -g \"$(slurp)\" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+[[snippets]]
+name    = "Screenshot: Copy Area"
+content = "grim -g \"$(slurp)\" - | wl-copy"
+
+[[snippets]]
+name    = "Screen Record (wf-recorder)"
+content = "wf-recorder -f ~/Videos/recording-$(date +%Y%m%d-%H%M%S).mp4"
+
+[[snippets]]
+name    = "Screen Record Area"
+content = "wf-recorder -g \"$(slurp)\" -f ~/Videos/recording-$(date +%Y%m%d-%H%M%S).mp4"
+
+# ── Mshell (bar) ────────────────────────────────────────────────────────────
+[[snippets]]
+name    = "Mshell: Toggle Bar"
+content = "mshell msg toggle-visibility"
+
+[[snippets]]
+name    = "Mshell: Restart"
+content = "pkill -x mshell; nohup mshell >/dev/null 2>&1 & disown"
+
+[[snippets]]
+name    = "Mshell: Volume +"
+content = "mshell msg volume-up"
+
+[[snippets]]
+name    = "Mshell: Volume -"
+content = "mshell msg volume-down"
+
+# ── Pano / renk seçici / kilitleme ──────────────────────────────────────────
+[[snippets]]
+name    = "Hyprpicker Color"
+content = "hyprpicker -a"
+
+[[snippets]]
+name    = "Clipboard History (cliphist)"
+content = "cliphist list"
+
+[[snippets]]
+name    = "Lock Screen"
+content = "loginctl lock-session"
+
+[[snippets]]
+name    = "Logout"
+content = "loginctl terminate-user $USER"

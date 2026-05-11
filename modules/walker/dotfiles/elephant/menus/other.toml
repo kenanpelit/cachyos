@@ -1,78 +1,84 @@
-name = "other"
-name_pretty = "Other"
-icon = "applications-other"
+# ════════════════════════════════════════════════════════════════════════════
+# menus:other — Hızlı sistem widget'ları (margo / wlroots)
+#
+# Eski osc-shell / quickshell yer tutucularının walker karşılığı.
+# wpctl / brightnessctl / hyprpicker hepsi wlroots altında çalışır.
+# ════════════════════════════════════════════════════════════════════════════
+name        = "other"
+name_pretty = "Diğer"
+icon        = "applications-other"
 
+# ── Renk Seçici (wlroots screencopy ile çalışır) ──────────────────────────
 [[entries]]
-text = "Color Picker"
-keywords = ["color","picker","hypr"]
-actions = { "cp_use" = "wl-copy $(hyprpicker)" }
-icon = "color-picker"
+text     = "Renk Seçici"
+keywords = ["color", "picker", "renk"]
+icon     = "color-picker"
+actions  = { "cp_use" = "sh -c 'wl-copy \"$(hyprpicker -a -n)\"'" }
 
+# ── Ses (PipeWire / Wireplumber üzerinden) ────────────────────────────────
+# OSD'li +/- için margo keybind  mshell msg volume-up  kullanıyor; buradakiler
+# %VALUE ile mutlak ayar yapmak için.
 [[entries]]
-icon = "zoom-in"
-text = "Zoom Toggle"
-actions = { "zoom_use" = "hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '(.float) | if . > 1 then 1 else 1.5 end')" }
-
-[[entries]]
-text = "Volume"
-async = "wpctl get-volume @DEFAULT_AUDIO_SINK@"
-icon = "audio-volume-high"
+text   = "Ses"
+async  = "wpctl get-volume @DEFAULT_AUDIO_SINK@"
+icon   = "audio-volume-high"
+keywords = ["volume", "ses", "sound", "audio"]
 [entries.actions]
-volume_raise   = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+"
-volume_lower   = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"
-volume_mute    = "wpctl set-mute   @DEFAULT_AUDIO_SINK@ 1"
-volume_unmute  = "wpctl set-mute   @DEFAULT_AUDIO_SINK@ 0"
-volume_set     = "wpctl set-volume @DEFAULT_AUDIO_SINK@ %VALUE%"
+volume_raise  = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+"
+volume_lower  = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-"
+volume_mute   = "wpctl set-mute   @DEFAULT_AUDIO_SINK@ 1"
+volume_unmute = "wpctl set-mute   @DEFAULT_AUDIO_SINK@ 0"
+volume_set    = "wpctl set-volume @DEFAULT_AUDIO_SINK@ %VALUE%"
 
 [[entries]]
-keywords = ["disk","drive","space"]
-text = "Disk"
-actions = { "disk_copy" = "wl-copy '%VALUE%'" }
-async = """df -h / | tail -1 | awk '{print "Used: " $3 " | Avail: " $4 " | Total: " $2}'"""
-icon = "drive-harddisk"
-
-[[entries]]
-text = "Mic"
-async = "wpctl get-volume @DEFAULT_AUDIO_SOURCE@"
-icon = "audio-input-microphone"
-actions = { "mic_set" = "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ %VALUE%" }
-
-[[entries]]
-text = "System"
-async = """printf "Mem: %s/%s | CPU: %s%%" "$(free -h | awk '/^Mem:/ {print $3}')" "$(free -h | awk '/^Mem:/ {print $2}')" "$(top -bn1 | awk -F'[, ]+' '/Cpu\\(s\\)/{printf \"%.1f\", 100-$8}')""""
-icon = "computer"
-
-[[entries]]
-text = "Today"
-keywords = ["date","today","calendar"]
-async = """date "+%H:%M - %d.%m. %A - KW %V""""
-icon = "clock"
-actions = { "open_cal" = "xdg-open https://calendar.google.com" }
-
-[[entries]]
-text = "Clipboard Manager"
-keywords = ["clipboard", "copy", "paste", "history"]
-actions = { "clipboard" = "clipmaster" }
-icon = "edit-paste"
-
-[[entries]]
-text = "Brightness"
-async = "brightnessctl get"
-icon = "display-brightness"
-keywords = ["brightness", "screen", "backlight"]
+text   = "Mikrofon"
+async  = "wpctl get-volume @DEFAULT_AUDIO_SOURCE@"
+icon   = "audio-input-microphone"
+keywords = ["mic", "mikrofon", "input"]
 [entries.actions]
-brightness_up = "brightnessctl set +10%"
+mic_set = "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ %VALUE%"
+
+# ── Parlaklık ──────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Parlaklık"
+async    = "brightnessctl get"
+icon     = "display-brightness"
+keywords = ["brightness", "parlaklık", "ekran", "backlight"]
+[entries.actions]
+brightness_up   = "brightnessctl set +10%"
 brightness_down = "brightnessctl set 10%-"
-brightness_set = "brightnessctl set %VALUE%%"
+brightness_set  = "brightnessctl set %VALUE%%"
+
+# ── Disk / Bellek / CPU özetleri ──────────────────────────────────────────
+[[entries]]
+text     = "Disk"
+keywords = ["disk", "drive", "space", "alan"]
+icon     = "drive-harddisk"
+async    = """df -h / | tail -1 | awk '{print "Used: " $3 " | Avail: " $4 " | Total: " $2}'"""
+actions  = { "disk_copy" = "wl-copy '%VALUE%'" }
 
 [[entries]]
-text = "Screenshot - Area"
-keywords = ["screenshot", "capture", "screen", "area"]
-icon = "camera-photo"
-actions = { "screenshot" = "bash -c 'screenshot ri'" }
+text     = "Sistem"
+keywords = ["system", "cpu", "ram", "bellek", "mem"]
+icon     = "computer"
+async    = """printf "Mem: %s/%s | CPU: %s%%" "$(free -h | awk '/^Mem:/ {print $3}')" "$(free -h | awk '/^Mem:/ {print $2}')" "$(top -bn1 | awk -F'[, ]+' '/Cpu\\(s\\)/{printf \"%.1f\", 100-$8}')""""
 
 [[entries]]
-text = "Screenshot - Pano"
-keywords = ["screenshot", "capture", "screen", "pano"]
-icon = "camera-photo"
-actions = { "screenshot" = "bash -c 'screenshot rec'" }
+text     = "Bugün"
+keywords = ["date", "today", "calendar", "bugün", "tarih"]
+icon     = "clock"
+async    = """date "+%H:%M - %d.%m. %A - KW %V""""
+actions  = { "open_cal" = "xdg-open https://calendar.google.com" }
+
+# ── Ekran görüntüsü (kullanıcının ~/.local/bin/screenshot script'i) ───────
+[[entries]]
+text     = "Ekran Görüntüsü — Alan"
+keywords = ["screenshot", "capture", "ss", "alan", "area"]
+icon     = "camera-photo"
+actions  = { "screenshot" = "bash -c 'screenshot ri'" }
+
+[[entries]]
+text     = "Ekran Görüntüsü — Kayıt"
+keywords = ["screenshot", "record", "kayıt", "rec"]
+icon     = "camera-video"
+actions  = { "screenshot" = "bash -c 'screenshot rec'" }

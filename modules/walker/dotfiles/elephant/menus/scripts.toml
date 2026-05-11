@@ -1,141 +1,259 @@
-name = "scripts"
+# ════════════════════════════════════════════════════════════════════════════
+# menus:scripts — ~/.cachy/modules/scripts/start altındaki tüm başlatıcılar
+#
+# Kurulum sırasında .sh uzantısı düşürülerek ~/.local/bin'e kopyalanıyor.
+# Bu yüzden  actions  içinde  start-helium-ai  (uzantısız) olarak çağırıyoruz.
+#
+# Sıralama:  Helium (varsayılan tarayıcı) → Brave → Chrome → Firefox →
+#            iletişim → medya → terminal
+# ════════════════════════════════════════════════════════════════════════════
+name        = "scripts"
 name_pretty = "Scripts"
-icon = "application-x-executable"
+icon        = "application-x-executable"
+
+# ── Helium — varsayılan browser ────────────────────────────────────────────
+[[entries]]
+text     = "Helium — Kenp"
+keywords = ["helium", "kenp", "browser", "tarayıcı"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-kenp" }
 
 [[entries]]
-text = "Brave - AI"
-keywords = ["brave", "ai", "browser"]
-actions = { "run" = "start-brave-ai" }
-icon = "brave-browser"
+text     = "Helium — AI"
+keywords = ["helium", "ai", "browser"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-ai" }
 
 [[entries]]
-text = "Brave - Compecta"
-keywords = ["brave", "compecta", "browser"]
-actions = { "run" = "start-brave-compecta" }
-icon = "brave-browser"
+text     = "Helium — Compecta"
+keywords = ["helium", "compecta", "browser", "iş"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-compecta" }
 
 [[entries]]
-text = "Brave - Discord"
-keywords = ["brave", "discord", "browser"]
-actions = { "run" = "start-brave-discord" }
-icon = "brave-browser"
+text     = "Helium — Discord"
+keywords = ["helium", "discord", "chat"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-discord" }
 
 [[entries]]
-text = "Brave - Exclude"
-keywords = ["brave", "exclude", "browser"]
-actions = { "run" = "start-brave-exclude" }
-icon = "brave-browser"
+text     = "Helium — Exclude"
+keywords = ["helium", "exclude", "browser"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-exclude" }
 
 [[entries]]
-text = "Brave - Kenp"
+text     = "Helium — Nil"
+keywords = ["helium", "nil", "browser"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-nil" }
+
+[[entries]]
+text     = "Helium — Spotify"
+keywords = ["helium", "spotify", "music", "müzik"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-spotify" }
+
+[[entries]]
+text     = "Helium — TikTok"
+keywords = ["helium", "tiktok", "video"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-tiktok" }
+
+[[entries]]
+text     = "Helium — WhatsApp"
+keywords = ["helium", "whatsapp", "chat"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-whatsapp" }
+
+[[entries]]
+text     = "Helium — Whats"
+keywords = ["helium", "whats", "whatsapp", "chat"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-whats" }
+
+[[entries]]
+text     = "Helium — YouTube"
+keywords = ["helium", "youtube", "video"]
+icon     = "net.imput.helium"
+actions  = { "run" = "start-helium-youtube" }
+
+# ── Brave ──────────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Brave — Kenp"
 keywords = ["brave", "kenp", "browser"]
-actions = { "run" = "start-helium-kenp" }
-icon = "brave-browser"
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-kenp" }
 
 [[entries]]
-text = "Brave - Spotify"
-keywords = ["brave", "spotify", "browser", "music"]
-actions = { "run" = "start-brave-spotify" }
-icon = "brave-browser"
+text     = "Brave — AI"
+keywords = ["brave", "ai", "browser"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-ai" }
 
 [[entries]]
-text = "Brave - TikTok"
-keywords = ["brave", "tiktok", "browser"]
-actions = { "run" = "start-brave-tiktok" }
-icon = "brave-browser"
+text     = "Brave — Compecta"
+keywords = ["brave", "compecta", "browser", "iş"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-compecta" }
 
 [[entries]]
-text = "Brave - Whats"
-keywords = ["brave", "whats", "whatsapp", "browser"]
-actions = { "run" = "start-brave-whats" }
-icon = "brave-browser"
+text     = "Brave — Discord"
+keywords = ["brave", "discord", "chat"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-discord" }
 
 [[entries]]
-text = "Brave - WhatsApp"
-keywords = ["brave", "whatsapp", "browser", "chat"]
-actions = { "run" = "start-brave-whatsapp" }
-icon = "brave-browser"
+text     = "Brave — Exclude"
+keywords = ["brave", "exclude", "browser"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-exclude" }
 
 [[entries]]
-text = "Brave - YouTube"
-keywords = ["brave", "youtube", "browser", "video"]
-actions = { "run" = "start-brave-youtube" }
-icon = "brave-browser"
+text     = "Brave — Nil"
+keywords = ["brave", "nil", "browser"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-nil" }
 
 [[entries]]
-text = "Chrome - AI"
-keywords = ["chrome", "ai", "browser"]
-actions = { "run" = "start-chrome-ai" }
-icon = "google-chrome"
+text     = "Brave — Spotify"
+keywords = ["brave", "spotify", "music", "müzik"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-spotify" }
 
 [[entries]]
-text = "Chrome - Compecta"
-keywords = ["chrome", "compecta", "browser"]
-actions = { "run" = "start-chrome-compecta" }
-icon = "google-chrome"
+text     = "Brave — TikTok"
+keywords = ["brave", "tiktok", "video"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-tiktok" }
 
 [[entries]]
-text = "Chrome - Kenp"
+text     = "Brave — WhatsApp"
+keywords = ["brave", "whatsapp", "chat"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-whatsapp" }
+
+[[entries]]
+text     = "Brave — Whats"
+keywords = ["brave", "whats", "whatsapp", "chat"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-whats" }
+
+[[entries]]
+text     = "Brave — YouTube"
+keywords = ["brave", "youtube", "video"]
+icon     = "brave-browser"
+actions  = { "run" = "start-brave-youtube" }
+
+# ── Chrome ─────────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Chrome — Kenp"
 keywords = ["chrome", "kenp", "browser"]
-actions = { "run" = "start-chrome-kenp" }
-icon = "google-chrome"
+icon     = "google-chrome"
+actions  = { "run" = "start-chrome-kenp" }
 
 [[entries]]
-text = "Chrome - Whats"
+text     = "Chrome — AI"
+keywords = ["chrome", "ai", "browser"]
+icon     = "google-chrome"
+actions  = { "run" = "start-chrome-ai" }
+
+[[entries]]
+text     = "Chrome — Compecta"
+keywords = ["chrome", "compecta", "browser", "iş"]
+icon     = "google-chrome"
+actions  = { "run" = "start-chrome-compecta" }
+
+[[entries]]
+text     = "Chrome — Whats"
 keywords = ["chrome", "whats", "whatsapp", "browser"]
-actions = { "run" = "start-chrome-whats" }
-icon = "google-chrome"
+icon     = "google-chrome"
+actions  = { "run" = "start-chrome-whats" }
+
+# ── Firefox ────────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Firefox — Kenp"
+keywords = ["firefox", "kenp", "browser"]
+icon     = "firefox"
+actions  = { "run" = "start-firefox-kenp" }
 
 [[entries]]
-text = "Discord"
-keywords = ["discord", "chat", "voice"]
-actions = { "run" = "start-discord" }
-icon = "discord"
+text     = "Firefox — Compecta"
+keywords = ["firefox", "compecta", "browser", "iş"]
+icon     = "firefox"
+actions  = { "run" = "start-firefox-compecta" }
 
 [[entries]]
-text = "Ferdium"
-keywords = ["ferdium", "messenger", "chat"]
-actions = { "run" = "start-ferdium" }
-icon = "ferdium"
+text     = "Firefox — Proxy"
+keywords = ["firefox", "proxy", "browser"]
+icon     = "firefox"
+actions  = { "run" = "start-firefox-proxy" }
+
+# ── İletişim ───────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Discord"
+keywords = ["discord", "chat", "voice", "sesli"]
+icon     = "discord"
+actions  = { "run" = "start-discord" }
 
 [[entries]]
-text = "Kitty Single"
-keywords = ["kitty", "terminal", "single"]
-actions = { "run" = "start-kitty-single" }
-icon = "kitty"
-
-[[entries]]
-text = "Kenp (K)"
-keywords = ["kkenp", "kenp"]
-actions = { "run" = "start-kkenp" }
-icon = "utilities-terminal"
-
-[[entries]]
-text = "Kenp (M)"
-keywords = ["mkenp", "kenp"]
-actions = { "run" = "start-mkenp" }
-icon = "utilities-terminal"
-
-[[entries]]
-text = "MPV"
-keywords = ["mpv", "video", "player"]
-actions = { "run" = "start-mpv" }
-icon = "mpv"
-
-[[entries]]
-text = "Spotify"
-keywords = ["spotify", "music", "player"]
-actions = { "run" = "start-spotify" }
-icon = "spotify"
-
-[[entries]]
-text = "Webcord"
+text     = "Webcord"
 keywords = ["webcord", "discord", "chat"]
-actions = { "run" = "start-webcord" }
-icon = "webcord"
+icon     = "webcord"
+actions  = { "run" = "start-webcord" }
 
 [[entries]]
-text = "RMPC"
-keywords = ["rmpc", "music", "terminal"]
-actions = { "run" = "start-rmpc" }
-icon = "music"
+text     = "Telegram"
+keywords = ["telegram", "chat", "messenger"]
+icon     = "telegram"
+actions  = { "run" = "start-telegram" }
+
+[[entries]]
+text     = "Ferdium"
+keywords = ["ferdium", "messenger", "chat"]
+icon     = "ferdium"
+actions  = { "run" = "start-ferdium" }
+
+[[entries]]
+text     = "ZapZap"
+keywords = ["zapzap", "whatsapp", "chat"]
+icon     = "zapzap"
+actions  = { "run" = "start-zapzap" }
+
+# ── Medya ──────────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Spotify"
+keywords = ["spotify", "music", "müzik", "player"]
+icon     = "spotify"
+actions  = { "run" = "start-spotify" }
+
+[[entries]]
+text     = "MPV"
+keywords = ["mpv", "video", "player"]
+icon     = "mpv"
+actions  = { "run" = "start-mpv" }
+
+[[entries]]
+text     = "RMPC"
+keywords = ["rmpc", "music", "müzik", "terminal", "mpd"]
+icon     = "music"
+actions  = { "run" = "start-rmpc" }
+
+# ── Terminal ───────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Kitty (Single)"
+keywords = ["kitty", "terminal", "single", "tek"]
+icon     = "kitty"
+actions  = { "run" = "start-kitty-single" }
+
+[[entries]]
+text     = "Kenp (K)"
+keywords = ["kkenp", "kenp", "terminal"]
+icon     = "utilities-terminal"
+actions  = { "run" = "start-kkenp" }
+
+[[entries]]
+text     = "Kenp (M)"
+keywords = ["mkenp", "kenp", "terminal"]
+icon     = "utilities-terminal"
+actions  = { "run" = "start-mkenp" }

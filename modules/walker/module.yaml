@@ -14,8 +14,8 @@ dotfiles:
   target: ~/.config/systemd/user/elephant.service
 - source: dotfiles/systemd/user/walker.service
   target: ~/.config/systemd/user/walker.service
-- source: dotfiles/systemd/user/walker.timer
-  target: ~/.config/systemd/user/walker.timer
+# walker.timer kaldırıldı — walker.service zaten margo-session.target ile
+# birlikte WantedBy üzerinden tetikleniyor; timer restart loop oluşturuyordu.
 - source: dotfiles/dbus-1/services/io.github.abenz1267.walker.service
   target: ~/.local/share/dbus-1/services/io.github.abenz1267.walker.service
 

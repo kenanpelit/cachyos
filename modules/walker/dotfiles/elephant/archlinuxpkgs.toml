@@ -1,0 +1,11 @@
+# archlinuxpkgs — AUR + repo paket araması (paru ile)
+# Walker'da gelen aksiyon:  install  (terminalde paru -S … çalıştırır)
+auto_wrap_with_terminal = true    # paru'yu terminal_cmd ile sar
+command_install         = "paru -S %VALUE%"
+command_remove          = "paru -R %VALUE%"
+
+[Config]
+hide_from_providerlist = false
+icon         = "system-software-install"
+min_score    = 50                 # 20 çok düşüktü, kısa kelimelerde sürekli paket gelirdi
+name_pretty  = "Paketler"

@@ -1,8 +1,10 @@
 [Unit]
 Description=Walker - Application launcher
 Documentation=https://github.com/abenz1267/walker
-PartOf=graphical-session.target niri-session.target hyprland-session.target
-After=graphical-session.target niri-session.target hyprland-session.target elephant.service
+# Yalnızca margo başlattığında çalışsın — niri/hyprland/diğer DE'ler
+# tetiklemesin. (margo-session.target uwsm tarafından oluşturulur.)
+PartOf=margo-session.target
+After=margo-session.target elephant.service
 Requires=elephant.service
 
 [Service]
@@ -18,6 +20,4 @@ TimeoutStartSec=120
 TimeoutStopSec=10
 
 [Install]
-WantedBy=niri-session.target
-WantedBy=hyprland-session.target
-WantedBy=graphical-session.target
+WantedBy=margo-session.target

@@ -1,0 +1,13 @@
+# bluetooth — bluez stack (bluetoothctl) ile cihaz arama/eşleme
+# Aksiyonlar:
+#   find        Ctrl+F        cihaz tarama
+#   pair        Return        eşle
+#   connect     Return        bağlan
+#   disconnect  Return        ayır
+#   trust/untrust  Ctrl+T     güven aç/kapa
+#   remove      Ctrl+D        kaldır
+[Config]
+hide_from_providerlist = false
+icon         = "bluetooth"
+min_score    = 30
+name_pretty  = "Bluetooth"

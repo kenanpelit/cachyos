@@ -1,0 +1,20 @@
+# clipboard — pano geçmişi (wl-clipboard ile)
+# Return       → kopyala
+# Ctrl+D       → sil
+# Ctrl+Shift+D → tümünü temizle
+# Ctrl+I       → resimler aç/kapa
+# Ctrl+O       → düzenle (text_editor_cmd ile)
+auto_cleanup     = 0           # 0 = kapalı; otomatik silme isteme
+command          = "wl-copy"
+ignore_symbols   = true        # tek karakter / sembol girdilerini saklama
+image_editor_cmd = "swayimg"
+max_items        = 200
+pinned_on_top    = true        # sabitlenmiş girdiler listenin başında
+text_editor_cmd  = "kitty -e nvim"
+time_format      = "%d.%m. - %H:%M"
+
+[Config]
+hide_from_providerlist = false
+icon         = "edit-paste"
+min_score    = 20              # 30'dan düşürdüm, fuzzy kısa eşleşmelerde de açılır
+name_pretty  = "Pano"

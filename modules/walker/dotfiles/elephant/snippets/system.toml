@@ -7,7 +7,7 @@ content = "df -h | grep -v tmpfs"
 
 [[snippets]]
 name = "System Info"
-content = "neofetch"
+content = "fastfetch"
 
 [[snippets]]
 name = "CPU Info"

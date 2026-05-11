@@ -1,0 +1,16 @@
+# bookmarks — tarayıcı bookmark + history araması
+# browsers boş bırakılırsa elephant kurulu tarayıcıları otomatik tarar.
+# (Önceki dene-yanıl: `browsers = ["helium"]` string-array elephant tarafından
+# kabul edilmiyor — inline-table veya boş istiyor.)
+browsers              = []
+categories            = []
+history               = true
+history_when_empty    = false
+location              = ""
+set_browser_on_import = false
+
+[Config]
+hide_from_providerlist = false
+icon         = "user-bookmarks"
+min_score    = 40
+name_pretty  = "Yer İmleri"
