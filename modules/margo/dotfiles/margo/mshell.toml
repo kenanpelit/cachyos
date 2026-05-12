@@ -85,9 +85,8 @@ interval_secs = 5             # 0 = sadece startup'ta; örn 1800 = 30 dk'da bir 
 left   = ["Updates", "Workspaces", "WindowTitle", "MediaPlayer"]
 center = ["Tempo", "Notifications"]
 right  = [
-  ["Podman",  "Power"],
   ["NetworkSpeed", "Dns"],
-  ["SystemInfo", "Ufw", "Settings"],
+  ["SystemInfo", "Power", "Ufw", "Podman", "Settings"],
   "Tray",
   "Privacy",
 ]
@@ -212,7 +211,7 @@ formats = [
 ]
 timezones = [
   "Europe/Istanbul",
-  #  "Europe/Berlin",
+  #"Europe/Berlin",
   #"America/New_York",
   #"Asia/Tokyo",
 ]
@@ -288,9 +287,9 @@ indicators = [
   "Bluetooth",
   "Network",
   "Vpn",
-  "Battery",
-  "PeripheralBattery",
-  "Brightness",
+  #"Battery",
+  #"PeripheralBattery",
+  #"Brightness",
 ]
 
 # Settings panel'inin altına eklenen özel butonlar
@@ -374,12 +373,15 @@ done'"""
 #  Görünüm — Catppuccin Mocha (Islands style)
 # ══════════════════════════════════════════════════════════════════════════
 [appearance]
-#style        = "Islands"                     # "Islands" / "Solid" / "Gradient"
-style        = "Solid"                     # "Islands" / "Solid" / "Gradient"
-#style        = "Gradient"                     # "Islands" / "Solid" / "Gradient"
-opacity      = 0.95
-font_name    = "Maple Mono NF 12"
-scale_factor = 1.1
+style         = "Islands"                    # "Islands" / "Solid" / "Gradient"
+opacity       = 0.95
+font_name     = "Maple Mono NF 12"
+scale_factor  = 1.1
+# Noctalia-tarzı bar density — Mini / Compact / Default / Comfortable / Spacious
+# (sırayla 23 / 27 / 31 / 37 / 47 px ham yükseklik; scale_factor uygulanır)
+bar_density   = "Default"
+# Islands modunda her capsule'a ince primary outline (noctalia havası)
+show_outline  = true
 
 # Menu — açılır panellerin görünümü
 [appearance.menu]
