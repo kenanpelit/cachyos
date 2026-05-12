@@ -376,12 +376,12 @@ done'"""
 style         = "Islands"                    # "Islands" / "Solid" / "Gradient"
 opacity       = 0.95
 font_name     = "Maple Mono NF 12"
-scale_factor  = 1.1
+scale_factor  = 1.2
 # Noctalia-tarzı bar density — Mini / Compact / Default / Comfortable / Spacious
 # (sırayla 23 / 27 / 31 / 37 / 47 px ham yükseklik; scale_factor uygulanır)
 bar_density   = "Default"
 # Islands modunda her capsule'a ince primary outline (noctalia havası)
-show_outline  = true
+show_outline  = false
 
 # Menu — açılır panellerin görünümü
 [appearance.menu]
