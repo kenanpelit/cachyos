@@ -1,41 +1,39 @@
 tags:
-- wm
-- desktop
+  - wm
+  - desktop
 description: Margo compositor config (UWSM-first)
 depends_on:
-- base
-- wayland-env
-- gtk
-- qt
-- xdg-dirs
-- scripts
-- fonts
-- wayland-autostart
-- xdg-portal
-- user-services
-- sessions
+  - base
+  - wayland-env
+  - gtk
+  - qt
+  - xdg-dirs
+  - scripts
+  - fonts
+  - wayland-autostart
+  - xdg-portal
+  - user-services
+  - sessions
 dotfiles:
-- source: dotfiles/margo/config.conf
-  target: ~/.config/margo/config.conf
-- source: dotfiles/margo/layout_vertical-ext-top.conf
-  target: ~/.config/margo/layout_vertical-ext-top.conf
-- source: dotfiles/margo/mshell.toml
-  target: ~/.config/margo/mshell.toml
-- source: dotfiles/environment.d/10-margo.conf
-  target: ~/.config/session-env/margo/10-margo.conf
-- source: dotfiles/environment.d/margo-session.envlist
-  target: ~/.config/environment.d/margo-session.envlist
-- source: dotfiles/systemd/user/margo-audio-init.service
-  target: ~/.config/systemd/user/margo-audio-init.service
-- source: dotfiles/systemd/user/margo-shell-ensure.service
-  target: ~/.config/systemd/user/margo-shell-ensure.service
-- source: dotfiles/systemd/user/margo-lid-switch-inhibit.service
-  target: ~/.config/systemd/user/margo-lid-switch-inhibit.service
-- source: dotfiles/systemd/user/margo-status-notifier-ready.service
-  target: ~/.config/systemd/user/margo-status-notifier-ready.service
-- source: dotfiles/systemd/user/margo-polkit-agent.service
-  target: ~/.config/systemd/user/margo-polkit-agent.service
-- source: dotfiles/systemd/user/margo-nm-applet.service
-  target: ~/.config/systemd/user/margo-nm-applet.service
+  - source: dotfiles/margo/config.conf
+    target: ~/.config/margo/config.conf
+  - source: dotfiles/margo/layout_vertical-ext-top.conf
+    target: ~/.config/margo/layout_vertical-ext-top.conf
+  - source: dotfiles/environment.d/10-margo.conf
+    target: ~/.config/session-env/margo/10-margo.conf
+  - source: dotfiles/environment.d/margo-session.envlist
+    target: ~/.config/environment.d/margo-session.envlist
+  - source: dotfiles/systemd/user/margo-audio-init.service
+    target: ~/.config/systemd/user/margo-audio-init.service
+  - source: dotfiles/systemd/user/margo-shell-ensure.service
+    target: ~/.config/systemd/user/margo-shell-ensure.service
+  - source: dotfiles/systemd/user/margo-lid-switch-inhibit.service
+    target: ~/.config/systemd/user/margo-lid-switch-inhibit.service
+  - source: dotfiles/systemd/user/margo-status-notifier-ready.service
+    target: ~/.config/systemd/user/margo-status-notifier-ready.service
+  - source: dotfiles/systemd/user/margo-polkit-agent.service
+    target: ~/.config/systemd/user/margo-polkit-agent.service
+  - source: dotfiles/systemd/user/margo-nm-applet.service
+    target: ~/.config/systemd/user/margo-nm-applet.service
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
