@@ -444,6 +444,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `margo-mpv`
+**Description:** Margo-only MPV helper. Uses `mctl` IPC (NOT `mmsg`).
+
+**Usage:** `margo-mpv [start|playback|play-yt|save-yt|move|stick|top|wallpaper]`
+
+---
+
 ### 📂 `margo-semsumo-daily`
 **Description:** Description:
 

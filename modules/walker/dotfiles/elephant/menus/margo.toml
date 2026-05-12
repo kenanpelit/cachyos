@@ -1,27 +1,21 @@
 # ════════════════════════════════════════════════════════════════════════════
 # menus:margo — margo compositor + mshell kontrol paneli
 #
-# Açmak için:    walker -m menus:margo     veya  walker içinde  "mm "  prefix
+# Sadece aksiyon. Tag-switch zaten margo keybind ile (Super+1..9), durum
+# inspeksiyonu terminalden  mctl  ile. Burada günlük "tıkla-yap" işleri.
 #
-# IPC client'ı:  mctl  (mmsg DEĞİL). Tüm action'lar mctl dispatch + mshell msg
-# üzerinden geçer. Bind ABI için:  mctl actions --verbose
+# Açmak için:    walker -m menus:margo     veya prefix:  mm
 # ════════════════════════════════════════════════════════════════════════════
 name        = "margo"
 name_pretty = "Margo"
 icon        = "preferences-desktop"
 
-# ── Config / shell yeniden yükleme ─────────────────────────────────────────
+# ── Config / shell ─────────────────────────────────────────────────────────
 [[entries]]
 text     = "Margo: Reload Config"
 keywords = ["margo", "reload", "config", "yenile"]
 icon     = "view-refresh"
 actions  = { "reload" = "mctl reload" }
-
-[[entries]]
-text     = "Margo: Config Doğrula"
-keywords = ["margo", "check", "validate", "doğrula"]
-icon     = "dialog-ok-apply"
-async    = "mctl check-config 2>&1 | head -10"
 
 [[entries]]
 text     = "Mshell: Yeniden Başlat"
@@ -35,10 +29,10 @@ keywords = ["mshell", "bar", "toggle", "gizle"]
 icon     = "view-fullscreen"
 actions  = { "toggle_bar" = "mshell msg toggle-visibility" }
 
-# ── Pencere yönetimi (focused client) ──────────────────────────────────────
+# ── Aktif pencere ──────────────────────────────────────────────────────────
 [[entries]]
 text     = "Pencereyi Kapat"
-keywords = ["kill", "close", "kapat", "killclient"]
+keywords = ["kill", "close", "kapat"]
 icon     = "window-close"
 actions  = { "kill" = "mctl dispatch killclient" }
 
@@ -56,99 +50,18 @@ actions  = { "float" = "mctl dispatch togglefloating" }
 
 [[entries]]
 text     = "Düzeni Değiştir"
-keywords = ["layout", "düzen", "switchlayout"]
+keywords = ["layout", "düzen"]
 icon     = "view-grid"
 actions  = { "layout" = "mctl dispatch switchlayout" }
 
 [[entries]]
 text     = "Genel Bakış"
-keywords = ["overview", "genel", "tüm"]
+keywords = ["overview", "genel"]
 icon     = "view-restore"
 actions  = { "overview" = "mctl dispatch toggleoverview" }
 
-# ── Tag (1..9) hızlı geçiş ─────────────────────────────────────────────────
-# tag N → bitmask 1 << (N-1)
-[[entries]]
-text     = "Tag 1'e Geç"
-keywords = ["tag", "1", "view"]
-icon     = "go-first"
-actions  = { "view" = "mctl dispatch view 1" }
-
-[[entries]]
-text     = "Tag 2'ye Geç"
-keywords = ["tag", "2", "view"]
-icon     = "go-next"
-actions  = { "view" = "mctl dispatch view 2" }
-
-[[entries]]
-text     = "Tag 3'e Geç"
-keywords = ["tag", "3", "view"]
-icon     = "go-next"
-actions  = { "view" = "mctl dispatch view 4" }
-
-[[entries]]
-text     = "Tag 4'e Geç"
-keywords = ["tag", "4", "view"]
-icon     = "go-next"
-actions  = { "view" = "mctl dispatch view 8" }
-
-[[entries]]
-text     = "Tag 5'e Geç"
-keywords = ["tag", "5", "view"]
-icon     = "go-next"
-actions  = { "view" = "mctl dispatch view 16" }
-
-[[entries]]
-text     = "Tag 6'ya Geç"
-keywords = ["tag", "6", "view"]
-icon     = "go-next"
-actions  = { "view" = "mctl dispatch view 32" }
-
-[[entries]]
-text     = "Tag 7'ye Geç"
-keywords = ["tag", "7", "view"]
-icon     = "go-next"
-actions  = { "view" = "mctl dispatch view 64" }
-
-[[entries]]
-text     = "Tag 8'e Geç"
-keywords = ["tag", "8", "view"]
-icon     = "go-next"
-actions  = { "view" = "mctl dispatch view 128" }
-
-[[entries]]
-text     = "Tag 9'a Geç"
-keywords = ["tag", "9", "view"]
-icon     = "go-last"
-actions  = { "view" = "mctl dispatch view 256" }
-
-[[entries]]
-text     = "Tüm Tag'leri Göster"
-keywords = ["tag", "all", "tüm", "hepsi"]
-icon     = "view-grid"
-actions  = { "tagall" = "mctl dispatch tagall" }
-
-# ── Durum / inspeksiyon ────────────────────────────────────────────────────
-[[entries]]
-text     = "Durum: Aktif Pencere"
-keywords = ["status", "focused", "aktif"]
-icon     = "dialog-information"
-async    = "mctl focused"
-
-[[entries]]
-text     = "Durum: Tüm Pencereler"
-keywords = ["clients", "windows", "list", "pencereler"]
-icon     = "view-list"
-async    = "mctl clients 2>&1 | head -20"
-
-[[entries]]
-text     = "Durum: Outputs / Monitörler"
-keywords = ["outputs", "monitors", "monitör", "ekran"]
-icon     = "video-display"
-async    = "mctl outputs 2>&1"
-
 [[entries]]
 text     = "Twilight: Aç/Kapa"
-keywords = ["twilight", "redshift", "gamma", "renk", "gece"]
+keywords = ["twilight", "redshift", "gamma", "renk", "gece", "night"]
 icon     = "weather-clear-night"
 actions  = { "twilight" = "mctl dispatch twilight" }

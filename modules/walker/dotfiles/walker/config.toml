@@ -1,39 +1,36 @@
 # ════════════════════════════════════════════════════════════════════════════
-# Walker — Application launcher (margo / wlroots)
+# Walker — margo (dwl/wlroots) için launcher
 #
-# Hangi compositor:  margo (dwl/wlroots)
-# Pencere yönetimi:  zwlr_foreign_toplevel_v1 → walker windows çalışır
-# IPC:               mctl dispatch ...   (mmsg DEĞİL, hatırla!)
-# Bar/shell:         mshell (~/.config/margo/mshell.toml)
+#   IPC client     :  mctl   (mmsg DEĞİL)
+#   Pencere listesi:  zwlr_foreign_toplevel_v1  → windows provider çalışır
+#   Bar/shell      :  mshell  (~/.config/margo/mshell.toml)
+#   Menü dosyaları :  ~/.config/elephant/menus/*.toml
 #
-# Bu config Walker v2 + Elephant ile çalışır. Bütün "providers"
-# satırlarındaki isimler  `elephant listproviders`  çıktısına birebir
-# eşleşir.  Açmak için margo keybind:
+#   Provider isimleri  `elephant listproviders`  çıktısına birebir eşleşir.
 #
-#   bind = super,space,spawn,walker             # toggle (close_when_open)
-#   bind = super,delete,spawn,walker -m menus:sysops
+# Margo keybind:
+#   bind = super,space,spawn,walker                       # toggle
+#   bind = super,delete,spawn,walker -m menus:sysops      # power menu
+#
+# Boyut: Walker TOML'da width/height YOK — themes/default/style.css içinde
+# `.box-wrapper { min-width / min-height }` belirler.
 # ════════════════════════════════════════════════════════════════════════════
 
 # ── General ────────────────────────────────────────────────────────────────
-force_keyboard_focus     = true
-close_when_open          = true     # Aynı binding tekrar basılırsa kapat
-click_to_close           = true
-selection_wrap           = false
+force_keyboard_focus      = true
+close_when_open           = true     # aynı binding tekrar basılırsa kapat
+click_to_close            = true
+selection_wrap            = false
 global_argument_delimiter = "#"
-exact_search_prefix      = "'"
-theme                    = "default"
-disable_mouse            = false
-debug                    = false
+exact_search_prefix       = "'"
+theme                     = "default"
+disable_mouse             = false
+debug                     = false
 
-# NOT: Walker'da TOML üzerinden width/height geçerli değil. Boyut GTK CSS
-# tarafından belirleniyor → themes/default/style.css içindeki
-# `.box-wrapper { min-width / min-height }` kuralı ayarlıyor.
-
-# ── Layer-shell konumu ─────────────────────────────────────────────────────
-# Walker layer surface ekranın TAMAMINI kaplar (overlay layer, 4 anchor),
-# içindeki  .box-wrapper  CSS halign/valign = center ile orta-orta'ya
-# yerleşir. Tüm 4'ü false yaparsan compositor 0,0 köşeye koyar — istemediğin
-# davranış. Bu yüzden hepsi true.
+# ── Layer-shell ────────────────────────────────────────────────────────────
+# Surface tüm ekranı kaplar (4 anchor true); içerideki .box-wrapper CSS
+# halign/valign=center ile orta-orta'ya yerleşir. Anchor'lardan biri false
+# olursa compositor 0,0 köşeye yerleştirir.
 [shell]
 exclusive_zone = -1
 layer          = "overlay"
@@ -44,40 +41,44 @@ anchor_right   = true
 
 # ── Placeholders ───────────────────────────────────────────────────────────
 [placeholders]
-"default"             = { input = "Ara...",              list = "Sonuç yok" }
-"desktopapplications" = { input = "Uygulama başlat",      list = "Uygulama bulunamadı" }
-"files"               = { input = "Dosya ara",            list = "Dosya yok" }
-"runner"              = { input = "Komut çalıştır",       list = "Komut yok" }
-"calc"                = { input = "Hesapla",              list = "Sonuç yok" }
-"websearch"           = { input = "Webde ara",            list = "Arama motoru seç" }
-"clipboard"           = { input = "Pano geçmişi",         list = "Pano boş" }
-"windows"             = { input = "Pencere seç",          list = "Açık pencere yok" }
-"symbols"             = { input = "Emoji / sembol",       list = "Sonuç yok" }
-"todo"                = { input = "Yapılacak iş",         list = "Liste boş" }
-"menus:sysops"        = { input = "Sistem işlemleri",     list = "Eşleşme yok" }
-"menus:margo"         = { input = "Margo / mshell",       list = "Eşleşme yok" }
-"menus:wallpapers"    = { input = "Duvar kâğıdı",         list = "Eşleşme yok" }
-"menus:scripts"       = { input = "Script",               list = "Eşleşme yok" }
-"menus:other"         = { input = "Hızlı işlem",          list = "Eşleşme yok" }
+"default"             = { input = "Ara...",           list = "Sonuç yok" }
+"desktopapplications" = { input = "Uygulama başlat",  list = "Uygulama bulunamadı" }
+"files"               = { input = "Dosya ara",        list = "Dosya yok" }
+"runner"              = { input = "Komut çalıştır",   list = "Komut yok" }
+"calc"                = { input = "Hesapla",          list = "Sonuç yok" }
+"websearch"           = { input = "Webde ara",        list = "Arama motoru seç" }
+"clipboard"           = { input = "Pano geçmişi",     list = "Pano boş" }
+"windows"             = { input = "Pencere seç",      list = "Açık pencere yok" }
+"symbols"             = { input = "Emoji / sembol",   list = "Sonuç yok" }
+"todo"                = { input = "Yapılacak iş",     list = "Liste boş" }
+"bluetooth"           = { input = "Bluetooth cihazı", list = "Cihaz yok" }
+"snippets"            = { input = "Snippet",          list = "Snippet yok" }
+"menus:margo"         = { input = "Margo / mshell",   list = "Eşleşme yok" }
+"menus:sysops"        = { input = "Sistem işlemleri", list = "Eşleşme yok" }
+"menus:network"       = { input = "Ağ / VPN",         list = "Eşleşme yok" }
+"menus:other"         = { input = "Hızlı işlem",      list = "Eşleşme yok" }
+"menus:scripts"       = { input = "Script",           list = "Eşleşme yok" }
+"menus:wallpapers"    = { input = "Duvar kâğıdı",     list = "Eşleşme yok" }
 
-# ── Keybindings (Vim + Emacs hybrid) ───────────────────────────────────────
+# ── Keybinds (Vim + Emacs hybrid) ──────────────────────────────────────────
 [keybinds]
-close              = ["Escape", "ctrl c", "ctrl q"]
-next               = ["Down", "ctrl j", "ctrl n"]
-previous           = ["Up", "ctrl k", "ctrl p"]
-page_down          = ["Page_Down", "ctrl f"]
-page_up            = ["Page_Up", "ctrl b"]
-first              = ["Home", "g g"]
-last               = ["End", "shift g"]
-forward_word       = ["ctrl Right", "alt f"]
-backward_word      = ["ctrl Left", "alt b"]
-toggle_exact       = ["ctrl e"]
-resume_last_query  = ["ctrl r"]
-quick_activate     = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "ctrl Return"]
+close             = ["Escape", "ctrl c", "ctrl q"]
+next              = ["Down", "ctrl j", "ctrl n"]
+previous          = ["Up", "ctrl k", "ctrl p"]
+page_down         = ["Page_Down", "ctrl f"]
+page_up           = ["Page_Up", "ctrl b"]
+first             = ["Home", "g g"]
+last              = ["End", "shift g"]
+forward_word      = ["ctrl Right", "alt f"]
+backward_word     = ["ctrl Left", "alt b"]
+toggle_exact      = ["ctrl e"]
+resume_last_query = ["ctrl r"]
+quick_activate    = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "ctrl Return"]
 
 # ── Providers ──────────────────────────────────────────────────────────────
 [providers]
-# Boş arama ile karışık sonuçlar göstereceği için DEFAULT'u dar tut.
+# DEFAULT — kullanıcı bir şey yazınca bakılan provider'lar. Geniş tutma,
+# karışık sonuç gelir.
 default = [
   "desktopapplications",
   "calc",
@@ -86,8 +87,9 @@ default = [
   "windows",
 ]
 
-# Boş input — sık kullanılanlar görünür. Windows önce gelir ki Alt-Tab
-# benzeri akış doğal olsun (wlr-foreign-toplevel margo'da destekli).
+# EMPTY — boş input'ta görünenler. Üstten alta sıra: önce pencereler
+# (Alt-Tab benzeri), sonra sık uygulamalar, scripts (Helium ilk),
+# son olarak power menüsü.
 empty = [
   "windows",
   "desktopapplications",
@@ -97,87 +99,79 @@ empty = [
 
 max_results = 100
 
-# ── Prefix routing (hızlı erişim) ─────────────────────────────────────────
-# Tek harfli prefix + boşluk → o provider'a girer. Örn: "c 2+2", "w" (pencere
-# listesi), "ms reboot".
+# ── Provider prefix'leri ───────────────────────────────────────────────────
+# Tek harf + boşluk → o provider'a girer.  Örnek:  "c 2+2",  "ms reboot"
+
+# Çekirdek arama
 [[providers.prefixes]]
 prefix = "p"
 provider = "providerlist"
-
 [[providers.prefixes]]
 prefix = "f"
 provider = "files"
-
 [[providers.prefixes]]
 prefix = "r"
 provider = "runner"
-
 [[providers.prefixes]]
 prefix = "c"
 provider = "calc"
-
 [[providers.prefixes]]
 prefix = "q"
 provider = "websearch"
-
-[[providers.prefixes]]
-prefix = "v"
-provider = "clipboard"
-
-[[providers.prefixes]]
-prefix = "e"
-provider = "symbols"
-
-[[providers.prefixes]]
-prefix = "t"
-provider = "todo"
-
-[[providers.prefixes]]
-prefix = "m"
-provider = "menus"
-
 [[providers.prefixes]]
 prefix = "w"
 provider = "windows"
 
+# Veri / pano / sembol
 [[providers.prefixes]]
-prefix = "b"
-provider = "bluetooth"
-
+prefix = "v"
+provider = "clipboard"
 [[providers.prefixes]]
 prefix = "s"
 provider = "snippets"
-
+[[providers.prefixes]]
+prefix = "e"
+provider = "symbols"
 [[providers.prefixes]]
 prefix = "u"
 provider = "unicode"
 
-# ── İki-harfli menu kısayolları ───────────────────────────────────────────
+# Görev / cihaz
 [[providers.prefixes]]
-prefix = "mo"
-provider = "menus:other"
-
+prefix = "t"
+provider = "todo"
 [[providers.prefixes]]
-prefix = "ms"
-provider = "menus:scripts"
+prefix = "b"
+provider = "bluetooth"
 
+# Menüler — tek harfli ana giriş + iki harfli kısayollar
+[[providers.prefixes]]
+prefix = "m"
+provider = "menus"
+[[providers.prefixes]]
+prefix = "mm"
+provider = "menus:margo"        # margo + mshell
 [[providers.prefixes]]
 prefix = "mt"
-provider = "menus:sysops"     # T = sysoT — "sistem"
-
+provider = "menus:sysops"       # T = sysoT (power)
+[[providers.prefixes]]
+prefix = "mn"
+provider = "menus:network"      # mullvad + bluetooth toggle + IP
+[[providers.prefixes]]
+prefix = "mo"
+provider = "menus:other"        # ses/parlaklık/SS/renk
+[[providers.prefixes]]
+prefix = "ms"
+provider = "menus:scripts"      # start-* başlatıcılar
 [[providers.prefixes]]
 prefix = "mw"
 provider = "menus:wallpapers"
 
-[[providers.prefixes]]
-prefix = "mm"
-provider = "menus:margo"        # margo + mshell kontrol paneli
-
-# ── Provider-spesifik ayar ────────────────────────────────────────────────
+# ── Provider-spesifik ayar ─────────────────────────────────────────────────
 [providers.clipboard]
 time_format = "%d.%m. - %H:%M"
 
-# ── Per-provider max results ──────────────────────────────────────────────
+# ── Per-provider max results ───────────────────────────────────────────────
 [providers.max_results_provider]
 desktopapplications = 50
 files               = 30
@@ -188,15 +182,15 @@ windows             = 30
 todo                = 30
 bluetooth           = 15
 snippets            = 25
-menus               = 20
+menus               = 50
 symbols             = 30
 unicode             = 30
 
-# ── Provider actions (her provider için keybind seti) ─────────────────────
+# ── Provider actions ───────────────────────────────────────────────────────
 [providers.actions]
 desktopapplications = [
   { action = "start",         default = true, bind = "Return" },
-  { action = "start:keep",    label = "aç + kalsın", bind = "shift Return", after = "KeepOpen" },
+  { action = "start:keep",    label = "aç + kalsın",   bind = "shift Return", after = "KeepOpen" },
   { action = "pin",           bind = "ctrl p", after = "AsyncReload" },
   { action = "unpin",         bind = "ctrl p", after = "AsyncReload" },
   { action = "erase_history", label = "geçmişi sil", bind = "ctrl h", after = "AsyncReload" },
@@ -204,15 +198,15 @@ desktopapplications = [
 
 files = [
   { action = "open",     default = true, bind = "Return" },
-  { action = "opendir",  label = "dizini aç", bind = "ctrl Return" },
-  { action = "copypath", label = "yolu kopyala", bind = "ctrl shift c" },
+  { action = "opendir",  label = "dizini aç",       bind = "ctrl Return" },
+  { action = "copypath", label = "yolu kopyala",    bind = "ctrl shift c" },
   { action = "copyfile", label = "dosyayı kopyala", bind = "ctrl c" },
 ]
 
 runner = [
-  { action = "run",         default = true, bind = "Return" },
-  { action = "runterminal", label = "terminalde çalıştır", bind = "shift Return" },
-  { action = "erase_history", label = "geçmişi sil", bind = "ctrl h", after = "Reload" },
+  { action = "run",           default = true, bind = "Return" },
+  { action = "runterminal",   label = "terminalde çalıştır", bind = "shift Return" },
+  { action = "erase_history", label = "geçmişi sil",         bind = "ctrl h", after = "Reload" },
 ]
 
 calc = [
@@ -229,18 +223,18 @@ websearch = [
 clipboard = [
   { action = "copy",          default = true, bind = "Return" },
   { action = "remove",        bind = "ctrl d", after = "ClearReload" },
-  { action = "remove_all",    global = true, label = "hepsini sil", bind = "ctrl shift d", after = "ClearReload" },
-  { action = "toggle_images", global = true, label = "resim aç/kapa", bind = "ctrl i", after = "ClearReload" },
+  { action = "remove_all",    global = true, label = "hepsini sil",   bind = "ctrl shift d", after = "ClearReload" },
+  { action = "toggle_images", global = true, label = "resim aç/kapa", bind = "ctrl i",       after = "ClearReload" },
   { action = "edit",          bind = "ctrl o" },
 ]
 
 symbols = [
-  { action = "run_cmd", label = "seç", default = true, bind = "Return" },
+  { action = "run_cmd",       label = "seç",         default = true, bind = "Return" },
   { action = "erase_history", label = "geçmişi sil", bind = "ctrl h", after = "Reload" },
 ]
 
 unicode = [
-  { action = "run_cmd", label = "seç", default = true, bind = "Return" },
+  { action = "run_cmd",       label = "seç",         default = true, bind = "Return" },
   { action = "erase_history", label = "geçmişi sil", bind = "ctrl h", after = "Reload" },
 ]
 
@@ -267,8 +261,7 @@ bluetooth = [
   { action = "disconnect", bind = "Return", after = "AsyncReload" },
 ]
 
-# margo: walker windows zwlr_foreign_toplevel_v1 üzerinden çalışır.
-# focus → toplevel.activate; close → toplevel.close.
+# windows: zwlr_foreign_toplevel_v1 → focus = toplevel.activate, close = toplevel.close
 windows = [
   { action = "focus", default = true, bind = "Return" },
   { action = "close", bind = "ctrl w" },
@@ -285,35 +278,19 @@ menus = [
 
 # ════════════════════════════════════════════════════════════════════════════
 # KISAYOL ÖZETİ
-# ════════════════════════════════════════════════════════════════════════════
+# ────────────────────────────────────────────────────────────────────────────
+# NAVIGATION    j/k · Ctrl+f/b (page) · gg/G (baş/son) · 1..9 (quick)
+# SEARCH        '<term>  exact · Ctrl+E exact toggle · Ctrl+R önceki sorgu
+# COMMON        Return aç · Shift+Return alternatif · Ctrl+D sil
+#               Ctrl+P pin/unpin · Ctrl+H geçmişi temizle
+# EXIT          Esc · Ctrl+C · Ctrl+Q
 #
-# NAVIGATION
-#   j / k                Alt / üst
-#   Ctrl+f / Ctrl+b      Sayfa alt / üst
-#   gg / G               Liste başı / sonu
-#
-# PROVIDER PREFIX (bir harf + boşluk)
-#   p   providerlist          c   calc                v   clipboard
-#   f   files                 q   websearch           e   symbols (emoji)
-#   r   runner                w   windows             u   unicode
-#   t   todo                  b   bluetooth           s   snippets
-#   m   menus                 mo  menus:other         ms  menus:scripts
-#   mt  menus:sysops          mw  menus:wallpapers
-#
-# SEARCH
-#   '            Exact-match prefix (yazmadan önce ')
-#   Ctrl+E       Exact toggle
-#   Ctrl+R       Önceki sorguyu geri getir
-#
-# COMMON ACTIONS
-#   Return            Activate / aç
-#   Shift+Return      Alternatif (terminalde, sekmede, vs.)
-#   Ctrl+P            Pin / unpin
-#   Ctrl+D            Sil
-#   Ctrl+H            Geçmişi temizle
-#   1..9 / Ctrl+Ret   Quick activate (kapatmadan tetikle)
-#
-# EXIT
-#   Esc / Ctrl+C / Ctrl+Q     Walker'ı kapat
-#
+# PROVIDER PREFIX'LERİ
+#   Çekirdek    p providerlist   f files        r runner
+#               c calc           q websearch    w windows
+#   Veri        v clipboard      s snippets     e symbols      u unicode
+#   Görev       t todo           b bluetooth
+#   Menüler     m  menus (hepsi)
+#               mm margo         mt sysops      mn network
+#               mo other         ms scripts     mw wallpapers
 # ════════════════════════════════════════════════════════════════════════════

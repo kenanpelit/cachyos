@@ -1,18 +1,18 @@
 # ════════════════════════════════════════════════════════════════════════════
-# menus:sysops — Güç + sistem işlemleri
+# menus:sysops — Güç & oturum
 #
-# Açmak için:
-#   walker -m menus:sysops          (margo keybind: super,delete)
-# veya  "mt " prefix'i ile Walker içinde
+# Klasik power menu. Margo/mshell  mm  prefix'inde, ağ  mn  prefix'inde.
+#
+# Açmak için:    walker -m menus:sysops    (keybind: super,delete)
+#                veya prefix:  mt
 # ════════════════════════════════════════════════════════════════════════════
 name        = "sysops"
 name_pretty = "Sistem"
 icon        = "preferences-system"
 
-# ── Güç işlemleri ──────────────────────────────────────────────────────────
 [[entries]]
 text     = "Kilitle"
-keywords = ["lock", "kilit", "screensaver", "lockscreen"]
+keywords = ["lock", "kilit", "lockscreen"]
 icon     = "system-lock-screen"
 actions  = { "lock" = "loginctl lock-session" }
 
@@ -32,11 +32,11 @@ actions  = { "hibernate" = "systemctl hibernate -i" }
 text     = "Yeniden Başlat"
 keywords = ["reboot", "restart", "yeniden başlat"]
 icon     = "system-reboot"
-actions  = { "reboot" = "systemctl reboot -i" }
+actions  = { "osc-safer-reboot" = "systemctl reboot -i" }
 
 [[entries]]
 text     = "UEFI'ye Yeniden Başlat"
-keywords = ["uefi", "bios", "firmware", "boot"]
+keywords = ["uefi", "bios", "firmware"]
 icon     = "system-reboot"
 actions  = { "reboot_uefi" = "systemctl reboot --firmware-setup" }
 
@@ -51,48 +51,3 @@ text     = "Kapat"
 keywords = ["shutdown", "poweroff", "kapat", "off"]
 icon     = "system-shutdown"
 actions  = { "shutdown" = "systemctl poweroff -i" }
-
-# ── Network kısa yolları ──────────────────────────────────────────────────
-[[entries]]
-text     = "Bluetooth: Aç/Kapa"
-keywords = ["bluetooth", "bt", "aç", "kapa"]
-icon     = "bluetooth"
-actions  = { "bt_toggle" = "bluetooth_toggle" }
-
-[[entries]]
-text     = "Mullvad: Bağlan"
-keywords = ["mullvad", "vpn", "bağlan"]
-icon     = "network-vpn"
-actions  = { "vpn_connect" = "mullvad connect" }
-
-[[entries]]
-text     = "Mullvad: Bağlantıyı Kes"
-keywords = ["mullvad", "vpn", "kes", "disconnect"]
-icon     = "network-vpn-disconnected"
-actions  = { "vpn_disconnect" = "mullvad disconnect" }
-
-[[entries]]
-text     = "Mullvad: Durum"
-keywords = ["mullvad", "vpn", "status", "durum"]
-icon     = "network-vpn"
-async    = "mullvad status"
-
-# ── Compositor / shell kontrolü ────────────────────────────────────────────
-# Margo IPC client'ı:  mctl   (mmsg DEĞİL)
-[[entries]]
-text     = "Margo: Reload Config"
-keywords = ["margo", "reload", "config", "yenile"]
-icon     = "view-refresh"
-actions  = { "reload" = "mctl reload" }
-
-[[entries]]
-text     = "Mshell: Yeniden Başlat"
-keywords = ["mshell", "shell", "bar", "yenile", "restart"]
-icon     = "view-refresh"
-actions  = { "restart_mshell" = "sh -c 'pkill -x mshell; nohup mshell >/dev/null 2>&1 & disown'" }
-
-[[entries]]
-text     = "Mshell: Bar Aç/Kapa"
-keywords = ["mshell", "bar", "toggle", "gizle"]
-icon     = "view-fullscreen"
-actions  = { "toggle_bar" = "mshell msg toggle-visibility" }

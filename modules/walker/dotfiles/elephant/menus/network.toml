@@ -1,0 +1,44 @@
+# ════════════════════════════════════════════════════════════════════════════
+# menus:network — Ağ & VPN
+#
+# Mullvad bağlan/kes + Bluetooth toggle. Detaylı BT için  b  prefix.
+#
+# Açmak için:    walker -m menus:network    veya prefix:  mn
+# ════════════════════════════════════════════════════════════════════════════
+name        = "network"
+name_pretty = "Ağ"
+icon        = "network-wired"
+
+# ── Mullvad VPN ────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Mullvad: Bağlan"
+keywords = ["mullvad", "vpn", "bağlan", "connect"]
+icon     = "network-vpn"
+actions  = { "vpn_connect" = "mullvad connect" }
+
+[[entries]]
+text     = "Mullvad: Bağlantıyı Kes"
+keywords = ["mullvad", "vpn", "kes", "disconnect"]
+icon     = "network-vpn-disconnected"
+actions  = { "vpn_disconnect" = "mullvad disconnect" }
+
+[[entries]]
+text     = "Mullvad: Durum"
+keywords = ["mullvad", "vpn", "status", "durum"]
+icon     = "network-vpn"
+async    = "mullvad status"
+
+# ── Bluetooth ──────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Bluetooth: Aç/Kapa"
+keywords = ["bluetooth", "bt", "aç", "kapa", "toggle"]
+icon     = "bluetooth"
+actions  = { "bt_toggle" = "bluetooth_toggle" }
+
+# ── IP ─────────────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Genel IP (kopyala)"
+keywords = ["public", "ip", "wan", "external", "genel", "kopyala"]
+icon     = "network-server"
+async    = "curl -s --max-time 3 ifconfig.me 2>/dev/null || echo 'bağlantı yok'"
+actions  = { "copy_ip" = "sh -c 'curl -s --max-time 3 ifconfig.me | wl-copy'" }

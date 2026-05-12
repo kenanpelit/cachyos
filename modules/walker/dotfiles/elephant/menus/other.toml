@@ -1,23 +1,16 @@
 # ════════════════════════════════════════════════════════════════════════════
-# menus:other — Hızlı sistem widget'ları (margo / wlroots)
+# menus:other — Hızlı widget'lar
 #
-# Eski osc-shell / quickshell yer tutucularının walker karşılığı.
-# wpctl / brightnessctl / hyprpicker hepsi wlroots altında çalışır.
+# Sadece aksiyon: ses/parlaklık ayarı, renk seçici, ekran görüntüsü, takvim.
+# Sistem stats (CPU/RAM/disk/pil) zaten mshell bar'da.
+#
+# Açmak için:   walker -m menus:other   veya prefix:  mo
 # ════════════════════════════════════════════════════════════════════════════
 name        = "other"
 name_pretty = "Diğer"
 icon        = "applications-other"
 
-# ── Renk Seçici (wlroots screencopy ile çalışır) ──────────────────────────
-[[entries]]
-text     = "Renk Seçici"
-keywords = ["color", "picker", "renk"]
-icon     = "color-picker"
-actions  = { "cp_use" = "sh -c 'wl-copy \"$(hyprpicker -a -n)\"'" }
-
-# ── Ses (PipeWire / Wireplumber üzerinden) ────────────────────────────────
-# OSD'li +/- için margo keybind  mshell msg volume-up  kullanıyor; buradakiler
-# %VALUE ile mutlak ayar yapmak için.
+# ── Ses & Mikrofon ─────────────────────────────────────────────────────────
 [[entries]]
 text   = "Ses"
 async  = "wpctl get-volume @DEFAULT_AUDIO_SINK@"
@@ -36,7 +29,9 @@ async  = "wpctl get-volume @DEFAULT_AUDIO_SOURCE@"
 icon   = "audio-input-microphone"
 keywords = ["mic", "mikrofon", "input"]
 [entries.actions]
-mic_set = "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ %VALUE%"
+mic_mute   = "wpctl set-mute   @DEFAULT_AUDIO_SOURCE@ 1"
+mic_unmute = "wpctl set-mute   @DEFAULT_AUDIO_SOURCE@ 0"
+mic_set    = "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ %VALUE%"
 
 # ── Parlaklık ──────────────────────────────────────────────────────────────
 [[entries]]
@@ -49,28 +44,14 @@ brightness_up   = "brightnessctl set +10%"
 brightness_down = "brightnessctl set 10%-"
 brightness_set  = "brightnessctl set %VALUE%%"
 
-# ── Disk / Bellek / CPU özetleri ──────────────────────────────────────────
+# ── Renk Seçici ────────────────────────────────────────────────────────────
 [[entries]]
-text     = "Disk"
-keywords = ["disk", "drive", "space", "alan"]
-icon     = "drive-harddisk"
-async    = """df -h / | tail -1 | awk '{print "Used: " $3 " | Avail: " $4 " | Total: " $2}'"""
-actions  = { "disk_copy" = "wl-copy '%VALUE%'" }
+text     = "Renk Seçici"
+keywords = ["color", "picker", "renk", "hex"]
+icon     = "color-picker"
+actions  = { "cp_use" = "sh -c 'wl-copy \"$(hyprpicker -a -n)\"'" }
 
-[[entries]]
-text     = "Sistem"
-keywords = ["system", "cpu", "ram", "bellek", "mem"]
-icon     = "computer"
-async    = """printf "Mem: %s/%s | CPU: %s%%" "$(free -h | awk '/^Mem:/ {print $3}')" "$(free -h | awk '/^Mem:/ {print $2}')" "$(top -bn1 | awk -F'[, ]+' '/Cpu\\(s\\)/{printf \"%.1f\", 100-$8}')""""
-
-[[entries]]
-text     = "Bugün"
-keywords = ["date", "today", "calendar", "bugün", "tarih"]
-icon     = "clock"
-async    = """date "+%H:%M - %d.%m. %A - KW %V""""
-actions  = { "open_cal" = "xdg-open https://calendar.google.com" }
-
-# ── Ekran görüntüsü (kullanıcının ~/.local/bin/screenshot script'i) ───────
+# ── Ekran Görüntüsü ────────────────────────────────────────────────────────
 [[entries]]
 text     = "Ekran Görüntüsü — Alan"
 keywords = ["screenshot", "capture", "ss", "alan", "area"]
@@ -78,7 +59,20 @@ icon     = "camera-photo"
 actions  = { "screenshot" = "bash -c 'screenshot ri'" }
 
 [[entries]]
-text     = "Ekran Görüntüsü — Kayıt"
-keywords = ["screenshot", "record", "kayıt", "rec"]
+text     = "Ekran Görüntüsü — Tam Ekran"
+keywords = ["screenshot", "fullscreen", "tam", "ekran"]
+icon     = "camera-photo"
+actions  = { "screenshot" = "bash -c 'screenshot fi'" }
+
+[[entries]]
+text     = "Ekran Kaydı"
+keywords = ["screenshot", "record", "kayıt", "rec", "video"]
 icon     = "camera-video"
 actions  = { "screenshot" = "bash -c 'screenshot rec'" }
+
+# ── Takvim ─────────────────────────────────────────────────────────────────
+[[entries]]
+text     = "Takvimi Aç"
+keywords = ["calendar", "takvim", "ajanda"]
+icon     = "x-office-calendar"
+actions  = { "open_cal" = "xdg-open https://calendar.google.com" }

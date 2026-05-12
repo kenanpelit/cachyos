@@ -53,12 +53,12 @@ fallback_color = "#1e1e2e"   # solid renk: path boş, dosya yok, ya da Contain l
 # Per-tag wallpaper'lar — mshell-owned (margo config.conf'a tagrule
 # yazmaya gerek yok). Active tag değişince mshell otomatik swap.
 [wallpaper.tags]
-"1" = "~/Pictures/wallpapers/others/28.jpg"
-"2" = "~/Pictures/wallpapers/others/28.jpg"
-"3" = "~/Pictures/wallpapers/others/28.jpg"
-"4" = "~/Pictures/wallpapers/others/28.jpg"
-"5" = "~/Pictures/wallpapers/others/28.jpg"
-"6" = "~/Pictures/wallpapers/others/28.jpg"
+"1" = "~/Pictures/wallpapers/others/04.jpg"
+"2" = "~/Pictures/wallpapers/others/04.jpg"
+"3" = "~/Pictures/wallpapers/others/04.jpg"
+"4" = "~/Pictures/wallpapers/others/04.jpg"
+"5" = "~/Pictures/wallpapers/others/04.jpg"
+"6" = "~/Pictures/wallpapers/others/04.jpg"
 "7" = "~/Pictures/wallpapers/others/57.jpg"
 "8" = "~/Pictures/wallpapers/others/57.jpg"
 "9" = "~/Pictures/wallpapers/others/57.jpg"
@@ -98,7 +98,7 @@ right  = [
   ["NetworkSpeed", "Dns"],
   ["SystemInfo", "Power", "Ufw", "Podman", "Settings"],
   "Tray",
-  "Privacy",
+  ["Privacy"],
 ]
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -230,19 +230,22 @@ watchdog_secs = 60
 #  Tempo — saat + hava + zaman dilimi cycle
 # ══════════════════════════════════════════════════════════════════════════
 [tempo]
-clock_format = "%H:%M  %a %d %b"
+clock_format = "%a %d %b %H:%M"
+
 formats = [
+  "%a %d %b %H:%M",
   "%H:%M",
   "%H:%M:%S",
-  "%a %d %b %H:%M",
   "%d.%m.%Y %H:%M",
 ]
+
 timezones = [
   "Europe/Istanbul",
   #"Europe/Berlin",
   #"America/New_York",
   #"Asia/Tokyo",
 ]
+
 weather_indicator = "IconAndTemperature"     # "IconAndTemperature" / "Icon" / "None"
 #weather_location  = "Current"
 # Sabit şehir istersen:
@@ -268,12 +271,12 @@ group_by_date    = true                      # menüde Today / Yesterday / Older
 toast            = true
 toast_position   = "top_right"               # top_left / top_right / bottom_left / bottom_right
 toast_timeout    = 4500                      # ms — varsayılan timeout
-toast_limit      = 5                         # bir anda ekranda en fazla kaç toast
-toast_max_height = 320                       # kart yüksekliği üst sınırı (px)
+toast_limit      = 6                         # bir anda ekranda en fazla kaç toast
+toast_max_height = 420                       # kart yüksekliği üst sınırı (px)
 blocklist        = []                        # regex pattern listesi (uygulama adına)
 
 # ── Toast geometri (mako-tarzı) ────────────────────────────────────────────
-toast_width              = 540               # kart genişliği
+toast_width              = 440               # kart genişliği
 toast_padding            = 16                # iç padding
 toast_radius             = 14                # köşe yarıçapı
 toast_icon_size          = 48                # uygulama ikon boyutu
