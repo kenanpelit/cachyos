@@ -373,7 +373,7 @@ done'"""
 #  Görünüm — Catppuccin Mocha (Islands style)
 # ══════════════════════════════════════════════════════════════════════════
 [appearance]
-style         = "Islands"                    # "Islands" / "Solid" / "Gradient"
+style         = "Solid"                      # "Islands" / "Solid" / "Gradient"
 opacity       = 0.95
 font_name     = "Maple Mono NF 12"
 scale_factor  = 1.2
