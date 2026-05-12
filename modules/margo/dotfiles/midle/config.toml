@@ -1,0 +1,49 @@
+# midle — margo'nun idle yöneticisi
+# Yer: ~/.config/midle/config.toml
+#
+# Margo başlangıcında autostart (config.conf):
+#     exec-once = midle
+#
+# CLI:
+#     midle info               # JSON snapshot
+#     midle pause 30m          # 30 dakika sus
+#     midle pause              # süresiz sus
+#     midle resume
+#     midle toggle-inhibit     # status bar için
+#     midle reload             # config'i tekrar oku
+#     midle stop               # daemon'u temiz kapat
+#
+# IPC socket: $XDG_RUNTIME_DIR/midle.sock (line-delimited JSON).
+
+[settings]
+# `midle pause <duration>` süresi bitince notify-send pulse'ı yolla.
+notify_on_unpause = true
+
+# Step'lerde `notify = true` olanlar için command öncesi notify.
+notify_before_action = false
+
+# ── Idle plan: sıralı timeout'lar ────────────────────────────────
+#
+# Her [[step]] timeout'u DURUM AÇILDIĞINDAN BERİ geçen süre — yani
+# 300s + 600s değil, ilk step 300s'de fire eder, ikincisi 600s'de.
+# Aktif olunca tüm fired step'lerin `resume_command`'ı ters sırayla
+# çalışır.
+
+[[step]]
+name = "dim"
+timeout = "5m"
+command = "brightnessctl --save >/dev/null && brightnessctl set 20%"
+resume_command = "brightnessctl --restore"
+notify = false
+
+[[step]]
+name = "lock"
+timeout = "10m"
+command = "mlock"
+notify = false
+
+[[step]]
+name = "suspend"
+timeout = "15m"
+command = "systemctl suspend"
+notify = false
