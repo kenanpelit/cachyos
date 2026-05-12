@@ -259,11 +259,11 @@ toast            = true
 toast_position   = "top_right"               # top_left / top_right / bottom_left / bottom_right
 toast_timeout    = 4500                      # ms — varsayılan timeout
 toast_limit      = 5                         # bir anda ekranda en fazla kaç toast
-toast_max_height = 140                       # kart yüksekliği üst sınırı (px)
+toast_max_height = 320                       # kart yüksekliği üst sınırı (px)
 blocklist        = []                        # regex pattern listesi (uygulama adına)
 
 # ── Toast geometri (mako-tarzı) ────────────────────────────────────────────
-toast_width              = 380               # kart genişliği (320-420 sweet spot)
+toast_width              = 540               # kart genişliği
 toast_padding            = 16                # iç padding
 toast_radius             = 14                # köşe yarıçapı
 toast_icon_size          = 48                # uygulama ikon boyutu
