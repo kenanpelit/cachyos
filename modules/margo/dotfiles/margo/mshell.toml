@@ -268,8 +268,9 @@ toast_padding            = 16                # iç padding
 toast_radius             = 14                # köşe yarıçapı
 toast_icon_size          = 48                # uygulama ikon boyutu
 toast_summary_font_size  = 13                # başlık fontu
-toast_body_font_size     = 11                # gövde fontu
+toast_body_font_size     = 12                # gövde fontu
 toast_opacity            = 0.92              # kart opaklığı
+font_name                = "Maple Mono NF 12"       # toast metni için özel font ailesi (boş = bar fontu)
 
 # ── Görsel polish ──────────────────────────────────────────────────────────
 show_urgency_bar  = false                    # 4px sol kenar urgency bar (kapalı)
