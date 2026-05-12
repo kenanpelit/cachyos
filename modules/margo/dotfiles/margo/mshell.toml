@@ -103,22 +103,22 @@ workspace_names          = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 enable_virtual_desktops  = false
 invert_scroll_direction  = "Trackpad"          # "All" / "Mouse" / "Trackpad"
 # ── Gelişmiş ───────────────────────────────────────────────────────────────
-font_name                = "JetBrainsMono Nerd Font"  # özel font; boş bırakırsan bar fontu
-font_size                = 8                          # override; boş = bar_font_size
-show_window_count        = true                       # 1² 2³ gibi pencere sayısı badge'i
+font_name                = "Maple Mono NF"     # özel font; boş bırakırsan bar fontu
+font_size                = 8                   # override; boş = bar_font_size
+show_window_count        = true                # 1² 2³ gibi pencere sayısı badge'i
 
 # Tag başına renk override — [appearance].workspace_colors'tan daha
 # basit syntax (sadece hex). Burada belirtilmeyen tag'ler appearance
 # bloğundaki paleti kullanır. Catppuccin Mocha defaults:
 [workspaces.colors]
 "1" = "#cba6f7"   # mauve
-"2" = "#89b4fa"   # blue
-"3" = "#94e2d5"   # teal
-"4" = "#a6e3a1"   # green
-"5" = "#f9e2af"   # yellow
-"6" = "#fab387"   # peach
-"7" = "#f38ba8"   # red
-"8" = "#cdd6f4"   # text
+"2" = "#cba6f7"   # blue
+"3" = "#cba6f7"   # teal
+"4" = "#cba6f7"   # green
+"5" = "#cba6f7"   # yellow
+"6" = "#cdd6f4"   # peach
+"7" = "#74c7ec"   # red
+"8" = "#74c7ec"   # text
 "9" = "#74c7ec"   # sapphire
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -189,7 +189,7 @@ upload_alert_kbps   = 10000                   # 10 MB/s'den yüksek → alert re
 # ══════════════════════════════════════════════════════════════════════════
 [dns]
 osc_command   = "osc-mullvad"               # PATH'te değilse tam yol ver
-watchdog_secs = 30                          # state polling aralığı
+watchdog_secs = 10                          # state polling aralığı
 # providers boş bırakılırsa default 5 preset kullanılır.
 # Custom eklemek istersen:
 #   [[dns.providers]]
@@ -268,9 +268,9 @@ toast_padding            = 16                # iç padding
 toast_radius             = 14                # köşe yarıçapı
 toast_icon_size          = 48                # uygulama ikon boyutu
 toast_summary_font_size  = 13                # başlık fontu
-toast_body_font_size     = 12                # gövde fontu
+toast_body_font_size     = 13                # gövde fontu
 toast_opacity            = 0.92              # kart opaklığı
-font_name                = "Maple Mono NF 12"       # toast metni için özel font ailesi (boş = bar fontu)
+font_name                = "Maple Mono NF"       # toast metni için özel font ailesi (boş = bar fontu)
 
 # ── Görsel polish ──────────────────────────────────────────────────────────
 show_urgency_bar  = false                    # 4px sol kenar urgency bar (kapalı)
@@ -316,7 +316,8 @@ lock_cmd      = "loginctl lock-session"
 shutdown_cmd  = "systemctl poweroff"
 suspend_cmd   = "systemctl suspend"
 hibernate_cmd = "systemctl hibernate"
-reboot_cmd    = "systemctl reboot"
+#reboot_cmd    = "systemctl reboot"
+reboot_cmd    = "osc-safe-reboot"
 logout_cmd    = "loginctl terminate-user $USER"
 
 # Indicator format'ları — Icon / Percentage / IconAndPercentage / Time / IconAndTime
@@ -341,6 +342,11 @@ bluetooth_more_cmd     = "blueman-manager"
 
 remove_airplane_btn = false
 remove_idle_btn     = false
+
+# ── Görsel polish ──────────────────────────────────────────────────────────
+font_name         = "Maple Mono NF"  # bölüm başlıkları + custom buton metni için özel font
+section_headers   = true             # "Bağlantı / Sistem / Özel" başlıkları
+header_font_size  = 11.0             # bölüm başlığı font boyutu
 
 # Panel'de hangi indicator'lar görünsün — bu sıra bar'a yansır
 indicators = [
@@ -367,8 +373,8 @@ tooltip        = "Wi-Fi hotspot'u aç/kapat"
 [[settings.CustomButton]]
 name           = "Night"
 icon           = ""
-command        = "mctl dispatch twilight"
-status_command = "mctl twilight --status 2>/dev/null | grep -q 'enabled:true' && echo on"
+command        = "mctl twilight toggle"
+status_command = "mctl twilight status --json 2>/dev/null | jq -re '.enabled' >/dev/null && echo on"
 tooltip        = "Twilight (gece modu) toggle"
 
 # ══════════════════════════════════════════════════════════════════════════
