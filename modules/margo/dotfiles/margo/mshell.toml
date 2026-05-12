@@ -12,7 +12,7 @@
 # Hyprland/Niri'ye özgü modüller (KeyboardSubmap vs.) bu fork'ta yok.
 
 log_level      = "warn"          # debug için: MSHELL_LOG=info mshell
-language       = "tr-TR"
+language       = "en-US"
 region         = "tr-TR"
 position       = "Top"
 layer          = "Top"
@@ -71,6 +71,16 @@ directory     = "~/Pictures/wallpapers/others"
 mode          = "Random"      # "Random" / "Sequential"
 per_output    = true          # true: her output farklı, false: hepsi aynı
 interval_secs = 5             # 0 = sadece startup'ta; örn 1800 = 30 dk'da bir rotate
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Matugen — wallpaper'dan Material You paleti
+# ══════════════════════════════════════════════════════════════════════════
+# `mshell matugen` veya super+ctrl+t kısayolu ile manuel tetiklenir.
+# auto_on_wallpaper_change = true ile aktif output'un wallpaper'ı her
+# değiştiğinde (tag swap / shuffle / state.json refresh) otomatik
+# yeniden çalışır, margo'yu mctl reload'la yeniler.
+[matugen]
+auto_on_wallpaper_change = true
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Module layout
