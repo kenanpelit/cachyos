@@ -253,25 +253,58 @@ blocklist = []                               # örn. ["NetworkManager", "blueman
 format           = "%H:%M"
 show_timestamps  = true
 show_bodies      = true
-grouped          = true
+grouped          = false                     # group_by_date varsa app-name gruplama atlanır
+group_by_date    = true                      # menüde Today / Yesterday / Older bölümleri
 toast            = true
-toast_position   = "top_right"               # snake_case: top_left / top_right / bottom_left / bottom_right
-toast_timeout    = 5000                      # ms
-toast_limit      = 4
-toast_max_height = 180
-blocklist        = []                        # regex pattern listesi (uygulama adına eşler)
-# ── Görsel polish ─────────────────────────────────────────────────────────
-show_urgency_bar  = true                     # 4px sol kenar urgency rengi
-summary_bold      = true                     # başlık (summary) bold
-accent_app_name   = true                     # app adı primary renkle
-show_count_badge  = true                     # bar'da ikonun yanında okunmamış bildirim sayısı
-show_actions      = true                     # D-Bus action butonlarını render et
+toast_position   = "top_right"               # top_left / top_right / bottom_left / bottom_right
+toast_timeout    = 4500                      # ms — varsayılan timeout
+toast_limit      = 5                         # bir anda ekranda en fazla kaç toast
+toast_max_height = 140                       # kart yüksekliği üst sınırı (px)
+blocklist        = []                        # regex pattern listesi (uygulama adına)
 
-# Urgency renkleri override (boş = theme palette: text / primary / danger)
+# ── Toast geometri (mako-tarzı) ────────────────────────────────────────────
+toast_width              = 380               # kart genişliği (320-420 sweet spot)
+toast_padding            = 16                # iç padding
+toast_radius             = 14                # köşe yarıçapı
+toast_icon_size          = 48                # uygulama ikon boyutu
+toast_summary_font_size  = 13                # başlık fontu
+toast_body_font_size     = 11                # gövde fontu
+toast_opacity            = 0.92              # kart opaklığı
+
+# ── Görsel polish ──────────────────────────────────────────────────────────
+show_urgency_bar  = false                    # 4px sol kenar urgency bar (kapalı)
+summary_bold      = true                     # başlık bold
+accent_app_name   = true                     # app adı primary renkle
+show_count_badge  = true                     # bar ikonu yanında okunmamış sayı
+show_actions      = true                     # D-Bus action butonları
+
+# ── Per-urgency timeout override (ms; 0 = sticky/manual dismiss) ───────────
+critical_timeout  = 0                        # critical her zaman sticky
+# low_timeout     = 2500
+
+# ── Yeni bildirimde shell komutu (sesli uyarı vb.) ────────────────────────
+# on_notify_command = "paplay ~/.sounds/message.oga"
+
+# Urgency renk override (boş = theme palette text / primary / danger)
 [notifications.urgency_colors]
 # low      = "#a6adc8"   # subtext1
 # normal   = "#cba6f7"   # mauve
 # critical = "#f38ba8"   # red
+
+# ── Per-app override'lar (mako'nun [app-name=Spotify] bloğunun karşılığı) ──
+# border_color: kart border'ı için hex; per-app vurgu.
+# timeout: bu uygulama için özel timeout (ms; 0 = sticky).
+[notifications.apps.Spotify]
+border_color = "#a6e3a1"
+timeout      = 3000
+
+[notifications.apps.Telegram]
+border_color = "#89b4fa"
+timeout      = 8000
+
+# [notifications.apps.firefox]
+# border_color = "#fab387"
+# timeout      = 30000
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Settings paneli — power / battery / audio / network / bluetooth / brightness
