@@ -22,6 +22,29 @@ notify_on_unpause = true
 # Step'lerde `notify = true` olanlar için command öncesi notify.
 notify_before_action = false
 
+# /proc'da bu regex'leri match eden bir process çalışıyorsa idle
+# tetiklenmez. Boş bırak veya kapat: `inhibit_apps = []`.
+inhibit_apps = [
+  "mpv",
+  "vlc",
+  "Spotify",
+  "firefox",
+  "chrome",
+  "helium",
+]
+
+# Inhibitor tarama aralığı (procfs + pactl). 5s makul yük/duyarlılık.
+inhibit_scan_interval = "5s"
+
+# PipeWire/PulseAudio sink-input RUNNING varsa idle olma.
+# `pactl` bulunur olması yeter; PipeWire'da `pipewire-pulse` üzerinden.
+monitor_media = true
+
+# Logind PrepareForSleep(true) sinyalinde anında çalıştırılır.
+# mlock'u yatmadan önce açmak için ideal — kapakta veya
+# systemctl suspend'de uyandığında ekran kilitli olur.
+prepare_sleep_command = "mlock"
+
 # ── Idle plan: sıralı timeout'lar ────────────────────────────────
 #
 # Her [[step]] timeout'u DURUM AÇILDIĞINDAN BERİ geçen süre — yani
