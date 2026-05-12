@@ -53,15 +53,15 @@ fallback_color = "#1e1e2e"   # solid renk: path boş, dosya yok, ya da Contain l
 # Per-tag wallpaper'lar — mshell-owned (margo config.conf'a tagrule
 # yazmaya gerek yok). Active tag değişince mshell otomatik swap.
 [wallpaper.tags]
-"1" = "~/Pictures/wallpapers/others/10.jpg"
-"2" = "~/Pictures/wallpapers/others/03.jpg"
+"1" = "~/Pictures/wallpapers/others/28.jpg"
+"2" = "~/Pictures/wallpapers/others/28.jpg"
 "3" = "~/Pictures/wallpapers/others/28.jpg"
-"4" = "~/Pictures/wallpapers/others/09.jpg"
-"5" = "~/Pictures/wallpapers/others/15.jpg"
-"6" = "~/Pictures/wallpapers/others/104.jpg"
-"7" = "~/Pictures/wallpapers/others/47.jpg"
-"8" = "~/Pictures/wallpapers/others/70.jpg"
-"9" = "~/Pictures/wallpapers/others/49.jpg"
+"4" = "~/Pictures/wallpapers/others/28.jpg"
+"5" = "~/Pictures/wallpapers/others/28.jpg"
+"6" = "~/Pictures/wallpapers/others/28.jpg"
+"7" = "~/Pictures/wallpapers/others/57.jpg"
+"8" = "~/Pictures/wallpapers/others/57.jpg"
+"9" = "~/Pictures/wallpapers/others/57.jpg"
 
 # Shuffle — açıkken yukarıdaki tags'leri ve state.json'ı bypass eder.
 # Klasörden rastgele seçim. Her mshell başlangıcında yeni atama.
@@ -80,7 +80,7 @@ interval_secs = 5             # 0 = sadece startup'ta; örn 1800 = 30 dk'da bir 
 # değiştiğinde (tag swap / shuffle / state.json refresh) otomatik
 # yeniden çalışır, margo'yu mctl reload'la yeniler.
 [matugen]
-auto_on_wallpaper_change = true
+auto_on_wallpaper_change = false
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Module layout
