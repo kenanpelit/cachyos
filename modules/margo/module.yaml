@@ -19,6 +19,8 @@ dotfiles:
   target: ~/.config/margo/config.conf
 - source: dotfiles/margo/layout_vertical-ext-top.conf
   target: ~/.config/margo/layout_vertical-ext-top.conf
+- source: dotfiles/margo/mshell.toml
+  target: ~/.config/margo/mshell.toml
 - source: dotfiles/environment.d/10-margo.conf
   target: ~/.config/session-env/margo/10-margo.conf
 - source: dotfiles/environment.d/margo-session.envlist
