@@ -31,19 +31,19 @@ notify_before_action = false
 
 [[step]]
 name = "dim"
-timeout = "5m"
+timeout = "15m"
 command = "brightnessctl --save >/dev/null && brightnessctl set 20%"
 resume_command = "brightnessctl --restore"
 notify = false
 
 [[step]]
 name = "lock"
-timeout = "10m"
+timeout = "30m"
 command = "mlock"
 notify = false
 
 [[step]]
 name = "suspend"
-timeout = "15m"
+timeout = "40m"
 command = "systemctl suspend"
 notify = false
