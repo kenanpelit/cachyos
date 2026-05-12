@@ -104,8 +104,22 @@ enable_virtual_desktops  = false
 invert_scroll_direction  = "Trackpad"          # "All" / "Mouse" / "Trackpad"
 # ── Gelişmiş ───────────────────────────────────────────────────────────────
 font_name                = "JetBrainsMono Nerd Font"  # özel font; boş bırakırsan bar fontu
-font_size                = 13                         # override; boş = bar_font_size
+font_size                = 8                          # override; boş = bar_font_size
 show_window_count        = true                       # 1² 2³ gibi pencere sayısı badge'i
+
+# Tag başına renk override — [appearance].workspace_colors'tan daha
+# basit syntax (sadece hex). Burada belirtilmeyen tag'ler appearance
+# bloğundaki paleti kullanır. Catppuccin Mocha defaults:
+[workspaces.colors]
+"1" = "#cba6f7"   # mauve
+"2" = "#89b4fa"   # blue
+"3" = "#94e2d5"   # teal
+"4" = "#a6e3a1"   # green
+"5" = "#f9e2af"   # yellow
+"6" = "#fab387"   # peach
+"7" = "#f38ba8"   # red
+"8" = "#cdd6f4"   # text
+"9" = "#74c7ec"   # sapphire
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Window title
@@ -246,6 +260,18 @@ toast_timeout    = 5000                      # ms
 toast_limit      = 4
 toast_max_height = 180
 blocklist        = []                        # regex pattern listesi (uygulama adına eşler)
+# ── Görsel polish ─────────────────────────────────────────────────────────
+show_urgency_bar  = true                     # 4px sol kenar urgency rengi
+summary_bold      = true                     # başlık (summary) bold
+accent_app_name   = true                     # app adı primary renkle
+show_count_badge  = true                     # bar'da ikonun yanında okunmamış bildirim sayısı
+show_actions      = true                     # D-Bus action butonlarını render et
+
+# Urgency renkleri override (boş = theme palette: text / primary / danger)
+[notifications.urgency_colors]
+# low      = "#a6adc8"   # subtext1
+# normal   = "#cba6f7"   # mauve
+# critical = "#f38ba8"   # red
 
 # ══════════════════════════════════════════════════════════════════════════
 #  Settings paneli — power / battery / audio / network / bluetooth / brightness
