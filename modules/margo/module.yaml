@@ -1,7 +1,7 @@
 tags:
   - wm
   - desktop
-description: Margo compositor config (UWSM-first)
+description: Margo compositor config (UWSM-first + start-margo supervisor)
 depends_on:
   - base
   - wayland-env

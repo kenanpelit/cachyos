@@ -81,22 +81,52 @@ if declare -F session_common_unset_manager_env >/dev/null 2>&1; then
     "SYSTEMD_OFFLINE=${SYSTEMD_OFFLINE}"
 fi
 
-session_cmd="margo-session"
+# Compositor command resolution — preference order:
+#   1) margo-session helper (sets up env + delegates to start-margo
+#      → margo). This is the canonical path and what uwsm should see.
+#   2) start-margo direct (watchdog wraps margo; gets crash budget +
+#      sd_notify + signal preservation + PR_SET_PDEATHSIG).
+#   3) bare margo (last-resort fallback when the supervisor binary
+#      isn't on PATH).
+session_cmd=""
+if command -v margo-session >/dev/null 2>&1; then
+  session_cmd="margo-session"
+elif command -v start-margo >/dev/null 2>&1; then
+  session_cmd="start-margo"
+elif command -v margo >/dev/null 2>&1; then
+  session_cmd="margo"
+fi
 
 if command -v uwsm >/dev/null 2>&1; then
-  if ! command -v "${session_cmd}" >/dev/null 2>&1; then
-    session_cmd="margo"
-  fi
-
-  if [[ "${session_cmd}" == "margo-session" ]]; then
-    exec uwsm start -D margo:mango -e -- "${session_cmd}"
-  fi
-
-  exec uwsm start -D margo:mango -e -- margo -c "${HOME}/.config/margo/config.conf"
+  case "${session_cmd}" in
+    margo-session|start-margo)
+      # margo-session and start-margo both absorb the config path
+      # themselves; uwsm just needs the binary name.
+      exec uwsm start -D margo:mango -e -- "${session_cmd}"
+      ;;
+    margo)
+      exec uwsm start -D margo:mango -e -- \
+        margo -c "${HOME}/.config/margo/config.conf"
+      ;;
+    *)
+      printf '[margo-uwsm-session] ERROR: no margo binary on PATH\n' >&2
+      exit 1
+      ;;
+  esac
 fi
 
-if command -v "${session_cmd}" >/dev/null 2>&1; then
-  exec "${session_cmd}"
-fi
-
-exec margo -c "${HOME}/.config/margo/config.conf"
+# uwsm unavailable — fall back to the resolved compositor command
+# directly. `margo-session` and `start-margo` both pass their own
+# -c flag through; bare margo needs the config explicitly.
+case "${session_cmd}" in
+  margo-session|start-margo)
+    exec "${session_cmd}"
+    ;;
+  margo)
+    exec margo -c "${HOME}/.config/margo/config.conf"
+    ;;
+  *)
+    printf '[margo-uwsm-session] ERROR: no margo binary on PATH\n' >&2
+    exit 1
+    ;;
+esac

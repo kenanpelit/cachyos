@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 # Margo compositor entrypoint with the repo-managed config path.
+#
+# Prefers `start-margo` — the workspace's watchdog supervisor — when it
+# is installed. start-margo adds: rolling crash budget (auto-restart
+# but with a cap so a broken config can't pin the CPU spinning),
+# sd_notify READY/STOPPING emission, original-signal forwarding, and
+# PR_SET_PDEATHSIG so a kill -9 on the supervisor cannot leave an
+# orphaned compositor. Falls back to bare `margo` if the supervisor
+# isn't on PATH (e.g. partial install).
 set -euo pipefail
 
 config_file="${HOME}/.config/margo/config.conf"
+
+if command -v start-margo >/dev/null 2>&1; then
+  exec start-margo -- -c "${config_file}" "$@"
+fi
 
 exec margo -c "${config_file}" "$@"
