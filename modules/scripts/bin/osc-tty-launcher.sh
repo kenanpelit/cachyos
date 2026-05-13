@@ -2,7 +2,7 @@
 # ==============================================================================
 # Script: osc-tty-launcher.sh
 # Description: UWSM-aware interactive TTY launcher for desktop routes and VM profiles
-# Usage: osc-tty-launcher [auto-tty [VT]] | [niri|hyprland|gnome|vmubuntu|vmarch|vmcachy|vmnixos]
+# Usage: osc-tty-launcher [auto-tty [VT]] | [margo|mango|niri|hyprland|vmubuntu|vmarch|vmcachy|vmnixos]
 # ==============================================================================
 set -euo pipefail
 
@@ -21,8 +21,6 @@ resolve_cmd() {
   fi
   return 1
 }
-
-GNOME_TTY_CMD="$(resolve_cmd "${HOME}/.local/bin/gnome_tty" "gnome_tty" 2>/dev/null || true)"
 
 SVM_UBUNTU_CMD="$(resolve_cmd "${HOME}/.local/bin/svmubuntu" "svmubuntu" 2>/dev/null || true)"
 SVM_ARCH_CMD="$(resolve_cmd "${HOME}/.local/bin/svmarch" "svmarch" 2>/dev/null || true)"
@@ -63,6 +61,33 @@ run_uwsm_route() {
   exit 1
 }
 
+# Margo route — prefers the session wrapper that already chains
+# margo-session → start-margo → margo. Wrapper handles env setup
+# (XDG_*, GTK/QT theme, icon theme, …) and uwsm start invocation.
+launch_margo() {
+  local wrapper_cmd
+  wrapper_cmd="$(resolve_cmd "${HOME}/.local/bin/margo-uwsm-session" "margo-uwsm-session" 2>/dev/null || true)"
+
+  if command -v margo-session >/dev/null 2>&1; then
+    run_uwsm_route "margo-session" "${wrapper_cmd}" margo-session
+  fi
+  if command -v start-margo >/dev/null 2>&1; then
+    run_uwsm_route "start-margo" "${wrapper_cmd}" start-margo
+  fi
+  run_uwsm_route "margo" "${wrapper_cmd}" margo
+}
+
+launch_mango() {
+  local wrapper_cmd
+  wrapper_cmd="$(resolve_cmd "${HOME}/.local/bin/mango-uwsm-session" "mango-uwsm-session" 2>/dev/null || true)"
+
+  if command -v mango-session >/dev/null 2>&1; then
+    run_uwsm_route "mango-session" "${wrapper_cmd}" mango-session
+  fi
+
+  run_uwsm_route "mango" "${wrapper_cmd}" mango
+}
+
 launch_niri() {
   local wrapper_cmd
   wrapper_cmd="$(resolve_cmd "${HOME}/.local/bin/niri-uwsm-session" "niri-uwsm-session" 2>/dev/null || true)"
@@ -83,19 +108,6 @@ launch_hyprland() {
   fi
 
   run_uwsm_route "Hyprland" "${wrapper_cmd}" Hyprland
-}
-
-launch_gnome() {
-  ensure_runtime_environment
-
-  export GNOME_TTY_GUARD=1
-  export GNOME_TTY_GUARD_FILE="${XDG_RUNTIME_DIR}/gnome-tty.guard"
-
-  if [[ -n "${GNOME_TTY_CMD}" ]]; then
-    exec "${GNOME_TTY_CMD}"
-  fi
-
-  exec gnome-session --session=gnome --no-reexec
 }
 
 run_vm_via_sway_profile() {
@@ -127,13 +139,14 @@ show_menu() {
 =========================================
   TTY Launcher (UWSM-aware)
 =========================================
-  1) Niri (UWSM)
-  2) Hyprland (UWSM)
-  3) GNOME
-  4) Ubuntu VM (Sway qemu_vmubuntu)
-  5) Arch VM   (Sway qemu_vmarch)
-  6) Cachy VM  (Sway qemu_vmcachy)
-  7) NixOS VM  (Sway qemu_vmnixos)
+  1) Margo    (UWSM)
+  2) Mango    (UWSM)
+  3) Niri     (UWSM)
+  4) Hyprland (UWSM)
+  5) Ubuntu VM (Sway qemu_vmubuntu)
+  6) Arch VM   (Sway qemu_vmarch)
+  7) Cachy VM  (Sway qemu_vmcachy)
+  8) NixOS VM  (Sway qemu_vmnixos)
   q) Exit
 EOF
 }
@@ -156,26 +169,28 @@ show_tty_hints() {
   Current TTY: ${tty}
 
   Quick routes:
-    tty2 -> Hyprland (UWSM)
-    tty3 -> Niri (UWSM)
-    tty4 -> GNOME
-    tty5 -> Ubuntu VM via Sway
+    tty2 -> Margo    (UWSM)
+    tty3 -> Mango    (UWSM)
+    tty4 -> Niri     (UWSM)
+    tty5 -> Hyprland (UWSM)
     tty6 -> manual launcher
 
   Manual commands:
     exec osc-tty-launcher
+    exec osc-tty-launcher margo
+    exec osc-tty-launcher mango
     exec osc-tty-launcher niri
     exec osc-tty-launcher hyprland
-    exec osc-tty-launcher gnome
 
   Route menu:
-    1) Niri (UWSM)
-    2) Hyprland (UWSM)
-    3) GNOME
-    4) Ubuntu VM
-    5) Arch VM
-    6) Cachy VM
-    7) NixOS VM
+    1) Margo    (UWSM)
+    2) Mango    (UWSM)
+    3) Niri     (UWSM)
+    4) Hyprland (UWSM)
+    5) Ubuntu VM
+    6) Arch VM
+    7) Cachy VM
+    8) NixOS VM
 
   Next step:
     Type: exec osc-tty-launcher
@@ -190,20 +205,20 @@ handle_auto_tty() {
       show_tty_hints "${tty}"
       ;;
     2)
-      echo "TTY2: launching Hyprland via UWSM"
-      launch_hyprland
+      echo "TTY2: launching Margo via UWSM"
+      launch_margo
       ;;
     3)
-      echo "TTY3: launching Niri via UWSM"
-      launch_niri
+      echo "TTY3: launching Mango via UWSM"
+      launch_mango
       ;;
     4)
-      echo "TTY4: launching GNOME"
-      launch_gnome
+      echo "TTY4: launching Niri via UWSM"
+      launch_niri
       ;;
     5)
-      echo "TTY5: launching Ubuntu VM profile in Sway"
-      run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
+      echo "TTY5: launching Hyprland via UWSM"
+      launch_hyprland
       ;;
     6)
       show_tty_hints "${tty}"
@@ -222,14 +237,17 @@ main() {
       handle_auto_tty "${1:-}"
       exit 0
       ;;
+    margo)
+      launch_margo
+      ;;
+    mango)
+      launch_mango
+      ;;
     niri)
       launch_niri
       ;;
     hyprland)
       launch_hyprland
-      ;;
-    gnome)
-      launch_gnome
       ;;
     vmubuntu)
       run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
@@ -256,24 +274,27 @@ main() {
 
     case "$choice" in
     1)
-      launch_niri
+      launch_margo
       ;;
     2)
-      launch_hyprland
+      launch_mango
       ;;
     3)
-      launch_gnome
+      launch_niri
       ;;
     4)
-      run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
+      launch_hyprland
       ;;
     5)
-      run_vm_via_sway_profile "qemu_vmarch" "${SVM_ARCH_CMD}"
+      run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
       ;;
     6)
-      run_vm_via_sway_profile "qemu_vmcachy" "${SVM_CACHY_CMD}"
+      run_vm_via_sway_profile "qemu_vmarch" "${SVM_ARCH_CMD}"
       ;;
     7)
+      run_vm_via_sway_profile "qemu_vmcachy" "${SVM_CACHY_CMD}"
+      ;;
+    8)
       run_vm_via_sway_profile "qemu_vmnixos" "${SVM_NIXOS_CMD}"
       ;;
     q | Q)
