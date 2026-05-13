@@ -207,16 +207,6 @@
                 },
                 {
                     "defaultSettings": {
-                        "gammaStep": 2,
-                        "iconOnlyInBar": false,
-                        "showLabelInBar": false,
-                        "tempStep": 150,
-                        "watchdogInterval": 60000
-                    },
-                    "id": "plugin:6ee06e:nsunsetr"
-                },
-                {
-                    "defaultSettings": {
                         "mainDeviceId": ""
                     },
                     "id": "plugin:valent-connect"
