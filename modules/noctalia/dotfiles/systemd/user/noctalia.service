@@ -1,7 +1,7 @@
 [Unit]
 Description=Noctalia Shell
-After=graphical-session.target hypr-session-env.service hypr-bootstrap.service niri-session-env.service niri-bootstrap.service mango-session-env.service mango-bootstrap.service margo-session-env.service margo-bootstrap.service
-PartOf=graphical-session.target hyprland-session.target niri-session.target mangowm-session.target margo-session.target
+After=graphical-session.target hypr-session-env.service hypr-bootstrap.service niri-session-env.service niri-bootstrap.service mango-session-env.service mango-bootstrap.service
+PartOf=graphical-session.target hyprland-session.target niri-session.target mangowm-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
@@ -23,4 +23,3 @@ RestartSec=1
 WantedBy=hyprland-session.target
 WantedBy=niri-session.target
 WantedBy=mangowm-session.target
-WantedBy=margo-session.target
