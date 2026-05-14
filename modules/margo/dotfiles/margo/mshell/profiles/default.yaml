@@ -1,0 +1,219 @@
+general:
+  clock_format_24_h: true
+  weather_location_query:
+    type: Coordinates
+    lat: 40.9974
+    lon: 29.0989
+  temperature_unit: Metric
+theme:
+  icons:
+    shell_icon_theme: OkMaterial
+    app_icon_theme: kora
+    apply_theme_filter: false
+    filter_strength: 1.0
+    monochrome_strength: 0.0
+    contrast_strength: 1.0
+  theme: OneDark
+  matugen:
+    preference: Darkness
+    scheme_type: TonalSpot
+    mode: Dark
+    contrast: 0.0
+  css_file: ''
+  attributes:
+    font:
+      primary: Maple Mono NF
+      secondary: Maple Mono NF
+      tertiary: Maple Mono NF
+    sizing:
+      radius_widget: 8
+      radius_window: 8
+      border_width: 2
+    window_opacity: 1.0
+bars:
+  frame:
+    enable_frame: true
+    monitor_filter: []
+  widgets:
+    quick_settings:
+      icon: Arch
+  top_bar:
+    minimum_height: 38
+    reveal_by_default: true
+    left_widgets:
+    - MargoTags
+    - MargoLayoutSwitcher
+    - ActiveWindow
+    - MediaPlayer
+    center_widgets:
+    - QuickSettings
+    - Clock
+    - Notifications
+    right_widgets:
+    - Nnetwork
+    - RecordingIndicator
+    - Screenshot
+    - Wallpaper
+    - Clipboard
+    - AudioInput
+    - AudioOutput
+    - Bluetooth
+    - VpnIndicator
+    - Battery
+    - Npower
+    - Nip
+    - Nnotes
+    - Npodman
+    - Ndns
+    - Nufw
+    - Tray
+  bottom_bar:
+    minimum_height: 0
+    reveal_by_default: false
+    left_widgets: []
+    center_widgets: []
+    right_widgets: []
+menus:
+  clock_menu:
+    position: Top
+    widgets:
+    - Calendar
+    - !Spacer
+      size: 20
+    - Weather
+    minimum_width: 410
+  clipboard_menu:
+    position: Top
+    widgets:
+    - Clipboard
+    - Nufw
+    minimum_width: 410
+  quick_settings_menu:
+    position: Top
+    widgets:
+    - Clock
+    - Network
+    - Bluetooth
+    - AudioOutput
+    - AudioInput
+    - PowerProfiles
+    - MediaPlayer
+    - !Spacer
+      size: 20
+    - !QuickActions
+      widgets:
+      - AirplaneMode
+      - Nightlight
+      - HyprPicker
+      - Settings
+    - !Spacer
+      size: 20
+    - !QuickActions
+      widgets:
+      - Logout
+      - Lock
+      - Reboot
+      - Shutdown
+    minimum_width: 410
+  notification_menu:
+    position: TopRight
+    widgets:
+    - Notifications
+    minimum_width: 410
+  screenshot_menu:
+    position: Top
+    widgets:
+    - Screenshots
+    - Divider
+    - ScreenRecording
+    minimum_width: 410
+  app_launcher_menu:
+    position: Top
+    widgets:
+    - AppLauncher
+    minimum_width: 410
+  wallpaper_menu:
+    position: Top
+    widgets:
+    - ThemePicker
+    - Wallpaper
+    minimum_width: 1200
+  screenshare_menu:
+    position: TopRight
+  nufw_menu:
+    position: Top
+    widgets:
+    - Nufw
+    minimum_width: 410
+  ndns_menu:
+    position: Top
+    widgets:
+    - Ndns
+    minimum_width: 420
+  npodman_menu:
+    position: Top
+    widgets:
+    - Npodman
+    minimum_width: 540
+  nnotes_menu:
+    position: Top
+    widgets:
+    - Nnotes
+    minimum_width: 540
+  nip_menu:
+    position: TopRight
+    widgets:
+    - Nip
+    minimum_width: 380
+  nnetwork_menu:
+    position: Top
+    widgets:
+    - Nnetwork
+    minimum_width: 460
+  npower_menu:
+    position: TopRight
+    widgets:
+    - Npower
+    minimum_width: 360
+  media_player_menu:
+    position: Top
+    widgets:
+    - MediaPlayer
+    minimum_width: 460
+  session_menu:
+    position: Top
+    widgets:
+    - Session
+    minimum_width: 420
+  left_menu_expansion_type: AlwaysExpanded
+  right_menu_expansion_type: AlwaysExpanded
+notifications:
+  notification_position: Right
+wallpaper:
+  wallpaper_dir: /home/kenan/Pictures/wallpapers/others
+  content_fit: Cover
+  apply_theme_filter: false
+  theme_filter_strength: 1.0
+  rotation_enabled: true
+  rotation_interval_minutes: 5
+  rotation_mode: Sequential
+tempo:
+  clock_format: '%a %d %b %H:%M'
+  formats:
+  - '%H:%M'
+  - '%H:%M:%S'
+  - '%a %d %b %H:%M'
+  - '%d.%m.%Y %H:%M'
+idle:
+  dim_enabled: true
+  dim_timeout_minutes: 15
+  lock_enabled: true
+  lock_timeout_minutes: 20
+  suspend_enabled: true
+  suspend_timeout_minutes: 30
+session:
+  lock_command: ''
+  logout_command: ''
+  suspend_command: osc-safe-reboot
+  reboot_command: ''
+  shutdown_command: ''

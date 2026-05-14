@@ -1,0 +1,26 @@
+[Unit]
+Description=mshell — margo's bar / shell (relm4 + GTK4 layer-shell)
+# NOT ordered After=margo-status-notifier-ready.service on purpose:
+# mshell *provides* the org.kde.StatusNotifierWatcher that gate waits
+# for, so depending on it deadlocked startup — the gate timed out
+# after 20s before mshell could even start. The gate stays for the
+# real consumers (margo-nm-applet etc.); mshell is the producer.
+After=graphical-session.target margo-shell-ensure.service dbus.service
+PartOf=margo-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionEnvironment=XDG_SESSION_DESKTOP=margo
+ConditionPathExists=/usr/bin/mshell
+
+[Service]
+Type=simple
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin:%h/bin
+ExecStart=/usr/bin/mshell
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=5
+StandardOutput=journal
+StandardError=journal
+Slice=session.slice
+
+[Install]
+WantedBy=margo-session.target
