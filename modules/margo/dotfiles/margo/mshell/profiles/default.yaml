@@ -5,15 +5,18 @@ general:
     lat: 40.9974
     lon: 29.0989
   temperature_unit: Metric
+  show_screen_corners: false
+  screen_corner_radius: 24
+  network_osd_enabled: false
 theme:
   icons:
-    shell_icon_theme: OkMaterial
+    shell_icon_theme: MargoMaterial
     app_icon_theme: kora
     apply_theme_filter: false
     filter_strength: 1.0
     monochrome_strength: 0.0
     contrast_strength: 1.0
-  theme: OneDark
+  theme: Default
   matugen:
     preference: Darkness
     scheme_type: TonalSpot
@@ -29,6 +32,7 @@ theme:
       radius_widget: 8
       radius_window: 8
       border_width: 2
+      settings_font_scale: 1.0
     window_opacity: 1.0
 bars:
   frame:
@@ -37,6 +41,8 @@ bars:
   widgets:
     quick_settings:
       icon: Arch
+    system_update:
+      check_interval_minutes: 180
   top_bar:
     minimum_height: 38
     reveal_by_default: true
@@ -60,6 +66,7 @@ bars:
     - Bluetooth
     - VpnIndicator
     - Battery
+    - SystemUpdate
     - Npower
     - Nip
     - Nnotes
@@ -82,12 +89,13 @@ menus:
       size: 20
     - Weather
     minimum_width: 410
+    maximum_height: 0
   clipboard_menu:
     position: Top
     widgets:
     - Clipboard
-    - Nufw
-    minimum_width: 410
+    minimum_width: 600
+    maximum_height: 520
   quick_settings_menu:
     position: Top
     widgets:
@@ -104,7 +112,7 @@ menus:
       widgets:
       - AirplaneMode
       - Nightlight
-      - HyprPicker
+      - ColorPicker
       - Settings
     - !Spacer
       size: 20
@@ -115,11 +123,13 @@ menus:
       - Reboot
       - Shutdown
     minimum_width: 410
+    maximum_height: 0
   notification_menu:
     position: TopRight
     widgets:
     - Notifications
     minimum_width: 410
+    maximum_height: 0
   screenshot_menu:
     position: Top
     widgets:
@@ -127,17 +137,20 @@ menus:
     - Divider
     - ScreenRecording
     minimum_width: 410
+    maximum_height: 0
   app_launcher_menu:
     position: Top
     widgets:
     - AppLauncher
-    minimum_width: 410
+    minimum_width: 800
+    maximum_height: 1080
   wallpaper_menu:
     position: Top
     widgets:
     - ThemePicker
     - Wallpaper
     minimum_width: 1200
+    maximum_height: 0
   screenshare_menu:
     position: TopRight
   nufw_menu:
@@ -145,46 +158,113 @@ menus:
     widgets:
     - Nufw
     minimum_width: 410
+    maximum_height: 0
   ndns_menu:
     position: Top
     widgets:
     - Ndns
     minimum_width: 420
+    maximum_height: 0
   npodman_menu:
     position: Top
     widgets:
     - Npodman
     minimum_width: 540
+    maximum_height: 0
   nnotes_menu:
     position: Top
     widgets:
     - Nnotes
     minimum_width: 540
+    maximum_height: 0
   nip_menu:
     position: TopRight
     widgets:
     - Nip
     minimum_width: 380
+    maximum_height: 0
   nnetwork_menu:
     position: Top
     widgets:
     - Nnetwork
     minimum_width: 460
+    maximum_height: 0
   npower_menu:
     position: TopRight
     widgets:
     - Npower
     minimum_width: 360
+    maximum_height: 0
   media_player_menu:
     position: Top
     widgets:
     - MediaPlayer
     minimum_width: 460
+    maximum_height: 0
   session_menu:
     position: Top
     widgets:
     - Session
     minimum_width: 420
+    maximum_height: 0
+  settings_menu:
+    position: Top
+    widgets: []
+    minimum_width: 780
+    maximum_height: 0
+  dashboard_menu:
+    position: Top
+    widgets:
+    - Clock
+    - !Spacer
+      size: 10
+    - !Container
+      widgets:
+      - !Container
+        widgets:
+        - CalendarGrid
+        - Weather
+        - MediaPlayer
+        spacing: 10
+        orientation: Vertical
+        minimum_width: 400
+      - !Container
+        widgets:
+        - Network
+        - Bluetooth
+        - AudioOutput
+        - AudioInput
+        - PowerProfiles
+        - !Spacer
+          size: 20
+        - !QuickActions
+          widgets:
+          - AirplaneMode
+          - Nightlight
+          - ColorPicker
+          - Settings
+        - !Spacer
+          size: 20
+        - !QuickActions
+          widgets:
+          - Logout
+          - Lock
+          - Reboot
+          - Shutdown
+        spacing: 8
+        orientation: Vertical
+        minimum_width: 400
+      spacing: 12
+      orientation: Horizontal
+      minimum_width: 0
+    minimum_width: 860
+    maximum_height: 0
+  margo_layout_menu:
+    position: Top
+    widgets:
+    - MargoLayout
+    minimum_width: 280
+    maximum_height: 0
   left_menu_expansion_type: AlwaysExpanded
   right_menu_expansion_type: AlwaysExpanded
 notifications:
@@ -214,6 +294,6 @@ idle:
 session:
   lock_command: ''
   logout_command: ''
-  suspend_command: osc-safe-reboot
-  reboot_command: ''
-  shutdown_command: ''
+  suspend_command: systemctl suspend -i
+  reboot_command: osc-safe-reboot
+  shutdown_command: systemctl poweroff -i
