@@ -52,27 +52,26 @@ bars:
     - ActiveWindow
     - MediaPlayer
     center_widgets:
-    - QuickSettings
-    - Clock
+    - Dashboard
     - Notifications
+    - KeepAwake
     right_widgets:
     - Nnetwork
+    - CpuDashboard
     - RecordingIndicator
     - Screenshot
     - Wallpaper
     - Clipboard
-    - AudioInput
-    - AudioOutput
+    - AudioDashboard
     - Bluetooth
     - VpnIndicator
-    - Battery
     - SystemUpdate
-    - Npower
     - Nip
     - Nnotes
     - Npodman
     - Ndns
     - Nufw
+    - Npower
     - Tray
   bottom_bar:
     minimum_height: 0
@@ -91,11 +90,11 @@ menus:
     minimum_width: 410
     maximum_height: 0
   clipboard_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Clipboard
-    minimum_width: 600
-    maximum_height: 520
+    minimum_width: 550
+    maximum_height: 890
   quick_settings_menu:
     position: Top
     widgets:
@@ -154,25 +153,25 @@ menus:
   screenshare_menu:
     position: TopRight
   nufw_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Nufw
     minimum_width: 410
     maximum_height: 0
   ndns_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Ndns
     minimum_width: 420
     maximum_height: 0
   npodman_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Npodman
     minimum_width: 540
     maximum_height: 0
   nnotes_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Nnotes
     minimum_width: 540
@@ -184,7 +183,7 @@ menus:
     minimum_width: 380
     maximum_height: 0
   nnetwork_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Nnetwork
     minimum_width: 460
@@ -195,8 +194,26 @@ menus:
     - Npower
     minimum_width: 360
     maximum_height: 0
+  bluetooth_menu:
+    position: TopRight
+    widgets:
+    - Bluetooth
+    minimum_width: 400
+    maximum_height: 0
+  cpu_dashboard_menu:
+    position: TopRight
+    widgets:
+    - CpuDashboard
+    minimum_width: 380
+    maximum_height: 0
+  audio_dashboard_menu:
+    position: TopRight
+    widgets:
+    - AudioDashboard
+    minimum_width: 400
+    maximum_height: 0
   media_player_menu:
-    position: Top
+    position: TopLeft
     widgets:
     - MediaPlayer
     minimum_width: 460
@@ -217,50 +234,51 @@ menus:
     widgets:
     - Clock
     - !Spacer
-      size: 10
+      size: 8
     - !Container
       widgets:
       - !Container
         widgets:
         - CalendarGrid
         - Weather
-        - MediaPlayer
         spacing: 10
         orientation: Vertical
         minimum_width: 400
+        homogeneous: false
+        fill: true
       - !Container
         widgets:
-        - Network
-        - Bluetooth
-        - AudioOutput
-        - AudioInput
-        - PowerProfiles
-        - !Spacer
-          size: 20
-        - !QuickActions
-          widgets:
-          - AirplaneMode
-          - Nightlight
-          - ColorPicker
-          - Settings
-        - !Spacer
-          size: 20
-        - !QuickActions
-          widgets:
-          - Logout
-          - Lock
-          - Reboot
-          - Shutdown
+        - OverviewIntel
+        - Connectivity
+        - CompactAudio
+        - SystemStatus
+        - MediaPlayer
         spacing: 8
         orientation: Vertical
         minimum_width: 400
+        homogeneous: false
+        fill: true
       spacing: 12
       orientation: Horizontal
       minimum_width: 0
+      homogeneous: true
+      fill: false
+    - !Spacer
+      size: 10
+    - !QuickActions
+      widgets:
+      - AirplaneMode
+      - Nightlight
+      - ColorPicker
+      - Settings
+      - Logout
+      - Lock
+      - Reboot
+      - Shutdown
     minimum_width: 860
     maximum_height: 0
   margo_layout_menu:
-    position: Top
+    position: TopLeft
     widgets:
     - MargoLayout
     minimum_width: 280
@@ -297,3 +315,10 @@ session:
   suspend_command: systemctl suspend -i
   reboot_command: osc-safe-reboot
   shutdown_command: systemctl poweroff -i
+clipboard:
+  max_entries: 1000
+  persist: FavoritesOnly
+  clear_policy: Never
+  clear_after_hours: 24
+  skip_sensitive: true
+  image_history: true
