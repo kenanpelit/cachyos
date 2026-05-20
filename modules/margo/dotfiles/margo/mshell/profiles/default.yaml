@@ -39,12 +39,13 @@ bars:
     enable_frame: true
     monitor_filter: []
   widgets:
-    quick_settings:
-      icon: Arch
     system_update:
       check_interval_minutes: 180
+      check_repo: true
+      check_aur: true
+      check_flatpak: false
   top_bar:
-    minimum_height: 38
+    minimum_height: 40
     reveal_by_default: true
     left_widgets:
     - MargoTags
@@ -55,8 +56,9 @@ bars:
     - Dashboard
     - Notifications
     - KeepAwake
+    - Valent
     right_widgets:
-    - Nnetwork
+    - Network
     - CpuDashboard
     - RecordingIndicator
     - Screenshot
@@ -66,12 +68,12 @@ bars:
     - Bluetooth
     - VpnIndicator
     - SystemUpdate
-    - Nip
-    - Nnotes
-    - Npodman
-    - Ndns
-    - Nufw
-    - Npower
+    - Ip
+    - Notes
+    - Podman
+    - Dns
+    - Ufw
+    - Power
     - Tray
   bottom_bar:
     minimum_height: 0
@@ -93,36 +95,8 @@ menus:
     position: TopRight
     widgets:
     - Clipboard
-    minimum_width: 550
-    maximum_height: 890
-  quick_settings_menu:
-    position: Top
-    widgets:
-    - Clock
-    - Network
-    - Bluetooth
-    - AudioOutput
-    - AudioInput
-    - PowerProfiles
-    - MediaPlayer
-    - !Spacer
-      size: 20
-    - !QuickActions
-      widgets:
-      - AirplaneMode
-      - Nightlight
-      - ColorPicker
-      - Settings
-    - !Spacer
-      size: 20
-    - !QuickActions
-      widgets:
-      - Logout
-      - Lock
-      - Reboot
-      - Shutdown
-    minimum_width: 410
-    maximum_height: 0
+    minimum_width: 540
+    maximum_height: 1080
   notification_menu:
     position: TopRight
     widgets:
@@ -152,46 +126,46 @@ menus:
     maximum_height: 0
   screenshare_menu:
     position: TopRight
-  nufw_menu:
+  ufw_menu:
     position: TopRight
     widgets:
-    - Nufw
+    - Ufw
     minimum_width: 410
     maximum_height: 0
-  ndns_menu:
+  dns_menu:
     position: TopRight
     widgets:
-    - Ndns
+    - Dns
     minimum_width: 420
     maximum_height: 0
-  npodman_menu:
+  podman_menu:
     position: TopRight
     widgets:
-    - Npodman
+    - Podman
     minimum_width: 540
     maximum_height: 0
-  nnotes_menu:
+  notes_menu:
     position: TopRight
     widgets:
-    - Nnotes
+    - Notes
     minimum_width: 540
     maximum_height: 0
-  nip_menu:
+  ip_menu:
     position: TopRight
     widgets:
-    - Nip
+    - Ip
     minimum_width: 380
     maximum_height: 0
-  nnetwork_menu:
+  network_menu:
     position: TopRight
     widgets:
-    - Nnetwork
+    - Network
     minimum_width: 460
     maximum_height: 0
-  npower_menu:
+  power_menu:
     position: TopRight
     widgets:
-    - Npower
+    - Power
     minimum_width: 360
     maximum_height: 0
   bluetooth_menu:
@@ -211,6 +185,24 @@ menus:
     widgets:
     - AudioDashboard
     minimum_width: 400
+    maximum_height: 0
+  system_update_menu:
+    position: TopRight
+    widgets:
+    - SystemUpdate
+    minimum_width: 460
+    maximum_height: 620
+  valent_menu:
+    position: Top
+    widgets:
+    - Valent
+    minimum_width: 460
+    maximum_height: 620
+  keep_awake_menu:
+    position: Top
+    widgets:
+    - KeepAwake
+    minimum_width: 450
     maximum_height: 0
   media_player_menu:
     position: TopLeft
@@ -287,6 +279,7 @@ menus:
   right_menu_expansion_type: AlwaysExpanded
 notifications:
   notification_position: Right
+  blocklist: []
 wallpaper:
   wallpaper_dir: /home/kenan/Pictures/wallpapers/others
   content_fit: Cover
@@ -317,8 +310,39 @@ session:
   shutdown_command: systemctl poweroff -i
 clipboard:
   max_entries: 1000
-  persist: FavoritesOnly
+  persist: All
   clear_policy: Never
   clear_after_hours: 24
   skip_sensitive: true
   image_history: true
+launcher:
+  autostart_scripts:
+  - name: start-helium-compecta
+    enabled: false
+    delay_secs: 5
+  - name: start-helium-kenp
+    enabled: false
+    delay_secs: 2
+  - name: start-kkenp
+    enabled: false
+    delay_secs: 3
+  - name: start-spotify
+    enabled: false
+    delay_secs: 9
+  - name: start-webcord
+    enabled: false
+    delay_secs: 6
+  - name: start-helium-youtube
+    enabled: false
+    delay_secs: 8
+  - name: start-ferdium
+    enabled: false
+    delay_secs: 10
+  - name: start-helium-ai
+    enabled: false
+    delay_secs: 4
+  - name: start-helium-nil
+    enabled: false
+    delay_secs: 0
+valent:
+  main_device_id: ''
