@@ -16,7 +16,7 @@ margo_ensure_runtime_dir
 margo_clear_foreign_session_env
 margo_load_session_env
 margo_normalize_session_paths
-export XDG_CURRENT_DESKTOP=margo:mango
+export XDG_CURRENT_DESKTOP=margo
 export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=margo
 export DESKTOP_SESSION=margo-uwsm
@@ -102,10 +102,10 @@ if command -v uwsm >/dev/null 2>&1; then
     margo-session|start-margo)
       # margo-session and start-margo both absorb the config path
       # themselves; uwsm just needs the binary name.
-      exec uwsm start -D margo:mango -e -- "${session_cmd}"
+      exec uwsm start -D margo -e -- "${session_cmd}"
       ;;
     margo)
-      exec uwsm start -D margo:mango -e -- \
+      exec uwsm start -D margo -e -- \
         margo -c "${HOME}/.config/margo/config.conf"
       ;;
     *)

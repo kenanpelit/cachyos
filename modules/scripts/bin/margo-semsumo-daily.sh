@@ -10,7 +10,7 @@
 #       no zombie helium/electron renderers after logout.
 #     * Logs go to journald (`journalctl --user -u app-uwsm-semsumo-daily-*`)
 #       in addition to ~/.local/state/semsumo/.
-#     * `XDG_CURRENT_DESKTOP=margo:mango` is preserved through systemd
+#     * `XDG_CURRENT_DESKTOP=margo` is preserved through systemd
 #       --user activation so portals that key off it (xdg-desktop-portal,
 #       gnome-keyring) authenticate against the right session.
 #

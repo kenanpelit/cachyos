@@ -169,10 +169,10 @@ detect_window_manager() {
     WM_TYPE="niri"
     log "INFO" "DETECT" "Detected Niri window manager"
   elif [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
-    # Margo MUST be checked before mango: the user's session sets
-    # XDG_CURRENT_DESKTOP=margo:mango (mango is listed for legacy
-    # tooling fallbacks), and both compositors speak dwl-ipc-v2 so
-    # a stray `mmsg -g` might succeed against margo. The two IPC
+    # The margo session sets XDG_CURRENT_DESKTOP=margo. The `*margo*`
+    # glob is kept defensively (it also matched the old margo:mango
+    # value), and margo + mango both speak dwl-ipc-v2 so a stray
+    # `mmsg -g` might succeed against margo. The two IPC
     # clients differ in tag-mask semantics — `mmsg -s -t 8` sets
     # tag bitmask 8 (= bit 3 = tag 4), while margo's dispatch
     # convention is `mctl tags <1 << (tag - 1)>` (1<<7=128 for
