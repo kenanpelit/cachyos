@@ -128,7 +128,7 @@ menus:
     minimum_width: 1200
     maximum_height: 0
   screenshare_menu:
-    position: TopRight
+    position: Top
   ufw_menu:
     position: TopRight
     widgets:
