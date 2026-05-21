@@ -73,6 +73,7 @@ bars:
     - Ip
     - Notes
     - Podman
+    - SshSessions
     - Dns
     - Ufw
     - Power
@@ -217,6 +218,12 @@ menus:
     widgets:
     - Keybinds
     minimum_width: 720
+    maximum_height: 1080
+  ssh_menu:
+    position: TopRight
+    widgets:
+    - SshSessions
+    minimum_width: 460
     maximum_height: 720
   media_player_menu:
     position: TopLeft
