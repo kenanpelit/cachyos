@@ -57,6 +57,8 @@ bars:
     - Notifications
     - KeepAwake
     - Valent
+    - Twilight
+    - Keybinds
     right_widgets:
     - Network
     - CpuDashboard
@@ -204,6 +206,18 @@ menus:
     - KeepAwake
     minimum_width: 450
     maximum_height: 0
+  twilight_menu:
+    position: Top
+    widgets:
+    - Twilight
+    minimum_width: 360
+    maximum_height: 0
+  keybinds_menu:
+    position: Top
+    widgets:
+    - Keybinds
+    minimum_width: 720
+    maximum_height: 720
   media_player_menu:
     position: TopLeft
     widgets:
@@ -297,9 +311,9 @@ tempo:
   - '%d.%m.%Y %H:%M'
 idle:
   dim_enabled: true
-  dim_timeout_minutes: 15
+  dim_timeout_minutes: 20
   lock_enabled: true
-  lock_timeout_minutes: 20
+  lock_timeout_minutes: 25
   suspend_enabled: true
   suspend_timeout_minutes: 30
 session:
