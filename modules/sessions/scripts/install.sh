@@ -89,14 +89,21 @@ remove_user_session "gnome-optimized.desktop"
 install_session "${DOTFILES_DIR}/niri-uwsm.desktop" "Niri (UWSM)"
 install_session "${DOTFILES_DIR}/hyprland-uwsm.desktop" "Hyprland (UWSM)"
 install_session "${DOTFILES_DIR}/mango-uwsm.desktop" "MangoWM (UWSM)"
-install_session "${DOTFILES_DIR}/margo-uwsm.desktop" "Margo (UWSM)"
+# margo's uwsm session entry is now shipped by the margo PACKAGE itself
+# (PKGBUILD → /usr/share/wayland-sessions/margo-uwsm.desktop). Installing
+# it here too would collide with pacman on that file ("exists in
+# filesystem"). Leave margo's session entry to the package.
+# install_session "${DOTFILES_DIR}/margo-uwsm.desktop" "Margo (UWSM)"
 
 install_wrapper "${DOTFILES_DIR}/niri-uwsm-session" "niri-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/hyprland-uwsm-session" "hyprland-uwsm-session"
 install_wrapper "${DOTFILES_DIR}/mango-session" "mango-session"
 install_wrapper "${DOTFILES_DIR}/mango-uwsm-session" "mango-uwsm-session"
-install_wrapper "${DOTFILES_DIR}/margo-session" "margo-session"
-install_wrapper "${DOTFILES_DIR}/margo-uwsm-session" "margo-uwsm-session"
+# margo-session / margo-uwsm-session are now shipped by the margo PACKAGE
+# (installed to /usr/bin). Don't drop the dotfiles copies into
+# /usr/local/bin — they would shadow the packaged ones on PATH.
+# install_wrapper "${DOTFILES_DIR}/margo-session" "margo-session"
+# install_wrapper "${DOTFILES_DIR}/margo-uwsm-session" "margo-uwsm-session"
 
 run_root rm -f "${LOCAL_BIN_DIR}/niri-optimized-session"
 remove_wrapper "gnome-optimized-session"
