@@ -1,9 +1,9 @@
 general:
   clock_format_24_h: true
   weather_location_query:
-    type: Coordinates
-    lat: 40.9974
-    lon: 29.0989
+    type: City
+    name: Atasehir
+    country: TR
   temperature_unit: Metric
   show_screen_corners: false
   screen_corner_radius: 24
@@ -29,10 +29,11 @@ theme:
       secondary: Maple Mono NF
       tertiary: Maple Mono NF
     sizing:
-      radius_widget: 8
-      radius_window: 8
+      radius_widget: 12
+      radius_window: 12
       border_width: 2
-      settings_font_scale: 1.0
+      bar_hover_strength: 14
+      settings_font_scale: 1.05
     window_opacity: 1.0
 bars:
   frame:
@@ -48,32 +49,27 @@ bars:
     minimum_height: 40
     reveal_by_default: true
     left_widgets:
+    - Twilight
     - MargoTags
     - MargoLayoutSwitcher
     - ActiveWindow
     - MediaPlayer
     center_widgets:
+    - Weather
     - Dashboard
     - Notifications
     - KeepAwake
-    - Valent
-    - Twilight
-    - Keybinds
     right_widgets:
     - Network
     - CpuDashboard
     - RecordingIndicator
-    - Screenshot
-    - Wallpaper
     - Clipboard
+    - Valent
     - AudioDashboard
     - Bluetooth
     - VpnIndicator
-    - SystemUpdate
-    - Ip
     - Notes
     - Podman
-    - SshSessions
     - Dns
     - Ufw
     - Power
@@ -98,7 +94,7 @@ menus:
     position: TopRight
     widgets:
     - Clipboard
-    minimum_width: 540
+    minimum_width: 520
     maximum_height: 1080
   notification_menu:
     position: TopRight
@@ -196,7 +192,7 @@ menus:
     minimum_width: 460
     maximum_height: 620
   valent_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Valent
     minimum_width: 460
@@ -207,8 +203,14 @@ menus:
     - KeepAwake
     minimum_width: 450
     maximum_height: 0
-  twilight_menu:
+  weather_menu:
     position: Top
+    widgets:
+    - Weather
+    minimum_width: 380
+    maximum_height: 0
+  twilight_menu:
+    position: TopLeft
     widgets:
     - Twilight
     minimum_width: 360
@@ -217,8 +219,8 @@ menus:
     position: Top
     widgets:
     - Keybinds
-    minimum_width: 720
-    maximum_height: 1080
+    minimum_width: 820
+    maximum_height: 1440
   ssh_menu:
     position: TopRight
     widgets:
@@ -283,6 +285,8 @@ menus:
       - AirplaneMode
       - Nightlight
       - ColorPicker
+      - Wallpaper
+      - Screenshot
       - Settings
       - Logout
       - Lock
@@ -301,6 +305,10 @@ menus:
 notifications:
   notification_position: Right
   blocklist: []
+  show_close_button: true
+  show_action_buttons: false
+  group_notifications: false
+  popup_width: 460
 wallpaper:
   wallpaper_dir: /home/kenan/Pictures/wallpapers/others
   content_fit: Cover
@@ -336,6 +344,7 @@ clipboard:
   clear_after_hours: 24
   skip_sensitive: true
   image_history: true
+  density: Comfortable
 launcher:
   autostart_scripts:
   - name: start-helium-compecta

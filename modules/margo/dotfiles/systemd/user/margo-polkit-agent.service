@@ -1,21 +1,20 @@
+# margo ships its own in-process polkit agent: mshell-polkit, started by
+# the mshell process (mshell-core registers it for the logind Display
+# session). Running polkit-gnome here as a SECOND agent made the two fight
+# over the session — polkit-gnome won and popped an unthemed dialog that
+# did not fit its window. This unit is intentionally neutered so the only
+# polkit agent is mshell's.
+#
+# To apply on the running session:
+#   systemctl --user daemon-reload
+#   systemctl --user disable --now margo-polkit-agent.service
+#   systemctl --user restart mshell      # mshell-polkit grabs the session
 [Unit]
-Description=Polkit authentication agent (polkit-gnome)
-BindsTo=wayland-wm@margo\x2dsession.service
-After=graphical-session.target wayland-wm@margo\x2dsession.service dbus.service
-PartOf=margo-session.target graphical-session.target wayland-wm@margo\x2dsession.service
-ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=XDG_SESSION_DESKTOP=margo
+Description=Polkit agent (disabled — margo uses mshell's in-process agent)
+# Belt-and-suspenders: never execute, even if something still pulls this
+# unit in as a dependency.
+ConditionPathExists=/nonexistent
 
 [Service]
-NoNewPrivileges=yes
-RestrictRealtime=yes
-RestrictSUIDSGID=yes
-ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-SuccessExitStatus=1
-Restart=on-abnormal
-RestartSec=1
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=margo-session.target
+Type=oneshot
+ExecStart=/bin/true
