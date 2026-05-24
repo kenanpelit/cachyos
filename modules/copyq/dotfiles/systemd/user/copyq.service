@@ -1,8 +1,13 @@
 [Unit]
 Description=CopyQ clipboard manager daemon
 After=graphical-session.target niri-session-env.service hypr-session-env.service dbus.service
-PartOf=graphical-session.target niri-session.target hyprland-session.target margo-session.target
+PartOf=graphical-session.target niri-session.target hyprland-session.target
 Requisite=graphical-session.target
+# margo ships its own clipboard history (mshell-clipboard), so CopyQ is
+# redundant there. Skip the unit when the session is margo — it still
+# starts under niri / Hyprland / any other desktop. (graphical-session
+# .target would otherwise pull it in for every session, margo included.)
+ConditionEnvironment=!XDG_CURRENT_DESKTOP=margo
 
 [Service]
 Type=simple
@@ -19,4 +24,3 @@ StandardError=journal
 WantedBy=graphical-session.target
 WantedBy=niri-session.target
 WantedBy=hyprland-session.target
-WantedBy=margo-session.target

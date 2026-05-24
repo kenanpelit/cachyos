@@ -57,7 +57,7 @@ enabled_modules:
   - rofi
   #- walker
   - noctalia
-  - lemurs
+  #- lemurs
   - fusuma
   - bt
   - connect

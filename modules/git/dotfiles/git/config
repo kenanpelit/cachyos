@@ -36,3 +36,8 @@
 [user]
 	email = kenanpelit@gmail.com
 	name = Kenan Pelit
+	signingkey = 8E3CB5C05CC793AA
+[commit]
+	gpgsign = true
+[tag]
+	gpgsign = true

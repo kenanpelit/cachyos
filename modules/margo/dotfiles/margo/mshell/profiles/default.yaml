@@ -28,12 +28,15 @@ theme:
       primary: Maple Mono NF
       secondary: Maple Mono NF
       tertiary: Maple Mono NF
+      monospace: ''
     sizing:
       radius_widget: 12
       radius_window: 12
       border_width: 2
       bar_hover_strength: 14
       settings_font_scale: 1.05
+      font_scale: 1.0
+      bar_font_scale: 1.0
     window_opacity: 1.0
 bars:
   frame:
@@ -94,13 +97,13 @@ menus:
     position: TopRight
     widgets:
     - Clipboard
-    minimum_width: 520
+    minimum_width: 280
     maximum_height: 1080
   notification_menu:
     position: TopRight
     widgets:
     - Notifications
-    minimum_width: 410
+    minimum_width: 480
     maximum_height: 0
   screenshot_menu:
     position: Top
@@ -376,3 +379,7 @@ launcher:
     delay_secs: 0
 valent:
   main_device_id: ''
+dock:
+  icon_size: 24
+  show_tooltips: true
+  show_running: true
