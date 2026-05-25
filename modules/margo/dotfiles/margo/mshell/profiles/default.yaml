@@ -1,9 +1,9 @@
 general:
-  clock_format_24_h: true
+  clock_format_24_h: false
   weather_location_query:
-    type: City
-    name: Atasehir
-    country: TR
+    type: Coordinates
+    lat: 0.0
+    lon: 0.0
   temperature_unit: Metric
   show_screen_corners: false
   screen_corner_radius: 24
@@ -11,12 +11,12 @@ general:
 theme:
   icons:
     shell_icon_theme: MargoMaterial
-    app_icon_theme: kora
+    app_icon_theme: MargoMaterial
     apply_theme_filter: false
     filter_strength: 1.0
     monochrome_strength: 0.0
     contrast_strength: 1.0
-  theme: Default
+  theme: Margo
   matugen:
     preference: Darkness
     scheme_type: TonalSpot
@@ -25,16 +25,16 @@ theme:
   css_file: ''
   attributes:
     font:
-      primary: Maple Mono NF
-      secondary: Maple Mono NF
-      tertiary: Maple Mono NF
+      primary: ''
+      secondary: ''
+      tertiary: ''
       monospace: ''
     sizing:
       radius_widget: 12
       radius_window: 12
       border_width: 2
       bar_hover_strength: 14
-      settings_font_scale: 1.05
+      settings_font_scale: 1.0
       font_scale: 1.0
       bar_font_scale: 1.0
     window_opacity: 1.0
@@ -47,39 +47,28 @@ bars:
       check_interval_minutes: 180
       check_repo: true
       check_aur: true
-      check_flatpak: false
+      check_flatpak: true
   top_bar:
-    minimum_height: 40
+    minimum_height: 0
     reveal_by_default: true
     left_widgets:
-    - Twilight
     - MargoTags
-    - MargoLayoutSwitcher
-    - ActiveWindow
-    - MediaPlayer
     center_widgets:
-    - Weather
-    - Dashboard
-    - Notifications
-    - KeepAwake
+    - MargoDock
     right_widgets:
-    - Network
-    - CpuDashboard
     - RecordingIndicator
+    - Tray
+    - Screenshot
+    - Wallpaper
     - Clipboard
-    - Valent
+    - Notifications
     - AudioDashboard
     - Bluetooth
-    - VpnIndicator
-    - Notes
-    - Podman
-    - Dns
-    - Ufw
-    - Power
-    - Tray
+    - Network
+    - Clock
   bottom_bar:
     minimum_height: 0
-    reveal_by_default: false
+    reveal_by_default: true
     left_widgets: []
     center_widgets: []
     right_widgets: []
@@ -97,16 +86,16 @@ menus:
     position: TopRight
     widgets:
     - Clipboard
-    minimum_width: 280
-    maximum_height: 1080
+    minimum_width: 550
+    maximum_height: 890
   notification_menu:
     position: TopRight
     widgets:
     - Notifications
-    minimum_width: 480
+    minimum_width: 410
     maximum_height: 0
   screenshot_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Screenshots
     - Divider
@@ -114,11 +103,11 @@ menus:
     minimum_width: 410
     maximum_height: 0
   app_launcher_menu:
-    position: Top
+    position: TopLeft
     widgets:
     - AppLauncher
-    minimum_width: 800
-    maximum_height: 1080
+    minimum_width: 410
+    maximum_height: 0
   wallpaper_menu:
     position: Top
     widgets:
@@ -127,7 +116,7 @@ menus:
     minimum_width: 1200
     maximum_height: 0
   screenshare_menu:
-    position: Top
+    position: TopRight
   ufw_menu:
     position: TopRight
     widgets:
@@ -150,7 +139,7 @@ menus:
     position: TopRight
     widgets:
     - Notes
-    minimum_width: 540
+    minimum_width: 480
     maximum_height: 0
   ip_menu:
     position: TopRight
@@ -171,19 +160,19 @@ menus:
     minimum_width: 360
     maximum_height: 0
   bluetooth_menu:
-    position: TopRight
+    position: Top
     widgets:
     - Bluetooth
     minimum_width: 400
     maximum_height: 0
   cpu_dashboard_menu:
-    position: TopRight
+    position: Top
     widgets:
     - CpuDashboard
     minimum_width: 380
     maximum_height: 0
   audio_dashboard_menu:
-    position: TopRight
+    position: Top
     widgets:
     - AudioDashboard
     minimum_width: 400
@@ -201,19 +190,19 @@ menus:
     minimum_width: 460
     maximum_height: 620
   keep_awake_menu:
-    position: Top
+    position: TopRight
     widgets:
     - KeepAwake
-    minimum_width: 450
+    minimum_width: 320
     maximum_height: 0
   weather_menu:
-    position: Top
+    position: TopRight
     widgets:
     - Weather
     minimum_width: 380
     maximum_height: 0
   twilight_menu:
-    position: TopLeft
+    position: TopRight
     widgets:
     - Twilight
     minimum_width: 360
@@ -222,8 +211,8 @@ menus:
     position: Top
     widgets:
     - Keybinds
-    minimum_width: 820
-    maximum_height: 1440
+    minimum_width: 720
+    maximum_height: 720
   ssh_menu:
     position: TopRight
     widgets:
@@ -231,10 +220,10 @@ menus:
     minimum_width: 460
     maximum_height: 720
   media_player_menu:
-    position: TopLeft
+    position: TopRight
     widgets:
     - MediaPlayer
-    minimum_width: 460
+    minimum_width: 380
     maximum_height: 0
   session_menu:
     position: Top
@@ -250,7 +239,8 @@ menus:
   dashboard_menu:
     position: Top
     widgets:
-    - Clock
+    - !PanelHeader
+      title: Dashboard
     - !Spacer
       size: 8
     - !Container
@@ -298,7 +288,7 @@ menus:
     minimum_width: 860
     maximum_height: 0
   margo_layout_menu:
-    position: TopLeft
+    position: Top
     widgets:
     - MargoLayout
     minimum_width: 280
@@ -310,14 +300,14 @@ notifications:
   blocklist: []
   show_close_button: true
   show_action_buttons: false
-  group_notifications: false
+  group_notifications: true
   popup_width: 460
 wallpaper:
-  wallpaper_dir: /home/kenan/Pictures/wallpapers/others
+  wallpaper_dir: ''
   content_fit: Cover
   apply_theme_filter: false
   theme_filter_strength: 1.0
-  rotation_enabled: true
+  rotation_enabled: false
   rotation_interval_minutes: 5
   rotation_mode: Sequential
 tempo:
@@ -329,19 +319,19 @@ tempo:
   - '%d.%m.%Y %H:%M'
 idle:
   dim_enabled: true
-  dim_timeout_minutes: 20
+  dim_timeout_minutes: 15
   lock_enabled: true
-  lock_timeout_minutes: 25
+  lock_timeout_minutes: 20
   suspend_enabled: true
   suspend_timeout_minutes: 30
 session:
   lock_command: ''
   logout_command: ''
-  suspend_command: systemctl suspend -i
-  reboot_command: osc-safe-reboot
-  shutdown_command: systemctl poweroff -i
+  suspend_command: ''
+  reboot_command: ''
+  shutdown_command: ''
 clipboard:
-  max_entries: 1000
+  max_entries: 100
   persist: All
   clear_policy: Never
   clear_after_hours: 24
@@ -349,37 +339,12 @@ clipboard:
   image_history: true
   density: Comfortable
 launcher:
-  autostart_scripts:
-  - name: start-helium-compecta
-    enabled: false
-    delay_secs: 5
-  - name: start-helium-kenp
-    enabled: false
-    delay_secs: 2
-  - name: start-kkenp
-    enabled: false
-    delay_secs: 3
-  - name: start-spotify
-    enabled: false
-    delay_secs: 9
-  - name: start-webcord
-    enabled: false
-    delay_secs: 6
-  - name: start-helium-youtube
-    enabled: false
-    delay_secs: 8
-  - name: start-ferdium
-    enabled: false
-    delay_secs: 10
-  - name: start-helium-ai
-    enabled: false
-    delay_secs: 4
-  - name: start-helium-nil
-    enabled: false
-    delay_secs: 0
+  autostart_scripts: []
 valent:
   main_device_id: ''
 dock:
-  icon_size: 24
+  icon_size: 32
   show_tooltips: true
   show_running: true
+pass:
+  store_path: ''

@@ -59,6 +59,18 @@ path=(
   $path
 )
 
+# ----------------------------------------------------------------------
+# Rust Build Cache (sccache)
+#
+# Wrap rustc with sccache when present: it caches non-incremental compile
+# units — mainly crates.io dependencies — so clean builds and branch /
+# worktree switches reuse them. Workspace dev crates stay on incremental
+# (sccache leaves those alone), so the two complement rather than fight.
+# Guarded so cargo still works on a host without sccache (a wrapper that
+# points at a missing binary makes cargo fail hard).
+# ----------------------------------------------------------------------
+command -v sccache >/dev/null 2>&1 && export RUSTC_WRAPPER=sccache
+
 # Do not force kitty-specific TERM from the shell.
 # - kitty.conf already declares a portable terminal type
 # - SSH should always advertise a broadly available TERM
