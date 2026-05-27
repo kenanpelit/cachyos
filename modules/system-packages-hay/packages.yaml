@@ -126,6 +126,7 @@ packages:
 - micro
 - modemmanager
 - modprobed-db
+- mpv-mpris
 - mpvpaper
 - mtools
 - mullvad-browser-bin
