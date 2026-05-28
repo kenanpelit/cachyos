@@ -29,8 +29,6 @@ dotfiles:
     target: ~/.config/systemd/user/margo-audio-init.service
   - source: dotfiles/systemd/user/margo-shell-ensure.service
     target: ~/.config/systemd/user/margo-shell-ensure.service
-  - source: dotfiles/systemd/user/margo-lid-switch-inhibit.service
-    target: ~/.config/systemd/user/margo-lid-switch-inhibit.service
   - source: dotfiles/systemd/user/margo-status-notifier-ready.service
     target: ~/.config/systemd/user/margo-status-notifier-ready.service
   - source: dotfiles/systemd/user/margo-polkit-agent.service
