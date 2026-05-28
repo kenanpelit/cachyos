@@ -119,7 +119,6 @@ packages:
 - lsscsi
 - lvm2
 - malcontent
-- mangowm-git
 - mdadm
 - meld
 - mesa-utils
