@@ -359,7 +359,7 @@ set -g @plugin 'tmux-plugins/tmux-open'                        # Dosya/URL açma
 set -g @plugin 'kenanpelit/tmux-fzf-url'                       # FZF ile URL tarama
 set -g @plugin 'tmux-plugins/tmux-prefix-highlight'            # Prefix tuşu vurgulama
 set -g @plugin 'tmux-plugins/tmux-online-status'               # Çevrimiçi durum göstergesi
-set -g @plugin 'sainnhe/tmux-fzf'                              # FZF entegrasyonu (ana menü)
+set -g @plugin 'kenanpelit/tmux-fzf'                              # FZF entegrasyonu (ana menü)
 set -g @plugin 'kenanpelit/tmux-ssh-status'                    # SSH bağlantı durum göstergesi
 set -g @plugin 'lljbash/tmux-update-display'                   # Display güncelleme desteği
 set -g @plugin 'roosta/tmux-fuzzback'                          # Geçmiş arama (fuzzback)

@@ -78,7 +78,7 @@
 	url = https://git::@github.com/roosta/tmux-fuzzback
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fzf"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-fzf
-	url = https://git::@github.com/sainnhe/tmux-fzf
+	url = https://git::@github.com/kenanpelit/tmux-fzf
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url
 	url = https://git::@github.com/kenanpelit/tmux-fzf-url
