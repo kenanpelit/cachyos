@@ -52,6 +52,7 @@ packages:
 - dosfstools
 - e2fsprogs
 - efitools
+- evtest
 - exfatprogs
 - f2fs-tools
 - ffmpegthumbnailer

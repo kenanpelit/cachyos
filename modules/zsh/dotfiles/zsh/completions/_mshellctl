@@ -1,0 +1,139 @@
+#compdef mshellctl
+# zsh completion for mshellctl
+#
+# Install:
+#   mkdir -p ~/.local/share/zsh/site-functions
+#   cp contrib/completions/_mshellctl ~/.local/share/zsh/site-functions/_mshellctl
+#   # Then ensure that path is in your $fpath (most zsh setups already do).
+#
+# Pulls plugin keys from `mshellctl plugin list --names` so the list
+# stays in sync with whatever's installed in
+# ~/.config/margo/mshell/plugins.
+
+_mshellctl() {
+    # Flat positional dispatch on $words / $CURRENT — every level calls
+    # `_describe` / `_values` directly. No nested `_arguments`/`->state`, which
+    # fzf-tab (and plain compsys) handle far more reliably for deep subcommands:
+    # the first level worked but the second never produced a group otherwise.
+
+    # `mshellctl <TAB>` → top-level subcommand.
+    if (( CURRENT == 2 )); then
+        _mshellctl_subcommands
+        return
+    fi
+
+    # Deeper positions dispatch on the subcommand in $words[2].
+    case ${words[2]} in
+        menu)
+            if (( CURRENT == 3 )); then
+                _mshellctl_menu_subcommands
+            elif (( CURRENT == 4 )) && [[ ${words[3]} == plugin ]]; then
+                _mshellctl_plugin_keys              # `menu plugin <KEY>`
+            fi
+            ;;
+        plugin)
+            if (( CURRENT == 3 )); then
+                _mshellctl_plugin_subcommands
+            elif (( CURRENT == 4 )) && [[ ${words[3]} == (reload|keybind) ]]; then
+                _mshellctl_plugin_keys              # `plugin reload|keybind <KEY>`
+            elif [[ ${words[3]} == list ]]; then
+                _values 'flag' '--names' '--enabled'
+            fi
+            ;;
+        audio)         (( CURRENT == 3 )) && _values 'audio'      volume mute toggle-mute output input help ;;
+        bar)           (( CURRENT == 3 )) && _values 'bar'        show hide toggle help ;;
+        brightness)    (( CURRENT == 3 )) && _values 'brightness' set up down help ;;
+        wallpaper)     (( CURRENT == 3 )) && _values 'wallpaper'  next prev random help ;;
+        settings)      (( CURRENT == 3 )) && _values 'settings'   open close toggle help ;;
+        screenshot)    (( CURRENT == 3 )) && _values 'screenshot' select-region help ;;
+        lock)          (( CURRENT == 3 )) && _values 'lock'       check help ;;
+        media)         (( CURRENT == 3 )) && _values 'media'      play-pause next previous stop help ;;
+        set-wallpaper) (( CURRENT == 3 )) && _files ;;
+        help)          (( CURRENT == 3 )) && _mshellctl_subcommands ;;
+    esac
+}
+
+_mshellctl_subcommands() {
+    local -a subs
+    subs=(
+        'audio:adjust output / input audio'
+        'bar:show / hide / toggle bars'
+        'brightness:set / step backlight'
+        'inspect:open the GTK inspector'
+        'lock:lock the session (or check state)'
+        'media:control MPRIS players'
+        'menu:open / close / toggle a menu'
+        'plugin:list / reload / fire a keybind on an installed plugin'
+        'quit:kill mshell'
+        'screenshot:bridge helpers for mscreenshot'
+        'set-wallpaper:set the current wallpaper to a path'
+        'settings:open / close / toggle the settings window'
+        'wallpaper:cycle wallpapers'
+        'wizard:open the in-shell setup wizard'
+        'help:show subcommand help'
+    )
+    _describe -t subcommands 'mshellctl subcommand' subs
+}
+
+_mshellctl_menu_subcommands() {
+    local -a subs
+    subs=(
+        'app-launcher:toggle the app launcher menu'
+        'clipboard:toggle the clipboard menu'
+        'clock:toggle the clock menu'
+        'notifications:toggle the notifications menu'
+        'screenshot:toggle the screenshot menu'
+        'wallpaper:toggle the wallpaper menu'
+        'ufw:toggle the UFW firewall menu'
+        'bluetooth:toggle the Bluetooth menu'
+        'cpu-dashboard:toggle the CPU dashboard menu'
+        'audio-dashboard:toggle the audio dashboard menu'
+        'system-update:toggle the system updates menu'
+        'valent:toggle the Valent Connect menu'
+        'keep-awake:toggle the keep-awake menu'
+        'twilight:toggle the twilight menu'
+        'weather:toggle the weather menu'
+        'keybinds:toggle the keybinds menu'
+        'alarm-clock:toggle the alarm clock menu'
+        'control-center:toggle the control center menu'
+        'ssh-sessions:toggle the SSH sessions menu'
+        'dns:toggle the DNS menu'
+        'podman:toggle the Podman menu'
+        'notes:toggle the notes menu'
+        'ip:toggle the IP menu'
+        'network:toggle the network menu'
+        'power:toggle the power menu'
+        'media-player:toggle the media-player menu'
+        'session:toggle the session menu'
+        'dashboard:toggle the dashboard menu'
+        'mshelldash:toggle the mshelldash menu'
+        'plugin:toggle an installed plugin'\''s panel/menu by key'
+    )
+    _describe -t menus 'menu' subs
+}
+
+_mshellctl_plugin_subcommands() {
+    local -a subs
+    subs=(
+        'list:list installed plugins (--names, --enabled)'
+        'reload:force-reload a plugin'\''s WASM panel from disk'
+        'keybind:fire a registered plugin keybind (opens panel + Keybind event)'
+        'help:show subcommand help'
+    )
+    _describe -t plugin-subcommands 'plugin subcommand' subs
+}
+
+_mshellctl_plugin_keys() {
+    local cache_var=_mshellctl_plugin_keys_cache
+    local -a list
+    if [[ -z ${(P)cache_var} ]]; then
+        list=(${(f)"$(mshellctl plugin list --names 2>/dev/null)"})
+        typeset -g $cache_var="${(j: :)list}"
+    else
+        list=(${=${(P)cache_var}})
+    fi
+    _describe -t plugin-keys 'plugin' list
+}
+
+# DO NOT call `_mshellctl "$@"` here. See the note in `_mctl` for why
+# leaving the file body as pure definitions keeps it source-safe.
