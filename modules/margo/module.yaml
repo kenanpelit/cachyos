@@ -35,6 +35,8 @@ dotfiles:
     target: ~/.config/systemd/user/margo-polkit-agent.service
   - source: dotfiles/systemd/user/margo-nm-applet.service
     target: ~/.config/systemd/user/margo-nm-applet.service
+  - source: dotfiles/systemd/user/mpower.service
+    target: ~/.config/systemd/user/mpower.service
   - source: dotfiles/systemd/user/mshell.service.d/10-margo-session.conf
     target: ~/.config/systemd/user/mshell.service.d/10-margo-session.conf
 post_install_hook: scripts/install.sh

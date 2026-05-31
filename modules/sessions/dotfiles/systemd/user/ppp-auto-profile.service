@@ -3,6 +3,9 @@ Description=Auto-switch power profile based on live CPU usage
 After=graphical-session.target
 PartOf=graphical-session.target
 Requisite=graphical-session.target
+# Everywhere EXCEPT margo — under margo, mpower handles power profiles and
+# carries the inverse condition, so the two never fight over powerprofilesctl.
+ConditionEnvironment=!XDG_CURRENT_DESKTOP=margo
 
 [Service]
 Type=oneshot

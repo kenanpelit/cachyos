@@ -1,6 +1,9 @@
 [Unit]
 Description=Periodic power profile chooser
 PartOf=graphical-session.target
+# Mirror the service: only on non-margo sessions (Hyprland/niri/mango/…).
+# Under margo the timer's condition fails, so it never fires.
+ConditionEnvironment=!XDG_CURRENT_DESKTOP=margo
 
 [Timer]
 # İlk çalışma: oturum açıldıktan kısa süre sonra
