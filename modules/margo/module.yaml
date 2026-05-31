@@ -17,8 +17,8 @@ depends_on:
 dotfiles:
   - source: dotfiles/margo/config.conf
     target: ~/.config/margo/config.conf
-  - source: dotfiles/margo/layout_vertical-ext-top.conf
-    target: ~/.config/margo/layout_vertical-ext-top.conf
+  - source: dotfiles/margo/layouts/layout_vertical-ext-top.conf
+    target: ~/.config/margo/layouts/layout_vertical-ext-top.conf
   - source: dotfiles/margo/mshell/profiles/default.yaml
     target: ~/.config/margo/mshell/profiles/default.yaml
   - source: dotfiles/environment.d/10-margo.conf
