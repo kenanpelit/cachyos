@@ -42,6 +42,9 @@ if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
   export LESSCHARSET="utf-8"
   export LESSHISTFILE="-"
   export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  # groff'u backspace-overstrike'a zorla (SGR yerine) — col|bat pager
+  # aksi halde escape kodlarını "4mFOO24m" gibi sızdırır.
+  export MANROFFOPT="-c"
   export MANWIDTH="100"
   export PAGER="less"
   export SAVEHIST="150000"
