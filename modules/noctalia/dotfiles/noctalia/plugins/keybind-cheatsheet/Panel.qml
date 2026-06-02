@@ -140,7 +140,10 @@ Item {
   readonly property string keyColorShiftOverride: cfg.keyColorShift ?? defaults.keyColorShift ?? ""
   readonly property color keyColorDefault: cfg.keyColorDefault || defaults.keyColorDefault || "#6C757D"
   readonly property color keyLabelColor:   cfg.keyLabelColor   || defaults.keyLabelColor   || "#FFFFFF"
-  readonly property color descriptionTextColor: cfg.descriptionTextColor || defaults.descriptionTextColor || "#E0E0E0"
+  // Empty string = theme-aware fallback (Color.mOnSurface). Any non-empty
+  // value is treated as an explicit user override.
+  readonly property string descriptionColorOverride: cfg.descriptionTextColor || defaults.descriptionTextColor || ""
+  readonly property color descriptionTextColor: descriptionColorOverride !== "" ? descriptionColorOverride : Color.mOnSurface
 
   // Per-category text color overrides (empty = fall back to keyLabelColor)
   readonly property string keyTextSuperOverride:   cfg.keyTextSuper   ?? defaults.keyTextSuper   ?? ""

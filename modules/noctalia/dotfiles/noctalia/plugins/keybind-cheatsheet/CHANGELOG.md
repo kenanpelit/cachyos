@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.3] - 2026-05-25
+
+### Fixes
+
+- **Niri: descriptions invisible on light/transparent backgrounds.** Since v3.5.0 the description text color defaulted to a hardcoded `#E0E0E0` (light gray), which is unreadable on light wallpapers shining through a transparent panel. Default is now empty → falls back to `Color.mOnSurface` (theme-aware, always readable). Existing users with a baked-in `#E0E0E0` in their `settings.json` should hit **Reset** on the Description color in Settings → Appearance to pick up the theme-aware default. Reported by @porcaror (#884)
+- **MangoWC: `binds=` / `axisbinds=` / `mousebinds=` (plural) directives now parsed.** MangoWC has two directive families: singular (keycode, QWERTY-mapped) and plural (keysym, layout-aware — used by AZERTY and other non-QWERTY layouts). The parser previously only matched the singular form, so AZERTY configs showed no binds. Both forms are now recognised. Reported by @Pintjebier (#881)
+
 ## [3.7.2] - 2026-05-21
 
 ### Fixes

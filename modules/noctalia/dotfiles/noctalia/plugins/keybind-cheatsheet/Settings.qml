@@ -67,7 +67,7 @@ ColumnLayout {
   property string valueKeyTextMouse:   cfg.keyTextMouse   ?? defaults.keyTextMouse   ?? ""
   property string valueKeyTextDefault: cfg.keyTextDefault ?? defaults.keyTextDefault ?? ""
   property string valueKeyLabelColor:  cfg.keyLabelColor  ?? defaults.keyLabelColor  ?? "#FFFFFF"
-  property string valueDescriptionTextColor: cfg.descriptionTextColor ?? defaults.descriptionTextColor ?? "#E0E0E0"
+  property string valueDescriptionTextColor: cfg.descriptionTextColor ?? defaults.descriptionTextColor ?? ""
 
   // Clipboard polling for quick-paste feature.
   // Reads wl-paste periodically while Settings is visible; exposes a validated hex if found.
@@ -1243,6 +1243,7 @@ ColumnLayout {
           }
 
           // Description text (text-only row — no background)
+          // Empty value = theme-aware (Color.mOnSurface) at render time.
           Local.ColorPairRow {
             pluginApi: root.pluginApi
             labelText: pluginApi?.tr("settings.color-description")
@@ -1250,13 +1251,12 @@ ColumnLayout {
             showBg: false
             bgValue: ""
             textValue: root.valueDescriptionTextColor
-            textFallback: defaults.descriptionTextColor || "#E0E0E0"
+            textFallback: Color.mOnSurface
             clipboardHex: root.clipboardHex
             onTextPicked: c => { root.valueDescriptionTextColor = c.toString(); root._applyPreview("descriptionTextColor", c.toString()); }
             onTextPasted: hex => { root.valueDescriptionTextColor = hex; root._applyPreview("descriptionTextColor", hex); }
             onResetRequested: {
-              var d = defaults.descriptionTextColor || "#E0E0E0";
-              root.valueDescriptionTextColor = d; root._applyPreview("descriptionTextColor", d);
+              root.valueDescriptionTextColor = ""; root._applyPreview("descriptionTextColor", "");
             }
           }
 
@@ -1279,7 +1279,7 @@ ColumnLayout {
               var dMouse   = defaults.keyColorMouse   || "#F38181";
               var dDefault = defaults.keyColorDefault || "#6C757D";
               var dLabel   = defaults.keyLabelColor   || "#FFFFFF";
-              var dDesc    = defaults.descriptionTextColor || "#E0E0E0";
+              var dDesc    = defaults.descriptionTextColor ?? "";
 
               root.valueKeyColorSuper = "";
               root.valueKeyColorCtrl = "";

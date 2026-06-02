@@ -1539,8 +1539,9 @@ Item {
         if (effectiveLine.length === 0) continue;
       }
 
-      // bind=MODS,KEY,ACTION,ARGS
-      var bindMatch = effectiveLine.match(/^bind\s*=\s*(.+)$/);
+      // bind=MODS,KEY,ACTION,ARGS  (also `binds=` — keysym-based variant
+      // used by layout-aware setups like AZERTY)
+      var bindMatch = effectiveLine.match(/^binds?\s*=\s*(.+)$/);
       if (bindMatch) {
         var parts = bindMatch[1].split(',');
         if (parts.length >= 3) {
@@ -1558,8 +1559,8 @@ Item {
         continue;
       }
 
-      // axisbind=MODS,AXIS,ACTION,ARGS
-      var axisMatch = effectiveLine.match(/^axisbind\s*=\s*(.+)$/);
+      // axisbind=MODS,AXIS,ACTION,ARGS  (also `axisbinds=` keysym variant)
+      var axisMatch = effectiveLine.match(/^axisbinds?\s*=\s*(.+)$/);
       if (axisMatch) {
         var axisParts = axisMatch[1].split(',');
         if (axisParts.length >= 3) {
@@ -1578,8 +1579,8 @@ Item {
         continue;
       }
 
-      // mousebind=MODS,BTN,ACTION,ARGS
-      var mouseMatch = effectiveLine.match(/^mousebind\s*=\s*(.+)$/);
+      // mousebind=MODS,BTN,ACTION,ARGS  (also `mousebinds=` keysym variant)
+      var mouseMatch = effectiveLine.match(/^mousebinds?\s*=\s*(.+)$/);
       if (mouseMatch) {
         var mouseParts = mouseMatch[1].split(',');
         if (mouseParts.length >= 3) {
