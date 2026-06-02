@@ -1,6 +1,6 @@
 [Unit]
 Description=Margo status notifier watcher readiness gate
-After=graphical-session.target margo-shell-ensure.service dbus.service
+After=graphical-session.target dbus.service
 PartOf=margo-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_SESSION_DESKTOP=margo
