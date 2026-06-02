@@ -445,9 +445,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `margo-mpv`
-**Description:** Margo-only MPV helper. Uses `mctl` IPC (NOT `mmsg`).
+**Description:** margo-mpv.sh — compatibility shim. Superseded by the first-party `mplay`
 
-**Usage:** `margo-mpv [start|playback|play-yt|save-yt|move|stick|top|wallpaper]`
+**Usage:** `margo-mpv`
 
 ---
 
@@ -676,9 +676,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-media`
-**Description:** Smart media controller that routes commands to the best available
+**Description:** osc-media.sh — compatibility shim. Superseded by `mplay media` (margo's
 
-**Usage:** `osc-media.sh [player] <command>`
+**Usage:** `osc-media`
 
 ---
 
