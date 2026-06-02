@@ -6,5 +6,12 @@ OnStartupSec=10s
 AccuracySec=1s
 Unit=bt-autoconnect.service
 
+# Bound to the three desktop session targets that want bluetooth
+# auto-connect. margo intentionally NOT listed: its mshell handles
+# bluetooth via its own UI and we don't want a 10s-after-login race
+# with mshell's connect logic. Dropping the default.target catch-all
+# also means user systemd login alone no longer triggers this timer.
 [Install]
-WantedBy=default.target
+WantedBy=hyprland-session.target
+WantedBy=niri-session.target
+WantedBy=mangowm-session.target
