@@ -1,0 +1,5 @@
+# margo twilight preset
+# static_temp: Kelvin (1000–25000)
+# static_gamma: brightness % (10–200)
+static_temp = 2450
+static_gamma = 96

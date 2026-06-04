@@ -1,0 +1,15 @@
+# mpower — automatic power-profile manager.
+# Managed by mpower + Settings → Power → Automatic Power Profile.
+# Hand-edits are honoured; mpower re-reads this file every tick.
+
+enabled = true
+tick_seconds = 5
+high_avg_percent = 35
+high_max_percent = 85
+low_avg_percent = 18
+low_max_percent = 70
+high_streak = 2
+low_streak = 3
+cooldown_seconds = 20
+battery_saver_below = 20
+notify = false

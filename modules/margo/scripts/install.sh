@@ -15,9 +15,15 @@ if [ "$(id -u)" -eq 0 ]; then
 	install -d -m0755 -o "${REAL_USER}" \
 		"${USER_HOME}/.config/margo" \
 		"${USER_HOME}/.config/margo/layouts" \
-		"${USER_HOME}/.config/margo/conf.d"
+		"${USER_HOME}/.config/margo/conf.d" \
+		"${USER_HOME}/.config/margo/twilight/presets" \
+		"${USER_HOME}/.config/margo/mshell/profiles"
 else
-	mkdir -p "${USER_HOME}/.config/margo/layouts" "${USER_HOME}/.config/margo/conf.d"
+	mkdir -p \
+		"${USER_HOME}/.config/margo/layouts" \
+		"${USER_HOME}/.config/margo/conf.d" \
+		"${USER_HOME}/.config/margo/twilight/presets" \
+		"${USER_HOME}/.config/margo/mshell/profiles"
 fi
 
 if command -v systemctl >/dev/null 2>&1; then

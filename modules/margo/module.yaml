@@ -19,8 +19,32 @@ dotfiles:
     target: ~/.config/margo/config.conf
   - source: dotfiles/margo/layouts/layout_vertical-ext-top.conf
     target: ~/.config/margo/layouts/layout_vertical-ext-top.conf
+  - source: dotfiles/margo/layouts/layout_default.conf
+    target: ~/.config/margo/layouts/layout_default.conf
+  - source: dotfiles/margo/binds.conf
+    target: ~/.config/margo/binds.conf
+  - source: dotfiles/margo/mlock.conf
+    target: ~/.config/margo/mlock.conf
+  - source: dotfiles/margo/mpower.toml
+    target: ~/.config/margo/mpower.toml
+  - source: dotfiles/margo/twilight/schedule.conf
+    target: ~/.config/margo/twilight/schedule.conf
+  - source: dotfiles/margo/twilight/presets/morning.toml
+    target: ~/.config/margo/twilight/presets/morning.toml
+  - source: dotfiles/margo/twilight/presets/late-morning.toml
+    target: ~/.config/margo/twilight/presets/late-morning.toml
+  - source: dotfiles/margo/twilight/presets/afternoon.toml
+    target: ~/.config/margo/twilight/presets/afternoon.toml
+  - source: dotfiles/margo/twilight/presets/sunset.toml
+    target: ~/.config/margo/twilight/presets/sunset.toml
+  - source: dotfiles/margo/twilight/presets/evening.toml
+    target: ~/.config/margo/twilight/presets/evening.toml
+  - source: dotfiles/margo/twilight/presets/deep-night.toml
+    target: ~/.config/margo/twilight/presets/deep-night.toml
   - source: dotfiles/margo/mshell/profiles/default.yaml
     target: ~/.config/margo/mshell/profiles/default.yaml
+  - source: dotfiles/margo/mshell/profiles/Nova.yaml
+    target: ~/.config/margo/mshell/profiles/Nova.yaml
   - source: dotfiles/environment.d/10-margo.conf
     target: ~/.config/session-env/margo/10-margo.conf
   - source: dotfiles/environment.d/margo-session.envlist
