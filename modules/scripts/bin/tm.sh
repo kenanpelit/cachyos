@@ -69,30 +69,54 @@ require_cmd() {
 readonly VERSION="2.0.0"
 readonly CONFIG_DIR="${HOME}/.config/tmux"
 readonly PLUGIN_DIR="${CONFIG_DIR}/plugins"
-readonly CACHE_DIR="${HOME}/.cache/tmux-manager"
 readonly FZF_DIR="${CONFIG_DIR}/fzf"
 readonly DEFAULT_SESSION="KENP"
 readonly BACKUP_GLOB="tmux_backup_*.tar.gz"
 readonly HISTORY_LIMIT=100
 readonly SOCKET_DIR="/tmp/tmux-${UID}"
-readonly SCRIPT_PATH="$(resolve_script_path)"
-readonly TMUX_BIN="$(command -v tmux 2>/dev/null || true)"
+SCRIPT_PATH="$(resolve_script_path)"
+TMUX_BIN="$(command -v tmux_cmd 2>/dev/null || true)"
+readonly SCRIPT_PATH TMUX_BIN
 
 tmux_cmd() {
 	"${TMUX_BIN:-tmux}" "$@"
 }
 
-# Gerekli dizinleri oluştur
-mkdir -p "${CONFIG_DIR}" "${PLUGIN_DIR}" "${CACHE_DIR}" "${FZF_DIR}"
+# Soft tmux çağrısı — başarısız olursa DEBUG=1 modunda log'lar, ama
+# script'i durdurmaz. set -e altında "|| true" sessizce yutuyordu.
+tmux_try() {
+	if ! tmux_cmd "$@" 2>/dev/null; then
+		debug "tmux_cmd başarısız: $*"
+		return 1
+	fi
+}
 
-# Renk tanımlamaları
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly BLUE='\033[0;34m'
-readonly MAGENTA='\033[0;35m'
-readonly CYAN='\033[0;36m'
-readonly NC='\033[0m' # Renk yok
+# Dizinler gerekli olduğunda lazy oluşturulur (eskiden tepe-seviye
+# mkdir vardı; "tm.sh version" / "help" çağrılarında bile dosya
+# sistemine yazıyordu). Use-site'lar ensure_dir ile yaratır.
+ensure_dir() {
+	local d="$1"
+	[[ -d "$d" ]] && return 0
+	if ! mkdir -p "$d" 2>/dev/null; then
+		error "Dizin oluşturulamadı: $d"
+		return 1
+	fi
+}
+
+# Renk tanımlamaları — TTY değilse veya NO_COLOR set ise devre dışı.
+# log() stdout, error() stderr'e yazıyor; her ikisi de TTY ise renk aç.
+if [[ -t 1 && -t 2 && -z "${NO_COLOR:-}" ]]; then
+	RED='\033[0;31m'
+	GREEN='\033[0;32m'
+	YELLOW='\033[1;33m'
+	BLUE='\033[0;34m'
+	MAGENTA='\033[0;35m'
+	CYAN='\033[0;36m'
+	NC='\033[0m'
+else
+	RED='' GREEN='' YELLOW='' BLUE='' MAGENTA='' CYAN='' NC=''
+fi
+readonly RED GREEN YELLOW BLUE MAGENTA CYAN NC
 
 # Mesaj fonksiyonları - timestamp eklendi
 log() {
@@ -135,27 +159,32 @@ debug() {
 	fi
 }
 
-# FZF tema kurulumu - Catppuccin Mocha - Tüm modlarda tutarlı
-setup_fzf_theme() {
-	local prompt_text="${1:-Tmux}"
-	local header_text="${2:-CTRL-R: Yenile | ESC: Çık}"
+# Catppuccin Mocha fzf tema argümanları — scope'lu (eskiden global
+# FZF_DEFAULT_OPTS export ediliyordu, kullanıcının normal fzf
+# ayarlarını script ömrünce eziyordu). fzf_themed() üzerinden kullan.
+_TM_FZF_THEME=(
+	-e -i
+	--info=inline
+	--layout=reverse
+	--border=rounded
+	--margin=1
+	--padding=1
+	--ansi
+	--pointer=▶
+	--marker=✓
+	--color='bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8'
+	--color='fg:#cdd6f4,header:#89b4fa,info:#cba6f7,pointer:#f5e0dc'
+	--color='marker:#a6e3a1,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8'
+	--tiebreak=index
+)
 
-	export FZF_DEFAULT_OPTS="\
-        -e -i \
-        --info=inline \
-        --layout=reverse \
-        --border=rounded \
-        --margin=1 \
-        --padding=1 \
-        --ansi \
-        --prompt='$prompt_text ❯ ' \
-        --pointer='▶' \
-        --marker='✓' \
-        --header='$header_text' \
-        --color='bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8' \
-        --color='fg:#cdd6f4,header:#89b4fa,info:#cba6f7,pointer:#f5e0dc' \
-        --color='marker:#a6e3a1,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8' \
-        --tiebreak=index"
+# Tema-aware fzf çağrı yardımcısı. Tema önce, kullanıcı argümanları
+# sonra — böylece site-spesifik --preview / --bind override edebilir.
+fzf_themed() {
+	local prompt="${1:-Tmux} ❯ "
+	local header="${2:-CTRL-R: Yenile | ESC: Çık}"
+	shift 2 || true
+	fzf "${_TM_FZF_THEME[@]}" --prompt="$prompt" --header="$header" "$@"
 }
 
 #--------------------------------------
@@ -264,7 +293,7 @@ check_requirements() {
 	"buffer")
 		check_tmux
 		if ! is_in_tmux; then
-			error "Tmux oturumunda değilsiniz. Lütfen tmux içinde çalıştırın."
+			error "Tmux oturumunda değilsiniz. Lütfen tmux_cmd içinde çalıştırın."
 			req_failed=1
 		fi
 		;;
@@ -386,7 +415,7 @@ clean_sockets() {
 		done
 	fi
 
-	tmux kill-server >/dev/null 2>&1 || true
+	tmux_cmd kill-server >/dev/null 2>&1 || true
 	sleep 1
 	success "Soketler temizlendi"
 }
@@ -396,11 +425,11 @@ check_tmux_version() {
 	local required_version="3.0"
 	local current_version_str cur_major cur_minor req_major req_minor
 
-	if ! command -v tmux >/dev/null 2>&1; then
+	if ! command -v tmux_cmd >/dev/null 2>&1; then
 		return 0
 	fi
 
-	current_version_str="$(tmux -V 2>/dev/null || true)"
+	current_version_str="$(tmux_cmd -V 2>/dev/null || true)"
 
 	if [[ "$current_version_str" =~ ([0-9]+)\\.([0-9]+) ]]; then
 		cur_major="${BASH_REMATCH[1]}"
@@ -428,7 +457,7 @@ list_sessions() {
 	check_tmux
 
 	local sessions
-	if ! sessions="$(tmux list-sessions -F "#{session_name}: #{session_windows} pencere, #{session_attached} bağlı#{?session_grouped, (gruplu),}" 2>/dev/null)"; then
+	if ! sessions="$(tmux_cmd list-sessions -F "#{session_name}: #{session_windows} pencere, #{session_attached} bağlı#{?session_grouped, (gruplu),}" 2>/dev/null)"; then
 		warn "Aktif oturum yok"
 		return 0
 	fi
@@ -449,7 +478,7 @@ kill_session() {
 	fi
 
 	# Eğer şu an bu oturumun içindeysek uyar
-	if is_in_tmux && [[ "$(tmux display-message -p '#S')" == "$session_name" ]]; then
+	if is_in_tmux && [[ "$(tmux_cmd display-message -p '#S')" == "$session_name" ]]; then
 		warn "Şu anda bu oturumun içindesiniz!"
 		read -p "Yine de sonlandırmak istiyor musunuz? (e/H): " -n 1 -r
 		echo
@@ -459,11 +488,17 @@ kill_session() {
 		fi
 	fi
 
-	if tmux kill-session -t "$session_name" 2>/dev/null; then
+	if tmux_cmd kill-session -t "$session_name" 2>/dev/null; then
 		success "Oturum '$session_name' sonlandırıldı"
 	else
-		error "Oturum '$session_name' sonlandırılamadı"
-		return 1
+		warn "İlk denemede sonlandırılamadı; soket temizliği deneniyor..."
+		clean_sockets
+		if tmux_cmd kill-session -t "$session_name" 2>/dev/null; then
+			success "Oturum '$session_name' sonlandırıldı (soket temizliği sonrası)"
+		else
+			error "Oturum '$session_name' sonlandırılamadı"
+			return 1
+		fi
 	fi
 }
 
@@ -563,6 +598,8 @@ create_layout() {
 	local session_name="$1"
 	local layout_num="$2"
 	local shell_cmd="${SHELL:-/bin/zsh} -l"
+	# Layout pencerelerinin başlangıç dizini — env ile override edilebilir.
+	local cwd="${TM_LAYOUT_CWD:-$HOME}"
 
 	if ! has_session_exact "$session_name"; then
 		error "Oturum '$session_name' bulunamadı."
@@ -573,43 +610,43 @@ create_layout() {
 
 	case "$layout_num" in
 	1)
-		# Tek panel düzeni
-		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 1 2>/dev/null || true
+		# Tek panel düzeni (sadece yeni pencere, split yok — placeholder)
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 1
 		;;
 	2)
 		# İki panel düzeni (dikey bölme - %80 üst)
-		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux split-window -v -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 2 2>/dev/null || true
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
+		tmux_try split-window -v -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 2
 		;;
 	3)
 		# Üç panel L-şekilli düzen
-		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux split-window -h -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 2 2>/dev/null || true
-		tmux split-window -v -p 85 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 3 2>/dev/null || true
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
+		tmux_try split-window -h -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 2
+		tmux_try split-window -v -l 85% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 3
 		;;
 	4)
 		# Dört panel grid düzeni
-		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux split-window -h -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux split-window -v -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 1 2>/dev/null || true
-		tmux split-window -v -p 80 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 4 2>/dev/null || true
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
+		tmux_try split-window -h -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try split-window -v -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 1
+		tmux_try split-window -v -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 4
 		;;
 	5)
 		# Beş panel düzeni
-		tmux new-window -t "$session_name" -n 'kenp' -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux split-window -h -p 70 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux split-window -h -p 50 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 1 2>/dev/null || true
-		tmux split-window -v -p 50 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 2 2>/dev/null || true
-		tmux split-window -v -p 50 -c "$HOME" "$shell_cmd" 2>/dev/null || true
-		tmux select-pane -t 5 2>/dev/null || true
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
+		tmux_try split-window -h -l 70% -c "$cwd" "$shell_cmd"
+		tmux_try split-window -h -l 50% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 1
+		tmux_try split-window -v -l 50% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 2
+		tmux_try split-window -v -l 50% -c "$cwd" "$shell_cmd"
+		tmux_try select-pane -t 5
 		;;
 	*)
 		error "Geçersiz düzen numarası: $layout_num (1-5 arası olmalı)"
@@ -630,10 +667,8 @@ handle_buffer_mode() {
 		return 1
 	fi
 
-	setup_fzf_theme "Buffer" "ENTER: Kopyala | CTRL-D: Sil | ESC: Çık"
-
 	local buffer_count
-	buffer_count=$(tmux list-buffers 2>/dev/null | wc -l)
+	buffer_count=$(tmux_cmd list-buffers 2>/dev/null | wc -l)
 
 	if [[ "$buffer_count" -eq 0 ]]; then
 		warn "Hiç buffer yok"
@@ -643,18 +678,19 @@ handle_buffer_mode() {
 	info "Buffer sayısı: $buffer_count"
 
 	local selected
-	selected=$(tmux list-buffers -F "#{buffer_name}: #{buffer_sample}" 2>/dev/null |
-		fzf --delimiter=': ' \
-			--preview 'tmux show-buffer -b {1}' \
+	selected=$(tmux_cmd list-buffers -F "#{buffer_name}: #{buffer_sample}" 2>/dev/null |
+		fzf_themed "Buffer" "ENTER: Kopyala | CTRL-D: Sil | ESC: Çık" \
+			--delimiter=': ' \
+			--preview 'tmux_cmd show-buffer -b {1}' \
 			--preview-window=up:70%:wrap \
-			--bind 'ctrl-d:execute(tmux delete-buffer -b {1})+reload(tmux list-buffers -F "#{buffer_name}: #{buffer_sample}")' \
+			--bind 'ctrl-d:execute(tmux_cmd delete-buffer -b {1})+reload(tmux_cmd list-buffers -F "#{buffer_name}: #{buffer_sample}")' \
 			--header-lines=0)
 
 	if [[ -n "$selected" ]]; then
 		local buffer_name
 		buffer_name="${selected%%:*}"
 
-		if tmux show-buffer -b "$buffer_name" | wl-copy 2>/dev/null; then
+		if tmux_cmd show-buffer -b "$buffer_name" | wl-copy 2>/dev/null; then
 			success "Buffer kopyalandı: $buffer_name"
 		else
 			error "Buffer kopyalanamadı"
@@ -685,11 +721,10 @@ handle_clipboard_mode() {
 	fi
 
 	if [[ "$backend" == "cliphist" ]]; then
-		setup_fzf_theme "Clipboard" "ENTER: Yapıştır | CTRL-D: Sil | ESC: Çık"
-
 		local selected
 		selected=$(cliphist list |
-			fzf --preview 'echo {} | cliphist decode' \
+			fzf_themed "Clipboard" "ENTER: Yapıştır | CTRL-D: Sil | ESC: Çık" \
+				--preview 'echo {} | cliphist decode' \
 				--preview-window=up:70%:wrap \
 				--bind 'ctrl-d:execute(echo {} | cliphist delete)+reload(cliphist list)')
 
@@ -725,6 +760,8 @@ install_plugin() {
 	local plugin_name="$1"
 	local repo_url="$2"
 	local plugin_path="${PLUGIN_DIR}/${plugin_name}"
+
+	ensure_dir "$PLUGIN_DIR" || return 1
 
 	if [[ -d "$plugin_path" ]]; then
 		warn "Eklenti zaten kurulu: $plugin_name"
@@ -819,6 +856,7 @@ handle_speed_mode() {
 	info "Komut hızlandırma modu başlatılıyor..."
 
 	# fspeed ile uyumlu cache (tmux fzf bundle)
+	ensure_dir "$FZF_DIR" || return 1
 	local cache_file="${FZF_DIR}/.fzf_cache"
 	touch "$cache_file"
 
@@ -835,9 +873,6 @@ handle_speed_mode() {
 	fi
 
 	debug "Toplam komut: $total | SSH: $ssh_count | TMUX: $tmux_count"
-
-	# FZF tema kurulumu
-	setup_fzf_theme "Speed" "Toplam: $total | SSH: $ssh_count | TMUX: $tmux_count | ENTER: Çalıştır | ESC: Çık"
 
 	speed_display_name() {
 		local filename="$1"
@@ -906,7 +941,8 @@ handle_speed_mode() {
 				printf '%s\t%s\n' "$filename" "$(speed_display_name "$filename")"
 			done
 		} |
-			fzf --delimiter='\t' \
+			fzf_themed "Speed" "Toplam: $total | SSH: $ssh_count | TMUX: $tmux_count | ENTER: Çalıştır | ESC: Çık" \
+				--delimiter=$'\t' \
 				--with-nth=2..
 	)" || {
 		info "İptal edildi"
@@ -984,16 +1020,16 @@ EOF
 	cat >"${sample_dir}/_tmux.list" <<'EOF'
 #!/usr/bin/env bash
 # List all tmux sessions
-tmux list-sessions
+tmux_cmd list-sessions
 EOF
 
 	cat >"${sample_dir}/_tmux.kill-all" <<'EOF'
 #!/usr/bin/env bash
 # Kill all tmux sessions
-read -p "Tüm tmux oturumlarını sonlandırmak istediğinize emin misiniz? (e/H): " -n 1 -r
+read -p "Tüm tmux_cmd oturumlarını sonlandırmak istediğinize emin misiniz? (e/H): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Ee]$ ]]; then
-    tmux kill-server
+    tmux_cmd kill-server
     echo "Tüm oturumlar sonlandırıldı"
 fi
 EOF
@@ -1001,7 +1037,7 @@ EOF
 	cat >"${sample_dir}/_tmux.attach" <<'EOF'
 #!/usr/bin/env bash
 # Attach to last tmux session
-tmux attach || tmux new-session
+tmux_cmd attach || tmux_cmd new-session
 EOF
 
 	# Git komutları
@@ -1090,7 +1126,7 @@ list_speed_commands() {
 	echo
 
 	# Kategorilere göre grupla
-	for category in ssh tmux git docker system; do
+	for category in ssh tmux_cmd git docker system; do
 		local count
 		count=$(find "$FZF_DIR" -maxdepth 1 -type f -name "_${category}*" 2>/dev/null | wc -l)
 
@@ -1342,7 +1378,7 @@ kenp_session_mode() {
 	fi
 
 	# Yeni oturum oluştur - sadece terminal penceresi
-	if ! tmux new-session -d -s "$session_name" -n 'terminal' 2>/dev/null; then
+	if ! tmux_cmd new-session -d -s "$session_name" -n 'terminal' 2>/dev/null; then
 		error "KENP oturumu oluşturulamadı"
 		return 1
 	fi
@@ -1408,7 +1444,7 @@ Kısayollar (buffer modunda):
     CTRL-J/K: Preview yukarı/aşağı
     ESC:     Çık
 
-Not: Buffer modu sadece tmux oturumu içinde çalışır
+Not: Buffer modu sadece tmux_cmd oturumu içinde çalışır
 EOF
 }
 
@@ -1585,7 +1621,7 @@ $(echo -e "${GREEN}")KENP Geliştirme Oturumu$(echo -e "${NC}")
 
 Kullanım: $SCRIPT_NAME kenp [oturum_adı]
 
-Basit ve hızlı tmux oturumu oluşturur.
+Basit ve hızlı tmux_cmd oturumu oluşturur.
 
 Pencere:
     terminal - Tek basit terminal penceresi
@@ -1653,7 +1689,7 @@ $(echo -e "${GREEN}")Modüller:$(echo -e "${NC}")
     $(echo -e "${YELLOW}")speed$(echo -e "${NC}")      Komut hızlandırma ve favoriler
     $(echo -e "${YELLOW}")config$(echo -e "${NC}")     Yapılandırma yedekleme ve geri yükleme
     $(echo -e "${YELLOW}")kenp$(echo -e "${NC}")       KENP geliştirme oturumu başlat
-    $(echo -e "${YELLOW}")tmx$(echo -e "${NC}")        Legacy tmux komutları (eski uyumluluk)
+    $(echo -e "${YELLOW}")tmx$(echo -e "${NC}")        Legacy tmux_cmd komutları (eski uyumluluk)
     $(echo -e "${YELLOW}")help$(echo -e "${NC}")       Yardım mesajlarını göster
 
 $(echo -e "${GREEN}")Hızlı Başlangıç:$(echo -e "${NC}")
@@ -1813,7 +1849,7 @@ process_buffer_commands() {
 		if ! check_requirements "buffer"; then
 			return 1
 		fi
-		tmux list-buffers
+		tmux_cmd list-buffers
 		;;
 	"show" | "s" | "")
 		handle_buffer_mode
@@ -1973,7 +2009,7 @@ process_tmx_commands() {
 		open_session_in_terminal "$1" "$2" "$layout"
 		;;
 	"-d" | "--detach" | "detach")
-		tmux detach-client
+		tmux_cmd detach-client
 		;;
 	"-a" | "--attach" | "attach")
 		if [[ -z "${1:-}" ]]; then
@@ -1998,7 +2034,7 @@ process_tmx_commands() {
 			return 1
 		fi
 
-		create_layout "$(tmux display-message -p '#S')" "$1"
+		create_layout "$(tmux_cmd display-message -p '#S')" "$1"
 		;;
 		"")
 			local session_name

@@ -4,8 +4,15 @@ general:
     type: City
     name: Atasehir
     country: TR
-  weather_saved_locations: []
+  weather_saved_locations:
+  - name: Home
+    query:
+      type: City
+      name: Atasehir
+      country: TR
   temperature_unit: Metric
+  weather_poll_minutes: 60
+  weather_retry_minutes: 55
   show_screen_corners: false
   screen_corner_radius: 24
   network_osd_enabled: false
@@ -119,6 +126,7 @@ bars:
     - Tray
     hidden_widgets:
     - Twilight
+    - Screenshot
     - AlarmClock
     - KeepAwake
     - Notes
@@ -149,6 +157,7 @@ bars:
     - Separator
     hidden_widgets: []
   islands: false
+  slide_duration_ms: 500
 menus:
   clock_menu:
     position: Top
@@ -163,8 +172,8 @@ menus:
     position: TopRight
     widgets:
     - Clipboard
-    minimum_width: 550
-    maximum_height: 890
+    minimum_width: 620
+    maximum_height: 1080
   notification_menu:
     position: TopRight
     widgets:
@@ -324,7 +333,7 @@ menus:
     minimum_width: 460
     maximum_height: 0
   session_menu:
-    position: Top
+    position: Bottom
     widgets:
     - Session
     minimum_width: 420
@@ -405,6 +414,8 @@ notifications:
   group_notifications: false
   popup_width: 460
   history_limit: 200
+  show_timeout_bar: true
+  popup_duration_ms: 5000
 wallpaper:
   wallpaper_dir: /home/kenan/Pictures/wallpapers/others
   content_fit: Cover
@@ -443,6 +454,7 @@ clipboard:
   clear_after_hours: 24
   skip_sensitive: true
   image_history: true
+  image_max_kb: 0
   density: Comfortable
 launcher:
   autostart_scripts:
@@ -482,6 +494,9 @@ launcher:
     enabled: false
     delay_secs: 10
     trigger: LoginOnce
+  show_preview: false
+  compact_rows: true
+  large_app_icons: true
 valent:
   main_device_id: ''
 dock:
@@ -564,3 +579,6 @@ control_center:
   - color_picker
   wide_tiles:
   - disk
+  show_battery_chip: true
+  show_power_profile: true
+  show_media: true
