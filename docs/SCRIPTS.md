@@ -1116,13 +1116,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `tm.sh.bak`
-**Description:** Backup copy of the unified tmux management helper.
-
-**Usage:** `tm.sh.bak`
-
----
-
 ### 📂 `tsm`
 **Description:** Advanced Transmission CLI manager with Pass integration and search
 

@@ -75,7 +75,7 @@ readonly BACKUP_GLOB="tmux_backup_*.tar.gz"
 readonly HISTORY_LIMIT=100
 readonly SOCKET_DIR="/tmp/tmux-${UID}"
 SCRIPT_PATH="$(resolve_script_path)"
-TMUX_BIN="$(command -v tmux_cmd 2>/dev/null || true)"
+TMUX_BIN="$(command -v tmux 2>/dev/null || true)"
 readonly SCRIPT_PATH TMUX_BIN
 
 tmux_cmd() {
@@ -86,7 +86,7 @@ tmux_cmd() {
 # script'i durdurmaz. set -e altında "|| true" sessizce yutuyordu.
 tmux_try() {
 	if ! tmux_cmd "$@" 2>/dev/null; then
-		debug "tmux_cmd başarısız: $*"
+		debug "tmux başarısız: $*"
 		return 1
 	fi
 }
@@ -293,7 +293,7 @@ check_requirements() {
 	"buffer")
 		check_tmux
 		if ! is_in_tmux; then
-			error "Tmux oturumunda değilsiniz. Lütfen tmux_cmd içinde çalıştırın."
+			error "Tmux oturumunda değilsiniz. Lütfen tmux içinde çalıştırın."
 			req_failed=1
 		fi
 		;;
@@ -681,9 +681,9 @@ handle_buffer_mode() {
 	selected=$(tmux_cmd list-buffers -F "#{buffer_name}: #{buffer_sample}" 2>/dev/null |
 		fzf_themed "Buffer" "ENTER: Kopyala | CTRL-D: Sil | ESC: Çık" \
 			--delimiter=': ' \
-			--preview 'tmux_cmd show-buffer -b {1}' \
+			--preview 'tmux show-buffer -b {1}' \
 			--preview-window=up:70%:wrap \
-			--bind 'ctrl-d:execute(tmux_cmd delete-buffer -b {1})+reload(tmux_cmd list-buffers -F "#{buffer_name}: #{buffer_sample}")' \
+			--bind 'ctrl-d:execute(tmux delete-buffer -b {1})+reload(tmux list-buffers -F "#{buffer_name}: #{buffer_sample}")' \
 			--header-lines=0)
 
 	if [[ -n "$selected" ]]; then
@@ -1020,16 +1020,16 @@ EOF
 	cat >"${sample_dir}/_tmux.list" <<'EOF'
 #!/usr/bin/env bash
 # List all tmux sessions
-tmux_cmd list-sessions
+tmux list-sessions
 EOF
 
 	cat >"${sample_dir}/_tmux.kill-all" <<'EOF'
 #!/usr/bin/env bash
 # Kill all tmux sessions
-read -p "Tüm tmux_cmd oturumlarını sonlandırmak istediğinize emin misiniz? (e/H): " -n 1 -r
+read -p "Tüm tmux oturumlarını sonlandırmak istediğinize emin misiniz? (e/H): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Ee]$ ]]; then
-    tmux_cmd kill-server
+    tmux kill-server
     echo "Tüm oturumlar sonlandırıldı"
 fi
 EOF
@@ -1037,7 +1037,7 @@ EOF
 	cat >"${sample_dir}/_tmux.attach" <<'EOF'
 #!/usr/bin/env bash
 # Attach to last tmux session
-tmux_cmd attach || tmux_cmd new-session
+tmux attach || tmux new-session
 EOF
 
 	# Git komutları
@@ -1126,7 +1126,7 @@ list_speed_commands() {
 	echo
 
 	# Kategorilere göre grupla
-	for category in ssh tmux_cmd git docker system; do
+	for category in ssh tmux git docker system; do
 		local count
 		count=$(find "$FZF_DIR" -maxdepth 1 -type f -name "_${category}*" 2>/dev/null | wc -l)
 
@@ -1444,7 +1444,7 @@ Kısayollar (buffer modunda):
     CTRL-J/K: Preview yukarı/aşağı
     ESC:     Çık
 
-Not: Buffer modu sadece tmux_cmd oturumu içinde çalışır
+Not: Buffer modu sadece tmux oturumu içinde çalışır
 EOF
 }
 
@@ -1621,7 +1621,7 @@ $(echo -e "${GREEN}")KENP Geliştirme Oturumu$(echo -e "${NC}")
 
 Kullanım: $SCRIPT_NAME kenp [oturum_adı]
 
-Basit ve hızlı tmux_cmd oturumu oluşturur.
+Basit ve hızlı tmux oturumu oluşturur.
 
 Pencere:
     terminal - Tek basit terminal penceresi
@@ -1689,7 +1689,7 @@ $(echo -e "${GREEN}")Modüller:$(echo -e "${NC}")
     $(echo -e "${YELLOW}")speed$(echo -e "${NC}")      Komut hızlandırma ve favoriler
     $(echo -e "${YELLOW}")config$(echo -e "${NC}")     Yapılandırma yedekleme ve geri yükleme
     $(echo -e "${YELLOW}")kenp$(echo -e "${NC}")       KENP geliştirme oturumu başlat
-    $(echo -e "${YELLOW}")tmx$(echo -e "${NC}")        Legacy tmux_cmd komutları (eski uyumluluk)
+    $(echo -e "${YELLOW}")tmx$(echo -e "${NC}")        Legacy tmux komutları (eski uyumluluk)
     $(echo -e "${YELLOW}")help$(echo -e "${NC}")       Yardım mesajlarını göster
 
 $(echo -e "${GREEN}")Hızlı Başlangıç:$(echo -e "${NC}")
