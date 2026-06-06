@@ -1,0 +1,9 @@
+tags:
+- media
+- tool
+description: satty config (portable config)
+depends_on:
+- base
+dotfiles:
+- source: dotfiles/satty
+  target: ~/.config/satty

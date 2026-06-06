@@ -1,0 +1,80 @@
+# satty — annotation editor for margo screenshots
+# Opened by `mshellctl screenshot region satty` (and the screenshot menu).
+# Schema: https://github.com/gabm/Satty  (keys validated against the source).
+
+[general]
+# Fill the screen — cleanest on Wayland / layer-shell.
+fullscreen = true
+# Close as soon as you copy or save — snappy screenshot flow.
+early-exit = true
+# Rounded rectangle/blur corners — matches margo's rounded UI.
+corner-roundness = 12
+# Tool selected on open. [pointer, crop, line, arrow, rectangle, text, marker, blur, brush]
+initial-tool = "arrow"
+# Wayland clipboard.
+copy-command = "wl-copy"
+# Annotation stroke/size scale (1 = default).
+annotation-size-factor = 1
+# Ctrl+S "save" target. Timestamped into the XDG Pictures/Screenshots dir.
+output-filename = "/home/kenan/Pictures/Screenshots/satty-%Y%m%d-%H%M%S.png"
+# Don't also write a file on every copy (clipboard is the default action).
+save-after-copy = false
+# Keep the toolbars visible.
+default-hide-toolbars = false
+focus-toggles-toolbars = false
+# Outline shapes by default (hold to fill, or pick fill in the toolbar).
+default-fill-shapes = false
+# Highlighter mode; hold Ctrl at stroke start for the freehand one.
+primary-highlighter = "block"
+# Let margo/mshell own notifications.
+disable-notifications = false
+# Smoother brush strokes.
+brush-smooth-history-size = 10
+# margo draws its own decorations; ask for none.
+no-window-decoration = true
+
+# Enter → copy to clipboard (early-exit then closes). Escape → just close.
+actions-on-enter = ["save-to-clipboard"]
+actions-on-escape = ["exit"]
+actions-on-right-click = []
+
+# Tool keyboard shortcuts (single-key, no modifier).
+[keybinds]
+pointer = "p"
+crop = "c"
+brush = "b"
+line = "i"
+arrow = "z"
+rectangle = "r"
+ellipse = "e"
+text = "t"
+marker = "m"
+blur = "u"
+highlight = "g"
+
+# Text-annotation font — matches the GTK/Adwaita UI font.
+[font]
+family = "Adwaita Sans"
+style = "Regular"
+
+[color-palette]
+# Quick-access swatches in the toolbar — high-contrast, readable on any shot.
+palette = [
+    "#ff5555",
+    "#ffb86c",
+    "#f1fa8c",
+    "#50fa7b",
+    "#8be9fd",
+    "#bd93f9",
+    "#ff79c6",
+    "#f8f8f2",
+]
+# Extra presets in the colour picker.
+custom = [
+    "#282a36",
+    "#ff5555",
+    "#50fa7b",
+    "#8be9fd",
+    "#bd93f9",
+    "#f8f8f2",
+]

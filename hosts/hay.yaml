@@ -51,6 +51,7 @@ enabled_modules:
   - hyprland
   - mangowm
   - margo
+  - satty
   - sessions
   - sway
   - xdg-portal
