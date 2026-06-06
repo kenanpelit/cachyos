@@ -1,4 +1,7 @@
 description: TCP/IP tuning packages
 packages:
   - iproute2
-  - iptables-nft
+  # Real pkgname is `iptables` (built with the nft backend; it only *provides*
+  # the virtual `iptables-nft`). Listing the provide made dcli's exact-name
+  # install check miss every sync and re-run paru for a no-op.
+  - iptables
