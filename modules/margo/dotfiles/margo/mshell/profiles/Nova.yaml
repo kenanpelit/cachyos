@@ -11,13 +11,15 @@ general:
       name: Atasehir
       country: TR
   temperature_unit: Metric
-  weather_poll_minutes: 60
-  weather_retry_minutes: 55
+  weather_poll_minutes: 180
+  weather_retry_minutes: 60
   show_screen_corners: false
   screen_corner_radius: 24
   network_osd_enabled: false
   media_seek_step_seconds: 10
   media_large_album_art: true
+  settings_panel_width: 1440
+  settings_panel_height: 1080
 theme:
   icons:
     shell_icon_theme: MargoMaterial
@@ -48,6 +50,7 @@ theme:
       settings_font_scale: 1.05
       font_scale: 1.0
       bar_font_scale: 1.0
+      surface_opacity: 100
     window_opacity: 1.0
 bars:
   frame:
@@ -55,10 +58,10 @@ bars:
     monitor_filter: []
   widgets:
     system_update:
-      check_interval_minutes: 180
+      check_interval_minutes: 720
       check_repo: true
       check_aur: true
-      check_flatpak: true
+      check_flatpak: false
     hidden_bar:
       start_expanded: false
       auto_expand: true
@@ -133,6 +136,7 @@ bars:
     - !Custom plugin:ambient-sound:ambient
     - !Custom plugin:breathing:breathing
     - !Custom plugin:musiclyrics:lyrics
+    - SystemUpdate
     - Keybinds
   bottom_bar:
     enabled: false
@@ -308,6 +312,12 @@ menus:
     - AlarmClock
     minimum_width: 420
     maximum_height: 640
+  dock_menu:
+    position: Bottom
+    widgets:
+    - MargoDock
+    minimum_width: 0
+    maximum_height: 0
   control_center_menu:
     position: TopRight
     widgets:
@@ -458,52 +468,102 @@ clipboard:
   density: Comfortable
 launcher:
   autostart_scripts:
-  - name: start-helium-compecta
-    enabled: false
-    delay_secs: 15
+  - name: start-kkenp
+    enabled: true
+    delay_secs: 9
     trigger: LoginOnce
+    args: ''
+    working_dir: ''
   - name: start-helium-kenp
-    enabled: false
+    enabled: true
+    delay_secs: 10
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-helium-ai
+    enabled: true
+    delay_secs: 11
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-helium-compecta
+    enabled: true
+    delay_secs: 11
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-webcord
+    enabled: true
     delay_secs: 12
     trigger: LoginOnce
-  - name: start-kkenp
-    enabled: false
-    delay_secs: 13
-    trigger: LoginOnce
-  - name: start-spotify
-    enabled: false
-    delay_secs: 18
-    trigger: LoginOnce
-  - name: start-webcord
-    enabled: false
-    delay_secs: 16
-    trigger: LoginOnce
+    args: ''
+    working_dir: ''
   - name: start-helium-youtube
-    enabled: false
-    delay_secs: 17
-    trigger: LoginOnce
-  - name: start-ferdium
-    enabled: false
-    delay_secs: 19
-    trigger: LoginOnce
-  - name: start-helium-ai
-    enabled: false
+    enabled: true
     delay_secs: 13
     trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-spotify
+    enabled: true
+    delay_secs: 13
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-ferdium
+    enabled: true
+    delay_secs: 13
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: mctl tags 2 && notify-send -a MARGO -t 5000 -i view-grid-symbolic "Margo" "Tag 2 Tmux Aktif"
+    enabled: true
+    delay_secs: 20
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
   - name: start-helium-nil
     enabled: false
     delay_secs: 10
     trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-helium-tiktok
+    enabled: false
+    delay_secs: 20
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
   show_preview: false
   compact_rows: true
   large_app_icons: true
 valent:
   main_device_id: ''
 dock:
-  icon_size: 24
+  icon_size: 32
   show_tooltips: true
   show_running: true
-  icon_overrides: []
+  icon_overrides:
+  - class: Kenp
+    icon: helium-browser
+  - class: CompecTA
+    icon: helium-browser
+  - class: Ai
+    icon: helium-browser
+  - class: TmuxKenp
+    icon: utilities-terminal
+  in_bar: true
+  standalone: true
+  style: popup
+  behavior: toggle
+  position: left
+  ignore: []
+  spacing: 6
+  hover_preview: true
+  separator: true
+  launcher_enabled: true
+  launcher_icon: view-app-grid-symbolic
+  launcher_command: ''
 system_tray:
   default_expanded: false
 pass:
@@ -525,6 +585,12 @@ network:
   proxy_socks: ''
   proxy_ignore: ''
   proxy_pac_url: ''
+login_network:
+  enabled: true
+  wifi_connection: Ken_5
+  connect_vpn: true
+  couple_blocky: true
+  delay_secs: 6
 bluetooth:
   autoconnect_enabled: true
   autoconnect_delay_secs: 10
@@ -543,6 +609,9 @@ privacy:
   remember_recent: true
 audio:
   hide_hdmi_outputs: true
+  restore_volume_on_start: true
+  default_output_volume: 30
+  default_input_volume: 5
 control_center:
   wifi: true
   bluetooth: true
@@ -582,3 +651,7 @@ control_center:
   show_battery_chip: true
   show_power_profile: true
   show_media: true
+logging:
+  enabled: true
+  level: info
+  keep_sessions: 3
