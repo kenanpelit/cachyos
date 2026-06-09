@@ -46,11 +46,14 @@ theme:
       radius_widget: 12
       radius_window: 12
       border_width: 2
-      bar_hover_strength: 14
+      bar_hover_strength: 32
       settings_font_scale: 1.05
       font_scale: 1.0
       bar_font_scale: 1.0
       surface_opacity: 100
+      frame_color: ''
+      frame_border_color: ''
+      separator_color: ''
     window_opacity: 1.0
 bars:
   frame:
@@ -115,14 +118,18 @@ bars:
     - Separator
     - Bluetooth
     - Separator
-    - VpnIndicator
     - Valent
     - Separator
     - Clipboard
+    - Separator
     - Podman
+    - Separator
     - Dns
+    - Separator
     - Ufw
+    - Separator
     - Power
+    - Separator
     - ControlCenter
     - Privacy
     - Separator
@@ -141,7 +148,7 @@ bars:
   bottom_bar:
     enabled: false
     minimum_height: 28
-    reveal_by_default: true
+    reveal_by_default: false
     auto_hide_delay_ms: 400
     left_widgets:
     - Separator

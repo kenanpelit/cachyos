@@ -43,8 +43,8 @@ dotfiles:
     target: ~/.config/margo/twilight/presets/deep-night.toml
   - source: dotfiles/margo/mshell/profiles/default.yaml
     target: ~/.config/margo/mshell/profiles/default.yaml
-  - source: dotfiles/margo/mshell/profiles/Nova.yaml
-    target: ~/.config/margo/mshell/profiles/Nova.yaml
+  - source: dotfiles/margo/mshell/profiles/margo.yaml
+    target: ~/.config/margo/mshell/profiles/margo.yaml
   - source: dotfiles/environment.d/10-margo.conf
     target: ~/.config/session-env/margo/10-margo.conf
   - source: dotfiles/environment.d/margo-session.envlist
