@@ -41,18 +41,18 @@ theme:
       primary: Maple Mono NF
       secondary: Maple Mono NF
       tertiary: Maple Mono NF
-      monospace: ''
+      monospace: Maple Mono NF
     sizing:
       radius_widget: 12
       radius_window: 12
       border_width: 2
       bar_hover_strength: 32
-      settings_font_scale: 1.05
+      settings_font_scale: 1.0
       font_scale: 1.0
       bar_font_scale: 1.0
       surface_opacity: 100
-      frame_color: ''
-      frame_border_color: ''
+      frame_color: '#1f1f2eff'
+      frame_border_color: '#303345ff'
       separator_color: ''
     window_opacity: 1.0
 bars:
@@ -124,7 +124,7 @@ bars:
     - Separator
     - Podman
     - Separator
-    - Dns
+    - Vpn
     - Separator
     - Ufw
     - Separator
@@ -145,6 +145,7 @@ bars:
     - !Custom plugin:musiclyrics:lyrics
     - SystemUpdate
     - Keybinds
+    - Ai
   bottom_bar:
     enabled: false
     minimum_height: 28
@@ -229,6 +230,18 @@ menus:
     - Ip
     minimum_width: 420
     maximum_height: 0
+  vpn_menu:
+    position: TopRight
+    widgets:
+    - Vpn
+    minimum_width: 520
+    maximum_height: 720
+  ai_menu:
+    position: TopRight
+    widgets:
+    - Ai
+    minimum_width: 520
+    maximum_height: 920
   podman_menu:
     position: TopRight
     widgets:
