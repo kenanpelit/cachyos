@@ -1095,6 +1095,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `tagwarp`
+**Description:** tagwarp
+
+**Usage:** `tagwarp`
+
+---
+
 ### 📂 `tarchiver`
 **Description:** Simple tar archive manager for compressing and extracting files
 

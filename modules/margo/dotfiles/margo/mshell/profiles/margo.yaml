@@ -531,19 +531,25 @@ launcher:
     args: ''
     working_dir: ''
   - name: start-ferdium
-    enabled: false
+    enabled: true
     delay_secs: 13
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-helium-whats
+  - name: tagwarp
     enabled: true
+    delay_secs: 20
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-helium-whats
+    enabled: false
     delay_secs: 12
     trigger: LoginOnce
     args: ''
     working_dir: ''
   - name: mctl tags 2 && notify-send -a MARGO -t 5000 -i view-grid-symbolic "Margo" "Tag 2 Tmux Aktif"
-    enabled: true
+    enabled: false
     delay_secs: 20
     trigger: LoginOnce
     args: ''
