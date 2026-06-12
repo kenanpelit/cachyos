@@ -18,7 +18,7 @@ general:
   network_osd_enabled: false
   media_seek_step_seconds: 10
   media_large_album_art: true
-  settings_panel_width: 1320
+  settings_panel_width: 1440
   settings_panel_height: 1080
 theme:
   icons:
@@ -204,7 +204,7 @@ menus:
     position: Top
     widgets:
     - AppLauncher
-    minimum_width: 800
+    minimum_width: 640
     maximum_height: 1080
   wallpaper_menu:
     position: Top
@@ -240,8 +240,8 @@ menus:
     position: TopRight
     widgets:
     - Ai
-    minimum_width: 520
-    maximum_height: 920
+    minimum_width: 640
+    maximum_height: 1080
   podman_menu:
     position: TopRight
     widgets:
@@ -490,13 +490,13 @@ launcher:
   autostart_scripts:
   - name: start-kkenp
     enabled: true
-    delay_secs: 9
+    delay_secs: 10
     trigger: LoginOnce
     args: ''
     working_dir: ''
   - name: start-helium-kenp
     enabled: true
-    delay_secs: 10
+    delay_secs: 11
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -508,7 +508,7 @@ launcher:
     working_dir: ''
   - name: start-helium-compecta
     enabled: true
-    delay_secs: 11
+    delay_secs: 9
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -520,19 +520,25 @@ launcher:
     working_dir: ''
   - name: start-helium-youtube
     enabled: true
-    delay_secs: 13
+    delay_secs: 12
     trigger: LoginOnce
     args: ''
     working_dir: ''
   - name: start-spotify
     enabled: true
-    delay_secs: 13
+    delay_secs: 12
     trigger: LoginOnce
     args: ''
     working_dir: ''
   - name: start-ferdium
-    enabled: true
+    enabled: false
     delay_secs: 13
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-helium-whats
+    enabled: true
+    delay_secs: 12
     trigger: LoginOnce
     args: ''
     working_dir: ''
