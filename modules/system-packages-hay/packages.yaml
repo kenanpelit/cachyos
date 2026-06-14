@@ -55,6 +55,7 @@ packages:
 - evtest
 - exfatprogs
 - f2fs-tools
+- fabric-ai
 - ffmpegthumbnailer
 - fsarchiver
 - fwupd
@@ -91,6 +92,7 @@ packages:
 - hyprwayland-scanner
 - inetutils
 - intel-media-driver
+- inter-font
 - name: io.ente.auth
   type: flatpak
 - iptables
@@ -134,6 +136,7 @@ packages:
 - nano-syntax-highlighting
 - nautilus
 - neovim-symlinks
+- nerd-fonts-inter
 - netctl
 - networkmanager-openvpn
 - nfs-utils
@@ -220,6 +223,7 @@ packages:
 - xl2tpd
 - xorg-xdpyinfo
 - xorg-xinput
+- zapzap
 - zathura
 - zathura-pdf-poppler
 - zip

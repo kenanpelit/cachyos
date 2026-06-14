@@ -35,6 +35,46 @@ theme:
     mode: Dark
     contrast: 0.0
     auto_polarity: false
+  apps:
+    helium:
+      enabled: true
+      isolated_root: ~/.helium/isolated
+      target_mode: all
+      apply_on_theme_change: true
+      targets:
+      - instance: Nil
+        profile: Profile 3
+        enabled: true
+      - instance: Whats
+        profile: Profile 4
+        enabled: true
+      - instance: helium-youtube.com__-Default
+        profile: Default
+        enabled: true
+      - instance: spotify
+        profile: Default
+        enabled: true
+      - instance: tiktok
+        profile: Default
+        enabled: true
+      - instance: whatsapp
+        profile: Default
+        enabled: true
+      - instance: Ai
+        profile: Profile 2
+        enabled: true
+      - instance: CompecTA
+        profile: Profile 1
+        enabled: true
+      - instance: Exclude
+        profile: Default
+        enabled: true
+      - instance: Kenp
+        profile: System Profile
+        enabled: true
+      - instance: Kenp
+        profile: Profile 4
+        enabled: true
   css_file: ''
   attributes:
     font:
@@ -74,6 +114,10 @@ bars:
     catwalk:
       minimum_threshold: 20
       hide_background: false
+      style: run_cat
+      display: icon
+      size: 24
+      poll_secs: 1
     privacy:
       hide_inactive: true
       enable_toast: true
@@ -423,6 +467,85 @@ menus:
       - Shutdown
     minimum_width: 860
     maximum_height: 0
+  mdash_menu:
+    position: Top
+    widgets:
+    - !PanelHeader
+      title: Dashboard
+      greeting: true
+    - !Spacer
+      size: 8
+    - !Container
+      widgets:
+      - !Container
+        widgets:
+        - CalendarGrid
+        - Weather
+        spacing: 10
+        orientation: Vertical
+        minimum_width: 400
+        homogeneous: false
+        fill: false
+      - !Container
+        widgets:
+        - OverviewIntel
+        - Connectivity
+        - CompactAudio
+        - SystemStatus
+        - MediaPlayer
+        spacing: 8
+        orientation: Vertical
+        minimum_width: 400
+        homogeneous: false
+        fill: false
+      spacing: 12
+      orientation: Horizontal
+      minimum_width: 0
+      homogeneous: true
+      fill: false
+    - !Spacer
+      size: 10
+    - !QuickActions
+      widgets:
+      - AirplaneMode
+      - Nightlight
+      - ColorPicker
+      - Wallpaper
+      - Screenshot
+      - Settings
+    - !Spacer
+      size: 8
+    - !QuickActions
+      widgets:
+      - Network
+      - Bluetooth
+      - CpuDashboard
+      - AudioDashboard
+      - Vpn
+      - ControlCenter
+      - Twilight
+    - !Spacer
+      size: 6
+    - !QuickActions
+      widgets:
+      - Keybinds
+      - Dns
+      - Power
+      - Session
+      - Ip
+      - AlarmClock
+      - SystemUpdate
+    - Divider
+    - !Spacer
+      size: 6
+    - !QuickActions
+      widgets:
+      - Logout
+      - Lock
+      - Reboot
+      - Shutdown
+    minimum_width: 860
+    maximum_height: 0
   margo_layout_menu:
     position: TopLeft
     widgets:
@@ -446,6 +569,16 @@ notifications:
   history_limit: 200
   show_timeout_bar: true
   popup_duration_ms: 5000
+  inline_reply: true
+  sound_enabled: false
+  sound_low: false
+  sound_normal: true
+  sound_critical: true
+  sound_from_client: true
+  quiet_hours_enabled: false
+  quiet_hours_start: 22:00
+  quiet_hours_end: 08:00
+  show_progress: true
 wallpaper:
   wallpaper_dir: /home/kenan/Pictures/wallpapers/others
   content_fit: Cover
@@ -588,7 +721,7 @@ dock:
   standalone: true
   style: popup
   behavior: toggle
-  position: right
+  position: bottom
   ignore: []
   spacing: 6
   hover_preview: true
@@ -686,3 +819,4 @@ logging:
   enabled: true
   level: info
   keep_sessions: 3
+config_version: 2
