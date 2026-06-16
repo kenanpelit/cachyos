@@ -145,7 +145,7 @@ bars:
     center_widgets:
     - Weather
     - Separator
-    - Mdash
+    - Dashboard
     - Separator
     - RecordingIndicator
     - Catwalk
@@ -416,6 +416,135 @@ menus:
     position: Top
     widgets: []
     minimum_width: 780
+    maximum_height: 0
+  dashboard_menu:
+    position: Top
+    widgets:
+    - Clock
+    - !Spacer
+      size: 8
+    - !Container
+      widgets:
+      - !Container
+        widgets:
+        - CalendarGrid
+        - Weather
+        spacing: 10
+        orientation: Vertical
+        minimum_width: 400
+        homogeneous: false
+        fill: true
+      - !Container
+        widgets:
+        - OverviewIntel
+        - Connectivity
+        - CompactAudio
+        - SystemStatus
+        - MediaPlayer
+        spacing: 8
+        orientation: Vertical
+        minimum_width: 400
+        homogeneous: false
+        fill: true
+      spacing: 12
+      orientation: Horizontal
+      minimum_width: 0
+      homogeneous: true
+      fill: false
+    - !Spacer
+      size: 10
+    - !QuickActions
+      widgets:
+      - AirplaneMode
+      - Nightlight
+      - ColorPicker
+      - Wallpaper
+      - Screenshot
+      - Settings
+      - Logout
+      - Lock
+      - Reboot
+      - Shutdown
+    minimum_width: 860
+    maximum_height: 0
+  mdash_menu:
+    position: Top
+    widgets:
+    - !PanelHeader
+      title: Dashboard
+      greeting: true
+    - !Spacer
+      size: 8
+    - !Container
+      widgets:
+      - !Container
+        widgets:
+        - CalendarGrid
+        - Weather
+        spacing: 10
+        orientation: Vertical
+        minimum_width: 400
+        homogeneous: false
+        fill: false
+      - !Container
+        widgets:
+        - OverviewIntel
+        - Connectivity
+        - CompactAudio
+        - SystemStatus
+        - MediaPlayer
+        spacing: 8
+        orientation: Vertical
+        minimum_width: 400
+        homogeneous: false
+        fill: false
+      spacing: 12
+      orientation: Horizontal
+      minimum_width: 0
+      homogeneous: true
+      fill: false
+    - !Spacer
+      size: 10
+    - !QuickActions
+      widgets:
+      - AirplaneMode
+      - Nightlight
+      - ColorPicker
+      - Wallpaper
+      - Screenshot
+      - Settings
+    - !Spacer
+      size: 8
+    - !QuickActions
+      widgets:
+      - Network
+      - Bluetooth
+      - CpuDashboard
+      - AudioDashboard
+      - Vpn
+      - ControlCenter
+      - Twilight
+    - !Spacer
+      size: 6
+    - !QuickActions
+      widgets:
+      - Keybinds
+      - Dns
+      - Power
+      - Session
+      - Ip
+      - AlarmClock
+      - SystemUpdate
+    - Divider
+    - !Spacer
+      size: 6
+    - !QuickActions
+      widgets:
+      - Logout
+      - Lock
+      - Reboot
+      - Shutdown
+    minimum_width: 860
     maximum_height: 0
   margo_layout_menu:
     position: TopLeft
