@@ -235,6 +235,7 @@ tmux_conf_theme_colour_15="#cba6f7"    # Mauve/Purple - Eflatun/Mor
 tmux_conf_theme_colour_16="#f5e0dc"    # Rosewater - Gül suyu
 tmux_conf_theme_colour_17="#f2cdcd"    # Flamingo - Flamingo
 tmux_conf_theme_colour_18="#ffffff"    # Pure white - Saf beyaz
+tmux_conf_theme_colour_19="#50AAA7"
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃ 4. Visual Appearance Settings      ┃
@@ -279,7 +280,7 @@ tmux_conf_theme_window_status_format="#[bold]#I #[nobold]#W#{?window_activity_fl
 
 # Current window status style - Aktif pencere status stili
 tmux_conf_theme_window_status_current_fg="$tmux_conf_theme_colour_1"      # Aktif pencere metni rengi
-tmux_conf_theme_window_status_current_bg="$tmux_conf_theme_colour_15"     # Aktif pencere arka plan rengi
+tmux_conf_theme_window_status_current_bg="$tmux_conf_theme_colour_19"     # Aktif pencere arka plan rengi
 tmux_conf_theme_window_status_current_attr="bold"                         # Aktif pencere metin özniteliği (kalın)
 tmux_conf_theme_window_status_current_format="#I #W"                      # Aktif pencere formatı: index + isim (basit)
 
@@ -310,19 +311,19 @@ tmux_conf_theme_status_right=" #{prefix} | #{mouse} | ⟲ #{synchronized} | ◉ 
 # Sol status renkleri (her bölüm için ayrı renk: session, pairing, online_status)
 tmux_conf_theme_status_left_fg="$tmux_conf_theme_colour_1,$tmux_conf_theme_colour_5_medium,$tmux_conf_theme_colour_5,$tmux_conf_theme_colour_1"
 # Sol status arka plan renkleri
-tmux_conf_theme_status_left_bg="$tmux_conf_theme_colour_15,$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_3,$tmux_conf_theme_colour_2"
+tmux_conf_theme_status_left_bg="$tmux_conf_theme_colour_19,$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_3,$tmux_conf_theme_colour_2"
 # Sol status metin öznitelikleri
 tmux_conf_theme_status_left_attr="bold,none,bold,bold,bold"
 
 # Sağ status renkleri (her bölüm için: prefix, mouse, sync, continuum, playerctl, kripto, ssh, hostname)
 tmux_conf_theme_status_right_fg="$tmux_conf_theme_colour_5,$tmux_conf_theme_colour_6,$tmux_conf_theme_colour_5,$tmux_conf_theme_colour_6,$tmux_conf_theme_colour_5,$tmux_conf_theme_colour_5,$tmux_conf_theme_colour_1,$tmux_conf_theme_colour_1,$tmux_conf_theme_colour_5_medium"
 # Sağ status arka plan renkleri
-tmux_conf_theme_status_right_bg="$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_1,$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_1,$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_4,$tmux_conf_theme_colour_13,$tmux_conf_theme_colour_15,$tmux_conf_theme_colour_15"
+tmux_conf_theme_status_right_bg="$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_1,$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_1,$tmux_conf_theme_colour_2,$tmux_conf_theme_colour_4,$tmux_conf_theme_colour_13,$tmux_conf_theme_colour_19,$tmux_conf_theme_colour_19"
 # Sağ status metin öznitelikleri
 tmux_conf_theme_status_right_attr="none,none,none,none,none,none,bold,bold,bold"
 
 # Clock style - Saat stili ayarları
-tmux_conf_theme_clock_colour="$tmux_conf_theme_colour_15"       # Saat rengi
+tmux_conf_theme_clock_colour="$tmux_conf_theme_colour_19"       # Saat rengi
 tmux_conf_theme_clock_style="24"                               # Saat formatı (24 saat)
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
