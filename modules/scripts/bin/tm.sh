@@ -611,41 +611,41 @@ create_layout() {
 	case "$layout_num" in
 	1)
 		# Tek panel düzeni (sadece yeni pencere, split yok — placeholder)
-		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd"
 		tmux_try select-pane -t 1
 		;;
 	2)
 		# İki panel düzeni (dikey bölme - %80 üst)
-		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
-		tmux_try split-window -v -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd"
+		tmux_try split-window -v -l 80% -c "$cwd"
 		tmux_try select-pane -t 2
 		;;
 	3)
 		# Üç panel L-şekilli düzen
-		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
-		tmux_try split-window -h -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd"
+		tmux_try split-window -h -l 80% -c "$cwd"
 		tmux_try select-pane -t 2
-		tmux_try split-window -v -l 85% -c "$cwd" "$shell_cmd"
+		tmux_try split-window -v -l 85% -c "$cwd"
 		tmux_try select-pane -t 3
 		;;
 	4)
 		# Dört panel grid düzeni
-		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
-		tmux_try split-window -h -l 80% -c "$cwd" "$shell_cmd"
-		tmux_try split-window -v -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd"
+		tmux_try split-window -h -l 80% -c "$cwd"
+		tmux_try split-window -v -l 80% -c "$cwd"
 		tmux_try select-pane -t 1
-		tmux_try split-window -v -l 80% -c "$cwd" "$shell_cmd"
+		tmux_try split-window -v -l 80% -c "$cwd"
 		tmux_try select-pane -t 4
 		;;
 	5)
 		# Beş panel düzeni
-		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd" "$shell_cmd"
-		tmux_try split-window -h -l 70% -c "$cwd" "$shell_cmd"
-		tmux_try split-window -h -l 50% -c "$cwd" "$shell_cmd"
+		tmux_try new-window -t "$session_name" -n 'kenp' -c "$cwd"
+		tmux_try split-window -h -l 70% -c "$cwd"
+		tmux_try split-window -h -l 50% -c "$cwd"
 		tmux_try select-pane -t 1
-		tmux_try split-window -v -l 50% -c "$cwd" "$shell_cmd"
+		tmux_try split-window -v -l 50% -c "$cwd"
 		tmux_try select-pane -t 2
-		tmux_try split-window -v -l 50% -c "$cwd" "$shell_cmd"
+		tmux_try split-window -v -l 50% -c "$cwd"
 		tmux_try select-pane -t 5
 		;;
 	*)
