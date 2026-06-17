@@ -197,17 +197,57 @@ startup_command = "nvim"
 [[session]]
 name            = "Tor 󰖟 "
 path            = "/repo/tor"
-startup_command = "tm tmx --layout 1"
 preview_command = "lsd -la --group-dirs=first /repo/tor"
 
-# ----- 4.6 Media -------------------------------------------------------------
+# ----- 4.6 Podman VPN bring-up (3-pane layout) -------------------------------
+#  Each session uses a `*-podman-up` helper that splits the current window into
+#  3 panes: container live log (left) · stop command (right top) · ssh+byobu
+#  (right bottom). Stop/ssh are pre-typed without Enter so you confirm before
+#  firing. Mirrors the layout from fzf/_ssh_*_podman scripts.
+[[session]]
+name            = "BMC Podman 󰗀 "
+path            = "~/.podman/vpn"
+startup_command = "bmc-podman-up"
+preview_command = "podman ps -a --filter name=vpn-bmc"
+
+[[session]]
+name            = "CMS Podman 󰗀 "
+path            = "~/.podman/vpn"
+startup_command = "cms-podman-up"
+preview_command = "podman ps -a --filter name=vpn-cms"
+
+[[session]]
+name            = "GTU Podman 󰗀 "
+path            = "~/.podman/vpn"
+startup_command = "gtu-podman-up"
+preview_command = "podman ps -a --filter name=vpn-gtu"
+
+[[session]]
+name            = "IYTE Podman 󰗀 "
+path            = "~/.podman/vpn"
+startup_command = "iyte-podman-up"
+preview_command = "podman ps -a --filter name=vpn-iyte"
+
+[[session]]
+name            = "TOGG Podman 󰗀 "
+path            = "~/.podman/vpn"
+startup_command = "togg-podman-up"
+preview_command = "podman ps -a --filter name=vpn-togg"
+
+[[session]]
+name            = "YTU Podman 󰗀 "
+path            = "~/.podman/vpn"
+startup_command = "ytu-podman-up"
+preview_command = "podman ps -a --filter name=vpn-ytu"
+
+# ----- 4.7 Media -------------------------------------------------------------
 [[session]]
 name            = "Music 󰎈 "
 path            = "~/Music"
 startup_command = "rmpc"
 preview_command = "lsd -la --group-dirs=first ~/Music"
 
-# ----- 4.7 Productivity & Notes ----------------------------------------------
+# ----- 4.8 Productivity & Notes ----------------------------------------------
 [[session]]
 name            = "Anote 󰎚 "
 path            = "~/"

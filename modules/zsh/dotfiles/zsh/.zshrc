@@ -55,6 +55,7 @@ path=(
   $HOME/.local/bin
   $HOME/bin
   $HOME/.iptv/bin
+  $HOME/.podman/vpn
   /usr/local/bin
   $path
 )
