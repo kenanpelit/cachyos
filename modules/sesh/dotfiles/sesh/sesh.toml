@@ -1,312 +1,274 @@
-# ---------------------------------------------------------------------------
-# Global Settings
-# ---------------------------------------------------------------------------
-strict_mode = true
-cache = true
-dir_length = 2
-separator_aware = true
-sort_order = ["config", "tmux", "zoxide", "tmuxinator"]
+# =============================================================================
+#  sesh.toml — smart tmux session manager (joshmedeski/sesh v2)
+# -----------------------------------------------------------------------------
+#  Layout:
+#    1. Global settings        2. TUI (Catppuccin-friendly)
+#    3. Default session        4. Sessions (grouped)
+#    5. Reusable windows       6. Wildcards
+#
+#  Reference (model.Config):
+#    cache, strict_mode, sort_order, dir_length, separator_aware,
+#    tmux_command, blacklist (regex[]), import (path[]), default_session,
+#    tui, [[session]], [[window]], [[wildcard]]
+# =============================================================================
 
-# ---------------------------------------------------------------------------
-# Default Session Settings
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+#  1. Global Settings
+# -----------------------------------------------------------------------------
+strict_mode      = true
+cache            = true
+dir_length       = 2
+separator_aware  = true
+# Order in which sources appear in the picker.
+sort_order       = ["config", "tmux", "zoxide"]
+
+# -----------------------------------------------------------------------------
+#  2. TUI (Catppuccin Mocha palette match — accent #50AAA7)
+# -----------------------------------------------------------------------------
+[tui]
+prompt      = "❯ "
+placeholder = "Search sessions..."
+show_icons  = true
+
+# -----------------------------------------------------------------------------
+#  3. Default Session (fallback startup/preview when a session omits them)
+# -----------------------------------------------------------------------------
 [default_session]
 startup_command = "lsd -la --group-dirs=first"
 preview_command = "lsd -la --group-dirs=first {}"
 
-# ---------------------------------------------------------------------------
-# SSH Sessions
-# ---------------------------------------------------------------------------
+# =============================================================================
+#  4. Sessions
+# =============================================================================
+
+# ----- 4.1 SSH ---------------------------------------------------------------
 [[session]]
-name = "Feynman  "
-path = "~/"
+name            = "Feynman 󰒍 "
+path            = "~/"
 startup_command = "ssh grid -t 'byobu has -t kenan || byobu new-session -d -s kenan && byobu a -t kenan'"
 
 [[session]]
-name = "Terminal  "
-path = "~/"
+name            = "Terminal 󰣀 "
+path            = "~/"
 startup_command = "ssh terminal -t 'byobu has -t kenan || byobu new-session -d -s kenan && byobu a -t kenan'"
 
 [[session]]
-name = "SSH  "
-path = "~/"
+name            = "SSH Hub 󰢹 "
+path            = "~/"
 startup_command = "t3"
 
-# ---------------------------------------------------------------------------
-# System Tools & Monitoring
-# ---------------------------------------------------------------------------
+# ----- 4.2 System & Monitoring (interactive only) ----------------------------
 [[session]]
-name = "Tunnelshow  "
-path = "~/"
-startup_command = "tunnelshow"
-
-[[session]]
-name = "Podman-Tui 󱘖 "
-path = "~/"
-startup_command = "podman-tui"
-preview_command = "podman ps -a"
-
-[[session]]
-name = "System Monitor 󰘳 "
-path = "~/"
+name            = "System Monitor 󰘳 "
+path            = "~/"
 startup_command = "btop"
 preview_command = "fastfetch"
 
 [[session]]
-name = "Logs 󰌱 "
-path = "/var/log"
-startup_command = "sudo journalctl -f"
-preview_command = "journalctl -n 40 --no-pager"
-windows = ["logs-shell"]
-
-# ---------------------------------------------------------------------------
-# File Management
-# ---------------------------------------------------------------------------
-[[session]]
-name = "Downloads 󰇚 "
-path = "~/Downloads"
-startup_command = "ranger"
-preview_command = "lsd -la --group-dirs=first ~/Downloads"
+name            = "Processes 󰓅 "
+path            = "~/"
+startup_command = "htop"
 
 [[session]]
-name = "Yazi 󱂵 "
-path = "~/"
+name            = "Disk Usage 󰋊 "
+path            = "~/"
+startup_command = "ncdu /"
+
+[[session]]
+name            = "Network Monitor 󰛳 "
+path            = "~/"
+startup_command = "sudo nethogs"
+
+[[session]]
+name            = "Logs 󰌱 "
+path            = "/var/log"
+startup_command = "journalctl --user -f"
+preview_command = "journalctl --user -n 40 --no-pager"
+windows         = ["logs-shell"]
+
+[[session]]
+name            = "Podman-Tui 󱘖 "
+path            = "~/"
+startup_command = "podman-tui"
+preview_command = "podman ps -a"
+
+# ----- 4.3 File Management ---------------------------------------------------
+[[session]]
+name            = "Home 󰉋 "
+path            = "~/"
 startup_command = "yazi"
 
 [[session]]
-name = "Home 󰉋 "
-path = "~/"
-startup_command = "lsd -la"
+name            = "Downloads 󰇚 "
+path            = "~/Downloads"
+startup_command = "yazi"
+preview_command = "lsd -la --group-dirs=first ~/Downloads"
 
 [[session]]
-name = "Documents 󰉖 "
-path = "~/Documents"
-startup_command = "lsd -la"
+name            = "Documents 󰉖 "
+path            = "~/Documents"
+startup_command = "yazi"
 preview_command = "lsd -la --group-dirs=first ~/Documents"
 
-# ---------------------------------------------------------------------------
-# Development & Configuration
-# ---------------------------------------------------------------------------
 [[session]]
-name = "TmuxConfig 󰆍 "
-path = "~/.config/tmux"
-startup_command = "vim ~/.config/tmux/tmux.conf.local"
-preview_command = "bat --color=always ~/.config/tmux/tmux.conf.local"
-windows = ["shell"]
+name            = "Pictures 󰋩 "
+path            = "~/Pictures"
+startup_command = "yazi"
+preview_command = "lsd -la --group-dirs=first ~/Pictures"
 
 [[session]]
-name = "Project 󱌢 "
-path = "~/Work/projects"
+name            = "Videos 󰕧 "
+path            = "~/Videos"
+startup_command = "yazi"
+preview_command = "lsd -la --group-dirs=first ~/Videos"
+
+# ----- 4.4 Config Editing (dotfiles) -----------------------------------------
+[[session]]
+name            = "Cachy 󰍛 "
+path            = "~/.cachy"
+startup_command = "nvim ."
+preview_command = "git -C ~/.cachy status --short --branch"
+windows         = ["git", "shell"]
+
+[[session]]
+name            = "Tmux Config 󰆍 "
+path            = "~/.config/tmux"
+startup_command = "nvim tmux.conf"
+preview_command = "bat --color=always ~/.config/tmux/tmux.conf"
+windows         = ["shell"]
+
+[[session]]
+name            = "Kitty Config 󰄛 "
+path            = "~/.config/kitty"
+startup_command = "nvim kitty.conf"
+preview_command = "bat --color=always ~/.config/kitty/kitty.conf"
+windows         = ["shell"]
+
+[[session]]
+name            = "Hyprland Config 󰣇 "
+path            = "~/.config/hypr"
+startup_command = "nvim ."
+preview_command = "lsd -la --group-dirs=first ~/.config/hypr"
+windows         = ["shell"]
+
+[[session]]
+name            = "Margo Config 󰣇 "
+path            = "~/.config/margo"
+startup_command = "nvim ."
+preview_command = "lsd -la --group-dirs=first ~/.config/margo"
+windows         = ["shell"]
+
+[[session]]
+name            = "Sesh Config 󰒓 "
+path            = "~/.config/sesh"
+startup_command = "nvim sesh.toml"
+preview_command = "bat --color=always ~/.config/sesh/sesh.toml"
+
+# ----- 4.5 Development -------------------------------------------------------
+[[session]]
+name            = "Projects 󱌢 "
+path            = "~/Work/projects"
 startup_command = "tm tmx --layout 3"
 preview_command = "lsd -la --group-dirs=first ~/Work/projects"
 
 [[session]]
-name = "Cachy Config 󰆍 "
-path = "~/.cachy"
-startup_command = "nvim ."
-preview_command = "git -C ~/.cachy status --short --branch"
-windows = ["git", "shell"]
+name            = "Kod 󰘧 "
+path            = "~/.kod"
+startup_command = "lsd -la --group-dirs=first"
+preview_command = "lsd -la --group-dirs=first ~/.kod"
 
 [[session]]
-name = "Git Status 󰊢 "
-path = "~/.cachy"
-startup_command = "command lazygit"
+name            = "Margo Kod 󰣇 "
+path            = "~/.kod/margo"
+startup_command = "lsd -la --group-dirs=first"
+windows         = ["shell"]
+
+[[session]]
+name            = "Git Status 󰊢 "
+path            = "~/.cachy"
+startup_command = "lazygit"
 preview_command = "git -C ~/.cachy status --short --branch"
 
 [[session]]
-name = "Neovim 󰆦 "
-path = "~/"
+name            = "Neovim 󰈸 "
+path            = "~/"
 startup_command = "nvim"
 
-# ---------------------------------------------------------------------------
-# Media & Entertainment
-# ---------------------------------------------------------------------------
 [[session]]
-name = "Music 󰎈 "
-path = "~/Music"
+name            = "Tor 󰖟 "
+path            = "/repo/tor"
+startup_command = "tm tmx --layout 1"
+preview_command = "lsd -la --group-dirs=first /repo/tor"
+
+# ----- 4.6 Media -------------------------------------------------------------
+[[session]]
+name            = "Music 󰎈 "
+path            = "~/Music"
 startup_command = "rmpc"
 preview_command = "lsd -la --group-dirs=first ~/Music"
 
+# ----- 4.7 Productivity & Notes ----------------------------------------------
 [[session]]
-name = "MPV Player 󰦝 "
-path = "~/Videos"
-startup_command = "yazi"
-preview_command = "lsd -la --group-dirs=first ~/Videos"
-
-[[session]]
-name = "Radio 󱉺 "
-path = "~/"
-startup_command = "radio-cli"
-
-[[session]]
-name = "YouTube 󰗃 "
-path = "~/Downloads"
-startup_command = "yt-dlp --help"
-preview_command = "lsd -la --group-dirs=first ~/Downloads"
-
-# ---------------------------------------------------------------------------
-# Network & Security
-# ---------------------------------------------------------------------------
-[[session]]
-name = "Tor 󰖟 "
-path = "/repo/tor"
-startup_command = "tm tmx --layout 3"
-preview_command = "lsd -la --group-dirs=first /repo/tor"
-
-[[session]]
-name = "Network Monitor 󰛳 "
-path = "~/"
-startup_command = "nethogs"
-
-[[session]]
-name = "WiFi Scanner 󰀂 "
-path = "~/"
-startup_command = "nmcli dev wifi"
-preview_command = "nmcli device wifi list"
-
-[[session]]
-name = "Firewall 󰓾 "
-path = "~/"
-startup_command = "sudo ufw status verbose"
-
-# ---------------------------------------------------------------------------
-# Productivity & Notes
-# ---------------------------------------------------------------------------
-[[session]]
-name = "Anote  "
-path = "~/"
+name            = "Anote 󰎚 "
+path            = "~/"
 startup_command = "anote"
 
 [[session]]
-name = "Notes 󰠮 "
-path = "~/Notes"
-startup_command = "vim ."
+name            = "Notes 󰠮 "
+path            = "~/Notes"
+startup_command = "nvim ."
 preview_command = "lsd -la --group-dirs=first ~/Notes"
-windows = ["shell"]
+windows         = ["shell"]
 
 [[session]]
-name = "Obsidian 󰈙 "
-path = "~/.anotes/obsi"
-startup_command = "obsidian"
-preview_command = "lsd -la --group-dirs=first ~/.anotes/obsi"
-
-[[session]]
-name = "Calendar 󰃭 "
-path = "~/"
-startup_command = "cal -y"
-
-[[session]]
-name = "Tasks 󰄬 "
-path = "~/"
+name            = "Tasks 󰄬 "
+path            = "~/"
 startup_command = "task"
 preview_command = "task next"
 
-# ---------------------------------------------------------------------------
-# System Information
-# ---------------------------------------------------------------------------
-[[session]]
-name = "System Info 󰘳 "
-path = "~/"
-startup_command = "fastfetch"
-preview_command = "fastfetch"
-
-[[session]]
-name = "Hardware 󰇄 "
-path = "~/"
-startup_command = "lscpu && echo && lsmem && echo && lsblk"
-preview_command = "lscpu"
-
-[[session]]
-name = "Disk Usage 󰋊 "
-path = "~/"
-startup_command = "ncdu /"
-
-[[session]]
-name = "Processes 󰘳 "
-path = "~/"
-startup_command = "htop"
-
-# ---------------------------------------------------------------------------
-# Development Tools
-# ---------------------------------------------------------------------------
-[[session]]
-name = "Podman 󰡨 "
-path = "~/"
-startup_command = "podman ps -a"
-preview_command = "podman ps -a"
-
-[[session]]
-name = "API Test 󰜏 "
-path = "~/"
-startup_command = "curl --help"
-
-# ---------------------------------------------------------------------------
-# Gaming & Fun
-# ---------------------------------------------------------------------------
-[[session]]
-name = "Games 󰊖 "
-path = "~/.steam"
-startup_command = "steam"
-preview_command = "lsd -la --group-dirs=first ~/.steam"
-
-[[session]]
-name = "Terminal Games 󰮂 "
-path = "~/"
-startup_command = "bastet"
-
-# ---------------------------------------------------------------------------
-# Backup & Sync
-# ---------------------------------------------------------------------------
-[[session]]
-name = "Backup 󰆓 "
-path = "~/"
-startup_command = "rsync --help"
-
-[[session]]
-name = "Cloud Sync ☁️ "
-path = "~/"
-startup_command = "rclone listremotes"
-preview_command = "rclone listremotes"
-
-# ---------------------------------------------------------------------------
-# Reusable Window Presets
-# ---------------------------------------------------------------------------
+# =============================================================================
+#  5. Reusable Window Presets
+# =============================================================================
 [[window]]
-name = "git"
-startup_script = "git status --short --branch || lazygit"
+name           = "git"
+startup_script = "lazygit"
 
 [[window]]
-name = "shell"
+name           = "shell"
 startup_script = "$SHELL"
 
 [[window]]
-name = "logs-shell"
+name           = "logs-shell"
 startup_script = "$SHELL"
-path = "/var/log"
+path           = "/var/log"
 
-# ---------------------------------------------------------------------------
-# Wildcard Project Sessions
-# ---------------------------------------------------------------------------
+# =============================================================================
+#  6. Wildcards (auto-config any matching directory from zoxide / picker)
+# =============================================================================
+#  Pattern semantics:
+#    "<dir>/*"  → direct children only
+#    "<dir>/**" → recursive descendants (excluding the dir itself)
+# -----------------------------------------------------------------------------
 [[wildcard]]
-pattern = "~/.kod/*"
+pattern         = "~/.kod/*"
 startup_command = "nvim ."
 preview_command = "lsd -la --group-dirs=first {}"
-windows = ["git", "shell"]
+windows         = ["git", "shell"]
 
 [[wildcard]]
-pattern = "~/Work/projects/*"
+pattern         = "~/Work/projects/*"
 startup_command = "nvim ."
 preview_command = "lsd -la --group-dirs=first {}"
-windows = ["git", "shell"]
+windows         = ["git", "shell"]
 
 [[wildcard]]
-pattern = "~/Work/projects/**"
+pattern         = "~/Work/projects/**"
 startup_command = "nvim ."
 preview_command = "lsd -la --group-dirs=first {}"
-windows = ["git", "shell"]
+windows         = ["git", "shell"]
 
 [[wildcard]]
-pattern = "~/Notes/**"
+pattern         = "~/Notes/**"
 startup_command = "nvim ."
 preview_command = "lsd -la --group-dirs=first {}"
-windows = ["shell"]
+windows         = ["shell"]

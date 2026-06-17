@@ -847,24 +847,31 @@ install_all_plugins() {
 #--------------------------------------
 
 # Hız modunu işle - hızlı komut çalıştırma için
+# Speed mode v2 — category-aware launcher with pin + recency.
+#
+# State files (under $FZF_DIR):
+#   .fzf_cache  — usage log (one base per execution, capped at HISTORY_LIMIT)
+#   .fzf_pins   — pinned bases (rendered with ⭐ at top of list)
+#
+# In-picker hotkeys:
+#   ↵      run selected script
+#   ⌃p     toggle pin (rewrites .fzf_pins, list reloads in place)
+#   ⌃e     edit script in $EDITOR
+#   ⌃o     open $FZF_DIR in yazi
 handle_speed_mode() {
-	# Gereksinim kontrolü
 	if ! check_requirements "speed"; then
 		return 1
 	fi
 
-	info "Komut hızlandırma modu başlatılıyor..."
-
-	# fspeed ile uyumlu cache (tmux fzf bundle)
 	ensure_dir "$FZF_DIR" || return 1
 	local cache_file="${FZF_DIR}/.fzf_cache"
-	touch "$cache_file"
+	local pins_file="${FZF_DIR}/.fzf_pins"
+	touch "$cache_file" "$pins_file"
 
-	# İstatistikler
-	local total ssh_count tmux_count
+	local total ssh_count vpn_count
 	total="$(find "$FZF_DIR" -maxdepth 1 -type f -name '_*' 2>/dev/null | wc -l | tr -d '[:space:]')"
 	ssh_count="$(find "$FZF_DIR" -maxdepth 1 -type f -name '_ssh*' 2>/dev/null | wc -l | tr -d '[:space:]')"
-	tmux_count="$(find "$FZF_DIR" -maxdepth 1 -type f -name '_tmux*' 2>/dev/null | wc -l | tr -d '[:space:]')"
+	vpn_count="$(find "$FZF_DIR" -maxdepth 1 -type f -name '_ssh*vpn*' 2>/dev/null | wc -l | tr -d '[:space:]')"
 
 	if [[ "$total" -eq 0 ]]; then
 		warn "Hiç speed komutu bulunamadı"
@@ -872,127 +879,183 @@ handle_speed_mode() {
 		return 0
 	fi
 
-	debug "Toplam komut: $total | SSH: $ssh_count | TMUX: $tmux_count"
+	debug "Toplam: $total | SSH: $ssh_count | VPN: $vpn_count"
 
-	speed_display_name() {
-		local filename="$1"
-		local base="${filename%%,*}"
-		local desc=""
-		if [[ "$filename" == *","* ]]; then
-			desc="${filename#*,}"
-		fi
+	# Dump helpers to a temp file so they're callable from fzf --bind sub-shells.
+	local helpers
+	helpers="$(mktemp -t tm-speed.XXXXXX)"
+	# RETURN trap fires after fzf exits, keeping helpers alive for binds.
+	trap 'rm -f "$helpers"' RETURN
 
-		local base_display="${base#_}"
-		base_display="${base_display//_/ }"
-		base_display="${base_display//./ }"
+	{
+		printf "FZF_DIR=%q\n" "$FZF_DIR"
+		printf "cache_file=%q\n" "$cache_file"
+		printf "pins_file=%q\n" "$pins_file"
+		cat <<'BODY'
 
-		if [[ -n "$desc" ]]; then
-			local desc_display="${desc//./ }"
-			printf '%s  %s' "$base_display" "$desc_display"
-		else
-			printf '%s' "$base_display"
-		fi
-	}
+# Categorize by leading-_ stripped basename → "<icon> <LABEL>" (padded to 5).
+speed_category() {
+	case "$1" in
+		ssh_*vpn*)              printf '%s' '󰒃 VPN  ' ;;
+		ssh_*podman*)           printf '%s' ' POD  ' ;;
+		ssh_*)                  printf '%s' '󰣀 SSH  ' ;;
+		*-history)              printf '%s' '󰋖 HIST ' ;;
+		translate_*)            printf '%s' '󰊿 I18N ' ;;
+		emoji|compose|zinger|snippets)
+								printf '%s' '󰅍 CLIP ' ;;
+		ipwebtv|ytfzf)          printf '%s' '󰕧 MEDIA' ;;
+		playerctl|pulseaudio|volume_mute)
+								printf '%s' '󰕾 AUDIO' ;;
+		anote|notes)            printf '%s' '󰠮 NOTE ' ;;
+		yazi_locate)            printf '%s' '󰉋 FILE ' ;;
+		wpaperctl)              printf '%s' '󰸉 WALL ' ;;
+		*window-switcher)       printf '%s' '󰓩 TMUX ' ;;
+		fman)                   printf '%s' '󰈙 DOCS ' ;;
+		applauncher)            printf '%s' '󰀻 APP  ' ;;
+		fkill)                  printf '%s' '󰜺 KILL ' ;;
+		trash)                  printf '%s' '󰩹 TRASH' ;;
+		calculator)             printf '%s' '󰪚 MATH ' ;;
+		*)                      printf '%s' ' MISC ' ;;
+	esac
+}
 
-	resolve_script_for_base() {
-		local base="$1"
-		local match=""
+# Strip "_" prefix; split "name,--.dotted.description" → "name|description".
+speed_display_name() {
+	local f="$1" base desc name d
+	base="${f%%,*}"
+	desc=""; [[ "$f" == *","* ]] && desc="${f#*,}"
+	name="${base#_}"; name="${name//_/ }"; name="${name//./ }"
+	d="${desc//./ }"; d="${d# }"; d="${d#-- }"
+	printf '%s|%s' "$name" "$d"
+}
 
-		shopt -s nullglob
-		local -a matches=("$FZF_DIR/${base},"* "$FZF_DIR/${base}")
-		shopt -u nullglob
+resolve_script_for_base() {
+	local base="$1" m
+	shopt -s nullglob
+	local -a matches=("$FZF_DIR/${base},"* "$FZF_DIR/${base}")
+	shopt -u nullglob
+	for m in "${matches[@]}"; do
+		[[ -f "$m" ]] && { printf '%s' "${m##*/}"; return; }
+	done
+}
 
-		for m in "${matches[@]}"; do
-			if [[ -f "$m" ]]; then
-				match="${m##*/}"
-				break
-			fi
+format_row() {
+	local fname="$1" base cat name desc
+	base="${fname%%,*}"
+	cat="$(speed_category "${base#_}")"
+	IFS='|' read -r name desc <<<"$(speed_display_name "$fname")"
+	if [[ -n "$desc" ]]; then
+		printf '%s  %-24s · %s' "$cat" "$name" "$desc"
+	else
+		printf '%s  %s' "$cat" "$name"
+	fi
+}
+
+toggle_pin() {
+	local base="${1%%,*}"
+	if grep -Fxq -- "$base" "$pins_file" 2>/dev/null; then
+		grep -Fxv -- "$base" "$pins_file" >"${pins_file}.tmp" 2>/dev/null || :
+		mv "${pins_file}.tmp" "$pins_file" 2>/dev/null || :
+	else
+		printf '%s\n' "$base" >>"$pins_file"
+	fi
+}
+
+# Score = frequency + recency bonus (latest cache lines weight more).
+# Output: <filename>\t<icon> <CAT>  <name>  · <desc>
+# Pinned first (alpha), then by score desc, then alpha.
+build_speed_list() {
+	local -A pinned=() score=()
+	local p
+	while IFS= read -r p; do
+		[[ -n "$p" ]] && pinned["$p"]=1
+	done <"$pins_file"
+
+	local -a recent=()
+	mapfile -t recent <"$cache_file"
+	local n=${#recent[@]} i base bonus
+	for ((i = 0; i < n; i++)); do
+		base="${recent[$i]}"
+		[[ -n "$base" ]] || continue
+		bonus=$(((i + 1) * 10 / (n + 1))) # 0..10, newer entries higher
+		score["$base"]=$((${score["$base"]:-0} + 1 + bonus))
+	done
+
+	# Pinned section (sorted alpha by base name)
+	if ((${#pinned[@]} > 0)); then
+		local b fname
+		for b in "${!pinned[@]}"; do
+			printf '%s\n' "$b"
+		done | sort | while IFS= read -r b; do
+			fname="$(resolve_script_for_base "$b")"
+			[[ -n "$fname" ]] || continue
+			printf '%s\t⭐ %s\n' "$fname" "$(format_row "$fname")"
 		done
+	fi
 
-		printf '%s' "$match"
-	}
+	# Non-pinned: score desc, then alpha
+	local s fname
+	while IFS= read -r fname; do
+		base="${fname%%,*}"
+		[[ -n "${pinned[$base]:-}" ]] && continue
+		s="${score[$base]:-0}"
+		# Pad score reversed so sort puts highest first; tie-break by filename.
+		printf '%010d\t%s\n' "$((9999999999 - s))" "$fname"
+	done < <(find "$FZF_DIR" -maxdepth 1 -type f -name '_*' -printf '%f\n' 2>/dev/null) \
+		| sort \
+		| while IFS=$'\t' read -r _ fname; do
+			printf '%s\t  %s\n' "$fname" "$(format_row "$fname")"
+		done
+}
+BODY
+	} >"$helpers"
 
-	# Sık kullanılan komutları getir (en çok kullanılan 10 base).
-	get_frequent_bases() {
-		[[ -s "$cache_file" ]] || return 0
-		sort "$cache_file" |
-			uniq -c |
-			sort -nr |
-			awk '{print $2}' |
-			head -n 10
-	}
-
-	local -a all_files=()
-	mapfile -t all_files < <(find "$FZF_DIR" -maxdepth 1 -type f -name '_*' -printf '%f\n' 2>/dev/null | sort)
-
-	# Ana seçim (TSV: filename<TAB>display). Cache base'e yazılır (fspeed uyumlu).
 	local selection
 	selection="$(
-		{
-			while IFS= read -r base; do
-				[[ -n "$base" ]] || continue
-				local filename
-				filename="$(resolve_script_for_base "$base")"
-				[[ -n "$filename" ]] || continue
-				printf '%s\t⭐ %s\n' "$filename" "$(speed_display_name "$filename")"
-			done < <(get_frequent_bases)
-
-			for filename in "${all_files[@]}"; do
-				printf '%s\t%s\n' "$filename" "$(speed_display_name "$filename")"
-			done
-		} |
-			fzf_themed "Speed" "Toplam: $total | SSH: $ssh_count | TMUX: $tmux_count | ENTER: Çalıştır | ESC: Çık" \
+		bash -c ". '$helpers'; build_speed_list" \
+			| fzf_themed "Speed" "Total $total · SSH $ssh_count · VPN $vpn_count │ ↵ run · ⌃p pin · ⌃e edit · ⌃o files · esc" \
 				--delimiter=$'\t' \
-				--with-nth=2..
+				--with-nth=2.. \
+				--no-sort \
+				--bind "ctrl-p:execute-silent(bash -c \". '$helpers'; toggle_pin {1}\")+reload(bash -c \". '$helpers'; build_speed_list\")" \
+				--bind "ctrl-e:execute(\${EDITOR:-nvim} '$FZF_DIR'/{1})+reload(bash -c \". '$helpers'; build_speed_list\")" \
+				--bind "ctrl-o:execute(yazi '$FZF_DIR')"
 	)" || {
 		info "İptal edildi"
 		return 0
 	}
 
-	# Seçim yapıldı mı kontrol et
 	if [[ -z "$selection" ]]; then
 		info "İptal edildi"
 		return 0
 	fi
 
 	local selected="${selection%%$'\t'*}"
-	if [[ -z "$selected" ]]; then
+	[[ -z "$selected" ]] && {
 		info "İptal edildi"
 		return 0
-	fi
+	}
 
-	# Kullanımı kaydet (sadece base)
+	# Record usage (base only, for stable scoring across renamed descriptions).
 	local selected_base="${selected%%,*}"
-	echo "${selected_base}" >>"$cache_file"
-
-	# Cache dosyası boyutunu sınırla
+	printf '%s\n' "$selected_base" >>"$cache_file"
 	if [[ "$(wc -l <"$cache_file")" -gt "$HISTORY_LIMIT" ]]; then
-		tail -n "$HISTORY_LIMIT" "$cache_file" >"${cache_file}.tmp" &&
-			mv "${cache_file}.tmp" "$cache_file"
+		tail -n "$HISTORY_LIMIT" "$cache_file" >"${cache_file}.tmp" \
+			&& mv "${cache_file}.tmp" "$cache_file"
 	fi
 
-	# Script yolunu bul
 	local script_path="${FZF_DIR}/${selected}"
-
-	if [[ -n "$script_path" ]] && [[ -f "$script_path" ]]; then
-		success "Çalıştırılıyor: ${script_path##*/}"
-
-		# Script çalıştırılabilir mi kontrol et
-		if [[ ! -x "$script_path" ]]; then
-			debug "Script çalıştırılabilir değil, izin veriliyor..."
-			chmod +x "$script_path" 2>/dev/null || true
-		fi
-
-		# Script'i çalıştır
+	if [[ -f "$script_path" ]]; then
+		success "Çalıştırılıyor: ${selected}"
+		[[ -x "$script_path" ]] || chmod +x "$script_path" 2>/dev/null || true
 		if "$script_path"; then
-			success "Komut başarıyla tamamlandı"
+			success "Komut tamamlandı"
 		else
-			error "Komut çalıştırılırken hata oluştu"
+			error "Komut hatası"
 			return 1
 		fi
 	else
 		error "Script bulunamadı: ${selected}"
-		warn "Beklenen konum: ${FZF_DIR}/${selected}"
 		return 1
 	fi
 }
