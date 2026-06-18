@@ -82,9 +82,6 @@
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url
 	url = https://git::@github.com/kenanpelit/tmux-fzf-url
-[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-kripto"]
-	path = modules/tmux/dotfiles/tmux/plugins/tmux-kripto
-	url = https://git::@github.com/vascomfnunes/tmux-kripto
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-nav-master"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-nav-master
 	url = https://git::@github.com/TheSast/tmux-nav-master
@@ -97,9 +94,6 @@
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-open"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-open
 	url = https://git::@github.com/tmux-plugins/tmux-open
-[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-plugin-playerctl"]
-	path = modules/tmux/dotfiles/tmux/plugins/tmux-plugin-playerctl
-	url = https://git::@github.com/richin13/tmux-plugin-playerctl
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-prefix-highlight"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-prefix-highlight
 	url = https://git::@github.com/tmux-plugins/tmux-prefix-highlight
