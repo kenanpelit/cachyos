@@ -197,6 +197,7 @@ startup_command = "nvim"
 [[session]]
 name            = "Tor 󰖟 "
 path            = "/repo/tor"
+startup_command = "yazi"
 preview_command = "lsd -la --group-dirs=first /repo/tor"
 
 # ----- 4.6 Podman VPN bring-up (3-pane layout) -------------------------------
@@ -246,6 +247,18 @@ name            = "Music 󰎈 "
 path            = "~/Music"
 startup_command = "rmpc"
 preview_command = "lsd -la --group-dirs=first ~/Music"
+
+[[session]]
+name            = "YouTube 󰗃 "
+path            = "~/Downloads"
+startup_command = "ytfzf -l"
+preview_command = "lsd -la --group-dirs=first ~/Downloads"
+
+[[session]]
+name            = "Internet TV 󰠰 "
+path            = "~/.config/ipwebtv"
+startup_command = "$HOME/.config/tmux/fzf/_ipwebtv,--.watch.internet.tv.channels"
+preview_command = "lsd -la --group-dirs=first ~/.config/ipwebtv"
 
 # ----- 4.8 Productivity & Notes ----------------------------------------------
 [[session]]
