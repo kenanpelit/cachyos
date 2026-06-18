@@ -73,9 +73,6 @@
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-copycat"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-copycat
 	url = https://git::@github.com/tmux-plugins/tmux-copycat
-[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fuzzback"]
-	path = modules/tmux/dotfiles/tmux/plugins/tmux-fuzzback
-	url = https://git::@github.com/roosta/tmux-fuzzback
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url
 	url = https://git::@github.com/kenanpelit/tmux-fzf-url
