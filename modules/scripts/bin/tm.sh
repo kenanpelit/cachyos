@@ -1424,7 +1424,44 @@ restore_config() {
 # KENP SESSION MODE
 #--------------------------------------
 
-# KENP geliştirme oturumu
+# anka, açılışta bu oturumu snapshot'tan geri yükleyecek mi? Yalnızca şu üç koşul
+# birden sağlanırsa "evet" döner ve bekleriz:
+#   1) @anka-restore-on-start açık (boş değer = anka varsayılanı 'on'),
+#   2) bir 'last' snapshot mevcut,
+#   3) snapshot bu oturumu içeriyor.
+# Aksi halde (restore kapalı / snapshot yok / oturum snapshot'ta yok) "hayır"
+# döner; böylece autorestore OFF senaryosunda HİÇ beklemeyiz, KENP'i kenp_session_mode
+# 4. adımda anında kendimiz kurarız.
+anka_restore_pending() {
+	local session_name="$1"
+
+	local ros
+	ros="$(tmux_cmd show-options -gqv @anka-restore-on-start 2>/dev/null || true)"
+	case "$ros" in
+	"" | on | 1 | true | yes) ;; # açık (boş = anka varsayılanı)
+	*) return 1 ;;               # kapalı → bekleme yok
+	esac
+
+	local dir
+	dir="$(tmux_cmd show-options -gqv @anka-dir 2>/dev/null || true)"
+	[[ -z "$dir" ]] && dir="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/anka"
+	dir="${dir/#\~/$HOME}"
+
+	local snap="${dir}/snapshots/last/snapshot.json"
+	[[ -f "$snap" ]] || return 1
+
+	grep -Fq "\"name\": \"${session_name}\"" "$snap" 2>/dev/null
+}
+
+# KENP geliştirme oturumu (tek-sahip kurgu).
+#
+# Eski hâl KENP'i doğrudan `new-session -d -s KENP` ile yaratıyordu; bu komut
+# server'ı başlatınca anka'nın restore-on-start'ı arka planda AYNI KENP'i kurmaya
+# başlıyor, ikisi çakışıp "duplicate session: KENP" hatası veriyor ve tm (dolayısıyla
+# kitty penceresi) kapanıyordu — tmux ise arkada yaşamaya devam ettiği için kullanıcı
+# 2. kez başlatmak zorunda kalıyordu. Çözüm: KENP'in tek sahibi belli olsun.
+#   - autorestore AÇIK + snapshot'ta KENP varsa → sahibi anka; biz sadece bekleyip bağlanırız.
+#   - autorestore KAPALI / snapshot yok / KENP yoksa → sahibi tm; beklemeden kendimiz kurarız.
 kenp_session_mode() {
 	local session_name="${1:-$DEFAULT_SESSION}"
 
@@ -1434,19 +1471,42 @@ kenp_session_mode() {
 
 	info "KENP oturumu başlatılıyor: $session_name"
 
-	# Oturum varsa bağlan
+	# 1) Zaten varsa (server açık + anka restore etmiş ya da önceki çalışmadan) bağlan.
 	if has_session_exact "$session_name"; then
 		attach_or_switch "$session_name"
 		return $?
 	fi
 
-	# Yeni oturum oluştur - sadece terminal penceresi
-	if ! tmux_cmd new-session -d -s "$session_name" -n 'terminal' 2>/dev/null; then
-		error "KENP oturumu oluşturulamadı"
-		return 1
+	# 2) Yoksa önce server'ı başlat. start-server idempotenttir: server kapalıysa onu
+	#    ayağa kaldırır ve böylece anka restore-on-start'ı tetikler. KENP'i burada
+	#    YARATMIYORUZ — autostart ile new-session yarışını baştan ortadan kaldırmak için.
+	tmux_cmd start-server 2>/dev/null || true
+
+	# 3) anka bu oturumu snapshot'tan getirecekse, gelmesini bekle (en fazla ~5 sn).
+	#    Bekleme yalnızca restore gerçekten beklenirken yapılır; OFF senaryosunda
+	#    anka_restore_pending "hayır" döndüğü için bu blok tümüyle atlanır (gecikme yok).
+	if anka_restore_pending "$session_name"; then
+		info "anka snapshot'tan '$session_name' geri yükleniyor, bekleniyor..."
+		local waited=0
+		while ((waited < 50)); do
+			has_session_exact "$session_name" && break
+			sleep 0.1
+			waited=$((waited + 1))
+		done
 	fi
 
-	success "KENP oturumu hazır"
+	# 4) Hâlâ yoksa (restore kapalı / snapshot'ta yok / zaman aşımı) kendimiz kuralım.
+	#    -A: anka tam bu an oturumu kurmuş olsa bile "duplicate session" hatası vermez;
+	#    var olana bağlanır, yoksa oluşturur. Çakışma artık imkânsız.
+	if ! has_session_exact "$session_name"; then
+		if ! tmux_cmd new-session -A -d -s "$session_name" -n 'terminal' 2>/dev/null; then
+			error "'$session_name' oturumu oluşturulamadı"
+			return 1
+		fi
+		success "'$session_name' oturumu hazır"
+	fi
+
+	# 5) Bağlan.
 	attach_or_switch "$session_name"
 }
 
