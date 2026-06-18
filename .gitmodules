@@ -82,12 +82,6 @@
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-fzf-url
 	url = https://git::@github.com/kenanpelit/tmux-fzf-url
-[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-nav-master"]
-	path = modules/tmux/dotfiles/tmux/plugins/tmux-nav-master
-	url = https://git::@github.com/TheSast/tmux-nav-master
-[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-nerd-font-window-name"]
-	path = modules/tmux/dotfiles/tmux/plugins/tmux-nerd-font-window-name
-	url = https://git::@github.com/joshmedeski/tmux-nerd-font-window-name
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-online-status"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-online-status
 	url = https://git::@github.com/tmux-plugins/tmux-online-status
@@ -100,9 +94,6 @@
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-resurrect"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-resurrect
 	url = https://git::@github.com/tmux-plugins/tmux-resurrect
-[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-sensible"]
-	path = modules/tmux/dotfiles/tmux/plugins/tmux-sensible
-	url = https://git::@github.com/tmux-plugins/tmux-sensible
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-sessionist"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-sessionist
 	url = https://git::@github.com/tmux-plugins/tmux-sessionist
