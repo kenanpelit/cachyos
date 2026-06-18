@@ -106,9 +106,6 @@
 [submodule "modules/tmux/dotfiles/tmux/plugins/tmux-update-display"]
 	path = modules/tmux/dotfiles/tmux/plugins/tmux-update-display
 	url = https://git::@github.com/lljbash/tmux-update-display
-[submodule "modules/tmux/dotfiles/tmux/plugins/tmux-yank"]
-	path = modules/tmux/dotfiles/tmux/plugins/tmux-yank
-	url = https://git::@github.com/tmux-plugins/tmux-yank
 [submodule "modules/tmux/dotfiles/tmux/plugins/tpm"]
 	path = modules/tmux/dotfiles/tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm
