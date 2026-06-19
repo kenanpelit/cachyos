@@ -55,7 +55,7 @@ startup_command = "ssh terminal -t 'byobu has -t kenan || byobu new-session -d -
 [[session]]
 name            = "SSH Hub 󰢹 "
 path            = "~/"
-startup_command = "t3"
+startup_command = "tm tmx --layout 1"
 
 # ----- 4.2 System & Monitoring (interactive only) ----------------------------
 [[session]]
