@@ -1032,6 +1032,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `start-enteauth`
+**Description:** No description provided.
+
+**Usage:** `start-enteauth`
+
+---
+
 ### 📂 `status-notifier-ready`
 **Description:** Shared readiness gate that waits for the StatusNotifierWatcher on the session bus.
 

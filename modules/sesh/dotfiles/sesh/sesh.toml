@@ -59,6 +59,12 @@ startup_command = "tm tmx --layout 1"
 
 # ----- 4.2 System & Monitoring (interactive only) ----------------------------
 [[session]]
+name            = "Update 󰣇 "
+path            = "~/"
+startup_command = "paru -Syu"
+#preview_command = "paru -Syu"
+
+[[session]]
 name            = "System Monitor 󰘳 "
 path            = "~/"
 startup_command = "btop"
