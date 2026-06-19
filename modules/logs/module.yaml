@@ -1,6 +1,6 @@
 tags:
 - tool
-description: System log management (journald + logrotate + atop retention)
+description: System log management (journald + coredump + logrotate + atop retention)
 depends_on:
 - base
 post_install_hook: scripts/install.sh

@@ -6,6 +6,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 JOURNAL_SRC="${SCRIPT_DIR}/../dotfiles/journald/10-limits.conf"
 JOURNAL_DST="/etc/systemd/journald.conf.d/10-logs.conf"
 
+COREDUMP_SRC="${SCRIPT_DIR}/../dotfiles/coredump/10-limits.conf"
+COREDUMP_DST="/etc/systemd/coredump.conf.d/10-logs.conf"
+
 LOGROTATE_SRC="${SCRIPT_DIR}/../dotfiles/logrotate/logs"
 LOGROTATE_DST="/etc/logrotate.d/logs"
 
@@ -76,6 +79,7 @@ configure_atop_generations() {
 }
 
 install_managed_file "${JOURNAL_SRC}" "${JOURNAL_DST}" 644
+install_managed_file "${COREDUMP_SRC}" "${COREDUMP_DST}" 644
 install_managed_file "${LOGROTATE_SRC}" "${LOGROTATE_DST}" 644
 configure_atop_generations
 
@@ -91,6 +95,7 @@ fi
 
 # Enforce limits immediately.
 ${SUDO} journalctl --vacuum-size=200M --vacuum-time=14d >/dev/null 2>&1 || true
+${SUDO} coredumpctl --vacuum-size=200M >/dev/null 2>&1 || true
 
 # Safety cleanup for old atop archives in case rotate policies were changed.
 if [ -d /var/log/atop ]; then
