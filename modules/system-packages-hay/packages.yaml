@@ -132,6 +132,7 @@ packages:
 - mpvpaper
 - mtools
 - mullvad-browser-bin
+- mynav
 - nano
 - nano-syntax-highlighting
 - nautilus
@@ -206,6 +207,7 @@ packages:
 - unrar
 - update-grub
 - upower
+- urlscan
 - usb_modeswitch
 - vlc
 - vlc-gui-skins2
@@ -223,6 +225,7 @@ packages:
 - xl2tpd
 - xorg-xdpyinfo
 - xorg-xinput
+- xorg-xlsclients
 - zapzap
 - zathura
 - zathura-pdf-poppler
