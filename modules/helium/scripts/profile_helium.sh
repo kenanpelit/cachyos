@@ -83,7 +83,6 @@ readonly BROWSERPASS_NATIVE_HOST_NAME="com.github.browserpass.native.json"
 #     yetmez — feature da set edilmeli.
 #
 DEFAULT_FLAGS=(
-		"--restore-last-session"
 		"--hide-crash-restore-bubble"
 		"--ozone-platform=wayland"
 		"--enable-features=UseOzonePlatform,WaylandWindowDecorations,VaapiVideoDecoder,TouchpadOverscrollHistoryNavigation"
@@ -380,9 +379,15 @@ EOF
 		' || true
 
 		if [[ -n "$profile_key" ]]; then
+			# restore_on_startup=1: oturum geri yüklemeyi --restore-last-session
+			# flag'i yerine pref üzerinden yaptırırız. Flag, çıkışta Helium'un
+			# vertical_tabs.collapsed_state pref'ini default'a (genişlemiş) eziyordu
+			# (bkz. imputnet/helium#949); pref yolu collapse'ı korur.
 			json_edit_in_place "${userdata_dir}/${profile_key}/Preferences" '
 				(.profile //= {}) |
-				.profile.exit_type = "Normal"
+				.profile.exit_type = "Normal" |
+				(.session //= {}) |
+				.session.restore_on_startup = 1
 			' || true
 			return 0
 		fi
@@ -946,6 +951,12 @@ validate_profile() {
 			;;
 		--kill-profile) kill_profile=true ;;
 		--incognito) incognito_mode=true ;;
+		--restore-last-session)
+			# Bilerek atlanıyor: çıkışta vertical_tabs.collapsed_state'i bozuyor.
+			# Oturum geri yükleme artık restore_on_startup=1 pref'i üzerinden
+			# (sanitize_chromium_userdata içinde set ediliyor).
+			log "INFO" "--restore-last-session atlandı (collapse korunsun; restore_on_startup=1)"
+			;;
 		--help | -h) usage 0 ;;
 		*)
 			if [[ -n "${1:-}" ]]; then
