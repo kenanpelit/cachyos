@@ -12,6 +12,7 @@ bin_dir="$user_home/.local/bin"
 mkdir -p "$bin_dir"
 ln -sf "$module_root/scripts/transmission-setup" "$bin_dir/transmission-setup"
 ln -sf "$module_root/scripts/transmission-ui" "$bin_dir/transmission-ui"
+ln -sf "$module_root/scripts/transmission-tui" "$bin_dir/transmission-tui"
 
 if [[ "$(id -u)" -eq 0 ]]; then
   user_group="$(id -gn "$real_user" 2>/dev/null || true)"
@@ -19,7 +20,8 @@ if [[ "$(id -u)" -eq 0 ]]; then
   chmod 755 "$bin_dir" || true
   chown -h "$real_user:${user_group:-$real_user}" \
     "$bin_dir/transmission-setup" \
-    "$bin_dir/transmission-ui" || true
+    "$bin_dir/transmission-ui" \
+    "$bin_dir/transmission-tui" || true
 fi
 
 run_as_user() {

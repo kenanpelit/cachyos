@@ -1,6 +1,6 @@
 tags:
 - tool
-description: Transmission (daemon + gui) portable config
+description: Transmission stack (daemon + GTK gui + rustmission TUI) portable config
 depends_on:
 - base
 dotfiles:
@@ -10,5 +10,7 @@ dotfiles:
   target: ~/.config/systemd/user/transmission.timer
 - source: dotfiles/applications/transmission-gtk.desktop
   target: ~/.local/share/applications/transmission-gtk.desktop
+- source: dotfiles/rustmission
+  target: ~/.config/rustmission
 post_install_hook: scripts/install.sh
 post_hook_behavior: always

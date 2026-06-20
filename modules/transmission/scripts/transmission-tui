@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Rustmission, Transmission daemon'una (RPC: http://localhost:9091) bağlanan TUI
+# arayüzdür — GTK arayüzü (transmission-ui) ile aynı daemon'u/config'i paylaşır.
+#
+# Daemon, transmission.timer ile açılıştan 60sn sonra başladığından, TUI'yi
+# beklemeden açtığında henüz ayakta olmayabilir. Burada önce servisi tetikleyip
+# RPC portunun yanıt vermesini kısa süre bekliyoruz, sonra rustmission'ı açıyoruz.
+
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl --user start transmission.service >/dev/null 2>&1 || true
+fi
+
+# RPC hazır olana kadar (en fazla ~5sn) bekle; transmission-remote varsa onu kullan.
+if command -v transmission-remote >/dev/null 2>&1; then
+  for _ in $(seq 1 25); do
+    if transmission-remote 127.0.0.1:9091 --session-info >/dev/null 2>&1; then
+      break
+    fi
+    sleep 0.2
+  done
+fi
+
+exec /usr/bin/rustmission "$@"

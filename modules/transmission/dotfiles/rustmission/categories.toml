@@ -1,0 +1,42 @@
+# Rustmission kategorileri — her kategori bir etiket + (opsiyonel) varsayılan indirme dizini.
+# Bir torrent'e 'c' ile kategori atarsın; default_dir verilmişse oraya iner.
+# Dizinler Transmission daemon'unun tabanıyla ($HOME/.tor/transmission/complete) hizalıdır.
+#
+# Aşağıdakileri kullanmak için ilgili [[categories]] bloğunun yorumunu kaldır
+# ve dizini bir kez oluştur (örn: mkdir -p ~/.tor/transmission/complete/film).
+#
+# Alan referansı:
+#   name        # zorunlu
+#   icon        # opsiyonel, varsayılan: ""           (Nerd Font önerilir)
+#   default_dir # opsiyonel, varsayılan: daemon'un download-dir'i
+#   color       # opsiyonel, varsayılan: "White"      (Red/Green/Blue/Yellow/Magenta/Cyan/hex)
+
+# [[categories]]
+# name = "Film"
+# icon = "󰿎"
+# default_dir = "~/.tor/transmission/complete/film"
+# color = "Cyan"
+
+# [[categories]]
+# name = "Dizi"
+# icon = "󰠫"
+# default_dir = "~/.tor/transmission/complete/dizi"
+# color = "Blue"
+
+# [[categories]]
+# name = "Müzik"
+# icon = "󰎄"
+# default_dir = "~/.tor/transmission/complete/muzik"
+# color = "Magenta"
+
+# [[categories]]
+# name = "Yazılım"
+# icon = "󰣖"
+# default_dir = "~/.tor/transmission/complete/yazilim"
+# color = "Green"
+
+# [[categories]]
+# name = "Kitap"
+# icon = "󰂽"
+# default_dir = "~/.tor/transmission/complete/kitap"
+# color = "Yellow"

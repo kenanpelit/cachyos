@@ -2,5 +2,6 @@ description: Transmission packages
 packages:
   - transmission-cli
   - transmission-gtk
+  - rustmission
   - pirate-get
   - at
