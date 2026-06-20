@@ -474,7 +474,7 @@ setup_environment() {
   export VISUAL=nvim
   export TERMINAL=gnome-terminal
   export TERM=xterm-256color
-  export BROWSER=helium-kenp-default
+  export BROWSER=zen-kenp-default
   debug_log "Varsayılan uygulamalar ayarlandı"
 
   # -------------------------------------------------------------------------

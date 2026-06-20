@@ -146,6 +146,21 @@ declare -A FIREFOX_BROWSERS=(
   ["firefox-proxy"]="firefox|-P proxy --class Proxy --name Proxy --new-window --new-instance|6|bypass|1|false"
 )
 
+# Zen (Firefox-based) - profiles live in ~/.zen (profiles.ini)
+# exclude + proxy run with VPN bypass; the rest go through the VPN (secure).
+declare -A ZEN_BROWSERS=(
+  ["zen-kenp"]="zen-browser|-P kenp --class Kenp --name Kenp --new-window --new-instance|1|secure|1|false"
+  ["zen-nil"]="zen-browser|-P nil --class Nil --name Nil --new-window --new-instance|1|secure|1|false"
+  ["zen-ai"]="zen-browser|-P ai --class Ai --name Ai --new-window --new-instance|3|secure|1|false"
+  ["zen-compecta"]="zen-browser|-P compecta --class Compecta --name Compecta --new-window --new-instance|4|secure|1|false"
+  ["zen-discord"]="zen-browser|-P discord --class Discord --name Discord --new-window --new-instance|5|secure|1|false"
+  ["zen-exclude"]="zen-browser|-P exclude --class Exclude --name Exclude --new-window --new-instance|6|bypass|1|false"
+  ["zen-proxy"]="zen-browser|-P proxy --class Proxy --name Proxy --new-window --new-instance|6|bypass|1|false"
+  ["zen-spotify"]="zen-browser|-P spotify --class Spotify --name Spotify --new-window --new-instance|8|secure|1|false"
+  ["zen-whats"]="zen-browser|-P whats --class Whats --name Whats --new-window --new-instance|9|secure|1|false"
+  ["zen-youtube"]="zen-browser|-P youtube --class Youtube --name Youtube --new-window --new-instance https://www.youtube.com|7|secure|1|false"
+)
+
 # Applications - UPDATED
 declare -A APPS=(
   ["discord"]="discord|-m --class=discord --title=discord|5|secure|1|true"
@@ -630,6 +645,10 @@ get_class_pattern() {
     local profile_class="${profile#firefox-}"
     echo "${profile_class^}"
     ;;
+  zen-*)
+    local profile_class="${profile#zen-}"
+    echo "${profile_class^}"
+    ;;
   discord) echo "discord|Discord" ;;
   spotify) echo "spotify|Spotify" ;;
   ferdium) echo "ferdium|Ferdium" ;;
@@ -680,6 +699,7 @@ get_browser_profiles() {
   "brave") echo "BRAVE_BROWSERS" ;;
   "chrome") echo "CHROME_BROWSERS" ;;
   "firefox") echo "FIREFOX_BROWSERS" ;;
+  "zen") echo "ZEN_BROWSERS" ;;
   *)
     log "ERROR" "BROWSER" "Invalid browser type: $BROWSER_TYPE"
     return 1
@@ -936,6 +956,11 @@ generate_all_scripts() {
     ((count++))
   done
 
+  for profile in "${!ZEN_BROWSERS[@]}"; do
+    generate_script "$profile" "${ZEN_BROWSERS[$profile]}"
+    ((count++))
+  done
+
   for profile in "${!CHROME_BROWSERS[@]}"; do
     generate_script "$profile" "${CHROME_BROWSERS[$profile]}"
     ((count++))
@@ -1136,6 +1161,8 @@ launch_profile() {
     launch_application "$profile" "${BRAVE_BROWSERS[$profile]}" "brave"
   elif [[ -v FIREFOX_BROWSERS["$profile"] && "$BROWSER_TYPE" == "firefox" ]]; then
     launch_application "$profile" "${FIREFOX_BROWSERS[$profile]}" "firefox"
+  elif [[ -v ZEN_BROWSERS["$profile"] && "$BROWSER_TYPE" == "zen" ]]; then
+    launch_application "$profile" "${ZEN_BROWSERS[$profile]}" "zen"
   elif [[ -v CHROME_BROWSERS["$profile"] && "$BROWSER_TYPE" == "chrome" ]]; then
     launch_application "$profile" "${CHROME_BROWSERS[$profile]}" "chrome"
   elif [[ -v APPS["$profile"] ]]; then
@@ -1461,6 +1488,7 @@ show_help() {
   echo "    helium                Use Helium Browser profiles (default)"
   echo "    brave                 Use Brave Browser profiles"
   echo "    firefox               Use Firefox profiles"
+  echo "    zen                   Use Zen Browser profiles (~/.zen)"
   echo "    chrome                Use Chrome Browser profiles"
   echo
   echo -e "${BOLD}Commands:${NC}"
@@ -1514,7 +1542,7 @@ show_help() {
 #-------------------------------------------------------------------------------
 
 parse_args() {
-  if [[ $# -gt 0 && ("$1" == "helium" || "$1" == "brave" || "$1" == "chrome" || "$1" == "firefox") ]]; then
+  if [[ $# -gt 0 && ("$1" == "helium" || "$1" == "brave" || "$1" == "chrome" || "$1" == "firefox" || "$1" == "zen") ]]; then
     BROWSER_TYPE="$1"
     shift
   fi

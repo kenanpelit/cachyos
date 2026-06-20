@@ -11,7 +11,62 @@ name        = "scripts"
 name_pretty = "Scripts"
 icon        = "application-x-executable"
 
-# ── Helium — varsayılan browser ────────────────────────────────────────────
+# ── Zen — varsayılan browser ─────────────────────────────────────────────────
+[[entries]]
+text     = "Zen — Kenp"
+keywords = ["zen", "kenp", "browser", "tarayıcı"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-kenp" }
+
+[[entries]]
+text     = "Zen — AI"
+keywords = ["zen", "ai", "browser"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-ai" }
+
+[[entries]]
+text     = "Zen — Compecta"
+keywords = ["zen", "compecta", "browser", "iş"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-compecta" }
+
+[[entries]]
+text     = "Zen — Discord"
+keywords = ["zen", "discord", "chat"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-discord" }
+
+[[entries]]
+text     = "Zen — Exclude"
+keywords = ["zen", "exclude", "browser"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-exclude" }
+
+[[entries]]
+text     = "Zen — Nil"
+keywords = ["zen", "nil", "browser"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-nil" }
+
+[[entries]]
+text     = "Zen — Proxy"
+keywords = ["zen", "proxy", "browser"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-proxy" }
+
+[[entries]]
+text     = "Zen — Spotify"
+keywords = ["zen", "spotify", "music", "müzik"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-spotify" }
+
+[[entries]]
+text     = "Zen — Whats"
+keywords = ["zen", "whats", "whatsapp", "chat"]
+icon     = "zen-browser"
+actions  = { "run" = "start-zen-whats" }
+
+# ── Helium ───────────────────────────────────────────────────────────────────
 [[entries]]
 text     = "Helium — Kenp"
 keywords = ["helium", "kenp", "browser", "tarayıcı"]

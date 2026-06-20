@@ -184,13 +184,6 @@ cleanup_legacy_bins() {
     osc-perf-mode
     rofi-performance
     start-wkenp
-    start-zen-compecta
-    start-zen-discord
-    start-zen-kenp
-    start-zen-novpn
-    start-zen-proxy
-    start-zen-spotify
-    start-zen-whats
   )
 
   local b p

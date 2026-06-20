@@ -498,7 +498,7 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-helium-kenp
+  - name: start-zen-kenp
     enabled: true
     delay_secs: 11
     trigger: LoginOnce

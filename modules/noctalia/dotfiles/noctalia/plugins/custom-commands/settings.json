@@ -11,6 +11,51 @@
       "icon": "activity"
     },
     {
+      "name": "Zen Kenp",
+      "command": "start-zen-kenp",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen AI",
+      "command": "start-zen-ai",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen Compecta",
+      "command": "start-zen-compecta",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen Discord",
+      "command": "start-zen-discord",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen Exclude",
+      "command": "start-zen-exclude",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen Nil",
+      "command": "start-zen-nil",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen Proxy",
+      "command": "start-zen-proxy",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen Spotify",
+      "command": "start-zen-spotify",
+      "icon": "globe"
+    },
+    {
+      "name": "Zen Whats",
+      "command": "start-zen-whats",
+      "icon": "globe"
+    },
+    {
       "name": "Helium AI",
       "command": "start-helium-ai",
       "icon": "globe"

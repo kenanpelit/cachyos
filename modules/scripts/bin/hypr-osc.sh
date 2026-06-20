@@ -292,11 +292,11 @@ launch_from_candidates() {
 }
 
 preferred_browser_prefix() {
-  if [[ "${BROWSER:-start-helium-kenp}" == *"helium"* ]]; then
-    printf '%s\n' "helium"
-  else
-    printf '%s\n' "brave"
-  fi
+  case "${BROWSER:-start-zen-kenp}" in
+    *zen*) printf '%s\n' "zen" ;;
+    *helium*) printf '%s\n' "helium" ;;
+    *) printf '%s\n' "brave" ;;
+  esac
 }
 
 launch_here_app() {
