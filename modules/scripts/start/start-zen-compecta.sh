@@ -23,7 +23,7 @@ readonly VPN_MODE="secure"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=1
 readonly COMMAND="zen-browser"
-readonly ARGS_STR="-P compecta --class Compecta --name Compecta --new-window --new-instance"
+readonly ARGS_STR="-P compecta --class CompecTA --name CompecTA --new-window --new-instance"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager
@@ -144,7 +144,7 @@ echo "Application started (PID: $APP_PID)"
 if [[ "$WORKSPACE" != "0" && "$WM_TYPE" == "hyprland" ]] && command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     echo "Verifying window on workspace $WORKSPACE..."
     ELAPSED=0
-    CLASS_PATTERN="Compecta"
+    CLASS_PATTERN="CompecTA"
     
     while [[ $ELAPSED -lt $APP_TIMEOUT ]]; do
         if hyprctl clients -j 2>/dev/null | jq -e ".[] | select(.workspace.id == $WORKSPACE and (.class | test(\"$CLASS_PATTERN\"; \"i\")))" >/dev/null 2>&1; then
