@@ -184,6 +184,9 @@ cleanup_legacy_bins() {
     osc-perf-mode
     rofi-performance
     start-wkenp
+    start-firefox-kenp
+    start-firefox-compecta
+    start-firefox-proxy
   )
 
   local b p

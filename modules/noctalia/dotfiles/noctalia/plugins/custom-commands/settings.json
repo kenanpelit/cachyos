@@ -161,21 +161,6 @@
       "icon": "message-circle"
     },
     {
-      "name": "Firefox Compecta",
-      "command": "start-firefox-compecta",
-      "icon": "globe"
-    },
-    {
-      "name": "Firefox Kenp",
-      "command": "start-firefox-kenp",
-      "icon": "globe"
-    },
-    {
-      "name": "Firefox Proxy",
-      "command": "start-firefox-proxy",
-      "icon": "globe"
-    },
-    {
       "name": "Brave AI",
       "command": "start-brave-ai",
       "icon": "globe"

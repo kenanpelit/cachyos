@@ -1214,3 +1214,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `zen-kenp-default`
+**Description:** Default browser entry for the Zen Kenp profile with niri focus.
+
+**Usage:** `zen-kenp-default.sh [URL]`
+
+---
+

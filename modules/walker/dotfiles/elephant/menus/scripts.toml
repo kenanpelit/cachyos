@@ -4,7 +4,7 @@
 # Kurulum sırasında .sh uzantısı düşürülerek ~/.local/bin'e kopyalanıyor.
 # Bu yüzden  actions  içinde  start-helium-ai  (uzantısız) olarak çağırıyoruz.
 #
-# Sıralama:  Helium (varsayılan tarayıcı) → Brave → Chrome → Firefox →
+# Sıralama:  Zen (varsayılan tarayıcı) → Helium → Brave → Chrome →
 #            iletişim → medya → terminal
 # ════════════════════════════════════════════════════════════════════════════
 name        = "scripts"
@@ -224,25 +224,6 @@ text     = "Chrome — Whats"
 keywords = ["chrome", "whats", "whatsapp", "browser"]
 icon     = "google-chrome"
 actions  = { "run" = "start-chrome-whats" }
-
-# ── Firefox ────────────────────────────────────────────────────────────────
-[[entries]]
-text     = "Firefox — Kenp"
-keywords = ["firefox", "kenp", "browser"]
-icon     = "firefox"
-actions  = { "run" = "start-firefox-kenp" }
-
-[[entries]]
-text     = "Firefox — Compecta"
-keywords = ["firefox", "compecta", "browser", "iş"]
-icon     = "firefox"
-actions  = { "run" = "start-firefox-compecta" }
-
-[[entries]]
-text     = "Firefox — Proxy"
-keywords = ["firefox", "proxy", "browser"]
-icon     = "firefox"
-actions  = { "run" = "start-firefox-proxy" }
 
 # ── İletişim ───────────────────────────────────────────────────────────────
 [[entries]]

@@ -139,13 +139,6 @@ declare -A CHROME_BROWSERS=(
   ["chrome-whats"]="profile_chrome|Whats --class Whats|9|secure|1|false"
 )
 
-# Browser Applications - Firefox
-declare -A FIREFOX_BROWSERS=(
-  ["firefox-kenp"]="firefox|-P kenp --class Kenp --name Kenp --new-window --new-instance|1|secure|1|false"
-  ["firefox-compecta"]="firefox|-P compecta --class Compecta --name Compecta --new-window --new-instance|4|secure|1|false"
-  ["firefox-proxy"]="firefox|-P proxy --class Proxy --name Proxy --new-window --new-instance|6|bypass|1|false"
-)
-
 # Zen (Firefox-based) - profiles live in ~/.zen (profiles.ini)
 # exclude + proxy run with VPN bypass; the rest go through the VPN (secure).
 declare -A ZEN_BROWSERS=(
@@ -533,18 +526,6 @@ is_app_running() {
         jq -e '.[] | select((.class // "") | test("brave-whatsapp"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
-      firefox-kenp)
-        jq -e '.[] | select((.class // "") | test("kenp"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      firefox-compecta)
-        jq -e '.[] | select((.class // "") | test("compecta"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      firefox-proxy)
-        jq -e '.[] | select((.class // "") | test("proxy"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
       chrome-*)
         local profile_class="${profile#chrome-}"
         jq -e --arg profile_class "$profile_class" \
@@ -641,10 +622,6 @@ get_class_pattern() {
     fi
     ;;
   chrome-*) echo "chrome|Google-chrome" ;;
-  firefox-*)
-    local profile_class="${profile#firefox-}"
-    echo "${profile_class^}"
-    ;;
   zen-*)
     local profile_class="${profile#zen-}"
     echo "${profile_class^}"
@@ -698,7 +675,6 @@ get_browser_profiles() {
   "helium") echo "HELIUM_BROWSERS" ;;
   "brave") echo "BRAVE_BROWSERS" ;;
   "chrome") echo "CHROME_BROWSERS" ;;
-  "firefox") echo "FIREFOX_BROWSERS" ;;
   "zen") echo "ZEN_BROWSERS" ;;
   *)
     log "ERROR" "BROWSER" "Invalid browser type: $BROWSER_TYPE"
@@ -951,11 +927,6 @@ generate_all_scripts() {
     ((count++))
   done
 
-  for profile in "${!FIREFOX_BROWSERS[@]}"; do
-    generate_script "$profile" "${FIREFOX_BROWSERS[$profile]}"
-    ((count++))
-  done
-
   for profile in "${!ZEN_BROWSERS[@]}"; do
     generate_script "$profile" "${ZEN_BROWSERS[$profile]}"
     ((count++))
@@ -1159,8 +1130,6 @@ launch_profile() {
     launch_application "$profile" "${HELIUM_BROWSERS[$profile]}" "helium"
   elif [[ -v BRAVE_BROWSERS["$profile"] && "$BROWSER_TYPE" == "brave" ]]; then
     launch_application "$profile" "${BRAVE_BROWSERS[$profile]}" "brave"
-  elif [[ -v FIREFOX_BROWSERS["$profile"] && "$BROWSER_TYPE" == "firefox" ]]; then
-    launch_application "$profile" "${FIREFOX_BROWSERS[$profile]}" "firefox"
   elif [[ -v ZEN_BROWSERS["$profile"] && "$BROWSER_TYPE" == "zen" ]]; then
     launch_application "$profile" "${ZEN_BROWSERS[$profile]}" "zen"
   elif [[ -v CHROME_BROWSERS["$profile"] && "$BROWSER_TYPE" == "chrome" ]]; then
@@ -1487,7 +1456,6 @@ show_help() {
   echo -e "${BOLD}Browser Types:${NC}"
   echo "    helium                Use Helium Browser profiles (default)"
   echo "    brave                 Use Brave Browser profiles"
-  echo "    firefox               Use Firefox profiles"
   echo "    zen                   Use Zen Browser profiles (~/.zen)"
   echo "    chrome                Use Chrome Browser profiles"
   echo
@@ -1542,7 +1510,7 @@ show_help() {
 #-------------------------------------------------------------------------------
 
 parse_args() {
-  if [[ $# -gt 0 && ("$1" == "helium" || "$1" == "brave" || "$1" == "chrome" || "$1" == "firefox" || "$1" == "zen") ]]; then
+  if [[ $# -gt 0 && ("$1" == "helium" || "$1" == "brave" || "$1" == "chrome" || "$1" == "zen") ]]; then
     BROWSER_TYPE="$1"
     shift
   fi
@@ -1726,7 +1694,6 @@ check_dependencies() {
   helium) command -v profile_helium >/dev/null 2>&1 || missing_deps+=("profile_helium") ;;
   brave) command -v profile_brave >/dev/null 2>&1 || missing_deps+=("profile_brave") ;;
   chrome) command -v profile_chrome >/dev/null 2>&1 || missing_deps+=("profile_chrome") ;;
-  firefox) command -v firefox >/dev/null 2>&1 || missing_deps+=("firefox") ;;
   esac
 
   if [[ "$WM_TYPE" == "hyprland" ]] && ! command -v jq >/dev/null 2>&1; then
