@@ -23,7 +23,7 @@ readonly VPN_MODE="bypass"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=1
 readonly COMMAND="profile_brave"
-readonly ARGS_STR="Kenp --separate --class=Exclude --title=Exclude --restore-last-session"
+readonly ARGS_STR="kenp --separate --class=exclude --title=exclude --restore-last-session"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager

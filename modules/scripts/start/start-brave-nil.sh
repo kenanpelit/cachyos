@@ -23,7 +23,7 @@ readonly VPN_MODE="secure"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=2
 readonly COMMAND="profile_brave"
-readonly ARGS_STR="Nil --separate --restore-last-session"
+readonly ARGS_STR="nil --separate --restore-last-session"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager
