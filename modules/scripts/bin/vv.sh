@@ -232,13 +232,15 @@ show_version() {
 # Dosya listesi gösterme
 list_files() {
 	local n size
-	n=$(find "$VV_DIR" -type f 2>/dev/null | wc -l)
-	size=$(du -sh "$VV_DIR" 2>/dev/null | cut -f1)
-	info "Mevcut dosyalar (${n} dosya, ${size:-?}):"
+	# || true: erişilemeyen alt dosya (Permission denied) du/find'i sıfır-dışı
+	# döndürür; sayım/boyut kozmetik olduğundan bu set -e'yi tetiklememeli.
+	n=$(find "$VV_DIR" -type f 2>/dev/null | wc -l || true)
+	size=$(du -sh "$VV_DIR" 2>/dev/null | cut -f1 || true)
+	info "Mevcut dosyalar (${n:-?} dosya, ${size:-?}):"
 	if command -v tree >/dev/null 2>&1; then
-		tree "$VV_DIR" -a -I '.git'
+		tree "$VV_DIR" -a -I '.git' || true
 	else
-		find "$VV_DIR" -type f | sort | sed "s|^$VV_DIR/||"
+		find "$VV_DIR" -type f 2>/dev/null | sort | sed "s|^$VV_DIR/||" || true
 	fi
 }
 
