@@ -80,6 +80,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `cleanup_zen_profiles`
+**Description:** Cleanup utility for Zen (Firefox-based) profile disk usage.
+
+**Usage:** `cleanup_zen_profiles.sh [options]`
+
+---
+
 ### 📂 `clustergit`
 **Description:** Multi-repository Git status monitoring tool with rich reporting.
 
