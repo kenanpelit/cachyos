@@ -8,7 +8,7 @@
 #   - Automatic window manager detection (Hyprland, Niri, generic Wayland/X11)
 #   - Application startup verification with timeout (Hyprland)
 #   - Startup script generation for all profiles
-#   - Multi-browser support (Helium, Brave, Chrome)
+#   - Multi-browser support (Helium, Brave, Firefox)
 #   - VPN bypass/secure mode support
 #   - Terminal session management
 #   - Config-free operation (no external config files needed)
@@ -131,14 +131,6 @@ declare -A BRAVE_BROWSERS=(
   ["brave-discord"]="profile_brave|--discord --separate --class discord --title discord|5|secure|1|true"
   ["brave-proxy"]="profile_brave|proxy --separate --title proxy|6|bypass|1|false"
   ["brave-whatsapp"]="profile_brave|--whatsapp --separate --class whatsapp --title whatsapp|9|secure|1|true"
-)
-
-# Browser Applications - Chrome
-declare -A CHROME_BROWSERS=(
-  ["chrome-kenp"]="profile_chrome|kenp --class kenp|1|secure|1|false"
-  ["chrome-ai"]="profile_chrome|ai --class ai|3|secure|1|false"
-  ["chrome-compecta"]="profile_chrome|compecta --class compecta|4|secure|1|false"
-  ["chrome-whats"]="profile_chrome|whats --class whats|9|secure|1|false"
 )
 
 # exclude + proxy run with VPN bypass; the rest go through the VPN (secure).
@@ -541,13 +533,6 @@ is_app_running() {
         jq -e '.[] | select((.class // "") | test("brave-whatsapp"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
-      chrome-*)
-        local profile_class="${profile#chrome-}"
-        jq -e --arg profile_class "$profile_class" \
-          '.[] | select((.class // "") | test("chrome|google-chrome"; "i")) | select((.title // "") | test($profile_class; "i"))' \
-          <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
       esac
     fi
   fi
@@ -636,7 +621,6 @@ get_class_pattern() {
       echo "brave|brave-browser"
     fi
     ;;
-  chrome-*) echo "chrome|Google-chrome" ;;
   discord) echo "discord|Discord" ;;
   spotify) echo "spotify|Spotify" ;;
   ferdium) echo "ferdium|Ferdium" ;;
@@ -685,7 +669,6 @@ get_browser_profiles() {
   case "$BROWSER_TYPE" in
   "helium") echo "HELIUM_BROWSERS" ;;
   "brave") echo "BRAVE_BROWSERS" ;;
-  "chrome") echo "CHROME_BROWSERS" ;;
   "firefox") echo "FIREFOX_BROWSERS" ;;
   *)
     log "ERROR" "BROWSER" "Invalid browser type: $BROWSER_TYPE"
@@ -948,11 +931,6 @@ generate_all_scripts() {
     ((count++))
   done
 
-  for profile in "${!CHROME_BROWSERS[@]}"; do
-    generate_script "$profile" "${CHROME_BROWSERS[$profile]}"
-    ((count++))
-  done
-
   for profile in "${!APPS[@]}"; do
     generate_script "$profile" "${APPS[$profile]}"
     ((count++))
@@ -993,7 +971,6 @@ resolve_profile_config() {
   elif [[ -v BRAVE_BROWSERS["$profile"] ]]; then echo "${BRAVE_BROWSERS[$profile]}"
   elif [[ -v FIREFOX_BROWSERS["$profile"] ]]; then echo "${FIREFOX_BROWSERS[$profile]}"
   elif [[ -v INCOGNITO_BROWSERS["$profile"] ]]; then echo "${INCOGNITO_BROWSERS[$profile]}"
-  elif [[ -v CHROME_BROWSERS["$profile"] ]]; then echo "${CHROME_BROWSERS[$profile]}"
   elif [[ -v APPS["$profile"] ]]; then echo "${APPS[$profile]}"
   else return 1
   fi
@@ -1175,8 +1152,6 @@ launch_profile() {
     launch_application "$profile" "${FIREFOX_BROWSERS[$profile]}" "firefox"
   elif [[ -v INCOGNITO_BROWSERS["$profile"] ]]; then
     launch_application "$profile" "${INCOGNITO_BROWSERS[$profile]}" "incognito"
-  elif [[ -v CHROME_BROWSERS["$profile"] && "$BROWSER_TYPE" == "chrome" ]]; then
-    launch_application "$profile" "${CHROME_BROWSERS[$profile]}" "chrome"
   elif [[ -v APPS["$profile"] ]]; then
     launch_application "$profile" "${APPS[$profile]}" "app"
   else
@@ -1509,7 +1484,6 @@ show_help() {
   echo "    helium                Use Helium Browser profiles (default)"
   echo "    brave                 Use Brave Browser profiles"
   echo "    firefox               Use Firefox Browser profiles (~/.mozilla)"
-  echo "    chrome                Use Chrome Browser profiles"
   echo
   echo -e "${BOLD}Commands:${NC}"
   echo "    generate [profile]    Generate startup script(s)"
@@ -1563,7 +1537,7 @@ show_help() {
 #-------------------------------------------------------------------------------
 
 parse_args() {
-  if [[ $# -gt 0 && ("$1" == "helium" || "$1" == "brave" || "$1" == "chrome" || "$1" == "firefox") ]]; then
+  if [[ $# -gt 0 && ("$1" == "helium" || "$1" == "brave" || "$1" == "firefox") ]]; then
     BROWSER_TYPE="$1"
     shift
   fi
@@ -1745,7 +1719,6 @@ check_dependencies() {
   case "$BROWSER_TYPE" in
   helium) command -v profile_helium >/dev/null 2>&1 || missing_deps+=("profile_helium") ;;
   brave) command -v profile_brave >/dev/null 2>&1 || missing_deps+=("profile_brave") ;;
-  chrome) command -v profile_chrome >/dev/null 2>&1 || missing_deps+=("profile_chrome") ;;
   esac
 
   if [[ "$WM_TYPE" == "hyprland" ]] && ! command -v jq >/dev/null 2>&1; then

@@ -892,13 +892,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `profile_chrome`
-**Description:** Advanced Google Chrome profile launcher and manager
-
-**Usage:** `profile_chrome.sh [profile_name] [options]`
-
----
-
 ### 📂 `publicip`
 **Description:** Advanced public IP address checker with VPN detection
 

@@ -90,13 +90,6 @@ if command -v starship >/dev/null 2>&1; then
   eval "$(starship init bash)"
 fi
 
-# ----------------------------------------------------------------------
-# Aliases (only if wrappers exist)
-# ----------------------------------------------------------------------
-if command -v chrome-launcher >/dev/null 2>&1; then
-  alias chrome=chrome-launcher
-fi
-
 # Transmission helpers
 if command -v transmission-remote >/dev/null 2>&1; then
   alias tr-list='transmission-remote -l'

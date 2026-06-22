@@ -913,12 +913,6 @@ _zsh_has bat && alias -- cat='bat --paging=never'
 alias -- cava-config='cat ~/.config/cava/config | grep -A10 '\''\[color\]'\'''
 alias -- cava-theme='echo '\''Current Cava Catppuccin flavor: mocha'\'''
 _zsh_has zoxide && alias -- cd=z
-alias -- chrome=chrome-launcher
-alias -- chrome-clean='chrome-launcher --disable-extensions --incognito'
-alias -- chrome-debug='chrome-launcher --enable-logging --v=1'
-alias -- chrome-profile='chrome-launcher --profile-directory='\''Default'\'''
-alias -- chrome-reset-cache='command find ~/.cache/google-chrome -type f \( -name '\''*.tmp'\'' -o -name '\''*.lock'\'' \) -delete 2>/dev/null || true'
-alias -- chrome-safe='chrome-launcher --disable-extensions --disable-gpu'
 alias -- compress=apack
 alias -- copy='xclip -selection clipboard'
 alias -- cp='cp -i'
