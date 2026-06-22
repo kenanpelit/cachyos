@@ -900,7 +900,6 @@ alias -- brave-clean='brave --disable-extensions --incognito'
 alias -- brave-debug='brave --enable-logging --v=1'
 alias -- brave-dev='brave --disable-web-security --user-data-dir=/tmp/brave-dev'
 alias -- brave-ext-list='ls -la ~/.config/BraveSoftware/Brave-Browser/Default/Extensions/ 2>/dev/null || echo '\''No Extensions directory found'\'''
-alias -- brave-extensions=brave-install-extensions
 alias -- brave-profile='brave --profile-directory='\''Default'\'''
 alias -- brave-reset-cache='command find ~/.cache/BraveSoftware -type f \( -name '\''*.tmp'\'' -o -name '\''*.lock'\'' \) -delete 2>/dev/null || true'
 alias -- brave-safe='brave --disable-extensions --disable-gpu'
