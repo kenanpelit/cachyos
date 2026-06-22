@@ -93,9 +93,6 @@ fi
 # ----------------------------------------------------------------------
 # Aliases (only if wrappers exist)
 # ----------------------------------------------------------------------
-if command -v brave-launcher >/dev/null 2>&1; then
-  alias brave=brave-launcher
-fi
 if command -v chrome-launcher >/dev/null 2>&1; then
   alias chrome=chrome-launcher
 fi

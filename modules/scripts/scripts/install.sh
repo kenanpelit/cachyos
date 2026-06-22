@@ -189,6 +189,7 @@ cleanup_legacy_bins() {
     cleanup_brave_profiles
     brave-kenp-default
     brave-extensions
+    brave-launcher
   )
 
   local b p
@@ -205,7 +206,6 @@ main() {
   install_from_dir "$module_root/bin"
   install_from_dir "$module_root/start"
   install_named_script "$repo_root/modules/brave/scripts/brave-launcher" "brave"
-  install_named_script "$repo_root/modules/brave/scripts/brave-launcher" "brave-launcher"
   install_privileged_system_bins
   cleanup_legacy_bins
 

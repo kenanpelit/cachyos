@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Brave Browser Launcher (portable)
-readonly SCRIPT_NAME="$(basename "$0")"
+# Brave Browser Launcher (portable). Installed as `brave` to shadow the system
+# binary; forwards to the real brave-origin* with a fixed flag set.
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   cat <<'HELP'
@@ -10,7 +10,6 @@ Brave Launcher
 
 Usage:
   brave [extra Brave flags...] [URL...]
-  brave-launcher [extra Brave flags...] [URL...]
 
 This wrapper always adds a fixed set of flags:
   - cache sizes
