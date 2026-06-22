@@ -185,6 +185,10 @@ cleanup_legacy_bins() {
     rofi-performance
     start-wkenp
     brave-ext-copy
+    brave_killer
+    cleanup_brave_profiles
+    brave-kenp-default
+    brave-extensions
   )
 
   local b p

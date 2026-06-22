@@ -18,7 +18,7 @@ export DCLI_SOPS_KEY_PATH="$HOME/.config/sops/age/keys.txt"
 if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
   export __HM_ZSH_SESS_VARS_SOURCED=1
   case "${BROWSER:-}" in
-    ""|brave|start-brave-kenp|brave-kenp-default|start-helium-kenp|helium-kenp-default)
+    ""|brave|start-brave-kenp|bravectl|start-helium-kenp|helium-kenp-default)
       if command -v start-brave-kenp >/dev/null 2>&1; then
         export BROWSER="start-brave-kenp"
       elif command -v start-helium-kenp >/dev/null 2>&1; then
@@ -27,8 +27,8 @@ if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
         export BROWSER="helium-kenp-default"
       elif command -v start-brave-kenp >/dev/null 2>&1; then
         export BROWSER="start-brave-kenp"
-      elif command -v brave-kenp-default >/dev/null 2>&1; then
-        export BROWSER="brave-kenp-default"
+      elif command -v bravectl >/dev/null 2>&1; then
+        export BROWSER="bravectl"
       else
         export BROWSER="brave"
       fi

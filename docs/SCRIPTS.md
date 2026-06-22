@@ -24,24 +24,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `brave-extensions`
-**Description:** Install Chrome Web Store extensions into ANY isolated Brave
+### 📂 `bravectl`
+**Description:** Unified Brave management for the isolated-profile setup
 
-**Usage:** `brave-extensions [target-profile]`
-
----
-
-### 📂 `brave-kenp-default`
-**Description:** Default browser entry for Kenp profile with niri window focus.
-
-**Usage:** `brave-kenp-default.sh [URL]`
-
----
-
-### 📂 `brave_killer`
-**Description:** Simple and effective tool to kill Brave browser processes.
-
-**Usage:** `brave_killer.sh [options]`
+**Usage:** `bravectl`
 
 ---
 
@@ -56,13 +42,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Dual-disk BTRFS helper to detect and mount other OS partitions.
 
 **Usage:** `cachy-mount.sh [mount|umount|status|chroot] [options]`
-
----
-
-### 📂 `cleanup_brave_profiles`
-**Description:** Cleanup utility for Brave isolated profile disk usage.
-
-**Usage:** `cleanup_brave_profiles.sh [options]`
 
 ---
 
