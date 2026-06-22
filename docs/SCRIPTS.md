@@ -24,13 +24,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `bravectl`
-**Description:** Unified Brave management for the isolated-profile setup
-
-**Usage:** `bravectl`
-
----
-
 ### 📂 `bt-autoconnect-once`
 **Description:** Bounded Bluetooth auto-connect helper for the user timer service.
 
@@ -896,13 +889,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Periodic power profile chooser using live CPU usage samples
 
 **Usage:** `ppp-auto-profile.sh [--help|--status]`
-
----
-
-### 📂 `profile_brave`
-**Description:** Brave Profile Launcher with window management and proxy support
-
-**Usage:** `profile_brave.sh [profile_name] [options]`
 
 ---
 

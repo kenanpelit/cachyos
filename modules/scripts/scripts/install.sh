@@ -205,7 +205,7 @@ main() {
 
   install_from_dir "$module_root/bin"
   install_from_dir "$module_root/start"
-  install_named_script "$repo_root/modules/brave/scripts/brave-launcher" "brave"
+  # brave / profile_brave / bravectl are owned by modules/brave now.
   install_privileged_system_bins
   cleanup_legacy_bins
 
