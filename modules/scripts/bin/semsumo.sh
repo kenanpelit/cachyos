@@ -155,6 +155,19 @@ declare -A FIREFOX_BROWSERS=(
   ["firefox-youtube"]="firefox|-P youtube --class youtube --name youtube --new-window --new-instance https://www.youtube.com|7|secure|1|false"
 )
 
+# Incognito / private-window variants — explicit, only profiles that need one.
+# Chromium family (profile_helium / profile_brave) honor --incognito and launch an
+# isolated instance whose window class gets a "_incognito" suffix (e.g. kenp_incognito),
+# so it never touches the normal session. Firefox has no profile_* wrapper and uses
+# --private-window (NOT --incognito); --new-instance is intentionally omitted because
+# Firefox locks a profile to a single instance — if a normal firefox-kenp is already
+# running, the private window opens inside it (sharing the kenp class).
+declare -A INCOGNITO_BROWSERS=(
+  ["helium-kenp-incognito"]="profile_helium|Kenp --separate --restore-last-session --incognito|1|secure|2|false"
+  ["brave-kenp-incognito"]="profile_brave|kenp --separate --restore-last-session --incognito|1|secure|2|false"
+  ["firefox-kenp-incognito"]="firefox|-P kenp --class kenp_incognito --name kenp_incognito --new-window --private-window|1|secure|1|false"
+)
+
 # Applications - UPDATED
 declare -A APPS=(
   ["discord"]="discord|-m --class=discord --title=discord|5|secure|1|true"
@@ -929,6 +942,11 @@ generate_all_scripts() {
     ((count++))
   done
 
+  for profile in "${!INCOGNITO_BROWSERS[@]}"; do
+    generate_script "$profile" "${INCOGNITO_BROWSERS[$profile]}"
+    ((count++))
+  done
+
   for profile in "${!CHROME_BROWSERS[@]}"; do
     generate_script "$profile" "${CHROME_BROWSERS[$profile]}"
     ((count++))
@@ -964,6 +982,31 @@ generate_daily_scripts() {
   done
 
   log "SUCCESS" "GENERATE" "Generated $count daily scripts"
+}
+
+# Resolve a profile's pipe-delimited config from whichever array defines it.
+resolve_profile_config() {
+  local profile="$1"
+  if [[ -v TERMINALS["$profile"] ]]; then echo "${TERMINALS[$profile]}"
+  elif [[ -v HELIUM_BROWSERS["$profile"] ]]; then echo "${HELIUM_BROWSERS[$profile]}"
+  elif [[ -v BRAVE_BROWSERS["$profile"] ]]; then echo "${BRAVE_BROWSERS[$profile]}"
+  elif [[ -v FIREFOX_BROWSERS["$profile"] ]]; then echo "${FIREFOX_BROWSERS[$profile]}"
+  elif [[ -v INCOGNITO_BROWSERS["$profile"] ]]; then echo "${INCOGNITO_BROWSERS[$profile]}"
+  elif [[ -v CHROME_BROWSERS["$profile"] ]]; then echo "${CHROME_BROWSERS[$profile]}"
+  elif [[ -v APPS["$profile"] ]]; then echo "${APPS[$profile]}"
+  else return 1
+  fi
+}
+
+generate_single_profile() {
+  local profile="$1"
+  local config
+  if ! config=$(resolve_profile_config "$profile"); then
+    log "ERROR" "GENERATE" "Profile not found: $profile"
+    return 1
+  fi
+  generate_script "$profile" "$config"
+  log "SUCCESS" "GENERATE" "Generated single profile: $profile"
 }
 
 clean_scripts() {
@@ -1129,6 +1172,8 @@ launch_profile() {
     launch_application "$profile" "${BRAVE_BROWSERS[$profile]}" "brave"
   elif [[ -v FIREFOX_BROWSERS["$profile"] && "$BROWSER_TYPE" == "firefox" ]]; then
     launch_application "$profile" "${FIREFOX_BROWSERS[$profile]}" "firefox"
+  elif [[ -v INCOGNITO_BROWSERS["$profile"] ]]; then
+    launch_application "$profile" "${INCOGNITO_BROWSERS[$profile]}" "incognito"
   elif [[ -v CHROME_BROWSERS["$profile"] && "$BROWSER_TYPE" == "chrome" ]]; then
     launch_application "$profile" "${CHROME_BROWSERS[$profile]}" "chrome"
   elif [[ -v APPS["$profile"] ]]; then
@@ -1364,6 +1409,15 @@ list_profiles() {
     local vpn=$(parse_config "$config" 4)
     printf "  %-20s %s (workspace: %s, vpn: %s)\n" "$profile" "$cmd" "$workspace" "$vpn"
   done
+
+  echo -e "\n${BOLD}${GREEN}Incognito / private:${NC}"
+  for profile in "${!INCOGNITO_BROWSERS[@]}"; do
+    local config="${INCOGNITO_BROWSERS[$profile]}"
+    local cmd=$(parse_config "$config" 1)
+    local workspace=$(parse_config "$config" 3)
+    local vpn=$(parse_config "$config" 4)
+    printf "  %-24s %s (workspace: %s, vpn: %s)\n" "$profile" "$cmd" "$workspace" "$vpn"
+  done
 }
 
 check_status() {
@@ -1491,6 +1545,7 @@ show_help() {
   echo -e "${BOLD}Examples:${NC}"
   echo "    $0 generate --all                   # Generate ALL scripts"
   echo "    $0 generate --daily                 # Generate daily scripts only"
+  echo "    $0 generate brave-kenp-incognito    # Generate a single profile"
   echo "    $0 launch --daily                   # Launch daily profiles"
   echo "    $0 helium launch helium-kenp        # Launch specific profile"
   echo "    $0 list                             # List all profiles"
@@ -1636,8 +1691,7 @@ main() {
     elif [[ "$LAUNCH_DAILY" == "true" ]]; then
       generate_daily_scripts
     elif [[ -n "$SINGLE_PROFILE" ]]; then
-      log "ERROR" "GENERATE" "Single profile generation not yet implemented in unified version"
-      exit 1
+      generate_single_profile "$SINGLE_PROFILE"
     else
       log "ERROR" "GENERATE" "Profile name or option required"
       show_help
