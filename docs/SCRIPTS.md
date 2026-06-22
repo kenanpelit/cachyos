@@ -24,17 +24,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `brave-ext-copy`
-**Description:** Pick extensions from a source Brave (isolated) profile and install
-
-**Usage:** `brave-ext-copy [source-profile]      (source defaults to "kenp")`
-
----
-
 ### 📂 `brave-extensions`
-**Description:** Manual extension installer for Brave Browser from Chrome Web Store.
+**Description:** Install Chrome Web Store extensions into ANY isolated Brave
 
-**Usage:** `brave-extensions.sh`
+**Usage:** `brave-extensions [target-profile]`
 
 ---
 
