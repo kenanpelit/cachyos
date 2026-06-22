@@ -75,6 +75,7 @@ enabled_modules:
   - brave
   - browserpass
   - helium
+  - firefox
   #- handy
   - webcord
   - user-services

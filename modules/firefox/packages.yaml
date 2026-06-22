@@ -1,0 +1,4 @@
+description: Firefox packages
+packages:
+  - jq
+  - firefox
