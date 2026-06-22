@@ -598,24 +598,14 @@ resolve_profile_source() {
 		done < <(find "$ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort)
 	fi
 
-	add_candidate_unique "$fallback_preferred_local_state"
-	add_candidate_unique "$fallback_default_local_state"
-	if [[ "${profile_name,,}" != "kenp" ]]; then
-		add_candidate_unique "$fallback_kenp_local_state"
-	fi
-
-	if [[ -d "$BRAVE_FALLBACK_ISOLATED_ROOT" ]]; then
-		while IFS= read -r local_state_path; do
-			add_candidate_unique "$local_state_path"
-		done < <(find "$BRAVE_FALLBACK_ISOLATED_ROOT" -mindepth 2 -maxdepth 2 -type f -name 'Local State' 2>/dev/null | sort)
-	fi
+	# Helium donor fallback intentionally removed: when a Brave profile with
+	# this name doesn't exist, the caller starts a clean, independent Brave
+	# profile instead of borrowing one from Helium. (fallback_* vars above are
+	# kept only to avoid touching the rest of the function.)
 
 	for candidate in "${candidates[@]}"; do
 		if profile_key=$(profile_key_from_state "$profile_name" "$candidate"); then
 			local_state_path="$candidate"
-			if [[ "$candidate" == "$fallback_default_local_state" || "$candidate" == "$BRAVE_FALLBACK_ISOLATED_ROOT/"* ]]; then
-				log "INFO" "Helium donor profili kullanılacak: $profile_name"
-			fi
 			printf '%s\t%s\n' "$local_state_path" "$profile_key"
 			return 0
 		fi
@@ -1041,14 +1031,20 @@ validate_profile() {
 	local profile_source_dir=""
 	local profile_local_state=""
 	local resolved=""
-	if ! resolved="$(resolve_profile_source "$profile_name")"; then
-		log "ERROR" "Profil bulunamadı: $profile_name"
-		list_profiles
-		exit 1
+	local fresh_profile=false
+	if resolved="$(resolve_profile_source "$profile_name")"; then
+		profile_local_state="${resolved%%$'\t'*}"
+		profile_key="${resolved#*$'\t'}"
+		profile_source_dir="$(dirname "$profile_local_state")"
+	else
+		# No Brave profile with this name — don't borrow one from Helium or any
+		# other donor. Start a clean, independent Brave profile in its own
+		# isolated user-data-dir; Brave creates a fresh Default profile there on
+		# first launch (sign in once; data then persists in that dir).
+		log "INFO" "Brave profili yok — donor'suz taze profil: $profile_name"
+		profile_key="Default"
+		fresh_profile=true
 	fi
-	profile_local_state="${resolved%%$'\t'*}"
-	profile_key="${resolved#*$'\t'}"
-	profile_source_dir="$(dirname "$profile_local_state")"
 
 	# Profil örneklerini kapat
 	if $kill_profile; then
@@ -1079,8 +1075,13 @@ validate_profile() {
 			local cmd=("$BRAVE_CMD")
 			if [[ "$separate_mode" == "true" ]]; then
 				local isolated_dir="${ISOLATED_ROOT}/${window_class}"
-				ensure_isolated_userdata "$isolated_dir" "$profile_source_dir"
-				ensure_isolated_profile_dir "$isolated_dir" "$profile_key" "$profile_source_dir"
+				if [[ "$fresh_profile" == true ]]; then
+					# Fresh profile: just create the dir; Brave seeds it itself.
+					mkdir -p "$isolated_dir"
+				else
+					ensure_isolated_userdata "$isolated_dir" "$profile_source_dir"
+					ensure_isolated_profile_dir "$isolated_dir" "$profile_key" "$profile_source_dir"
+				fi
 
 				cmd+=("--user-data-dir=$isolated_dir")
 			fi
