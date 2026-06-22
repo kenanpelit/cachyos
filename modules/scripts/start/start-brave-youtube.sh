@@ -23,7 +23,7 @@ readonly VPN_MODE="secure"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=1
 readonly COMMAND="profile_brave"
-readonly ARGS_STR="--youtube --separate --class brave-youtube.com__-Default"
+readonly ARGS_STR="kenp --separate --app=https://youtube.com/ --title youtube"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager

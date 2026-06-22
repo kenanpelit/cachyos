@@ -122,12 +122,13 @@ declare -A BRAVE_BROWSERS=(
   ["brave-nil"]="profile_brave|nil --separate --restore-last-session|1|secure|2|false"
   ["brave-ai"]="profile_brave|ai --separate --restore-last-session|3|secure|2|false"
   ["brave-compecta"]="profile_brave|compecta --separate --restore-last-session|4|secure|2|false"
-  ["brave-whats"]="profile_brave|whats --separate --restore-last-session|9|secure|1|false"
+  ["brave-whats"]="profile_brave|kenp --separate --app-id=hnpfjngllnobngcgfapefoaidbinmjnm|9|secure|1|false"
   ["brave-exclude"]="profile_brave|kenp --separate --class=exclude --title=exclude --restore-last-session|6|bypass|1|false"
-  ["brave-youtube"]="profile_brave|--youtube --separate --class brave-youtube.com__-Default|7|secure|1|false"
+  ["brave-youtube"]="profile_brave|kenp --separate --app=https://youtube.com/ --title youtube|7|secure|1|false"
   ["brave-tiktok"]="profile_brave|--tiktok --separate --class tiktok --title tiktok|6|secure|1|true"
-  ["brave-spotify"]="profile_brave|--spotify --separate --class spotify --title spotify|8|secure|1|true"
+  ["brave-spotify"]="profile_brave|kenp --separate --app=https://open.spotify.com/ --title spotify|8|secure|1|true"
   ["brave-discord"]="profile_brave|--discord --separate --class discord --title discord|5|secure|1|true"
+  ["brave-proxy"]="profile_brave|proxy --separate --proxy --title proxy|6|bypass|1|false"
   ["brave-whatsapp"]="profile_brave|--whatsapp --separate --class whatsapp --title whatsapp|9|secure|1|true"
 )
 

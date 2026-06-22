@@ -23,7 +23,7 @@ readonly VPN_MODE="secure"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=1
 readonly COMMAND="profile_brave"
-readonly ARGS_STR="whats --separate --restore-last-session"
+readonly ARGS_STR="kenp --separate --app-id=hnpfjngllnobngcgfapefoaidbinmjnm"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager
@@ -144,7 +144,7 @@ echo "Application started (PID: $APP_PID)"
 if [[ "$WORKSPACE" != "0" && "$WM_TYPE" == "hyprland" ]] && command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     echo "Verifying window on workspace $WORKSPACE..."
     ELAPSED=0
-    CLASS_PATTERN="Whats"
+    CLASS_PATTERN="brave-hnpfjngllnobngcgfapefoaidbinmjnm-Default"
     
     while [[ $ELAPSED -lt $APP_TIMEOUT ]]; do
         if hyprctl clients -j 2>/dev/null | jq -e ".[] | select(.workspace.id == $WORKSPACE and (.class | test(\"$CLASS_PATTERN\"; \"i\")))" >/dev/null 2>&1; then
