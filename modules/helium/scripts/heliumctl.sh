@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: bravectl.sh
-# Description: Unified Brave management for the isolated-profile setup
-#              (~/.brave/isolated). One entry point that replaces the old
-#              brave_killer / cleanup_brave_profiles / brave-kenp-default /
-#              brave-extensions scripts. The actual profile launcher remains the
-#              separate `profile_brave` engine, which bravectl delegates to.
+# Script: heliumctl.sh
+# Description: Unified Helium management for the isolated-profile setup
+#              (~/.helium/isolated). One entry point that replaces the old
+#              cleanup_helium_profiles / helium-kenp-default / helium-extensions
+#              scripts. The actual profile launcher remains the separate
+#              `profile_helium` engine, which heliumctl delegates to.
+#              (The Helium analog of bravectl.)
 #
 # Subcommands:
-#   bravectl launch <profile> [args...]   Launch via profile_brave
-#   bravectl default [url...]             Open url(s) in the kenp profile
-#   bravectl kill [opts]                  Kill Brave processes
-#   bravectl clean [opts]                 Reclaim disk from isolated profiles
-#   bravectl ext [profile]                Extension manager (catalog + copy)
-#   bravectl list                         List isolated profiles (+running)
-#   bravectl help
+#   heliumctl launch <profile> [args...]  Launch via profile_helium
+#   heliumctl default [url...]            Open url(s) in the kenp profile
+#   heliumctl kill [opts]                 Kill Helium processes
+#   heliumctl clean [opts]                Reclaim disk from isolated profiles
+#   heliumctl ext [profile]              Extension manager (catalog + copy)
+#   heliumctl list                        List isolated profiles (+running)
+#   heliumctl help
 #
-# As $BROWSER: `bravectl <url>` is treated as `bravectl default <url>`.
+# As $BROWSER: `heliumctl <url>` is treated as `heliumctl default <url>`.
 # ==============================================================================
 
 set -uo pipefail   # NOT -e: the interactive `ext` menu relies on non-zero
@@ -26,7 +27,7 @@ set -uo pipefail   # NOT -e: the interactive `ext` menu relies on non-zero
 # Shared config & colors
 # =============================================================================
 readonly STORE_URL="https://chromewebstore.google.com/detail"
-ISOLATED_ROOT="${ISOLATED_ROOT:-$HOME/.brave/isolated}"
+ISOLATED_ROOT="${HELIUM_ISOLATED_ROOT:-$HOME/.helium/isolated}"
 
 if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
   RED=$'\033[0;31m'; GREEN=$'\033[0;32m'; YELLOW=$'\033[1;33m'
@@ -41,26 +42,27 @@ info() { printf '%bℹ%b %s\n' "$BLUE" "$NC" "$*"; }
 ok()   { printf '%b✓%b %s\n' "$GREEN" "$NC" "$*"; }
 warn() { printf '%b⚠%b %s\n' "$YELLOW" "$NC" "$*"; }
 
-# Resolve the profile_brave engine.
-resolve_profile_brave() {
+# Resolve the profile_helium engine.
+resolve_profile_helium() {
   local script_dir candidate
   script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
   for candidate in \
-    "${script_dir}/profile_brave" \
-    "${HOME}/.local/bin/profile_brave" \
-    "/usr/local/bin/profile_brave" \
-    "profile_brave"; do
+    "${script_dir}/profile_helium" \
+    "${HOME}/.local/bin/profile_helium" \
+    "/usr/local/bin/profile_helium" \
+    "profile_helium"; do
     command -v "$candidate" >/dev/null 2>&1 && { command -v "$candidate"; return 0; }
   done
   return 1
 }
 
-# Resolve a raw brave binary (last-resort fallback).
-resolve_brave_binary() {
+# Resolve a raw helium binary (last-resort fallback).
+resolve_helium_binary() {
   local c
-  for c in "${BRAVE_BIN:-}" brave-origin brave-origin-beta brave-browser brave; do
+  for c in "${HELIUM_BIN:-}" helium-browser helium /opt/helium-browser-bin/helium-wrapper; do
     [[ -n "$c" ]] || continue
     command -v "$c" >/dev/null 2>&1 && { command -v "$c"; return 0; }
+    [[ -x "$c" ]] && { printf '%s\n' "$c"; return 0; }
   done
   return 1
 }
@@ -74,29 +76,29 @@ profiles_list() {
 # launch / default / list
 # =============================================================================
 cmd_launch() {
-  (($#)) || die "kullanım: bravectl launch <profil> [args...]"
-  local pb; pb="$(resolve_profile_brave)" || die "profile_brave bulunamadı"
-  exec "$pb" "$@"
+  (($#)) || die "kullanım: heliumctl launch <profil> [args...]"
+  local ph; ph="$(resolve_profile_helium)" || die "profile_helium bulunamadı"
+  exec "$ph" "$@"
 }
 
 cmd_default() {
-  local pb
-  if pb="$(resolve_profile_brave)"; then
+  local ph
+  if ph="$(resolve_profile_helium)"; then
     if (($#)); then
-      "$pb" kenp --separate --new-tab "$@"
+      "$ph" kenp --separate --new-tab "$@"
     else
-      "$pb" kenp --separate
+      "$ph" kenp --separate
     fi
     return 0
   fi
-  # Fallback: raw brave on its default profile.
-  local bin; bin="$(resolve_brave_binary)" || die "profile_brave ve brave bulunamadı"
+  # Fallback: raw helium on its default profile.
+  local bin; bin="$(resolve_helium_binary)" || die "profile_helium ve helium bulunamadı"
   exec "$bin" --profile-directory=Default "$@"
 }
 
 cmd_list() {
   [[ -d "$ISOLATED_ROOT" ]] || die "izole profil dizini yok: $ISOLATED_ROOT"
-  printf '%bBrave izole profilleri%b (%s):\n' "$BOLD" "$NC" "$ISOLATED_ROOT"
+  printf '%bHelium izole profilleri%b (%s):\n' "$BOLD" "$NC" "$ISOLATED_ROOT"
   local p mark
   while IFS= read -r p; do
     [[ -n "$p" ]] || continue
@@ -110,16 +112,16 @@ cmd_list() {
 }
 
 # =============================================================================
-# kill  (eski brave_killer)
+# kill  (eski yardımcı yoktu — heliumctl ile eklendi)
 # =============================================================================
+# Binary-specific pattern so heliumctl never matches (and kills) itself.
 kill_find() {
   local filter="${1:-}" pat
   if [[ -n "$filter" ]]; then
-    pat="brave.*(user-data-dir|profile-directory).*$filter"
+    pat="(helium-browser|helium-wrapper).*(user-data-dir|profile-directory).*$filter"
   else
-    pat="brave"
+    pat="helium-browser|helium-wrapper"
   fi
-  # Drop bravectl's own PID so `kill` never SIGTERMs itself mid-run.
   pgrep -f -- "$pat" 2>/dev/null | grep -vxF "$$" || true
 }
 
@@ -134,8 +136,8 @@ cmd_kill() {
       --dry-run)   dry=true ;;
       -h|--help)
         cat <<EOF
-bravectl kill [--profile=AD] [--force] [--timeout=SN] [--dry-run]
-  Brave süreçlerini kapatır (önce SIGTERM, kalırsa SIGKILL).
+heliumctl kill [--profile=AD] [--force] [--timeout=SN] [--dry-run]
+  Helium süreçlerini kapatır (önce SIGTERM, kalırsa SIGKILL).
 EOF
         return 0 ;;
       *) die "kill: bilinmeyen seçenek: $1" ;;
@@ -145,9 +147,9 @@ EOF
   [[ "$timeout" =~ ^[0-9]+$ ]] || die "geçersiz timeout: $timeout"
 
   local pids; pids="$(kill_find "$filter")"
-  if [[ -z "$pids" ]]; then info "Çalışan Brave süreci yok${filter:+ ($filter)}"; return 0; fi
+  if [[ -z "$pids" ]]; then info "Çalışan Helium süreci yok${filter:+ ($filter)}"; return 0; fi
   local count; count="$(printf '%s\n' "$pids" | wc -l)"
-  info "${count} Brave süreci bulundu${filter:+ (profil: $filter)}"
+  info "${count} Helium süreci bulundu${filter:+ (profil: $filter)}"
 
   if $dry; then info "DRY-RUN — PID'ler: $(printf '%s' "$pids" | tr '\n' ' ')"; return 0; fi
 
@@ -167,12 +169,12 @@ EOF
     fi
   fi
 
-  if [[ -z "$(kill_find "$filter")" ]]; then ok "Tüm Brave süreçleri kapatıldı${filter:+ ($filter)}"
+  if [[ -z "$(kill_find "$filter")" ]]; then ok "Tüm Helium süreçleri kapatıldı${filter:+ ($filter)}"
   else die "Bazı süreçler kapatılamadı"; fi
 }
 
 # =============================================================================
-# clean  (eski cleanup_brave_profiles)
+# clean  (eski cleanup_helium_profiles)
 # =============================================================================
 clean_to_human() {
   if command -v numfmt >/dev/null 2>&1; then numfmt --to=iec-i --suffix=B "$1"; else echo "${1}B"; fi
@@ -188,7 +190,7 @@ clean_running_pids() {
   local root="$1"
   ps -eo pid=,args= | awk -v dir="$root" '
     { pid=$1; $1=""; sub(/^[[:space:]]+/,"",$0); cmd=$0
-      if (cmd !~ /(^|[[:space:]])([^[:space:]]*\/)?brave([[:space:]]|$)/) next
+      if (cmd !~ /(helium-browser|helium-wrapper)/) next
       if (index(cmd, "--user-data-dir=" dir) || index(cmd, "--user-data-dir " dir)) print pid }'
 }
 
@@ -204,10 +206,10 @@ cmd_clean() {
       --yes|-y)     yes=true ;;
       -h|--help)
         cat <<EOF
-bravectl clean [--profile AD]... [--aggressive] [--force-close] [--yes]
+heliumctl clean [--profile AD]... [--aggressive] [--force-close] [--yes]
   İzole profillerden cache/yedek dizinlerini siler (kullanıcı verisine dokunmaz).
   --aggressive   Service Worker klasörlerini de siler.
-  --force-close  Çalışan eşleşen Brave süreçlerini otomatik kapatır.
+  --force-close  Çalışan eşleşen Helium süreçlerini otomatik kapatır.
 EOF
         return 0 ;;
       *) die "clean: bilinmeyen seçenek: $1" ;;
@@ -224,7 +226,7 @@ EOF
       local rem; rem="$(clean_running_pids "$ISOLATED_ROOT" || true)"
       [[ -n "$rem" ]] && { printf '%s\n' "$rem" | xargs -r kill -KILL; }
     else
-      die "İzole Brave profilleri çalışıyor. Kapat veya --force-close kullan."
+      die "İzole Helium profilleri çalışıyor. Kapat veya --force-close kullan."
     fi
   fi
 
@@ -269,7 +271,7 @@ EOF
 }
 
 # =============================================================================
-# ext  (eski brave-extensions / brave-ext-copy) — interaktif eklenti yöneticisi
+# ext  (eski helium-extensions) — interaktif eklenti yöneticisi
 # =============================================================================
 declare -a CORE_EXTENSIONS=(
   "aapbdbdomjkkjkaonfhkkikfgjllcleb:Google Translate"
@@ -345,11 +347,11 @@ ext_select_target() {
 
 ext_open() {
   local urls=("$@"); ((${#urls[@]})) || return 0
-  if command -v "start-brave-$EXT_TARGET" >/dev/null 2>&1; then
-    "start-brave-$EXT_TARGET" "${urls[@]}" >/dev/null 2>&1 &
+  if command -v "start-helium-$EXT_TARGET" >/dev/null 2>&1; then
+    "start-helium-$EXT_TARGET" "${urls[@]}" >/dev/null 2>&1 &
   else
-    local bin; bin="$(resolve_brave_binary || true)"
-    [[ -n "$bin" ]] || { warn "start-brave-$EXT_TARGET ve brave bulunamadı."; return 1; }
+    local bin; bin="$(resolve_helium_binary || true)"
+    [[ -n "$bin" ]] || { warn "start-helium-$EXT_TARGET ve helium bulunamadı."; return 1; }
     "$bin" --user-data-dir="$ISOLATED_ROOT/$EXT_TARGET" --profile-directory=Default "${urls[@]}" >/dev/null 2>&1 &
   fi
   disown 2>/dev/null || true
@@ -394,7 +396,7 @@ ext_install_list() {
   done
   echo
   if ((${#urls[@]})); then
-    printf '%b%d Web Store sayfası '\''%s'\'' profilinde açılıyor — her birinde "Add to Brave" tıkla.%b\n' "$CYAN" "${#urls[@]}" "$EXT_TARGET" "$NC"
+    printf '%b%d Web Store sayfası '\''%s'\'' profilinde açılıyor — her birinde "Add to Helium" tıkla.%b\n' "$CYAN" "${#urls[@]}" "$EXT_TARGET" "$NC"
     ext_open "${urls[@]}"
   else
     printf '%bHepsi zaten yüklü.%b\n' "$GREEN" "$NC"
@@ -575,20 +577,20 @@ cmd_ext() {
 # =============================================================================
 cmd_help() {
   cat <<EOF
-${BOLD}bravectl${NC} — Brave izole-profil yönetimi (~/.brave/isolated)
+${BOLD}heliumctl${NC} — Helium izole-profil yönetimi (~/.helium/isolated)
 
 ${BOLD}Komutlar:${NC}
-  launch <profil> [args]   profile_brave ile başlat
+  launch <profil> [args]   profile_helium ile başlat
   default [url...]         url'leri kenp profilinde aç (\$BROWSER girişi)
-  kill [seçenekler]        Brave süreçlerini kapat (--profile= --force --dry-run)
+  kill [seçenekler]        Helium süreçlerini kapat (--profile= --force --dry-run)
   clean [seçenekler]       izole profillerden cache/yedek temizle (--aggressive --yes)
   ext [profil]            eklenti yöneticisi (katalog + profilden kopyala)
   list                    izole profilleri listele (+çalışıyor mu)
   help                    bu yardım
 
 ${BOLD}Notlar:${NC}
-  • profile_brave ayrı bir 'motor'dur; bravectl ona delege eder.
-  • \$BROWSER olarak: 'bravectl <url>' → 'bravectl default <url>'.
+  • profile_helium ayrı bir 'motor'dur; heliumctl ona delege eder.
+  • \$BROWSER olarak: 'heliumctl <url>' → 'heliumctl default <url>'.
 EOF
 }
 
@@ -602,7 +604,7 @@ main() {
     list|ls)           shift; cmd_list "$@" ;;
     ""|help|-h|--help) cmd_help ;;
     *://*|magnet:*)    cmd_default "$@" ;;   # URL → \$BROWSER davranışı
-    *)                 die "bilinmeyen komut: $1  (bkz: bravectl help)" ;;
+    *)                 die "bilinmeyen komut: $1  (bkz: heliumctl help)" ;;
   esac
 }
 

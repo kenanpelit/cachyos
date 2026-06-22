@@ -38,13 +38,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `cleanup_helium_profiles`
-**Description:** Cleanup utility for Helium isolated profile disk usage.
-
-**Usage:** `cleanup_helium_profiles.sh [options]`
-
----
-
 ### 📂 `cleanup`
 **Description:** No description provided.
 
@@ -154,20 +147,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** GNOME TTY/GDM launcher for ThinkPad E14 Gen 6 with Intel Arc.
 
 **Usage:** `gnome_tty.sh [options]`
-
----
-
-### 📂 `helium-extensions`
-**Description:** Manual Helium extension installer from a donor isolated profile.
-
-**Usage:** `helium-extensions.sh [missing|all|status|list|interactive] [options]`
-
----
-
-### 📂 `helium-kenp-default`
-**Description:** Default browser entry for Kenp profile with niri window focus.
-
-**Usage:** `helium-kenp-default.sh [URL]`
 
 ---
 

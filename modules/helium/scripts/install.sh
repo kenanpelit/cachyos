@@ -11,6 +11,7 @@ source "$REPO_ROOT/modules/base/lib/core.sh"
 bin_dir="$USER_HOME/.local/bin"
 config_dir="$USER_HOME/.config/helium-launcher"
 launcher_src="$REPO_ROOT/modules/helium/scripts/profile_helium.sh"
+heliumctl_src="$REPO_ROOT/modules/helium/scripts/heliumctl.sh"
 log_file="$config_dir/helium-launcher.log"
 
 ensure_user_dir() {
@@ -29,9 +30,11 @@ ensure_user_dir() {
 ensure_user_dir "$bin_dir"
 ensure_user_dir "$config_dir"
 
-# Link the launcher scripts
+# Link the launcher + management scripts (heliumctl is the Helium analog of
+# bravectl; the helium module owns every helium bin, like modules/brave).
 run_as_user ln -sfn "$launcher_src" "$bin_dir/profile_helium"
 run_as_user ln -sfn "$launcher_src" "$bin_dir/helium-launcher"
+run_as_user ln -sfn "$heliumctl_src" "$bin_dir/heliumctl"
 
 # Ensure writable log file exists
 run_as_user touch "$log_file"

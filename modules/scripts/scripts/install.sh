@@ -196,6 +196,9 @@ cleanup_legacy_bins() {
     start-chrome-ai
     start-chrome-compecta
     start-chrome-whats
+    cleanup_helium_profiles
+    helium-extensions
+    helium-kenp-default
   )
 
   local b p
