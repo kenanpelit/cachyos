@@ -19,6 +19,14 @@ ISOLATED_ROOT="${ISOLATED_ROOT:-$HOME/.brave/isolated}"
 SOURCE="${1:-kenp}"
 WEBSTORE="https://chromewebstore.google.com/detail"
 
+# Extra extensions to always offer for install, even when they aren't in the
+# source profile. One per line: "<32-char id><TAB><display name>". The id is
+# the last path segment of the Chrome Web Store URL
+# (…/detail/<slug>/<id>?…  ->  the <id> part).
+EXTRA_EXTENSIONS=(
+	"aapbdbdomjkkjkaonfhkkikfgjllcleb"$'\t'"Google Translate"
+)
+
 src_dir="$ISOLATED_ROOT/$SOURCE/Default"
 src_pref="$src_dir/Preferences"
 src_ext="$src_dir/Extensions"
@@ -62,6 +70,14 @@ for d in "$src_ext"/*/; do
 	[[ "$id" =~ ^[a-p]{32}$ ]] || continue   # extension ids are 32 chars a-p
 	items+=("$id"$'\t'"$(resolve_name "$id")")
 done
+
+# Append the curated extras that aren't already present in the source profile.
+for ex in "${EXTRA_EXTENSIONS[@]}"; do
+	ex_id="${ex%%$'\t'*}"
+	for it in "${items[@]}"; do [[ "${it%%$'\t'*}" == "$ex_id" ]] && continue 2; done
+	items+=("$ex")
+done
+
 ((${#items[@]})) || { echo "'$SOURCE' içinde eklenti bulunamadı." >&2; exit 1; }
 
 # Pick the target profile (the other isolated profiles).
