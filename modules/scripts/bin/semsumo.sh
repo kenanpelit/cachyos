@@ -122,6 +122,7 @@ declare -A BRAVE_BROWSERS=(
   ["brave-nil"]="profile_brave|nil --separate --restore-last-session|1|secure|2|false"
   ["brave-ai"]="profile_brave|ai --separate --restore-last-session|3|secure|2|false"
   ["brave-compecta"]="profile_brave|compecta --separate --restore-last-session|4|secure|2|false"
+  ["brave-block"]="profile_brave|block --separate --restore-last-session|1|secure|2|false"
   ["brave-whats"]="profile_brave|kenp --separate --app-id=hnpfjngllnobngcgfapefoaidbinmjnm|9|secure|1|false"
   ["brave-exclude"]="profile_brave|kenp --separate --class=exclude --title=exclude --restore-last-session|6|bypass|1|false"
   ["brave-youtube"]="profile_brave|kenp --separate --app=https://youtube.com/ --title youtube|7|secure|1|false"
