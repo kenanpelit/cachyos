@@ -769,15 +769,19 @@ create_profile() {
 			--class="$app_name" --title="$app_name" "$@"
 	}
 
-launch_whatsapp() { launch_app "WhatsApp" "https://web.whatsapp.com" "Kenp" "$@"; }
-launch_youtube() { launch_app "YouTube" "https://youtube.com" "Kenp" "$@"; }
-launch_tiktok() { launch_app "TikTok" "https://tiktok.com" "Kenp" "$@"; }
-launch_spotify() { launch_app "Spotify" "https://open.spotify.com/" "Kenp" "$@"; }
+# Each web-app gets its OWN dedicated profile name (not the shared "Kenp"
+# donor). Those names don't exist in the main Brave install, so profile_brave
+# takes the fresh-profile path: a stable per-app isolated user-data-dir that is
+# never re-seeded — so a login (Spotify, WhatsApp, …) actually persists.
+launch_whatsapp() { launch_app "WhatsApp" "https://web.whatsapp.com" "whatsapp" "$@"; }
+launch_youtube() { launch_app "YouTube" "https://youtube.com" "youtube" "$@"; }
+launch_tiktok() { launch_app "TikTok" "https://tiktok.com" "tiktok" "$@"; }
+launch_spotify() { launch_app "Spotify" "https://open.spotify.com/" "spotify" "$@"; }
 
 launch_discord() {
 	local discord_url
 	discord_url=$(pass discord-channels 2>/dev/null || echo "https://discord.com/app")
-	launch_app "Discord" "$discord_url" "Kenp" "$@"
+	launch_app "Discord" "$discord_url" "discord" "$@"
 }
 
 # Proxy ile başlatma (geliştirilmiş)
