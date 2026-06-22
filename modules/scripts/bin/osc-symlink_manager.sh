@@ -48,8 +48,6 @@ EXTRA_LINKS=(
   "/repo/archive/.brave|$HOME/.brave"
   "/repo/archive/.helium|$HOME/.helium"
   #"/repo/archive/.mozilla|$HOME/.mozilla"
-  "/repo/archive/.zen|$HOME/.zen"
-  "$HOME/.zen|$HOME/.config/zen"
   "/repo/archive/.kenp|$HOME/.kenp"
   "/repo/archive/.keep|$HOME/.keep"
   "/repo/archive/.kod|$HOME/.kod"

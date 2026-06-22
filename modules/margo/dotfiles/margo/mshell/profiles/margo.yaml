@@ -498,7 +498,7 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-zen-kenp
+  - name: start-brave-kenp
     enabled: true
     delay_secs: 11
     trigger: LoginOnce

@@ -19,8 +19,8 @@ if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
   export __HM_ZSH_SESS_VARS_SOURCED=1
   case "${BROWSER:-}" in
     ""|brave|start-brave-kenp|brave-kenp-default|start-helium-kenp|helium-kenp-default)
-      if command -v start-zen-kenp >/dev/null 2>&1; then
-        export BROWSER="start-zen-kenp"
+      if command -v start-brave-kenp >/dev/null 2>&1; then
+        export BROWSER="start-brave-kenp"
       elif command -v start-helium-kenp >/dev/null 2>&1; then
         export BROWSER="start-helium-kenp"
       elif command -v helium-kenp-default >/dev/null 2>&1; then

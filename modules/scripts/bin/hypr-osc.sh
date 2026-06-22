@@ -292,7 +292,7 @@ launch_from_candidates() {
 }
 
 preferred_browser_prefix() {
-  case "${BROWSER:-start-zen-kenp}" in
+  case "${BROWSER:-start-brave-kenp}" in
     *zen*) printf '%s\n' "zen" ;;
     *helium*) printf '%s\n' "helium" ;;
     *) printf '%s\n' "brave" ;;

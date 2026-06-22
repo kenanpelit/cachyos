@@ -1253,7 +1253,7 @@ tty)
       export XDG_SESSION_DESKTOP="niri"
       export XDG_CURRENT_DESKTOP="niri"
       export DESKTOP_SESSION="niri"
-      export BROWSER="${BROWSER:-start-zen-kenp}"
+      export BROWSER="${BROWSER:-start-brave-kenp}"
 
       case ":${PATH:-}:" in
       *":${HOME}/.local/bin:"*) ;;
@@ -2360,8 +2360,8 @@ EOF
 
       if [[ -z "${kenp_id:-}" && -n "${home_out:-}" && -n "${home_idx:-}" ]]; then
         # Try to spawn and wait briefly for window to appear.
-        if command -v start-zen-kenp >/dev/null 2>&1; then
-          start-zen-kenp >/dev/null 2>&1 & disown || true
+        if command -v start-brave-kenp >/dev/null 2>&1; then
+          start-brave-kenp >/dev/null 2>&1 & disown || true
           for _ in {1..50}; do
             kenp_id="$("${NIRI[@]}" -j windows 2>/dev/null | jq -r 'first(.[] | select(.app_id=="Kenp") | .id) // empty' || true)"
             [[ -n "${kenp_id:-}" ]] && break
@@ -2373,7 +2373,7 @@ EOF
       if [[ -z "${kenp_id:-}" ]]; then
         # Best-effort fallback: just try to focus/spawn without moving.
         if command -v niri-osc >/dev/null 2>&1; then
-          niri-osc flow focus-or-spawn --app-id '^Kenp$' start-zen-kenp >/dev/null 2>&1 || true
+          niri-osc flow focus-or-spawn --app-id '^Kenp$' start-brave-kenp >/dev/null 2>&1 || true
         fi
         return 0
       fi

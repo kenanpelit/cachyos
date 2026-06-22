@@ -23,7 +23,7 @@ readonly VPN_MODE="bypass"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=1
 readonly COMMAND="profile_brave"
-readonly ARGS_STR="proxy --separate --proxy --title proxy"
+readonly ARGS_STR="proxy --separate --title proxy"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager
