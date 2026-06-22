@@ -24,6 +24,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `brave-ext-copy`
+**Description:** Pick extensions from a source Brave (isolated) profile and install
+
+**Usage:** `brave-ext-copy [source-profile]      (source defaults to "kenp")`
+
+---
+
 ### 📂 `brave-extensions`
 **Description:** Manual extension installer for Brave Browser from Chrome Web Store.
 
@@ -77,13 +84,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** No description provided.
 
 **Usage:** `cleanup`
-
----
-
-### 📂 `cleanup_zen_profiles`
-**Description:** Cleanup utility for Zen (Firefox-based) profile disk usage.
-
-**Usage:** `cleanup_zen_profiles.sh [options]`
 
 ---
 
@@ -1144,6 +1144,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `url-open`
+**Description:** url-open — open URL(s) as a new TAB in the running *default* browser instance.
+
+**Usage:** `url-open`
+
+---
+
 ### 📂 `videokes`
 **Description:** Video trimming tool using ffmpeg for quick cutting of video files
 
@@ -1218,13 +1225,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Export and validate YouTube cookies in Netscape format via yt-dlp.
 
 **Usage:** `yt-cookies-youtube`
-
----
-
-### 📂 `zen-kenp-default`
-**Description:** Default browser entry for the Zen Kenp profile with niri focus.
-
-**Usage:** `zen-kenp-default.sh [URL]`
 
 ---
 
