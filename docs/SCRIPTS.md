@@ -955,6 +955,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `spotify-media`
+**Description:** Drive Spotify play/pause/next/prev whether it is the native
+
+**Usage:** `spotify-media [toggle|next|prev|status]   (default: toggle)`
+
+---
+
 ### 📂 `sqm`
 **Description:** Automatic SQM/CAKE Setup for bufferbloat reduction (WAN/VPN)
 
