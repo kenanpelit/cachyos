@@ -103,12 +103,12 @@ declare -A TERMINALS=(
 
 # Browser Applications - Helium
 declare -A HELIUM_BROWSERS=(
-  ["helium-kenp"]="profile_helium|Kenp --separate --restore-last-session|1|secure|2|false"
-  ["helium-nil"]="profile_helium|Nil --separate --restore-last-session|1|secure|2|false"
-  ["helium-ai"]="profile_helium|Ai --separate --restore-last-session|3|secure|2|false"
-  ["helium-compecta"]="profile_helium|CompecTA --separate --restore-last-session|4|secure|2|false"
-  ["helium-whats"]="profile_helium|Whats --separate --restore-last-session|9|secure|1|false"
-  ["helium-exclude"]="profile_helium|Kenp --separate --class=Exclude --title=Exclude --restore-last-session|6|bypass|1|false"
+  ["helium-kenp"]="profile_helium|kenp --separate --restore-last-session|1|secure|2|false"
+  ["helium-nil"]="profile_helium|nil --separate --restore-last-session|1|secure|2|false"
+  ["helium-ai"]="profile_helium|ai --separate --restore-last-session|3|secure|2|false"
+  ["helium-compecta"]="profile_helium|compecta --separate --restore-last-session|4|secure|2|false"
+  ["helium-whats"]="profile_helium|whats --separate --restore-last-session|9|secure|1|false"
+  ["helium-exclude"]="profile_helium|kenp --separate --class=exclude --title=exclude --restore-last-session|6|bypass|1|false"
   ["helium-youtube"]="profile_helium|--youtube --separate --class helium-youtube.com__-Default|7|secure|1|false"
   ["helium-tiktok"]="profile_helium|--tiktok --separate --class tiktok --title tiktok|6|secure|1|true"
   ["helium-spotify"]="profile_helium|--spotify --separate --class spotify --title spotify|8|secure|1|true"
@@ -135,10 +135,10 @@ declare -A BRAVE_BROWSERS=(
 
 # Browser Applications - Chrome
 declare -A CHROME_BROWSERS=(
-  ["chrome-kenp"]="profile_chrome|Kenp --class Kenp|1|secure|1|false"
-  ["chrome-ai"]="profile_chrome|AI --class AI|3|secure|1|false"
-  ["chrome-compecta"]="profile_chrome|CompecTA --class CompecTA|4|secure|1|false"
-  ["chrome-whats"]="profile_chrome|Whats --class Whats|9|secure|1|false"
+  ["chrome-kenp"]="profile_chrome|kenp --class kenp|1|secure|1|false"
+  ["chrome-ai"]="profile_chrome|ai --class ai|3|secure|1|false"
+  ["chrome-compecta"]="profile_chrome|compecta --class compecta|4|secure|1|false"
+  ["chrome-whats"]="profile_chrome|whats --class whats|9|secure|1|false"
 )
 
 # exclude + proxy run with VPN bypass; the rest go through the VPN (secure).
@@ -164,7 +164,7 @@ declare -A FIREFOX_BROWSERS=(
 # Firefox locks a profile to a single instance — if a normal firefox-kenp is already
 # running, the private window opens inside it (sharing the kenp class).
 declare -A INCOGNITO_BROWSERS=(
-  ["helium-kenp-incognito"]="profile_helium|Kenp --separate --restore-last-session --incognito|1|secure|2|false"
+  ["helium-kenp-incognito"]="profile_helium|kenp --separate --restore-last-session --incognito|1|secure|2|false"
   ["brave-kenp-incognito"]="profile_brave|kenp --separate --restore-last-session --incognito|1|secure|2|false"
   ["firefox-kenp-incognito"]="firefox|-P kenp --class kenp_incognito --name kenp_incognito --new-window --private-window|1|secure|1|false"
 )
@@ -454,27 +454,27 @@ is_app_running() {
         return 1
         ;;
       helium-kenp)
-        jq -e '.[] | select((.class // "") == "Kenp" or (.initialTitle // "") == "Kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "kenp" or (.initialTitle // "") == "kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       helium-nil)
-        jq -e '.[] | select((.class // "") == "Nil" or (.initialTitle // "") == "Nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "nil" or (.initialTitle // "") == "nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       helium-ai)
-        jq -e '.[] | select((.class // "") == "Ai" or (.initialTitle // "") == "Ai Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "ai" or (.initialTitle // "") == "ai Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       helium-compecta)
-        jq -e '.[] | select((.class // "") == "CompecTA" or (.initialTitle // "") == "CompecTA Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "compecta" or (.initialTitle // "") == "compecta Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       helium-whats)
-        jq -e '.[] | select((.class // "") == "Whats" or (.initialTitle // "") == "Whats Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "whats" or (.initialTitle // "") == "whats Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       helium-exclude)
-        jq -e '.[] | select((.class // "") == "Exclude" or (.initialTitle // "") == "Exclude Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "exclude" or (.initialTitle // "") == "exclude Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       helium-youtube)
@@ -498,27 +498,27 @@ is_app_running() {
         return 1
         ;;
       brave-kenp)
-        jq -e '.[] | select((.class // "") == "Kenp" or (.initialTitle // "") == "Kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "kenp" or (.initialTitle // "") == "kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       brave-nil)
-        jq -e '.[] | select((.class // "") == "Nil" or (.initialTitle // "") == "Nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "nil" or (.initialTitle // "") == "nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       brave-ai)
-        jq -e '.[] | select((.class // "") == "Ai" or (.initialTitle // "") == "Ai Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "ai" or (.initialTitle // "") == "ai Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       brave-compecta)
-        jq -e '.[] | select((.class // "") == "CompecTA" or (.initialTitle // "") == "CompecTA Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "compecta" or (.initialTitle // "") == "compecta Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       brave-whats)
-        jq -e '.[] | select((.class // "") == "Whats" or (.initialTitle // "") == "Whats Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "whats" or (.initialTitle // "") == "whats Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       brave-exclude)
-        jq -e '.[] | select((.class // "") == "Exclude" or (.initialTitle // "") == "Exclude Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
+        jq -e '.[] | select((.class // "") == "exclude" or (.initialTitle // "") == "exclude Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
         return 1
         ;;
       brave-youtube)
@@ -1042,7 +1042,7 @@ ensure_windows_on_correct_workspace() {
   # Define window to workspace mappings - UPDATED based on your layout
   declare -A WINDOW_WORKSPACE_MAP=(
     ["TmuxKenp"]="2"                    # Terminal
-    ["Kenp"]="1"                        # Main browser (multiple windows possible)
+    ["kenp"]="1"                        # Main browser (multiple windows possible)
     ["discord|Discord|WebCord"]="5"     # Discord/WebCord
     ["helium-youtube.com__-Default|brave-youtube.com__-Default"]="7" # YouTube
     ["spotify|Spotify"]="8"             # Spotify

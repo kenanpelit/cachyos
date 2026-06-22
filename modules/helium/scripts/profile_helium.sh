@@ -509,7 +509,7 @@ resolve_profile_source() {
 	local -a candidates=()
 	local candidate=""
 	local preferred_local_state="${ISOLATED_ROOT}/${profile_name}/Local State"
-	local kenp_local_state="${ISOLATED_ROOT}/Kenp/Local State"
+	local kenp_local_state="${ISOLATED_ROOT}/kenp/Local State"
 	local default_local_state="$LOCAL_STATE_PATH"
 
 	add_candidate_unique() {
@@ -525,7 +525,7 @@ resolve_profile_source() {
 	# Priority:
 	# 1) same-profile isolated Local State (most deterministic)
 	# 2) default Helium Local State
-	# 3) Kenp isolated Local State as canonical donor
+	# 3) kenp isolated Local State as canonical donor
 	# 4) all other isolated Local State files (fallback)
 	add_candidate_unique "$preferred_local_state"
 	add_candidate_unique "$default_local_state"
@@ -694,7 +694,7 @@ create_profile() {
 	launch_app() {
 		local app_name="$1"
 		local app_url="$2"
-		local profile="${3:-Kenp}"
+		local profile="${3:-kenp}"
 	shift 3
 
 	log "SUCCESS" "$app_name başlatılıyor..."
@@ -705,15 +705,15 @@ create_profile() {
 			--class="$app_name" --title="$app_name" "$@"
 	}
 
-launch_whatsapp() { launch_app "WhatsApp" "https://web.whatsapp.com" "Kenp" "$@"; }
-launch_youtube() { launch_app "YouTube" "https://youtube.com" "Kenp" "$@"; }
-launch_tiktok() { launch_app "TikTok" "https://tiktok.com" "Kenp" "$@"; }
-launch_spotify() { launch_app "Spotify" "https://open.spotify.com/" "Kenp" "$@"; }
+launch_whatsapp() { launch_app "WhatsApp" "https://web.whatsapp.com" "kenp" "$@"; }
+launch_youtube() { launch_app "YouTube" "https://youtube.com" "kenp" "$@"; }
+launch_tiktok() { launch_app "TikTok" "https://tiktok.com" "kenp" "$@"; }
+launch_spotify() { launch_app "Spotify" "https://open.spotify.com/" "kenp" "$@"; }
 
 launch_discord() {
 	local discord_url
 	discord_url=$(pass discord-channels 2>/dev/null || echo "https://discord.com/app")
-	launch_app "Discord" "$discord_url" "Kenp" "$@"
+	launch_app "Discord" "$discord_url" "kenp" "$@"
 }
 
 # Proxy ile başlatma (geliştirilmiş)

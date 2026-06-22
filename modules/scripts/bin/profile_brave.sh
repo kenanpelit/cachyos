@@ -561,10 +561,10 @@ resolve_profile_source() {
 	local -a candidates=()
 	local candidate=""
 	local preferred_local_state="${ISOLATED_ROOT}/${profile_name}/Local State"
-	local kenp_local_state="${ISOLATED_ROOT}/Kenp/Local State"
+	local kenp_local_state="${ISOLATED_ROOT}/kenp/Local State"
 	local default_local_state="$LOCAL_STATE_PATH"
 	local fallback_preferred_local_state="${BRAVE_FALLBACK_ISOLATED_ROOT}/${profile_name}/Local State"
-	local fallback_kenp_local_state="${BRAVE_FALLBACK_ISOLATED_ROOT}/Kenp/Local State"
+	local fallback_kenp_local_state="${BRAVE_FALLBACK_ISOLATED_ROOT}/kenp/Local State"
 	local fallback_default_local_state="${BRAVE_FALLBACK_PROFILES_DIR}/Local State"
 
 	add_candidate_unique() {
@@ -580,11 +580,11 @@ resolve_profile_source() {
 	# Priority:
 	# 1) same-profile isolated Local State (most deterministic)
 	# 2) default Brave Local State
-	# 3) Kenp isolated Local State as canonical donor
+	# 3) kenp isolated Local State as canonical donor
 	# 4) all other Brave isolated Local State files
 	# 5) same-profile Helium isolated Local State (donor fallback)
 	# 6) default Helium Local State
-	# 7) Kenp Helium isolated Local State
+	# 7) kenp Helium isolated Local State
 	# 8) all other Helium isolated Local State files
 	add_candidate_unique "$preferred_local_state"
 	add_candidate_unique "$default_local_state"
@@ -758,7 +758,7 @@ create_profile() {
 	launch_app() {
 		local app_name="$1"
 		local app_url="$2"
-		local profile="${3:-Kenp}"
+		local profile="${3:-kenp}"
 	shift 3
 
 	log "SUCCESS" "$app_name başlatılıyor..."
@@ -769,7 +769,7 @@ create_profile() {
 			--class="$app_name" --title="$app_name" "$@"
 	}
 
-# Each web-app gets its OWN dedicated profile name (not the shared "Kenp"
+# Each web-app gets its OWN dedicated profile name (not the shared "kenp"
 # donor). Those names don't exist in the main Brave install, so profile_brave
 # takes the fresh-profile path: a stable per-app isolated user-data-dir that is
 # never re-seeded — so a login (Spotify, WhatsApp, …) actually persists.
