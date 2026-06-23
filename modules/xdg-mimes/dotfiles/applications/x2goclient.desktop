@@ -1,0 +1,17 @@
+[Desktop Entry]
+# Override: x2goclient is an X11-only Qt5 app (QX11Info + Xlib). Under the
+# Wayland Qt platform it gets a NULL X Display and SIGSEGVs in
+# XDefaultRootWindow when its session-poll timer fires (right at connect).
+# Force the xcb (XWayland) platform so it has a real X11 Display.
+Version=1.0
+Type=Application
+Name=X2Go Client
+Exec=env QT_QPA_PLATFORM=xcb x2goclient
+Icon=x2goclient
+StartupWMClass=x2goclient
+X-Window-Icon=x2goclient
+X-Osso-Type=application/x-executable
+Terminal=false
+Categories=Qt;KDE;Network;
+Keywords=Terminal,Client,Remote,Desktop,Published,Applications,Session,Profile;
+MimeType=application/x-x2go;
