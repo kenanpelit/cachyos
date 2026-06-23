@@ -587,7 +587,7 @@ dock:
   - class: Ai
     icon: /usr/share/icons/kora/apps/scalable/brave-browser.svg
   - class: TmuxKenp
-    icon: tmux-symbolic
+    icon: /usr/share/icons/kora/apps/scalable/kitty.svg
   - class: brave-youtube.com__-Default
     icon: /usr/share/icons/kora/apps/scalable/youtube.svg
   in_bar: true
