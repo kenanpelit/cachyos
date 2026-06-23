@@ -581,11 +581,11 @@ dock:
   show_running: true
   icon_overrides:
   - class: Kenp
-    icon: helium-browser
+    icon: brave-browser
   - class: CompecTA
-    icon: helium-browser
+    icon: brave-browser
   - class: Ai
-    icon: helium-browser
+    icon: brave-browser
   - class: TmuxKenp
     icon: utilities-terminal
   in_bar: true
