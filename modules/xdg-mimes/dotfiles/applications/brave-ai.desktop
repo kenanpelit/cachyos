@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Brave (Ai)
+GenericName=Web Browser
+Comment=Open the Ai Brave profile
+Exec=bravectl launch ai --separate --restore-last-session
+Terminal=false
+Icon=brave-browser
+Categories=Network;WebBrowser;
+StartupNotify=true
+StartupWMClass=ai
+Keywords=brave;browser;web;ai;

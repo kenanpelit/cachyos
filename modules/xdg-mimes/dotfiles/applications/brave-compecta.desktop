@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Brave (CompecTA)
+GenericName=Web Browser
+Comment=Open the CompecTA Brave profile
+Exec=bravectl launch compecta --separate --restore-last-session
+Terminal=false
+Icon=brave-browser
+Categories=Network;WebBrowser;
+StartupNotify=true
+StartupWMClass=compecta
+Keywords=brave;browser;web;compecta;

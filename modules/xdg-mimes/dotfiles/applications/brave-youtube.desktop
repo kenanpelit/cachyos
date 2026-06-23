@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=YouTube (Brave)
+GenericName=Web Browser
+Comment=Open YouTube as a Brave app (kenp profile)
+Exec=bravectl launch kenp --separate --app=https://youtube.com/ --title youtube
+Terminal=false
+Icon=youtube
+Categories=Network;WebBrowser;
+StartupNotify=true
+StartupWMClass=brave-youtube.com__-Default
+Keywords=youtube;video;brave;

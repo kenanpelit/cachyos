@@ -588,6 +588,8 @@ dock:
     icon: brave-browser
   - class: TmuxKenp
     icon: utilities-terminal
+  - class: brave-youtube.com__-Default
+    icon: youtube
   in_bar: true
   standalone: true
   style: popup
