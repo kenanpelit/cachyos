@@ -581,15 +581,15 @@ dock:
   show_running: true
   icon_overrides:
   - class: Kenp
-    icon: brave-browser
+    icon: /usr/share/icons/kora/apps/scalable/brave-browser.svg
   - class: CompecTA
-    icon: brave-browser
+    icon: /usr/share/icons/kora/apps/scalable/brave-browser.svg
   - class: Ai
-    icon: brave-browser
+    icon: /usr/share/icons/kora/apps/scalable/brave-browser.svg
   - class: TmuxKenp
-    icon: utilities-terminal
+    icon: tmux-symbolic
   - class: brave-youtube.com__-Default
-    icon: youtube
+    icon: /usr/share/icons/kora/apps/scalable/youtube.svg
   in_bar: true
   standalone: true
   style: popup
