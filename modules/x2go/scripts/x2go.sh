@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 #
-# x2go — launch x2goclient under XWayland (xcb), not native Wayland.
+# x2go — launch x2goclient.
 #
-# x2goclient is an X11-only Qt5 app (QX11Info + raw Xlib). Under margo's
-# Wayland Qt platform plugin (the session ships QT_QPA_PLATFORM="wayland;xcb",
-# so Qt picks wayland) QX11Info::display() returns NULL and the client
-# SIGSEGVs in XDefaultRootWindow the instant its session-poll timer fires —
-# i.e. right as a session connects. Pinning the xcb platform makes it talk to
-# margo's XWayland server (DISPLAY=:0), where it has a real X11 Display.
+# DEFAULT: native Wayland (whatever QT_QPA_PLATFORM the session ships). Under
+# Wayland the Qt menus/popups are xdg-popups that the compositor positions
+# correctly — this is the path that "just works".
+#
+# Forcing XWayland (xcb) was added earlier to dodge a connect-time SIGSEGV in
+# x2goclient's X11-only paths (QX11Info -> XDefaultRootWindow on a NULL X
+# display). But under XWayland the X11 override-redirect menus open in the
+# wrong place (top-left corner). So xcb is now OPT-IN:
+#
+#   X2GO_XCB=1 x2go        # force XWayland — use ONLY if it crashes at connect
+#                          # under Wayland (trade-off: menus may misplace)
+#   X2GO_SCALE=1.3 x2go    # uniform Qt scale for the xcb path (DPI-unaware GUI)
 #
 # Any extra args are passed straight through to x2goclient.
 
@@ -18,16 +24,17 @@ if ! command -v x2goclient >/dev/null 2>&1; then
 	exit 127
 fi
 
-# margo brings XWayland up on :0; honour whatever DISPLAY is already set.
+# XWayland server margo brings up on :0 — only relevant for the xcb path.
 export DISPLAY="${DISPLAY:-:0}"
-export QT_QPA_PLATFORM=xcb
 
-# x2goclient's Qt5 GUI is DPI-unaware (x2go bug #913). The session ships
-# QT_AUTO_SCREEN_SCALE_FACTOR=1, which makes Qt5/XCB auto-scale per screen and
-# yields disproportionate menus on a mixed-DPI multi-monitor setup. Drop that
-# and force ONE uniform scale instead — the maintainer-recommended lever
-# (QT_SCALE_FACTOR scales fonts too). Tune per taste: X2GO_SCALE=1.3 x2go
-unset QT_AUTO_SCREEN_SCALE_FACTOR QT_ENABLE_HIGHDPI_SCALING QT_SCREEN_SCALE_FACTORS
-export QT_SCALE_FACTOR="${X2GO_SCALE:-1}"
+if [ "${X2GO_XCB:-0}" = "1" ]; then
+	# XWayland fallback: real X11 Display (no connect crash), but the X11
+	# menus can land in the wrong spot. x2goclient's GUI is DPI-unaware
+	# (x2go bug #913); force one uniform scale instead of the session's
+	# per-screen auto-scaling.
+	export QT_QPA_PLATFORM=xcb
+	unset QT_AUTO_SCREEN_SCALE_FACTOR QT_ENABLE_HIGHDPI_SCALING QT_SCREEN_SCALE_FACTORS
+	export QT_SCALE_FACTOR="${X2GO_SCALE:-1}"
+fi
 
 exec x2goclient "$@"
