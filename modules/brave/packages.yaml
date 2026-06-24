@@ -2,4 +2,4 @@ description: Brave packages
 
 packages:
   - jq
-  - brave-origin-beta-bin
+  - brave-origin-bin
