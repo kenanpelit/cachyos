@@ -2,11 +2,9 @@
 Description=Automatic power-profile manager for margo (mpower)
 After=graphical-session.target
 PartOf=margo-session.target graphical-session.target
-# Bound to the margo session target (like the other margo-* units), so it
-# only ever runs under margo — never alongside another compositor's
-# auto-profile tool (ppp-auto-profile), which would fight over
-# powerprofilesctl. The ConditionEnvironment is belt-and-suspenders, matching
-# the sibling units.
+# Bound to the margo session target (like the other margo-* units), so it only
+# ever runs under margo and never double-manages powerprofilesctl. The
+# ConditionEnvironment is belt-and-suspenders, matching the sibling units.
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionEnvironment=XDG_SESSION_DESKTOP=margo
 

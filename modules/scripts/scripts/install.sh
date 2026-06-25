@@ -257,6 +257,8 @@ cleanup_legacy_bins() {
     gnome-settings
     gnome_tty
     setup-gnome
+    # power auto-profile tool for the dropped WMs; margo uses mpower instead
+    ppp-auto-profile
   )
 
   local b p

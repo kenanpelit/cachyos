@@ -100,11 +100,6 @@ skip_automanaged_unit() {
     # Geoclue is started by its delayed timer, not directly by the service.
     return 0
     ;;
-  sessions:ppp-auto-profile.service)
-    # PPP auto-profile is intentionally timer-driven; only the timer should be
-    # enabled by the generic synchronizer.
-    return 0
-    ;;
   sunsetr:sunsetr.service | sunsetr:sunsetr-auto-profile.timer)
     # Sunsetr manages its own Niri-scoped enablement and reenable lifecycle in
     # the module install hook. Letting the generic synchronizer touch these

@@ -465,13 +465,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `ppp-auto-profile`
-**Description:** Periodic power profile chooser using live CPU usage samples
-
-**Usage:** `ppp-auto-profile.sh [--help|--status]`
-
----
-
 ### 📂 `publicip`
 **Description:** Advanced public IP address checker with VPN detection
 
