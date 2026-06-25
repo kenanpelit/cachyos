@@ -1,2 +1,0 @@
-# Allow non-root access to libinput devices for fusuma
-KERNEL=="event*", SUBSYSTEM=="input", GROUP="input", MODE="660"

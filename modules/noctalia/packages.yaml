@@ -1,5 +1,0 @@
-description: Noctalia shell packages
-packages:
-  - noctalia-shell-git
-  - cachyos-niri-noctalia
-  - wlsunset

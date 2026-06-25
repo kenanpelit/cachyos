@@ -24,13 +24,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `bt-autoconnect-once`
-**Description:** Bounded Bluetooth auto-connect helper for the user timer service.
-
-**Usage:** `bt-autoconnect-once`
-
----
-
 ### 📂 `cachy-mount`
 **Description:** Dual-disk BTRFS helper to detect and mount other OS partitions.
 
@@ -210,27 +203,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Compositor-aware MPV helper for window management and IPC control.
 
 **Usage:** `mpv-manager.sh [start|playback|play-yt|save-yt|move|stick|top|wallpaper]`
-
----
-
-### 📂 `noctalia-launch`
-**Description:** Prepare session-specific Noctalia state and launch the shell.
-
-**Usage:** `noctalia-launch`
-
----
-
-### 📂 `noctalia-preflight`
-**Description:** Ensure writable Noctalia runtime files exist before launch.
-
-**Usage:** `noctalia-preflight`
-
----
-
-### 📂 `noctalia-should-start`
-**Description:** ExecCondition helper deciding whether Noctalia should start.
-
-**Usage:** `noctalia-should-start`
 
 ---
 
@@ -665,20 +637,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Shared readiness gate that waits for the StatusNotifierWatcher on the session bus.
 
 **Usage:** `status-notifier-ready`
-
----
-
-### 📂 `sunsetr-scheduler-loop`
-**Description:** Integrated background loop for sunsetr preset sync
-
-**Usage:** `sunsetr-scheduler-loop`
-
----
-
-### 📂 `sunsetr-scheduler`
-**Description:** One-shot preset sync for sunsetr based on the current schedule
-
-**Usage:** `sunsetr-scheduler`
 
 ---
 

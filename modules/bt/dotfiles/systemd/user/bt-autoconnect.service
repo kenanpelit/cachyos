@@ -1,9 +1,0 @@
-[Unit]
-Description=Bluetooth auto-connect
-Wants=pipewire.service wireplumber.service
-After=graphical-session.target pipewire.service wireplumber.service
-
-[Service]
-Type=oneshot
-TimeoutStartSec=90s
-ExecStart=%h/.local/bin/bt-autoconnect-once

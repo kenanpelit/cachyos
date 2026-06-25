@@ -1,5 +1,0 @@
-{
-  "terminalCommand": "kitty",
-  "pollInterval": 10,
-  "showInactiveHosts": true
-}

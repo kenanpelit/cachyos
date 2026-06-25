@@ -1,8 +1,8 @@
 [Unit]
 Description=Clipse clipboard listener
-After=graphical-session.target niri-session-env.service hypr-session-env.service dbus.service
+After=graphical-session.target dbus.service
 BindsTo=graphical-session.target
-PartOf=graphical-session.target niri-session.target hyprland-session.target margo-session.target
+PartOf=graphical-session.target margo-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 ConditionPathExists=/usr/bin/clipse
 ConditionPathExists=/usr/bin/wl-paste
@@ -20,6 +20,4 @@ StandardError=journal
 
 [Install]
 WantedBy=graphical-session.target
-WantedBy=niri-session.target
-WantedBy=hyprland-session.target
 WantedBy=margo-session.target

@@ -54,12 +54,8 @@ enabled_modules:
   - xdg-portal
   - rofi
   #- walker
-  - noctalia
   #- lemurs
-  - fusuma
-  - bt
   - connect
-  - sunsetr
   - anydesk
   - mpv
   - ytdlp
@@ -77,7 +73,6 @@ enabled_modules:
   - webcord
   - user-services
   - ai
-  - copyq
   - xdg-mimes
 module_processing: sequential
 flatpak_scope: user

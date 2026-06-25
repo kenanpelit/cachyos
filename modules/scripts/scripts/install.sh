@@ -247,6 +247,18 @@ cleanup_legacy_bins() {
     wm-workspace
     osc-here-hypr
     osc-niri-workspaces-mode
+    # helpers from modules dropped on the margo-only branch
+    noctalia-launch
+    noctalia-preflight
+    noctalia-should-start
+    sunsetr-scheduler
+    sunsetr-scheduler-loop
+    bt-autoconnect-once
+    fusuma-fullscreen
+    fusuma-overview
+    fusuma-should-start
+    fusuma-swipe
+    fusuma-workspace-monitor
   )
 
   local b p
