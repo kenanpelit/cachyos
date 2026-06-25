@@ -332,13 +332,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `osc-niri-workspaces-mode`
-**Description:** No description provided.
-
-**Usage:** `osc-niri-workspaces-mode`
-
----
-
 ### 📂 `osc-open-webui`
 **Description:** Podman helper for Open WebUI lifecycle management.
 

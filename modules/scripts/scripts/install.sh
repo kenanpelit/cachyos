@@ -246,6 +246,7 @@ cleanup_legacy_bins() {
     mango-workspace-smart
     wm-workspace
     osc-here-hypr
+    osc-niri-workspaces-mode
   )
 
   local b p
