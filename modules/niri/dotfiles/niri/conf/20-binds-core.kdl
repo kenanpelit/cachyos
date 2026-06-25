@@ -12,9 +12,6 @@ binds {
   Mod+Ctrl+K hotkey-overlay-title="Focus Window Up"   { focus-window-up; }
   Mod+Ctrl+J hotkey-overlay-title="Focus Window Down" { focus-window-down; }
 
-  Mod+Tab hotkey-overlay-title="Cycle Window (Stack)"      { focus-window-down; }
-  Mod+Shift+Tab hotkey-overlay-title="Cycle Window Back"   { focus-window-up; }
-
   Mod+Shift+Left  hotkey-overlay-title="Move Left"  { move-column-left; }
   Mod+Shift+Right hotkey-overlay-title="Move Right" { move-column-right; }
   Mod+Shift+Up    hotkey-overlay-title="Move Up"    { move-window-up; }
