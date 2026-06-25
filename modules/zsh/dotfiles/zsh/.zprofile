@@ -2,12 +2,11 @@
 # =============================================================================
 # Multi-TTY desktop autostart router (login shell only)
 # =============================================================================
-# TTY1: display manager / manual launch info
-# TTY2: Hyprland (UWSM)
-# TTY3: Niri (UWSM)
-# TTY4: GNOME (gnome_tty)
-# TTY5: VM route (svmubuntu via Sway profile)
-# TTY6: manual
+# Delegates to osc-tty-autostart, which routes by VT number:
+#   TTY2          -> Margo (UWSM)
+#   TTY1/3/4/5/6  -> manual launcher hints (osc-tty-launcher)
+# VMs (Ubuntu/Arch/Cachy/NixOS via Sway) are reachable from the launcher
+# menu or directly, e.g. `osc-tty-launcher vmubuntu`.
 # =============================================================================
 
 resolve_cmd() {

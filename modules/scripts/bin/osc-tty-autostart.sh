@@ -60,20 +60,11 @@ main() {
 
   [[ -z "${OSC_TTY_AUTOSTART_ATTEMPTED:-}" ]] || exit 0
   [[ -z "${OSC_TTY_LAUNCHER_GUARD:-}" ]] || exit 0
-  [[ -z "${NIRI_TTY_GUARD:-}" ]] || exit 0
-  [[ -z "${GNOME_TTY_GUARD:-}" ]] || exit 0
   [[ -z "${WAYLAND_DISPLAY:-}" ]] || exit 0
   [[ -z "${DISPLAY:-}" ]] || exit 0
 
   tty_vtnr="$(detect_tty_vtnr 2>/dev/null || true)"
   [[ "${tty_vtnr:-}" =~ ^[1-6]$ ]] || exit 0
-
-  if pgrep -u "$(id -u)" -x gnome-shell >/dev/null 2>&1 \
-    || [[ -n "${GNOME_DESKTOP_SESSION_ID:-}" ]] \
-    || [[ -n "${GNOME_SHELL_SESSION_MODE:-}" ]]; then
-    log_tty_autostart "skip due to active gnome-shell tty=${tty_vtnr}"
-    exit 0
-  fi
 
   if [[ "${tty_vtnr}" == "1" && -n "${XDG_SESSION_TYPE:-}" ]]; then
     log_tty_autostart "skip tty1 due to existing session type=${XDG_SESSION_TYPE}"
@@ -96,11 +87,11 @@ main() {
   log_tty_autostart "route tty=${tty_vtnr} launcher=${launcher_cmd}"
 
   case "${tty_vtnr}" in
-    1|6)
-      "${launcher_cmd}" auto-tty "${tty_vtnr}"
-      ;;
-    2|3|4|5)
+    2)
       exec "${launcher_cmd}" auto-tty "${tty_vtnr}"
+      ;;
+    1|3|4|5|6)
+      "${launcher_cmd}" auto-tty "${tty_vtnr}"
       ;;
   esac
 }

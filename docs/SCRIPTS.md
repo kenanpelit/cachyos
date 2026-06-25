@@ -375,9 +375,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-tty-launcher`
-**Description:** UWSM-aware interactive TTY launcher for desktop routes and VM profiles
+**Description:** UWSM-aware interactive TTY launcher for the Margo desktop and VM profiles
 
-**Usage:** `osc-tty-launcher [auto-tty [VT]] | [margo|mango|niri|hyprland|vmubuntu|vmarch|vmcachy|vmnixos]`
+**Usage:** `osc-tty-launcher [auto-tty [VT]] | [margo|vmubuntu|vmarch|vmcachy|vmnixos]`
 
 ---
 
