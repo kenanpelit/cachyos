@@ -259,7 +259,6 @@ decoration {
   shadow {
     color=0x${THEME_SHADOW_HEX}
     enabled=true
-    ignore_window=true
     offset=0 8
     range=${THEME_SHADOW_RANGE}
     render_power=${THEME_SHADOW_RENDER_POWER}
