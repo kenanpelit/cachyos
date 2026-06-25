@@ -676,9 +676,9 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-proxy`
-**Description:** SSH SOCKS5 proxy manager. Each tunnel is managed via an SSH ControlMaster socket, so multiple tunnels can run on different ports at once and status/stop are reliable (no PID grep). Default port 4999.
+**Description:** SSH SOCKS5 proxy manager. Her tünel bir SSH ControlMaster soketi
 
-**Usage:** `osc-proxy <start <host> [port] | stop [port|all] | restart <host> [port] | status [port] | list | test [port]>`
+**Usage:** `osc-proxy <komut> [argümanlar]`
 
 ---
 
