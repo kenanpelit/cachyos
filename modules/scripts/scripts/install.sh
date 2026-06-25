@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ==============================================================================
-# copy-scripts-to-local-bin
+# link-scripts-to-local-bin
 # ==============================================================================
 
 module_root="$(cd "$(dirname "$0")/.." && pwd)"
@@ -60,56 +60,50 @@ ensure_bin_dir() {
   fi
 }
 
-is_unchanged_install() {
+is_correct_symlink() {
   local src="$1"
   local dst="$2"
 
-  [[ -f "$dst" ]] || return 1
-  cmp -s "$src" "$dst" || return 1
-  [[ "$(stat -c '%a' "$dst" 2>/dev/null || echo "")" == "755" ]] || return 1
+  [[ -L "$dst" ]] || return 1
+  [[ "$(readlink "$dst" 2>/dev/null || echo "")" == "$src" ]] || return 1
   return 0
 }
 
-# Atomic copy: write to a temp file in the same dir, then rename over destination.
-atomic_install() {
+# Atomic symlink: create a temp symlink in the same dir, then rename over destination.
+# The link points at the repo source (extension included) so repo edits go live
+# immediately, with no copy/re-sync needed — same model as the WM dotfiles.
+atomic_symlink() {
   local src="$1"
   local dst="$2"
   local tmp
 
-  if is_unchanged_install "$src" "$dst"; then
+  if is_correct_symlink "$src" "$dst"; then
     ((skipped_count += 1))
     if $is_root; then
-      chown "$target_uid:$target_gid" "$dst" || true
+      chown -h "$target_uid:$target_gid" "$dst" || true
     fi
     return 0
   fi
 
-  # Use a temp file in the same directory for atomic rename.
+  # Use a temp symlink in the same directory for atomic rename.
   tmp="$bin_dir/.${dst##*/}.tmp.$$"
-
-  # Create/overwrite temp with correct mode.
-  if command -v install >/dev/null 2>&1; then
-    install -m 0755 "$src" "$tmp"
-  else
-    cp -f "$src" "$tmp"
-    chmod 0755 "$tmp" || true
-  fi
+  ln -sfn "$src" "$tmp"
 
   # Ensure ownership before final placement when running as root.
   if $is_root; then
-    chown "$target_uid:$target_gid" "$tmp" || true
+    chown -h "$target_uid:$target_gid" "$tmp" || true
   fi
 
-  # Replace destination atomically.
+  # Replace destination atomically (renames the symlink, not its target).
   # If this fails with EPERM, it's usually: root-owned dir, immutable flag, or FS perms.
   mv -f "$tmp" "$dst" || {
     rm -f "$tmp" || true
-    die "Failed to install '$dst' (check ownership, permissions, or immutable flag with: lsattr '$dst')"
+    die "Failed to symlink '$dst' (check ownership, permissions, or immutable flag with: lsattr '$dst')"
   }
 
   # Final ownership enforcement (belt + suspenders).
   if $is_root; then
-    chown "$target_uid:$target_gid" "$dst" || true
+    chown -h "$target_uid:$target_gid" "$dst" || true
   fi
 
   ((installed_count += 1))
@@ -128,21 +122,11 @@ install_from_dir() {
 
     should_install "$name" || continue
 
-    # Ensure source is executable (helpful for direct use too).
+    # Ensure the real source is executable (the symlink inherits it).
     chmod +x "$f" || true
 
-    atomic_install "$f" "$dst"
+    atomic_symlink "$f" "$dst"
   done
-}
-
-install_named_script() {
-  local src="$1"
-  local dst_name="$2"
-  local dst="$bin_dir/$dst_name"
-
-  [[ -f "$src" ]] || return 0
-  chmod +x "$src" || true
-  atomic_install "$src" "$dst"
 }
 
 install_privileged_system_bins() {
@@ -264,7 +248,8 @@ cleanup_legacy_bins() {
   local b p
   for b in "${legacy_bins[@]}"; do
     p="$bin_dir/$b"
-    [[ -e "$p" ]] || continue
+    # -e misses broken symlinks (source already deleted); -L catches them too.
+    [[ -e "$p" || -L "$p" ]] || continue
     rm -f "$p" || true
   done
 }
