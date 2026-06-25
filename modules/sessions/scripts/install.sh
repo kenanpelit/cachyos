@@ -83,6 +83,10 @@ remove_session "niri.desktop"
 remove_session "niri-optimized.desktop"
 remove_session "hyprland.desktop"
 remove_session "mango.desktop"
+# uwsm session entries left behind by the dropped niri/hyprland/mango modules
+remove_session "niri-uwsm.desktop"
+remove_session "hyprland-uwsm.desktop"
+remove_session "mango-uwsm.desktop"
 remove_session "gnome-optimized.desktop"
 remove_user_session "gnome-optimized.desktop"
 
@@ -100,6 +104,10 @@ remove_user_session "gnome-optimized.desktop"
 
 run_root rm -f "${LOCAL_BIN_DIR}/niri-optimized-session"
 remove_wrapper "gnome-optimized-session"
+# uwsm session wrappers left behind by the dropped niri/hyprland/mango modules
+remove_wrapper "niri-uwsm-session"
+remove_wrapper "hyprland-uwsm-session"
+remove_wrapper "mango-uwsm-session"
 
 if command -v systemctl >/dev/null 2>&1; then
   user_systemd_dir="$USER_HOME/.config/systemd/user"
