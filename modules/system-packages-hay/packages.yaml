@@ -86,11 +86,6 @@ packages:
 - haveged
 - hdparm
 - hwdetect
-- hyprland-protocols
-- hyprlang
-- hyprsunset
-- hyprutils
-- hyprwayland-scanner
 - inetutils
 - intel-media-driver
 - inter-font
@@ -136,7 +131,6 @@ packages:
 - mynav
 - nano
 - nano-syntax-highlighting
-- nautilus
 - neovim-symlinks
 - nerd-fonts-inter
 - netctl

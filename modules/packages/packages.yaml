@@ -13,7 +13,6 @@ packages:
   - firefox
   - fzf
   - gnupg
-  - grimblast-git
   - gpu-screen-recorder
   - libsecret
   - localsend

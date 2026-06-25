@@ -1,4 +1,0 @@
-description: GNOME Desktop packages
-packages:
-  - nautilus
-  - gnome-keyring

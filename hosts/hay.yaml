@@ -54,7 +54,6 @@ enabled_modules:
   - xdg-portal
   - rofi
   #- walker
-  #- lemurs
   - connect
   - anydesk
   - mpv

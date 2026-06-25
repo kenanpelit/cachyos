@@ -77,6 +77,11 @@ atomic_symlink() {
   local dst="$2"
   local tmp
 
+  # Canonicalize the target so the link is identical no matter whether the repo
+  # is reached via ~/.cachy or the ~/.config/arch-config symlink (avoids churn
+  # between manual and dcli-driven runs).
+  src="$(realpath "$src" 2>/dev/null || echo "$src")"
+
   if is_correct_symlink "$src" "$dst"; then
     ((skipped_count += 1))
     if $is_root; then
@@ -243,6 +248,15 @@ cleanup_legacy_bins() {
     fusuma-should-start
     fusuma-swipe
     fusuma-workspace-monitor
+    # gnome desktop helpers removed on the margo-only branch (GNOME not installed)
+    gnome-column-width
+    gnome-extensions-installer
+    gnome-kr-fix
+    gnome-monitor-set
+    gnome-set
+    gnome-settings
+    gnome_tty
+    setup-gnome
   )
 
   local b p

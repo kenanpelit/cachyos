@@ -94,55 +94,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `gnome-column-width`
-**Description:** Cycle or set window width proportions on GNOME (Wayland-safe).
-
-**Usage:** `gnome-column-width.sh [cycle|set|toggle] [options]`
-
----
-
-### 📂 `gnome-extensions-installer`
-**Description:** Install, update, and manage GNOME Shell extensions.
-
-**Usage:** `gnome-extensions-installer.sh [options]`
-
----
-
-### 📂 `gnome-kr-fix`
-**Description:** GNOME Keyring lag fixer by restarting/replacing the daemon.
-
-**Usage:** `gnome-kr-fix.sh`
-
----
-
-### 📂 `gnome-monitor-set`
-**Description:** Automatically sets external monitor as primary in GNOME.
-
-**Usage:** `gnome-monitor-set.sh`
-
----
-
-### 📂 `gnome-set`
-**Description:** GNOME window management helpers (Niri-like 'here' and 'go').
-
-**Usage:** `gnome-set.sh [here|go] [APP_ID|all]`
-
----
-
-### 📂 `gnome-settings`
-**Description:** Complete GNOME configuration script with Catppuccin Mocha theme.
-
-**Usage:** `gnome-settings.sh`
-
----
-
-### 📂 `gnome_tty`
-**Description:** GNOME TTY/GDM launcher for ThinkPad E14 Gen 6 with Intel Arc.
-
-**Usage:** `gnome_tty.sh [options]`
-
----
-
 ### 📂 `home-net-vpn`
 **Description:** Bring up the home Wi-Fi profile, then reconcile Mullvad/Blocky.
 
