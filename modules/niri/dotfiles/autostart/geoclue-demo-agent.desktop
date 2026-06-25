@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Geoclue Demo agent (Masked)
-Exec=/usr/bin/true
-Hidden=true
-X-GNOME-Autostart-enabled=false

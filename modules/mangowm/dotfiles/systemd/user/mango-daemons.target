@@ -1,6 +1,0 @@
-[Unit]
-Description=MangoWM session daemons stage
-Wants=mango-status-notifier-ready.service mango-polkit-agent.service mango-nm-applet.service mango-blueman-applet.service mango-state-bridge.service
-After=graphical-session.target wayland-wm@mango\x2dsession.service mango-bootstrap.service
-BindsTo=graphical-session.target wayland-wm@mango\x2dsession.service
-PartOf=mangowm-session.target graphical-session.target wayland-wm@mango\x2dsession.service

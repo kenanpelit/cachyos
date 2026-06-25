@@ -5,17 +5,11 @@ depends_on:
   - base
   - scripts
 dotfiles:
-  - source: dotfiles/hyprland-uwsm.desktop
-    target: ~/.local/share/wayland-sessions/hyprland-uwsm.desktop
-  - source: dotfiles/mango-uwsm.desktop
-    target: ~/.local/share/wayland-sessions/mango-uwsm.desktop
   # margo's uwsm session entry is now shipped by the margo PACKAGE
   # (/usr/share/wayland-sessions/margo-uwsm.desktop). Linking a user-level
   # copy here too would show a duplicate "Margo (UWSM)" in the DM chooser.
   # - source: dotfiles/margo-uwsm.desktop
   #   target: ~/.local/share/wayland-sessions/margo-uwsm.desktop
-  - source: dotfiles/niri-uwsm.desktop
-    target: ~/.local/share/wayland-sessions/niri-uwsm.desktop
   - source: dotfiles/systemd/user/margo-session.target
     target: ~/.config/systemd/user/margo-session.target
   - source: dotfiles/systemd/user/margo-clip-persist.service

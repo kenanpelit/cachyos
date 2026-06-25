@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=GNOME Keyring PKCS#11 (disabled by hyprland module)
-Exec=/usr/bin/true
-Hidden=true
-X-GNOME-Autostart-enabled=false

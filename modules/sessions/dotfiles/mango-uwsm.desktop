@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=MangoWM (UWSM)
-Comment=MangoWM managed by Universal Wayland Session Manager
-Type=Application
-DesktopNames=mango
-X-GDM-SessionType=wayland
-X-Session-Type=wayland
-Exec=/usr/local/bin/mango-uwsm-session
-Keywords=wayland;wm;tiling;mango;mangowm;compositor;uwsm;

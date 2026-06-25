@@ -47,9 +47,6 @@ enabled_modules:
   - gtk
   - qt
   - pipewire-rt
-  - niri
-  - hyprland
-  - mangowm
   - margo
   - satty
   - sessions
