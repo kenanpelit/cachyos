@@ -199,6 +199,53 @@ cleanup_legacy_bins() {
     cleanup_helium_profiles
     helium-extensions
     helium-kenp-default
+    # WM helpers removed on the margo-only branch (niri/hyprland/mango dropped)
+    niri-arrange
+    niri-bootstrap
+    niri-desktop-settings
+    niri-float-sticky
+    niri-osc
+    niri-post-bootstrap
+    niri-session-common
+    niri-session-init
+    niri-snapper-tools-check
+    niri-start
+    niri-status-notifier-ready
+    niri-two-column-layout
+    niri-workspace-smart
+    hypr-blueman-applet
+    hypr-bootstrap
+    hypr-desktop-settings
+    hypr-expo
+    hypr-osc
+    hypr-post-bootstrap
+    hypr-scroll
+    hypr-session-common
+    hypr-session-init
+    hypr-status-notifier-ready
+    mango-arrange
+    mango-blueman-applet
+    mango-bootstrap
+    mango-desktop-settings
+    mango-here
+    mango-layer-audit
+    mango-lid-watch
+    mango-monitor-smart
+    mango-overview
+    mango-performance-mode
+    mango-post-bootstrap
+    mango-profile-select
+    mango-session-common
+    mango-session-doctor
+    mango-session-init
+    mango-session-refresh
+    mango-state-bridge
+    mango-status-notifier-ready
+    mango-tag-smart
+    mango-virtual-output
+    mango-workspace-smart
+    wm-workspace
+    osc-here-hypr
   )
 
   local b p
