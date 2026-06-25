@@ -12,6 +12,9 @@ binds {
   Mod+Ctrl+K hotkey-overlay-title="Focus Window Up"   { focus-window-up; }
   Mod+Ctrl+J hotkey-overlay-title="Focus Window Down" { focus-window-down; }
 
+  Mod+Tab hotkey-overlay-title="Cycle Window (Stack)"      { focus-window-down; }
+  Mod+Shift+Tab hotkey-overlay-title="Cycle Window Back"   { focus-window-up; }
+
   Mod+Shift+Left  hotkey-overlay-title="Move Left"  { move-column-left; }
   Mod+Shift+Right hotkey-overlay-title="Move Right" { move-column-right; }
   Mod+Shift+Up    hotkey-overlay-title="Move Up"    { move-window-up; }
@@ -49,7 +52,8 @@ binds {
   Mod+Alt+O repeat=false hotkey-overlay-title="Overview (Niri)" { toggle-overview; }
   Mod+Ctrl+W hotkey-overlay-title="Toggle Column Tabs" { toggle-column-tabbed-display; }
 
-  Mod+G hotkey-overlay-title="Toggle Float/Tile" { spawn "niri-osc" "set" "float"; }
+  Mod+G hotkey-overlay-title="Dashboard (mdash)" { spawn "osc-shell" "ipc" "call" "dash" "toggle" "overview"; }
+  Mod+Shift+Space hotkey-overlay-title="Toggle Float/Tile" { spawn "niri-osc" "set" "float"; }
   Mod+Ctrl+BackSpace hotkey-overlay-title="Focus Float/Tile" { switch-focus-between-floating-and-tiling; }
   Mod+Ctrl+Shift+F hotkey-overlay-title="Expand Column (Fill)" { expand-column-to-available-width; }
   Mod+Ctrl+Shift+C hotkey-overlay-title="Center Visible Columns" { center-visible-columns; }
@@ -75,7 +79,7 @@ binds {
 
   Mod+Space repeat=false hotkey-overlay-title="Launcher" { spawn "osc-shell" "ipc" "call" "launcher" "toggle"; }
   Mod+Ctrl+D repeat=false hotkey-overlay-title="Settings" { spawn "osc-shell" "ipc" "call" "settings" "toggle"; }
-  Mod+D repeat=false hotkey-overlay-title="Control Center" { spawn "osc-shell" "ipc" "call" "control-center" "toggle"; }
+  Mod+D repeat=false hotkey-overlay-title="App Launcher" { spawn "osc-shell" "ipc" "call" "launcher" "toggle"; }
   Mod+Alt+S repeat=false hotkey-overlay-title="Dash Center" { spawn "osc-shell" "ipc" "call" "dash" "toggle" "overview"; }
   Mod+Alt+D repeat=false hotkey-overlay-title="Handy: Toggle Recording" { spawn "handyctl" "toggle"; }
   Mod+Alt+Shift+D repeat=false hotkey-overlay-title="Handy: Post-Process Recording" { spawn "handyctl" "post"; }
@@ -83,7 +87,7 @@ binds {
   Mod+N repeat=false hotkey-overlay-title="Notifications" { spawn "osc-shell" "ipc" "call" "notifications" "toggleHistory"; }
 
   Mod+V repeat=false hotkey-overlay-title="CopyQ Toggle" { spawn "copyq" "toggle"; }
-  Mod+Shift+D repeat=false hotkey-overlay-title="Dash Overview" { spawn "osc-shell" "ipc" "call" "launcher" "windows"; }
+  Mod+Shift+D repeat=false hotkey-overlay-title="Control Center" { spawn "osc-shell" "ipc" "call" "control-center" "toggle"; }
   Mod+Shift+P repeat=false hotkey-overlay-title="Process List" { spawn "osc-shell" "ipc" "call" "systemMonitor" "toggle"; }
   Mod+Ctrl+N repeat=false hotkey-overlay-title="Notepad" { spawn "osc-shell" "ipc" "call" "plugin:notes" "togglePanel"; }
   Mod+Comma repeat=false hotkey-overlay-title="Settings" { spawn "osc-shell" "ipc" "call" "settings" "toggle"; }
@@ -92,6 +96,7 @@ binds {
 
   Mod+B repeat=false hotkey-overlay-title="Toggle Bar" { spawn "osc-shell" "ipc" "call" "bar" "toggle"; }
   Mod+Shift+B repeat=false hotkey-overlay-title="Toggle Dock" { spawn "osc-shell" "ipc" "call" "dock" "toggle"; }
+  Alt+F repeat=false hotkey-overlay-title="Toggle Dock" { spawn "osc-shell" "ipc" "call" "dock" "toggle"; }
   Mod+Ctrl+B repeat=false hotkey-overlay-title="Auto-Hide Bar" { spawn "osc-shell" "ipc" "call" "bar" "toggleAutoHide"; }
 
   Mod+Delete repeat=false hotkey-overlay-title="Power Menu" { spawn "osc-shell" "ipc" "call" "sessionMenu" "toggle"; }
@@ -156,10 +161,11 @@ binds {
   Alt+T allow-inhibiting=false repeat=false hotkey-overlay-title="KKENP Start" { spawn "uwsm" "app" "-a" "start-kkenp" "--" "start-kkenp"; }
   Alt+N allow-inhibiting=false repeat=false hotkey-overlay-title="Notes (Anotes)" { spawn "uwsm" "app" "-a" "anotes" "--" "anotes"; }
   Mod+Alt+Return repeat=false hotkey-overlay-title="SemsuMo Daily" { spawn "semsumo-daily"; }
-  Mod+Return repeat=false hotkey-overlay-title="Dropdown Terminal" { spawn "niri-osc" "drop" "kitty" "--class" "dropdown-terminal"; }
+  Mod+Return repeat=false hotkey-overlay-title="Terminal" { spawn "uwsm" "app" "-a" "kitty" "--" "kitty"; }
+  Mod+Ctrl+Return repeat=false hotkey-overlay-title="Dropdown Terminal" { spawn "niri-osc" "drop" "kitty" "--class" "dropdown-terminal"; }
   Alt+Space repeat=false hotkey-overlay-title="Custom Commands" { spawn "osc-shell" "ipc" "call" "plugin:custom-commands" "toggle"; }
   Mod+Alt+Space repeat=false hotkey-overlay-title="Rofi Launcher" { spawn "uwsm" "app" "-a" "rofi-launcher" "--" "rofi-launcher"; }
-  Mod+Shift+S repeat=false hotkey-overlay-title="Sticky Toggle" { spawn "niri-float-sticky" "toggle-active"; }
+  Mod+Ctrl+S repeat=false hotkey-overlay-title="Sticky Toggle" { spawn "niri-float-sticky" "toggle-active"; }
 
   Mod+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Nemo)" { spawn "uwsm" "app" "-a" "nemo" "--" "nemo"; }
   Alt+Ctrl+F repeat=false hotkey-overlay-title="File Manager (Yazi)" { spawn "uwsm" "app" "-a" "yazi" "--" "kitty" "-e" "yazi"; }
