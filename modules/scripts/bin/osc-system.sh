@@ -361,7 +361,7 @@ EOF
 		fi
 	done
 
-	# Power backend / auto-profile automation status
+	# Power backend status
 	PPD_LOAD="$(systemctl show -p LoadState --value power-profiles-daemon.service 2>/dev/null || true)"
 	PPD_STATE="$(systemctl show -p ActiveState --value power-profiles-daemon.service 2>/dev/null || true)"
 	PPD_SUBSTATE="$(systemctl show -p SubState --value power-profiles-daemon.service 2>/dev/null || true)"
@@ -369,29 +369,6 @@ EOF
 	PPD_CURRENT="$(powerprofilesctl get 2>/dev/null || true)"
 	[[ -z "$PPD_CURRENT" ]] && PPD_CURRENT="unknown"
 
-	USER_SYSTEMD_AVAILABLE=false
-	PPP_TIMER_LOAD="" PPP_TIMER_STATE="" PPP_TIMER_SUBSTATE="" PPP_TIMER_RESULT=""
-	PPP_SERVICE_LOAD="" PPP_SERVICE_STATE="" PPP_SERVICE_SUBSTATE="" PPP_SERVICE_RESULT=""
-	if systemctl --user show-environment >/dev/null 2>&1; then
-		USER_SYSTEMD_AVAILABLE=true
-		PPP_TIMER_LOAD="$(systemctl --user show -p LoadState --value ppp-auto-profile.timer 2>/dev/null || true)"
-		PPP_TIMER_STATE="$(systemctl --user show -p ActiveState --value ppp-auto-profile.timer 2>/dev/null || true)"
-		PPP_TIMER_SUBSTATE="$(systemctl --user show -p SubState --value ppp-auto-profile.timer 2>/dev/null || true)"
-		PPP_TIMER_RESULT="$(systemctl --user show -p Result --value ppp-auto-profile.timer 2>/dev/null || true)"
-
-		PPP_SERVICE_LOAD="$(systemctl --user show -p LoadState --value ppp-auto-profile.service 2>/dev/null || true)"
-		PPP_SERVICE_STATE="$(systemctl --user show -p ActiveState --value ppp-auto-profile.service 2>/dev/null || true)"
-		PPP_SERVICE_SUBSTATE="$(systemctl --user show -p SubState --value ppp-auto-profile.service 2>/dev/null || true)"
-		PPP_SERVICE_RESULT="$(systemctl --user show -p Result --value ppp-auto-profile.service 2>/dev/null || true)"
-	fi
-
-	PPP_LOCK_FILE="${HOME}/.local/state/ppd-auto-profile/lock"
-	PPP_LOCKED=false
-	PPP_LOCK_PROFILE=""
-	if [[ -f "$PPP_LOCK_FILE" ]]; then
-		PPP_LOCKED=true
-		PPP_LOCK_PROFILE="$(awk -F= '/^profile=/{print $2; exit}' "$PPP_LOCK_FILE" 2>/dev/null || true)"
-	fi
 
 	# Sample Power (if requested)
 	PKG_W_NOW=""
@@ -448,18 +425,7 @@ EOF
 				--arg ppd_state "$PPD_STATE" \
 				--arg ppd_substate "$PPD_SUBSTATE" \
 				--arg ppd_result "$PPD_RESULT" \
-				--arg ppp_timer_load "$PPP_TIMER_LOAD" \
-				--arg ppp_timer_state "$PPP_TIMER_STATE" \
-				--arg ppp_timer_substate "$PPP_TIMER_SUBSTATE" \
-				--arg ppp_timer_result "$PPP_TIMER_RESULT" \
-				--arg ppp_service_load "$PPP_SERVICE_LOAD" \
-				--arg ppp_service_state "$PPP_SERVICE_STATE" \
-				--arg ppp_service_substate "$PPP_SERVICE_SUBSTATE" \
-				--arg ppp_service_result "$PPP_SERVICE_RESULT" \
-				--arg ppp_lock_profile "$PPP_LOCK_PROFILE" \
 				--arg ts "$TS" \
-				--argjson user_systemd_available "$([[ "$USER_SYSTEMD_AVAILABLE" == true ]] && echo true || echo false)" \
-				--argjson ppp_locked "$([[ "$PPP_LOCKED" == true ]] && echo true || echo false)" \
 				--argjson turbo "$TURBO_ENABLED" \
 				--argjson hwp_boost "$HWP_BOOST_BOOL" \
 				--argjson mmio_loaded "$MMIO_LOADED" \
@@ -512,25 +478,6 @@ EOF
 	            state: $ppd_state,
 	            substate: $ppd_substate,
 	            result: $ppd_result
-	          }
-	        },
-	        ppp_auto_profile: {
-	          user_systemd_available: $user_systemd_available,
-	          timer: {
-	            load: $ppp_timer_load,
-	            state: $ppp_timer_state,
-	            substate: $ppp_timer_substate,
-	            result: $ppp_timer_result
-	          },
-	          service: {
-	            load: $ppp_service_load,
-	            state: $ppp_service_state,
-	            substate: $ppp_service_substate,
-	            result: $ppp_service_result
-	          },
-	          lock: {
-	            enabled: $ppp_locked,
-	            profile: $ppp_lock_profile
 	          }
 	        },
 	        pkg_watts_now: $pkg_w_now,
@@ -687,40 +634,6 @@ EOF
 			printf "  %-30s ${RED}✗ %s${RST} ${DIM}(%s)${RST}\n" "power-profiles-daemon" "${PPD_STATE:-unknown}" "${PPD_RESULT:-unknown}"
 		fi
 		[[ "$PPD_CURRENT" != "unknown" ]] && echo "    ${DIM}Current profile: ${PPD_CURRENT}${RST}"
-
-		if [[ "$USER_SYSTEMD_AVAILABLE" == true ]]; then
-			if [[ -z "$PPP_TIMER_LOAD" || "$PPP_TIMER_LOAD" == "not-found" ]]; then
-				echo "  ppp-auto-profile.timer         ${DIM}– not installed${RST}"
-			elif [[ "$PPP_TIMER_STATE" == "active" ]]; then
-				printf "  %-30s ${GRN}✓ ACTIVE${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.timer" "${PPP_TIMER_SUBSTATE:-waiting}"
-			elif [[ "$PPP_TIMER_STATE" == "inactive" ]]; then
-				printf "  %-30s ${YLW}⚠ INACTIVE${RST} ${DIM}(auto-switch disabled)${RST}\n" "ppp-auto-profile.timer"
-			else
-				printf "  %-30s ${RED}✗ %s${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.timer" "${PPP_TIMER_STATE:-unknown}" "${PPP_TIMER_RESULT:-unknown}"
-			fi
-
-			if [[ -z "$PPP_SERVICE_LOAD" || "$PPP_SERVICE_LOAD" == "not-found" ]]; then
-				echo "  ppp-auto-profile.service       ${DIM}– not installed${RST}"
-			elif [[ "$PPP_SERVICE_STATE" == "active" ]]; then
-				printf "  %-30s ${GRN}✓ ACTIVE${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.service" "${PPP_SERVICE_SUBSTATE:-running}"
-			elif [[ "$PPP_SERVICE_STATE" == "inactive" && "$PPP_SERVICE_RESULT" == "success" ]]; then
-				printf "  %-30s ${GRN}✓ OK${RST} ${DIM}(oneshot completed)${RST}\n" "ppp-auto-profile.service"
-			else
-				printf "  %-30s ${RED}✗ %s${RST} ${DIM}(%s)${RST}\n" "ppp-auto-profile.service" "${PPP_SERVICE_STATE:-unknown}" "${PPP_SERVICE_RESULT:-unknown}"
-			fi
-		else
-			echo "  ppp-auto-profile               ${DIM}– user systemd unavailable in this session${RST}"
-		fi
-
-		if [[ "$PPP_LOCKED" == true ]]; then
-			if [[ -n "$PPP_LOCK_PROFILE" ]]; then
-				echo "  auto-profile lock              ${YLW}⚠ LOCKED${RST} ${DIM}(${PPP_LOCK_PROFILE})${RST}"
-			else
-				echo "  auto-profile lock              ${YLW}⚠ LOCKED${RST}"
-			fi
-		else
-			echo "  auto-profile lock              ${GRN}✓ unlocked${RST}"
-		fi
 
 		echo ""
 		echo "POTENTIAL CONFLICTS:"
