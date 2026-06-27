@@ -118,7 +118,7 @@ setopt INC_APPEND_HISTORY
 setopt autocd
 unsetopt APPEND_HISTORY
 
-HISTORY_IGNORE="(ls|cd|pwd|exit|clear|history|cd ..|cd -|z *|zi *)"
+HISTORY_IGNORE="(ls|cd|pwd|exit|clear|history|cd ..|cd -|z *|zi *|yazi*--cwd-file*)"
 
 if [[ -t 0 && -t 1 && $options[zle] = on ]] && command -v fzf >/dev/null 2>&1; then
   _fzf_zsh_init="$(fzf --zsh 2>/dev/null)"
