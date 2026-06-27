@@ -961,6 +961,7 @@ validate_profile() {
 		local incognito_mode=false
 		# Niri/Hyprland'da workspace rule'ların düzgün çalışması için default: ayrı instance
 		local separate_mode="auto"
+		local newtab_mode=false
 		local pid_file=""
 
 	# Parametreleri güvenli şekilde işle
@@ -986,6 +987,8 @@ validate_profile() {
 				;;
 			--separate) separate_mode="true" ;;
 			--no-separate) separate_mode="false" ;;
+			# URL'yi çalışan instance'a sekme olarak ilet (bkz. DEFAULT_FLAGS bloğu)
+			--new-tab) newtab_mode=true ;;
 			--pid-file=*) pid_file="${1#*=}" ;;
 			--pid-file)
 				shift
@@ -1094,6 +1097,17 @@ validate_profile() {
 	# İnkognito modu
 	if $incognito_mode; then
 		cmd+=("--incognito")
+	elif [[ "$newtab_mode" == true ]]; then
+		# URL'yi zaten çalışan profile instance'ına SEKME olarak ilet.
+		# --restore-last-session'ı düş: forward edilen komut satırında bu bayrak
+		# olunca Brave bunu "oturum geri yükle" başlatması sayıp URL'yi yeni bir
+		# PENCEREYE koyar; mevcut pencereye sekme eklemez. Diğer platform
+		# bayrakları (ozone/features) korunur.
+		local _flag
+		for _flag in "${DEFAULT_FLAGS[@]}"; do
+			[[ "$_flag" == "--restore-last-session" ]] && continue
+			cmd+=("$_flag")
+		done
 	else
 		cmd+=("${DEFAULT_FLAGS[@]}")
 	fi
