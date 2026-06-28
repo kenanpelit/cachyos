@@ -431,35 +431,42 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `svmarch`
-**Description:** SVM (Simple VM) profile for Arch Linux using QEMU/KVM
+**Description:** Compatibility shim — runs 'svm arch' (unified VM manager, svm.sh).
 
 **Usage:** `svmarch.sh [install|start|stop|status|connect|console|reset] [options]`
 
 ---
 
 ### 📂 `svmcachy`
-**Description:** SVM (Simple VM) profile for CachyOS using QEMU/KVM
+**Description:** Compatibility shim — runs 'svm cachy' (unified VM manager, svm.sh).
 
 **Usage:** `svmcachy.sh [install|start|stop|status|connect|console|reset] [options]`
 
 ---
 
 ### 📂 `svmnil`
-**Description:** SVM (Simple VM) profile for CachyOS using QEMU/KVM
+**Description:** Compatibility shim — runs 'svm nil' (unified VM manager, svm.sh).
 
-**Usage:** `svmcachy.sh [install|start|stop|status|connect|console|reset] [options]`
+**Usage:** `svmnil.sh [install|start|stop|status|connect|console|reset] [options]`
 
 ---
 
 ### 📂 `svmnixos`
-**Description:** SVM (Simple VM) profile for NixOS using QEMU/KVM
+**Description:** Compatibility shim — runs 'svm nixos' (unified VM manager, svm.sh).
 
 **Usage:** `svmnixos.sh [install|start|stop|status|connect|console|reset] [options]`
 
 ---
 
+### 📂 `svm`
+**Description:** Unified QEMU/KVM VM manager; per-distro config (svm <distro> ...).
+
+**Usage:** `svm.sh <distro> [install|start|stop|status|connect|console|reset] [opts]`
+
+---
+
 ### 📂 `svmubuntu`
-**Description:** SVM (Simple VM) profile for Ubuntu using QEMU/KVM
+**Description:** Compatibility shim — runs 'svm ubuntu' (unified VM manager, svm.sh).
 
 **Usage:** `svmubuntu.sh [install|start|stop|status|connect|console|reset] [options]`
 

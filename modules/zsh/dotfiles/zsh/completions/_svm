@@ -1,0 +1,33 @@
+#compdef svm
+
+# Completion for svm — unified QEMU/KVM VM manager (svm <distro> <command>).
+# Distros are discovered from the per-distro config dir at completion time.
+
+_svm() {
+  local curcontext="$curcontext" state line
+  local conf_dir="${SVM_CONF_DIR:-/sun/san/shared/svm}"
+  local -a distros cmds
+
+  distros=(${(f)"$(ls "$conf_dir"/*.conf 2>/dev/null | xargs -n1 -r basename 2>/dev/null | sed 's/\.conf$//')"})
+  cmds=(
+    'install:Boot from ISO (first install)'
+    'start:Start the VM (default)'
+    'stop:Stop the VM'
+    'status:Show VM status'
+    'connect:SSH into the guest'
+    'console:QEMU monitor console'
+    'reset:Remove disk/vars files (DANGEROUS)'
+  )
+
+  _arguments -C \
+    '1: :->distro' \
+    '2: :->cmd' \
+    '*:: :->opts' && return 0
+
+  case $state in
+    distro) _describe -t distros 'distro' distros ;;
+    cmd)    _describe -t commands 'svm command' cmds ;;
+  esac
+}
+
+_svm "$@"

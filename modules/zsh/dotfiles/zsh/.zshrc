@@ -531,6 +531,10 @@ autoload -Uz _osc-sqm 2>/dev/null || true
 autoload -Uz _osc-ports 2>/dev/null || true
 (( $+functions[_osc-ports] )) && compdef _osc-ports osc-ports
 
+# Bind svm completion explicitly for cached compinit sessions too.
+autoload -Uz _svm 2>/dev/null || true
+(( $+functions[_svm] )) && compdef _svm svm
+
 # Bind pass completion for alternate password stores backed by aliases.
 # The upstream _pass completion supports per-command store prefixes via zstyle.
 autoload -Uz _pass 2>/dev/null || true
