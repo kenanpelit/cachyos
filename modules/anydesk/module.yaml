@@ -1,11 +1,6 @@
 tags:
 - network
 - tool
-description: Anydesk (launcher + desktop entry) portable config
+description: Anydesk — system package only; uses its own /usr/share/applications/anydesk.desktop (launcher + x-scheme-handler/anydesk)
 depends_on:
 - base
-dotfiles:
-- source: dotfiles/applications/runanydesk.desktop
-  target: ~/.local/share/applications/runanydesk.desktop
-post_install_hook: scripts/install.sh
-post_hook_behavior: always
