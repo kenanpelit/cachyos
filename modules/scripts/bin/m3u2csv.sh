@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 # ==============================================================================
-# Script: m3u2csv.py
+# Script: m3u2csv.sh
 # Description: Convert M3U playlists to TSV (name, group, url).
-# Usage: m3u2csv.py INPUT.m3u OUTPUT.csv
+# Usage: m3u2csv.sh INPUT.m3u OUTPUT.csv
 # ==============================================================================
 if [ "$#" -lt 2 ]; then
   echo "usage: m3u2csv INPUT.m3u OUTPUT.csv" >&2

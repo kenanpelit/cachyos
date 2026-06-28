@@ -80,13 +80,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `discord-sandbox`
-**Description:** Launches Discord with sandbox disabled to avoid common issues.
-
-**Usage:** `discord-sandbox.sh [options]`
-
----
-
 ### 📂 `ente-run`
 **Description:** Launches Ente Auth with GNOME Keyring Secrets support.
 
@@ -108,17 +101,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `m3u2csv.py`
+### 📂 `m3u2csv`
 **Description:** Convert M3U playlists to TSV (name, group, url).
 
-**Usage:** `m3u2csv.py INPUT.m3u OUTPUT.csv`
-
----
-
-### 📂 `margo-mpv`
-**Description:** margo-mpv.sh — compatibility shim. Superseded by the first-party `mplay`
-
-**Usage:** `margo-mpv`
+**Usage:** `m3u2csv.sh INPUT.m3u OUTPUT.csv`
 
 ---
 
