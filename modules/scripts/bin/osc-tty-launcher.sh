@@ -22,10 +22,8 @@ resolve_cmd() {
   return 1
 }
 
-SVM_UBUNTU_CMD="$(resolve_cmd "${HOME}/.local/bin/svmubuntu" "svmubuntu" 2>/dev/null || true)"
-SVM_ARCH_CMD="$(resolve_cmd "${HOME}/.local/bin/svmarch" "svmarch" 2>/dev/null || true)"
-SVM_CACHY_CMD="$(resolve_cmd "${HOME}/.local/bin/svmcachy" "svmcachy" 2>/dev/null || true)"
-SVM_NIXOS_CMD="$(resolve_cmd "${HOME}/.local/bin/svmnixos" "svmnixos" 2>/dev/null || true)"
+# Unified VM manager: `svm <distro> ...` (replaces the per-distro svm* scripts).
+SVM_CMD="$(resolve_cmd "${HOME}/.local/bin/svm" "svm" 2>/dev/null || true)"
 
 ensure_runtime_environment() {
   local uid
@@ -79,7 +77,7 @@ launch_margo() {
 
 run_vm_via_sway_profile() {
   local profile="$1"
-  local fallback_cmd="$2"
+  local distro="$2"
   local cfg="${HOME}/.config/sway/${profile}"
 
   ensure_runtime_environment
@@ -93,11 +91,11 @@ run_vm_via_sway_profile() {
     exec sway -c "$cfg"
   fi
 
-  if [[ -n "$fallback_cmd" ]]; then
-    exec "$fallback_cmd" start --gtk-gl off
+  if [[ -n "$SVM_CMD" ]]; then
+    exec "$SVM_CMD" "$distro" start --gtk-gl off
   fi
 
-  echo "[${SCRIPT_NAME}] VM route unavailable: ${profile}" >&2
+  echo "[${SCRIPT_NAME}] VM route unavailable: ${profile} (svm not found)" >&2
   exit 1
 }
 
@@ -178,16 +176,16 @@ main() {
       launch_margo
       ;;
     vmubuntu)
-      run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
+      run_vm_via_sway_profile "qemu_vmubuntu" "ubuntu"
       ;;
     vmarch)
-      run_vm_via_sway_profile "qemu_vmarch" "${SVM_ARCH_CMD}"
+      run_vm_via_sway_profile "qemu_vmarch" "arch"
       ;;
     vmcachy)
-      run_vm_via_sway_profile "qemu_vmcachy" "${SVM_CACHY_CMD}"
+      run_vm_via_sway_profile "qemu_vmcachy" "cachy"
       ;;
     vmnixos)
-      run_vm_via_sway_profile "qemu_vmnixos" "${SVM_NIXOS_CMD}"
+      run_vm_via_sway_profile "qemu_vmnixos" "nixos"
       ;;
     -h|--help|help)
       show_tty_hints "${XDG_VTNR:-?}"
@@ -205,16 +203,16 @@ main() {
       launch_margo
       ;;
     2)
-      run_vm_via_sway_profile "qemu_vmubuntu" "${SVM_UBUNTU_CMD}"
+      run_vm_via_sway_profile "qemu_vmubuntu" "ubuntu"
       ;;
     3)
-      run_vm_via_sway_profile "qemu_vmarch" "${SVM_ARCH_CMD}"
+      run_vm_via_sway_profile "qemu_vmarch" "arch"
       ;;
     4)
-      run_vm_via_sway_profile "qemu_vmcachy" "${SVM_CACHY_CMD}"
+      run_vm_via_sway_profile "qemu_vmcachy" "cachy"
       ;;
     5)
-      run_vm_via_sway_profile "qemu_vmnixos" "${SVM_NIXOS_CMD}"
+      run_vm_via_sway_profile "qemu_vmnixos" "nixos"
       ;;
     q | Q)
       exit 0
