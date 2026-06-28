@@ -605,17 +605,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `walk`
-**Description:** Walker Launcher (minimal, elegant) - Launches Walker with predefined dimensions
-
-**Usage:** `walk.sh`
-
----
-
 ### 📂 `wayland-session-common`
 **Description:** Shared env parsing and runtime-dir helpers for Wayland sessions.
 
-**Usage:** `wayland-session-common`
+**Usage:** `source wayland-session-common.sh   # library — do not execute directly`
 
 ---
 
