@@ -3,7 +3,5 @@
   Host: \n  |  TTY: \l  |  Kernel: \r
 ==============================================================
   Quick routes:
-    tty2 -> Hyprland (UWSM)
-    tty3 -> Niri (UWSM)
-    tty4 -> GNOME
-    tty5 -> Sway VM
+    tty2    -> Margo (UWSM, auto)
+    others  -> exec osc-tty-launcher  (Margo + Ubuntu/Arch/Cachy/NixOS VM)
