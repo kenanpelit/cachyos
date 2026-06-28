@@ -17,13 +17,12 @@ log() {
 }
 
 notify() {
-  if command -v notify-send >/dev/null 2>&1; then
-    notify-send \
-      -a "$APP_NAME" \
-      -t 5000 \
-      -i "$ICON_NAME" \
+  if command -v mshellctl >/dev/null 2>&1; then
+    mshellctl toast \
       "Margo" \
-      "Tag ${TAG} • Tmux Active" >/dev/null 2>&1 || true
+      "Tag ${TAG} • Tmux Active" \
+      --icon "$ICON_NAME" \
+      --severity positive >/dev/null 2>&1 || true
   fi
 }
 

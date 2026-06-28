@@ -750,7 +750,11 @@ initialize_audio() {
 			wpctl set-default "${last_source}" >/dev/null 2>&1 || debug_print "Uyarı" "Source ayarlanamadı: ${last_source}"
 		fi
 	fi
-	notify "Ses Ayarları" "Ses: %${DEFAULT_VOLUME}, Mikrofon: %${DEFAULT_MIC_VOLUME}" "audio-volume-medium"
+	# Açılış durum bilgisi: notify-send yerine mshell toast (ephemeral, geçmişe yazmaz)
+	info "Ses Ayarları: Ses: %${DEFAULT_VOLUME}, Mikrofon: %${DEFAULT_MIC_VOLUME}"
+	command -v mshellctl >/dev/null 2>&1 &&
+		mshellctl toast "Ses Ayarları" "Ses: %${DEFAULT_VOLUME}, Mikrofon: %${DEFAULT_MIC_VOLUME}" \
+			--icon audio-volume-medium-symbolic --severity calm >/dev/null 2>&1 || true
 	success "Audio initialized successfully"
 }
 save_profile() {

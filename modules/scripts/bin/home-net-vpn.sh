@@ -31,9 +31,19 @@ notify_msg() {
   local body="$2"
   local urgency="${3:-normal}"
   local icon="${4:-network-wireless}"
+  local severity
 
-  command -v notify-send >/dev/null 2>&1 || return 0
-  notify-send -a "$LOG_TAG" -u "$urgency" -t 5000 -i "$icon" "$title" "$body" >/dev/null 2>&1 || true
+  # urgency → mshell toast severity (notify-send yerine ephemeral toast)
+  case "$urgency" in
+    critical) severity=danger ;;
+    low)      severity=calm ;;
+    *)        severity=positive ;;
+  esac
+  # toast simgesi symbolic isim ister
+  [[ "$icon" == *-symbolic ]] || icon="${icon}-symbolic"
+
+  command -v mshellctl >/dev/null 2>&1 || return 0
+  mshellctl toast "$title" "$body" --icon "$icon" --severity "$severity" >/dev/null 2>&1 || true
 }
 
 handle_error() {
