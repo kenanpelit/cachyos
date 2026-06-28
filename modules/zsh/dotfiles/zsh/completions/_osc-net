@@ -12,6 +12,7 @@ _osc-net() {
     'vpn:Mullvad VPN manager (connect / relay / blocky / slot / obf / ...)'
     'proxy:SSH SOCKS5 proxy / tunnel manager'
     'wifi:NetworkManager home Wi-Fi setup (Ken_5 / Ken_2_4)'
+    'ip:Public IP + Mullvad VPN exposure check'
   )
 
   _arguments -C \
@@ -49,6 +50,10 @@ _osc-net() {
         wifi)
           _arguments \
             '1:wifi command:(status)'
+          ;;
+        ip)
+          _arguments \
+            '--no-notify[Do not send a desktop notification]'
           ;;
       esac
       ;;

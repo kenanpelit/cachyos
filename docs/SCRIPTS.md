@@ -206,6 +206,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-ports`
+**Description:** Network discovery, port scanning, and local listening-socket view.
+
+**Usage:** `osc-ports.sh {discover|scan <host> <ports> [tcp|udp]|listen}`
+
+---
+
 ### 📂 `osc-rsync`
 **Description:** Unified RSYNC Operations CLI for backup and transfer workflows
 
@@ -311,6 +318,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-vnc`
+**Description:** Flexible TigerVNC viewer; runs under Xwayland when DISPLAY is missing.
+
+**Usage:** `osc-vnc [options] [host:display]`
+
+---
+
 ### 📂 `osc-wiremix`
 **Description:** Launch wiremix in kitty with stable class/app-id
 
@@ -339,31 +353,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `ports`
-**Description:** OSC Port Scanner and network discovery utility
-
-**Usage:** `ports.sh [options]`
-
----
-
-### 📂 `powerprofilesctl-toggle`
-**Description:** Backward-compatible wrapper for power-profile toggle
-
-**Usage:** `powerprofilesctl-toggle.sh`
-
----
-
 ### 📂 `power-profile`
 **Description:** Power profile helper for powerprofilesctl with lock integration
 
 **Usage:** `power-profile.sh [toggle|set <profile>]`
-
----
-
-### 📂 `publicip`
-**Description:** Advanced public IP address checker with VPN detection
-
-**Usage:** `publicip.sh [options]`
 
 ---
 
@@ -395,13 +388,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `schema.json`
-**Description:** No description provided.
-
-**Usage:** `schema.json`
-
----
-
 ### 📂 `screenshot`
 **Description:** Screenshot helper for the margo Wayland compositor, with a
 
@@ -423,13 +409,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `sil_ayni_mp4`
-**Description:** Duplicate MP4 file cleaner based on MD5 content matching
-
-**Usage:** `sil_ayni_mp4.sh [directory]`
-
----
-
 ### 📂 `smart-suspend`
 **Description:** Smart Suspend Script for Margo with state saving/restoration
 
@@ -441,13 +420,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Drive Spotify play/pause/next/prev whether it is the native
 
 **Usage:** `spotify-media [toggle|next|prev|status]   (default: toggle)`
-
----
-
-### 📂 `ssh-launcher`
-**Description:** Launch SSH with optional menu selection using fzf/rofi
-
-**Usage:** `ssh-launcher.sh [ssh_arguments]`
 
 ---
 
@@ -500,13 +472,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `tarchiver`
-**Description:** Simple tar archive manager for compressing and extracting files
-
-**Usage:** `tarchiver.sh [compress|extract] <target>`
-
----
-
 ### 📂 `ter`
 **Description:** Remote SSH tunnel manager with search and byobu session management
 
@@ -549,13 +514,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `vmarch`
-**Description:** Linux VM Manager - Manages QEMU/KVM based Linux virtual machines (Arch focus)
-
-**Usage:** `vmarch.sh [OPTIONS]`
-
----
-
 ### 📂 `vm-start`
 **Description:** Basit libvirt VM başlatıcı (win10 VM’ini başlatır)
 
@@ -563,17 +521,10 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `vnc-connect`
-**Description:** VNC istemci başlatıcı (VNC sunucularına bağlanmak için hafif wrapper)
+### 📂 `vnc-local`
+**Description:** Quick VNC connect to localhost:5901 using the pass-stored password.
 
-**Usage:** `vnc-connect.sh`
-
----
-
-### 📂 `vncviewer-wl`
-**Description:** Run TigerVNC viewer under Xwayland when DISPLAY is missing
-
-**Usage:** `vncviewer-wl [options] [host:display]`
+**Usage:** `vnc-local`
 
 ---
 

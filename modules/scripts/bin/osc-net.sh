@@ -4411,17 +4411,117 @@ wifi_main() {
 
 
 # ==============================================================================
+# ip — public IP address + Mullvad VPN exposure check (folded in from publicip)
+# ==============================================================================
+_ip_curl() { curl -fsS --connect-timeout 2 --max-time 5 "$@"; }
+
+_ip_country() {
+	local addr="$1" c
+	[[ -n "${addr:-}" ]] || {
+		echo "Unknown"
+		return 0
+	}
+	c="$(_ip_curl "https://ipapi.co/${addr}/country_name" 2>/dev/null | tr -d '\n' || true)"
+	[[ -n "$c" ]] && echo "$c" || echo "Unknown"
+}
+
+_ip_physical_iface() {
+	# En iyi çaba: tünel olmayan, UP durumda bir fiziksel arayüz seç.
+	ip -o link show up 2>/dev/null |
+		awk -F': ' '{print $2}' | awk '{print $1}' |
+		grep -Ev '^(lo|mullvad|wg[0-9]*|tun[0-9]*|tap[0-9]*|docker[0-9]*|veth.*|br-.*|virbr.*)$' |
+		head -n 1
+}
+
+_ip_real_bypass() {
+	# VPN'i atlayıp gerçek genel IP'yi almaya çalış (mullvad-exclude → fiziksel iface).
+	local rip="" iface
+	if have mullvad-exclude; then
+		rip="$(mullvad-exclude bash -lc 'curl -fsS --connect-timeout 2 --max-time 5 https://ipinfo.io/ip' 2>/dev/null | tr -d '\n' || true)"
+	fi
+	if [[ -z "$rip" ]]; then
+		iface="$(_ip_physical_iface)"
+		[[ -n "$iface" ]] && rip="$(_ip_curl --interface "$iface" https://ipinfo.io/ip 2>/dev/null | tr -d '\n' || true)"
+	fi
+	echo "$rip"
+}
+
+_ip_notify() {
+	[[ "${IP_NOTIFY:-1}" == "1" ]] || return 0
+	have notify-send || return 0
+	notify-send -i network-vpn "$1" "$2" 2>/dev/null || true
+}
+
+ip_main() {
+	local IP_NOTIFY=1
+	case "${1:-}" in
+	-h | --help | help)
+		cat <<EOF
+$PROG ip — public IP address with Mullvad VPN exposure check
+
+Usage: $PROG ip [--no-notify]
+
+Shows your current public IP and country. When Mullvad is connected it also
+tries to reveal the real (bypassed) IP via mullvad-exclude or a physical
+interface, so you can confirm the tunnel isn't leaking.
+EOF
+		return 0
+		;;
+	--no-notify) IP_NOTIFY=0 ;;
+	esac
+
+	have curl || {
+		printf '%s ip: curl gerekli\n' "$PROG" >&2
+		return 1
+	}
+
+	local G=$'\033[0;32m' Y=$'\033[0;33m' C=$'\033[0;36m' B=$'\033[1m' R=$'\033[0m'
+	local status_output current_ip
+	status_output="$(have mullvad && mullvad status 2>/dev/null || true)"
+	current_ip="$(_ip_curl https://ipinfo.io/ip 2>/dev/null | tr -d '\n' || true)"
+
+	printf '\n %s%sIP ADDRESS STATUS%s\n' "$B" "$C" "$R"
+	printf ' ───────────────────────────────\n'
+
+	if [[ -n "$status_output" ]] && echo "$status_output" | grep -q "Connected"; then
+		local vpn_ip vpn_country real_ip real_country note=""
+		vpn_ip="$(echo "$status_output" | grep -oP 'IPv4: \K[0-9.]+' || true)"
+		real_ip="$(_ip_real_bypass)"
+		if [[ -z "$real_ip" ]]; then
+			real_ip="$current_ip"
+			note="(bypass yok)"
+		elif [[ -n "$vpn_ip" && "$real_ip" == "$vpn_ip" ]]; then
+			note="(bypass VPN IP döndü)"
+		fi
+		vpn_country="$(_ip_country "$vpn_ip")"
+		real_country="$(_ip_country "$real_ip")"
+		_ip_notify "VPN Connected" "VPN: $vpn_ip ($vpn_country) | Real: $real_ip ($real_country) $note"
+		printf ' %s🔒 VPN%s     : %sConnected%s\n' "$B" "$R" "$G" "$R"
+		printf ' %s🌐 VPN IP%s  : %s%s%s (%s)\n' "$B" "$R" "$G" "${vpn_ip:-?}" "$R" "$vpn_country"
+		printf ' %s🌐 Real IP%s : %s%s%s (%s) %s\n' "$B" "$R" "$Y" "${real_ip:-?}" "$R" "$real_country" "$note"
+	else
+		local country
+		country="$(_ip_country "$current_ip")"
+		_ip_notify "VPN Disconnected" "IP: ${current_ip:-?} ($country)"
+		printf ' %s⚠ VPN%s     : %sDisconnected%s\n' "$B" "$R" "$Y" "$R"
+		printf ' %s🌐 IP%s      : %s%s%s (%s)\n' "$B" "$R" "$Y" "${current_ip:-?}" "$R" "$country"
+	fi
+	printf '\n'
+}
+
+# ==============================================================================
 # Dispatcher
 # ==============================================================================
 net_usage() {
 	cat <<EOF
-osc-net — Unified network tool for margo (dns / vpn / proxy / wifi)
+osc-net — Unified network tool for margo (dns / vpn / proxy / wifi / ip)
 
 Usage:
   $PROG dns   [args]   DNS status summary + connectivity testing
   $PROG vpn   [args]   Mullvad VPN manager (connect/relay/blocky/slot/obf/...)
   $PROG proxy [args]   SSH SOCKS5 proxy/tunnel manager
   $PROG wifi  [args]   NetworkManager home Wi-Fi setup (Ken_5 / Ken_2_4)
+  $PROG ip    [--no-notify]   Public IP + Mullvad VPN exposure check
 
 Run '$PROG <sub> --help' for sub-tool help (where supported).
 EOF
@@ -4450,6 +4550,12 @@ case "${1:-}" in
 		shift || true
 		set -Eeuo pipefail
 		wifi_main "$@"
+		;;
+	ip)
+		shift || true
+		SCRIPT_NAME="$PROG ip"
+		ip_main "$@"
+		exit $?
 		;;
 	-h | --help | help | "")
 		net_usage

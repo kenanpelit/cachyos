@@ -1,0 +1,37 @@
+#compdef osc-ports
+
+# Completion for osc-ports — network discovery / port scan / listening sockets.
+
+_osc-ports() {
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+
+  local -a cmds
+  cmds=(
+    'discover:Scan the LAN for devices (with MAC vendor)'
+    'scan:Scan ports on a remote host'
+    'listen:Show local listening sockets'
+  )
+
+  _arguments -C \
+    '1: :->cmd' \
+    '*:: :->args' && return 0
+
+  case $state in
+    cmd)
+      _describe -t commands 'osc-ports command' cmds
+      ;;
+    args)
+      case $line[1] in
+        scan)
+          _arguments \
+            '1:host:_hosts' \
+            '2:ports (80 / 80-100 / 80,443):' \
+            '3:protocol:(tcp udp)'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_osc-ports "$@"

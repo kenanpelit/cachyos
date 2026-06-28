@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: vnc-connect.sh
-# Description: VNC istemci başlatıcı (VNC sunucularına bağlanmak için hafif wrapper)
-# Usage: vnc-connect.sh
+# Script: vnc-local.sh
+# Description: Quick VNC connect to localhost:5901 using the pass-stored password.
+# Usage: vnc-local
 # ==============================================================================
-# vnc-connect.sh - VNC istemci başlatıcı
-# Belirlenmiş VNC sunucularına bağlanmak için hafif wrapper (host/port parametreli).
+# vnc-local - localhost:5901 VNC sunucusuna pass'taki parolayla hızlı bağlanır.
+# Esnek/genel viewer için: osc-vnc.
 
 # Pass'dan VNC parolasını al
 VNC_PASS=$(pass vncpass 2>/dev/null)

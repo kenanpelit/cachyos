@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: vncviewer-wl.sh
-# Description: Run TigerVNC viewer under Xwayland when DISPLAY is missing
-# Usage: vncviewer-wl [options] [host:display]
+# Script: osc-vnc.sh
+# Description: Flexible TigerVNC viewer; runs under Xwayland when DISPLAY is missing.
+# Usage: osc-vnc [options] [host:display]
 # ==============================================================================
-# vncviewer-wl: Run TigerVNC viewer under Xwayland when DISPLAY is missing (Wayland session)
+# osc-vnc: Flexible VNC viewer wrapper. Runs TigerVNC under Xwayland when
+# DISPLAY is missing (Wayland session). Quick localhost shortcut: vnc-local.
 
 set -euo pipefail
 
