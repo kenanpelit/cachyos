@@ -524,13 +524,9 @@ autoload -Uz _dcli 2>/dev/null || true
 autoload -Uz _osc-shell 2>/dev/null || true
 (( $+functions[_osc-shell] )) && compdef _osc-shell osc-shell
 
-# Bind osc-media completion explicitly for cached compinit sessions too.
-autoload -Uz _osc-media 2>/dev/null || true
-(( $+functions[_osc-media] )) && compdef _osc-media osc-media osc-media.sh
-
-# Bind osc-mullvad completion explicitly for cached compinit sessions too.
-autoload -Uz _osc-mullvad 2>/dev/null || true
-(( $+functions[_osc-mullvad] )) && compdef _osc-mullvad osc-mullvad osc-mullvad.sh
+# Bind osc-net completion explicitly for cached compinit sessions too.
+autoload -Uz _osc-net 2>/dev/null || true
+(( $+functions[_osc-net] )) && compdef _osc-net osc-net
 
 # Bind pass completion for alternate password stores backed by aliases.
 # The upstream _pass completion supports per-command store prefixes via zstyle.
@@ -831,7 +827,14 @@ export FZF_CTRL_R_OPTS="\
 _zsh_yazi_cd() {
   local tmp cwd
   tmp="$(mktemp -t "yazi-cwd.XXXXXX")" || return 1
-  yazi "$@" --cwd-file="$tmp"
+  # yazi probes terminal features (DA1/DSR) at startup; through tmux+kitty that
+  # probe times out (~1s) and yazi prints a harmless two-line "Terminal response
+  # timeout" warning to stderr — it still works, all tmux mitigations are already
+  # set (allow-passthrough on, modern tmux, no M-[) and there's no upstream switch
+  # to disable the probe. Drop just that warning, including its leading colour-only
+  # escape line so no red/bold leaks into the prompt; all other stderr is kept.
+  yazi "$@" --cwd-file="$tmp" 2> >(grep -avP --line-buffered \
+    'Terminal response timeout|yazi-rs\.github\.io/docs/faq#trt|^(?:\x1b\[[0-9;]*m)+\r?$' >&2)
   if cwd="$(command cat -- "$tmp")" && [[ -n "$cwd" && "$cwd" != "$PWD" ]]; then
     builtin cd -- "$cwd"
   fi

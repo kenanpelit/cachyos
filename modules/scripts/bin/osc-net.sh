@@ -1,22 +1,630 @@
 #!/usr/bin/env bash
 # ==============================================================================
+# Script: osc-net.sh
+# Description: Unified network tool for margo (dns / vpn / proxy / wifi)
+# Usage: osc-net.sh {dns|vpn|proxy|wifi} [args]
+#
+#   osc-net dns   [args]   DNS status summary + connectivity testing
+#   osc-net vpn   [args]   Mullvad VPN manager (connect/relay/blocky/slot/obf/...)
+#   osc-net proxy [args]   SSH SOCKS5 proxy/tunnel manager
+#   osc-net wifi  [args]   NetworkManager home Wi-Fi setup (Ken_5 / Ken_2_4)
+#
+# NOTE: There is intentionally NO global `set -euo pipefail`. The vpn (Mullvad)
+#       logic was written WITHOUT errexit and relies on explicit $? checks, so
+#       enabling it globally would change its exit behavior. The dns/proxy/wifi
+#       paths opt into strict mode individually in the dispatcher at the bottom.
+# ==============================================================================
+
+PROG="$(basename "$0")"
+PROXY_PROG="$PROG proxy"
+
+# ---- Shared color palette (TTY-gated; superset of all four sub-tools) --------
+if [[ -t 1 ]]; then
+	RED=$'\033[0;31m'
+	GREEN=$'\033[0;32m'
+	YELLOW=$'\033[0;33m'
+	BLUE=$'\033[0;34m'
+	PURPLE=$'\033[0;35m'
+	CYAN=$'\033[0;36m'
+	DIM=$'\033[0;2m'
+	NC=$'\033[0m'
+else
+	RED='' GREEN='' YELLOW='' BLUE='' PURPLE='' CYAN='' DIM='' NC=''
+fi
+# osc-dns historical color aliases
+GRN="$GREEN"
+YLW="$YELLOW"
+CYN="$CYAN"
+RST="$NC"
+
+# ---- Shared command-existence checks (deduped have/have_cmd) -----------------
+have() { command -v "$1" >/dev/null 2>&1; }
+have_cmd() { command -v "$1" >/dev/null 2>&1; }
+
+# ==============================================================================
+# dns  — DNS status summary + connectivity testing  (from osc-dns.sh)
+# ==============================================================================
+# ==============================================================================
+# Script: osc-dns.sh
+# Description: DNS status summary and connectivity testing tool.
+# Usage: osc-dns.sh [status] [--verbose]
+# ==============================================================================
+
+
+
+
+hr() { printf "%s\n" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; }
+
+print_kv() {
+	local key="$1"
+	shift
+	printf "%s%s:%s %s\n" "${CYN}" "$key" "${RST}" "$*"
+}
+
+get_nameservers() {
+	# Parse /etc/resolv.conf in a conservative way.
+	# Only prints the IP/host part after "nameserver".
+	[[ -r /etc/resolv.conf ]] || return 0
+	awk '$1=="nameserver"{print $2}' /etc/resolv.conf 2>/dev/null || true
+}
+
+is_loopback_resolver() {
+	local ns="${1:-}"
+	case "$ns" in
+	127.* | ::1 | localhost) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+
+is_active() {
+	local unit="$1"
+	have systemctl || return 1
+	systemctl is-active --quiet "$unit" 2>/dev/null
+}
+
+join_by() {
+	local sep="$1"
+	shift
+	local out=''
+	local item
+	for item in "$@"; do
+		if [[ -z "$out" ]]; then
+			out="$item"
+		else
+			out="${out}${sep}${item}"
+		fi
+	done
+	printf "%s" "$out"
+}
+
+DIG_STATUS=''
+DIG_VALUE=''
+DIG_RAW=''
+DEFAULT_STATUS=''
+DEFAULT_VALUE=''
+DEFAULT_RAW=''
+RESOLVECTL_OK=0
+RESOLVECTL_ERROR=''
+RESOLVECTL_DNS_RAW=''
+RESOLVECTL_SERVERS=''
+RESOLVECTL_CURRENT=''
+RESOLVECTL_STATUS_RAW=''
+RESOLVECTL_DNS_LINKS=''
+RESOLVECTL_LINK_DNS=''
+RESOLVECTL_PROVIDER=''
+RESOLVECTL_LINK_PROVIDER=''
+
+dig_probe() {
+	# Sets globals: DIG_STATUS, DIG_VALUE, DIG_RAW
+	# DIG_STATUS: ok | noanswer | refused | timeout | error | nodig
+	# DIG_VALUE: last answer line (usually an IP, when available)
+	local server="$1"
+	local name="$2"
+	local qtype="${3:-A}"
+
+	DIG_STATUS='error'
+	DIG_VALUE=''
+	DIG_RAW=''
+
+	if ! have dig; then
+		DIG_STATUS='nodig'
+		return 0
+	fi
+
+	local raw rc
+	set +e
+	if [[ -n "$server" ]]; then
+		raw="$(dig @"$server" "$name" "$qtype" +tries=1 +timeout=2 +short 2>&1)"
+		rc=$?
+	else
+		raw="$(dig "$name" "$qtype" +tries=1 +timeout=2 +short 2>&1)"
+		rc=$?
+	fi
+	set -e
+
+	DIG_RAW="$raw"
+
+	if [[ "$rc" -ne 0 ]]; then
+		if printf '%s\n' "$raw" | command grep -qi 'connection refused'; then
+			DIG_STATUS='refused'
+			return 0
+		fi
+		if printf '%s\n' "$raw" | command grep -Eqi 'timed out|no servers could be reached'; then
+			DIG_STATUS='timeout'
+			return 0
+		fi
+		DIG_STATUS='error'
+		return 0
+	fi
+
+	# dig prints errors and even the command header to STDOUT on failures (even with +short).
+	# Drop comment-like lines (starting with ';') and blanks.
+	local filtered
+	filtered="$(printf '%s\n' "$raw" | sed -e '/^[;].*/d' -e '/^$/d' || true)"
+
+	if [[ -n "$filtered" ]]; then
+		DIG_STATUS='ok'
+		DIG_VALUE="$(printf '%s\n' "$filtered" | tail -n 1 | head -n 1)"
+		return 0
+	fi
+
+	DIG_STATUS='noanswer'
+}
+
+default_probe() {
+	# Prefer libc resolver path here so local loopback stubs do not hit dig/libuv bugs.
+	DEFAULT_STATUS='error'
+	DEFAULT_VALUE=''
+	DEFAULT_RAW=''
+
+	if have getent; then
+		local raw rc
+		set +e
+		raw="$(getent ahostsv4 example.com 2>&1)"
+		rc=$?
+		set -e
+
+		DEFAULT_RAW="$raw"
+		if [[ "$rc" -eq 0 ]]; then
+			DEFAULT_STATUS='ok'
+			DEFAULT_VALUE="$(printf '%s\n' "$raw" | awk 'NR==1{print $1; exit}')"
+			return 0
+		fi
+
+		if [[ -z "$raw" ]]; then
+			DEFAULT_STATUS='noanswer'
+			return 0
+		fi
+	fi
+
+	dig_probe "" example.com A
+	DEFAULT_STATUS="$DIG_STATUS"
+	DEFAULT_VALUE="$DIG_VALUE"
+	DEFAULT_RAW="$DIG_RAW"
+}
+
+collect_resolvectl_state() {
+	RESOLVECTL_OK=0
+	RESOLVECTL_ERROR=''
+	RESOLVECTL_DNS_RAW=''
+	RESOLVECTL_SERVERS=''
+	RESOLVECTL_CURRENT=''
+	RESOLVECTL_STATUS_RAW=''
+	RESOLVECTL_DNS_LINKS=''
+	RESOLVECTL_LINK_DNS=''
+	RESOLVECTL_PROVIDER=''
+	RESOLVECTL_LINK_PROVIDER=''
+
+	have resolvectl || return 0
+
+	local dns_raw dns_rc
+	set +e
+	dns_raw="$(resolvectl dns 2>&1)"
+	dns_rc=$?
+	set -e
+
+	if [[ "$dns_rc" -ne 0 ]]; then
+		RESOLVECTL_ERROR="$dns_raw"
+		return 0
+	fi
+
+	RESOLVECTL_DNS_RAW="$dns_raw"
+	RESOLVECTL_SERVERS="$(
+		printf '%s\n' "$dns_raw" |
+			sed -E 's/^Link [0-9]+ \([^)]*\):[[:space:]]*//' |
+			tr '\n' ' ' |
+			sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//'
+	)"
+
+	local status_raw status_rc
+	set +e
+	status_raw="$(resolvectl status 2>&1)"
+	status_rc=$?
+	set -e
+
+	if [[ "$status_rc" -eq 0 ]]; then
+		RESOLVECTL_STATUS_RAW="$status_raw"
+		RESOLVECTL_CURRENT="$(
+			printf '%s\n' "$status_raw" |
+				awk -F': ' '/Current DNS Server:/ {print $2}' |
+				paste -sd', ' -
+		)"
+		RESOLVECTL_DNS_LINKS="$(
+			printf '%s\n' "$status_raw" |
+				awk '
+					match($0, /^Link [0-9]+ \(([^)]+)\)/, m) { cur = m[1]; next }
+					/^[[:space:]]*Current Scopes:/ {
+						if (cur != "" && $0 ~ /DNS/) {
+							if (seen[cur] != 1) {
+								seen[cur] = 1
+								if (out == "") out = cur
+								else out = out ", " cur
+							}
+						}
+					}
+					END { print out }
+				'
+		)"
+		RESOLVECTL_LINK_DNS="$(
+			printf '%s\n' "$status_raw" |
+				awk '
+					match($0, /^Link [0-9]+ \(([^)]+)\)/, m) { cur = m[1]; next }
+					/^[[:space:]]*Current DNS Server:/ {
+						if (cur != "") {
+							val = $0
+							sub(/^[[:space:]]*Current DNS Server:[[:space:]]*/, "", val)
+							if (seen[cur] != 1) {
+								seen[cur] = 1
+								if (out == "") out = cur " -> " val
+								else out = out ", " cur " -> " val
+							}
+						}
+					}
+					END { print out }
+				'
+		)"
+	fi
+
+	RESOLVECTL_PROVIDER="$(detect_provider_label "${RESOLVECTL_CURRENT} ${RESOLVECTL_SERVERS}")"
+	RESOLVECTL_LINK_PROVIDER="$(detect_provider_label "$RESOLVECTL_LINK_DNS")"
+
+	RESOLVECTL_OK=1
+}
+
+fmt_state() {
+	local s="$1"
+	case "$s" in
+	ok) echo "${GRN}OK${RST}" ;;
+	localstub) echo "${YLW}LOCAL_STUB${RST}" ;;
+	blocked) echo "${YLW}BLOCKED${RST}" ;;
+	noanswer) echo "${YLW}NOANSWER${RST}" ;;
+	refused) echo "${RED}REFUSED${RST}" ;;
+	timeout) echo "${RED}TIMEOUT${RST}" ;;
+	nodig) echo "${DIM}NO_DIG${RST}" ;;
+	*) echo "${RED}ERR${RST}" ;;
+	esac
+}
+
+is_blocked_value() {
+	local v="${1:-}"
+	case "$v" in
+	0.0.0.0 | 127.0.0.1 | :: | ::1) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+
+is_ip_token() {
+	local v="${1:-}"
+	[[ "$v" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ || "$v" =~ ^[0-9A-Fa-f:]+$ ]]
+}
+
+extract_ip_tokens() {
+	local text="${1:-}"
+	[[ -n "$text" ]] || return 0
+
+	local token
+	for token in $text; do
+		token="${token%,}"
+		token="${token#\[}"
+		token="${token%\]}"
+		if ! is_ip_token "$token"; then
+			continue
+		fi
+		if is_loopback_resolver "$token"; then
+			continue
+		fi
+		printf '%s\n' "$token"
+	done | awk '!seen[$0]++'
+}
+
+known_dns_provider() {
+	local joined
+	joined=" $(join_by ' ' "$@") "
+
+	case "$joined" in
+	*" 8.8.8.8 "*|*" 8.8.4.4 "*) echo "Google" ;;
+	*" 1.1.1.1 "*|*" 1.0.0.1 "*) echo "Cloudflare" ;;
+	*" 208.67.222.222 "*|*" 208.67.220.220 "*) echo "OpenDNS" ;;
+	*" 94.140.14.14 "*|*" 94.140.15.15 "*) echo "AdGuard" ;;
+	*" 9.9.9.9 "*|*" 149.112.112.112 "*) echo "Quad9" ;;
+	*) return 1 ;;
+	esac
+}
+
+detect_provider_label() {
+	local text="${1:-}"
+	local ips=()
+	local ip
+
+	while IFS= read -r ip; do
+		[[ -n "$ip" ]] || continue
+		ips+=("$ip")
+	done < <(extract_ip_tokens "$text")
+
+	if [[ ${#ips[@]} -eq 0 ]]; then
+		return 0
+	fi
+
+	local provider=''
+	if provider="$(known_dns_provider "${ips[@]}")"; then
+		printf '%s (%s)\n' "$provider" "$(join_by ', ' "${ips[@]}")"
+	else
+		printf 'Custom (%s)\n' "$(join_by ', ' "${ips[@]}")"
+	fi
+}
+
+classify_blocking() {
+	# Usage: classify_blocking <control_status> <test_status> <test_value>
+	local control_status="$1"
+	local test_status="$2"
+	local test_value="${3:-}"
+
+	if [[ "$control_status" != "ok" ]]; then
+		echo "skip"
+		return 0
+	fi
+
+	if [[ "$test_status" == "ok" ]]; then
+		if is_blocked_value "$test_value"; then
+			echo "blocked"
+		else
+			echo "ok"
+		fi
+		return 0
+	fi
+
+	if [[ "$test_status" == "noanswer" ]]; then
+		echo "blocked"
+		return 0
+	fi
+
+	echo "$test_status"
+}
+
+show_service_state() {
+	local unit="$1"
+	if ! have systemctl; then
+		echo "${DIM}<systemctl not available>${RST}"
+		return 0
+	fi
+
+	if systemctl list-unit-files "$unit" >/dev/null 2>&1; then
+		if systemctl is-active --quiet "$unit" 2>/dev/null; then
+			echo "${GRN}active${RST}"
+		else
+			local state
+			state="$(systemctl show -p ActiveState --value "$unit" 2>/dev/null || echo "unknown")"
+			echo "${YLW}${state}${RST}"
+		fi
+	else
+		echo "${DIM}not installed${RST}"
+	fi
+}
+
+show_dns_status() {
+	local verbose="${OSC_DNS_VERBOSE:-0}"
+	case "${1:-}" in
+	-v | --verbose) verbose=1 ;;
+	esac
+
+	echo "=== DNS STATUS ==="
+	print_kv "Time" "$(date -Is)"
+
+	local blocky_active=0
+	local mullvad_active=0
+	local mullvad_state=''
+	local mullvad_connected=0
+	local resolved_active=0
+
+	if is_active blocky.service; then blocky_active=1; fi
+	if is_active mullvad-daemon.service; then mullvad_active=1; fi
+	if is_active systemd-resolved.service; then resolved_active=1; fi
+	if have mullvad; then
+		mullvad_state="$(mullvad status 2>/dev/null | head -n 1 || true)"
+		if [[ "$mullvad_state" == Connected* ]]; then
+			mullvad_connected=1
+		fi
+	fi
+
+	local ns_list=()
+	while IFS= read -r ns; do
+		[[ -n "$ns" ]] || continue
+		ns_list+=("$ns")
+	done < <(get_nameservers)
+
+	local has_loopback=0
+	local ns
+	for ns in "${ns_list[@]:-}"; do
+		if is_loopback_resolver "$ns"; then
+			has_loopback=1
+			break
+		fi
+	done
+
+	local mode='default (isp/custom)'
+	if [[ "$blocky_active" -eq 1 && "$mullvad_connected" -eq 1 ]]; then
+		mode='conflict (blocky+mullvad)'
+	elif [[ "$mullvad_connected" -eq 1 ]]; then
+		mode='mullvad vpn'
+	elif [[ "$blocky_active" -eq 1 ]]; then
+		mode='blocky fallback'
+	elif [[ "$has_loopback" -eq 1 && "$resolved_active" -eq 1 ]]; then
+		mode='systemd-resolved (local stub)'
+	elif [[ "$has_loopback" -eq 1 ]]; then
+		mode='local stub'
+	fi
+
+	hr
+	print_kv "Mode" "$mode"
+	print_kv "blocky" "$(show_service_state blocky.service)"
+	print_kv "mullvad-daemon" "$(show_service_state mullvad-daemon.service)"
+	if [[ -n "$mullvad_state" ]]; then
+		print_kv "mullvad" "$mullvad_state"
+	fi
+
+	local ns_line
+	ns_line="$(join_by ", " "${ns_list[@]:-}")"
+	print_kv "resolv.conf" "${ns_line:-<no nameserver>}"
+
+	collect_resolvectl_state
+	if [[ "$RESOLVECTL_OK" -eq 1 ]]; then
+		[[ -n "$RESOLVECTL_SERVERS" ]] && print_kv "resolvectl dns" "$RESOLVECTL_SERVERS"
+		[[ -n "$RESOLVECTL_CURRENT" ]] && print_kv "current dns" "$RESOLVECTL_CURRENT"
+		[[ -n "$RESOLVECTL_DNS_LINKS" ]] && print_kv "dns link" "$RESOLVECTL_DNS_LINKS"
+		[[ -n "$RESOLVECTL_LINK_DNS" ]] && print_kv "link dns" "$RESOLVECTL_LINK_DNS"
+		[[ -n "$RESOLVECTL_LINK_PROVIDER" ]] && print_kv "link provider" "$RESOLVECTL_LINK_PROVIDER"
+		[[ -n "$RESOLVECTL_PROVIDER" ]] && print_kv "provider" "$RESOLVECTL_PROVIDER"
+	fi
+
+	if have resolvconf; then
+		local sources
+		sources="$(resolvconf -i 2>/dev/null | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/[[:space:]]+$//' || true)"
+		[[ -n "$sources" ]] || sources="<none>"
+		print_kv "sources" "$sources"
+	fi
+
+	if [[ "$has_loopback" -eq 1 && "$blocky_active" -eq 0 && "$resolved_active" -eq 0 ]]; then
+		print_kv "warning" "loopback resolvers are configured but no known local DNS service is active"
+	fi
+
+	hr
+	default_probe
+	if [[ "$DEFAULT_STATUS" == "ok" ]]; then
+		print_kv "default" "$(fmt_state ok) example.com → ${DEFAULT_VALUE}"
+	else
+		print_kv "default" "$(fmt_state "$DEFAULT_STATUS") example.com"
+	fi
+
+	hr
+	echo "${CYN}Resolvers${RST}"
+	if [[ ${#ns_list[@]} -eq 0 ]]; then
+		echo "${DIM}<no nameserver entries found>${RST}"
+	else
+		for ns in "${ns_list[@]}"; do
+			if is_loopback_resolver "$ns"; then
+				local stub_note='upstream unknown'
+				if [[ "$RESOLVECTL_OK" -eq 1 && -n "$RESOLVECTL_SERVERS" ]]; then
+					stub_note="upstream ${RESOLVECTL_SERVERS}"
+				fi
+				if [[ "$DEFAULT_STATUS" == "ok" ]]; then
+					echo "- ${CYN}${ns}${RST}: $(fmt_state localstub) ${stub_note} | example $(fmt_state ok) ${DEFAULT_VALUE}"
+				else
+					echo "- ${CYN}${ns}${RST}: $(fmt_state localstub) ${stub_note}"
+				fi
+				continue
+			fi
+
+			dig_probe "$ns" example.com A
+			local c_status="$DIG_STATUS"
+			local c_value="$DIG_VALUE"
+			local c_raw="$DIG_RAW"
+
+			if [[ "$c_status" != "ok" ]]; then
+				echo "- ${CYN}${ns}${RST}: $(fmt_state "$c_status")"
+				if [[ "$verbose" -eq 1 && -n "$c_raw" ]]; then
+					echo "  ${DIM}${c_raw}${RST}"
+				fi
+				continue
+			fi
+
+			dig_probe "$ns" ad.doubleclick.net A
+			local ad_status
+			ad_status="$(classify_blocking "$c_status" "$DIG_STATUS" "$DIG_VALUE")"
+
+			dig_probe "$ns" www.youtube.com A
+			local yt_status
+			yt_status="$(classify_blocking "$c_status" "$DIG_STATUS" "$DIG_VALUE")"
+
+			echo "- ${CYN}${ns}${RST}: example $(fmt_state ok) ${c_value} | ads $(fmt_state "$ad_status") | youtube $(fmt_state "$yt_status")"
+		done
+	fi
+
+	if [[ "$verbose" -eq 1 ]]; then
+		hr
+		echo "${CYN}/etc/resolv.conf${RST}"
+		if [[ -r /etc/resolv.conf ]]; then
+			sed -n '1,60p' /etc/resolv.conf
+		else
+			echo "${DIM}<not readable>${RST}"
+		fi
+
+		if [[ -n "$RESOLVECTL_DNS_RAW" ]]; then
+			hr
+			echo "${CYN}resolvectl dns${RST}"
+			printf '%s\n' "$RESOLVECTL_DNS_RAW"
+		elif [[ -n "$RESOLVECTL_ERROR" ]]; then
+			hr
+			echo "${CYN}resolvectl${RST}"
+			echo "${DIM}${RESOLVECTL_ERROR}${RST}"
+		fi
+	fi
+}
+
+usage() {
+	cat <<EOF
+Usage:
+  ${SCRIPT_NAME} status [--verbose]
+
+Commands:
+  status   Show a short DNS summary + quick tests
+
+Flags:
+  -v, --verbose   Include raw dig errors and /etc/resolv.conf
+EOF
+}
+
+dns_main() {
+	case "${1:-status}" in
+	-v | --verbose)
+		show_dns_status --verbose
+		;;
+	status)
+		shift || true
+		show_dns_status "$@"
+		;;
+	-h | --help | help) usage ;;
+	*)
+		echo "${RED}Unknown command:${RST} ${1:-}" >&2
+		usage >&2
+		exit 2
+		;;
+	esac
+}
+
+
+# ==============================================================================
+# vpn  — Integrated Mullvad VPN Manager  (from osc-mullvad.sh)
+# ==============================================================================
+# ==============================================================================
 # Script: osc-mullvad.sh
 # Description: Integrated Mullvad VPN Manager for connection and relay control.
 # Usage: osc-mullvad.sh [COMMAND] [ARGUMENTS]
 # ==============================================================================
 
 # Set color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
 
 # Configuration and settings
 VERSION="3.0.0"
-SCRIPT_NAME=$(basename "$0")
 TIMEOUT=30 # Seconds to wait for connection before timeout
 CONNECTION_RETRIES=3
 TOGGLE_LOCK_FILE="${OSC_MULLVAD_TOGGLE_LOCK_FILE:-${XDG_RUNTIME_DIR:-/tmp}/osc-mullvad-toggle.$(id -u).lock}"
@@ -38,10 +646,6 @@ SLOT_DRY_RUN="false"
 SLOT_ACCOUNT_NUMBER=""
 
 # Create directories if they don't exist
-mkdir -p "$LOG_DIR"
-mkdir -p "$CONFIG_DIR"
-chmod 0700 "$CONFIG_DIR" 2>/dev/null || true
-touch "$FAVORITES_FILE"
 
 # Europe countries
 EUROPE_COUNTRIES=("at" "be" "bg" "ch" "cz" "de" "dk" "ee" "es" "fi" "fr" "gb" "gr" "hr" "hu" "ie" "it" "nl" "no" "pl" "pt" "ro" "rs" "se" "si" "sk" "tr" "ua")
@@ -58,7 +662,6 @@ MISC_COUNTRIES=("nz")
 ALL_COUNTRIES=("${EUROPE_COUNTRIES[@]}" "${AMERICAS_COUNTRIES[@]}" "${ASIA_COUNTRIES[@]}" "${AFRICA_ME_COUNTRIES[@]}" "${MISC_COUNTRIES[@]}")
 
 # Script sourcing kontrolü
-[[ "${BASH_SOURCE[0]}" != "$0" ]] && echo "Script source edilemez!" && exit 1
 
 # ----------------------------------------------------------------------------
 # Basic functions from original mullvad-manager script
@@ -264,7 +867,6 @@ toggle_basic_vpn() {
 # Optional DNS helper: Blocky <-> Mullvad coexistence
 # ----------------------------------------------------------------------------
 
-have_cmd() { command -v "$1" >/dev/null 2>&1; }
 
 sudo_run() {
 	# Runs a command as root.
@@ -2940,7 +3542,11 @@ show_help() {
 }
 
 # Main function to handle all commands
-main() {
+vpn_main() {
+	mkdir -p "$LOG_DIR"
+	mkdir -p "$CONFIG_DIR"
+	chmod 0700 "$CONFIG_DIR" 2>/dev/null || true
+	touch "$FAVORITES_FILE"
 	# Check requirements first
 	check_requirements
 	migrate_favorites_format
@@ -3162,6 +3768,695 @@ main() {
 	esac
 }
 
-# Execute main function and preserve its real exit status.
-main "$@"
-exit $?
+
+# ==============================================================================
+# proxy  — SSH SOCKS5 proxy/tunnel manager  (from osc-proxy.sh)
+# ==============================================================================
+# ==============================================================================
+# Script: osc-proxy.sh
+# Description: SSH SOCKS5 proxy manager. Her tünel bir SSH ControlMaster soketi
+#              ile yönetilir; aynı anda farklı portlarda birden fazla tünel
+#              çalışabilir. Durum/durdurma soket üzerinden yapılır (kırılgan
+#              PID-grep yok).
+#
+# Usage: osc-proxy <komut> [argümanlar]
+#   start <host> [port]      bir tünel başlat (varsayılan port 4999)
+#   stop  [port|all]         tüneli (veya hepsini) durdur
+#   restart <host> [port]    yeniden başlat
+#   status [port]            bir tünelin (veya hepsinin) durumu
+#   list                     aktif tünelleri listele
+#   test  [port]             proxy üzerinden çıkış IP'sini test et
+#   help                     bu yardım
+#
+# Ortam değişkenleri:
+#   OSC_PROXY_PORT       varsayılan port (öntanımlı 4999)
+#   OSC_PROXY_SSH_OPTS   ssh'a eklenecek ekstra seçenekler (boşlukla ayrılmış)
+# ==============================================================================
+
+
+SCRIPT_NAME="SSH SOCKS Proxy"
+DEFAULT_PORT="${OSC_PROXY_PORT:-4999}"
+STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/osc-proxy"
+
+# Renk kodları (terminal değilse devre dışı)
+
+msg()  { echo -e "$@"; }
+err()  { echo -e "${RED}✗ $*${NC}" >&2; }
+ok()   { echo -e "${GREEN}✓ $*${NC}"; }
+warn() { echo -e "${YELLOW}! $*${NC}"; }
+
+# ------------------------------------------------------------------------------
+# Yardımcılar
+# ------------------------------------------------------------------------------
+ensure_state_dir() {
+	mkdir -p "$STATE_DIR"
+	chmod 700 "$STATE_DIR" 2>/dev/null || true
+}
+
+sock_path() { echo "$STATE_DIR/$1.sock"; }
+host_path() { echo "$STATE_DIR/$1.host"; }
+log_path()  { echo "$STATE_DIR/$1.log"; }
+
+valid_port() {
+	local p="$1"
+	[[ "$p" =~ ^[0-9]+$ ]] && [ "$p" -ge 1 ] && [ "$p" -le 65535 ]
+}
+
+# Bu porttaki master canlı mı? (0 = canlı)
+master_alive() {
+	local port="$1" sock host
+	sock="$(sock_path "$port")"
+	host="$(saved_host "$port")"
+	[ -S "$sock" ] || return 1
+	[ -n "$host" ] || return 1
+	ssh -O check -o ControlPath="$sock" "$host" >/dev/null 2>&1
+}
+
+saved_host() {
+	local hf; hf="$(host_path "$1")"
+	[ -f "$hf" ] && cat "$hf" || true
+}
+
+# Master PID'i (canlıysa) — `ssh -O check` "Master running (pid=NNNN)" basar
+master_pid() {
+	local port="$1" sock host
+	sock="$(sock_path "$port")"; host="$(saved_host "$port")"
+	[ -n "$host" ] || return 1
+	ssh -O check -o ControlPath="$sock" "$host" 2>&1 \
+		| grep -oE 'pid=[0-9]+' | grep -oE '[0-9]+' | head -1
+}
+
+# Ölü/artık soket dosyalarını temizle
+cleanup_stale() {
+	local port="$1"
+	if ! master_alive "$port"; then
+		rm -f "$(sock_path "$port")" "$(host_path "$port")"
+	fi
+}
+
+list_ports() {
+	ensure_state_dir
+	local f port
+	for f in "$STATE_DIR"/*.sock; do
+		[ -e "$f" ] || continue
+		port="$(basename "$f" .sock)"
+		echo "$port"
+	done
+}
+
+# ------------------------------------------------------------------------------
+# Komutlar
+# ------------------------------------------------------------------------------
+start_proxy() {
+	local host="${1:-}" port="${2:-$DEFAULT_PORT}"
+	[ -n "$port" ] || port="$DEFAULT_PORT"
+
+	if [ -z "$host" ]; then
+		err "Hostname belirtilmedi"
+		echo "Kullanım: ${PROXY_PROG} start <host> [port]" >&2
+		return 1
+	fi
+	if ! valid_port "$port"; then
+		err "Geçersiz port: $port"
+		return 1
+	fi
+
+	ensure_state_dir
+	if master_alive "$port"; then
+		warn "Port $port'da zaten bir tünel çalışıyor ($(saved_host "$port"), PID $(master_pid "$port"))"
+		return 1
+	fi
+	cleanup_stale "$port"
+
+	local sock log; sock="$(sock_path "$port")"; log="$(log_path "$port")"
+
+	msg "${BLUE}SSH SOCKS proxy başlatılıyor...${NC}"
+	msg "  Host: $host   Port: $port"
+
+	# ControlMaster soketi tüneli yönetir. ExitOnForwardFailure: port doluysa
+	# (ya da -D bağlanamazsa) ssh sessizce bağlanmak yerine hata ile çıkar.
+	# -f auth+forward başarılı olunca arka plana geçer; çıkış kodu güvenilirdir.
+	# shellcheck disable=SC2086
+	if ssh -f -N -T \
+		-D "$port" -C \
+		-o ControlMaster=yes \
+		-o ControlPath="$sock" \
+		-o ExitOnForwardFailure=yes \
+		-o ServerAliveInterval=60 \
+		-o ServerAliveCountMax=3 \
+		-o StrictHostKeyChecking=accept-new \
+		-o LogLevel=ERROR \
+		${OSC_PROXY_SSH_OPTS:-} \
+		"$host" >"$log" 2>&1; then
+		echo "$host" >"$(host_path "$port")"
+		ok "Tünel açıldı (PID $(master_pid "$port"))"
+		ok "SOCKS5 proxy: localhost:$port"
+		msg "${DIM}  Tarayıcı: SOCKS5 host 127.0.0.1, port $port${NC}"
+		msg "${DIM}  Test:     ${PROXY_PROG} test $port${NC}"
+	else
+		err "Tünel başlatılamadı"
+		[ -s "$log" ] && msg "${YELLOW}--- $log ---${NC}" && cat "$log" >&2
+		rm -f "$sock"
+		return 1
+	fi
+}
+
+stop_one() {
+	local port="$1" sock host
+	sock="$(sock_path "$port")"; host="$(saved_host "$port")"
+	if master_alive "$port"; then
+		ssh -O exit -o ControlPath="$sock" "$host" >/dev/null 2>&1 || true
+		ok "Port $port durduruldu ($host)"
+	else
+		warn "Port $port'da çalışan tünel yok"
+	fi
+	rm -f "$sock" "$(host_path "$port")" "$(log_path "$port")"
+}
+
+stop_proxy() {
+	local target="${1:-$DEFAULT_PORT}"
+	[ -n "$target" ] || target="$DEFAULT_PORT"
+
+	if [ "$target" = "all" ]; then
+		local any=0 port
+		while IFS= read -r port; do
+			[ -n "$port" ] || continue
+			stop_one "$port"; any=1
+		done < <(list_ports)
+		[ "$any" -eq 0 ] && warn "Çalışan tünel yok"
+		return 0
+	fi
+
+	if ! valid_port "$target"; then
+		err "Geçersiz port: $target  (port numarası ya da 'all' bekleniyor)"
+		return 1
+	fi
+	stop_one "$target"
+}
+
+restart_proxy() {
+	local host="${1:-}" port="${2:-$DEFAULT_PORT}"
+	[ -n "$port" ] || port="$DEFAULT_PORT"
+	# host verilmediyse kayıtlı host'u kullan
+	if [ -z "$host" ]; then
+		host="$(saved_host "$port")"
+		[ -n "$host" ] || { err "Host belirtilmedi ve port $port için kayıt yok"; return 1; }
+	fi
+	msg "${BLUE}Yeniden başlatılıyor (port $port)...${NC}"
+	stop_proxy "$port" || true
+	start_proxy "$host" "$port"
+}
+
+status_one() {
+	local port="$1"
+	if master_alive "$port"; then
+		printf "${GREEN}● %-6s${NC} %-22s ${DIM}PID %s · socks5://127.0.0.1:%s${NC}\n" \
+			"$port" "$(saved_host "$port")" "$(master_pid "$port")" "$port"
+	else
+		printf "${RED}○ %-6s${NC} %-22s ${DIM}(ölü soket, temizlendi)${NC}\n" \
+			"$port" "$(saved_host "$port")"
+		cleanup_stale "$port"
+	fi
+}
+
+proxy_show_status() {
+	local port="${1:-}"
+	if [ -n "$port" ]; then
+		valid_port "$port" || { err "Geçersiz port: $port"; return 1; }
+		if [ -S "$(sock_path "$port")" ]; then
+			status_one "$port"
+		else
+			msg "${RED}✗ Port $port'da tünel yok${NC}"
+		fi
+		return 0
+	fi
+	list_proxies
+}
+
+list_proxies() {
+	local found=0 port
+	while IFS= read -r port; do
+		[ -n "$port" ] || continue
+		[ "$found" -eq 0 ] && msg "${BLUE}Aktif tüneller:${NC}"
+		status_one "$port"; found=1
+	done < <(list_ports)
+	[ "$found" -eq 0 ] && msg "${DIM}Çalışan tünel yok${NC}"
+}
+
+test_proxy() {
+	local port="${1:-$DEFAULT_PORT}"
+	[ -n "$port" ] || port="$DEFAULT_PORT"
+	valid_port "$port" || { err "Geçersiz port: $port"; return 1; }
+
+	if ! master_alive "$port"; then
+		err "Port $port'da çalışan tünel yok"
+		return 1
+	fi
+	if ! command -v curl >/dev/null 2>&1; then
+		err "curl bulunamadı"
+		return 1
+	fi
+	msg "${BLUE}Proxy üzerinden çıkış IP'si test ediliyor (port $port)...${NC}"
+	local ip
+	if ip="$(curl -fsS --max-time 15 --socks5-hostname "localhost:$port" https://ipinfo.io/ip 2>/dev/null)"; then
+		ok "Çıkış IP: $ip"
+	else
+		err "Test başarısız (proxy yanıt vermedi)"
+		return 1
+	fi
+}
+
+proxy_show_help() {
+	cat <<EOF
+$(echo -e "${BLUE}$SCRIPT_NAME${NC}")
+
+Kullanım:
+  ${PROXY_PROG} start <host> [port]    Tünel başlat (varsayılan port $DEFAULT_PORT)
+  ${PROXY_PROG} stop  [port|all]       Tüneli (veya hepsini) durdur
+  ${PROXY_PROG} restart <host> [port]  Yeniden başlat
+  ${PROXY_PROG} status [port]          Durum (port verilmezse hepsi)
+  ${PROXY_PROG} list                   Aktif tünelleri listele
+  ${PROXY_PROG} test  [port]           Proxy üzerinden çıkış IP'sini test et
+  ${PROXY_PROG} help                   Bu yardım
+
+Örnekler:
+  ${PROXY_PROG} start tosun
+  ${PROXY_PROG} start hosman_nova154 5000
+  ${PROXY_PROG} list
+  ${PROXY_PROG} test 5000
+  ${PROXY_PROG} stop 5000
+  ${PROXY_PROG} stop all
+
+Ortam değişkenleri:
+  OSC_PROXY_PORT=$DEFAULT_PORT
+  OSC_PROXY_SSH_OPTS   ssh'a eklenecek ekstra seçenekler
+EOF
+}
+
+# ------------------------------------------------------------------------------
+# Ana program
+# ------------------------------------------------------------------------------
+proxy_main() {
+	case "${1:-help}" in
+	start)        shift; start_proxy "${1:-}" "${2:-}" ;;
+	stop)         shift; stop_proxy "${1:-}" ;;
+	restart)      shift; restart_proxy "${1:-}" "${2:-}" ;;
+	status|st)    shift; proxy_show_status "${1:-}" ;;
+	list|ls)      list_proxies ;;
+	test)         shift; test_proxy "${1:-}" ;;
+	help|-h|--help) proxy_show_help ;;
+	*)            err "Bilinmeyen komut: ${1:-}"; echo; proxy_show_help; exit 1 ;;
+	esac
+}
+
+# ==============================================================================
+# wifi  — NetworkManager home Wi-Fi setup  (from osc-wifi-home.sh)
+# ==============================================================================
+# ==============================================================================
+# Script: osc-wifi-home.sh
+# Description: NetworkManager connection setup for home WiFi (Ken_5 and Ken_2_4)
+# Usage: osc-wifi-home.sh <Ken_5_Password> <Ken_2_4_Password>
+# ==============================================================================
+
+# ==============================================================================
+# Script: osc-wifi-home.sh
+# Description:
+#   Create or recreate two NetworkManager Wi-Fi profiles for home use.
+#
+#   Profiles:
+#     1) Ken_5
+#        - Primary profile
+#        - Forced to 5 GHz
+#        - Static IPv4
+#        - Higher autoconnect priority
+#
+#     2) Ken_2_4
+#        - Secondary/fallback profile
+#        - Forced to 2.4 GHz
+#        - Static IPv4
+#        - Lower autoconnect priority
+#
+#   DNS features:
+#     - Supports DNS presets:
+#         cloudflare | google | quad9 | adguard | opendns | blocky
+#     - "blocky" preset uses localhost resolvers:
+#         127.0.0.1 and ::1
+#     - Auto DNS from router is disabled intentionally.
+#
+# Usage:
+#   ./osc-wifi-home.sh <Ken_5_Password> <Ken_2_4_Password> [dns_preset]
+#
+# Examples:
+#   ./osc-wifi-home.sh 'pass5' 'pass24'
+#   ./osc-wifi-home.sh 'pass5' 'pass24' cloudflare
+#   ./osc-wifi-home.sh 'pass5' 'pass24' blocky
+#
+# Notes:
+#   - This script deletes old profiles with the same names and recreates them.
+#   - Both Wi-Fi profiles use static IPv4 addresses.
+#   - Adjust the IP settings below to match your LAN.
+#   - Make sure the chosen IPs are reserved or not already in use.
+# ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+# User configuration
+# ------------------------------------------------------------------------------
+
+PRIMARY_CONN_NAME="Ken_5"
+SECONDARY_CONN_NAME="Ken_2_4"
+
+PRIMARY_SSID="Ken_5"
+SECONDARY_SSID="Ken_2_4"
+
+PRIMARY_IPV4_ADDRESS="192.168.0.100/24"
+PRIMARY_IPV4_GATEWAY="192.168.0.1"
+PRIMARY_ROUTE_METRIC="100"
+
+SECONDARY_IPV4_ADDRESS="192.168.0.101/24"
+SECONDARY_IPV4_GATEWAY="192.168.0.1"
+SECONDARY_ROUTE_METRIC="200"
+
+PRIMARY_PRIORITY="100"
+SECONDARY_PRIORITY="10"
+
+PRIMARY_AUTOCONNECT="yes"
+SECONDARY_AUTOCONNECT="yes"
+
+# 0 = default
+# 1 = ignore
+# 2 = disable
+# 3 = enable
+WIFI_POWERSAVE="2"
+
+IPV6_METHOD="disabled"
+
+# If set to "yes", the script activates the primary profile at the end.
+AUTO_ACTIVATE_PRIMARY="yes"
+
+# Set to "yes" if you want the secondary connection to never become the default route.
+# Usually "no" is better for a real fallback profile.
+SECONDARY_NEVER_DEFAULT="no"
+
+# ------------------------------------------------------------------------------
+# Logging helpers
+# ------------------------------------------------------------------------------
+
+wifi_log() {
+  printf '[INFO] %s\n' "$*"
+}
+
+wifi_warn() {
+  printf '[WARN] %s\n' "$*" >&2
+}
+
+die() {
+  printf '[ERROR] %s\n' "$*" >&2
+  exit 1
+}
+
+# ------------------------------------------------------------------------------
+# Validation helpers
+# ------------------------------------------------------------------------------
+
+require_command() {
+  command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
+}
+
+validate_arguments() {
+  if [[ $# -lt 2 || $# -gt 3 ]]; then
+    cat >&2 <<EOF
+Usage:
+  $PROG wifi <Ken_5_Password> <Ken_2_4_Password> [dns_preset]
+
+DNS presets:
+  cloudflare
+  google
+  quad9
+  adguard
+  opendns
+  blocky
+EOF
+    exit 1
+  fi
+}
+
+validate_networkmanager() {
+  nmcli general status >/dev/null 2>&1 || die "NetworkManager is not running or not accessible."
+}
+
+detect_wifi_interface() {
+  local iface
+  iface="$(
+    nmcli -t -f DEVICE,TYPE,STATE device status |
+      awk -F: '$2=="wifi" {print $1; exit}'
+  )"
+
+  [[ -n "${iface:-}" ]] || die "No Wi-Fi interface detected."
+  printf '%s\n' "$iface"
+}
+
+# ------------------------------------------------------------------------------
+# DNS preset handling
+# ------------------------------------------------------------------------------
+
+DNS_IPV4=""
+DNS_IPV6=""
+
+set_dns_preset() {
+  case "$DNS_PRESET" in
+  cloudflare)
+    DNS_IPV4="1.1.1.1 1.0.0.1"
+    DNS_IPV6=""
+    ;;
+  google)
+    DNS_IPV4="8.8.8.8 8.8.4.4"
+    DNS_IPV6=""
+    ;;
+  quad9)
+    DNS_IPV4="9.9.9.9 149.112.112.112"
+    DNS_IPV6=""
+    ;;
+  adguard)
+    DNS_IPV4="94.140.14.14 94.140.15.15"
+    DNS_IPV6=""
+    ;;
+  opendns)
+    DNS_IPV4="208.67.222.222 208.67.220.220"
+    DNS_IPV6=""
+    ;;
+  blocky)
+    DNS_IPV4="127.0.0.1"
+    DNS_IPV6="::1"
+    ;;
+  *)
+    die "Unsupported DNS preset: $DNS_PRESET"
+    ;;
+  esac
+}
+
+# ------------------------------------------------------------------------------
+# Connection helpers
+# ------------------------------------------------------------------------------
+
+delete_connection_if_exists() {
+  local conn_name="$1"
+
+  if nmcli connection show "$conn_name" >/dev/null 2>&1; then
+    wifi_log "Deleting existing connection profile: $conn_name"
+    nmcli connection delete "$conn_name" >/dev/null
+  fi
+}
+
+apply_common_dns_settings() {
+  local conn_name="$1"
+
+  nmcli connection modify "$conn_name" \
+    ipv4.ignore-auto-dns yes \
+    ipv4.dns "$DNS_IPV4" \
+    ipv4.dns-search "" \
+    >/dev/null
+
+  if [[ -n "$DNS_IPV6" ]]; then
+    nmcli connection modify "$conn_name" \
+      ipv6.ignore-auto-dns yes \
+      ipv6.dns "$DNS_IPV6" \
+      >/dev/null
+  fi
+}
+
+add_primary_connection() {
+  local iface="$1"
+  local password="$2"
+
+  wifi_log "Creating primary 5 GHz profile: $PRIMARY_CONN_NAME"
+
+  nmcli connection add \
+    type wifi \
+    ifname "$iface" \
+    con-name "$PRIMARY_CONN_NAME" \
+    ssid "$PRIMARY_SSID" \
+    802-11-wireless.band a \
+    wifi.powersave "$WIFI_POWERSAVE" \
+    wifi-sec.key-mgmt wpa-psk \
+    wifi-sec.psk "$password" \
+    connection.autoconnect "$PRIMARY_AUTOCONNECT" \
+    connection.autoconnect-priority "$PRIMARY_PRIORITY" \
+    connection.interface-name "$iface" \
+    802-11-wireless.cloned-mac-address permanent \
+    ipv4.method manual \
+    ipv4.addresses "$PRIMARY_IPV4_ADDRESS" \
+    ipv4.gateway "$PRIMARY_IPV4_GATEWAY" \
+    ipv4.route-metric "$PRIMARY_ROUTE_METRIC" \
+    ipv4.may-fail no \
+    ipv6.method "$IPV6_METHOD" \
+    >/dev/null
+
+  apply_common_dns_settings "$PRIMARY_CONN_NAME"
+}
+
+add_secondary_connection() {
+  local iface="$1"
+  local password="$2"
+
+  wifi_log "Creating fallback 2.4 GHz profile: $SECONDARY_CONN_NAME"
+
+  nmcli connection add \
+    type wifi \
+    ifname "$iface" \
+    con-name "$SECONDARY_CONN_NAME" \
+    ssid "$SECONDARY_SSID" \
+    802-11-wireless.band bg \
+    wifi.powersave "$WIFI_POWERSAVE" \
+    wifi-sec.key-mgmt wpa-psk \
+    wifi-sec.psk "$password" \
+    connection.autoconnect "$SECONDARY_AUTOCONNECT" \
+    connection.autoconnect-priority "$SECONDARY_PRIORITY" \
+    connection.interface-name "$iface" \
+    802-11-wireless.cloned-mac-address permanent \
+    ipv4.method manual \
+    ipv4.addresses "$SECONDARY_IPV4_ADDRESS" \
+    ipv4.gateway "$SECONDARY_IPV4_GATEWAY" \
+    ipv4.route-metric "$SECONDARY_ROUTE_METRIC" \
+    ipv4.may-fail yes \
+    ipv4.never-default "$SECONDARY_NEVER_DEFAULT" \
+    ipv6.method "$IPV6_METHOD" \
+    >/dev/null
+
+  apply_common_dns_settings "$SECONDARY_CONN_NAME"
+}
+
+activate_primary_connection() {
+  if [[ "$AUTO_ACTIVATE_PRIMARY" == "yes" ]]; then
+    wifi_log "Activating primary profile: $PRIMARY_CONN_NAME"
+    nmcli connection up "$PRIMARY_CONN_NAME" >/dev/null ||
+      wifi_warn "Primary profile could not be activated immediately."
+  fi
+}
+
+show_connection_details() {
+  local conn_name="$1"
+
+  printf '\n'
+  printf -- '--- %s ---\n' "$conn_name"
+  nmcli -f connection.id,connection.interface-name,connection.autoconnect,connection.autoconnect-priority,802-11-wireless.ssid,802-11-wireless.band,ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns,ipv4.route-metric,ipv4.never-default,ipv6.method connection show "$conn_name"
+}
+
+show_summary() {
+  printf '\n'
+  printf '============================================================\n'
+  printf 'Wi-Fi profiles recreated successfully.\n'
+  printf '============================================================\n'
+  printf 'DNS preset        : %s\n' "$DNS_PRESET"
+  printf 'Wi-Fi interface   : %s\n' "$WIFI_IFACE"
+  printf 'Primary profile   : %s\n' "$PRIMARY_CONN_NAME"
+  printf 'Secondary profile : %s\n' "$SECONDARY_CONN_NAME"
+  printf '============================================================\n'
+
+  show_connection_details "$PRIMARY_CONN_NAME"
+  show_connection_details "$SECONDARY_CONN_NAME"
+
+  printf '\n'
+  printf 'Active Wi-Fi scan:\n'
+  nmcli -f IN-USE,SSID,CHAN,SIGNAL,SECURITY dev wifi list || true
+}
+
+# ------------------------------------------------------------------------------
+# Main
+# ------------------------------------------------------------------------------
+
+wifi_main() {
+  DNS_PRESET="${3:-blocky}"
+  require_command nmcli
+  validate_arguments "$@"
+  validate_networkmanager
+  set_dns_preset
+
+  local primary_password="$1"
+  local secondary_password="$2"
+
+  WIFI_IFACE="$(detect_wifi_interface)"
+  wifi_log "Detected Wi-Fi interface: $WIFI_IFACE"
+  wifi_log "Selected DNS preset: $DNS_PRESET"
+
+  delete_connection_if_exists "$PRIMARY_CONN_NAME"
+  delete_connection_if_exists "$SECONDARY_CONN_NAME"
+
+  add_primary_connection "$WIFI_IFACE" "$primary_password"
+  add_secondary_connection "$WIFI_IFACE" "$secondary_password"
+
+  activate_primary_connection
+  show_summary
+}
+
+
+# ==============================================================================
+# Dispatcher
+# ==============================================================================
+net_usage() {
+	cat <<EOF
+osc-net — Unified network tool for margo (dns / vpn / proxy / wifi)
+
+Usage:
+  $PROG dns   [args]   DNS status summary + connectivity testing
+  $PROG vpn   [args]   Mullvad VPN manager (connect/relay/blocky/slot/obf/...)
+  $PROG proxy [args]   SSH SOCKS5 proxy/tunnel manager
+  $PROG wifi  [args]   NetworkManager home Wi-Fi setup (Ken_5 / Ken_2_4)
+
+Run '$PROG <sub> --help' for sub-tool help (where supported).
+EOF
+}
+
+case "${1:-}" in
+	dns)
+		shift || true
+		SCRIPT_NAME="$PROG dns"
+		set -euo pipefail
+		dns_main "$@"
+		;;
+	vpn)
+		shift || true
+		SCRIPT_NAME="$PROG vpn"
+		vpn_main "$@"
+		exit $?
+		;;
+	proxy)
+		shift || true
+		SCRIPT_NAME="SSH SOCKS Proxy"
+		set -euo pipefail
+		proxy_main "$@"
+		;;
+	wifi)
+		shift || true
+		set -Eeuo pipefail
+		wifi_main "$@"
+		;;
+	-h | --help | help | "")
+		net_usage
+		;;
+	*)
+		printf 'osc-net: unknown subcommand: %s\n\n' "${1:-}" >&2
+		net_usage >&2
+		exit 2
+		;;
+esac

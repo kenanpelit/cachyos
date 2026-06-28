@@ -1,34 +1,41 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: osc-login-prompts
+# Script: osc-secrets
 # Description: Session login warmup (GPG, Keyring, secrets) for non-interactive use.
-# Usage: osc-login-prompts [options]
+#              Also exposes a standalone GPG agent unlock mode (--gpg-unlock).
+# Usage: osc-secrets [options]
 # ==============================================================================
 
 set -euo pipefail
 
-delay="${OSC_LOGIN_PROMPTS_DELAY:-6}"
+delay="${OSC_SECRETS_DELAY:-6}"
 gpg_pass_entry="${OSC_GPG_PASS_ENTRY:-kenp/gnupg}"
 login_pass_entry="${OSC_LOGIN_PASS_ENTRY:-kenp/login}"
-notify_enabled="${OSC_LOGIN_PROMPTS_NOTIFY:-1}"
-bootstrap_dir="${OSC_LOGIN_PROMPTS_BOOTSTRAP_DIR:-$HOME/.config/osc-login-prompts}"
+notify_enabled="${OSC_SECRETS_NOTIFY:-1}"
+bootstrap_dir="${OSC_SECRETS_BOOTSTRAP_DIR:-$HOME/.config/osc-secrets}"
 bootstrap_gpg_env="${OSC_GPG_BOOTSTRAP_PASSPHRASE:-}"
 bootstrap_login_env="${OSC_LOGIN_BOOTSTRAP_PASSWORD:-}"
 bootstrap_gpg_file="${OSC_GPG_BOOTSTRAP_FILE:-${bootstrap_dir}/gnupg.pass}"
 bootstrap_login_file="${OSC_LOGIN_BOOTSTRAP_FILE:-${bootstrap_dir}/login.pass}"
-log_enabled="${OSC_LOGIN_PROMPTS_LOG:-1}"
-log_dir="${OSC_LOGIN_PROMPTS_LOG_DIR:-$HOME/.logs}"
-log_file="${OSC_LOGIN_PROMPTS_LOG_FILE:-${log_dir}/osc-login-prompts.log}"
-session_name="${OSC_LOGIN_PROMPTS_SESSION:-Margo Login}"
+log_enabled="${OSC_SECRETS_LOG:-1}"
+log_dir="${OSC_SECRETS_LOG_DIR:-$HOME/.logs}"
+log_file="${OSC_SECRETS_LOG_FILE:-${log_dir}/osc-secrets.log}"
+session_name="${OSC_SECRETS_SESSION:-Margo Login}"
 once_enabled=0
+mode="warmup"
 
 runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-once_stamp="${OSC_LOGIN_PROMPTS_STAMP:-${runtime_dir}/osc-login-prompts.done}"
+once_stamp="${OSC_SECRETS_STAMP:-${runtime_dir}/osc-secrets.done}"
 
 usage() {
   cat <<EOF
 Usage:
-  osc-login-prompts [options]
+  osc-secrets [options]
+
+Modes:
+  --gpg-unlock      Interactive GPG agent unlock: refresh env, restart
+                    gpg-agent, update TTY, list keys, run a clearsign test.
+                    (Runs immediately; ignores warmup-only options.)
 
 Options:
   --delay <sec>     Delay before warmup (default: ${delay})
@@ -50,6 +57,9 @@ parse_args() {
       shift
       [[ $# -gt 0 ]] || { echo "Missing value for --delay" >&2; exit 2; }
       delay="$1"
+      ;;
+    --gpg-unlock)
+      mode="gpg-unlock"
       ;;
     --once)
       once_enabled=1
@@ -126,22 +136,30 @@ file_first_line() {
   head -n1 "${file_path}" 2>/dev/null
 }
 
-unlock_gpg_with_passphrase() {
+# Tek noktadan GPG clearsign testi (warmup ve gpg-unlock modlari paylasir).
+#   $1 passphrase : verilirse loopback ile non-interactive imzalar,
+#                   bos ise gpg-agent/pinentry uzerinden interactive imzalar.
+#   $2 show       : "1" ise (yalniz interactive) imza ciktisini stdout'a yazar.
+gpg_sign_test() {
   local gpg_passphrase="${1:-}"
-  [[ -n "${gpg_passphrase}" ]] || return 1
+  local show_output="${2:-0}"
   command -v gpg >/dev/null 2>&1 || return 1
 
   local tmp_file="/tmp/.margo-gpg-test-$$.asc"
-  if printf "margo-boot\n" \
-    | gpg --batch --yes --no-tty --pinentry-mode loopback \
-      --passphrase "${gpg_passphrase}" \
-      --clearsign --output "${tmp_file}" >/dev/null 2>&1; then
-    rm -f "${tmp_file}" 2>/dev/null || true
-    return 0
+  local rc=0
+  if [[ -n "${gpg_passphrase}" ]]; then
+    printf "margo-boot\n" \
+      | gpg --batch --yes --no-tty --pinentry-mode loopback \
+        --passphrase "${gpg_passphrase}" \
+        --clearsign --output "${tmp_file}" >/dev/null 2>&1 || rc=1
+  elif [[ "${show_output}" == "1" ]]; then
+    printf "margo-boot\n" | gpg --clearsign 2>&1 || rc=1
+  else
+    printf "margo-boot\n" | gpg --clearsign --output "${tmp_file}" >/dev/null 2>&1 || rc=1
   fi
 
   rm -f "${tmp_file}" 2>/dev/null || true
-  return 1
+  return "${rc}"
 }
 
 unlock_keyring_with_password() {
@@ -160,8 +178,54 @@ unlock_keyring_with_password() {
   printf '%s' "${login_password}" | "${gkd_bin}" --unlock >/dev/null 2>&1
 }
 
+# Standalone GPG agent unlock: cevre tazele, agent yeniden baslat, TTY guncelle,
+# anahtarlari listele ve gpg-agent/pinentry uzerinden bir clearsign testi calistir.
+run_gpg_unlock() {
+  local red='' green='' blue='' yellow='' bold='' nc=''
+  if [[ -t 1 ]]; then
+    red=$'\033[0;31m'; green=$'\033[0;32m'; blue=$'\033[0;34m'
+    yellow=$'\033[1;33m'; bold=$'\033[1m'; nc=$'\033[0m'
+  fi
+  local hdr="${yellow}==================================================${nc}"
+
+  # Cevre degiskenlerini tazele (gpg-agent/pinentry icin).
+  printf '\n%s%sCevre Degiskenleri%s\n%s\n' "${bold}" "${yellow}" "${nc}" "${hdr}"
+  export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}"
+  export XDG_RUNTIME_DIR="${runtime_dir}"
+  export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=${runtime_dir}/bus}"
+  local tty_name
+  tty_name="$(tty 2>/dev/null || true)"
+  [[ -n "${tty_name}" ]] && export GPG_TTY="${tty_name}"
+  printf '%s[INFO]%s Cevre degiskenleri ayarlandi\n' "${blue}" "${nc}"
+
+  # gpg-agent yeniden baslat + startup TTY guncelle.
+  printf '\n%s%sGPG Agent Yeniden Baslatiliyor%s\n%s\n' "${bold}" "${yellow}" "${nc}" "${hdr}"
+  command -v gpgconf >/dev/null 2>&1 && { gpgconf --kill all >/dev/null 2>&1 || true; sleep 1; }
+  gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1 || true
+  printf '%s[INFO]%s gpg-agent yeniden baslatildi, TTY guncellendi\n' "${blue}" "${nc}"
+
+  # Anahtarlari listele.
+  printf '\n%s%sGPG Anahtarlari%s\n%s\n' "${bold}" "${yellow}" "${nc}" "${hdr}"
+  gpg -K --with-keygrip 2>/dev/null || true
+
+  # Imza testi: passphrase verilmez -> gpg-agent/pinentry uzerinden imzalar.
+  printf '\n%s%sTest Imzalama%s\n%s\n' "${bold}" "${yellow}" "${nc}" "${hdr}"
+  if gpg_sign_test "" 1; then
+    printf '%s[SUCCESS]%s GPG anahtar kilidi acildi, imzalama basarili.\n' "${green}" "${nc}"
+    log_line "INFO" "gpg-unlock: imzalama basarili."
+    return 0
+  fi
+  printf '%s[ERROR]%s Imzalama basarisiz! GPG kilidi acilamadi.\n' "${red}" "${nc}"
+  log_line "ERROR" "gpg-unlock: imzalama basarisiz."
+  return 1
+}
+
 main() {
   parse_args "$@"
+
+  if [[ "${mode}" == "gpg-unlock" ]]; then
+    if run_gpg_unlock; then exit 0; else exit 1; fi
+  fi
 
   if [[ "${once_enabled}" == "1" && -f "${once_stamp}" ]]; then
     log_line "INFO" "Warmup skip: stamp mevcut (${once_stamp})."
@@ -205,7 +269,7 @@ main() {
     notify "normal" "${session_name}" "Cozum: OSC_GPG_BOOTSTRAP_PASSPHRASE veya ${bootstrap_gpg_file} kullan."
   fi
 
-  if [[ -n "${gpg_passphrase}" ]] && unlock_gpg_with_passphrase "${gpg_passphrase}"; then
+  if [[ -n "${gpg_passphrase}" ]] && gpg_sign_test "${gpg_passphrase}"; then
     gpg_ok=0
     notify "low" "${session_name}" "GPG warmup tamamlandi."
     log_line "INFO" "GPG warmup tamamlandi."

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-pass.sh
-# Description: Multi-store `pass(1)` wrapper with built-in stores, interactive selection, audit, migrate, and git backup helpers.
-# Usage: osc-pass.sh [stores|current|path|mkdir|init|env|audit|migrate|select] [args]
+# Description: Multi-store `pass(1)` wrapper with built-in stores, interactive selection, audit, migrate, import/export, and git backup helpers.
+# Usage: osc-pass.sh [stores|current|path|mkdir|init|env|audit|migrate|import|export|select] [args]
 # ==============================================================================
 
 set -euo pipefail
@@ -152,6 +152,8 @@ Usage:
   $SCRIPT_NAME env <store>
   $SCRIPT_NAME audit [store]
   $SCRIPT_NAME migrate <src-store> <dst-store> [--move] [--force]
+  $SCRIPT_NAME import [store] <file>
+  $SCRIPT_NAME export [store] <file>
   $SCRIPT_NAME select [pass-args...]
   $SCRIPT_NAME <store> <pass-args...>
   $SCRIPT_NAME <pass-args...>      # fzf store picker if available
@@ -161,6 +163,9 @@ Notes:
   - Additional stores are auto-discovered from ~/.pass-<name>
   - Unknown store names resolve to ~/.pass-<name>
   - Git backup runs automatically after successful changes when the store is a git repo
+  - import/export use the 'personal' store when no store is given
+  - import/export files use blocks of: "İsim: <name>" / "Parola: <secret>" / separator line
+  - export skips 'secret_service/*' entries and any 'test' entry
 
 Examples:
   $SCRIPT_NAME stores
@@ -171,6 +176,8 @@ Examples:
   $SCRIPT_NAME show gmail
   $SCRIPT_NAME audit
   $SCRIPT_NAME migrate personal helium --force
+  $SCRIPT_NAME export backup.txt
+  $SCRIPT_NAME import helium backup.txt
 
 Available stores:
 $(while IFS= read -r store; do printf '  %-12s -> %s\n' "$store" "${STORE_PATHS[$store]}"; done < <(sorted_store_names))
@@ -440,6 +447,83 @@ migrate_store() {
 	[[ "$move_mode" == "1" ]] && maybe_git_backup "$src_path" "$src_store migrate to $dst_store"
 }
 
+import_passwords() {
+	local store="$1"
+	local input_file="$2"
+	local path line recipient current_name current_pass
+	local -a recipients=() recipient_args=()
+
+	require_pass
+	require_gpg
+
+	path="$(store_path "$store")"
+	[[ -d "$path" ]] || die "Store directory missing: $path"
+	[[ -s "$path/.gpg-id" ]] || die "Store not initialized (missing .gpg-id): $path"
+	[[ -f "$input_file" ]] || die "Input file not found: $input_file"
+
+	mapfile -t recipients <"$path/.gpg-id"
+	for recipient in "${recipients[@]}"; do
+		recipient="$(trim "$recipient")"
+		[[ -n "$recipient" ]] && recipient_args+=(--recipient "$recipient")
+	done
+	(( ${#recipient_args[@]} > 0 )) || die "No gpg recipients in $path/.gpg-id"
+
+	info "Importing passwords into store '$store' from $input_file"
+
+	current_name=""
+	while IFS= read -r line || [[ -n "$line" ]]; do
+		[[ -z "$line" || "$line" =~ ^-+$ ]] && continue
+
+		if [[ "$line" =~ ^[İi]sim:\ *(.*) ]]; then
+			current_name="${BASH_REMATCH[1]}"
+		elif [[ "$line" =~ ^Parola:\ *(.*) ]] && [[ -n "$current_name" ]]; then
+			current_pass="${BASH_REMATCH[1]}"
+			mkdir -p "$path/$(dirname "$current_name")"
+			printf '%s\n' "$current_pass" | gpg --quiet --encrypt "${recipient_args[@]}" -o "$path/$current_name.gpg"
+			info "Imported: $current_name"
+			current_name=""
+		fi
+	done <"$input_file"
+
+	maybe_git_backup "$path" "$store import"
+	info "Import complete"
+}
+
+export_passwords() {
+	local store="$1"
+	local output_file="$2"
+	local path password_file entry password
+
+	require_pass
+
+	path="$(store_path "$store")"
+	[[ -d "$path" ]] || die "Store directory missing: $path"
+
+	info "Exporting passwords from store '$store' to $output_file"
+
+	: >"$output_file"
+
+	while IFS= read -r -d '' password_file; do
+		entry="${password_file#$path/}"
+		entry="${entry%.gpg}"
+
+		case "$entry" in
+		secret_service/* | */secret_service/*) continue ;;
+		test | */test) continue ;;
+		esac
+
+		password="$(PASSWORD_STORE_DIR="$path" pass show "$entry")"
+
+		printf 'İsim: %s\n' "$entry" >>"$output_file"
+		printf 'Parola: %s\n' "$password" >>"$output_file"
+		printf '%s\n' "------------------------" >>"$output_file"
+
+		info "Exported: $entry"
+	done < <(find "$path" -type f -name '*.gpg' -print0)
+
+	info "Export complete"
+}
+
 run_selected_store() {
 	local store
 
@@ -501,6 +585,20 @@ main() {
 	migrate)
 		[[ $# -ge 2 ]] || die "Usage: $SCRIPT_NAME migrate <src-store> <dst-store> [--move] [--force]"
 		migrate_store "$@"
+		;;
+	import)
+		case $# in
+		1) import_passwords personal "$1" ;;
+		2) import_passwords "$1" "$2" ;;
+		*) die "Usage: $SCRIPT_NAME import [store] <file>" ;;
+		esac
+		;;
+	export)
+		case $# in
+		1) export_passwords personal "$1" ;;
+		2) export_passwords "$1" "$2" ;;
+		*) die "Usage: $SCRIPT_NAME export [store] <file>" ;;
+		esac
 		;;
 	select)
 		run_selected_store "$@"

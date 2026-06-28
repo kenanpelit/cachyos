@@ -1,0 +1,58 @@
+#compdef osc-net
+
+# Completion for osc-net — unified network tool (dns / vpn / proxy / wifi).
+
+_osc-net() {
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+
+  local -a subcommands
+  subcommands=(
+    'dns:DNS status summary + connectivity testing'
+    'vpn:Mullvad VPN manager (connect / relay / blocky / slot / obf / ...)'
+    'proxy:SSH SOCKS5 proxy / tunnel manager'
+    'wifi:NetworkManager home Wi-Fi setup (Ken_5 / Ken_2_4)'
+  )
+
+  _arguments -C \
+    '1: :->subcmd' \
+    '*:: :->args' && return 0
+
+  case $state in
+    subcmd)
+      _describe -t subcommands 'osc-net subcommand' subcommands
+      ;;
+    args)
+      case $line[1] in
+        dns)
+          _arguments \
+            '1:command:(status)' \
+            '--verbose[Show verbose DNS/connectivity detail]'
+          ;;
+        vpn)
+          _arguments \
+            '1:vpn command:(toggle ensure connect disconnect split status test protocol random owned rented fastest favorite slot timer obf version)' \
+            '--with-blocky[Couple Blocky DNS fail-safe on]' \
+            '--no-blocky[Do not touch Blocky]' \
+            '--dry-run[Print actions without applying]' \
+            '--no-notify[Suppress desktop notifications]' \
+            '--grace[Grace period before fail-safe]:seconds' \
+            '--poll[State poll interval]:seconds' \
+            '--no-internet-check[Skip the connectivity probe]' \
+            '--no-disconnect[Keep current tunnel; only reconcile]'
+          ;;
+        proxy)
+          _arguments \
+            '1:proxy command:(start stop restart status list)' \
+            '2:name:'
+          ;;
+        wifi)
+          _arguments \
+            '1:wifi command:(status)'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_osc-net "$@"

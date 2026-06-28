@@ -1,42 +1,29 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: osc-radio.sh
-# Description: Terminal Based Radio Player (Internet radio player using mpv)
-# Usage: osc-radio.sh [options]
+# Script: osc-stream.sh
+# Description: Unified stream player for margo (radio / vradio / tv / lofi)
+# Usage: osc-stream <subcommand> [args]   (no subcommand => radio)
+#
+# Subcommands:
+#   radio [args]   Interactive internet-radio player via mpv/cvlc (the engine).
+#                  Flags: -t N (toggle station N), -s (stop), -l (list),
+#                         -p (switch player), -h (help), N (play station N).
+#                  This is the DEFAULT when no subcommand is given.
+#   vradio         Preset launcher: stop any running stream then play station 1.
+#   tv [args]      IPTV channel splitter/player for iptv-org streams.
+#   lofi           Toggle a YouTube lo-fi radio stream (mpv + yt-dlp).
+#   help           Show this help.
+#
+# Merged from: osc-radio.sh, osc-vradio.sh, osc-tv-splitter.sh, lofi.sh
+# Author: Kenan Pelit | License: MIT
 # ==============================================================================
-
-# tradio - Terminal Based Radio Player
-# ===================================
-#
-# Description:
-# -----------
-# tradio is a lightweight, terminal-based radio player that allows users to listen
-# to various online radio stations directly from their terminal. It provides an
-# easy-to-use interface with features like favorites, history tracking, and
-# volume control.
-#
-# Features:
-# --------
-# - Simple and clean terminal user interface
-# - Support for multiple radio stations
-# - Favorites system for quick access to preferred stations
-# - History tracking of played stations
-# - Volume control integration
-# - Search functionality
-# - Support for both MPV and VLC players
-# - Automatic dependency checking
-# - Notification system integration
-# - Cross-platform compatibility (Linux, BSD, macOS)
-# - Special support for Linux environments
-# - CLI interface with toggle support
-#
-# Version: 1.1
-# Author: Kenan Pelit | https://github.com/kenanpelit/tradio
-# License: MIT
-#
 
 # Disable debug output
 set +x
+
+# ------------------------------------------------------------------------------
+# Shared helpers (colors / logging / notify / dependency checks / mpv launch)
+# ------------------------------------------------------------------------------
 
 # Color definitions
 RED='\033[0;31m'
@@ -45,6 +32,42 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 BOLD='\033[1m'
+
+# Dependency check primitive
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# Desktop notification (no-op if notify-send is unavailable)
+notify() {
+	local title=$1 message=$2
+	have notify-send && notify-send -i "audio-x-generic" "$title" "$message" -t 2000
+}
+
+# Logging helpers (used mainly by the tv subcommand)
+error() {
+	echo -e "${RED}ERROR: $1${NC}" >&2
+	exit 1
+}
+
+success() {
+	echo -e "${GREEN}✓ $1${NC}"
+}
+
+info() {
+	echo -e "${YELLOW}→ $1${NC}"
+}
+
+# Background mpv launcher (prefers runbg if present, falls back to plain bg)
+mpv_play() {
+	if have runbg; then
+		runbg mpv "$@"
+	else
+		mpv "$@" &
+	fi
+}
+
+# ==============================================================================
+# RADIO ENGINE (ported from osc-radio.sh) -- tradio, Terminal Based Radio Player
+# ==============================================================================
 
 # Radio stations - Virgin Radio first, rest alphabetically sorted
 declare -A RADIOS
@@ -88,7 +111,7 @@ check_dependencies() {
 	local missing=()
 
 	for dep in "${deps[@]}"; do
-		if ! command -v "$dep" >/dev/null 2>&1; then
+		if ! have "$dep"; then
 			missing+=("$dep")
 		fi
 	done
@@ -189,9 +212,9 @@ change_volume() {
 	sed -i "s/volume=.*/volume=$VOLUME/" "$CONFIG_FILE"
 
 	# Try different volume control methods
-	if command -v pactl >/dev/null 2>&1; then
+	if have pactl; then
 		pactl set-sink-volume @DEFAULT_SINK@ "${VOLUME}%"
-	elif command -v amixer >/dev/null 2>&1; then
+	elif have amixer; then
 		amixer -q sset Master "${VOLUME}%" 2>/dev/null
 	fi
 }
@@ -224,9 +247,7 @@ play_radio() {
 
 	# Notification and history
 	echo -e "${GREEN}Starting: $name${NC}"
-	if command -v notify-send >/dev/null 2>&1; then
-		notify-send -i "audio-x-generic" "🎵 Radio Player" "Now playing: $name" -t 2000
-	fi
+	notify "🎵 Radio Player" "Now playing: $name"
 	add_to_history "$name"
 
 	# Start player based on selected player
@@ -393,8 +414,18 @@ show_menu() {
 	echo -e "\nYour choice: "
 }
 
-# Main program with argument handling
-main() {
+# Cleanup function (radio)
+cleanup() {
+	stop_radio
+	echo -e "\n${GREEN}Exiting...${NC}"
+	exit 0
+}
+
+# Radio engine main with argument handling (was osc-radio.sh main())
+radio_main() {
+	# Set up exit trap (scoped to the interactive radio engine)
+	trap cleanup INT TERM
+
 	check_dependencies
 	init_config
 	create_station_list
@@ -403,7 +434,7 @@ main() {
 	if [ $# -gt 0 ]; then
 		case $1 in
 		-h | --help)
-			echo "Usage: tradio [OPTION] [NUMBER]"
+			echo "Usage: osc-stream radio [OPTION] [NUMBER]"
 			echo "Options:"
 			echo "  -h, --help     Show this help"
 			echo "  -t, --toggle   Toggle play/stop for given station"
@@ -551,15 +582,208 @@ main() {
 	done
 }
 
-# Cleanup function
-cleanup() {
-	stop_radio
-	echo -e "\n${GREEN}Exiting...${NC}"
-	exit 0
+# ==============================================================================
+# VRADIO (ported from osc-vradio.sh) -- preset launcher for station 1
+# ==============================================================================
+vradio_main() {
+	# Stop any currently running stream player
+	pkill -f cvlc 2>/dev/null
+	pkill -f 'mpv --no-video' 2>/dev/null
+
+	# Clear stale state so the preset toggle reliably starts playback
+	rm -f "$PID_FILE" "$NOW_PLAYING_FILE"
+
+	# Wait for processes to clean up
+	sleep 1
+
+	# Start the radio engine with the preset station (station 1)
+	radio_main -t 1
 }
 
-# Set up exit trap
-trap cleanup INT TERM
+# ==============================================================================
+# TV (ported from osc-tv-splitter.sh) -- IPTV channel splitter/player
+# ==============================================================================
+tv_main() {
+	# Configuration
+	local APPS_DIR="$HOME/.apps"
+	local IPTV_DIR="$APPS_DIR/iptv"
+	local CHANNELS_DIR="$HOME/.iptv/channels"
+	local SCRIPTS_DIR="$HOME/.iptv/bin"
 
-# Start the program with all arguments
+	# Check dependencies
+	info "Checking dependencies..."
+	local cmd
+	for cmd in git mpv; do
+		have "$cmd" || error "Required command not found: $cmd"
+	done
+	success "Dependencies OK"
+
+	# Create necessary directories
+	info "Creating directories..."
+	mkdir -p "$APPS_DIR" "$CHANNELS_DIR" "$SCRIPTS_DIR" || error "Failed to create directories"
+	success "Directories created"
+
+	# Clone or update iptv repository
+	info "Managing IPTV repository..."
+	if [ -d "$IPTV_DIR" ]; then
+		cd "$IPTV_DIR" || error "Cannot change to IPTV directory"
+		git pull origin master >/dev/null 2>&1 || error "Git pull failed"
+		success "Repository updated"
+	else
+		cd "$APPS_DIR" || error "Cannot change to apps directory"
+		git clone --depth 1 https://github.com/iptv-org/iptv >/dev/null 2>&1 || error "Git clone failed"
+		success "Repository cloned"
+	fi
+
+	# Validate M3U file
+	local M3U_FILE="$IPTV_DIR/streams/tr.m3u"
+	[ -f "$M3U_FILE" ] || error "M3U file not found: $M3U_FILE"
+	[ -r "$M3U_FILE" ] || error "M3U file not readable"
+	success "M3U file validated"
+
+	# Process tr.m3u file
+	info "Processing M3U file..."
+	cd "$IPTV_DIR/streams" || error "Cannot change to streams directory"
+
+	# Clean old files
+	rm -f "$CHANNELS_DIR"/*.m3u 2>/dev/null
+	rm -f "$SCRIPTS_DIR"/tv-* 2>/dev/null
+
+	# Initialize counters
+	local processed_count=0
+	local current_file=""
+	local line channel_id channel_name safe_id script_name
+
+	# Process file line by line
+	while IFS= read -r line || [ -n "$line" ]; do
+		if [[ $line == \#EXTINF* ]]; then
+			# Extract channel ID
+			channel_id=$(echo "$line" | grep -o 'tvg-id="[^"]*"' | cut -d'"' -f2)
+
+			# Extract channel name (everything after the last comma)
+			channel_name=$(echo "$line" | sed 's/.*,//')
+
+			if [ -n "$channel_id" ]; then
+				# Sanitize channel ID for filename
+				safe_id=$(echo "$channel_id" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/_/g')
+
+				current_file="$CHANNELS_DIR/${safe_id}.m3u"
+				script_name="tv-${safe_id}"
+
+				# Create M3U file
+				echo "$line" >"$current_file" || error "Failed to create channel file"
+
+				# Create executable script for this channel
+				cat >"$SCRIPTS_DIR/$script_name" <<EOF
+#!/usr/bin/env bash
+# TV Script for: $channel_name
+# Channel ID: $channel_id
+mpv --no-resume-playback --title="$channel_name" "$current_file"
+EOF
+				chmod +x "$SCRIPTS_DIR/$script_name" || error "Failed to make script executable"
+
+				((processed_count++))
+			else
+				current_file=""
+			fi
+
+		elif [[ $line == http* ]] && [ -n "$current_file" ]; then
+			# Add stream URL to current channel file
+			echo "$line" >>"$current_file" || error "Failed to append URL to channel file"
+		fi
+
+	done <"tr.m3u"
+
+	success "Processing completed"
+
+	# Show results
+	echo
+	echo "==============================================="
+	echo -e "${GREEN}Process completed successfully!${NC}"
+	echo "==============================================="
+	echo "📺 Channels processed: $processed_count"
+	echo "📁 M3U files: $CHANNELS_DIR"
+	echo "🎬 TV scripts: $SCRIPTS_DIR"
+	echo
+	echo "🚀 Usage:"
+	echo "   Add to PATH: export PATH=\"$SCRIPTS_DIR:\$PATH\""
+	echo "   Then run: tv-<channel-name>"
+	echo
+	echo "📋 Sample channels:"
+	find "$SCRIPTS_DIR" -name "tv-*" -type f | head -5 | while read -r script; do
+		echo "   $(basename "$script")"
+	done
+
+	local total_scripts
+	total_scripts=$(find "$SCRIPTS_DIR" -name "tv-*" -type f | wc -l)
+	if [ "$total_scripts" -gt 5 ]; then
+		echo "   ... and $((total_scripts - 5)) more"
+	fi
+
+	echo
+	echo "✨ All done!"
+}
+
+# ==============================================================================
+# LOFI (ported from lofi.sh) -- toggle a YouTube lo-fi radio stream
+# ==============================================================================
+lofi_main() {
+	if ps aux | grep mpv | grep -v grep >/dev/null; then
+		pkill mpv
+	else
+		mpv_play --no-video "https://www.youtube.com/live/jfKfPfyJRdk?si=OF0HKrYFFj33BzMo"
+	fi
+}
+
+# ==============================================================================
+# Usage / dispatcher
+# ==============================================================================
+usage() {
+	cat <<'EOF'
+Unified stream player for margo (radio / vradio / tv / lofi)
+
+Usage: osc-stream <subcommand> [args]
+
+Subcommands:
+  radio [args]   Interactive internet-radio player (mpv/cvlc). DEFAULT if omitted.
+                 Flags: -t N (toggle station N), -s (stop), -l (list),
+                        -p (switch player), -h (radio help), N (play station N)
+  vradio         Preset launcher: stop current stream, then play station 1
+  tv [args]      IPTV channel splitter/player (iptv-org streams)
+  lofi           Toggle a YouTube lo-fi radio stream (mpv + yt-dlp)
+  help           Show this help
+
+With no subcommand, osc-stream behaves like 'radio' (muscle memory preserved).
+EOF
+}
+
+main() {
+	case "${1:-}" in
+	radio)
+		shift
+		radio_main "$@"
+		;;
+	vradio)
+		shift
+		vradio_main "$@"
+		;;
+	tv)
+		shift
+		tv_main "$@"
+		;;
+	lofi)
+		shift
+		lofi_main "$@"
+		;;
+	help | --help | -h)
+		usage
+		exit 0
+		;;
+	*)
+		# Default: behave like the radio engine (preserves osc-radio invocation)
+		radio_main "$@"
+		;;
+	esac
+}
+
 main "$@"

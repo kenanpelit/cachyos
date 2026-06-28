@@ -129,12 +129,12 @@ ensure_mullvad_connection() {
   case "$state" in
     connected)
       log "Mullvad already connected; reconciling Blocky fail-safe state"
-      osc-mullvad ensure --grace 0 --poll 1
+      osc-net vpn ensure --grace 0 --poll 1
       MULLVAD_RESULT="already connected"
       ;;
     disconnected)
       log "Mullvad disconnected; enabling VPN with Blocky coupling"
-      osc-mullvad toggle --with-blocky --no-notify
+      osc-net vpn toggle --with-blocky --no-notify
       state="$(settle_mullvad_state)"
       if [[ "$state" == "connected" ]]; then
         MULLVAD_RESULT="connected"
@@ -144,7 +144,7 @@ ensure_mullvad_connection() {
       ;;
     connecting|disconnecting)
       log "Mullvad still in transition; enforcing fail-safe state"
-      osc-mullvad ensure --grace 10 --poll 1
+      osc-net vpn ensure --grace 10 --poll 1
       state="$(settle_mullvad_state)"
       case "$state" in
         connected)
@@ -195,7 +195,7 @@ main() {
 
   require_command nmcli
   require_command mullvad
-  require_command osc-mullvad
+  require_command osc-net
   acquire_lock
 
   ensure_wifi_connection
