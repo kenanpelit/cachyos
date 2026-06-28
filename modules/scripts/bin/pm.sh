@@ -32,7 +32,10 @@ usage() {
     echo "  ug, upgrade-git      Upgrade only development packages (*-git, *-svn, ...)."
     echo "  ugy, upgrade-git-yes Upgrade development packages with auto-confirm."
     echo "  f,  fetch            Update local package database."
+    echo "  c,  clean            Clean the package cache."
+    echo "  o,  orphans          Remove orphaned (unneeded) dependencies."
     echo "  n,  info <pkg>       Print package information."
+    echo "  owns <file>          Show which package owns a file."
     echo "  la, list all         List all packages."
     echo "  li, list installed   List installed packages."
     echo "  sa  search all       Interactively search between repo packages."
@@ -108,7 +111,7 @@ main() {
     pm_detect
 
     # Cache used for fetch timestamps and optional indexes.
-    PM_CACHE_DIR=${XDG_CACHE_DIR:-$HOME/.cache}/pm/$PM
+    PM_CACHE_DIR=${XDG_CACHE_HOME:-$HOME/.cache}/pm/$PM
     mkdir -p "$PM_CACHE_DIR"
 
     COMMAND=$1
@@ -136,6 +139,9 @@ main() {
     si) search installed ;;
     sa) search all ;;
     f | fetch) fetch ;;
+    c | clean) clean ;;
+    o | orphans | autoremove) orphans "$@" ;;
+    owns | own) owns "$@" ;;
     w | which) which ;;
     *) die_wrong_usage "invalid <command> argument '$COMMAND'" ;;
     esac
@@ -238,6 +244,9 @@ fetch() {
 }
 
 info() {
+    if [ $# -eq 0 ]; then
+        die_wrong_usage "expected <package> argument"
+    fi
     pm_info "$1"
 }
 
@@ -270,6 +279,32 @@ search() {
 
 which() {
     echo "$PM"
+}
+
+clean() {
+    pm_clean
+}
+
+orphans() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        -y | --yes | --noconfirm)
+            PM_NOCONFIRM=1
+            shift
+            ;;
+        *)
+            break
+            ;;
+        esac
+    done
+    pm_orphans
+}
+
+owns() {
+    if [ $# -eq 0 ]; then
+        die_wrong_usage "expected <file> argument"
+    fi
+    pm_owns "$@"
 }
 
 # =============================================================================
@@ -524,6 +559,18 @@ pm_format() {
     "${PM}_format_$1"
 }
 
+pm_clean() {
+    "${PM}_clean"
+}
+
+pm_orphans() {
+    "${PM}_orphans"
+}
+
+pm_owns() {
+    "${PM}_owns" "$@"
+}
+
 # =============================================================================
 # Pacman
 # =============================================================================
@@ -588,6 +635,34 @@ pacman_format_all() {
 
 pacman_format_installed() {
     awk "{ print $FMT_NAME \$1 $FMT_VERSION \$2 $FMT_RESET }"
+}
+
+pacman_clean() {
+    if is_noconfirm; then
+        with_sudo pacman -Sc --noconfirm
+    else
+        with_sudo pacman -Sc
+    fi
+}
+
+pacman_orphans() {
+    ORPHANS=$(pacman -Qtdq 2>/dev/null || true)
+    if [ -z "$ORPHANS" ]; then
+        echo "No orphan packages to remove"
+        return 0
+    fi
+    echo "Removing orphan packages:"
+    printf "%s\n" "$ORPHANS"
+    # shellcheck disable=SC2086
+    if is_noconfirm; then
+        with_sudo pacman -Rns --noconfirm $ORPHANS
+    else
+        with_sudo pacman -Rns $ORPHANS
+    fi
+}
+
+pacman_owns() {
+    pacman -Qo "$@"
 }
 
 # =============================================================================
@@ -713,6 +788,22 @@ paru_format_installed() {
     awk "{ print $FMT_NAME \$1 $FMT_VERSION \$2 $FMT_RESET }"
 }
 
+paru_clean() {
+    if is_noconfirm; then
+        paru --sudo "$AUR_SUDO" -Sc --noconfirm
+    else
+        paru --sudo "$AUR_SUDO" -Sc
+    fi
+}
+
+paru_orphans() {
+    pacman_orphans
+}
+
+paru_owns() {
+    pacman -Qo "$@"
+}
+
 # =============================================================================
 # Yay
 # =============================================================================
@@ -793,6 +884,22 @@ yay_format_installed() {
     awk "{ print $FMT_NAME \$1 $FMT_VERSION \$2 $FMT_RESET }"
 }
 
+yay_clean() {
+    if is_noconfirm; then
+        yay --sudo "$AUR_SUDO" -Sc --noconfirm
+    else
+        yay --sudo "$AUR_SUDO" -Sc
+    fi
+}
+
+yay_orphans() {
+    pacman_orphans
+}
+
+yay_owns() {
+    pacman -Qo "$@"
+}
+
 # =============================================================================
 # Apt
 # =============================================================================
@@ -851,6 +958,23 @@ apt_format_all() {
 
 apt_format_installed() {
     awk "{ print $FMT_NAME \$1 $FMT_VERSION \$2 $FMT_RESET }"
+}
+
+apt_clean() {
+    with_sudo apt clean
+    with_sudo apt autoclean
+}
+
+apt_orphans() {
+    if is_noconfirm; then
+        with_sudo apt autoremove -y
+    else
+        with_sudo apt autoremove
+    fi
+}
+
+apt_owns() {
+    dpkg -S "$@"
 }
 
 # =============================================================================
@@ -936,6 +1060,22 @@ dnf_format_all() {
 
 dnf_format_installed() {
     awk "{ print $FMT_NAME \$1 $FMT_VERSION \$2 $FMT_RESET }"
+}
+
+dnf_clean() {
+    with_sudo dnf clean all
+}
+
+dnf_orphans() {
+    if is_noconfirm; then
+        with_sudo dnf autoremove -y
+    else
+        with_sudo dnf autoremove
+    fi
+}
+
+dnf_owns() {
+    dnf provides "$@"
 }
 
 # =============================================================================
