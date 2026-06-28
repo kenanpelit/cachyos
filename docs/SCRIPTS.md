@@ -248,6 +248,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-sqm`
+**Description:** Smart Queue Management (CAKE) for bufferbloat reduction on WAN/VPN.
+
+**Usage:** `osc-sqm.sh {setup|cleanup|status|restart} [--help]`
+
+---
+
 ### 📂 `osc-ssh`
 **Description:** OSC SSH Master Utility for ASSH, session control, and backups
 
@@ -437,13 +444,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `sqm`
-**Description:** Automatic SQM/CAKE Setup for bufferbloat reduction (WAN/VPN)
-
-**Usage:** `sqm.sh [options]`
-
----
-
 ### 📂 `ssh-launcher`
 **Description:** Launch SSH with optional menu selection using fzf/rofi
 
@@ -469,13 +469,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** SVM (Simple VM) profile for CachyOS using QEMU/KVM
 
 **Usage:** `svmcachy.sh [install|start|stop|status|connect|console|reset] [options]`
-
----
-
-### 📂 `svmnil2`
-**Description:** Simple QEMU/KVM VM manager for CachyOS
-
-**Usage:** `svmnil2.sh [install|start|stop|status|connect|console|reset] [options]`
 
 ---
 

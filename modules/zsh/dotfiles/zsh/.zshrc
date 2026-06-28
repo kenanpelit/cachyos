@@ -523,6 +523,10 @@ autoload -Uz _dcli 2>/dev/null || true
 autoload -Uz _osc-net 2>/dev/null || true
 (( $+functions[_osc-net] )) && compdef _osc-net osc-net
 
+# Bind osc-sqm completion explicitly for cached compinit sessions too.
+autoload -Uz _osc-sqm 2>/dev/null || true
+(( $+functions[_osc-sqm] )) && compdef _osc-sqm osc-sqm
+
 # Bind pass completion for alternate password stores backed by aliases.
 # The upstream _pass completion supports per-command store prefixes via zstyle.
 autoload -Uz _pass 2>/dev/null || true

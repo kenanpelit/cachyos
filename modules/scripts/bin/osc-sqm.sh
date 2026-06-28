@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: sqm.sh
-# Description: Automatic SQM/CAKE Setup for bufferbloat reduction (WAN/VPN)
-# Usage: sqm.sh [options]
+# Script: osc-sqm.sh
+# Description: Smart Queue Management (CAKE) for bufferbloat reduction on WAN/VPN.
+# Usage: osc-sqm.sh {setup|cleanup|status|restart} [--help]
 # ==============================================================================
 set -euo pipefail
 
 #===============================================================================
-# Config (env ile değiştirilebilir; ör. WAN_DOWN=40mbit VPN_UP=10mbit ./sqm.sh)
+# Config (env ile değiştirilebilir; ör. WAN_DOWN=40mbit VPN_UP=10mbit osc-sqm setup)
 #===============================================================================
 WAN_UP="${WAN_UP:-15mbit}"
 WAN_DOWN="${WAN_DOWN:-50mbit}"
@@ -19,6 +19,9 @@ VPN_NAT="${VPN_NAT:-0}" # genelde 0
 
 MEMLIMIT="${MEMLIMIT:-32Mb}"
 
+# Bu script'in gerçek yolu (symlink üzerinden çağrılsa bile sudo re-exec için)
+SELF="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+
 #===============================================================================
 # Tools & logging
 #===============================================================================
@@ -28,6 +31,40 @@ need() { command -v "$1" >/dev/null 2>&1 || {
 	error "missing: $1"
 	exit 1
 }; }
+
+#===============================================================================
+# Privilege & kernel-capability preflight
+#===============================================================================
+require_root() {
+	# tc/ip link root ister; değilsek env'i koruyarak sudo ile yeniden çalış.
+	[ "$(id -u)" -eq 0 ] && return 0
+	if command -v sudo >/dev/null 2>&1; then
+		log "tc/ip için root gerekli — sudo ile yeniden çalıştırılıyor…"
+		exec sudo \
+			WAN_UP="$WAN_UP" WAN_DOWN="$WAN_DOWN" WAN_NAT="$WAN_NAT" \
+			VPN_UP="$VPN_UP" VPN_DOWN="$VPN_DOWN" VPN_NAT="$VPN_NAT" \
+			MEMLIMIT="$MEMLIMIT" \
+			"$SELF" "$@"
+	fi
+	error "Root gerekiyor (tc/ip link). 'sudo $0 $*' ile çalıştır."
+	exit 1
+}
+
+ensure_kmods() {
+	# CAKE ve IFB çekirdek desteğini sağla; eksikse kriptik tc hatası yerine net mesaj.
+	modprobe ifb 2>/dev/null || true
+	modprobe sch_cake 2>/dev/null || true
+
+	# CAKE'i tek kullanımlık bir dummy arayüzde dener (izole, yan etkisiz).
+	if ip link add sqm-probe0 type dummy 2>/dev/null; then
+		if ! tc qdisc add dev sqm-probe0 root cake 2>/dev/null; then
+			ip link del sqm-probe0 type dummy 2>/dev/null || true
+			error "CAKE qdisc kullanılamıyor (çekirdekte CONFIG_NET_SCH_CAKE / sch_cake gerekli)."
+			exit 1
+		fi
+		ip link del sqm-probe0 type dummy 2>/dev/null || true
+	fi
+}
 
 #===============================================================================
 # Detect
@@ -41,6 +78,17 @@ vpn_ifaces() {
 is_up() {
 	# bayraklarda UP var mı? (state UNKNOWN olabilir; WireGuard böyle çalışır)
 	ip -o link show "$1" 2>/dev/null | grep -q '<[^>]*UP[^>]*>'
+}
+active_mode() {
+	# En az bir wg*/tun* UP ise VPN, değilse WAN.
+	local v
+	for v in $(vpn_ifaces); do
+		is_up "$v" && {
+			echo "VPN"
+			return 0
+		}
+	done
+	echo "WAN"
 }
 
 #===============================================================================
@@ -206,12 +254,17 @@ cleanup_all() {
 	log "Cleanup completed."
 }
 
+restart_mode() {
+	cleanup_all
+	setup_mode
+}
+
 status_show() {
-	local def
+	local def vpns
 	def="$(default_iface || true)"
-	local vpns
 	vpns="$(vpn_ifaces)"
 	echo "================ SQM Status ================"
+	echo "Mode    : $(active_mode)"
 	echo "Default : ${def:-N/A}"
 	echo "VPNs    : $(echo $vpns | tr '\n' ' ')"
 	echo "WAN_UP/DOWN=${WAN_UP}/${WAN_DOWN}  VPN_UP/DOWN=${VPN_UP}/${VPN_DOWN}"
@@ -232,7 +285,13 @@ status_show() {
 #===============================================================================
 usage() {
 	cat <<USAGE
-Usage: $0 {setup|cleanup|status}
+Usage: ${0##*/} {setup|cleanup|status|restart}
+
+Commands:
+  setup     Apply CAKE shaping (auto WAN vs VPN mode). [root]
+  cleanup   Remove all CAKE/ingress qdiscs and ifb-* devices. [root]
+  restart   cleanup + setup. [root]
+  status    Show current mode and active qdiscs. [no root needed]
 
 Env vars:
   WAN_UP (def: $WAN_UP)       WAN upstream
@@ -243,15 +302,33 @@ Env vars:
   VPN_DOWN (def: $VPN_DOWN)   VPN downstream (applies on default iface)
   VPN_NAT (def: $VPN_NAT)     1/0
 
+  MEMLIMIT (def: $MEMLIMIT)   CAKE memory limit
+
+Notes:
+  setup/cleanup/restart auto-elevate via sudo if not run as root.
+  Mode is chosen at run time: re-run 'setup' after a VPN goes up/down.
+
 Examples:
-  WAN_DOWN=40mbit VPN_DOWN=45mbit $0 setup
+  WAN_DOWN=40mbit VPN_DOWN=45mbit ${0##*/} setup
 USAGE
 }
 
 cmd="${1:-setup}"
 case "$cmd" in
-setup) setup_mode ;;
-cleanup) cleanup_all ;;
+setup)
+	require_root "$@"
+	ensure_kmods
+	setup_mode
+	;;
+cleanup)
+	require_root "$@"
+	cleanup_all
+	;;
+restart)
+	require_root "$@"
+	ensure_kmods
+	restart_mode
+	;;
 status) status_show ;;
 -h | --help | help) usage ;;
 *)

@@ -1,0 +1,16 @@
+#compdef osc-sqm
+
+# Completion for osc-sqm — CAKE/SQM bufferbloat shaping (WAN/VPN).
+
+_osc-sqm() {
+  local -a cmds
+  cmds=(
+    'setup:Apply CAKE shaping (auto WAN/VPN mode)'
+    'cleanup:Remove all CAKE/ingress qdiscs and ifb-* devices'
+    'restart:cleanup + setup'
+    'status:Show current mode and active qdiscs'
+  )
+  _describe -t commands 'osc-sqm command' cmds
+}
+
+_osc-sqm "$@"
