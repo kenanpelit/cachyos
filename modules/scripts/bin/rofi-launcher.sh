@@ -81,9 +81,9 @@ POWER_CMD[reboot]="systemctl reboot -i"
 POWER_TEXT[lockscreen]="Lock Screen"
 POWER_ICON[lockscreen]="󰍁"
 POWER_COLOR[lockscreen]="#7aa2f7"
-# Prefer the active shell backend for locking, otherwise fall back to the margo
-# locker (mlock), then finally logind lock-session.
-POWER_CMD[lockscreen]="osc-shell ipc call lockScreen lock || mlock || loginctl lock-session"
+# Lock via the margo session shell (mshellctl lock), fall back to the margo
+# locker binary (mlock), then finally logind lock-session.
+POWER_CMD[lockscreen]="mshellctl lock || mlock || loginctl lock-session"
 
 POWER_TEXT[logout]="Sign Out"
 POWER_ICON[logout]="󰗼"

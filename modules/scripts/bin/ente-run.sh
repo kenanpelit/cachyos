@@ -21,9 +21,33 @@ LYELLOW="\e[38;2;249;226;175m"
 LMAUVE="\e[38;2;203;166;247m"
 
 # ------------------------------------------------------------------------------
+# 🔔 Desktop toast (margo mshellctl, notify-send fallback, else silent)
+# ------------------------------------------------------------------------------
+toast() {
+	local title="$1" body="${2:-}" sev="${3:-calm}"
+	if command -v mshellctl >/dev/null 2>&1; then
+		mshellctl toast "$title" "$body" --severity "$sev" >/dev/null 2>&1 || true
+	elif command -v notify-send >/dev/null 2>&1; then
+		notify-send -a "Ente Auth" "$title" "$body" >/dev/null 2>&1 || true
+	fi
+}
+
+# ------------------------------------------------------------------------------
 # 🧩 Header
 # ------------------------------------------------------------------------------
 printf "\n${LBLUE}${BOLD}==> Ente Auth Launcher${RESET}\n"
+
+# ------------------------------------------------------------------------------
+# 🔁 Already running? Surface it and exit (don't spawn a second instance).
+# ------------------------------------------------------------------------------
+if pgrep -x enteauth >/dev/null 2>&1 \
+	|| pgrep -x ente_auth >/dev/null 2>&1 \
+	|| pgrep -f 'io\.ente\.auth' >/dev/null 2>&1; then
+	printf "${LGREEN}✓ Ente Auth is already running.${RESET}\n"
+	toast "Ente Auth" "Zaten çalışıyor" calm
+	exit 0
+fi
+
 printf "${LMAUVE}Checking D-Bus and Secret Service environment...${RESET}\n"
 
 # ------------------------------------------------------------------------------
@@ -59,6 +83,7 @@ fi
 printf "${LMAUVE}Launching Ente Auth...${RESET}\n"
 
 # Prefer native binaries first, then Flatpak app id.
+toast "Ente Auth" "Başlatılıyor…" calm
 if ente_bin="$(command -v enteauth 2>/dev/null)"; then
 	exec "$ente_bin"
 elif ente_bin="$(command -v ente-auth 2>/dev/null)"; then
@@ -72,6 +97,7 @@ elif command -v flatpak >/dev/null 2>&1 && flatpak info io.ente.auth >/dev/null 
 else
 	printf "${LRED}✗ Ente Auth executable not found.${RESET}\n"
 	printf "${LYELLOW}Hint:${RESET} install with ${BOLD}flatpak install flathub io.ente.auth${RESET}\n"
+	toast "Ente Auth" "Çalıştırılabilir bulunamadı" danger
 	exit 1
 fi
 

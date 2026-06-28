@@ -519,11 +519,6 @@ autoload -Uz bashcompinit && bashcompinit
 autoload -Uz _dcli 2>/dev/null || true
 (( $+functions[_dcli] )) && compdef _dcli dcli
 
-# Bind osc-shell completion explicitly so new user completions work even when
-# compinit is using a cached dump file.
-autoload -Uz _osc-shell 2>/dev/null || true
-(( $+functions[_osc-shell] )) && compdef _osc-shell osc-shell
-
 # Bind osc-net completion explicitly for cached compinit sessions too.
 autoload -Uz _osc-net 2>/dev/null || true
 (( $+functions[_osc-net] )) && compdef _osc-net osc-net

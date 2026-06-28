@@ -32,7 +32,7 @@ detect_wayland_display() {
   printf '%s\n' "$display"
 }
 
-lock_via_noctalia() {
+lock_via_mshell() {
   local session_id="$1"
   local user_id="$2"
   local user_name="$3"
@@ -41,7 +41,7 @@ lock_via_noctalia() {
   local runtime_dir=""
   local bus_address=""
   local wayland_display=""
-  local osc_shell=""
+  local -a locker=()
 
   [[ "$session_type" == "wayland" ]] || return 1
 
@@ -55,10 +55,12 @@ lock_via_noctalia() {
   user_home="$(getent passwd "$user_id" | cut -d: -f6)"
   [[ -n "$user_home" ]] || return 1
 
-  if [[ -x "${user_home}/.local/bin/osc-shell" ]]; then
-    osc_shell="${user_home}/.local/bin/osc-shell"
-  elif command -v osc-shell >/dev/null 2>&1; then
-    osc_shell="$(command -v osc-shell)"
+  # Lock via the margo session shell (non-blocking); skip if mshellctl is absent
+  # so this pre-sleep hook never blocks waiting on a locker binary.
+  if [[ -x "${user_home}/.local/bin/mshellctl" ]]; then
+    locker=("${user_home}/.local/bin/mshellctl" lock)
+  elif command -v mshellctl >/dev/null 2>&1; then
+    locker=("$(command -v mshellctl)" lock)
   else
     return 1
   fi
@@ -69,7 +71,7 @@ lock_via_noctalia() {
       DBUS_SESSION_BUS_ADDRESS="$bus_address" \
       WAYLAND_DISPLAY="$wayland_display" \
       XDG_SESSION_TYPE=wayland \
-      "$osc_shell" ipc call lockScreen lock >/dev/null 2>&1
+      "${locker[@]}" >/dev/null 2>&1
     return $?
   fi
 
@@ -79,7 +81,7 @@ lock_via_noctalia() {
       DBUS_SESSION_BUS_ADDRESS="$bus_address" \
       WAYLAND_DISPLAY="$wayland_display" \
       XDG_SESSION_TYPE=wayland \
-      "$osc_shell" ipc call lockScreen lock >/dev/null 2>&1
+      "${locker[@]}" >/dev/null 2>&1
     return $?
   fi
 
@@ -140,7 +142,7 @@ lock_active_sessions() {
 
     session_ids+=("$session_id")
     loginctl lock-session "$session_id" >/dev/null 2>&1 || true
-    lock_via_noctalia "$session_id" "$user_id" "$user_name" "$session_type" || true
+    lock_via_mshell "$session_id" "$user_id" "$user_name" "$session_type" || true
   done < <(loginctl list-sessions --no-legend 2>/dev/null)
 
   if ((${#session_ids[@]} == 0)); then
