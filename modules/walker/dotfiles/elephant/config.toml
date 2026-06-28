@@ -1,3 +1,0 @@
-[providers]
-# Providers live under ~/.config/elephant/providers.
-path = "~/.config/elephant/providers"

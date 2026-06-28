@@ -53,7 +53,6 @@ enabled_modules:
   - sway
   - xdg-portal
   - rofi
-  #- walker
   - connect
   - anydesk
   - mpv

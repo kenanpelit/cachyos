@@ -1,8 +1,0 @@
-# dnfpackages — Fedora DNF. Arch sisteminde gereksiz; elephant.toml içinde
-# ignored_providers ile zaten yüklenmiyor. Yine de provider listesinden
-# kalkması için aşağıda da gizli.
-[Config]
-hide_from_providerlist = true
-icon         = "system-software-install"
-min_score    = 100
-name_pretty  = "DNF (devre dışı)"
