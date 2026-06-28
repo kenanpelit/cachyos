@@ -2,7 +2,38 @@
 # ==============================================================================
 # Script: wayland-session-common.sh
 # Description: Shared env parsing and runtime-dir helpers for Wayland sessions.
+# Usage: source wayland-session-common.sh   # library — do not execute directly
 # ==============================================================================
+# ⚠️  CRITICAL SHARED LIBRARY — DO NOT DELETE.
+#
+#   This is load-bearing infrastructure for the whole session-launch stack.
+#   It is sourced by ~80 callers: every modules/scripts/start/start-* launcher
+#   (brave/helium/firefox/telegram/spotify/kkenp/…) plus semsumo.sh,
+#   semsumo-daily.sh, margo-semsumo-daily.sh, margo-session-common.sh and
+#   delayed-portals.sh. They rely on the public session_common_* function
+#   names below to set up PATH/XDG dirs, cursor/theme env, and the Wayland
+#   display before spawning apps under uwsm/systemd.
+#
+#   Rules of thumb:
+#     • Keep the session_common_* function names/signatures stable — renaming
+#       or removing one silently breaks dozens of launchers.
+#     • Never add `set -e`/`set -u` or top-level side effects: this file is
+#       SOURCED, so any such change leaks into every caller's shell.
+#     • Add new helpers rather than repurposing existing ones.
+#
+# Function library — it only defines session_common_* helpers and runs no
+# top-level logic. Re-sourcing it in the same shell is a no-op.
+
+# Refuse to run as a standalone program — it only makes sense when sourced.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	printf '%s is a library; source it, do not execute it.\n' \
+		"${BASH_SOURCE[0]##*/}" >&2
+	exit 64 # EX_USAGE
+fi
+
+# Idempotent include guard: skip re-defining functions if already sourced.
+[[ -n "${_WAYLAND_SESSION_COMMON_SOURCED:-}" ]] && return 0
+_WAYLAND_SESSION_COMMON_SOURCED=1
 
 session_common_log_warn() {
 	printf '[wayland-session-common] WARN: %s\n' "$*" >&2
@@ -17,10 +48,16 @@ session_common_ensure_runtime_dir() {
 session_common_expand_env_value() {
 	local value="$1"
 	local expanded prefix var_name suffix var_value
+	local guard=0
+	local -r max_iter=64 # bound expansion so a self-referential value can't hang
 
 	expanded="$value"
 
 	while [[ "$expanded" =~ (.*)\$\{([A-Za-z_][A-Za-z0-9_]*)\}(.*) ]]; do
+		if ((++guard > max_iter)); then
+			session_common_log_warn "env value did not converge, leaving as-is: ${value}"
+			break
+		fi
 		prefix="${BASH_REMATCH[1]}"
 		var_name="${BASH_REMATCH[2]}"
 		suffix="${BASH_REMATCH[3]}"
@@ -28,7 +65,12 @@ session_common_expand_env_value() {
 		expanded="${prefix}${var_value}${suffix}"
 	done
 
+	guard=0
 	while [[ "$expanded" =~ (.*)\$([A-Za-z_][A-Za-z0-9_]*)(.*) ]]; do
+		if ((++guard > max_iter)); then
+			session_common_log_warn "env value did not converge, leaving as-is: ${value}"
+			break
+		fi
 		prefix="${BASH_REMATCH[1]}"
 		var_name="${BASH_REMATCH[2]}"
 		suffix="${BASH_REMATCH[3]}"
@@ -107,6 +149,7 @@ session_common_normalize_colon_list() {
 	local expanded part
 	local -a parts cleaned=()
 	local -A seen=()
+	local IFS # scope IFS to this function so ':' never leaks back to the caller
 
 	expanded="${value//\$\{HOME\}/$HOME}"
 	expanded="${expanded//\$HOME/$HOME}"
