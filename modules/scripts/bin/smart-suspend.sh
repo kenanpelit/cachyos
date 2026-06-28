@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: smart-suspend.sh
-# Description: Smart Suspend Script for Hyprland with state saving/restoration
+# Description: Smart Suspend Script for Margo with state saving/restoration
 # Usage: smart-suspend.sh [options]
 # ==============================================================================
 
@@ -23,35 +23,20 @@ fi
 exec 1> >(tee -a "$LOG_FILE")
 exec 2>&1
 
-echo "$(date): Hyprland suspend kontrolü başlatıldı"
+echo "$(date): Margo suspend kontrolü başlatıldı"
 
 # ============================================================================
-# Hyprland State Management
+# Session detection (margo, with generic-Wayland fallback)
 # ============================================================================
 
-save_hyprland_state() {
-	if command -v hyprctl >/dev/null 2>&1; then
-		# Workspace bilgilerini kaydet
-		hyprctl workspaces >"$CACHE_DIR/hypr_workspace_state"
-		# Aktif pencere bilgilerini kaydet
-		hyprctl clients >"$CACHE_DIR/hypr_clients_state"
-		# Aktif workspace ID'sini kaydet
-		hyprctl activeworkspace -j | jq -r '.id' >"$CACHE_DIR/active_workspace" 2>/dev/null
-		return 0
+check_margo_session() {
+	if [[ "${XDG_CURRENT_DESKTOP:-}" == *[Mm]argo* ]] ||
+		{ command -v mctl >/dev/null 2>&1 && mctl status >/dev/null 2>&1; }; then
+		echo "Margo masaüstü ortamı tespit edildi"
 	else
-		echo "Hyprctl bulunamadı"
-		return 1
+		echo "Margo bulunamadı; generic Wayland oturumu varsayılıyor"
 	fi
-}
-
-check_hyprland_active() {
-	if [[ "$DESKTOP_SESSION" == *"hyprland"* ]] || [[ "$XDG_CURRENT_DESKTOP" == *"Hyprland"* ]]; then
-		echo "Hyprland masaüstü ortamı tespit edildi"
-		return 0
-	else
-		echo "Hyprland masaüstü ortamı bulunamadı!"
-		return 1
-	fi
+	return 0
 }
 
 # ============================================================================
@@ -87,15 +72,12 @@ check_processes() {
 }
 
 check_active_windows() {
-	if command -v hyprctl >/dev/null 2>&1; then
-		active_windows=$(hyprctl clients -j | jq 'length' 2>/dev/null)
-		if [ "$active_windows" -gt 0 ]; then
-			echo "Aktif pencere sayısı: $active_windows"
-			hyprctl clients -j | jq -r '.[] | "\(.class) - \(.title)"' 2>/dev/null | while read -r window; do
-				echo "  • $window"
-			done
-		fi
-	fi
+	# margo: best-effort active-window dump (mctl clients output is margo-specific,
+	# logged raw and non-fatal). Skipped if mctl / the subcommand is unavailable.
+	command -v mctl >/dev/null 2>&1 || return 0
+	mctl clients >/dev/null 2>&1 || return 0
+	echo "Aktif pencereler (mctl clients):"
+	mctl clients 2>/dev/null | head -40
 }
 
 # ============================================================================
@@ -219,36 +201,20 @@ restore_bluetooth_state() {
 prepare_suspend() {
 	echo "$(date): Suspend hazırlıkları başlatılıyor..."
 
-	# Hyprland özel hazırlıkları
-	if command -v hyprctl >/dev/null 2>&1; then
-		# Ekranı kitle
-		hyprctl dispatch dpms off 2>/dev/null
-		sleep 0.5
-	fi
+	# NOTE: pre-suspend DPMS-off + workspace snapshot were Hyprland-only.
+	# margo persists its tags/windows across a suspend (it is not a fresh
+	# login on resume), and systemd-suspend powers the outputs down anyway,
+	# so no compositor-side preparation is needed.
 
 	# Durumları kaydet
 	save_audio_state
 	save_bluetooth_state
-	save_hyprland_state
 
 	echo "Tüm durumlar kaydedildi"
 }
 
 restore_after_wake() {
 	echo "$(date): Sistem uyandırıldı, restore işlemi başlatılıyor..."
-
-	# Hyprland özel restorasyon
-	if command -v hyprctl >/dev/null 2>&1; then
-		# Ekranı aç
-		hyprctl dispatch dpms on 2>/dev/null
-		sleep 0.5
-
-		# Aktif workspace'e dön
-		if [ -f "$CACHE_DIR/active_workspace" ]; then
-			workspace=$(cat "$CACHE_DIR/active_workspace")
-			hyprctl dispatch workspace "$workspace" 2>/dev/null
-		fi
-	fi
 
 	# Durumları geri yükle
 	restore_audio_state
@@ -263,8 +229,8 @@ restore_after_wake() {
 # ============================================================================
 
 main() {
-	# Hyprland kontrolü
-	check_hyprland_active || exit 1
+	# Oturum tespiti (margo / generic Wayland) — bilgi amaçlı, bloklamaz
+	check_margo_session
 
 	# Temel kontroller
 	check_battery

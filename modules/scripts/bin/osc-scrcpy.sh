@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-scrcpy.sh
-# Description: Simple scrcpy helper for Wayland/Hyprland/niri with UHID input
+# Description: Simple scrcpy helper for Wayland (margo) with UHID input
 # Usage: osc-scrcpy.sh [options]
 # ==============================================================================
 set -euo pipefail
 
 # Simple scrcpy helper without zenity.
-# Wayland/Hyprland/niri friendly defaults (UHID input).
+# Wayland-friendly defaults (UHID input).
 
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/scrcpy"
 IP_FILE="$CONFIG_DIR/ip.txt"

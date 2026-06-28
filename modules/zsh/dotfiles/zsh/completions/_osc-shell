@@ -94,7 +94,7 @@ _osc_shell_ipc_targets() {
     plugin:clipper plugin:keybind-cheatsheet plugin:assistant-panel
     plugin:screenshot plugin:ndns
     control-center spotlight dash notepad keybinds widget
-    powermenu inhibit dankdash theme night audio clipboard niri
+    powermenu inhibit dankdash theme night audio clipboard
   )
 
   _osc_shell_plugin_ids
@@ -217,9 +217,6 @@ _osc_shell_static_methods() {
     clipboard)
       reply=(toggle)
       ;;
-    niri)
-      reply=(screenshot screenshotScreen screenshotWindow)
-      ;;
     plugin:*)
       reply=(toggle)
       ;;
@@ -337,7 +334,7 @@ _osc_shell() {
     '-h:show usage'
   )
   backends=(noctalia)
-  compositors=(default niri hyprland)
+  compositors=(default margo)
   profile_sub=(show set use)
   ipc_sub=(show call)
 
@@ -372,7 +369,7 @@ _osc_shell() {
       case "$words[3]" in
         set)
           if (( CURRENT == 4 )); then
-            compadd default niri hyprland
+            compadd default margo
           elif (( CURRENT == 5 )); then
             compadd -- "${backends[@]}"
           fi

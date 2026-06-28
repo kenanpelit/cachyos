@@ -166,23 +166,10 @@ session_common_backfill_visual_env() {
 		*[Mm]argo*)
 			session_env_file="${config_home}/session-env/margo/10-margo.conf"
 			;;
-		*[Mm]ango*)
-			session_env_file="${config_home}/session-env/mangowm/10-mangowm.conf"
-			;;
-		*[Nn]iri*)
-			session_env_file="${config_home}/session-env/niri/10-niri-env.conf"
-			;;
-		*[Hh]ypr* | *[Hh]yprland*)
-			session_env_file="${config_home}/session-env/hyprland/10-hyprland.conf"
-			;;
 		*)
-			if [[ -n "${NIRI_SOCKET:-}" ]]; then
-				session_env_file="${config_home}/session-env/niri/10-niri-env.conf"
-			elif [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
-				session_env_file="${config_home}/session-env/hyprland/10-hyprland.conf"
-			elif command -v mmsg >/dev/null 2>&1 && mmsg -g >/dev/null 2>&1; then
-				session_env_file="${config_home}/session-env/mangowm/10-mangowm.conf"
-			fi
+			# Generic Wayland fallback: no compositor-specific session-env
+			# file; the shared 00-wayland/10-gtk/20-qt files below still apply.
+			session_env_file=""
 			;;
 		esac
 

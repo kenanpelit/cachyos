@@ -46,8 +46,8 @@ readonly CUSTOM_BIN_DIRS=(
 	"$HOME/bin"
 )
 
-# Hyprland config file
-readonly HYPR_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprland.conf"
+# margo keybinds file (managed by mshell Settings → Keybinds)
+readonly MARGO_BINDS="${XDG_CONFIG_HOME:-$HOME/.config}/margo/binds.conf"
 
 #╭──────────────────────────────────────────────────────────────────────────────╮
 #│                      POWER MENU CONFIGURATION                                │
@@ -81,14 +81,14 @@ POWER_CMD[reboot]="systemctl reboot -i"
 POWER_TEXT[lockscreen]="Lock Screen"
 POWER_ICON[lockscreen]="󰍁"
 POWER_COLOR[lockscreen]="#7aa2f7"
-# Prefer the active shell backend for locking, otherwise fall back to Hyprlock,
-# then finally logind lock-session.
-POWER_CMD[lockscreen]="osc-shell ipc call lockScreen lock || hyprlock || loginctl lock-session"
+# Prefer the active shell backend for locking, otherwise fall back to the margo
+# locker (mlock), then finally logind lock-session.
+POWER_CMD[lockscreen]="osc-shell ipc call lockScreen lock || mlock || loginctl lock-session"
 
 POWER_TEXT[logout]="Sign Out"
 POWER_ICON[logout]="󰗼"
 POWER_COLOR[logout]="#bb9af7"
-POWER_CMD[logout]="uwsm stop || hyprctl dispatch exit || niri msg action quit || swaymsg exit || loginctl terminate-session \${XDG_SESSION_ID:-}"
+POWER_CMD[logout]="uwsm stop || mctl quit || loginctl terminate-session \${XDG_SESSION_ID:-}"
 
 POWER_TEXT[suspend]="Sleep"
 POWER_ICON[suspend]="󰒲"
@@ -1013,15 +1013,18 @@ power_menu_rofi_mode() {
 }
 
 mode_keys() {
-	if [[ ! -f "$HYPR_CONFIG" ]]; then
-		notify "Rofi Launcher" "Hyprland config not found: $HYPR_CONFIG" "dialog-error"
+	if [[ ! -f "$MARGO_BINDS" ]]; then
+		notify "Rofi Launcher" "margo binds not found: $MARGO_BINDS" "dialog-error"
 		return 1
 	fi
 
-	local keybinds=$(grep -oP '(?<=bind=).*' "$HYPR_CONFIG" |
-		sed 's/,\([^,]*\)$/ = \1/' |
-		sed 's/, exec//g' |
-		sed 's/^,//g')
+	# margo binds syntax: bind = MODS,KEY,ACTION[,ARGS]   #"description"
+	# Render each active bind as "MODS+KEY    ACTION[,ARGS]" (commented-out
+	# lines start with '#' and are skipped; trailing '#"…"' notes are stripped).
+	local keybinds
+	keybinds=$(grep -E '^[[:space:]]*bind[[:space:]]*=' "$MARGO_BINDS" |
+		sed -E 's/^[[:space:]]*bind[[:space:]]*=[[:space:]]*//; s/[[:space:]]*#.*$//' |
+		awk -F, '{ mods=$1; key=$2; sub(/^[^,]*,[^,]*,?/, ""); printf "%-24s %s\n", mods "+" key, $0 }')
 
 	if [[ -z "$keybinds" ]]; then
 		notify "Rofi Launcher" "No keybindings found in config" "dialog-warning"
@@ -1030,7 +1033,7 @@ mode_keys() {
 
 	echo "$keybinds" | rofi_cmd \
 		-dmenu \
-		-p "⌨ Hyprland Keybindings" \
+		-p "⌨ margo Keybindings" \
 		-i \
 		-matching fuzzy \
 		-theme-str 'window {width: 60%;} listview {columns: 1;}' \
@@ -1058,7 +1061,7 @@ MODES:
     files, -f, --files          File browser
     ssh, -s, --ssh              SSH connections
     custom, -c, --custom        Custom commands (start-*)
-    keys, -k, --keys            Hyprland keybindings
+    keys, -k, --keys            margo keybindings
     power, -p, --power          Power menu (full featured)
     help, -h, --help            Show this help
 

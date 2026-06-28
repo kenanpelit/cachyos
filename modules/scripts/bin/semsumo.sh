@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: semsumo.sh
-# Description: Unified Application Launcher & Generator (Hyprland/Niri/Generic)
+# Description: Unified Application Launcher & Generator (Margo / generic Wayland)
 # Usage: semsumo.sh [options]
 # ==============================================================================
 #   Features:
-#   - Automatic window manager detection (Hyprland, Niri, generic Wayland/X11)
-#   - Application startup verification with timeout (Hyprland)
+#   - Automatic window manager detection (Margo, generic Wayland)
 #   - Startup script generation for all profiles
 #   - Multi-browser support (Helium, Brave, Firefox)
 #   - VPN bypass/secure mode support
@@ -177,33 +176,18 @@ declare -A APPS=(
 #-------------------------------------------------------------------------------
 
 detect_window_manager() {
-  if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
-    WM_TYPE="hyprland"
-    log "INFO" "DETECT" "Detected Hyprland window manager"
-  elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
-    WM_TYPE="niri"
-    log "INFO" "DETECT" "Detected Niri window manager"
-  elif [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
-    # The margo session sets XDG_CURRENT_DESKTOP=margo. The `*margo*`
-    # glob is kept defensively (it also matched the old margo:mango
-    # value), and margo + mango both speak dwl-ipc-v2 so a stray
-    # `mmsg -g` might succeed against margo. The two IPC
-    # clients differ in tag-mask semantics — `mmsg -s -t 8` sets
-    # tag bitmask 8 (= bit 3 = tag 4), while margo's dispatch
-    # convention is `mctl tags <1 << (tag - 1)>` (1<<7=128 for
-    # tag 8). Picking the wrong client here makes us silently
-    # switch to the wrong workspace.
+  # The margo session sets XDG_CURRENT_DESKTOP=margo and exposes the `mctl`
+  # IPC client (margo dispatches tags as `mctl tags <1 << (tag - 1)>`).
+  # Anything else falls back to generic Wayland.
+  if [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
     WM_TYPE="margo"
     log "INFO" "DETECT" "Detected Margo window manager"
-  elif [[ "${XDG_CURRENT_DESKTOP:-}" == *mango* ]] || (command -v mmsg &>/dev/null && mmsg -g >/dev/null 2>&1); then
-    WM_TYPE="mango"
-    log "INFO" "DETECT" "Detected Mango window manager"
-  elif [[ -n "$WAYLAND_DISPLAY" ]]; then
+  elif [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
     WM_TYPE="wayland"
     log "INFO" "DETECT" "Detected generic Wayland session"
   else
-    WM_TYPE="x11"
-    log "INFO" "DETECT" "Detected X11 session"
+    WM_TYPE="wayland"
+    log "WARN" "DETECT" "No Wayland session detected; assuming generic Wayland"
   fi
 }
 
@@ -352,27 +336,6 @@ switch_workspace() {
   fi
 
   case "$WM_TYPE" in
-  hyprland)
-    if command -v hyprctl &>/dev/null; then
-      local current=$(hyprctl activeworkspace -j | grep -o '"id": [0-9]*' | grep -o '[0-9]*' || echo "")
-      if [[ "$current" != "$workspace" ]]; then
-        log "INFO" "WORKSPACE" "Switching to workspace $workspace (Hyprland)"
-        hyprctl dispatch workspace "$workspace"
-        sleep 1
-      fi
-    fi
-    ;;
-  niri)
-    if command -v niri >/dev/null 2>&1; then
-      log "INFO" "WORKSPACE" "Switching to workspace $workspace (Niri)"
-      if command -v niri-osc >/dev/null 2>&1; then
-        niri-osc flow legacy -wn "$workspace" || log "WARN" "WORKSPACE" "Niri workspace switch failed"
-      else
-        niri msg action focus-workspace "$workspace" || log "WARN" "WORKSPACE" "Niri workspace switch failed"
-      fi
-      sleep 1
-    fi
-    ;;
   margo)
     if command -v mctl >/dev/null 2>&1; then
       log "INFO" "WORKSPACE" "Switching to workspace $workspace (Margo)"
@@ -381,23 +344,8 @@ switch_workspace() {
       sleep 1
     fi
     ;;
-  mango)
-    if command -v mmsg >/dev/null 2>&1; then
-      log "INFO" "WORKSPACE" "Switching to workspace $workspace (Mango)"
-      mmsg -s -t "$workspace" || log "WARN" "WORKSPACE" "Mango workspace switch failed"
-      sleep 1
-    fi
-    ;;
-  wayland)
+  wayland | *)
     log "INFO" "WORKSPACE" "Skipping workspace switch on generic Wayland session"
-    ;;
-  x11 | *)
-    if [[ -n "${DISPLAY:-}" ]] && command -v wmctrl >/dev/null 2>&1; then
-      local target_workspace=$((workspace - 1))
-      log "INFO" "WORKSPACE" "Switching to workspace $workspace (wmctrl)"
-      wmctrl -s "$target_workspace" || log "WARN" "WORKSPACE" "wmctrl workspace switch failed"
-      sleep 1
-    fi
     ;;
   esac
 }
@@ -407,137 +355,18 @@ focus_tmuxkenp_best_effort() {
     return 0
   fi
 
-  case "$WM_TYPE" in
-  hyprland)
-    if command -v hyprctl >/dev/null 2>&1; then
-      # Önce class ile dene, olmazsa title ile yakala.
-      hyprctl dispatch focuswindow "class:^TmuxKenp$" >/dev/null 2>&1 ||
-        hyprctl dispatch focuswindow "title:^Tmux$" >/dev/null 2>&1 || true
-    fi
-    ;;
-  niri | *)
-    # Niri'de workspace 2'ye geçmek genelde yeterli (aktif pencere otomatik odaklanır).
-    true
-    ;;
-  esac
+  # Margo / generic Wayland: switching to the target workspace is enough
+  # (the active window is focused automatically). No focus-by-class API used.
+  true
 }
 
 is_app_running() {
   local profile="$1"
   local search_pattern="${2:-}"
-  local clients_json=""
 
-  # For managed profiles, prefer window checks on Hyprland.
-  if [[ "$WM_TYPE" == "hyprland" ]] && command -v hyprctl &>/dev/null && command -v jq &>/dev/null; then
-    clients_json=$(hyprctl clients -j 2>/dev/null || true)
-
-    if [[ -n "$clients_json" ]]; then
-      case "$profile" in
-      kkenp | mkenp)
-        jq -e '.[] | select((.class // "") == "TmuxKenp")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      kitty-single)
-        jq -e '.[] | select((.class // "") == "kitty")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      rmpc)
-        jq -e '.[] | select((.class // "") == "rmpc")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-kenp)
-        jq -e '.[] | select((.class // "") == "kenp" or (.initialTitle // "") == "kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-nil)
-        jq -e '.[] | select((.class // "") == "nil" or (.initialTitle // "") == "nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-ai)
-        jq -e '.[] | select((.class // "") == "ai" or (.initialTitle // "") == "ai Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-compecta)
-        jq -e '.[] | select((.class // "") == "compecta" or (.initialTitle // "") == "compecta Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-whats)
-        jq -e '.[] | select((.class // "") == "whats" or (.initialTitle // "") == "whats Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-exclude)
-        jq -e '.[] | select((.class // "") == "exclude" or (.initialTitle // "") == "exclude Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-youtube)
-        jq -e '.[] | select((.class // "") | test("helium-youtube|youtube"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-tiktok)
-        jq -e '.[] | select((.class // "") | test("helium-tiktok|tiktok"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-spotify)
-        jq -e '.[] | select((.class // "") | test("helium-spotify|spotify"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-discord)
-        jq -e '.[] | select((.class // "") | test("helium-discord|discord"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      helium-whatsapp)
-        jq -e '.[] | select((.class // "") | test("helium-whatsapp|whatsapp"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-kenp)
-        jq -e '.[] | select((.class // "") == "kenp" or (.initialTitle // "") == "kenp Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-nil)
-        jq -e '.[] | select((.class // "") == "nil" or (.initialTitle // "") == "nil Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-ai)
-        jq -e '.[] | select((.class // "") == "ai" or (.initialTitle // "") == "ai Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-compecta)
-        jq -e '.[] | select((.class // "") == "compecta" or (.initialTitle // "") == "compecta Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-whats)
-        jq -e '.[] | select((.class // "") == "whats" or (.initialTitle // "") == "whats Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-exclude)
-        jq -e '.[] | select((.class // "") == "exclude" or (.initialTitle // "") == "exclude Browser")' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-youtube)
-        jq -e '.[] | select((.class // "") | test("brave-youtube"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-tiktok)
-        jq -e '.[] | select((.class // "") | test("brave-tiktok"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-spotify)
-        jq -e '.[] | select((.class // "") | test("brave-spotify"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-discord)
-        jq -e '.[] | select((.class // "") | test("brave-discord"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      brave-whatsapp)
-        jq -e '.[] | select((.class // "") | test("brave-whatsapp"; "i"))' <<<"$clients_json" >/dev/null 2>&1 && return 0
-        return 1
-        ;;
-      esac
-    fi
-  fi
-
-  # Fallback to process check
+  # margo / generic Wayland have no compositor-side window query wired up here,
+  # so fall back to a process check.
+  # TODO: margo equivalent (per-class window check via mctl, if it grows one)
   if [[ -n "$search_pattern" ]]; then
     pgrep -f "$search_pattern" &>/dev/null
   else
@@ -548,44 +377,17 @@ is_app_running() {
 check_window_on_workspace() {
   local workspace="$1"
   local class_pattern="$2"
-  local timeout="${3:-$APP_TIMEOUT}"
-  local interval="${4:-$CHECK_INTERVAL}"
 
   if [[ "$DRY_RUN" == "true" ]]; then
     return 0
   fi
 
-  # Only Hyprland has window verification
-  if [[ "$WM_TYPE" != "hyprland" ]]; then
-    sleep "$WAIT_TIME"
-    return 0
-  fi
-
-  if ! command -v hyprctl &>/dev/null || ! command -v jq &>/dev/null; then
-    log "WARN" "VERIFY" "hyprctl or jq not available, skipping window verification"
-    sleep "$WAIT_TIME"
-    return 0
-  fi
-
-  local elapsed=0
-  log "INFO" "VERIFY" "Waiting for window (class: $class_pattern) on workspace $workspace (timeout: ${timeout}s)"
-
-  while [[ $elapsed -lt $timeout ]]; do
-    if hyprctl clients -j 2>/dev/null | jq -e ".[] | select(.workspace.id == $workspace and (.class | test(\"$class_pattern\"; \"i\")))" >/dev/null 2>&1; then
-      log "SUCCESS" "VERIFY" "Window found on workspace $workspace after ${elapsed}s"
-      return 0
-    fi
-
-    sleep "$interval"
-    ((elapsed += interval))
-
-    if ((elapsed % 3 == 0)); then
-      log "DEBUG" "VERIFY" "Still waiting... (${elapsed}/${timeout}s)"
-    fi
-  done
-
-  log "WARN" "VERIFY" "Timeout waiting for window on workspace $workspace after ${timeout}s"
-  return 1
+  # Window verification was Hyprland-only; margo / generic Wayland have no
+  # equivalent window-query API wired up here, so just wait for the app to
+  # settle.
+  # TODO: margo equivalent (per-window verification via mctl, if available)
+  sleep "$WAIT_TIME"
+  return 0
 }
 
 get_class_pattern() {
@@ -636,27 +438,9 @@ make_fullscreen() {
     return 0
   fi
 
-  case "$WM_TYPE" in
-  hyprland)
-    if command -v hyprctl &>/dev/null; then
-      log "INFO" "FULLSCREEN" "Making window fullscreen (Hyprland)"
-      sleep 1
-      hyprctl dispatch fullscreen 1
-      sleep 1
-    fi
-    ;;
-  niri)
-    if command -v niri >/dev/null 2>&1; then
-      log "INFO" "FULLSCREEN" "Making window fullscreen (Niri)"
-      sleep 1
-      niri msg action fullscreen-window
-      sleep 1
-    fi
-    ;;
-  *)
-    log "WARN" "FULLSCREEN" "Fullscreen not supported for $WM_TYPE - press F11 manually"
-    ;;
-  esac
+  # No margo / generic Wayland fullscreen automation wired up here.
+  # TODO: margo equivalent (fullscreen dispatch via mctl, if available)
+  log "WARN" "FULLSCREEN" "Fullscreen not automated on $WM_TYPE - press F11 manually"
 }
 
 parse_config() {
@@ -698,8 +482,6 @@ generate_script() {
   [[ -z "$wait" ]] && wait="1"
   [[ -z "$fullscreen" ]] && fullscreen="false"
 
-  local class_pattern=$(get_class_pattern "$profile" "$args")
-
   mkdir -p "$SCRIPTS_DIR"
 
   cat >"$script_path" <<'SCRIPT_HEREDOC_START'
@@ -731,20 +513,11 @@ readonly COMMAND="COMMAND_VALUE"
 readonly ARGS_STR="ARGS_VALUE"
 readonly STATE_DIR="STATE_DIR_VALUE"
 
-# Detect window manager
-if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
-    WM_TYPE="hyprland"
-elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
-    WM_TYPE="niri"
-elif [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
-    # Margo before mango — same protocol family, different IPC client.
+# Detect window manager (margo or generic Wayland)
+if [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
     WM_TYPE="margo"
-elif [[ "${XDG_CURRENT_DESKTOP:-}" == *mango* ]] || (command -v mmsg &>/dev/null && mmsg -g >/dev/null 2>&1); then
-    WM_TYPE="mango"
-elif [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-    WM_TYPE="wayland"
 else
-    WM_TYPE="x11"
+    WM_TYPE="wayland"
 fi
 
 echo "Initializing PROFILE_NAME on $WM_TYPE..."
@@ -760,27 +533,6 @@ fi
 # Switch to workspace
 if [[ "$WORKSPACE" != "0" ]]; then
     case "$WM_TYPE" in
-    hyprland)
-        if command -v hyprctl >/dev/null 2>&1; then
-            CURRENT=$(hyprctl activeworkspace -j | grep -o '"id": [0-9]*' | grep -o '[0-9]*' || echo "")
-            if [[ "$CURRENT" != "$WORKSPACE" ]]; then
-                echo "Switching to workspace $WORKSPACE..."
-                hyprctl dispatch workspace "$WORKSPACE"
-                sleep 1
-            fi
-        fi
-        ;;
-    niri)
-        if command -v niri >/dev/null 2>&1; then
-            echo "Switching to workspace $WORKSPACE..."
-            if [[ -x "$HOME/.local/bin/niri-osc" ]]; then
-                "$HOME/.local/bin/niri-osc" flow legacy -wn "$WORKSPACE" || echo "WARNING: Niri workspace switch failed"
-            else
-                niri msg action focus-workspace "$WORKSPACE" || echo "WARNING: Niri workspace switch failed"
-            fi
-            sleep 1
-        fi
-        ;;
     margo)
         if command -v mctl >/dev/null 2>&1; then
             echo "Switching to workspace $WORKSPACE..."
@@ -788,23 +540,8 @@ if [[ "$WORKSPACE" != "0" ]]; then
             sleep 1
         fi
         ;;
-    mango)
-        if command -v mmsg >/dev/null 2>&1; then
-            echo "Switching to workspace $WORKSPACE..."
-            mmsg -s -t "$WORKSPACE" || echo "WARNING: Mango workspace switch failed"
-            sleep 1
-        fi
-        ;;
-    wayland)
+    wayland|*)
         echo "Skipping workspace switch on generic Wayland session..."
-        ;;
-    x11|*)
-        if [[ -n "${DISPLAY:-}" ]] && command -v wmctrl >/dev/null 2>&1; then
-            TARGET=$((WORKSPACE - 1))
-            echo "Switching to workspace $WORKSPACE..."
-            wmctrl -s "$TARGET" || echo "WARNING: wmctrl workspace switch failed"
-            sleep 1
-        fi
         ;;
     esac
 fi
@@ -845,40 +582,16 @@ echo "$APP_PID" > "$STATE_DIR/PROFILE_NAME.pid"
 echo "$COMMAND" > "$STATE_DIR/PROFILE_NAME.cmd"
 echo "Application started (PID: $APP_PID)"
 
-# Window verification (Hyprland only)
-if [[ "$WORKSPACE" != "0" && "$WM_TYPE" == "hyprland" ]] && command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-    echo "Verifying window on workspace $WORKSPACE..."
-    ELAPSED=0
-    CLASS_PATTERN="CLASS_PATTERN_VALUE"
-    
-    while [[ $ELAPSED -lt $APP_TIMEOUT ]]; do
-        if hyprctl clients -j 2>/dev/null | jq -e ".[] | select(.workspace.id == $WORKSPACE and (.class | test(\"$CLASS_PATTERN\"; \"i\")))" >/dev/null 2>&1; then
-            echo "Window verified after ${ELAPSED}s"
-            break
-        fi
-        sleep $CHECK_INTERVAL
-        ((ELAPSED += CHECK_INTERVAL))
-        if ((ELAPSED % 3 == 0)); then
-            echo "Waiting... (${ELAPSED}/${APP_TIMEOUT}s)"
-        fi
-    done
-    
-    [[ $ELAPSED -ge $APP_TIMEOUT ]] && echo "WARNING: Timeout after ${APP_TIMEOUT}s"
-else
-    sleep $WAIT_TIME
-fi
+# Window verification was Hyprland-only; margo / generic Wayland just wait for
+# the app to settle.
+# TODO: margo equivalent (per-window verification via mctl, if available)
+sleep $WAIT_TIME
 
 # Make fullscreen if needed
 if [[ "$FULLSCREEN" == "true" ]]; then
+    # No margo / generic Wayland fullscreen automation; toggle manually (F11).
+    # TODO: margo equivalent (fullscreen dispatch via mctl, if available)
     sleep $WAIT_TIME
-    case "$WM_TYPE" in
-    hyprland)
-        command -v hyprctl >/dev/null 2>&1 && hyprctl dispatch fullscreen 1
-        ;;
-    niri)
-        command -v niri >/dev/null 2>&1 && niri msg action fullscreen-window
-        ;;
-    esac
 fi
 
 echo "PROFILE_NAME initialization complete"
@@ -895,7 +608,6 @@ SCRIPT_HEREDOC_START
   replace_literal_token "$script_path" "WAIT_VALUE" "$wait"
   replace_literal_token "$script_path" "COMMAND_VALUE" "$cmd"
   replace_literal_token "$script_path" "ARGS_VALUE" "$args"
-  replace_literal_token "$script_path" "CLASS_PATTERN_VALUE" "$class_pattern"
   replace_literal_token "$script_path" "STATE_DIR_VALUE" "$STATE_DIR"
 
   chmod +x "$script_path"
@@ -999,60 +711,11 @@ clean_scripts() {
 # Launch Functions
 #-------------------------------------------------------------------------------
 
-# Window verification - ENHANCED
-ensure_windows_on_correct_workspace() {
-  if [[ "$DRY_RUN" == "true" ]]; then
-    return 0
-  fi
-
-  if [[ "$WM_TYPE" != "hyprland" ]]; then
-    return 0
-  fi
-
-  if ! command -v hyprctl &>/dev/null || ! command -v jq &>/dev/null; then
-    log "WARN" "WINDOW" "hyprctl or jq not available, skipping window workspace verification"
-    return 0
-  fi
-
-  log "INFO" "WINDOW" "Ensuring all windows are on correct workspaces..."
-
-  # Define window to workspace mappings - UPDATED based on your layout
-  declare -A WINDOW_WORKSPACE_MAP=(
-    ["TmuxKenp"]="2"                    # Terminal
-    ["kenp"]="1"                        # Main browser (multiple windows possible)
-    ["discord|Discord|WebCord"]="5"     # Discord/WebCord
-    ["helium-youtube.com__-Default|brave-youtube.com__-Default"]="7" # YouTube
-    ["spotify|Spotify"]="8"             # Spotify
-    ["ferdium|Ferdium"]="9"             # Ferdium
-  )
-
-  local moved_count=0
-
-  for class_pattern in "${!WINDOW_WORKSPACE_MAP[@]}"; do
-    local target_workspace="${WINDOW_WORKSPACE_MAP[$class_pattern]}"
-
-    # Check if window exists and move if needed
-    if hyprctl clients -j 2>/dev/null | jq -e ".[] | select(.class | test(\"^($class_pattern)$\"; \"i\"))" >/dev/null 2>&1; then
-      # Only move if window is not already on target workspace
-      local current_workspace=$(hyprctl clients -j 2>/dev/null | jq -r ".[] | select(.class | test(\"^($class_pattern)$\"; \"i\")) | .workspace.id" | head -1)
-
-      if [[ "$current_workspace" != "$target_workspace" ]]; then
-        log "INFO" "WINDOW" "Moving windows matching '$class_pattern' from workspace $current_workspace to $target_workspace"
-        hyprctl dispatch movetoworkspacesilent "${target_workspace},class:^(${class_pattern})$" >/dev/null 2>&1
-        ((moved_count++))
-        sleep 0.5
-      else
-        log "DEBUG" "WINDOW" "Window '$class_pattern' already on correct workspace $target_workspace"
-      fi
-    fi
-  done
-
-  if [[ $moved_count -gt 0 ]]; then
-    log "SUCCESS" "WINDOW" "Moved $moved_count window type(s) to correct workspaces"
-  else
-    log "INFO" "WINDOW" "All windows already on correct workspaces"
-  fi
-}
+# NOTE: window-to-workspace correction was Hyprland-only (hyprctl
+# movetoworkspacesilent) and has no margo equivalent wired up, so it was
+# removed. On margo/generic Wayland, windows land on the workspace that was
+# active when the app was launched.
+# TODO: margo equivalent (move-window-to-tag via mctl, if available)
 
 launch_application() {
   local profile="$1"
@@ -1213,12 +876,6 @@ launch_daily_profiles() {
       fi
     done
 
-    if [[ "$WM_TYPE" == "hyprland" ]]; then
-      log "INFO" "WINDOW" "Verifying window positions..."
-      sleep 2
-      ensure_windows_on_correct_workspace
-    fi
-
     log "INFO" "WORKSPACE" "Switching to default workspace 2"
     switch_workspace "2"
     focus_tmuxkenp_best_effort
@@ -1255,13 +912,6 @@ launch_daily_profiles() {
       sleep 0.5
     fi
   done
-
-  # Ensure all windows are on correct workspaces (Hyprland specific)
-  if [[ "$WM_TYPE" == "hyprland" ]]; then
-    log "INFO" "WINDOW" "Verifying window positions..."
-    sleep 2
-    ensure_windows_on_correct_workspace
-  fi
 
   # Switch to default workspace (2 - Terminal on primary monitor)
   log "INFO" "WORKSPACE" "Switching to default workspace 2"
@@ -1511,8 +1161,7 @@ show_help() {
   echo "    --no-notify           Disable desktop notifications"
   echo
   echo -e "${BOLD}Features:${NC}"
-  echo "    - Auto-detects window manager (Hyprland/Niri/generic)"
-  echo "    - Window verification on Hyprland (requires jq)"
+  echo "    - Auto-detects window manager (Margo / generic Wayland)"
   echo "    - VPN bypass/secure mode support (Mullvad)"
   echo "    - Multi-browser profile support"
   echo "    - Nix expression generator for home-manager integration"
@@ -1683,13 +1332,6 @@ main() {
       exit 1
     fi
 
-    # Ensure all windows are on correct workspaces (Hyprland only)
-    if [[ "$WM_TYPE" == "hyprland" ]]; then
-      log "INFO" "WINDOW" "Verifying window positions..."
-      sleep 2 # Give windows time to fully appear
-      ensure_windows_on_correct_workspace
-    fi
-
     if [[ -n "$FINAL_WORKSPACE" ]]; then
       log "INFO" "WORKSPACE" "Switching to final workspace $FINAL_WORKSPACE"
       switch_workspace "$FINAL_WORKSPACE"
@@ -1720,10 +1362,6 @@ check_dependencies() {
   helium) command -v profile_helium >/dev/null 2>&1 || missing_deps+=("profile_helium") ;;
   brave) command -v profile_brave >/dev/null 2>&1 || missing_deps+=("profile_brave") ;;
   esac
-
-  if [[ "$WM_TYPE" == "hyprland" ]] && ! command -v jq >/dev/null 2>&1; then
-    log "WARN" "DEPS" "jq not found - window verification disabled"
-  fi
 
   if [[ ${#missing_deps[@]} -gt 0 ]]; then
     log "WARN" "DEPS" "Missing: ${missing_deps[*]}"

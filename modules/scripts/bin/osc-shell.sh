@@ -18,12 +18,10 @@ PROFILE_FILE="${PROFILE_DIR}/profile.conf"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/osc-shell"
 
 DEFAULT_BACKEND_DEFAULT="noctalia"
-DEFAULT_BACKEND_NIRI="noctalia"
-DEFAULT_BACKEND_HYPRLAND="noctalia"
+DEFAULT_BACKEND_MARGO="noctalia"
 
 profile_default="$DEFAULT_BACKEND_DEFAULT"
-profile_niri="$DEFAULT_BACKEND_NIRI"
-profile_hyprland="$DEFAULT_BACKEND_HYPRLAND"
+profile_margo="$DEFAULT_BACKEND_MARGO"
 
 IPC_TARGET=""
 IPC_METHOD=""
@@ -57,8 +55,7 @@ notify_msg() {
 
 load_profile() {
   profile_default="$DEFAULT_BACKEND_DEFAULT"
-  profile_niri="$DEFAULT_BACKEND_NIRI"
-  profile_hyprland="$DEFAULT_BACKEND_HYPRLAND"
+  profile_margo="$DEFAULT_BACKEND_MARGO"
 
   [[ -f "$PROFILE_FILE" ]] || return 0
 
@@ -74,8 +71,7 @@ load_profile() {
 
     case "$key" in
       default) profile_default="$val" ;;
-      niri) profile_niri="$val" ;;
-      hyprland) profile_hyprland="$val" ;;
+      margo) profile_margo="$val" ;;
     esac
   done <"$PROFILE_FILE"
 }
@@ -85,58 +81,28 @@ save_profile() {
   cat >"$PROFILE_FILE" <<EOF
 # ${SCRIPT_NAME} profile
 default=${profile_default}
-niri=${profile_niri}
-hyprland=${profile_hyprland}
+margo=${profile_margo}
 EOF
 }
 
 detect_compositor() {
-  # Prefer compositor-specific runtime sockets first; these are reliable even
-  # when XDG desktop/session variables are not populated yet at early startup.
-  if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
-    printf 'niri\n'
-    return 0
-  fi
-  
-  # Check for Niri socket in common runtime dir locations as fallback
-  if [[ -z "${NIRI_SOCKET:-}" && -n "${XDG_RUNTIME_DIR:-}" ]]; then
-    for sock in "${XDG_RUNTIME_DIR}"/niri.*.sock; do
-      [[ -S "$sock" ]] || continue
-      printf 'niri\n'
-      return 0
-    done
-  fi
-
-  if [[ -n "${HYPRLAND_SOCKET:-}" && -S "${HYPRLAND_SOCKET}" ]]; then
-    printf 'hyprland\n'
-    return 0
-  fi
-
-  if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" && -n "${XDG_RUNTIME_DIR:-}" && -d "${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}" ]]; then
-    printf 'hyprland\n'
-    return 0
-  fi
-  
-  # Check for Hyprland socket dir in common runtime dir as fallback
-  if [[ -n "${XDG_RUNTIME_DIR:-}" && -d "${XDG_RUNTIME_DIR}/hypr" ]]; then
-    for dir in "${XDG_RUNTIME_DIR}"/hypr/*; do
-      [[ -d "$dir" ]] || continue
-      printf 'hyprland\n'
-      return 0
-    done
-  fi
-
+  # margo sets XDG_CURRENT_DESKTOP=margo and exposes the `mctl` CLI; either
+  # signal is enough to recognize the session even when other XDG session
+  # variables are not populated yet at early startup.
   local all
   all="$(to_lower "${XDG_CURRENT_DESKTOP:-} ${XDG_SESSION_DESKTOP:-} ${DESKTOP_SESSION:-}")"
 
-  if [[ "$all" == *"niri"* ]]; then
-    printf 'niri\n'
+  if [[ "$all" == *"margo"* ]]; then
+    printf 'margo\n'
     return 0
   fi
-  if [[ "$all" == *"hypr"* ]]; then
-    printf 'hyprland\n'
+
+  if command -v mctl >/dev/null 2>&1 && mctl status >/dev/null 2>&1; then
+    printf 'margo\n'
     return 0
   fi
+
+  # Generic Wayland fallback.
   printf 'default\n'
 }
 
@@ -144,8 +110,7 @@ backend_for_compositor() {
   local comp="$1"
   load_profile
   case "$comp" in
-    niri) printf '%s\n' "$profile_niri" ;;
-    hyprland) printf '%s\n' "$profile_hyprland" ;;
+    margo) printf '%s\n' "$profile_margo" ;;
     *) printf '%s\n' "$profile_default" ;;
   esac
 }
@@ -156,29 +121,24 @@ ensure_systemd_user() {
 }
 
 import_session_environment() {
-  # Keep user service environment aligned with active compositor session.
+  # Keep user service environment aligned with the active Wayland session.
   systemctl --user import-environment \
     XDG_CURRENT_DESKTOP \
     XDG_SESSION_DESKTOP \
     XDG_SESSION_TYPE \
     WAYLAND_DISPLAY \
-    DISPLAY \
-    NIRI_SOCKET \
-    HYPRLAND_INSTANCE_SIGNATURE \
-    HYPRLAND_SOCKET \
-    SWAYSOCK >/dev/null 2>&1 || true
+    DISPLAY >/dev/null 2>&1 || true
 }
 
-wait_for_niri_startup_settle() {
+wait_for_margo_startup_settle() {
   [[ "${OSC_SHELL_STARTUP:-0}" == "1" ]] || return 0
-  [[ "$(detect_compositor)" == "niri" ]] || return 0
+  [[ "$(detect_compositor)" == "margo" ]] || return 0
 
-  # `niri-shell-ensure.service` already starts after bootstrap/session env.
-  # Only give the compositor socket a brief chance to materialize if the
-  # environment was imported slightly ahead of the runtime socket creation.
+  # Only give the margo compositor a brief chance to come up if the session
+  # environment was imported slightly ahead of the compositor being ready.
   local i
   for i in {1..20}; do
-    if [[ -n "${WAYLAND_DISPLAY:-}" && -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+    if [[ -n "${WAYLAND_DISPLAY:-}" ]] && command -v mctl >/dev/null 2>&1 && mctl status >/dev/null 2>&1; then
       return 0
     fi
     sleep 0.05
@@ -192,7 +152,7 @@ ensure_backend() {
     noctalia)
       if ensure_systemd_user; then
         import_session_environment
-        wait_for_niri_startup_settle
+        wait_for_margo_startup_settle
         systemctl --user start noctalia.service >/dev/null 2>&1 || true
       fi
       ;;
@@ -311,15 +271,6 @@ normalize_ipc() {
       ;;
     clipboard:toggle)
       target="plugin:clipper"; method="toggle"; args=()
-      ;;
-    niri:screenshot)
-      target="plugin:screenshot"; method="takeScreenshot"; args=("region")
-      ;;
-    niri:screenshotScreen)
-      target="plugin:screenshot"; method="takeScreenshot"; args=("output")
-      ;;
-    niri:screenshotWindow)
-      target="plugin:screenshot"; method="takeScreenshot"; args=("window")
       ;;
   esac
 
@@ -451,8 +402,7 @@ cmd_profile() {
     show)
       cat <<EOF
 default=${profile_default}
-niri=${profile_niri}
-hyprland=${profile_hyprland}
+margo=${profile_margo}
 active_compositor=$(detect_compositor)
 active_backend=$(backend_for_compositor "$(detect_compositor)")
 EOF
@@ -462,7 +412,7 @@ EOF
       key="$(to_lower "$key")"
       backend="$(to_lower "$backend")"
       [[ -n "$key" && -n "$backend" ]] || {
-        echo "Usage: ${SCRIPT_NAME} profile set <default|niri|hyprland> <noctalia>" >&2
+        echo "Usage: ${SCRIPT_NAME} profile set <default|margo> <noctalia>" >&2
         return 1
       }
       is_backend "$backend" || {
@@ -471,8 +421,7 @@ EOF
       }
       case "$key" in
         default) profile_default="$backend" ;;
-        niri) profile_niri="$backend" ;;
-        hyprland) profile_hyprland="$backend" ;;
+        margo) profile_margo="$backend" ;;
         *)
           echo "Invalid profile key: $key" >&2
           return 1
@@ -485,11 +434,11 @@ EOF
       backend="$(to_lower "$backend")"
       comp="$(to_lower "$comp")"
       is_backend "$backend" || {
-        echo "Usage: ${SCRIPT_NAME} profile use <noctalia> [niri|hyprland|default]" >&2
+        echo "Usage: ${SCRIPT_NAME} profile use <noctalia> [margo|default]" >&2
         return 1
       }
       case "$comp" in
-        niri | hyprland | default)
+        margo | default)
           "$0" profile set "$comp" "$backend"
           ;;
         *)
@@ -510,11 +459,11 @@ cmd_switch() {
   backend="$(to_lower "$backend")"
   comp="$(to_lower "$comp")"
   is_backend "$backend" || {
-    echo "Usage: ${SCRIPT_NAME} switch <noctalia> [niri|hyprland|default]" >&2
+    echo "Usage: ${SCRIPT_NAME} switch <noctalia> [margo|default]" >&2
     return 1
   }
   case "$comp" in
-    niri | hyprland | default) ;;
+    margo | default) ;;
     *)
       echo "Invalid compositor key: $comp" >&2
       return 1
@@ -576,16 +525,16 @@ usage() {
 Usage:
   ${SCRIPT_NAME} backend [compositor]
   ${SCRIPT_NAME} profile show
-  ${SCRIPT_NAME} profile set <default|niri|hyprland> <noctalia>
-  ${SCRIPT_NAME} profile use <noctalia> [niri|hyprland|default]
-  ${SCRIPT_NAME} switch <noctalia> [niri|hyprland|default]
+  ${SCRIPT_NAME} profile set <default|margo> <noctalia>
+  ${SCRIPT_NAME} profile use <noctalia> [margo|default]
+  ${SCRIPT_NAME} switch <noctalia> [margo|default]
   ${SCRIPT_NAME} ensure [noctalia]
   ${SCRIPT_NAME} ipc show
   ${SCRIPT_NAME} ipc call <target> <method> [args...]
 
 Examples:
   ${SCRIPT_NAME} profile show
-  ${SCRIPT_NAME} switch noctalia niri
+  ${SCRIPT_NAME} switch noctalia margo
   ${SCRIPT_NAME} ipc call launcher toggle
   ${SCRIPT_NAME} ipc call plugin:clipper toggle
 EOF

@@ -6,20 +6,11 @@
 # ==============================================================================
 set -euo pipefail
 
-# When invoked from a systemd --user service (e.g. DMS), the process may not be
-# associated with a logind session. In that case, logind-mediated actions like
-# `systemctl reboot/poweroff` can fail with "Caller does not belong to any known session."
-# Work around it by re-executing the command via Hyprland so it runs inside the
-# compositor session cgroup.
-if [[ "${OSC_SAFE_REBOOT_REEXEC:-0}" != "1" ]] && [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && [[ -z "${XDG_SESSION_ID:-}" ]]; then
-  if command -v hyprctl >/dev/null 2>&1; then
-    export OSC_SAFE_REBOOT_REEXEC=1
-    self="$(command -v osc-safe-reboot 2>/dev/null || true)"
-    [[ -n "${self:-}" ]] || self="$0"
-    hyprctl dispatch exec "env OSC_SAFE_REBOOT_REEXEC=1 ${self}" >/dev/null 2>&1 || true
-    exit 0
-  fi
-fi
+# TODO(margo): When invoked from a systemd --user service that isn't tied to a
+# logind session, `systemctl reboot/poweroff` can fail with "Caller does not
+# belong to any known session." The old Hyprland re-exec workaround was removed
+# (margo-only cleanup); reboot_with_fallbacks() below now covers the session-less
+# case via `-i`/`-f`/sudo. If a margo-native re-exec is ever needed, gate it here.
 
 #--- Ayarlar -------------------------------------------------------------------
 GRACE_PATTERNS=("brave" "chromium" "helium-browser" "helium-wrapper" "/opt/helium-browser-bin/helium")

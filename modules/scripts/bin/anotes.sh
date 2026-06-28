@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-# Niri/DM launches may provide a minimal PATH; normalize it so helper binaries
+# Compositor/DM launches may provide a minimal PATH; normalize it so helper binaries
 # (anote, kitty/alacritty/foot, etc.) are always discoverable.
 for path_entry in "$HOME/.local/bin" "$HOME/bin" /usr/local/bin /usr/bin /bin; do
   case ":${PATH:-}:" in

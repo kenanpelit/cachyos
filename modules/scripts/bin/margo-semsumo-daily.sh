@@ -32,8 +32,8 @@ SEMSUMO_DAILY_POWER_PROFILE="${SEMSUMO_DAILY_POWER_PROFILE:-performance}"
 
 # ── Margo guard ─────────────────────────────────────────────────────────────
 # Refuse to run on non-margo sessions; the upstream `semsumo-daily.sh`
-# handles hyprland/niri/generic. Avoids accidental dual-launch when the
-# bind survives a session-manager switch.
+# handles the generic Wayland fallback. Avoids accidental dual-launch when
+# the bind survives a session-manager switch.
 case "${XDG_CURRENT_DESKTOP:-}" in
 *margo* | *Margo*) ;;
 *)

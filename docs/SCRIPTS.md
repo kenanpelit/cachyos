@@ -150,13 +150,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `mpv-manager`
-**Description:** Compositor-aware MPV helper for window management and IPC control.
-
-**Usage:** `mpv-manager.sh [start|playback|play-yt|save-yt|move|stick|top|wallpaper]`
-
----
-
 ### 📂 `ntodo`
 **Description:** Simple todo list manager with XDG storage support.
 
@@ -245,13 +238,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 **Description:** Integrated Mullvad VPN Manager for connection and relay control.
 
 **Usage:** `osc-mullvad.sh [COMMAND] [ARGUMENTS]`
-
----
-
-### 📂 `osc-ndrop`
-**Description:** Toggle a "drop-down" style window for Niri, Hyprland, and GNOME.
-
-**Usage:** `osc-ndrop.sh [OPTIONS] <command...>`
 
 ---
 

@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-delay="${OSC_LOGIN_PROMPTS_DELAY:-${NIRI_BOOT_PROMPT_DELAY:-6}}"
+delay="${OSC_LOGIN_PROMPTS_DELAY:-6}"
 gpg_pass_entry="${OSC_GPG_PASS_ENTRY:-kenp/gnupg}"
 login_pass_entry="${OSC_LOGIN_PASS_ENTRY:-kenp/login}"
 notify_enabled="${OSC_LOGIN_PROMPTS_NOTIFY:-1}"
@@ -19,7 +19,7 @@ bootstrap_login_file="${OSC_LOGIN_BOOTSTRAP_FILE:-${bootstrap_dir}/login.pass}"
 log_enabled="${OSC_LOGIN_PROMPTS_LOG:-1}"
 log_dir="${OSC_LOGIN_PROMPTS_LOG_DIR:-$HOME/.logs}"
 log_file="${OSC_LOGIN_PROMPTS_LOG_FILE:-${log_dir}/osc-login-prompts.log}"
-session_name="${OSC_LOGIN_PROMPTS_SESSION:-Niri Login}"
+session_name="${OSC_LOGIN_PROMPTS_SESSION:-Margo Login}"
 once_enabled=0
 
 runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
@@ -107,7 +107,7 @@ notify() {
 warn_missing_bootstrap_file() {
   local label="${1:-Bootstrap}" path="${2:-}"
   [[ -n "${path}" ]] || return 0
-  notify "normal" "Niri Login" "${label} dosyasi bulunamadi: ${path}"
+  notify "normal" "Margo Login" "${label} dosyasi bulunamadi: ${path}"
   log_line "WARN" "${label} dosyasi bulunamadi: ${path}"
 }
 
@@ -131,8 +131,8 @@ unlock_gpg_with_passphrase() {
   [[ -n "${gpg_passphrase}" ]] || return 1
   command -v gpg >/dev/null 2>&1 || return 1
 
-  local tmp_file="/tmp/.niri-gpg-test-$$.asc"
-  if printf "niri-boot\n" \
+  local tmp_file="/tmp/.margo-gpg-test-$$.asc"
+  if printf "margo-boot\n" \
     | gpg --batch --yes --no-tty --pinentry-mode loopback \
       --passphrase "${gpg_passphrase}" \
       --clearsign --output "${tmp_file}" >/dev/null 2>&1; then

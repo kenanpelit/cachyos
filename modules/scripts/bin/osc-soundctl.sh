@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-soundctl.sh
-# Description: HyprFlow PipeWire Audio Switcher for Hyprland/Wayland
+# Description: HyprFlow PipeWire Audio Switcher for Margo/Wayland
 # Usage: osc-soundctl.sh [options]
 # ==============================================================================
 
