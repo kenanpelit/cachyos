@@ -1,9 +1,33 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# AnyDesk launcher wrapper (portable)
+#
+#   - applies the desktop's GTK/Qt theme so AnyDesk's window/tray match
+#   - normalizes an `anydesk:` / `anydesk://` URI down to the bare address
+#     AnyDesk expects (used as the x-scheme-handler/anydesk URL handler)
+#   - launches DETACHED and quiet, so a terminal or URL click returns
+#     immediately and AnyDesk's harmless `domainname -A` startup probe
+#     doesn't spam stderr
+set -eu
 
-# AnyDesk wrapper (portable)
 export GTK_THEME="Catppuccin-Mocha-Blue-Standard"
 export QT_STYLE_OVERRIDE="kvantum"
 export GDK_BACKEND="x11"
 
-exec anydesk "$@"
+bin=$(command -v anydesk) || {
+	echo "run-anydesk: 'anydesk' not found in PATH" >&2
+	exit 127
+}
+
+# Map anydesk: / anydesk:// URIs to a plain ID/address; pass other args through.
+args=()
+for a in "$@"; do
+	case "$a" in
+	anydesk://*) a=${a#anydesk://} ;;
+	anydesk:*) a=${a#anydesk:} ;;
+	esac
+	a=${a%/} # strip any trailing slash
+	[ -n "$a" ] && args+=("$a")
+done
+
+# Detach from the controlling terminal and silence startup chatter.
+exec setsid -f "$bin" ${args[@]+"${args[@]}"} >/dev/null 2>&1
