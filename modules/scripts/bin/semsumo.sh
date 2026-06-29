@@ -164,7 +164,7 @@ declare -A INCOGNITO_BROWSERS=(
 declare -A APPS=(
   ["discord"]="discord|-m --class=discord --title=discord|5|secure|1|true"
   ["webcord"]="webcord|--class=WebCord --title=Webcord|5|secure|1|false"
-  ["spotify"]="spotify|--class Spotify -T Spotify|8|bypass|1|false"
+  ["spotify"]="spotify|--class Spotify -T Spotify --enable-features=UseOzonePlatform --ozone-platform=wayland|8|bypass|1|false"
   ["mpv"]="mpv|--player-operation-mode=pseudo-gui --input-ipc-server=/tmp/mpvsocket|6|bypass|1|true"
   ["ferdium"]="ferdium||9|secure|1|false"
   ["telegram"]="Telegram||6|secure|1|false"

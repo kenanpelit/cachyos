@@ -23,7 +23,7 @@ readonly VPN_MODE="bypass"
 readonly FULLSCREEN=false
 readonly WAIT_TIME=1
 readonly COMMAND="spotify"
-readonly ARGS_STR="--class Spotify -T Spotify"
+readonly ARGS_STR="--class Spotify -T Spotify --enable-features=UseOzonePlatform --ozone-platform=wayland"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
 # Detect window manager
