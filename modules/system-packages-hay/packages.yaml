@@ -1,232 +1,231 @@
 description: Packages installed manually on the system (auto-synced by dcli)
 packages:
-- accountsservice
-- adwaita-icon-theme
-- alacritty
-- alsa-firmware
-- alsa-plugins
-- antigravity
-- awesome-terminal-fonts
-- bemenu
-- bemenu-wayland
-- bluez-hid2hci
-- bluez-libs
-- browserpass-chromium
-- btrfs-progs
-- cachyos-alacritty-config
-- cachyos-fish-config
-- cachyos-grub-theme
-- cachyos-hello
-- cachyos-hooks
-- cachyos-kernel-manager
-- cachyos-keyring
-- cachyos-micro-settings
-- cachyos-mirrorlist
-- cachyos-nord-gtk-theme-git
-- cachyos-packageinstaller
-- cachyos-plymouth-bootanimation
-- cachyos-rate-mirrors
-- cachyos-settings
-- cachyos-v3-mirrorlist
-- cachyos-v4-mirrorlist
-- cachyos-wallpapers
-- cage
-- cantarell-fonts
-- capitaine-cursors
-- ccache
-- chaotic-keyring
-- chaotic-mirrorlist
-- chwd
-- cloc
-- cpio
-- cryptsetup
-- dcli-arch-git
-- device-mapper
-- dhclient
-- diffutils
-- direnv
-- discord
-- distro-grub-themes-arch
-- dmraid
-- dnsmasq
-- dolphin
-- dosfstools
-- e2fsprogs
-- efitools
-- evtest
-- exfatprogs
-- f2fs-tools
-- fabric-ai
-- ffmpegthumbnailer
-- fsarchiver
-- fwupd
-- gist
-- github-cli
-- globalprotect-openconnect
-- gnome-settings-daemon
-- gnome-themes-extra
-- gp-saml-gui-git
-- grub-btrfs-support
-- grub-hook
-- gst-libav
-- gst-plugin-pipewire
-- gst-plugin-va
-- gst-plugins-bad
-- gst-plugins-ugly
-- gvfs
-- gvfs-afc
-- gvfs-dnssd
-- gvfs-goa
-- gvfs-gphoto2
-- gvfs-mtp
-- gvfs-nfs
-- gvfs-onedrive
-- gvfs-smb
-- gvfs-wsdd
-- haveged
-- hdparm
-- hwdetect
-- inetutils
-- intel-media-driver
-- inter-font
-- name: io.ente.auth
-  type: flatpak
-- iptables
-- iwd
-- jfsutils
-- kittyfetch
-- kora-icon-theme
-- kvantum-theme-nordic-git
-- less
-- lib32-mesa
-- lib32-opencl-mesa
-- lib32-vulkan-intel
-- libdvdcss
-- libgsf
-- libnma
-- libopenraw
-- libsimple
-- libwebp-utils
-- libwnck3
-- lidm-git
-- lidm-systemd-git
-- linux-cachyos-bore-lto
-- linux-cachyos-bore-lto-headers
-- linux-meteor-lto
-- linux-meteor-lto-headers
-- logrotate
-- lsscsi
-- lvm2
-- malcontent
-- mdadm
-- meld
-- mesa-utils
-- micro
-- modemmanager
-- modprobed-db
-- mpv-mpris
-- mpvpaper
-- mtools
-- mullvad-browser-bin
-- mynav
-- nano
-- nano-syntax-highlighting
-- neovim-symlinks
-- nerd-fonts-inter
-- netctl
-- nethogs
-- networkmanager-openvpn
-- nfs-utils
-- nilfs-utils
-- nirimod-git
-- noto-color-emoji-fontconfig
-- nss-mdns
-- ntfs-3g
-- ntp
-- octopi
-- openbsd-netcat
-- opencl-mesa
-- name: org.ferdium.Ferdium
-  type: flatpak
-- name: org.freedesktop.Platform
-  type: flatpak
-- name: org.freedesktop.Platform.GL.default
-  type: flatpak
-- name: org.freedesktop.Platform.VAAPI.Intel
-  type: flatpak
-- name: org.freedesktop.Platform.codecs-extra
-  type: flatpak
-- name: org.gnome.Platform
-  type: flatpak
-- otf-font-awesome
-- pamixer
-- papers
-- pavucontrol
-- perf
-- perl
-- pipewire-alsa
-- pipewire-pulse
-- playerctl
-- plymouth
-- podman-tui-bin
-- polkit-kde-agent
-- poppler-glib
-- power-profiles-daemon
-- pv
-- python-defusedxml
-- python-packaging
-- qt6-wayland
-- rtkit
-- rust-bindgen
-- s-nail
-- sddm
-- sesh-bin
-- sg3_utils
-- smartmontools
-- snapper-gui-git
-- snapper-tools
-- socat
-- sof-firmware
-- statis
-- swaylock-effects-git
-- swaylock-fancy-git
-- sysfsutils
-- texinfo
-- tokei
-- ttf-bitstream-vera
-- ttf-fantasque-nerd
-- ttf-fira-sans
-- ttf-hack
-- ttf-jetbrains-maple-mono-nf-xx-xx
-- ttf-jetbrains-mono-nerd
-- ttf-meslo-nerd
-- unrar
-- update-grub
-- upower
-- urlscan
-- usb_modeswitch
-- vlc
-- vlc-gui-skins2
-- vlc-plugins-all
-- vpl-gpu-rt
-- vulkan-intel
-- webkit2gtk-bin
-- which
-- wireless-regdb
-- wofi
-- wpa_supplicant
-- xdg-user-dirs-gtk
-- xf86-input-libinput
-- xfsprogs
-- xl2tpd
-- xorg-xdpyinfo
-- xorg-xinput
-- xorg-xlsclients
-- zapzap
-- zathura
-- zathura-pdf-poppler
-- zip
-- zsh-history-substring-search
+  - accountsservice
+  - adwaita-icon-theme
+  - alacritty
+  - alsa-firmware
+  - alsa-plugins
+  - antigravity
+  - awesome-terminal-fonts
+  - bemenu
+  - bemenu-wayland
+  - bluez-hid2hci
+  - bluez-libs
+  - browserpass-chromium
+  - btrfs-progs
+  - cachyos-alacritty-config
+  - cachyos-fish-config
+  - cachyos-grub-theme
+  - cachyos-hello
+  - cachyos-hooks
+  - cachyos-kernel-manager
+  - cachyos-keyring
+  - cachyos-micro-settings
+  - cachyos-mirrorlist
+  - cachyos-nord-gtk-theme-git
+  - cachyos-packageinstaller
+  - cachyos-plymouth-bootanimation
+  - cachyos-rate-mirrors
+  - cachyos-settings
+  - cachyos-v3-mirrorlist
+  - cachyos-v4-mirrorlist
+  - cachyos-wallpapers
+  - cage
+  - cantarell-fonts
+  - capitaine-cursors
+  - ccache
+  - chaotic-keyring
+  - chaotic-mirrorlist
+  - chwd
+  - cloc
+  - cpio
+  - cryptsetup
+  - device-mapper
+  - dhclient
+  - diffutils
+  - direnv
+  - discord
+  - distro-grub-themes-arch
+  - dmraid
+  - dnsmasq
+  - dolphin
+  - dosfstools
+  - e2fsprogs
+  - efitools
+  - evtest
+  - exfatprogs
+  - f2fs-tools
+  - fabric-ai
+  - ffmpegthumbnailer
+  - fsarchiver
+  - fwupd
+  - gist
+  - github-cli
+  - globalprotect-openconnect
+  - gnome-settings-daemon
+  - gnome-themes-extra
+  - gp-saml-gui-git
+  - grub-btrfs-support
+  - grub-hook
+  - gst-libav
+  - gst-plugin-pipewire
+  - gst-plugin-va
+  - gst-plugins-bad
+  - gst-plugins-ugly
+  - gvfs
+  - gvfs-afc
+  - gvfs-dnssd
+  - gvfs-goa
+  - gvfs-gphoto2
+  - gvfs-mtp
+  - gvfs-nfs
+  - gvfs-onedrive
+  - gvfs-smb
+  - gvfs-wsdd
+  - haveged
+  - hdparm
+  - hwdetect
+  - inetutils
+  - intel-media-driver
+  - inter-font
+  - name: io.ente.auth
+    type: flatpak
+  - iptables
+  - iwd
+  - jfsutils
+  - kittyfetch
+  - kora-icon-theme
+  - kvantum-theme-nordic-git
+  - less
+  - lib32-mesa
+  - lib32-opencl-mesa
+  - lib32-vulkan-intel
+  - libdvdcss
+  - libgsf
+  - libnma
+  - libopenraw
+  - libsimple
+  - libwebp-utils
+  - libwnck3
+  - lidm-git
+  - lidm-systemd-git
+  - linux-cachyos-bore-lto
+  - linux-cachyos-bore-lto-headers
+  - linux-meteor-lto
+  - linux-meteor-lto-headers
+  - logrotate
+  - lsscsi
+  - lvm2
+  - malcontent
+  - mdadm
+  - meld
+  - mesa-utils
+  - micro
+  - modemmanager
+  - modprobed-db
+  - mpv-mpris
+  - mpvpaper
+  - mtools
+  - mullvad-browser-bin
+  - mynav
+  - nano
+  - nano-syntax-highlighting
+  - neovim-symlinks
+  - nerd-fonts-inter
+  - netctl
+  - nethogs
+  - networkmanager-openvpn
+  - nfs-utils
+  - nilfs-utils
+  - nirimod-git
+  - noto-color-emoji-fontconfig
+  - nss-mdns
+  - ntfs-3g
+  - ntp
+  - octopi
+  - openbsd-netcat
+  - opencl-mesa
+  - name: org.ferdium.Ferdium
+    type: flatpak
+  - name: org.freedesktop.Platform
+    type: flatpak
+  - name: org.freedesktop.Platform.GL.default
+    type: flatpak
+  - name: org.freedesktop.Platform.VAAPI.Intel
+    type: flatpak
+  - name: org.freedesktop.Platform.codecs-extra
+    type: flatpak
+  - name: org.gnome.Platform
+    type: flatpak
+  - otf-font-awesome
+  - pamixer
+  - papers
+  - pavucontrol
+  - perf
+  - perl
+  - pipewire-alsa
+  - pipewire-pulse
+  - playerctl
+  - plymouth
+  - podman-tui-bin
+  - polkit-kde-agent
+  - poppler-glib
+  - power-profiles-daemon
+  - pv
+  - python-defusedxml
+  - python-packaging
+  - qt6-wayland
+  - rtkit
+  - rust-bindgen
+  - s-nail
+  - sddm
+  - sesh-bin
+  - sg3_utils
+  - smartmontools
+  - snapper-gui-git
+  - snapper-tools
+  - socat
+  - sof-firmware
+  - statis
+  - swaylock-effects-git
+  - swaylock-fancy-git
+  - sysfsutils
+  - texinfo
+  - tokei
+  - ttf-bitstream-vera
+  - ttf-fantasque-nerd
+  - ttf-fira-sans
+  - ttf-hack
+  - ttf-jetbrains-maple-mono-nf-xx-xx
+  - ttf-jetbrains-mono-nerd
+  - ttf-meslo-nerd
+  - unrar
+  - update-grub
+  - upower
+  - urlscan
+  - usb_modeswitch
+  - vlc
+  - vlc-gui-skins2
+  - vlc-plugins-all
+  - vpl-gpu-rt
+  - vulkan-intel
+  - webkit2gtk-bin
+  - which
+  - wireless-regdb
+  - wofi
+  - wpa_supplicant
+  - xdg-user-dirs-gtk
+  - xf86-input-libinput
+  - xfsprogs
+  - xl2tpd
+  - xorg-xdpyinfo
+  - xorg-xinput
+  - xorg-xlsclients
+  - zapzap
+  - zathura
+  - zathura-pdf-poppler
+  - zip
+  - zsh-history-substring-search
 deb_packages: []
 exclude: []
 conflicts: []
