@@ -22,7 +22,7 @@ find_repo_root() {
 
   [[ -n "${DCLI_REPO_ROOT:-}" ]] && candidates+=("${DCLI_REPO_ROOT}")
   [[ -n "${ARCH_CONFIG_ROOT:-}" ]] && candidates+=("${ARCH_CONFIG_ROOT}")
-  candidates+=("${SCRIPT_DIR}" "$(pwd -P)" "${HOME}/.cachy" "${HOME}/.config/dcli")
+  candidates+=("${SCRIPT_DIR}" "$(pwd -P)" "${HOME}/.cachy" "${HOME}/.config/mdots")
 
   for candidate in "${candidates[@]}"; do
     [[ -n "$candidate" ]] || continue

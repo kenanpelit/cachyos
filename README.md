@@ -53,7 +53,7 @@ The system includes a suite of custom-engineered operational tools:
 
 - **`niri-osc` / `hypr-osc`**: Advanced compositor control suites.
 - **`osc-shell`**: Unified router for desktop IPC actions and state management.
-- **`dcli-docgen`**: Automatic documentation engine for local scripts.
+- **`mdots-docgen`**: Automatic documentation engine for local scripts.
 - **`vv`**: Optimized daily journaling and scratchpad manager.
 
 > [!TIP]
@@ -67,13 +67,13 @@ The system includes a suite of custom-engineered operational tools:
 ```bash
 git clone --recurse-submodules https://github.com/kenanpelit/cachyos.git ~/.cachy
 mkdir -p ~/.config
-ln -sfn ~/.cachy ~/.config/dcli
+ln -sfn ~/.cachy ~/.config/mdots
 ```
 
 ### 2. Synchronize State
 ```bash
 cd ~/.cachy
-sudo -E dcli sync
+sudo -E mdots sync
 ```
 
 ## ⌨️ Keyboard Layout Warning
@@ -84,7 +84,7 @@ This repo is opinionated about keyboard defaults and assumes **Turkish F** unles
 - **Niri**: `layout "tr"` + `variant "f"`
 - **Hyprland**: `kb_layout=tr` + `kb_variant=f`
 
-If you do **not** use Turkish F, change the layout before your first serious `dcli sync`. Otherwise you can end up with mixed keyboard behavior between TTY, Lemurs/LiDM, Niri, and Hyprland.
+If you do **not** use Turkish F, change the layout before your first serious `mdots sync`. Otherwise you can end up with mixed keyboard behavior between TTY, Lemurs/LiDM, Niri, and Hyprland.
 
 Current source locations:
 
@@ -126,7 +126,7 @@ What it updates:
 After changing layout:
 
 ```bash
-sudo -E dcli sync
+sudo -E mdots sync
 ```
 
 Notes:
@@ -189,7 +189,7 @@ instead of inheriting the compositor process tree directly.
 
 **Update and Rebase System:**
 ```bash
-git pull --rebase && git submodule update --init --recursive && sudo -E dcli sync
+git pull --rebase && git submodule update --init --recursive && sudo -E mdots sync
 ```
 
 **Validate Configurations:**

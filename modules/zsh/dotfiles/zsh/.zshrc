@@ -515,9 +515,9 @@ _safe_compinit
 # Allows bash completion scripts to work in ZSH
 autoload -Uz bashcompinit && bashcompinit
 
-# Bind dcli completion explicitly (after compinit)
-autoload -Uz _dcli 2>/dev/null || true
-(( $+functions[_dcli] )) && compdef _dcli dcli
+# Bind mdots completion explicitly (after compinit)
+autoload -Uz _mdots 2>/dev/null || true
+(( $+functions[_mdots] )) && compdef _mdots mdots
 
 # Bind osc-net completion explicitly for cached compinit sessions too.
 autoload -Uz _osc-net 2>/dev/null || true

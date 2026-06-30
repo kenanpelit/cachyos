@@ -11,10 +11,10 @@ export XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME XDG_STATE_HOME
 
 # Keep zsh config under XDG.
 export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
-# dcli: declarative config repo lives at ~/.cachy, reached via the ~/.config/dcli
+# mdots: declarative config repo lives at ~/.cachy, reached via the ~/.config/mdots
 # symlink (the canonical config path).
-export DCLI_CONFIG_DIR="$HOME/.config/dcli"
-export DCLI_SOPS_KEY_PATH="$HOME/.config/sops/age/keys.txt"
+export MDOTS_CONFIG_DIR="$HOME/.config/mdots"
+export MDOTS_SOPS_KEY_PATH="$HOME/.config/sops/age/keys.txt"
 
 # Environment variables
 # Only source this once

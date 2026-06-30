@@ -78,8 +78,8 @@ atomic_symlink() {
   local tmp
 
   # Canonicalize the target so the link is identical no matter whether the repo
-  # is reached via ~/.cachy or the ~/.config/dcli symlink (avoids churn
-  # between manual and dcli-driven runs).
+  # is reached via ~/.cachy or the ~/.config/mdots symlink (avoids churn
+  # between manual and mdots-driven runs).
   src="$(realpath "$src" 2>/dev/null || echo "$src")"
 
   if is_correct_symlink "$src" "$dst"; then
@@ -282,9 +282,9 @@ main() {
   echo "Scripts install summary: $installed_count updated, $skipped_count unchanged"
   
   # Auto-generate documentation
-  if [[ -x "$module_root/bin/dcli-docgen" ]]; then
+  if [[ -x "$module_root/bin/mdots-docgen" ]]; then
     echo "Generating script documentation..."
-    "$module_root/bin/dcli-docgen" || true
+    "$module_root/bin/mdots-docgen" || true
   fi
 }
 

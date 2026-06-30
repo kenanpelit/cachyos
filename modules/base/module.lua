@@ -1,4 +1,4 @@
-local chassis = dcli.hardware.chassis_type()
+local chassis = mdots.hardware.chassis_type()
 local package_files = { "packages-core.yaml" }
 local post_install_hook = nil
 

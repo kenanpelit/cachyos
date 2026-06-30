@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script: dcli-cleanup.sh
+# Script: mdots-cleanup.sh
 # Description: Cleans up empty directories and unused structures in ~/.cachy.
-# Usage: dcli-cleanup.sh [options]
+# Usage: mdots-cleanup.sh [options]
 # ==============================================================================
 
 set -euo pipefail
