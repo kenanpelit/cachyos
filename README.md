@@ -67,7 +67,7 @@ The system includes a suite of custom-engineered operational tools:
 ```bash
 git clone --recurse-submodules https://github.com/kenanpelit/cachyos.git ~/.cachy
 mkdir -p ~/.config
-ln -sfn ~/.cachy ~/.config/arch-config
+ln -sfn ~/.cachy ~/.config/dcli
 ```
 
 ### 2. Synchronize State

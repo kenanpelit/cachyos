@@ -112,7 +112,7 @@ looks_repo_backed() {
   local target="$1"
   local resolved
   resolved="$(realpath -m "$target" 2>/dev/null || printf '%s' "$target")"
-  [[ "$resolved" == "$HOME/.config/arch-config/"* || "$resolved" == "$HOME/.cachy/"* ]]
+  [[ "$resolved" == "$HOME/.config/dcli/"* || "$resolved" == "$HOME/.cachy/"* ]]
 }
 
 has_browser_root() {

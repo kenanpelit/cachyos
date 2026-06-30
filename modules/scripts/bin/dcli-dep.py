@@ -11,7 +11,7 @@ import argparse
 from pathlib import Path
 
 # Configuration paths
-CONFIG_DIR = Path.home() / ".config/arch-config"
+CONFIG_DIR = Path.home() / ".config/dcli"
 if "ARCH_CONFIG_DIR" in os.environ:
     CONFIG_DIR = Path(os.environ["ARCH_CONFIG_DIR"])
 

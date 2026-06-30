@@ -78,7 +78,7 @@ atomic_symlink() {
   local tmp
 
   # Canonicalize the target so the link is identical no matter whether the repo
-  # is reached via ~/.cachy or the ~/.config/arch-config symlink (avoids churn
+  # is reached via ~/.cachy or the ~/.config/dcli symlink (avoids churn
   # between manual and dcli-driven runs).
   src="$(realpath "$src" 2>/dev/null || echo "$src")"
 

@@ -51,7 +51,7 @@ find_repo_root() {
 
   [[ -n "${DCLI_REPO_ROOT:-}" ]] && candidates+=("${DCLI_REPO_ROOT}")
   [[ -n "${ARCH_CONFIG_ROOT:-}" ]] && candidates+=("${ARCH_CONFIG_ROOT}")
-  candidates+=("${SCRIPT_DIR}" "$(pwd -P)" "${HOME}/.cachy" "${HOME}/.config/arch-config")
+  candidates+=("${SCRIPT_DIR}" "$(pwd -P)" "${HOME}/.cachy" "${HOME}/.config/dcli")
 
   for candidate in "${candidates[@]}"; do
     [[ -n "$candidate" ]] || continue
