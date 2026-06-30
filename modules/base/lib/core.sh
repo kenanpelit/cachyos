@@ -112,11 +112,13 @@ safe_install() {
 }
 
 # --- Logging ---
-# Standardized logging output
-log_info() { echo -e "\033[0;34m[INFO]\033[0m $*"; }
-log_success() { echo -e "\033[0;32m[SUCCESS]\033[0m $*"; }
-log_warn() { echo -e "\033[1;33m[WARN]\033[0m $*" >&2; }
-log_error() { echo -e "\033[0;31m[ERROR]\033[0m $*" >&2; }
+# Glyph-prefixed, consistent with `dcli sync` output. When invoked as a dcli
+# hook, dcli exports DCLI_LOG_INDENT so these lines align under its detail
+# column; standalone the variable is unset and the lines start at the margin.
+log_info() { echo -e "${DCLI_LOG_INDENT:-}\033[0;36m→\033[0m $*"; }
+log_success() { echo -e "${DCLI_LOG_INDENT:-}\033[0;32m✓\033[0m $*"; }
+log_warn() { echo -e "${DCLI_LOG_INDENT:-}\033[1;33m⚠\033[0m $*" >&2; }
+log_error() { echo -e "${DCLI_LOG_INDENT:-}\033[0;31m✗\033[0m $*" >&2; }
 die() { log_error "$*"; exit 1; }
 
 # Initialize common variables for sourcing scripts
