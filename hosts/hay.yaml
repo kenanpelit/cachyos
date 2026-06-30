@@ -1,5 +1,5 @@
 host: hay
-description: CachyOS setup (ported from nixosc via dcli)
+description: CachyOS setup (ported from nixosc via mdots)
 enabled_modules:
   - base
   - pacman

@@ -20,8 +20,8 @@ run_root() {
 
 ENV_DST="/etc/environment"
 TMP="$(mktemp)"
-MANAGED_BEGIN="# >>> dcli-wayland-env >>>"
-MANAGED_END="# <<< dcli-wayland-env <<<"
+MANAGED_BEGIN="# >>> mdots-wayland-env >>>"
+MANAGED_END="# <<< mdots-wayland-env <<<"
 
 cleanup() {
   rm -f "${TMP}" "${TMP}.new"

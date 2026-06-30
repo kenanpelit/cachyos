@@ -1,4 +1,4 @@
-description: Packages installed manually on the system (auto-synced by dcli)
+description: Packages installed manually on the system (auto-synced by mdots)
 packages:
   - accountsservice
   - adwaita-icon-theme

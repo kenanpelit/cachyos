@@ -1,4 +1,4 @@
-description: System packages for hay (auto-synced by dcli merge)
+description: System packages for hay (auto-synced by mdots merge)
 conflicts: []
 pre_install_hook: null
 post_install_hook: null

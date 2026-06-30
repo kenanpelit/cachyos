@@ -11,7 +11,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
 
-# Source the core DCLI library
+# Source the core MDOTS library
 source "$REPO_ROOT/modules/base/lib/core.sh"
 
 # --- Configuration Discovery ---
@@ -20,7 +20,7 @@ active_host_from_config() {
   local host=""
   local config_file="$REPO_ROOT/config.yaml"
 
-  for key in DCLI_HOST DCLI_ACTIVE_HOST DCLI_TARGET_HOST; do
+  for key in MDOTS_HOST MDOTS_ACTIVE_HOST MDOTS_TARGET_HOST; do
     if [[ -n "${!key:-}" ]]; then
       host="${!key}"
       break
@@ -269,7 +269,7 @@ sync_user_units() {
             fi
           else
             # Enable using the ABSOLUTE path in the repository
-            # This ensures Systemd can find it even before dcli links it.
+            # This ensures Systemd can find it even before mdots links it.
             if run_as_user systemctl --user enable "$unit_file" >/dev/null 2>&1; then
               echo "  -> Enabled $unit_name ($module_name)"
             else

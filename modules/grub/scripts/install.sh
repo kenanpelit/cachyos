@@ -3,7 +3,7 @@ set -euo pipefail
 
 # This script requires root to update system GRUB
 if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root (via dcli sync with sudo)"
+    echo "Please run as root (via mdots sync with sudo)"
     exit 1
 fi
 

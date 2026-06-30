@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# DCLI Core Library (modules/base/lib/core.sh)
+# MDOTS Core Library (modules/base/lib/core.sh)
 # Common functions for declarative module scripts.
 # ==============================================================================
 
@@ -112,13 +112,13 @@ safe_install() {
 }
 
 # --- Logging ---
-# Glyph-prefixed, consistent with `dcli sync` output. When invoked as a dcli
-# hook, dcli exports DCLI_LOG_INDENT so these lines align under its detail
+# Glyph-prefixed, consistent with `mdots sync` output. When invoked as a mdots
+# hook, mdots exports MDOTS_LOG_INDENT so these lines align under its detail
 # column; standalone the variable is unset and the lines start at the margin.
-log_info() { echo -e "${DCLI_LOG_INDENT:-}\033[0;36m→\033[0m $*"; }
-log_success() { echo -e "${DCLI_LOG_INDENT:-}\033[0;32m✓\033[0m $*"; }
-log_warn() { echo -e "${DCLI_LOG_INDENT:-}\033[1;33m⚠\033[0m $*" >&2; }
-log_error() { echo -e "${DCLI_LOG_INDENT:-}\033[0;31m✗\033[0m $*" >&2; }
+log_info() { echo -e "${MDOTS_LOG_INDENT:-}\033[0;36m→\033[0m $*"; }
+log_success() { echo -e "${MDOTS_LOG_INDENT:-}\033[0;32m✓\033[0m $*"; }
+log_warn() { echo -e "${MDOTS_LOG_INDENT:-}\033[1;33m⚠\033[0m $*" >&2; }
+log_error() { echo -e "${MDOTS_LOG_INDENT:-}\033[0;31m✗\033[0m $*" >&2; }
 die() { log_error "$*"; exit 1; }
 
 # Initialize common variables for sourcing scripts

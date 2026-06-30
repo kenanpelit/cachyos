@@ -64,7 +64,7 @@ Current `ask` modules:
 - `modules/search`
 - `modules/bt`
 
-Operator policy during `dcli sync`:
+Operator policy during `mdots sync`:
 
 - Run hook now when the module changes system state needed immediately (services, mime/default handlers, runtime dirs).
 - Skip temporarily only when you intentionally defer side effects.

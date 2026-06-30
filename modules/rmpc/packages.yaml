@@ -1,5 +1,5 @@
 description: rmpc packages
 
 packages:
-  # NOTE: might be AUR on Arch/CachyOS (auto-detected by dcli)
+  # NOTE: might be AUR on Arch/CachyOS (auto-detected by mdots)
   - rmpc
