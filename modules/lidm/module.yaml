@@ -1,8 +1,0 @@
-tags:
-- tool
-description: LiDM display manager for TTY-based UWSM session launch
-depends_on:
-- base
-- sessions
-post_install_hook: scripts/install.sh
-post_hook_behavior: always
