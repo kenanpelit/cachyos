@@ -60,3 +60,6 @@ modules/xdg-mimes/dotfiles/applications/helium-*.desktop
 !modules/xdg-mimes/dotfiles/applications/brave-compecta.desktop
 !modules/xdg-mimes/dotfiles/applications/brave-youtube.desktop
 !modules/xdg-mimes/dotfiles/applications/helium-kenp.desktop
+
+# graphify generated knowledge-graph output (any module + repo root)
+graphify-out/
