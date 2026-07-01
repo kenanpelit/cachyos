@@ -35,7 +35,7 @@ skins2-last=/home/kenan/.config/vlc/skins2/Hind-ArcDark.vlt
 skins2-config=[{"id":"main","visible":true,"x":26,"y":26,"width":580,"height":421}]
 
 [core] # Core settings
-intf=skins2,any
+intf=qt
 extraintf=
 
 # Catppuccin-inspired dark interface
