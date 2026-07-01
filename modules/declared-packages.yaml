@@ -2,6 +2,9 @@ description: Packages installed manually on the system (auto-synced by mdots)
 packages:
 - adw-gtk-theme
 - blueman
+- chromium
+- cups
+- playwright
 - shelly
 exclude: []
 conflicts: []
