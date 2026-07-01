@@ -207,11 +207,11 @@ session_common_backfill_visual_env() {
 
 		case "${XDG_CURRENT_DESKTOP:-}" in
 		*[Mm]argo*)
-			session_env_file="${config_home}/session-env/margo/10-margo.conf"
+			session_env_file="${config_home}/environment.d/10-margo-wayland.conf"
 			;;
 		*)
-			# Generic Wayland fallback: no compositor-specific session-env
-			# file; the shared 00-wayland/10-gtk/20-qt files below still apply.
+			# Generic Wayland fallback: no compositor-specific env file;
+			# the shared 10-gtk/20-qt files below still apply.
 			session_env_file=""
 			;;
 		esac
@@ -227,7 +227,6 @@ session_common_backfill_visual_env() {
 			esac
 		done < <(
 			session_common_parse_env_dir \
-				"${env_dir}/00-wayland.conf" \
 				"${env_dir}/10-gtk.conf" \
 				"${env_dir}/20-qt.conf" \
 				"${session_env_file}"

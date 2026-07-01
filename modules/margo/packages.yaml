@@ -1,6 +1,8 @@
 description: Margo compositor packages
 
 packages:
+  # Wayland base (was the wayland-env module, now folded into margo).
+  - wayland
   - margo-git
   - uwsm
   - polkit-gnome

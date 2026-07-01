@@ -43,7 +43,6 @@ enabled_modules:
   - kitty
   - alacritty
   - ghostty
-  - wayland-env
   - gtk
   - qt
   - pipewire-rt

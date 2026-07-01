@@ -1,5 +1,0 @@
-description: Shared Wayland session environment
-
-# Shared Wayland base package for compositor-agnostic environment defaults.
-packages:
-  - wayland

@@ -15,7 +15,7 @@ margo_log_warn() {
 }
 
 margo_session_env_file() {
-  printf '%s\n' "${MARGO_SESSION_ENVIRONMENT_FILE:-$HOME/.config/session-env/margo/10-margo.conf}"
+  printf '%s\n' "${MARGO_SESSION_ENVIRONMENT_FILE:-$HOME/.config/environment.d/10-margo-wayland.conf}"
 }
 
 margo_session_env_dir() {
@@ -69,7 +69,6 @@ margo_parse_env_dir() {
   if [[ ${#env_files[@]} -eq 0 ]]; then
     env_file="$(margo_session_env_file)"
     env_files=(
-      "${env_dir}/00-wayland.conf"
       "${env_dir}/10-gtk.conf"
       "${env_dir}/20-qt.conf"
       "${env_file}"
