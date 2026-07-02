@@ -120,6 +120,16 @@ unsetopt APPEND_HISTORY
 
 HISTORY_IGNORE="(ls|cd|pwd|exit|clear|history|cd ..|cd -|z *|zi *|yazi*--cwd-file*)"
 
+# HISTORY_IGNORE alone is applied only at history *file-write* time and leaks under
+# SHARE_HISTORY / INC_APPEND_HISTORY. tmux-anka restore does `send-keys -l "<cmd>" Enter`,
+# so `yazi --cwd-file=/tmp/yazi-cwd.XXXXXX` is *executed* on every resurrect and floods
+# the file. zshaddhistory runs at line-accept, before the entry is stored, so returning
+# non-zero (line matches HISTORY_IGNORE) keeps those out reliably. Not fired by `print -s`.
+zshaddhistory() {
+  emulate -L zsh
+  [[ ${1%%$'\n'} != ${~HISTORY_IGNORE} ]]
+}
+
 if [[ -t 0 && -t 1 && $options[zle] = on ]] && command -v fzf >/dev/null 2>&1; then
   _fzf_zsh_init="$(fzf --zsh 2>/dev/null)"
   if [[ -n "${_fzf_zsh_init:-}" ]]; then
