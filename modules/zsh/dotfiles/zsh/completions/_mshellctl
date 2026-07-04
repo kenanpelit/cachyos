@@ -15,8 +15,8 @@ _mshellctl() {
 
     local context curcontext="$curcontext" state line
     _arguments "${_arguments_options[@]}" : \
-'-h[Print help (see more with '\''--help'\'')]' \
-'--help[Print help (see more with '\''--help'\'')]' \
+'-h[Print help]' \
+'--help[Print help]' \
 '-V[Print version]' \
 '--version[Print version]' \
 ":: :_mshellctl_commands" \
@@ -202,6 +202,12 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
+(audio-route)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
 (system-update)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -221,6 +227,12 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (twilight)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(margo-layout)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -305,6 +317,12 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (media-player)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(lyrics)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -398,7 +416,7 @@ esac
     ;;
 esac
 ;;
-(dashboard)
+(mdash)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -501,6 +519,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(audio-route)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (system-update)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -514,6 +536,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (twilight)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(margo-layout)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -573,6 +599,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(lyrics)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (session)
 _arguments "${_arguments_options[@]}" : \
 ":: :_mshellctl__subcmd__menu__subcmd__help__subcmd__session_commands" \
@@ -609,7 +639,7 @@ _arguments "${_arguments_options[@]}" : \
     ;;
 esac
 ;;
-(dashboard)
+(mdash)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -772,6 +802,7 @@ _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
 ':action -- toggle | expand | collapse | pin | unpin:_default' \
+'::name -- Optional drawer name to target (omit to act on all drawers):_default' \
 && ret=0
 ;;
 (audio)
@@ -854,6 +885,12 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
+(route-next)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
 (mic-up)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -929,6 +966,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (switch-mic)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(route-next)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -1390,6 +1431,193 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (check)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(session)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__session_commands" \
+"*::: :->session" \
+&& ret=0
+
+    case $state in
+    (session)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-session-command-$line[1]:"
+        case $line[1] in
+            (menu)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(lock)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(logout)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(suspend)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(reboot)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(shutdown)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__session__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-session-help-command-$line[1]:"
+        case $line[1] in
+            (menu)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(lock)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(logout)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(suspend)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(reboot)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(shutdown)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(notification)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__notification_commands" \
+"*::: :->notification" \
+&& ret=0
+
+    case $state in
+    (notification)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-notification-command-$line[1]:"
+        case $line[1] in
+            (open)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(clear)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(read)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(dnd)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::state -- on | off (omit to toggle):(on off)' \
+&& ret=0
+;;
+(count)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__notification__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-notification-help-command-$line[1]:"
+        case $line[1] in
+            (open)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(clear)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(read)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(dnd)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(count)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -1977,6 +2205,631 @@ esac
     ;;
 esac
 ;;
+(toast)
+_arguments "${_arguments_options[@]}" : \
+'--icon=[Symbolic icon name (default\: dialog-information-symbolic)]:ICON:_default' \
+'--severity=[Severity tint\: calm | warn | danger | positive]:SEVERITY:_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+':title -- Toast title (the bold first line):_default' \
+'::body -- Optional body line:_default' \
+&& ret=0
+;;
+(gamemode)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::action -- on | off | toggle | status (default\: toggle):(on off toggle status)' \
+&& ret=0
+;;
+(calendar)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__calendar_commands" \
+"*::: :->calendar" \
+&& ret=0
+
+    case $state in
+    (calendar)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-calendar-command-$line[1]:"
+        case $line[1] in
+            (today)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(agenda)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::days -- Number of days (default 7):_default' \
+&& ret=0
+;;
+(on)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':date -- The date, e.g. 2026-07-04:_default' \
+&& ret=0
+;;
+(account)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::args -- Arguments passed straight to `mcal account …`:_default' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__calendar__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-calendar-help-command-$line[1]:"
+        case $line[1] in
+            (today)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(agenda)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(on)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(account)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(vpn)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__vpn_commands" \
+"*::: :->vpn" \
+&& ret=0
+
+    case $state in
+    (vpn)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-vpn-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(connect)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(disconnect)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(reconnect)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(random)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(fastest)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(menu)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__vpn__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-vpn-help-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(connect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(disconnect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(reconnect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(random)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(fastest)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(menu)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(power)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__power_commands" \
+"*::: :->power" \
+&& ret=0
+
+    case $state in
+    (power)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-power-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(cycle)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':profile -- performance | balanced | power-saver:(performance balanced power-saver)' \
+&& ret=0
+;;
+(pause)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(resume)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(auto)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__power__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-power-help-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(cycle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pause)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(resume)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(auto)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(layout)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__layout_commands" \
+"*::: :->layout" \
+&& ret=0
+
+    case $state in
+    (layout)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-layout-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(current)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Layout name:_default' \
+&& ret=0
+;;
+(next)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(prev)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(preview)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Layout name:_default' \
+&& ret=0
+;;
+(pick)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__layout__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-layout-help-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(current)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(next)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(prev)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(preview)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pick)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(osk)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__osk_commands" \
+"*::: :->osk" \
+&& ret=0
+
+    case $state in
+    (osk)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-osk-command-$line[1]:"
+        case $line[1] in
+            (show)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(hide)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__osk__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-osk-help-command-$line[1]:"
+        case $line[1] in
+            (show)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(hide)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(color)
+_arguments "${_arguments_options[@]}" : \
+'--format=[Output format (default\: hex)]:FORMAT:(hex rgb hsl cmyk)' \
+'--copy[Copy the picked colour to the clipboard]' \
+'--notify[Show a notification with the picked colour]' \
+'--lowercase[Lower-case the hex output]' \
+'--no-zoom[Disable the zoom lens]' \
+'--quiet[Suppress the printed result (pair with \`--copy\`/\`--notify\`)]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__play_commands" \
+"*::: :->play" \
+&& ret=0
+
+    case $state in
+    (play)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-play-command-$line[1]:"
+        case $line[1] in
+            (start)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::target -- What to play (omit to resume):_default' \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(snap)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(pin)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(focus)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(wallpaper)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::args -- `start \[PATH\]` or `stop`:_default' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__play__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-play-help-command-$line[1]:"
+        case $line[1] in
+            (start)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(snap)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pin)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(focus)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(wallpaper)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
 (doctor)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -2098,6 +2951,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(audio-route)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (system-update)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -2111,6 +2968,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (twilight)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(margo-layout)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -2170,6 +3031,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(lyrics)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (session)
 _arguments "${_arguments_options[@]}" : \
 ":: :_mshellctl__subcmd__help__subcmd__menu__subcmd__session_commands" \
@@ -2206,7 +3071,7 @@ _arguments "${_arguments_options[@]}" : \
     ;;
 esac
 ;;
-(dashboard)
+(mdash)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -2311,6 +3176,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (switch-mic)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(route-next)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -2507,6 +3376,82 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (check)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(session)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__session_commands" \
+"*::: :->session" \
+&& ret=0
+
+    case $state in
+    (session)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-session-command-$line[1]:"
+        case $line[1] in
+            (menu)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(lock)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(logout)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(suspend)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(reboot)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(shutdown)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(notification)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__notification_commands" \
+"*::: :->notification" \
+&& ret=0
+
+    case $state in
+    (notification)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-notification-command-$line[1]:"
+        case $line[1] in
+            (open)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(clear)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(read)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(dnd)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(count)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -2734,6 +3679,258 @@ _arguments "${_arguments_options[@]}" : \
     ;;
 esac
 ;;
+(toast)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(gamemode)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(calendar)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__calendar_commands" \
+"*::: :->calendar" \
+&& ret=0
+
+    case $state in
+    (calendar)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-calendar-command-$line[1]:"
+        case $line[1] in
+            (today)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(agenda)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(on)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(account)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(vpn)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__vpn_commands" \
+"*::: :->vpn" \
+&& ret=0
+
+    case $state in
+    (vpn)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-vpn-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(connect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(disconnect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(reconnect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(random)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(fastest)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(menu)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(power)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__power_commands" \
+"*::: :->power" \
+&& ret=0
+
+    case $state in
+    (power)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-power-command-$line[1]:"
+        case $line[1] in
+            (status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(cycle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pause)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(resume)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(auto)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(layout)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__layout_commands" \
+"*::: :->layout" \
+&& ret=0
+
+    case $state in
+    (layout)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-layout-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(current)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(set)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(next)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(prev)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(preview)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pick)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(osk)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__osk_commands" \
+"*::: :->osk" \
+&& ret=0
+
+    case $state in
+    (osk)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-osk-command-$line[1]:"
+        case $line[1] in
+            (show)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(hide)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(color)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__play_commands" \
+"*::: :->play" \
+&& ret=0
+
+    case $state in
+    (play)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-play-command-$line[1]:"
+        case $line[1] in
+            (start)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(snap)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pin)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(focus)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(wallpaper)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
 (doctor)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -2761,9 +3958,9 @@ _mshellctl_commands() {
 'quit:Quit the shell process — bars and menus disappear, but the compositor (margo) keeps running' \
 'inspect:Open the GTK4 inspector — handy for finding CSS node names and classes while styling' \
 'set-wallpaper:Set the wallpaper to a specific image (one-shot). Use \`wallpaper\` to cycle through a directory instead' \
-'menu:Open, close, or toggle a shell menu (control-center, dashboard, clipboard, …)' \
+'menu:Open, close, or toggle a shell menu (control-center, mdash, clipboard, …)' \
 'bar:Show, hide, or toggle the top and bottom bars' \
-'hidden-bar:Control the Hidden Bar drawer widget' \
+'hidden-bar:Control a Hidden Bar drawer widget. With no \`name\`, the verb reaches every drawer; pass a \`name\` to target one named drawer (a \`bars.widgets.hidden_bars\` entry, placed via \`!HiddenBarNamed <name>\`)' \
 'audio:Audio control — output/input volume, mute, and device switching' \
 'bluetooth:Bluetooth auto-connect engine\: toggle / connect / disconnect the configured device(s). Bind \`bluetooth toggle\` to F10 to replace the old bluetooth_toggle script' \
 'media:Control the active MPRIS media player — play/pause, next, previous' \
@@ -2771,14 +3968,25 @@ _mshellctl_commands() {
 'log:Shell file-logging controls (~/.local/state/margo/logs/mshell-*.log). \`level\`/\`enable\`/\`disable\` retune the running shell live' \
 'dock:Standalone mdock surface — toggle / show / hide' \
 'lock:Lock the session. Bare \`lock\` locks; \`lock check\` reports state' \
+'session:Session / power actions — lock, logout, suspend, reboot, shutdown, or open the session menu. Bind \`session logout\` to a key to replace a wlogout/rofi script' \
+'notification:Notification centre — open the panel, clear, dismiss popups, toggle Do Not Disturb, or print the history count' \
 'settings:Open or close the Settings window' \
 'wizard:Open the in-shell setup wizard (a layer-shell menu)' \
 'wallpaper:Cycle the wallpaper — next, previous, or random' \
 'theme:Colour scheme — list, show, or switch the active scheme live (the same picker as Settings → Theme → Color Scheme; no restart)' \
 'plugin:Manage installed WASM plugins (reload from disk, …)' \
-'screenshot:Bridge commands for the mscreenshot CLI — currently the \`select-region\` helper that lets external tools reuse the in-shell area selector (preview state, snap-to-window, aspect info) instead of spawning \`slurp\`' \
+'screenshot:Capture a screenshot — region / window / output / full, delivered to file + clipboard (or \`--copy\` / \`--save\` / \`--edit\`). Drives the shell'\''s own screenshot engine (same path as the screenshot menu)' \
 'screenrecord:Screen recording — start / stop / toggle. Drives the shell'\''s own recording engine (same as the screenshot menu'\''s recording section)' \
 'clipboard:Clipboard history — list / copy / pin / delete / clear / wipe. Drives the same store as \`mshellctl menu clipboard\`' \
+'toast:Show a transient state-change toast — the \`notify-send\` equivalent for the toast surface. Ephemeral (no notification history); usable from scripts and startup services' \
+'gamemode:Game Mode — drop compositor effects, silence notifications, and keep the session awake while gaming. Configure what it affects in Settings → Game Mode' \
+'calendar:Calendar — today'\''s / upcoming events and connected accounts (proxied to the \`mcal\` calendar tool). \`calendar account setup google\` connects a Google account' \
+'vpn:Mullvad VPN control — connect / disconnect / pick a relay (proxied to \`mvpn\`). Use \`vpn menu\` for the shell'\''s DNS/VPN panel' \
+'power:Power-profile control — status / cycle / set / pause / resume (proxied to the \`mpower\` daemon). Use \`menu power\` for the panel' \
+'layout:Saved tiling-layout snapshots — list / set / next / prev / preview (proxied to \`mlayout\`)' \
+'osk:On-screen keyboard — show / hide / toggle (proxied to \`mkeys\`)' \
+'color:Pick a screen colour (proxied to \`mpicker\`) — prints the colour; use \`--copy\` / \`--notify\` / \`--format\`' \
+'play:mpv companion — play / toggle / stop / snapshot / video wallpaper (proxied to \`mplay\`)' \
 'doctor:Health check — is the shell on the session bus, is it the same version as this \`mshellctl\`, are its key services up. Run \`mctl doctor\` for the compositor side' \
 'completions:Generate a shell-completion script (bash / zsh / fish / …) to stdout' \
 'help:Print this message or the help of the given subcommand(s)' \
@@ -2798,6 +4006,7 @@ _mshellctl__subcmd__audio_commands() {
 'input:Switch the default input — next | prev | INDEX | NAME fragment' \
 'switch:Cycle the default output to the next device (alias for \`output next\`)' \
 'switch-mic:Cycle the default input to the next device (alias for \`input next\`)' \
+'route-next:Cycle the default output like the Audio Route pill'\''s left-click\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
 'mic-up:Increase the microphone volume by 5 percent' \
 'mic-down:Decrease the microphone volume by 5 percent' \
 'mic:Set the microphone volume to an absolute PERCENT (0–150)' \
@@ -2819,6 +4028,7 @@ _mshellctl__subcmd__audio__subcmd__help_commands() {
 'input:Switch the default input — next | prev | INDEX | NAME fragment' \
 'switch:Cycle the default output to the next device (alias for \`output next\`)' \
 'switch-mic:Cycle the default input to the next device (alias for \`input next\`)' \
+'route-next:Cycle the default output like the Audio Route pill'\''s left-click\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
 'mic-up:Increase the microphone volume by 5 percent' \
 'mic-down:Decrease the microphone volume by 5 percent' \
 'mic:Set the microphone volume to an absolute PERCENT (0–150)' \
@@ -2871,6 +4081,11 @@ _mshellctl__subcmd__audio__subcmd__help__subcmd__mute_commands() {
 _mshellctl__subcmd__audio__subcmd__help__subcmd__output_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl audio help output commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__audio__subcmd__help__subcmd__route-next_commands] )) ||
+_mshellctl__subcmd__audio__subcmd__help__subcmd__route-next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl audio help route-next commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__audio__subcmd__help__subcmd__status_commands] )) ||
 _mshellctl__subcmd__audio__subcmd__help__subcmd__status_commands() {
@@ -2941,6 +4156,11 @@ _mshellctl__subcmd__audio__subcmd__mute_commands() {
 _mshellctl__subcmd__audio__subcmd__output_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl audio output commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__audio__subcmd__route-next_commands] )) ||
+_mshellctl__subcmd__audio__subcmd__route-next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl audio route-next commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__audio__subcmd__status_commands] )) ||
 _mshellctl__subcmd__audio__subcmd__status_commands() {
@@ -3154,6 +4374,73 @@ _mshellctl__subcmd__brightness__subcmd__up_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl brightness up commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__calendar_commands] )) ||
+_mshellctl__subcmd__calendar_commands() {
+    local commands; commands=(
+'today:Events happening today' \
+'agenda:Events over the next DAYS days (default 7)' \
+'on:Events on a specific date (YYYY-MM-DD)' \
+'account:Manage connected accounts — \`list\`, \`setup google\`, \`remove <id>\`' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl calendar commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__account_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__account_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar account commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__agenda_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__agenda_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar agenda commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__help_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__help_commands() {
+    local commands; commands=(
+'today:Events happening today' \
+'agenda:Events over the next DAYS days (default 7)' \
+'on:Events on a specific date (YYYY-MM-DD)' \
+'account:Manage connected accounts — \`list\`, \`setup google\`, \`remove <id>\`' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl calendar help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__help__subcmd__account_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__help__subcmd__account_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar help account commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__help__subcmd__agenda_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__help__subcmd__agenda_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar help agenda commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__help__subcmd__on_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__help__subcmd__on_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar help on commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__help__subcmd__today_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__help__subcmd__today_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar help today commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__on_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__on_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar on commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__calendar__subcmd__today_commands] )) ||
+_mshellctl__subcmd__calendar__subcmd__today_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl calendar today commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__clipboard_commands] )) ||
 _mshellctl__subcmd__clipboard_commands() {
     local commands; commands=(
@@ -3257,6 +4544,11 @@ _mshellctl__subcmd__clipboard__subcmd__wipe_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl clipboard wipe commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__color_commands] )) ||
+_mshellctl__subcmd__color_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl color commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__completions_commands] )) ||
 _mshellctl__subcmd__completions_commands() {
     local commands; commands=()
@@ -3334,15 +4626,20 @@ _mshellctl__subcmd__doctor_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl doctor commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__gamemode_commands] )) ||
+_mshellctl__subcmd__gamemode_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl gamemode commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help_commands] )) ||
 _mshellctl__subcmd__help_commands() {
     local commands; commands=(
 'quit:Quit the shell process — bars and menus disappear, but the compositor (margo) keeps running' \
 'inspect:Open the GTK4 inspector — handy for finding CSS node names and classes while styling' \
 'set-wallpaper:Set the wallpaper to a specific image (one-shot). Use \`wallpaper\` to cycle through a directory instead' \
-'menu:Open, close, or toggle a shell menu (control-center, dashboard, clipboard, …)' \
+'menu:Open, close, or toggle a shell menu (control-center, mdash, clipboard, …)' \
 'bar:Show, hide, or toggle the top and bottom bars' \
-'hidden-bar:Control the Hidden Bar drawer widget' \
+'hidden-bar:Control a Hidden Bar drawer widget. With no \`name\`, the verb reaches every drawer; pass a \`name\` to target one named drawer (a \`bars.widgets.hidden_bars\` entry, placed via \`!HiddenBarNamed <name>\`)' \
 'audio:Audio control — output/input volume, mute, and device switching' \
 'bluetooth:Bluetooth auto-connect engine\: toggle / connect / disconnect the configured device(s). Bind \`bluetooth toggle\` to F10 to replace the old bluetooth_toggle script' \
 'media:Control the active MPRIS media player — play/pause, next, previous' \
@@ -3350,14 +4647,25 @@ _mshellctl__subcmd__help_commands() {
 'log:Shell file-logging controls (~/.local/state/margo/logs/mshell-*.log). \`level\`/\`enable\`/\`disable\` retune the running shell live' \
 'dock:Standalone mdock surface — toggle / show / hide' \
 'lock:Lock the session. Bare \`lock\` locks; \`lock check\` reports state' \
+'session:Session / power actions — lock, logout, suspend, reboot, shutdown, or open the session menu. Bind \`session logout\` to a key to replace a wlogout/rofi script' \
+'notification:Notification centre — open the panel, clear, dismiss popups, toggle Do Not Disturb, or print the history count' \
 'settings:Open or close the Settings window' \
 'wizard:Open the in-shell setup wizard (a layer-shell menu)' \
 'wallpaper:Cycle the wallpaper — next, previous, or random' \
 'theme:Colour scheme — list, show, or switch the active scheme live (the same picker as Settings → Theme → Color Scheme; no restart)' \
 'plugin:Manage installed WASM plugins (reload from disk, …)' \
-'screenshot:Bridge commands for the mscreenshot CLI — currently the \`select-region\` helper that lets external tools reuse the in-shell area selector (preview state, snap-to-window, aspect info) instead of spawning \`slurp\`' \
+'screenshot:Capture a screenshot — region / window / output / full, delivered to file + clipboard (or \`--copy\` / \`--save\` / \`--edit\`). Drives the shell'\''s own screenshot engine (same path as the screenshot menu)' \
 'screenrecord:Screen recording — start / stop / toggle. Drives the shell'\''s own recording engine (same as the screenshot menu'\''s recording section)' \
 'clipboard:Clipboard history — list / copy / pin / delete / clear / wipe. Drives the same store as \`mshellctl menu clipboard\`' \
+'toast:Show a transient state-change toast — the \`notify-send\` equivalent for the toast surface. Ephemeral (no notification history); usable from scripts and startup services' \
+'gamemode:Game Mode — drop compositor effects, silence notifications, and keep the session awake while gaming. Configure what it affects in Settings → Game Mode' \
+'calendar:Calendar — today'\''s / upcoming events and connected accounts (proxied to the \`mcal\` calendar tool). \`calendar account setup google\` connects a Google account' \
+'vpn:Mullvad VPN control — connect / disconnect / pick a relay (proxied to \`mvpn\`). Use \`vpn menu\` for the shell'\''s DNS/VPN panel' \
+'power:Power-profile control — status / cycle / set / pause / resume (proxied to the \`mpower\` daemon). Use \`menu power\` for the panel' \
+'layout:Saved tiling-layout snapshots — list / set / next / prev / preview (proxied to \`mlayout\`)' \
+'osk:On-screen keyboard — show / hide / toggle (proxied to \`mkeys\`)' \
+'color:Pick a screen colour (proxied to \`mpicker\`) — prints the colour; use \`--copy\` / \`--notify\` / \`--format\`' \
+'play:mpv companion — play / toggle / stop / snapshot / video wallpaper (proxied to \`mplay\`)' \
 'doctor:Health check — is the shell on the session bus, is it the same version as this \`mshellctl\`, are its key services up. Run \`mctl doctor\` for the compositor side' \
 'completions:Generate a shell-completion script (bash / zsh / fish / …) to stdout' \
 'help:Print this message or the help of the given subcommand(s)' \
@@ -3377,6 +4685,7 @@ _mshellctl__subcmd__help__subcmd__audio_commands() {
 'input:Switch the default input — next | prev | INDEX | NAME fragment' \
 'switch:Cycle the default output to the next device (alias for \`output next\`)' \
 'switch-mic:Cycle the default input to the next device (alias for \`input next\`)' \
+'route-next:Cycle the default output like the Audio Route pill'\''s left-click\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
 'mic-up:Increase the microphone volume by 5 percent' \
 'mic-down:Decrease the microphone volume by 5 percent' \
 'mic:Set the microphone volume to an absolute PERCENT (0–150)' \
@@ -3423,6 +4732,11 @@ _mshellctl__subcmd__help__subcmd__audio__subcmd__mute_commands() {
 _mshellctl__subcmd__help__subcmd__audio__subcmd__output_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help audio output commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__audio__subcmd__route-next_commands] )) ||
+_mshellctl__subcmd__help__subcmd__audio__subcmd__route-next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help audio route-next commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__audio__subcmd__status_commands] )) ||
 _mshellctl__subcmd__help__subcmd__audio__subcmd__status_commands() {
@@ -3532,6 +4846,36 @@ _mshellctl__subcmd__help__subcmd__brightness__subcmd__up_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help brightness up commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__help__subcmd__calendar_commands] )) ||
+_mshellctl__subcmd__help__subcmd__calendar_commands() {
+    local commands; commands=(
+'today:Events happening today' \
+'agenda:Events over the next DAYS days (default 7)' \
+'on:Events on a specific date (YYYY-MM-DD)' \
+'account:Manage connected accounts — \`list\`, \`setup google\`, \`remove <id>\`' \
+    )
+    _describe -t commands 'mshellctl help calendar commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__calendar__subcmd__account_commands] )) ||
+_mshellctl__subcmd__help__subcmd__calendar__subcmd__account_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help calendar account commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__calendar__subcmd__agenda_commands] )) ||
+_mshellctl__subcmd__help__subcmd__calendar__subcmd__agenda_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help calendar agenda commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__calendar__subcmd__on_commands] )) ||
+_mshellctl__subcmd__help__subcmd__calendar__subcmd__on_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help calendar on commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__calendar__subcmd__today_commands] )) ||
+_mshellctl__subcmd__help__subcmd__calendar__subcmd__today_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help calendar today commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help__subcmd__clipboard_commands] )) ||
 _mshellctl__subcmd__help__subcmd__clipboard_commands() {
     local commands; commands=(
@@ -3580,6 +4924,11 @@ _mshellctl__subcmd__help__subcmd__clipboard__subcmd__wipe_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help clipboard wipe commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__help__subcmd__color_commands] )) ||
+_mshellctl__subcmd__help__subcmd__color_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help color commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help__subcmd__completions_commands] )) ||
 _mshellctl__subcmd__help__subcmd__completions_commands() {
     local commands; commands=()
@@ -3620,6 +4969,11 @@ _mshellctl__subcmd__help__subcmd__doctor_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help doctor commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__help__subcmd__gamemode_commands] )) ||
+_mshellctl__subcmd__help__subcmd__gamemode_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help gamemode commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help__subcmd__help_commands] )) ||
 _mshellctl__subcmd__help__subcmd__help_commands() {
     local commands; commands=()
@@ -3634,6 +4988,54 @@ _mshellctl__subcmd__help__subcmd__hidden-bar_commands() {
 _mshellctl__subcmd__help__subcmd__inspect_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help inspect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout_commands() {
+    local commands; commands=(
+'list:List saved layouts' \
+'current:Print the current layout' \
+'set:Apply a saved layout by name' \
+'next:Apply the next saved layout' \
+'prev:Apply the previous saved layout' \
+'preview:Preview a layout without applying it' \
+'pick:Interactive layout picker' \
+    )
+    _describe -t commands 'mshellctl help layout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout__subcmd__current_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout__subcmd__current_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help layout current commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout__subcmd__list_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help layout list commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout__subcmd__next_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout__subcmd__next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help layout next commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout__subcmd__pick_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout__subcmd__pick_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help layout pick commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout__subcmd__prev_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout__subcmd__prev_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help layout prev commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout__subcmd__preview_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout__subcmd__preview_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help layout preview commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__layout__subcmd__set_commands] )) ||
+_mshellctl__subcmd__help__subcmd__layout__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help layout set commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__lock_commands] )) ||
 _mshellctl__subcmd__help__subcmd__lock_commands() {
@@ -3739,10 +5141,12 @@ _mshellctl__subcmd__help__subcmd__menu_commands() {
 'bluetooth:Toggle the Bluetooth menu (connect/disconnect/scan/pair)' \
 'cpu-dashboard:Toggle the CPU Dashboard menu (CPU, temp, RAM, load)' \
 'audio-dashboard:Toggle the Audio Dashboard menu (output + input mixer)' \
+'audio-route:Toggle the Audio Route picker menu (pick any output directly — the Audio Route pill'\''s right-click surface)' \
 'system-update:Toggle the System Updates menu (repo / AUR / Flatpak)' \
 'valent:Toggle the Valent Connect menu (phone status + actions)' \
 'keep-awake:Toggle the Keep Awake menu (duration grid + countdown)' \
 'twilight:Toggle the Twilight menu (toggle + temperature + mode + presets)' \
+'margo-layout:Toggle the Margo Layout Switcher menu (pick the current tag'\''s tiling layout — same picker as the bar'\''s Margo Layout Switcher pill)' \
 'weather:Toggle the Weather menu (current + hourly + daily, all in one)' \
 'keybinds:Toggle the keybind cheatsheet menu (searchable shortcut list)' \
 'alarm-clock:Toggle the Alarm Clock menu (alarms list + add/edit + stopwatch)' \
@@ -3757,8 +5161,9 @@ _mshellctl__subcmd__help__subcmd__menu_commands() {
 'network:Toggle the Network Console menu' \
 'power:Toggle the Power Profile (power) menu' \
 'media-player:Toggle the Media Player menu' \
+'lyrics:Toggle the Lyrics menu (synced lyrics of the now-playing track)' \
 'session:Toggle the session / power menu, or run a session action' \
-'dashboard:Toggle the combined dashboard menu (clock + weather + quick settings, all in one panel)' \
+'mdash:Toggle the mdash dashboard menu — greeting header, calendar + weather, the quick-settings card stack, and a menu-shortcut grid' \
 'plugin:Toggle an installed plugin'\''s panel/menu by key — e.g. \`menu plugin assistant\` or \`menu plugin mullvad\`. Generic\: works for any plugin that ships a panel or a \`\[\[widget.menu\]\]\`, with no per-plugin code (the key matches the plugin id or a widget key)' \
 'close-all:Close all open menus' \
     )
@@ -3783,6 +5188,11 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__app-launcher_commands() {
 _mshellctl__subcmd__help__subcmd__menu__subcmd__audio-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu audio-dashboard commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__audio-route_commands] )) ||
+_mshellctl__subcmd__help__subcmd__menu__subcmd__audio-route_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help menu audio-route commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__bluetooth_commands] )) ||
 _mshellctl__subcmd__help__subcmd__menu__subcmd__bluetooth_commands() {
@@ -3814,11 +5224,6 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__cpu-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu cpu-dashboard commands' commands "$@"
 }
-(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__dashboard_commands] )) ||
-_mshellctl__subcmd__help__subcmd__menu__subcmd__dashboard_commands() {
-    local commands; commands=()
-    _describe -t commands 'mshellctl help menu dashboard commands' commands "$@"
-}
 (( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__dns_commands] )) ||
 _mshellctl__subcmd__help__subcmd__menu__subcmd__dns_commands() {
     local commands; commands=()
@@ -3838,6 +5243,21 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__keep-awake_commands() {
 _mshellctl__subcmd__help__subcmd__menu__subcmd__keybinds_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu keybinds commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__lyrics_commands] )) ||
+_mshellctl__subcmd__help__subcmd__menu__subcmd__lyrics_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help menu lyrics commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__margo-layout_commands] )) ||
+_mshellctl__subcmd__help__subcmd__menu__subcmd__margo-layout_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help menu margo-layout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__mdash_commands] )) ||
+_mshellctl__subcmd__help__subcmd__menu__subcmd__mdash_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help menu mdash commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__media-player_commands] )) ||
 _mshellctl__subcmd__help__subcmd__menu__subcmd__media-player_commands() {
@@ -3985,6 +5405,120 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__weather_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu weather commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__help__subcmd__notification_commands] )) ||
+_mshellctl__subcmd__help__subcmd__notification_commands() {
+    local commands; commands=(
+'open:Open the notifications menu' \
+'clear:Clear every notification — history and on-screen popups' \
+'read:Dismiss the on-screen popups, keeping them in history' \
+'dnd:Toggle Do Not Disturb, or set it explicitly with \`on\` / \`off\`' \
+'count:Print the number of notifications in history' \
+    )
+    _describe -t commands 'mshellctl help notification commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__notification__subcmd__clear_commands] )) ||
+_mshellctl__subcmd__help__subcmd__notification__subcmd__clear_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help notification clear commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__notification__subcmd__count_commands] )) ||
+_mshellctl__subcmd__help__subcmd__notification__subcmd__count_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help notification count commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__notification__subcmd__dnd_commands] )) ||
+_mshellctl__subcmd__help__subcmd__notification__subcmd__dnd_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help notification dnd commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__notification__subcmd__open_commands] )) ||
+_mshellctl__subcmd__help__subcmd__notification__subcmd__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help notification open commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__notification__subcmd__read_commands] )) ||
+_mshellctl__subcmd__help__subcmd__notification__subcmd__read_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help notification read commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__osk_commands] )) ||
+_mshellctl__subcmd__help__subcmd__osk_commands() {
+    local commands; commands=(
+'show:Show the on-screen keyboard' \
+'hide:Hide the on-screen keyboard' \
+'toggle:Toggle the on-screen keyboard' \
+    )
+    _describe -t commands 'mshellctl help osk commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__osk__subcmd__hide_commands] )) ||
+_mshellctl__subcmd__help__subcmd__osk__subcmd__hide_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help osk hide commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__osk__subcmd__show_commands] )) ||
+_mshellctl__subcmd__help__subcmd__osk__subcmd__show_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help osk show commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__osk__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__help__subcmd__osk__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help osk toggle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play_commands() {
+    local commands; commands=(
+'start:Start the mpv companion window' \
+'toggle:Toggle the mpv window (show/hide)' \
+'play:Play a target (URL / path / clipboard, per mplay'\''s rules)' \
+'stop:Stop playback / close the window' \
+'snap:Snapshot the current frame' \
+'pin:Pin the window on top' \
+'focus:Focus the mpv window' \
+'wallpaper:Video-wallpaper engine — \`wallpaper start \[PATH\]\` / \`wallpaper stop\`' \
+    )
+    _describe -t commands 'mshellctl help play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__focus_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__focus_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play focus commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__pin_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__pin_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play pin commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__play_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__play_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__snap_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__snap_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play snap commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__start_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play start commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play stop commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play toggle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play wallpaper commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help__subcmd__plugin_commands] )) ||
 _mshellctl__subcmd__help__subcmd__plugin_commands() {
     local commands; commands=(
@@ -4008,6 +5542,48 @@ _mshellctl__subcmd__help__subcmd__plugin__subcmd__list_commands() {
 _mshellctl__subcmd__help__subcmd__plugin__subcmd__reload_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help plugin reload commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__power_commands] )) ||
+_mshellctl__subcmd__help__subcmd__power_commands() {
+    local commands; commands=(
+'status:Print the active profile + governor state' \
+'cycle:Cycle to the next profile' \
+'set:Set a specific profile' \
+'pause:Pause automatic management (hold the current profile)' \
+'resume:Resume automatic management' \
+'auto:Resume automatic management (alias for \`resume\`)' \
+    )
+    _describe -t commands 'mshellctl help power commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__power__subcmd__auto_commands] )) ||
+_mshellctl__subcmd__help__subcmd__power__subcmd__auto_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help power auto commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__power__subcmd__cycle_commands] )) ||
+_mshellctl__subcmd__help__subcmd__power__subcmd__cycle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help power cycle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__power__subcmd__pause_commands] )) ||
+_mshellctl__subcmd__help__subcmd__power__subcmd__pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help power pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__power__subcmd__resume_commands] )) ||
+_mshellctl__subcmd__help__subcmd__power__subcmd__resume_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help power resume commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__power__subcmd__set_commands] )) ||
+_mshellctl__subcmd__help__subcmd__power__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help power set commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__power__subcmd__status_commands] )) ||
+_mshellctl__subcmd__help__subcmd__power__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help power status commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__quit_commands] )) ||
 _mshellctl__subcmd__help__subcmd__quit_commands() {
@@ -4074,6 +5650,48 @@ _mshellctl__subcmd__help__subcmd__screenshot__subcmd__window_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help screenshot window commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__help__subcmd__session_commands] )) ||
+_mshellctl__subcmd__help__subcmd__session_commands() {
+    local commands; commands=(
+'menu:Open the session / power menu' \
+'lock:Lock the session' \
+'logout:Log out of the session' \
+'suspend:Suspend the system' \
+'reboot:Reboot the system' \
+'shutdown:Power off the system' \
+    )
+    _describe -t commands 'mshellctl help session commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__session__subcmd__lock_commands] )) ||
+_mshellctl__subcmd__help__subcmd__session__subcmd__lock_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help session lock commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__session__subcmd__logout_commands] )) ||
+_mshellctl__subcmd__help__subcmd__session__subcmd__logout_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help session logout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__session__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__help__subcmd__session__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help session menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__session__subcmd__reboot_commands] )) ||
+_mshellctl__subcmd__help__subcmd__session__subcmd__reboot_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help session reboot commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__session__subcmd__shutdown_commands] )) ||
+_mshellctl__subcmd__help__subcmd__session__subcmd__shutdown_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help session shutdown commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__session__subcmd__suspend_commands] )) ||
+_mshellctl__subcmd__help__subcmd__session__subcmd__suspend_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help session suspend commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help__subcmd__set-wallpaper_commands] )) ||
 _mshellctl__subcmd__help__subcmd__set-wallpaper_commands() {
     local commands; commands=()
@@ -4121,6 +5739,65 @@ _mshellctl__subcmd__help__subcmd__theme__subcmd__set_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help theme set commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__help__subcmd__toast_commands] )) ||
+_mshellctl__subcmd__help__subcmd__toast_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help toast commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn_commands() {
+    local commands; commands=(
+'status:Connection status (relay, IP, protocol)' \
+'connect:Connect using the current relay selection' \
+'disconnect:Disconnect' \
+'toggle:Toggle the connection on/off' \
+'reconnect:Reconnect (disconnect + connect)' \
+'random:Connect to a random relay' \
+'fastest:Connect to the fastest relay (latency-ranked)' \
+'menu:Open the shell'\''s DNS/VPN menu (D-Bus, not \`mvpn\`)' \
+    )
+    _describe -t commands 'mshellctl help vpn commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__connect_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__connect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn connect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__disconnect_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__disconnect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn disconnect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__fastest_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__fastest_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn fastest commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__random_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__random_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn random commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__reconnect_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__reconnect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn reconnect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__status_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn status commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__vpn__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__help__subcmd__vpn__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help vpn toggle commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__help__subcmd__wallpaper_commands() {
     local commands; commands=(
@@ -4159,6 +5836,109 @@ _mshellctl__subcmd__hidden-bar_commands() {
 _mshellctl__subcmd__inspect_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl inspect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout_commands] )) ||
+_mshellctl__subcmd__layout_commands() {
+    local commands; commands=(
+'list:List saved layouts' \
+'current:Print the current layout' \
+'set:Apply a saved layout by name' \
+'next:Apply the next saved layout' \
+'prev:Apply the previous saved layout' \
+'preview:Preview a layout without applying it' \
+'pick:Interactive layout picker' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl layout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__current_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__current_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout current commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help_commands() {
+    local commands; commands=(
+'list:List saved layouts' \
+'current:Print the current layout' \
+'set:Apply a saved layout by name' \
+'next:Apply the next saved layout' \
+'prev:Apply the previous saved layout' \
+'preview:Preview a layout without applying it' \
+'pick:Interactive layout picker' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl layout help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__current_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__current_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help current commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__list_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help list commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__next_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help next commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__pick_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__pick_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help pick commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__prev_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__prev_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help prev commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__preview_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__preview_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help preview commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__help__subcmd__set_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__help__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout help set commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__list_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout list commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__next_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout next commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__pick_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__pick_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout pick commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__prev_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__prev_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout prev commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__preview_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__preview_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout preview commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__layout__subcmd__set_commands] )) ||
+_mshellctl__subcmd__layout__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl layout set commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__lock_commands] )) ||
 _mshellctl__subcmd__lock_commands() {
@@ -4375,10 +6155,12 @@ _mshellctl__subcmd__menu_commands() {
 'bluetooth:Toggle the Bluetooth menu (connect/disconnect/scan/pair)' \
 'cpu-dashboard:Toggle the CPU Dashboard menu (CPU, temp, RAM, load)' \
 'audio-dashboard:Toggle the Audio Dashboard menu (output + input mixer)' \
+'audio-route:Toggle the Audio Route picker menu (pick any output directly — the Audio Route pill'\''s right-click surface)' \
 'system-update:Toggle the System Updates menu (repo / AUR / Flatpak)' \
 'valent:Toggle the Valent Connect menu (phone status + actions)' \
 'keep-awake:Toggle the Keep Awake menu (duration grid + countdown)' \
 'twilight:Toggle the Twilight menu (toggle + temperature + mode + presets)' \
+'margo-layout:Toggle the Margo Layout Switcher menu (pick the current tag'\''s tiling layout — same picker as the bar'\''s Margo Layout Switcher pill)' \
 'weather:Toggle the Weather menu (current + hourly + daily, all in one)' \
 'keybinds:Toggle the keybind cheatsheet menu (searchable shortcut list)' \
 'alarm-clock:Toggle the Alarm Clock menu (alarms list + add/edit + stopwatch)' \
@@ -4393,8 +6175,9 @@ _mshellctl__subcmd__menu_commands() {
 'network:Toggle the Network Console menu' \
 'power:Toggle the Power Profile (power) menu' \
 'media-player:Toggle the Media Player menu' \
+'lyrics:Toggle the Lyrics menu (synced lyrics of the now-playing track)' \
 'session:Toggle the session / power menu, or run a session action' \
-'dashboard:Toggle the combined dashboard menu (clock + weather + quick settings, all in one panel)' \
+'mdash:Toggle the mdash dashboard menu — greeting header, calendar + weather, the quick-settings card stack, and a menu-shortcut grid' \
 'plugin:Toggle an installed plugin'\''s panel/menu by key — e.g. \`menu plugin assistant\` or \`menu plugin mullvad\`. Generic\: works for any plugin that ships a panel or a \`\[\[widget.menu\]\]\`, with no per-plugin code (the key matches the plugin id or a widget key)' \
 'close-all:Close all open menus' \
 'help:Print this message or the help of the given subcommand(s)' \
@@ -4420,6 +6203,11 @@ _mshellctl__subcmd__menu__subcmd__app-launcher_commands() {
 _mshellctl__subcmd__menu__subcmd__audio-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu audio-dashboard commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__audio-route_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__audio-route_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu audio-route commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__bluetooth_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__bluetooth_commands() {
@@ -4451,11 +6239,6 @@ _mshellctl__subcmd__menu__subcmd__cpu-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu cpu-dashboard commands' commands "$@"
 }
-(( $+functions[_mshellctl__subcmd__menu__subcmd__dashboard_commands] )) ||
-_mshellctl__subcmd__menu__subcmd__dashboard_commands() {
-    local commands; commands=()
-    _describe -t commands 'mshellctl menu dashboard commands' commands "$@"
-}
 (( $+functions[_mshellctl__subcmd__menu__subcmd__dns_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__dns_commands() {
     local commands; commands=()
@@ -4475,10 +6258,12 @@ _mshellctl__subcmd__menu__subcmd__help_commands() {
 'bluetooth:Toggle the Bluetooth menu (connect/disconnect/scan/pair)' \
 'cpu-dashboard:Toggle the CPU Dashboard menu (CPU, temp, RAM, load)' \
 'audio-dashboard:Toggle the Audio Dashboard menu (output + input mixer)' \
+'audio-route:Toggle the Audio Route picker menu (pick any output directly — the Audio Route pill'\''s right-click surface)' \
 'system-update:Toggle the System Updates menu (repo / AUR / Flatpak)' \
 'valent:Toggle the Valent Connect menu (phone status + actions)' \
 'keep-awake:Toggle the Keep Awake menu (duration grid + countdown)' \
 'twilight:Toggle the Twilight menu (toggle + temperature + mode + presets)' \
+'margo-layout:Toggle the Margo Layout Switcher menu (pick the current tag'\''s tiling layout — same picker as the bar'\''s Margo Layout Switcher pill)' \
 'weather:Toggle the Weather menu (current + hourly + daily, all in one)' \
 'keybinds:Toggle the keybind cheatsheet menu (searchable shortcut list)' \
 'alarm-clock:Toggle the Alarm Clock menu (alarms list + add/edit + stopwatch)' \
@@ -4493,8 +6278,9 @@ _mshellctl__subcmd__menu__subcmd__help_commands() {
 'network:Toggle the Network Console menu' \
 'power:Toggle the Power Profile (power) menu' \
 'media-player:Toggle the Media Player menu' \
+'lyrics:Toggle the Lyrics menu (synced lyrics of the now-playing track)' \
 'session:Toggle the session / power menu, or run a session action' \
-'dashboard:Toggle the combined dashboard menu (clock + weather + quick settings, all in one panel)' \
+'mdash:Toggle the mdash dashboard menu — greeting header, calendar + weather, the quick-settings card stack, and a menu-shortcut grid' \
 'plugin:Toggle an installed plugin'\''s panel/menu by key — e.g. \`menu plugin assistant\` or \`menu plugin mullvad\`. Generic\: works for any plugin that ships a panel or a \`\[\[widget.menu\]\]\`, with no per-plugin code (the key matches the plugin id or a widget key)' \
 'close-all:Close all open menus' \
 'help:Print this message or the help of the given subcommand(s)' \
@@ -4520,6 +6306,11 @@ _mshellctl__subcmd__menu__subcmd__help__subcmd__app-launcher_commands() {
 _mshellctl__subcmd__menu__subcmd__help__subcmd__audio-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu help audio-dashboard commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__audio-route_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__help__subcmd__audio-route_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu help audio-route commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__bluetooth_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__help__subcmd__bluetooth_commands() {
@@ -4551,11 +6342,6 @@ _mshellctl__subcmd__menu__subcmd__help__subcmd__cpu-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu help cpu-dashboard commands' commands "$@"
 }
-(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__dashboard_commands] )) ||
-_mshellctl__subcmd__menu__subcmd__help__subcmd__dashboard_commands() {
-    local commands; commands=()
-    _describe -t commands 'mshellctl menu help dashboard commands' commands "$@"
-}
 (( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__dns_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__help__subcmd__dns_commands() {
     local commands; commands=()
@@ -4580,6 +6366,21 @@ _mshellctl__subcmd__menu__subcmd__help__subcmd__keep-awake_commands() {
 _mshellctl__subcmd__menu__subcmd__help__subcmd__keybinds_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu help keybinds commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__lyrics_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__help__subcmd__lyrics_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu help lyrics commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__margo-layout_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__help__subcmd__margo-layout_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu help margo-layout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__mdash_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__help__subcmd__mdash_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu help mdash commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__media-player_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__help__subcmd__media-player_commands() {
@@ -4741,6 +6542,21 @@ _mshellctl__subcmd__menu__subcmd__keep-awake_commands() {
 _mshellctl__subcmd__menu__subcmd__keybinds_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu keybinds commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__lyrics_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__lyrics_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu lyrics commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__margo-layout_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__margo-layout_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu margo-layout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__mdash_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__mdash_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu mdash commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__media-player_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__media-player_commands() {
@@ -4968,6 +6784,255 @@ _mshellctl__subcmd__menu__subcmd__weather_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu weather commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__notification_commands] )) ||
+_mshellctl__subcmd__notification_commands() {
+    local commands; commands=(
+'open:Open the notifications menu' \
+'clear:Clear every notification — history and on-screen popups' \
+'read:Dismiss the on-screen popups, keeping them in history' \
+'dnd:Toggle Do Not Disturb, or set it explicitly with \`on\` / \`off\`' \
+'count:Print the number of notifications in history' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl notification commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__clear_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__clear_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification clear commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__count_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__count_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification count commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__dnd_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__dnd_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification dnd commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__help_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__help_commands() {
+    local commands; commands=(
+'open:Open the notifications menu' \
+'clear:Clear every notification — history and on-screen popups' \
+'read:Dismiss the on-screen popups, keeping them in history' \
+'dnd:Toggle Do Not Disturb, or set it explicitly with \`on\` / \`off\`' \
+'count:Print the number of notifications in history' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl notification help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__help__subcmd__clear_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__help__subcmd__clear_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification help clear commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__help__subcmd__count_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__help__subcmd__count_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification help count commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__help__subcmd__dnd_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__help__subcmd__dnd_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification help dnd commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__help__subcmd__open_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__help__subcmd__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification help open commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__help__subcmd__read_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__help__subcmd__read_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification help read commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__open_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification open commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__notification__subcmd__read_commands] )) ||
+_mshellctl__subcmd__notification__subcmd__read_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl notification read commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk_commands] )) ||
+_mshellctl__subcmd__osk_commands() {
+    local commands; commands=(
+'show:Show the on-screen keyboard' \
+'hide:Hide the on-screen keyboard' \
+'toggle:Toggle the on-screen keyboard' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl osk commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__help_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__help_commands() {
+    local commands; commands=(
+'show:Show the on-screen keyboard' \
+'hide:Hide the on-screen keyboard' \
+'toggle:Toggle the on-screen keyboard' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl osk help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl osk help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__help__subcmd__hide_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__help__subcmd__hide_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl osk help hide commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__help__subcmd__show_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__help__subcmd__show_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl osk help show commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__help__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__help__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl osk help toggle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__hide_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__hide_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl osk hide commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__show_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__show_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl osk show commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__osk__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__osk__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl osk toggle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play_commands] )) ||
+_mshellctl__subcmd__play_commands() {
+    local commands; commands=(
+'start:Start the mpv companion window' \
+'toggle:Toggle the mpv window (show/hide)' \
+'play:Play a target (URL / path / clipboard, per mplay'\''s rules)' \
+'stop:Stop playback / close the window' \
+'snap:Snapshot the current frame' \
+'pin:Pin the window on top' \
+'focus:Focus the mpv window' \
+'wallpaper:Video-wallpaper engine — \`wallpaper start \[PATH\]\` / \`wallpaper stop\`' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__focus_commands] )) ||
+_mshellctl__subcmd__play__subcmd__focus_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play focus commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help_commands() {
+    local commands; commands=(
+'start:Start the mpv companion window' \
+'toggle:Toggle the mpv window (show/hide)' \
+'play:Play a target (URL / path / clipboard, per mplay'\''s rules)' \
+'stop:Stop playback / close the window' \
+'snap:Snapshot the current frame' \
+'pin:Pin the window on top' \
+'focus:Focus the mpv window' \
+'wallpaper:Video-wallpaper engine — \`wallpaper start \[PATH\]\` / \`wallpaper stop\`' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl play help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__focus_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__focus_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help focus commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__pin_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__pin_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help pin commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__play_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__play_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__snap_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__snap_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help snap commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__start_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help start commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help stop commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help toggle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help wallpaper commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__pin_commands] )) ||
+_mshellctl__subcmd__play__subcmd__pin_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play pin commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__play_commands] )) ||
+_mshellctl__subcmd__play__subcmd__play_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__snap_commands] )) ||
+_mshellctl__subcmd__play__subcmd__snap_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play snap commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__start_commands] )) ||
+_mshellctl__subcmd__play__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play start commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__play__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play stop commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__play__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play toggle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper_commands] )) ||
+_mshellctl__subcmd__play__subcmd__wallpaper_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play wallpaper commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__plugin_commands] )) ||
 _mshellctl__subcmd__plugin_commands() {
     local commands; commands=(
@@ -5022,6 +7087,97 @@ _mshellctl__subcmd__plugin__subcmd__list_commands() {
 _mshellctl__subcmd__plugin__subcmd__reload_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl plugin reload commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power_commands] )) ||
+_mshellctl__subcmd__power_commands() {
+    local commands; commands=(
+'status:Print the active profile + governor state' \
+'cycle:Cycle to the next profile' \
+'set:Set a specific profile' \
+'pause:Pause automatic management (hold the current profile)' \
+'resume:Resume automatic management' \
+'auto:Resume automatic management (alias for \`resume\`)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl power commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__auto_commands] )) ||
+_mshellctl__subcmd__power__subcmd__auto_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power auto commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__cycle_commands] )) ||
+_mshellctl__subcmd__power__subcmd__cycle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power cycle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help_commands() {
+    local commands; commands=(
+'status:Print the active profile + governor state' \
+'cycle:Cycle to the next profile' \
+'set:Set a specific profile' \
+'pause:Pause automatic management (hold the current profile)' \
+'resume:Resume automatic management' \
+'auto:Resume automatic management (alias for \`resume\`)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl power help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help__subcmd__auto_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help__subcmd__auto_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power help auto commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help__subcmd__cycle_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help__subcmd__cycle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power help cycle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help__subcmd__pause_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help__subcmd__pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power help pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help__subcmd__resume_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help__subcmd__resume_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power help resume commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help__subcmd__set_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power help set commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__help__subcmd__status_commands] )) ||
+_mshellctl__subcmd__power__subcmd__help__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power help status commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__pause_commands] )) ||
+_mshellctl__subcmd__power__subcmd__pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__resume_commands] )) ||
+_mshellctl__subcmd__power__subcmd__resume_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power resume commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__set_commands] )) ||
+_mshellctl__subcmd__power__subcmd__set_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power set commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__power__subcmd__status_commands] )) ||
+_mshellctl__subcmd__power__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl power status commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__quit_commands] )) ||
 _mshellctl__subcmd__quit_commands() {
@@ -5162,6 +7318,97 @@ _mshellctl__subcmd__screenshot__subcmd__window_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl screenshot window commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__session_commands] )) ||
+_mshellctl__subcmd__session_commands() {
+    local commands; commands=(
+'menu:Open the session / power menu' \
+'lock:Lock the session' \
+'logout:Log out of the session' \
+'suspend:Suspend the system' \
+'reboot:Reboot the system' \
+'shutdown:Power off the system' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl session commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help_commands() {
+    local commands; commands=(
+'menu:Open the session / power menu' \
+'lock:Lock the session' \
+'logout:Log out of the session' \
+'suspend:Suspend the system' \
+'reboot:Reboot the system' \
+'shutdown:Power off the system' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl session help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help__subcmd__lock_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help__subcmd__lock_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session help lock commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help__subcmd__logout_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help__subcmd__logout_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session help logout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session help menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help__subcmd__reboot_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help__subcmd__reboot_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session help reboot commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help__subcmd__shutdown_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help__subcmd__shutdown_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session help shutdown commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__help__subcmd__suspend_commands] )) ||
+_mshellctl__subcmd__session__subcmd__help__subcmd__suspend_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session help suspend commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__lock_commands] )) ||
+_mshellctl__subcmd__session__subcmd__lock_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session lock commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__logout_commands] )) ||
+_mshellctl__subcmd__session__subcmd__logout_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session logout commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__session__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__reboot_commands] )) ||
+_mshellctl__subcmd__session__subcmd__reboot_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session reboot commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__shutdown_commands] )) ||
+_mshellctl__subcmd__session__subcmd__shutdown_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session shutdown commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__session__subcmd__suspend_commands] )) ||
+_mshellctl__subcmd__session__subcmd__suspend_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl session suspend commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__set-wallpaper_commands] )) ||
 _mshellctl__subcmd__set-wallpaper_commands() {
     local commands; commands=()
@@ -5264,6 +7511,126 @@ _mshellctl__subcmd__theme__subcmd__list_commands() {
 _mshellctl__subcmd__theme__subcmd__set_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl theme set commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__toast_commands] )) ||
+_mshellctl__subcmd__toast_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl toast commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn_commands] )) ||
+_mshellctl__subcmd__vpn_commands() {
+    local commands; commands=(
+'status:Connection status (relay, IP, protocol)' \
+'connect:Connect using the current relay selection' \
+'disconnect:Disconnect' \
+'toggle:Toggle the connection on/off' \
+'reconnect:Reconnect (disconnect + connect)' \
+'random:Connect to a random relay' \
+'fastest:Connect to the fastest relay (latency-ranked)' \
+'menu:Open the shell'\''s DNS/VPN menu (D-Bus, not \`mvpn\`)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl vpn commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__connect_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__connect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn connect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__disconnect_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__disconnect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn disconnect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__fastest_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__fastest_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn fastest commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help_commands() {
+    local commands; commands=(
+'status:Connection status (relay, IP, protocol)' \
+'connect:Connect using the current relay selection' \
+'disconnect:Disconnect' \
+'toggle:Toggle the connection on/off' \
+'reconnect:Reconnect (disconnect + connect)' \
+'random:Connect to a random relay' \
+'fastest:Connect to the fastest relay (latency-ranked)' \
+'menu:Open the shell'\''s DNS/VPN menu (D-Bus, not \`mvpn\`)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl vpn help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__connect_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__connect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help connect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__disconnect_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__disconnect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help disconnect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__fastest_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__fastest_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help fastest commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__random_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__random_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help random commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__reconnect_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__reconnect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help reconnect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__status_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help status commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__help__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__help__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn help toggle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__random_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__random_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn random commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__reconnect_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__reconnect_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn reconnect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__status_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn status commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__vpn__subcmd__toggle_commands] )) ||
+_mshellctl__subcmd__vpn__subcmd__toggle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl vpn toggle commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__wallpaper_commands() {
