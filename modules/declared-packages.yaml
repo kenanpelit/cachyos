@@ -4,6 +4,7 @@ packages:
 - blueman
 - chromium
 - cups
+- graphify
 - playwright
 - shelly
 exclude: []

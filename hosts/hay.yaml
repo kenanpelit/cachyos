@@ -67,7 +67,7 @@ enabled_modules:
   - browserpass
   - helium
   - firefox
-  - handy
+  #- handy
   - webcord
   - user-services
   - ai
