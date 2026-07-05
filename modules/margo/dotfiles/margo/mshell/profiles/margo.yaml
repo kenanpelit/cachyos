@@ -168,7 +168,7 @@ bars:
     - Separator
 menus:
   clipboard_menu:
-    minimum_width: 620
+    minimum_width: 720
     maximum_height: 1080
   notification_menu:
     minimum_width: 520
@@ -177,7 +177,8 @@ menus:
     position: Top
   app_launcher_menu:
     position: Top
-    minimum_width: 640
+    minimum_width: 720
+    maximum_height: 920
   screenshare_menu:
     position: Top
   dns_menu:
