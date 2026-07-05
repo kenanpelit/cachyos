@@ -10,37 +10,18 @@ general:
       type: City
       name: Atasehir
       country: TR
-  temperature_unit: Metric
   weather_poll_minutes: 180
-  weather_retry_minutes: 60
-  show_screen_corners: false
-  screen_corner_radius: 24
-  network_osd_enabled: false
-  media_seek_step_seconds: 10
   media_large_album_art: true
   settings_panel_width: 1440
   settings_panel_height: 1080
 theme:
   icons:
-    shell_icon_theme: MargoMaterial
     app_icon_theme: kora
-    apply_theme_filter: false
-    filter_strength: 1.0
-    monochrome_strength: 0.0
-    contrast_strength: 1.0
   theme: Default
-  matugen:
-    preference: Darkness
-    scheme_type: TonalSpot
-    mode: Dark
-    contrast: 0.0
-    auto_polarity: false
   apps:
     helium:
       enabled: true
-      isolated_root: ~/.helium/isolated
       target_mode: all
-      apply_on_theme_change: true
       targets:
       - instance: Nil
         profile: Profile 3
@@ -75,7 +56,6 @@ theme:
       - instance: Kenp
         profile: Profile 4
         enabled: true
-  css_file: ''
   attributes:
     font:
       primary: Maple Mono NF
@@ -85,27 +65,20 @@ theme:
     sizing:
       radius_widget: 12
       radius_window: 12
-      border_width: 2
       bar_hover_strength: 32
-      settings_font_scale: 1.0
-      font_scale: 1.0
-      bar_font_scale: 1.0
-      surface_opacity: 100
       frame_color: '#1f1f2eff'
       frame_border_color: '#303345ff'
-      separator_color: ''
-    window_opacity: 1.0
 bars:
-  frame:
-    enable_frame: true
-    monitor_filter: []
   widgets:
     system_update:
       check_interval_minutes: 720
-      check_repo: true
-      check_aur: true
       check_flatpak: false
-    hidden_bar:
+    hidden_bars:
+    - name: right
+      widgets:
+      - Network
+      - Separator
+      - CpuDashboard
       start_expanded: false
       auto_expand: true
       hover_delay_ms: 0
@@ -113,27 +86,11 @@ bars:
       collapse_delay_ms: 1000
     catwalk:
       minimum_threshold: 20
-      hide_background: false
-      style: run_cat
-      display: icon
       size: 24
-      poll_secs: 1
     privacy:
       hide_inactive: true
-      enable_toast: true
-      track_mic: true
-      track_camera: true
-      detect_screen_share: true
-      mic_filter: ''
-      cam_filter: ''
-      accent: Error
-      history_limit: 50
-    custom_widgets: []
   top_bar:
-    enabled: true
     minimum_height: 36
-    reveal_by_default: true
-    auto_hide_delay_ms: 400
     left_widgets:
     - MargoTags
     - Separator
@@ -143,20 +100,20 @@ bars:
     - Separator
     - MediaPlayer
     center_widgets:
+    - Catwalk
+    - Separator
     - Weather
     - Separator
     - Mdash
     - Separator
-    - RecordingIndicator
-    - Catwalk
-    - Separator
     - Notifications
     - Separator
     - HiddenBar
-    right_widgets:
-    - Network
     - Separator
-    - CpuDashboard
+    - Lyrics
+    - VpnIndicator
+    right_widgets:
+    - !HiddenBarNamed right
     - Separator
     - AudioDashboard
     - Separator
@@ -165,8 +122,6 @@ bars:
     - Valent
     - Separator
     - Clipboard
-    - Separator
-    - Podman
     - Separator
     - Vpn
     - Separator
@@ -190,11 +145,11 @@ bars:
     - SystemUpdate
     - Keybinds
     - Ai
+    - Podman
   bottom_bar:
     enabled: false
     minimum_height: 28
     reveal_by_default: false
-    auto_hide_delay_ms: 400
     left_widgets:
     - Separator
     - !Spacer 8
@@ -211,285 +166,78 @@ bars:
     - Separator
     - Tray
     - Separator
-    hidden_widgets: []
-  islands: false
-  slide_duration_ms: 500
 menus:
-  clock_menu:
-    position: Top
-    widgets:
-    - Calendar
-    - !Spacer
-      size: 20
-    - Weather
-    minimum_width: 410
-    maximum_height: 0
   clipboard_menu:
-    position: TopRight
-    widgets:
-    - Clipboard
     minimum_width: 620
     maximum_height: 1080
   notification_menu:
-    position: TopRight
-    widgets:
-    - Notifications
     minimum_width: 520
     maximum_height: 1200
   screenshot_menu:
     position: Top
-    widgets:
-    - Screenshots
-    - Divider
-    - ScreenRecording
-    minimum_width: 410
-    maximum_height: 0
   app_launcher_menu:
     position: Top
-    widgets:
-    - AppLauncher
     minimum_width: 640
-    maximum_height: 1080
-  wallpaper_menu:
-    position: Top
-    widgets:
-    - ThemePicker
-    - Wallpaper
-    minimum_width: 1200
-    maximum_height: 0
   screenshare_menu:
     position: Top
-  ufw_menu:
-    position: TopRight
-    widgets:
-    - Ufw
-    minimum_width: 410
-    maximum_height: 0
   dns_menu:
-    position: TopRight
     widgets:
     - Dns
     - !Spacer
       size: 16
     - Ip
-    minimum_width: 420
-    maximum_height: 0
   vpn_menu:
-    position: TopRight
-    widgets:
-    - Vpn
     minimum_width: 520
-    maximum_height: 720
   ai_menu:
-    position: TopRight
-    widgets:
-    - Ai
     minimum_width: 640
     maximum_height: 1080
-  podman_menu:
-    position: TopRight
-    widgets:
-    - Podman
-    minimum_width: 540
-    maximum_height: 0
   notes_menu:
     position: Top
-    widgets:
-    - Notes
     minimum_width: 540
-    maximum_height: 0
-  ip_menu:
-    position: TopRight
-    widgets:
-    - Ip
-    minimum_width: 380
-    maximum_height: 0
-  network_menu:
-    position: TopRight
-    widgets:
-    - Network
-    minimum_width: 460
-    maximum_height: 0
-  power_menu:
-    position: TopRight
-    widgets:
-    - Power
-    minimum_width: 360
-    maximum_height: 0
   bluetooth_menu:
     position: TopRight
-    widgets:
-    - Bluetooth
-    minimum_width: 400
-    maximum_height: 0
   cpu_dashboard_menu:
     position: TopRight
-    widgets:
-    - CpuDashboard
-    minimum_width: 380
-    maximum_height: 0
   audio_dashboard_menu:
     position: TopRight
-    widgets:
-    - AudioDashboard
-    minimum_width: 400
-    maximum_height: 0
-  system_update_menu:
-    position: TopRight
-    widgets:
-    - SystemUpdate
-    minimum_width: 460
-    maximum_height: 620
-  valent_menu:
-    position: TopRight
-    widgets:
-    - Valent
-    minimum_width: 460
-    maximum_height: 620
   keep_awake_menu:
     position: Top
-    widgets:
-    - KeepAwake
     minimum_width: 450
-    maximum_height: 0
   weather_menu:
     position: Top
-    widgets:
-    - Weather
     minimum_width: 680
     maximum_height: 780
   twilight_menu:
     position: Top
-    widgets:
-    - Twilight
-    minimum_width: 360
-    maximum_height: 0
   keybinds_menu:
-    position: Top
-    widgets:
-    - Keybinds
     minimum_width: 820
     maximum_height: 1440
   alarmclock_menu:
     position: Top
-    widgets:
-    - AlarmClock
-    minimum_width: 420
-    maximum_height: 640
-  dock_menu:
-    position: Bottom
-    widgets:
-    - MargoDock
-    minimum_width: 0
-    maximum_height: 0
   control_center_menu:
-    position: TopRight
-    widgets:
-    - ControlCenter
-    minimum_width: 460
     maximum_height: 1080
-  ssh_menu:
-    position: TopRight
-    widgets:
-    - SshSessions
-    minimum_width: 460
-    maximum_height: 720
-  privacy_menu:
-    position: TopRight
-    widgets:
-    - Privacy
-    minimum_width: 380
-    maximum_height: 560
   media_player_menu:
     position: TopLeft
-    widgets:
-    - MediaPlayer
     minimum_width: 460
-    maximum_height: 0
   session_menu:
     position: Bottom
-    widgets:
-    - Session
-    minimum_width: 420
-    maximum_height: 0
-  settings_menu:
-    position: Top
-    widgets: []
-    minimum_width: 780
-    maximum_height: 0
   margo_layout_menu:
     position: TopLeft
-    widgets:
-    - MargoLayout
-    minimum_width: 280
-    maximum_height: 0
-  plugin_panel_menu:
-    position: TopRight
-    widgets: []
-    minimum_width: 420
-    maximum_height: 560
-  left_menu_expansion_type: AlwaysExpanded
-  right_menu_expansion_type: AlwaysExpanded
 notifications:
-  notification_position: Right
-  blocklist: []
-  show_close_button: true
-  show_action_buttons: false
   group_notifications: false
-  popup_width: 460
-  history_limit: 200
-  show_timeout_bar: true
-  popup_duration_ms: 5000
-  inline_reply: true
-  sound_enabled: false
-  sound_low: false
-  sound_normal: true
-  sound_critical: true
-  sound_from_client: true
-  quiet_hours_enabled: false
-  quiet_hours_start: 22:00
-  quiet_hours_end: 08:00
-  show_progress: true
 wallpaper:
   wallpaper_dir: /home/kenan/Pictures/wallpapers/others
-  content_fit: Cover
-  apply_theme_filter: false
-  theme_filter_strength: 1.0
   rotation_enabled: true
-  rotation_interval_minutes: 5
-  rotation_mode: Sequential
-  daily_wallpaper_enabled: false
   daily_wallpaper_source: nasa
-  daily_wallpaper_locale: ''
-tempo:
-  clock_format: '%a %d %b %H:%M'
-  formats:
-  - '%H:%M'
-  - '%H:%M:%S'
-  - '%a %d %b %H:%M'
-  - '%d.%m.%Y %H:%M'
 idle:
-  dim_enabled: true
   dim_timeout_minutes: 20
-  lock_enabled: true
   lock_timeout_minutes: 25
-  suspend_enabled: true
-  suspend_timeout_minutes: 30
 session:
-  lock_command: ''
-  logout_command: ''
   suspend_command: systemctl suspend -i
   reboot_command: osc-safe-reboot
   shutdown_command: systemctl poweroff -i
 clipboard:
   max_entries: 1000
-  persist: All
-  clear_policy: Never
-  clear_after_hours: 24
-  skip_sensitive: true
-  image_history: true
-  image_max_kb: 0
-  density: Comfortable
 launcher:
   autostart_scripts:
   - name: start-kkenp
@@ -504,51 +252,81 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-helium-ai
-    enabled: true
+  - name: start-helium-kenp
+    enabled: false
     delay_secs: 11
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-helium-compecta
-    enabled: true
-    delay_secs: 9
-    trigger: LoginOnce
-    args: ''
-    working_dir: ''
-  - name: start-webcord
+  - name: start-brave-ai
     enabled: true
     delay_secs: 12
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-helium-youtube
-    enabled: true
+  - name: start-helium-ai
+    enabled: false
     delay_secs: 12
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-spotify
-    enabled: true
-    delay_secs: 12
-    trigger: LoginOnce
-    args: ''
-    working_dir: ''
-  - name: start-ferdium
+  - name: start-brave-compecta
     enabled: true
     delay_secs: 13
     trigger: LoginOnce
     args: ''
     working_dir: ''
+  - name: start-helium-compecta
+    enabled: false
+    delay_secs: 13
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-discord
+    enabled: true
+    delay_secs: 14
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-webcord
+    enabled: false
+    delay_secs: 14
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-brave-youtube
+    enabled: true
+    delay_secs: 15
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-helium-youtube
+    enabled: false
+    delay_secs: 15
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-spotify
+    enabled: true
+    delay_secs: 16
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-ferdium
+    enabled: true
+    delay_secs: 17
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
   - name: tagwarp
     enabled: true
-    delay_secs: 20
+    delay_secs: 30
     trigger: LoginOnce
     args: ''
     working_dir: ''
   - name: start-helium-whats
     enabled: false
-    delay_secs: 12
+    delay_secs: 22
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -570,15 +348,8 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  show_preview: false
   compact_rows: true
-  large_app_icons: true
-valent:
-  main_device_id: ''
 dock:
-  icon_size: 32
-  show_tooltips: true
-  show_running: true
   icon_overrides:
   - class: Kenp
     icon: brave-browser
@@ -590,20 +361,9 @@ dock:
     icon: kitty
   - class: brave-youtube.com__-Default
     icon: youtube
-  in_bar: true
   standalone: true
   style: popup
   behavior: toggle
-  position: bottom
-  ignore: []
-  spacing: 6
-  hover_preview: true
-  separator: true
-  launcher_enabled: true
-  launcher_icon: view-app-grid-symbolic
-  launcher_command: ''
-system_tray:
-  default_expanded: false
 pass:
   store_path: ~/.pass
 alarm:
@@ -613,21 +373,9 @@ alarm:
     name: test
     enabled: false
     repeat_mask: 0
-  snooze_minutes: 5
-  notifications: true
-  urgency: normal
-network:
-  proxy_mode: None
-  proxy_http: ''
-  proxy_https: ''
-  proxy_socks: ''
-  proxy_ignore: ''
-  proxy_pac_url: ''
 login_network:
   enabled: true
   wifi_connection: Ken_5
-  connect_vpn: true
-  couple_blocky: true
   delay_secs: 6
 bluetooth:
   autoconnect_enabled: true
@@ -637,36 +385,12 @@ bluetooth:
     name: SLP4
   - mac: E8:EE:CC:4D:29:00
     name: SL4
-  route_audio_output: true
-  route_audio_input: false
-  notifications: true
-power:
-  low_battery_warning: true
-  low_battery_threshold: 15
-privacy:
-  remember_recent: true
 audio:
   hide_hdmi_outputs: true
   restore_volume_on_start: true
   default_output_volume: 30
   default_input_volume: 5
 control_center:
-  wifi: true
-  bluetooth: true
-  audio_out: true
-  mic: true
-  battery: true
-  keep_awake: true
-  dnd: true
-  dark_mode: true
-  night_light: true
-  color_picker: true
-  disk: true
-  airplane_mode: true
-  vpn: true
-  valent: true
-  ufw: true
-  podman: true
   tile_order:
   - wifi
   - bluetooth
@@ -684,12 +408,6 @@ control_center:
   - dnd
   - dark_mode
   - color_picker
-  wide_tiles: []
-  show_battery_chip: true
-  show_power_profile: true
-  show_media: true
-logging:
-  enabled: true
-  level: info
-  keep_sessions: 3
+toasts:
+  position: TopLeft
 config_version: 2

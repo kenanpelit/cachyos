@@ -348,3 +348,4 @@ dock:
   show_running: true
 pass:
   store_path: ''
+config_version: 2
