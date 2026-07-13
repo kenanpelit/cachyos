@@ -1,12 +1,17 @@
 description: Packages installed manually on the system (auto-synced by mdots)
 packages:
-- adw-gtk-theme
-- blueman
-- chromium
-- cups
-- graphify
-- playwright
-- shelly
+  - adw-gtk-theme
+  - blueman
+  - chromium
+  - cups
+  - foot
+  - google-chrome
+  - graphify
+  - playwright
+  - remmina-plugin-anydesk-git
+  - remmina-plugin-folder
+  - remmina-plugin-rustdesk
+  - shelly
 exclude: []
 conflicts: []
 pre_install_hook: null

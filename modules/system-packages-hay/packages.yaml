@@ -137,7 +137,6 @@ packages:
   - networkmanager-openvpn
   - nfs-utils
   - nilfs-utils
-  - nirimod-git
   - noto-color-emoji-fontconfig
   - nss-mdns
   - ntfs-3g

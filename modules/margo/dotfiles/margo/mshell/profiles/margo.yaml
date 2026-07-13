@@ -411,4 +411,4 @@ control_center:
   - color_picker
 toasts:
   position: TopLeft
-config_version: 2
+config_version: 3
