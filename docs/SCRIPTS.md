@@ -66,13 +66,6 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
-### 📂 `home-net-vpn`
-**Description:** Bring up the home Wi-Fi profile, then reconcile Mullvad/Blocky.
-
-**Usage:** `home-net-vpn`
-
----
-
 ### 📂 `imv-dir`
 **Description:** Opens imv at a file while including all images in its directory.
 

@@ -134,9 +134,10 @@ if command -v systemctl >/dev/null 2>&1; then
     run_as_user systemctl --user start geoclue-agent.service >/dev/null 2>&1 || true
   fi
 
-  if ! run_as_user systemctl --user is-enabled home-net-vpn.timer >/dev/null 2>&1; then
-    run_as_user systemctl --user enable --now home-net-vpn.timer >/dev/null 2>&1 || true
-  fi
+  # home-net-vpn is retired — the login reconcile now runs natively inside
+  # mshell (`login_network` config; mshell-services/src/login_net.rs). Make
+  # sure previously enabled script units are gone on every machine.
+  run_as_user systemctl --user disable --now home-net-vpn.timer home-net-vpn.service >/dev/null 2>&1 || true
 fi
 
 echo "Session installation complete."
