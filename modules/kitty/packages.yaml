@@ -2,3 +2,5 @@ description: kitty packages
 
 packages:
   - kitty
+  # kitty.conf's font (Nerd Font glyphs included)
+  - maplemono-nf
