@@ -2,10 +2,22 @@
 
 # tagwarp
 # Switch Margo to a target tag reliably during startup or manual use.
+#
+# Usage: tagwarp [TAG] [OUTPUT]
+#
+# OUTPUT defaults to DP-3 (tags 1-6 per the margo tagrules; use eDP-1 for
+# 7-9), overridable via $TAGWARP_OUTPUT or arg 2. Pinning the output matters:
+# `mctl tags` without `-o` targets margo's *active* output, and during
+# startup a late-mapping app (Electron cold start on the other monitor) can
+# steal focus right before we run — the switch then lands on the wrong
+# monitor and the session appears to "ignore" tagwarp.
 
 set -u
 
 TAG="${1:-2}"
+OUTPUT="${2:-${TAGWARP_OUTPUT:-DP-3}}"
+# mctl takes a raw bitmask, not a tag number (tag N = 1 << (N-1)).
+MASK=$((1 << (TAG - 1)))
 APP_NAME="MARGO"
 ICON_NAME="view-grid-symbolic"
 LOG_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/tagwarp.log"
@@ -46,8 +58,8 @@ if ! command -v mctl >/dev/null 2>&1; then
 fi
 
 for attempt in $(seq 1 30); do
-  if mctl tags "$TAG" >>"$LOG_FILE" 2>&1; then
-    log "SUCCESS: switched to tag $TAG on attempt $attempt"
+  if mctl -o "$OUTPUT" tags "$MASK" >>"$LOG_FILE" 2>&1; then
+    log "SUCCESS: switched $OUTPUT to tag $TAG (mask $MASK) on attempt $attempt"
     notify
     exit 0
   fi
