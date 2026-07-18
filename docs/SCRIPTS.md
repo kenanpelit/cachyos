@@ -461,7 +461,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ### 📂 `tagwarp`
 **Description:** tagwarp
 
-**Usage:** `tagwarp`
+**Usage:** `tagwarp [TAG] [OUTPUT]`
 
 ---
 
