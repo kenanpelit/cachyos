@@ -17,7 +17,6 @@ general:
 theme:
   icons:
     app_icon_theme: kora
-  theme: Default
   apps:
     helium:
       enabled: true
@@ -177,7 +176,7 @@ menus:
     position: Top
   app_launcher_menu:
     position: Top
-    minimum_width: 720
+    minimum_width: 640
     maximum_height: 920
   screenshare_menu:
     position: Top
