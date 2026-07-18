@@ -382,9 +382,8 @@ check_window_on_workspace() {
     return 0
   fi
 
-  # Window verification was Hyprland-only; margo / generic Wayland have no
-  # equivalent window-query API wired up here, so just wait for the app to
-  # settle.
+  # margo / generic Wayland have no window-query API wired up here, so just
+  # wait for the app to settle.
   # TODO: margo equivalent (per-window verification via mctl, if available)
   sleep "$WAIT_TIME"
   return 0
@@ -582,8 +581,8 @@ echo "$APP_PID" > "$STATE_DIR/PROFILE_NAME.pid"
 echo "$COMMAND" > "$STATE_DIR/PROFILE_NAME.cmd"
 echo "Application started (PID: $APP_PID)"
 
-# Window verification was Hyprland-only; margo / generic Wayland just wait for
-# the app to settle.
+# No window verification on margo / generic Wayland; just wait for the app to
+# settle.
 # TODO: margo equivalent (per-window verification via mctl, if available)
 sleep $WAIT_TIME
 
@@ -711,10 +710,9 @@ clean_scripts() {
 # Launch Functions
 #-------------------------------------------------------------------------------
 
-# NOTE: window-to-workspace correction was Hyprland-only (hyprctl
-# movetoworkspacesilent) and has no margo equivalent wired up, so it was
-# removed. On margo/generic Wayland, windows land on the workspace that was
-# active when the app was launched.
+# NOTE: no window-to-workspace correction is wired up. On margo/generic
+# Wayland, windows land on the workspace that was active when the app was
+# launched.
 # TODO: margo equivalent (move-window-to-tag via mctl, if available)
 
 launch_application() {

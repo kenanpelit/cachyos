@@ -26,20 +26,11 @@ readonly COMMAND="profile_brave"
 readonly ARGS_STR="kenp --separate --app-id=hnpfjngllnobngcgfapefoaidbinmjnm"
 readonly STATE_DIR="/run/user/1000/semsumo"
 
-# Detect window manager
-if command -v hyprctl &>/dev/null && hyprctl version &>/dev/null; then
-    WM_TYPE="hyprland"
-elif command -v niri &>/dev/null && [[ "$XDG_CURRENT_DESKTOP" == "niri" ]]; then
-    WM_TYPE="niri"
-elif [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
-    # Margo before mango — same protocol family, different IPC client.
+# Detect window manager (margo or generic Wayland)
+if [[ "${XDG_CURRENT_DESKTOP:-}" == *margo* ]] || (command -v mctl &>/dev/null && mctl status &>/dev/null); then
     WM_TYPE="margo"
-elif [[ "${XDG_CURRENT_DESKTOP:-}" == *mango* ]] || (command -v mmsg &>/dev/null && mmsg -g >/dev/null 2>&1); then
-    WM_TYPE="mango"
-elif [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-    WM_TYPE="wayland"
 else
-    WM_TYPE="x11"
+    WM_TYPE="wayland"
 fi
 
 echo "Initializing brave-whats on $WM_TYPE..."
@@ -55,27 +46,6 @@ fi
 # Switch to workspace
 if [[ "$WORKSPACE" != "0" ]]; then
     case "$WM_TYPE" in
-    hyprland)
-        if command -v hyprctl >/dev/null 2>&1; then
-            CURRENT=$(hyprctl activeworkspace -j | grep -o '"id": [0-9]*' | grep -o '[0-9]*' || echo "")
-            if [[ "$CURRENT" != "$WORKSPACE" ]]; then
-                echo "Switching to workspace $WORKSPACE..."
-                hyprctl dispatch workspace "$WORKSPACE"
-                sleep 1
-            fi
-        fi
-        ;;
-    niri)
-        if command -v niri >/dev/null 2>&1; then
-            echo "Switching to workspace $WORKSPACE..."
-            if [[ -x "$HOME/.local/bin/niri-osc" ]]; then
-                "$HOME/.local/bin/niri-osc" flow legacy -wn "$WORKSPACE" || echo "WARNING: Niri workspace switch failed"
-            else
-                niri msg action focus-workspace "$WORKSPACE" || echo "WARNING: Niri workspace switch failed"
-            fi
-            sleep 1
-        fi
-        ;;
     margo)
         if command -v mctl >/dev/null 2>&1; then
             echo "Switching to workspace $WORKSPACE..."
@@ -83,23 +53,8 @@ if [[ "$WORKSPACE" != "0" ]]; then
             sleep 1
         fi
         ;;
-    mango)
-        if command -v mmsg >/dev/null 2>&1; then
-            echo "Switching to workspace $WORKSPACE..."
-            mmsg -s -t "$WORKSPACE" || echo "WARNING: Mango workspace switch failed"
-            sleep 1
-        fi
-        ;;
-    wayland)
+    wayland|*)
         echo "Skipping workspace switch on generic Wayland session..."
-        ;;
-    x11|*)
-        if [[ -n "${DISPLAY:-}" ]] && command -v wmctrl >/dev/null 2>&1; then
-            TARGET=$((WORKSPACE - 1))
-            echo "Switching to workspace $WORKSPACE..."
-            wmctrl -s "$TARGET" || echo "WARNING: wmctrl workspace switch failed"
-            sleep 1
-        fi
         ;;
     esac
 fi
@@ -140,40 +95,16 @@ echo "$APP_PID" > "$STATE_DIR/brave-whats.pid"
 echo "$COMMAND" > "$STATE_DIR/brave-whats.cmd"
 echo "Application started (PID: $APP_PID)"
 
-# Window verification (Hyprland only)
-if [[ "$WORKSPACE" != "0" && "$WM_TYPE" == "hyprland" ]] && command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-    echo "Verifying window on workspace $WORKSPACE..."
-    ELAPSED=0
-    CLASS_PATTERN="brave-hnpfjngllnobngcgfapefoaidbinmjnm-Default"
-    
-    while [[ $ELAPSED -lt $APP_TIMEOUT ]]; do
-        if hyprctl clients -j 2>/dev/null | jq -e ".[] | select(.workspace.id == $WORKSPACE and (.class | test(\"$CLASS_PATTERN\"; \"i\")))" >/dev/null 2>&1; then
-            echo "Window verified after ${ELAPSED}s"
-            break
-        fi
-        sleep $CHECK_INTERVAL
-        ((ELAPSED += CHECK_INTERVAL))
-        if ((ELAPSED % 3 == 0)); then
-            echo "Waiting... (${ELAPSED}/${APP_TIMEOUT}s)"
-        fi
-    done
-    
-    [[ $ELAPSED -ge $APP_TIMEOUT ]] && echo "WARNING: Timeout after ${APP_TIMEOUT}s"
-else
-    sleep $WAIT_TIME
-fi
+# No window verification on margo / generic Wayland; just wait for the app to
+# settle.
+# TODO: margo equivalent (per-window verification via mctl, if available)
+sleep $WAIT_TIME
 
 # Make fullscreen if needed
 if [[ "$FULLSCREEN" == "true" ]]; then
+    # No margo / generic Wayland fullscreen automation; toggle manually (F11).
+    # TODO: margo equivalent (fullscreen dispatch via mctl, if available)
     sleep $WAIT_TIME
-    case "$WM_TYPE" in
-    hyprland)
-        command -v hyprctl >/dev/null 2>&1 && hyprctl dispatch fullscreen 1
-        ;;
-    niri)
-        command -v niri >/dev/null 2>&1 && niri msg action fullscreen-window
-        ;;
-    esac
 fi
 
 echo "brave-whats initialization complete"
