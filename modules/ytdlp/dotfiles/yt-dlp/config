@@ -11,17 +11,19 @@
 # ---------------------------------------------------------------------------
 # YouTube Client Settings
 # ---------------------------------------------------------------------------
-# YouTube player client seçimi (öncelik sırasına göre):
-# - android_sdkless: Daha az "PO Token" problemi (yüksek formatlar daha sık gelir)
-# - web_safari: SABR/missing-url durumlarında daha iyi fallback olabiliyor
+# YouTube player client seçimi (Temmuz 2026 durumu, VPN/Mullvad altında test edildi):
+# - android_vr: Captcha'sız ve DRM'siz tek client; PO token istemeden VP9 1080p
+#   + Opus veriyor. Cookie DESTEKLEMEZ (yaş kısıtlı videolarda tek başına yetmez).
+# - tv: Cookie destekli yedek (yaş kısıtı vb. için); ancak YouTube'un 2026 DRM
+#   yayılımı yüzünden birçok videoda "drm protected" diyor.
 #
-# Not:
-# Son dönem YouTube değişiklikleri bazı client'larda "PO Token" gerektirebiliyor.
-# Bu sırayı (android_sdkless -> web_safari) seçmemizin sebebi, pratikte en az
-# sorun çıkaran kombinasyonlardan biri olması.
-# Not: `android_sdkless` cookies desteklemediği için (login/captcha durumlarında) atlanabilir.
-# Cookie uyumlu ve pratikte stabil olan client'ları öne alıyoruz.
---extractor-args "youtube:player_client=web_safari,web,android_sdkless"
+# Bilinçli olarak DIŞARIDA bırakılanlar:
+# - web/web_safari/mweb: VPN çıkış IP'lerinde "captcha challenge" ile bloklanıyor;
+#   VPN dışında da GVS PO token olmadan gerçek format vermiyor ("only images").
+#   PO token sağlayıcısı (bgutil-ytdlp-pot-provider) kurulursa tekrar eklenebilir.
+# - android_sdkless: Bu yt-dlp sürümünden kaldırıldı ("Skipping unsupported client").
+# - tv_simply: PO token'sız yalnızca format 18 (360p) veriyor.
+--extractor-args "youtube:player_client=android_vr,tv"
 
 # YouTube extraction without a JS runtime has been deprecated; this avoids missing formats.
 --js-runtimes "deno"
