@@ -1507,6 +1507,22 @@ kenp_session_mode() {
 	fi
 
 	# 5) Bağlan.
+	# Savunma: buraya sadece "server az önce soğuktan kalktı / anka restore
+	# etti" yolundan gelinir (üstteki has_session_exact erken-dönüşü hariç).
+	# Taze restore edilmiş bir pane'de asla gönderilmemiş metin OLMAMALI;
+	# olduysa (kaynağı hâlâ tespit edilemedi — bkz. tm-stray-pane.log) önce
+	# adli kayıt için loglayıp sonra temizliyoruz, kullanıcı görmeden.
+	local stray_log="${XDG_CACHE_HOME:-$HOME/.cache}/tm-stray-pane.log"
+	local stray
+	stray="$(tmux_cmd capture-pane -p -t "$session_name" 2>/dev/null)"
+	if [[ -n "$stray" ]]; then
+		{
+			printf '=== %s session=%s ===\n' "$(date '+%F %T')" "$session_name"
+			printf '%s\n' "$stray"
+			printf -- '---\n'
+		} >>"$stray_log" 2>/dev/null
+	fi
+	tmux_cmd send-keys -t "$session_name" C-u 2>/dev/null || true
 	attach_or_switch "$session_name"
 }
 
