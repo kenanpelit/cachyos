@@ -84,27 +84,6 @@ require("lazy").setup({
       },
     },
 
-    -- =======================================================================
-    -- Gemini AI Integration
-    -- =======================================================================
-    {
-      "kiddos/gemini.nvim",
-      dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-      opts = {
-        model_config = {
-          model_id = "gemini-2.0-flash-exp", -- Updated model
-          temperature = 0.10,
-          top_k = 128,
-          response_mime_type = "text/plain",
-        },
-        chat_config = { enabled = true },
-        hints = { enabled = true, hints_delay = 2000 },
-        completion = { enabled = true, completion_delay = 800 },
-      },
-      config = function(_, opts)
-        require("gemini").setup(opts)
-      end,
-    },
   },
   defaults = {
     lazy = false,

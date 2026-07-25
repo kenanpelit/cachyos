@@ -1,23 +1,15 @@
 tags:
 - tool
-description: AI tooling (Gemini, Codex, Claude, Ollama) portable config
+description: AI tooling (Codex, Claude, Ollama) portable config
 depends_on:
 - base
 - scripts
 - user-services
 dotfiles:
-- source: scripts/bin/ai-gemini
-  target: ~/.local/bin/ai-gemini
-- source: scripts/bin/ai-gemini-nightly
-  target: ~/.local/bin/ai-gemini-nightly
-- source: scripts/bin/ai-gemini-update
-  target: ~/.local/bin/ai-gemini-update
 - source: scripts/bin/ai-codex
   target: ~/.local/bin/ai-codex
 - source: scripts/bin/ai-claude
   target: ~/.local/bin/ai-claude
-- source: dotfiles/applications/gemini-cli.desktop
-  target: ~/.local/share/applications/gemini-cli.desktop
 - source: dotfiles/applications/codex-cli.desktop
   target: ~/.local/share/applications/codex-cli.desktop
 - source: dotfiles/applications/claude-cli.desktop
