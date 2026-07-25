@@ -466,7 +466,21 @@ notify_mic() {
 	[ -z "$vol" ] && vol="${DEFAULT_MIC_VOLUME}"
 	notify "Mikrofon Seviyesi" "Mikrofon: ${vol}%" "audio-input-microphone"
 }
-notify_mute() { notify "Ses" "Ses durumu değiştirildi" "audio-volume-muted"; }
+__sink_is_muted() {
+	wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | grep -q "MUTED"
+}
+notify_mute() {
+	# platform::mute LED'ini gerçek sink durumuna göre senkronla ve bildir.
+	# (Mute tuşu PipeWire mute'unu değiştiriyor; audio-mute kernel trigger'ı bu
+	#  LED'i PipeWire'a göre sürmüyor, o yüzden burada elle yazıyoruz.)
+	if __sink_is_muted; then
+		__set_mute_led 1
+		notify "Ses" "Kapalı" "audio-volume-muted"
+	else
+		__set_mute_led 0
+		notify "Ses" "Açık" "audio-volume-high"
+	fi
+}
 __mic_is_muted() {
 	wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q "MUTED"
 }
@@ -483,6 +497,15 @@ __volume_bar() {
 __set_micmute_led() {
 	local val="$1"
 	local led_path="${MICMUTE_LED_PATH:-/sys/class/leds/platform::micmute/brightness}"
+	if [[ -w "$led_path" ]]; then
+		echo "$val" >"$led_path" 2>/dev/null || true
+	elif command -v sudo >/dev/null 2>&1; then
+		echo "$val" | sudo -n tee "$led_path" >/dev/null 2>&1 || true
+	fi
+}
+__set_mute_led() {
+	local val="$1"
+	local led_path="${MUTE_LED_PATH:-/sys/class/leds/platform::mute/brightness}"
 	if [[ -w "$led_path" ]]; then
 		echo "$val" >"$led_path" 2>/dev/null || true
 	elif command -v sudo >/dev/null 2>&1; then
@@ -750,6 +773,12 @@ initialize_audio() {
 			wpctl set-default "${last_source}" >/dev/null 2>&1 || debug_print "Uyarı" "Source ayarlanamadı: ${last_source}"
 		fi
 	fi
+	# Mute LED'lerini gerçek durumla senkronla. audio-mute kernel trigger'ı
+	# boot'ta platform::mute LED'ini "yanık" bırakabiliyor (ses açık olsa bile),
+	# çünkü mute PipeWire tarafında yönetiliyor ve bu LED'i sürmüyor.
+	if __sink_is_muted; then __set_mute_led 1; else __set_mute_led 0; fi
+	if __mic_is_muted; then __set_micmute_led 1; else __set_micmute_led 0; fi
+
 	# Açılış durum bilgisi: notify-send yerine mshell toast (ephemeral, geçmişe yazmaz)
 	info "Ses Ayarları: Ses: %${DEFAULT_VOLUME}, Mikrofon: %${DEFAULT_MIC_VOLUME}"
 	command -v mshellctl >/dev/null 2>&1 &&
