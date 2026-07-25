@@ -17,6 +17,7 @@ general:
 theme:
   icons:
     app_icon_theme: kora
+  theme: Margo
   apps:
     helium:
       enabled: true
