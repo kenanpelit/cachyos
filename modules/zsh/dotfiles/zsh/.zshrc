@@ -912,9 +912,6 @@ alias -- .....='cd ../../../..'
 if command -v ai-codex >/dev/null 2>&1; then
   alias -- codex=ai-codex
 fi
-if command -v ai-gemini >/dev/null 2>&1; then
-  alias -- gemini=ai-gemini
-fi
 alias -- brave-backup='brave-setup backup'
 alias -- brave-clean='brave --disable-extensions --incognito'
 alias -- brave-debug='brave --enable-logging --v=1'
@@ -1865,3 +1862,6 @@ bindkey -M vicmd '\es' sesh-sessions    # Alternative Alt+S binding
 export GOPATH="$HOME/.local/share/go"
 path=("$GOPATH/bin" $path)
 export PATH
+
+# kimi-code
+export PATH="$HOME/.kimi-code/bin:$PATH"

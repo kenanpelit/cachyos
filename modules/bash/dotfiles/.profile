@@ -5,3 +5,6 @@
 # environment.d stack remains the single source of truth.
 export TERM=kitty
 export GTK_THEME=catppuccin-mocha-mauve-standard+default
+
+# Added by Antigravity CLI installer
+export PATH="$HOME/.local/bin:$PATH"

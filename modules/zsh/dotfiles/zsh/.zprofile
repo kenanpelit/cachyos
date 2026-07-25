@@ -35,3 +35,6 @@ if $is_login_shell \
   TTY_AUTOSTART_CMD="$(resolve_cmd "${HOME}/.local/bin/osc-tty-autostart" "osc-tty-autostart" 2>/dev/null || true)"
   [[ -n "${TTY_AUTOSTART_CMD}" ]] && "${TTY_AUTOSTART_CMD}" || true
 fi
+
+# Added by Antigravity CLI installer
+export PATH="$HOME/.local/bin:$PATH"
