@@ -181,6 +181,7 @@ local user_opts = {
 
     persistentprogress = false,            -- always show a small progress line at the bottom of the screen
     persistentprogressheight = 17,         -- height of the persistent progress bar
+    persistentprogress_color = "#886AD3",  -- color of the persistent bar (thin bottom line; progressbar.lua look)
     persistentbuffer = false,              -- show buffer status on web videos in the persistent progress line
 
     -- Miscellaneous settings
@@ -520,6 +521,7 @@ local function set_osc_styles()
         chapter_title = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.chapter_title_color) .. "&\\3c&H0&\\fs" .. user_opts.chapter_title_font_size .. "\\fn" .. user_opts.font .. "}",
         seekbar_bg = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.seekbarbg_color) .. "&}",
         seekbar_fg = "{\\blur1\\bord1\\1c&H" .. osc_color_convert(user_opts.seekbarfg_color) .. "&}",
+        persistentseekbar_fg = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.persistentprogress_color) .. "&}",
         thumbnail = "{\\blur0\\bord1\\1c&H" .. osc_color_convert(user_opts.thumbnail_border_color) .. "&\\3c&H" .. osc_color_convert(user_opts.thumbnail_border_outline) .. "&}",
         time = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.time_color) .. "&\\3c&H0&\\fs" .. user_opts.time_font_size .. "\\fn" .. user_opts.font .. "}",
         cache = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.cache_info_color) .. "&\\3c&H0&\\fs" .. user_opts.cache_info_font_size .. "\\fn" .. user_opts.font .. "}",
@@ -1781,8 +1783,8 @@ layouts["modern"] = function ()
     if user_opts.persistentprogress or state.persistent_progress_toggle then
         lo = add_layout("persistentseekbar")
         lo.geometry = {x = refX, y = refY, an = 5, w = osc_geo.w, h = user_opts.persistentprogressheight}
-        lo.style = osc_styles.seekbar_fg
-        lo.slider.gap = (seekbar_h - seekbar_bg_h) / 2.0
+        lo.style = osc_styles.persistentseekbar_fg
+        lo.slider.gap = 0
         lo.slider.tooltip_an = 0
     end
 
