@@ -78,13 +78,13 @@ if not engine then
 end
 
 -- Bir özelliği kendi ortamında ayağa kaldır.
-local function spawn(body_file, conf_name, prefix)
+local function spawn(body_file, conf_prefix, prefix)
     local body = load_part(body_file)
     if not body then return end
 
     local env = setmetatable({}, { __index = _G })
     env.mp = prefixed_mp(prefix)  -- bağlama adları bu örneğe özel
-    env.SUITE_CONF = conf_name    -- engine.lua'daki read_list_options bunu okur
+    env.SUITE_CONF = conf_prefix  -- read_list_options bunu conf-öneki olarak kullanır
 
     setfenv(engine, env)
     engine()
@@ -96,6 +96,6 @@ local function spawn(body_file, conf_name, prefix)
     end
 end
 
-spawn('history.lua',   'SimpleHistory',     'history-')
-spawn('bookmark.lua',  'SimpleBookmark',    'bookmark-')
-spawn('clipboard.lua', 'SmartCopyPaste_II', 'clipboard-')
+spawn('history.lua',   'history_',   'history-')
+spawn('bookmark.lua',  'bookmark_',  'bookmark-')
+spawn('clipboard.lua', 'clipboard_', 'clipboard-')

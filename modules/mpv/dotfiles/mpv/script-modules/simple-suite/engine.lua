@@ -1268,11 +1268,41 @@ function update_search_results(character, action)
 	end
 end
 
--- ── ortak ayar okuyucu ─────────────────────────────────────────────────────
--- Önce script-opts/simple-suite.conf (üç script'in ortak ayarları), sonra
--- script'in kendi conf'u okunur; ikincisi birincisini ezer.
-function read_list_options(opts, conf_name)
-	local options = require 'mp.options'
-	options.read_options(opts, 'simple-suite')          -- ortak varsayılanlar
-	options.read_options(opts, conf_name or SUITE_CONF) -- bu örneğe özel (ezer)
+-- ── ayar okuyucu (tek dosya: simple-suite.conf) ────────────────────────────
+-- Üç örnek de TEK script-opts/simple-suite.conf'tan okur. mpv'nin read_options'ı
+-- kullanılmaz (önekli/örneğe-özel anahtarlar için "unknown key" uyarısı verirdi).
+-- Anahtar çözümü, verilen örnek öneki (conf_prefix, ör. "history_") ile:
+--   1) "<önek><ad>" ve <ad> opts'ta varsa  -> opts[<ad>]   (aynı-adlı, örneğe göre farklı)
+--   2) değilse "<anahtar>" opts'ta varsa    -> opts[<anahtar>] (ortak veya örneğe-özel)
+-- Değer türü, opts'taki varsayılanın türüne göre dönüştürülür (bool/sayı/string).
+local function coerce_opt(default, v)
+	local t = type(default)
+	if t == "boolean" then
+		return v == "yes" or v == "true"
+	elseif t == "number" then
+		return tonumber(v) or default
+	else
+		return v
+	end
+end
+function read_list_options(opts, conf_prefix)
+	local path = mp.find_config_file("script-opts/simple-suite.conf")
+	if not path then return end
+	local f = io.open(path, "r")
+	if not f then return end
+	for line in f:lines() do
+		if not line:match("^%s*#") then
+			local k, v = line:match("^%s*([%w_]+)%s*=(.*)$")  -- değeri BİREBİR koru (boşluk kırpma)
+			if k then
+				if conf_prefix and k:sub(1, #conf_prefix) == conf_prefix
+					and opts[k:sub(#conf_prefix + 1)] ~= nil then
+					local base = k:sub(#conf_prefix + 1)
+					opts[base] = coerce_opt(opts[base], v)
+				elseif opts[k] ~= nil then
+					opts[k] = coerce_opt(opts[k], v)
+				end
+			end
+		end
+	end
+	f:close()
 end
