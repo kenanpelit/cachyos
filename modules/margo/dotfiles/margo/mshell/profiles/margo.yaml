@@ -233,6 +233,8 @@ wallpaper:
 idle:
   dim_timeout_minutes: 20
   lock_timeout_minutes: 25
+  suspend_enabled: true
+  suspend_timeout_minutes: 30
 session:
   suspend_command: systemctl suspend -i
   reboot_command: osc-safe-reboot
