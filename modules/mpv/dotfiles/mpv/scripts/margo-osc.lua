@@ -182,6 +182,8 @@ local user_opts = {
     persistentprogress = false,            -- always show a small progress line at the bottom of the screen
     persistentprogressheight = 17,         -- height of the persistent progress bar
     persistentprogress_color = "#886AD3",  -- color of the persistent bar (thin bottom line; progressbar.lua look)
+    persistentprogress_markers = true,     -- draw chapter markers (dots) on the persistent bar
+    persistentprogress_marker_color = "#2D2D2D", -- color of those chapter markers (notch color)
     persistentbuffer = false,              -- show buffer status on web videos in the persistent progress line
 
     -- center pause indicator (integrated from pause_indicator_lite)
@@ -1480,6 +1482,28 @@ local function render_persistentprogressbar(master_ass)
 
                 elem_ass:draw_stop()
                 master_ass:merge(elem_ass)
+
+                -- chapter markers (nokta gibi) — ince çubuğu bölümlere ayırır
+                if user_opts.persistentprogress_markers and element.slider.markerF ~= nil then
+                    local markers = element.slider.markerF()
+                    if #markers > 0 then
+                        local elem_geo = element.layout.geometry
+                        local mark_ass = assdraw.ass_new()
+                        mark_ass:merge(element.style_ass)
+                        ass_append_alpha(mark_ass, element.layout.alpha, 0, true)
+                        mark_ass:append("{\\blur0\\bord0\\1c&H" ..
+                            osc_color_convert(user_opts.persistentprogress_marker_color) .. "&}")
+                        mark_ass:draw_start()
+                        for _, marker in pairs(markers) do
+                            if marker >= element.slider.min.value and marker <= element.slider.max.value then
+                                local s = get_slider_ele_pos_for(element, marker)
+                                mark_ass:rect_cw(s - 1, 0, s + 1, elem_geo.h)
+                            end
+                        end
+                        mark_ass:draw_stop()
+                        master_ass:merge(mark_ass)
+                    end
+                end
             end
         end
     end
@@ -2866,7 +2890,20 @@ local function osc_init()
     ne = new_element("persistentseekbar", "slider")
     ne.enabled = mp.get_property("percent-pos") ~= nil
     state.slider_element = ne.enabled and ne or nil  -- used for forced_title
-    ne.slider.markerF = function () return {} end
+    ne.slider.markerF = function ()
+        if not user_opts.persistentprogress_markers then return {} end
+        local duration = mp.get_property_number("duration")
+        if duration ~= nil then
+            local chapters = mp.get_property_native("chapter-list", {})
+            local markers = {}
+            for n = 1, #chapters do
+                markers[n] = (chapters[n].time / duration * 100)
+            end
+            return markers
+        else
+            return {}
+        end
+    end
     ne.slider.posF = function ()
         if mp.get_property_bool("eof-reached") then return 100 end
         return mp.get_property_number("percent-pos")
