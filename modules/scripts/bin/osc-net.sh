@@ -4421,7 +4421,11 @@ _ip_country() {
 		echo "Unknown"
 		return 0
 	}
-	c="$(_ip_curl "https://ipapi.co/${addr}/country_name" 2>/dev/null | tr -d '\n' || true)"
+	# Birincil: ip-api.com — tam ülke adı, anahtarsız, 45 istek/dk.
+	c="$(_ip_curl "http://ip-api.com/line/${addr}?fields=country" 2>/dev/null | tr -d '\n' || true)"
+	# Yedek: ipinfo.io — 2 harfli kod (bu script IP için zaten onu kullanıyor).
+	# (Eski ipapi.co sağlayıcısı sık 429 rate-limit döndürüp "Unknown" yapıyordu.)
+	[[ -n "$c" ]] || c="$(_ip_curl "https://ipinfo.io/${addr}/country" 2>/dev/null | tr -d '\n' || true)"
 	[[ -n "$c" ]] && echo "$c" || echo "Unknown"
 }
 
