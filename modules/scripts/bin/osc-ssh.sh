@@ -87,15 +87,41 @@ setup_dirs() {
 }
 
 # Assh version check and installation
+# assh'in son sürüm etiketini GitHub'dan (moul/assh) çeker; baştaki "v" atılır.
+# Başarısız olursa (ağ yok / API rate-limit) boş döner.
+get_latest_assh_version() {
+	local ver=""
+	# Birincil: GitHub releases API (tag_name alanı).
+	ver=$(curl -fsSL --connect-timeout 4 --max-time 8 \
+		"https://api.github.com/repos/moul/assh/releases/latest" 2>/dev/null |
+		grep -oP '"tag_name":[[:space:]]*"\K[^"]+' | head -n 1)
+	# Yedek: releases/latest yönlendirmesindeki Location başlığı (API 403/rate-limit olursa).
+	if [[ -z "$ver" ]]; then
+		ver=$(curl -fsSI --connect-timeout 4 --max-time 8 \
+			"https://github.com/moul/assh/releases/latest" 2>/dev/null |
+			grep -i '^location:' | grep -oP 'tag/\K[^[:space:]]+' | head -n 1)
+	fi
+	printf '%s' "${ver#v}"
+}
+
 check_and_install_assh() {
 	local ASSH_BIN="/usr/local/bin/assh"
 	local ASSH_BACKUP_DIR="$ARCH_CONFIG_DIR/config/usr/local/bin"
-	local LATEST_ASSH_VERSION="2.16.0"
+
+	# Son sürümü canlı olarak GitHub'dan al; alınamazsa bu yedek değere düş.
+	local ASSH_FALLBACK_VERSION="2.17.3"
+	local LATEST_ASSH_VERSION
+	LATEST_ASSH_VERSION=$(get_latest_assh_version)
+	if [[ -z "$LATEST_ASSH_VERSION" ]]; then
+		LATEST_ASSH_VERSION="$ASSH_FALLBACK_VERSION"
+		warn_msg "GitHub'dan son sürüm alınamadı; yedek sürüm kullanılıyor (v$LATEST_ASSH_VERSION)."
+	fi
 	local ASSH_URL="https://github.com/moul/assh/releases/download/v${LATEST_ASSH_VERSION}/assh_${LATEST_ASSH_VERSION}_linux_amd64.tar.gz"
 
 	if command -v assh &>/dev/null; then
 		local INSTALLED_VERSION
-		INSTALLED_VERSION=$(assh version | grep -oP '(\d+\.\d+\.\d+)' | head -n 1)
+		# Not: bu assh'te "assh version" komutu yok; sürüm --version bayrağıyla gelir.
+		INSTALLED_VERSION=$(assh --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+' | head -n 1)
 		if [[ "$INSTALLED_VERSION" == "$LATEST_ASSH_VERSION" ]]; then
 			success_msg "assh is already at the latest version (v$INSTALLED_VERSION)."
 			return
