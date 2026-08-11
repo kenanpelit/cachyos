@@ -31,7 +31,7 @@ qt-icon-change=0
 qt-max-volume=150
 
 [skins2] # Skins interface
-skins2-last=/home/kenan/.config/vlc/skins2/Hind-ArcDark.vlt
+skins2-last=/home/kenan/.config/vlc/skins2/Materia.vlt
 skins2-config=[{"id":"main","visible":true,"x":26,"y":26,"width":580,"height":421}]
 
 [core] # Core settings
