@@ -132,6 +132,25 @@ declare -A BRAVE_BROWSERS=(
   ["brave-whatsapp"]="profile_brave|--whatsapp --separate --class whatsapp --title whatsapp|9|secure|1|true"
 )
 
+# Browser Applications - Google Chrome (fresh-isolated instances under ~/.chrome/<name>)
+# Mirror of BRAVE_BROWSERS with COMMAND=profile_chrome. No profile seeding: each
+# profile is a clean, independent Chrome user-data-dir (sign in once, persists).
+declare -A CHROME_BROWSERS=(
+  ["chrome-kenp"]="profile_chrome|kenp --separate --restore-last-session|1|secure|2|false"
+  ["chrome-nil"]="profile_chrome|nil --separate --restore-last-session|1|secure|2|false"
+  ["chrome-ai"]="profile_chrome|ai --separate --restore-last-session|3|secure|2|false"
+  ["chrome-compecta"]="profile_chrome|compecta --separate --restore-last-session|4|secure|2|false"
+  ["chrome-block"]="profile_chrome|block --separate --restore-last-session|1|secure|2|false"
+  ["chrome-whats"]="profile_chrome|kenp --separate --app-id=hnpfjngllnobngcgfapefoaidbinmjnm|9|secure|1|false"
+  ["chrome-exclude"]="profile_chrome|kenp --separate --class=exclude --title=exclude --restore-last-session|6|bypass|1|false"
+  ["chrome-youtube"]="profile_chrome|kenp --separate --app=https://youtube.com/ --title youtube|7|secure|1|false"
+  ["chrome-tiktok"]="profile_chrome|--tiktok --separate --class tiktok --title tiktok|6|secure|1|true"
+  ["chrome-spotify"]="profile_chrome|kenp --separate --app=https://open.spotify.com/ --title spotify|8|secure|1|true"
+  ["chrome-discord"]="profile_chrome|--discord --separate --class discord --title discord|5|secure|1|true"
+  ["chrome-proxy"]="profile_chrome|proxy --separate --title proxy|6|bypass|1|false"
+  ["chrome-whatsapp"]="profile_chrome|--whatsapp --separate --class whatsapp --title whatsapp|9|secure|1|true"
+)
+
 # exclude + proxy run with VPN bypass; the rest go through the VPN (secure).
 # Firefox profiles (lowercase classes) - profiles live in ~/.mozilla/firefox
 declare -A FIREFOX_BROWSERS=(
@@ -157,6 +176,7 @@ declare -A FIREFOX_BROWSERS=(
 declare -A INCOGNITO_BROWSERS=(
   ["helium-kenp-incognito"]="profile_helium|kenp --separate --restore-last-session --incognito|1|secure|2|false"
   ["brave-kenp-incognito"]="profile_brave|kenp --separate --restore-last-session --incognito|1|secure|2|false"
+  ["chrome-kenp-incognito"]="profile_chrome|kenp --separate --restore-last-session --incognito|1|secure|2|false"
   ["firefox-kenp-incognito"]="firefox|-P kenp --class kenp_incognito --name kenp_incognito --new-window --private-window|1|secure|1|false"
 )
 
@@ -452,6 +472,7 @@ get_browser_profiles() {
   case "$BROWSER_TYPE" in
   "helium") echo "HELIUM_BROWSERS" ;;
   "brave") echo "BRAVE_BROWSERS" ;;
+  "chrome") echo "CHROME_BROWSERS" ;;
   "firefox") echo "FIREFOX_BROWSERS" ;;
   *)
     log "ERROR" "BROWSER" "Invalid browser type: $BROWSER_TYPE"
@@ -632,6 +653,11 @@ generate_all_scripts() {
     ((count++))
   done
 
+  for profile in "${!CHROME_BROWSERS[@]}"; do
+    generate_script "$profile" "${CHROME_BROWSERS[$profile]}"
+    ((count++))
+  done
+
   for profile in "${!FIREFOX_BROWSERS[@]}"; do
     generate_script "$profile" "${FIREFOX_BROWSERS[$profile]}"
     ((count++))
@@ -680,6 +706,7 @@ resolve_profile_config() {
   if [[ -v TERMINALS["$profile"] ]]; then echo "${TERMINALS[$profile]}"
   elif [[ -v HELIUM_BROWSERS["$profile"] ]]; then echo "${HELIUM_BROWSERS[$profile]}"
   elif [[ -v BRAVE_BROWSERS["$profile"] ]]; then echo "${BRAVE_BROWSERS[$profile]}"
+  elif [[ -v CHROME_BROWSERS["$profile"] ]]; then echo "${CHROME_BROWSERS[$profile]}"
   elif [[ -v FIREFOX_BROWSERS["$profile"] ]]; then echo "${FIREFOX_BROWSERS[$profile]}"
   elif [[ -v INCOGNITO_BROWSERS["$profile"] ]]; then echo "${INCOGNITO_BROWSERS[$profile]}"
   elif [[ -v APPS["$profile"] ]]; then echo "${APPS[$profile]}"
@@ -809,6 +836,8 @@ launch_profile() {
     launch_application "$profile" "${HELIUM_BROWSERS[$profile]}" "helium"
   elif [[ -v BRAVE_BROWSERS["$profile"] && "$BROWSER_TYPE" == "brave" ]]; then
     launch_application "$profile" "${BRAVE_BROWSERS[$profile]}" "brave"
+  elif [[ -v CHROME_BROWSERS["$profile"] && "$BROWSER_TYPE" == "chrome" ]]; then
+    launch_application "$profile" "${CHROME_BROWSERS[$profile]}" "chrome"
   elif [[ -v FIREFOX_BROWSERS["$profile"] && "$BROWSER_TYPE" == "firefox" ]]; then
     launch_application "$profile" "${FIREFOX_BROWSERS[$profile]}" "firefox"
   elif [[ -v INCOGNITO_BROWSERS["$profile"] ]]; then

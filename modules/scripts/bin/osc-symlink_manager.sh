@@ -42,19 +42,20 @@ DIRS=(
 
 # Explicit links: "source|target"
 EXTRA_LINKS=(
-  "/repo/archive/.mullvad|$HOME/.mullvad"
   "/repo/archive/.anote|$HOME/.anote"
   "/repo/archive/.backups|$HOME/.backups"
   "/repo/archive/.brave|$HOME/.brave"
+  "/repo/archive/.chrome|$HOME/.chrome"
   "/repo/archive/.helium|$HOME/.helium"
-  #"/repo/archive/.mozilla|$HOME/.mozilla"
   "/repo/archive/.kenp|$HOME/.kenp"
   "/repo/archive/.keep|$HOME/.keep"
   "/repo/archive/.kod|$HOME/.kod"
+  "/repo/archive/.mozilla|$HOME/.mozilla"
+  "/repo/archive/.mullvad|$HOME/.mullvad"
   "/repo/archive/.pass|$HOME/.pass"
   "/repo/archive/.passh|$HOME/.passh"
+  "/others/tor|$HOME/.tor"
   "/repo/archive/.keyrings|$HOME/.local/share/keyrings"
-  "/repo/tor|$HOME/.tor"
 )
 
 # Options
