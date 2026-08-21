@@ -409,6 +409,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `start-sayonara`
+**Description:** Sayonara müzik oynatıcıyı büyütülmüş arayüzle başlatır.
+
+**Usage:** `start-sayonara.sh [sayonara options] [files|dirs]`
+
+---
+
 ### 📂 `status-notifier-ready`
 **Description:** Shared readiness gate that waits for the StatusNotifierWatcher on the session bus.
 

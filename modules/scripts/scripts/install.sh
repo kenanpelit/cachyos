@@ -179,12 +179,6 @@ cleanup_legacy_bins() {
     brave-kenp-default
     brave-extensions
     brave-launcher
-    profile_chrome
-    chrome-launcher
-    start-chrome-kenp
-    start-chrome-ai
-    start-chrome-compecta
-    start-chrome-whats
     cleanup_helium_profiles
     helium-extensions
     helium-kenp-default
