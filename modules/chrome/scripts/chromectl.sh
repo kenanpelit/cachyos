@@ -189,7 +189,10 @@ clean_to_human() {
 }
 
 clean_dir_bytes() {
-  local t="$1"
+  # Resolve symlinks first: ISOLATED_ROOT (~/.chrome) is often a symlink, and
+  # `du` on a symlink measures the ~21-byte link itself, not the tree it points
+  # at — which made "before/after" both read 21B and every clean report 0B freed.
+  local t; t="$(readlink -f -- "$1" 2>/dev/null)"; [[ -n "$t" ]] || t="$1"
   if du -sb -- "$t" >/dev/null 2>&1; then du -sb -- "$t" 2>/dev/null | awk '{print $1}'
   else du -sk -- "$t" 2>/dev/null | awk '{print $1 * 1024}'; fi
 }
