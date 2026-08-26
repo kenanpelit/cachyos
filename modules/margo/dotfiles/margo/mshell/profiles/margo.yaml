@@ -17,7 +17,7 @@ general:
 theme:
   icons:
     app_icon_theme: kora
-  theme: Margo
+  theme: Default
   apps:
     helium:
       enabled: true
@@ -247,8 +247,14 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-brave-kenp
+  - name: start-chrome-kenp
     enabled: true
+    delay_secs: 11
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-brave-kenp
+    enabled: false
     delay_secs: 11
     trigger: LoginOnce
     args: ''
@@ -259,8 +265,14 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-brave-ai
+  - name: start-chrome-ai
     enabled: true
+    delay_secs: 12
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-brave-ai
+    enabled: false
     delay_secs: 12
     trigger: LoginOnce
     args: ''
@@ -271,8 +283,14 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-brave-compecta
+  - name: start-chrome-compecta
     enabled: true
+    delay_secs: 13
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-brave-compecta
+    enabled: false
     delay_secs: 13
     trigger: LoginOnce
     args: ''
@@ -295,8 +313,14 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
+  - name: start-chrome-youtube
+    enabled: false
+    delay_secs: 15
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
   - name: start-brave-youtube
-    enabled: true
+    enabled: false
     delay_secs: 15
     trigger: LoginOnce
     args: ''
@@ -322,6 +346,12 @@ launcher:
   - name: tagwarp
     enabled: true
     delay_secs: 30
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-chrome-whats
+    enabled: false
+    delay_secs: 0
     trigger: LoginOnce
     args: ''
     working_dir: ''

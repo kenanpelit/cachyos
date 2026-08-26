@@ -21,15 +21,15 @@ export MDOTS_SOPS_KEY_PATH="$HOME/.config/sops/age/keys.txt"
 if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
   export __HM_ZSH_SESS_VARS_SOURCED=1
   case "${BROWSER:-}" in
-    ""|brave|start-brave-kenp|bravectl|start-helium-kenp|heliumctl)
-      if command -v start-brave-kenp >/dev/null 2>&1; then
+    ""|brave|start-brave-kenp|start-chrome-kenp|bravectl|start-helium-kenp|heliumctl)
+      if command -v start-chrome-kenp >/dev/null 2>&1; then
+        export BROWSER="start-chrome-kenp"
+      elif command -v start-brave-kenp >/dev/null 2>&1; then
         export BROWSER="start-brave-kenp"
       elif command -v start-helium-kenp >/dev/null 2>&1; then
         export BROWSER="start-helium-kenp"
       elif command -v heliumctl >/dev/null 2>&1; then
         export BROWSER="heliumctl"
-      elif command -v start-brave-kenp >/dev/null 2>&1; then
-        export BROWSER="start-brave-kenp"
       elif command -v bravectl >/dev/null 2>&1; then
         export BROWSER="bravectl"
       else
