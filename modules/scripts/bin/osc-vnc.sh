@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-vnc.sh
-# Description: Flexible TigerVNC viewer; runs under Xwayland when DISPLAY is missing.
+# Description: Flexible TurboVNC viewer; runs under Xwayland when DISPLAY is missing.
 # Usage: osc-vnc [options] [host:display]
 # ==============================================================================
-# osc-vnc: Flexible VNC viewer wrapper. Runs TigerVNC under Xwayland when
+# osc-vnc: Flexible VNC viewer wrapper. Runs TurboVNC under Xwayland when
 # DISPLAY is missing (Wayland session). Quick localhost shortcut: vnc-local.
 
 set -euo pipefail
@@ -15,7 +15,7 @@ Kullanım:
   vncviewer-wl [options] [host:display]
 
 Options:
-  --passwd-file FILE    TigerVNC `-passwd` dosyası (vncpasswd -f formatı)
+  --passwd-file FILE    VNC `-passwd` dosyası (vncpasswd -f formatı)
   --password PASS       PASS ile geçici `-passwd` dosyası üret
   --password-stdin      Parolayı stdin'den oku (tek satır)
   --ask-pass            Parolayı prompt ile sor (echo kapalı)

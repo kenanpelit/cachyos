@@ -305,7 +305,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-vnc`
-**Description:** Flexible TigerVNC viewer; runs under Xwayland when DISPLAY is missing.
+**Description:** Flexible TurboVNC viewer; runs under Xwayland when DISPLAY is missing.
 
 **Usage:** `osc-vnc [options] [host:display]`
 

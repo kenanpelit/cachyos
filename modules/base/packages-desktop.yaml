@@ -5,9 +5,8 @@ packages:
   - wf-recorder
   - swappy
   - brightnessctl
-  - tigervnc
+  - turbovnc
   - remmina
-  # tigervnc is enforced via the base hook to keep it on extra/tigervnc.
 
   # Documents (moved evince, zathura)
   - poppler
