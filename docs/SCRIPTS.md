@@ -528,6 +528,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `vncv`
+**Description:** No description provided.
+
+**Usage:** `vncv [viewer options] [host:display]`
+
+---
+
 ### 📂 `vv`
 **Description:** Otomatik numaralandırma ile günlük not tutma aracı
 
