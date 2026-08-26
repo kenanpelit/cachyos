@@ -207,7 +207,7 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 ---
 
 ### 📂 `osc-safe-reboot`
-**Description:** Safe reboot/shutdown for Brave/Chromium browsers without crash warnings
+**Description:** Safe reboot/shutdown for Chrome/Brave/Chromium/Helium browsers without crash warnings
 
 **Usage:** `osc-safe-reboot.sh [reboot|poweroff]`
 

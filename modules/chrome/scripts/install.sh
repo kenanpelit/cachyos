@@ -11,6 +11,7 @@ mkdir -p "$bin_dir" "$HOME/.config/chrome-launcher"
 # The chrome module owns profile_chrome (mirrors how modules/brave owns
 # profile_brave). Symlinked so edits to the repo source are live, no reinstall.
 ln -sf "$scripts_dir/profile_chrome.sh" "$bin_dir/profile_chrome" # isolated-profile engine
+ln -sf "$scripts_dir/chromectl.sh"      "$bin_dir/chromectl"      # management dispatcher (kill/clean/ext/list)
 
 # Generated per-profile launchers (start-chrome-*) live in the scripts module
 # (Semsumo writes them there). Link whatever currently exists.
