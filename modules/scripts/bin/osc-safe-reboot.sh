@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: osc-safe-reboot.sh
-# Description: Safe reboot/shutdown for Brave/Chromium browsers without crash warnings
+# Description: Safe reboot/shutdown for Chrome/Brave/Chromium/Helium browsers without crash warnings
 # Usage: osc-safe-reboot.sh [reboot|poweroff]
 # ==============================================================================
 set -euo pipefail
@@ -13,7 +13,10 @@ set -euo pipefail
 # case via `-i`/`-f`/sudo. If a margo-native re-exec is ever needed, gate it here.
 
 #--- Ayarlar -------------------------------------------------------------------
-GRACE_PATTERNS=("brave" "chromium" "helium-browser" "helium-wrapper" "/opt/helium-browser-bin/helium")
+# NOTE: Google Chrome's command line is `/opt/google/chrome/chrome …` — it
+# contains neither "brave" nor "chromium", so it needs its own pattern here or
+# `pkill -f` never touches it (profile_chrome resolves google-chrome-stable).
+GRACE_PATTERNS=("/opt/google/chrome/chrome" "brave" "chromium" "helium-browser" "helium-wrapper" "/opt/helium-browser-bin/helium")
 SOFT_TIMEOUT=3   # SIGTERM sonrası bekleme (saniye)
 HARD_DELAY=0.5   # KILL öncesi küçük bekleme
 NOTIFY_TIME=3000 # Bildirim gösterim süresi (ms)
@@ -131,6 +134,21 @@ fix_browser_flags() {
   if [[ -d "$HOME/.brave/isolated" ]]; then
     local d
     for d in "$HOME/.brave/isolated"/*; do
+      [[ -d "$d" ]] || continue
+      fix_profile_files_in_dir "$d"
+    done
+  fi
+
+  # Chrome - ana dizin
+  fix_profile_files_in_dir "$HOME/.config/google-chrome"
+
+  # Chrome isolated (profile_chrome --separate ile)
+  # ISOLATED_ROOT=~/.chrome, profiller doğrudan ~/.chrome/<Class> altında
+  # (brave'in aksine ara "isolated" dizini yok): ~/.chrome/<Class>/Local State
+  # + Default/Preferences.
+  if [[ -d "$HOME/.chrome" ]]; then
+    local d
+    for d in "$HOME/.chrome"/*; do
       [[ -d "$d" ]] || continue
       fix_profile_files_in_dir "$d"
     done
