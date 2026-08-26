@@ -17,5 +17,8 @@ if [ ! -f ~/.vnc/passwd ]; then
 	chmod 600 ~/.vnc/passwd
 fi
 
-# VNC bağlantısını kur
-vncviewer localhost:5901 -SecurityTypes VncAuth -passwd ~/.vnc/passwd
+# VNC bağlantısını kur (vncv wrapper: JDK 24+ native-access uyarısını bastırır,
+# TurboVNC Helper JNI'sini yükler). vncv yoksa ham vncviewer'a düş.
+viewer="vncviewer"
+command -v vncv >/dev/null 2>&1 && viewer="vncv"
+exec "$viewer" localhost:5901 -SecurityTypes VncAuth -passwd ~/.vnc/passwd

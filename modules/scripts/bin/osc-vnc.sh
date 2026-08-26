@@ -124,8 +124,20 @@ if [[ -n "${passwd_file}" && "${has_explicit_passwd_opt}" -eq 0 ]]; then
   viewer_args+=(-passwd "${passwd_file}")
 fi
 
+# Launch through the vncv wrapper: it passes --enable-native-access so JDK 24+
+# does not warn about the TurboVNC Helper's native access, and it does not echo
+# the libjawt path the raw /usr/bin/vncviewer launcher prints. Fall back to a
+# sibling vncv.sh, then to the raw vncviewer launcher.
+viewer="vncviewer"
+if command -v vncv >/dev/null 2>&1; then
+  viewer="vncv"
+else
+  self="$(readlink -f "$0" 2>/dev/null || printf '%s' "$0")"
+  [[ -x "$(dirname "$self")/vncv.sh" ]] && viewer="$(dirname "$self")/vncv.sh"
+fi
+
 if [[ -n "${DISPLAY:-}" ]]; then
-  exec vncviewer "${viewer_args[@]}" "$target"
+  exec "$viewer" "${viewer_args[@]}" "$target"
 fi
 
 # Pick a display number that is likely free
@@ -137,4 +149,4 @@ if ! pgrep -af "Xwayland ${disp}" >/dev/null 2>&1; then
   sleep 0.5
 fi
 
-DISPLAY="${disp}" exec vncviewer "${viewer_args[@]}" "$target"
+DISPLAY="${disp}" exec "$viewer" "${viewer_args[@]}" "$target"
