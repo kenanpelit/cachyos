@@ -58,6 +58,7 @@ modules/xdg-mimes/dotfiles/applications/helium-*.desktop
 # Exception for hand-crafted shortcuts if any
 !modules/xdg-mimes/dotfiles/applications/brave-kenp.desktop
 !modules/xdg-mimes/dotfiles/applications/brave-ai.desktop
+!modules/xdg-mimes/dotfiles/applications/chrome-kenp.desktop
 !modules/xdg-mimes/dotfiles/applications/brave-compecta.desktop
 !modules/xdg-mimes/dotfiles/applications/brave-youtube.desktop
 !modules/xdg-mimes/dotfiles/applications/helium-kenp.desktop

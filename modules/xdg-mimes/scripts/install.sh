@@ -8,9 +8,24 @@ if command -v update-desktop-database >/dev/null 2>&1; then
   update-desktop-database "$app_dir" >/dev/null 2>&1 || true
 fi
 
-if command -v xdg-settings >/dev/null 2>&1; then
-  if [[ -f "$app_dir/helium-kenp.desktop" ]]; then
-    xdg-settings set default-web-browser helium-kenp.desktop >/dev/null 2>&1 || true
+# Default web browser -> Chrome (Kenp). Three resolvers each read a different
+# store and drift apart otherwise: xdg-open (via xdg-mime query) is what most
+# link clicks hit, gio mime is what GTK/GIO apps use, and xdg-settings is the
+# umbrella. Pin all three to chrome-kenp so a clicked link always lands in the
+# running Kenp Chrome (chrome-kenp.desktop -> `chromectl default %U`).
+browser_desktop="chrome-kenp.desktop"
+if [[ -f "$app_dir/$browser_desktop" ]]; then
+  if command -v xdg-settings >/dev/null 2>&1; then
+    xdg-settings set default-web-browser "$browser_desktop" >/dev/null 2>&1 || true
+  fi
+  if command -v xdg-mime >/dev/null 2>&1; then
+    xdg-mime default "$browser_desktop" \
+      x-scheme-handler/http x-scheme-handler/https text/html >/dev/null 2>&1 || true
+  fi
+  if command -v gio >/dev/null 2>&1; then
+    gio mime x-scheme-handler/http "$browser_desktop" >/dev/null 2>&1 || true
+    gio mime x-scheme-handler/https "$browser_desktop" >/dev/null 2>&1 || true
+    gio mime text/html "$browser_desktop" >/dev/null 2>&1 || true
   fi
 fi
 
