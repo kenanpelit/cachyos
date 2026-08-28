@@ -129,6 +129,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-browser`
+**Description:** Switch the system-wide default browser on demand (chrome/brave/
+
+**Usage:** `osc-browser [chrome|brave|helium|toggle|status|list]`
+
+---
+
 ### 📂 `osc-font-info`
 **Description:** Shows effective font configuration and resolved Fontconfig defaults.
 

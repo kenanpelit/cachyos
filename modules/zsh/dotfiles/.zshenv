@@ -21,8 +21,18 @@ export MDOTS_SOPS_KEY_PATH="$HOME/.config/sops/age/keys.txt"
 if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
   export __HM_ZSH_SESS_VARS_SOURCED=1
   case "${BROWSER:-}" in
-    ""|brave|start-brave-kenp|start-chrome-kenp|bravectl|start-helium-kenp|heliumctl)
-      if command -v start-chrome-kenp >/dev/null 2>&1; then
+    ""|brave|chrome|helium|start-brave-kenp|start-chrome-kenp|start-helium-kenp|bravectl|heliumctl)
+      # osc-browser switcher writes a short name (chrome|brave|helium) here; it
+      # wins so `osc-browser <x>` + `exec zsh` flips $BROWSER too. Absent/invalid
+      # -> fall back to the chrome-first availability chain below.
+      _oscb=""
+      if [[ -r "${XDG_STATE_HOME}/osc-browser/current" ]]; then
+        read -r _oscb < "${XDG_STATE_HOME}/osc-browser/current" 2>/dev/null || _oscb=""
+      fi
+      case "$_oscb" in chrome|brave|helium) ;; *) _oscb="" ;; esac
+      if [[ -n "$_oscb" ]] && command -v "start-${_oscb}-kenp" >/dev/null 2>&1; then
+        export BROWSER="start-${_oscb}-kenp"
+      elif command -v start-chrome-kenp >/dev/null 2>&1; then
         export BROWSER="start-chrome-kenp"
       elif command -v start-brave-kenp >/dev/null 2>&1; then
         export BROWSER="start-brave-kenp"
@@ -35,6 +45,7 @@ if [[ -z "$__HM_ZSH_SESS_VARS_SOURCED" ]]; then
       else
         export BROWSER="brave"
       fi
+      unset _oscb
       ;;
   esac
   export COMPLETION_WAITING_DOTS="true"
