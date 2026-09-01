@@ -90,6 +90,7 @@ ${BOLD}Commands:${RST}
   ${CYN}power-check${RST}         Measure instantaneous power consumption
   ${CYN}power-monitor${RST}       Real-time power monitoring dashboard
   ${CYN}profile-refresh${RST}     Restart all power management services (requires root)
+  ${CYN}meteor${RST}              Verify linux-meteor kernel & hardware profile
   ${CYN}help${RST}, -h, --help    Show this help message
 
 ${BOLD}Examples:${RST}
@@ -99,6 +100,7 @@ ${BOLD}Examples:${RST}
   sudo ${SUDO_SCRIPT_CMD} turbostat-quick
   ${SCRIPT_NAME} power-monitor
   sudo ${SUDO_SCRIPT_CMD} profile-refresh
+  ${SCRIPT_NAME} meteor --expect-scheduler eevdf
 
 ${BOLD}For command-specific help:${RST}
   ${SCRIPT_NAME} <command> --help
@@ -1373,6 +1375,644 @@ EOF
 }
 
 # ==============================================================================
+# COMMAND: meteor  (linux-meteor kernel & hardware profile verification)
+# ==============================================================================
+# Ported verbatim from linux-meteor/check-meteor.sh: a read-only PASS/WARN/FAIL
+# report on the expected scheduler, kernel config, drivers, memory/network
+# tunables and boot parameters of the linux-meteor kernel. Honours the same
+# --expect-scheduler / --expect-gpu / --plain / --verbose flags and the same
+# EXPECT_* environment overrides. Keep this block in sync with check-meteor.sh.
+#
+# Stateless probe helpers live at file scope; the stateful reporters
+# (section/line/config_pass/config_optional) and all mutable state live inside
+# the cmd_meteor subshell so `set +e` and the counters never leak.
+
+have_cmd() {
+	command -v "$1" >/dev/null 2>&1
+}
+
+cfg_line() {
+	[[ -r /proc/config.gz ]] || return 1
+	zgrep -m1 -E "^CONFIG_$1(=| is not set)" /proc/config.gz 2>/dev/null
+}
+
+cfg_enabled() {
+	[[ -r /proc/config.gz ]] || return 1
+	zgrep -q "^CONFIG_$1=y$" /proc/config.gz 2>/dev/null
+}
+
+cfg_module() {
+	[[ -r /proc/config.gz ]] || return 1
+	zgrep -q "^CONFIG_$1=m$" /proc/config.gz 2>/dev/null
+}
+
+cfg_available() {
+	cfg_enabled "$1" || cfg_module "$1"
+}
+
+cfg_value() {
+	[[ -r /proc/config.gz ]] || return 1
+	zgrep -m1 "^CONFIG_$1=" /proc/config.gz 2>/dev/null | cut -d= -f2- | tr -d '"'
+}
+
+module_loaded() {
+	grep -q "^$1 " /proc/modules 2>/dev/null
+}
+
+loaded_any() {
+	local mod
+	for mod in "$@"; do
+		module_loaded "$mod" && return 0
+	done
+	return 1
+}
+
+modules_loaded() {
+	local absent=()
+	local mod
+	for mod in "$@"; do
+		module_loaded "$mod" || absent+=("$mod")
+	done
+
+	if ((${#absent[@]} == 0)); then
+		return 0
+	fi
+
+	printf '%s' "${absent[*]}"
+	return 1
+}
+
+read_first() {
+	local path="$1"
+	[[ -r "$path" ]] || return 1
+	tr -d '\0' <"$path" 2>/dev/null | head -n1
+}
+
+human_bytes() {
+	local bytes="$1"
+	if have_cmd numfmt; then
+		numfmt --to=iec --suffix=B "$bytes" 2>/dev/null || printf '%sB' "$bytes"
+	else
+		printf '%sB' "$bytes"
+	fi
+}
+
+cmdline_has() {
+	grep -qw "$1" /proc/cmdline 2>/dev/null
+}
+
+cmdline_matches() {
+	grep -Eq "$1" /proc/cmdline 2>/dev/null
+}
+
+sysctl_get() {
+	sysctl -n "$1" 2>/dev/null
+}
+
+gpu_driver() {
+	have_cmd lspci || return 1
+	lspci -nnk 2>/dev/null |
+		awk -F': ' '/VGA compatible controller.*Intel/{found=1} found && /Kernel driver in use/{print $2; exit}'
+}
+
+pci_driver_for() {
+	local pattern="$1"
+	have_cmd lspci || return 1
+	lspci -nnk 2>/dev/null |
+		awk -v pattern="$pattern" -F': ' '
+			$0 ~ pattern {found=1}
+			found && /Kernel driver in use/ {print $2; exit}
+		'
+}
+
+config_state() {
+	local symbol="$1"
+	if cfg_enabled "$symbol"; then
+		printf 'y'
+	elif cfg_module "$symbol"; then
+		printf 'm'
+	else
+		printf 'off'
+	fi
+}
+
+meteor_usage() {
+	cat <<EOF
+${BOLD}Meteor Command${RST} - Verify linux-meteor kernel & hardware profile
+
+${BOLD}Usage:${RST} ${SCRIPT_NAME} meteor [options]
+
+${BOLD}Options:${RST}
+  --expect-scheduler S  Expected scheduler: auto, eevdf, or bore
+  --expect-gpu G        Expected GPU driver: xe, i915, or auto
+  --plain               Disable colors
+  --verbose             Show extra diagnostics
+  -h, --help            Show this help
+
+${BOLD}Environment overrides:${RST}
+  EXPECT_SCHED EXPECT_GPU EXPECT_HZ EXPECT_TICK EXPECT_PREEMPT
+  EXPECT_THP EXPECT_ZRAM_COMP
+
+${BOLD}Examples:${RST}
+  ${SCRIPT_NAME} meteor
+  ${SCRIPT_NAME} meteor --expect-scheduler eevdf
+  EXPECT_GPU=i915 ${SCRIPT_NAME} meteor
+
+EOF
+}
+
+# line()/config_* reporters always return 0, so `test && line PASS || line WARN`
+# is intentional (not a broken if-then-else); silence SC2015 for the whole cmd.
+# shellcheck disable=SC2015
+cmd_meteor() (
+	# Function body is a subshell: `set +e` and all state stay contained.
+	# This is a reporting tool that expects most probes to fail cleanly.
+	set +e
+
+	EXPECT_SCHED="${EXPECT_SCHED:-auto}"
+	EXPECT_GPU="${EXPECT_GPU:-auto}"
+	EXPECT_HZ="${EXPECT_HZ:-1000}"
+	EXPECT_TICK="${EXPECT_TICK:-idle}"
+	EXPECT_PREEMPT="${EXPECT_PREEMPT:-dynamic}"
+	EXPECT_THP="${EXPECT_THP:-madvise}"
+	EXPECT_ZRAM_COMP="${EXPECT_ZRAM_COMP:-lz4}"
+
+	USE_COLOR=auto
+	VERBOSE=no
+
+	while (($#)); do
+		case "$1" in
+		--expect-scheduler)
+			shift
+			[[ $# -gt 0 ]] || {
+				printf 'Missing value for --expect-scheduler\n' >&2
+				exit 2
+			}
+			EXPECT_SCHED="$1"
+			;;
+		--expect-gpu)
+			shift
+			[[ $# -gt 0 ]] || {
+				printf 'Missing value for --expect-gpu\n' >&2
+				exit 2
+			}
+			EXPECT_GPU="$1"
+			;;
+		--plain)
+			USE_COLOR=no
+			;;
+		--verbose)
+			VERBOSE=yes
+			;;
+		-h | --help)
+			meteor_usage
+			exit 0
+			;;
+		*)
+			printf 'Unknown option: %s\n' "$1" >&2
+			meteor_usage >&2
+			exit 2
+			;;
+		esac
+		shift
+	done
+
+	case "$EXPECT_SCHED" in
+	auto | eevdf | bore) ;;
+	*)
+		printf 'Invalid EXPECT_SCHED: %s\n' "$EXPECT_SCHED" >&2
+		exit 2
+		;;
+	esac
+
+	case "$EXPECT_GPU" in
+	xe | i915 | auto) ;;
+	*)
+		printf 'Invalid EXPECT_GPU: %s\n' "$EXPECT_GPU" >&2
+		exit 2
+		;;
+	esac
+
+	if [[ "$USE_COLOR" == auto ]]; then
+		if [[ -t 1 ]]; then
+			USE_COLOR=yes
+		else
+			USE_COLOR=no
+		fi
+	fi
+
+	if [[ "$USE_COLOR" == yes ]]; then
+		MT_GREEN=$'\033[0;32m'
+		MT_BLUE=$'\033[0;34m'
+		MT_YELLOW=$'\033[1;33m'
+		MT_RED=$'\033[0;31m'
+		MT_BOLD=$'\033[1m'
+		MT_NC=$'\033[0m'
+	else
+		MT_GREEN=''
+		MT_BLUE=''
+		MT_YELLOW=''
+		MT_RED=''
+		MT_BOLD=''
+		MT_NC=''
+	fi
+
+	PASS=0
+	WARN=0
+	FAIL=0
+	INFO=0
+
+	section() {
+		printf '\n%s%s%s\n' "$MT_BOLD" "$1" "$MT_NC"
+	}
+
+	line() {
+		local state="$1"
+		local label="$2"
+		local value="$3"
+		local detail="${4:-}"
+		local color="$MT_BLUE"
+
+		case "$state" in
+		PASS) color="$MT_GREEN"; ((PASS++)) ;;
+		WARN) color="$MT_YELLOW"; ((WARN++)) ;;
+		FAIL) color="$MT_RED"; ((FAIL++)) ;;
+		INFO) color="$MT_BLUE"; ((INFO++)) ;;
+		esac
+
+		printf '%b%-6s%b %-26s %s' "$color" "[$state]" "$MT_NC" "$label:" "$value"
+		[[ -n "$detail" ]] && printf '  %s' "$detail"
+		printf '\n'
+	}
+
+	config_pass() {
+		local label="$1"
+		local symbol="$2"
+		local state
+		state="$(config_state "$symbol")"
+		if [[ "$state" == y || "$state" == m ]]; then
+			line PASS "$label" "$state" "CONFIG_$symbol"
+		else
+			line FAIL "$label" "off" "CONFIG_$symbol is required"
+		fi
+	}
+
+	config_optional() {
+		local label="$1"
+		local symbol="$2"
+		local note="${3:-optional}"
+		local state
+		state="$(config_state "$symbol")"
+		if [[ "$state" == y || "$state" == m ]]; then
+			line PASS "$label" "$state" "CONFIG_$symbol"
+		else
+			line INFO "$label" "off" "$note"
+		fi
+	}
+
+	printf '%s╔════════════════════════════════════════════════════════════╗%s\n' "$MT_BOLD" "$MT_NC"
+	printf '%s║        linux-meteor Profile Verification Tool             ║%s\n' "$MT_BOLD" "$MT_NC"
+	printf '%s╚════════════════════════════════════════════════════════════╝%s\n' "$MT_BOLD" "$MT_NC"
+	printf 'Expected profile: scheduler=%s gpu=%s hz=%s tick=%s preempt=%s thp=%s zram=%s\n' \
+		"$EXPECT_SCHED" "$EXPECT_GPU" "$EXPECT_HZ" "$EXPECT_TICK" "$EXPECT_PREEMPT" "$EXPECT_THP" "$EXPECT_ZRAM_COMP"
+
+	section "Kernel"
+	kernel="$(uname -r)"
+	build="$(uname -v)"
+	if [[ "$kernel" == *meteor* ]]; then
+		line PASS "Kernel" "$kernel"
+	else
+		line WARN "Kernel" "$kernel" "name does not contain meteor"
+	fi
+	line INFO "Build" "$build"
+
+	if [[ -r /proc/config.gz ]]; then
+		line PASS "Runtime config" "/proc/config.gz"
+	else
+		line FAIL "Runtime config" "missing" "enable IKCONFIG_PROC"
+	fi
+
+	section "Core Profile"
+	if cfg_enabled SCHED_BORE; then
+		scheduler="bore"
+	else
+		scheduler="eevdf"
+	fi
+	if [[ "$EXPECT_SCHED" == auto ]]; then
+		line PASS "Scheduler" "$scheduler" "auto-detected"
+	elif [[ "$scheduler" == "$EXPECT_SCHED" ]]; then
+		line PASS "Scheduler" "$scheduler"
+	else
+		line WARN "Scheduler" "$scheduler" "expected $EXPECT_SCHED"
+	fi
+
+	hz="$(cfg_value HZ || true)"
+	if [[ -z "$hz" ]]; then
+		hz="$(zgrep -m1 -E '^CONFIG_HZ_[0-9]+=y$' /proc/config.gz 2>/dev/null | sed -E 's/^CONFIG_HZ_([0-9]+)=y$/\1/')"
+	fi
+	if [[ "$hz" == "$EXPECT_HZ" ]]; then
+		line PASS "Tick rate" "${hz}Hz"
+	else
+		line WARN "Tick rate" "${hz:-unknown}" "expected ${EXPECT_HZ}Hz"
+	fi
+
+	if cfg_enabled HZ_PERIODIC; then
+		tick="periodic"
+	elif cfg_enabled NO_HZ_FULL; then
+		tick="full"
+	elif cfg_enabled NO_HZ_IDLE; then
+		tick="idle"
+	else
+		tick="unknown"
+	fi
+	if [[ "$tick" == "$EXPECT_TICK" ]]; then
+		line PASS "Tick mode" "$tick"
+	else
+		line WARN "Tick mode" "$tick" "expected $EXPECT_TICK"
+	fi
+
+	if cfg_enabled PREEMPT_RT; then
+		preempt="rt"
+	elif cfg_enabled PREEMPT_DYNAMIC; then
+		preempt="dynamic"
+	elif cfg_enabled PREEMPT_LAZY; then
+		preempt="lazy"
+	elif cfg_enabled PREEMPT; then
+		preempt="full"
+	else
+		preempt="none"
+	fi
+	if [[ "$preempt" == "$EXPECT_PREEMPT" ]]; then
+		line PASS "Preemption" "$preempt"
+	else
+		line WARN "Preemption" "$preempt" "expected $EXPECT_PREEMPT"
+	fi
+
+	if cfg_enabled LTO_CLANG_THIN; then
+		lto="ThinLTO"
+	elif cfg_enabled LTO_CLANG_FULL; then
+		lto="Full LTO"
+	else
+		lto="disabled"
+	fi
+	if [[ "$lto" == "disabled" ]]; then
+		line FAIL "LLVM LTO" "$lto"
+	else
+		line PASS "LLVM LTO" "$lto"
+	fi
+
+	section "CPU Power"
+	scaling_driver="$(read_first /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver || true)"
+	if [[ "$scaling_driver" == intel_pstate ]]; then
+		line PASS "CPU freq driver" "$scaling_driver"
+	else
+		line WARN "CPU freq driver" "${scaling_driver:-unknown}" "expected intel_pstate"
+	fi
+
+	governor="$(read_first /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor || true)"
+	if [[ "$governor" == powersave && "$scaling_driver" == intel_pstate ]]; then
+		line PASS "Governor" "$governor" "normal for intel_pstate active mode"
+	elif [[ -n "$governor" ]]; then
+		line INFO "Governor" "$governor"
+	else
+		line WARN "Governor" "unknown"
+	fi
+
+	epp="$(read_first /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference || true)"
+	case "$epp" in
+	performance | balance_performance)
+		line PASS "Intel EPP" "$epp"
+		;;
+	balance_power | power)
+		line WARN "Intel EPP" "$epp" "lower performance profile"
+		;;
+	*)
+		line WARN "Intel EPP" "${epp:-unknown}"
+		;;
+	esac
+
+	pstate="$(read_first /sys/devices/system/cpu/intel_pstate/status || true)"
+	if [[ "$pstate" == active ]]; then
+		line PASS "intel_pstate" "$pstate"
+	else
+		line WARN "intel_pstate" "${pstate:-unknown}" "expected active"
+	fi
+
+	turbo="$(read_first /sys/devices/system/cpu/intel_pstate/no_turbo || true)"
+	if [[ "$turbo" == 0 ]]; then
+		line PASS "Turbo" "enabled"
+	elif [[ "$turbo" == 1 ]]; then
+		line WARN "Turbo" "disabled"
+	else
+		line INFO "Turbo" "unknown"
+	fi
+
+	xe_force_source="sysfs"
+	xe_force="$(read_first /sys/module/xe/parameters/force_probe || true)"
+	if [[ -z "$xe_force" ]]; then
+		xe_force="$(cfg_value DRM_XE_FORCE_PROBE || true)"
+		xe_force_source="config"
+	fi
+
+	i915_force_source="sysfs"
+	i915_force="$(read_first /sys/module/i915/parameters/force_probe || true)"
+	if [[ -z "$i915_force" ]]; then
+		i915_force="$(cfg_value DRM_I915_FORCE_PROBE || true)"
+		i915_force_source="config"
+	fi
+
+	actual_expect_gpu="$EXPECT_GPU"
+	if [[ "$actual_expect_gpu" == auto ]]; then
+		if [[ "$xe_force" == *7d55* && "$i915_force" == *"!7d55"* ]]; then
+			actual_expect_gpu="xe"
+		elif [[ "$i915_force" == *7d55* && "$i915_force" != *"!7d55"* ]]; then
+			actual_expect_gpu="i915"
+		fi
+	fi
+
+	section "Graphics"
+	gpu="$(gpu_driver || true)"
+	if [[ "$actual_expect_gpu" == auto ]]; then
+		line INFO "GPU driver" "${gpu:-unknown}"
+	elif [[ "$gpu" == "$actual_expect_gpu" ]]; then
+		line PASS "GPU driver" "$gpu"
+	else
+		line FAIL "GPU driver" "${gpu:-unknown}" "expected $actual_expect_gpu"
+	fi
+
+	if [[ "$actual_expect_gpu" == xe ]]; then
+		[[ "$xe_force" == *7d55* ]] && line PASS "xe force_probe" "$xe_force" "source: $xe_force_source" || line WARN "xe force_probe" "${xe_force:-unset}" "expected 7d55"
+		[[ "$i915_force" == *"!7d55"* ]] && line PASS "i915 force_probe" "$i915_force" "source: $i915_force_source" || line WARN "i915 force_probe" "${i915_force:-unset}" "expected !7d55"
+	elif [[ "$actual_expect_gpu" == i915 ]]; then
+		[[ "$i915_force" == *7d55* && "$i915_force" != *"!7d55"* ]] && line PASS "i915 force_probe" "$i915_force" "source: $i915_force_source" || line WARN "i915 force_probe" "${i915_force:-unset}" "expected 7d55"
+		# Optional: check if xe is properly disabled
+		if [[ "$xe_force" == *"!7d55"* ]]; then
+			line PASS "xe force_probe" "$xe_force" "source: $xe_force_source"
+		elif [[ -n "$xe_force" ]]; then
+			line WARN "xe force_probe" "$xe_force" "should probably be !7d55 to avoid conflicts"
+		else
+			line PASS "xe force_probe" "unset" "normal for i915-only mode"
+		fi
+	else
+		line INFO "xe force_probe" "${xe_force:-unset}" "source: $xe_force_source"
+		line INFO "i915 force_probe" "${i915_force:-unset}" "source: $i915_force_source"
+	fi
+
+	if cmdline_matches '(^| )i915\.' && [[ "$gpu" == xe ]]; then
+		line WARN "Boot GPU args" "i915.* present" "these do not tune xe"
+	else
+		line PASS "Boot GPU args" "clean"
+	fi
+
+	if loaded_any xe i915; then
+		loaded_gpu_modules=()
+		module_loaded xe && loaded_gpu_modules+=("xe")
+		module_loaded i915 && loaded_gpu_modules+=("i915")
+		line INFO "Loaded GPU modules" "${loaded_gpu_modules[*]}"
+	fi
+
+	section "Platform Devices"
+	audio_drv="$(pci_driver_for 'Multimedia audio controller.*Meteor Lake' || true)"
+	if [[ "$audio_drv" == sof-audio-pci-intel-mtl ]]; then
+		line PASS "Audio driver" "$audio_drv"
+	else
+		line WARN "Audio driver" "${audio_drv:-unknown}" "expected SOF Meteor Lake"
+	fi
+
+	# pciutils renamed the device (Meteor Lake NPU -> Core Ultra ... NPU); the PCI ID is stable
+	npu_drv="$(pci_driver_for 'Processing accelerators.*8086:7d1d' || true)"
+	if [[ "$npu_drv" == intel_vpu ]]; then
+		line PASS "NPU driver" "$npu_drv"
+	else
+		line WARN "NPU driver" "${npu_drv:-unknown}" "expected intel_vpu"
+	fi
+
+	wifi_drv="$(pci_driver_for 'Network controller.*Meteor Lake PCH CNVi WiFi' || true)"
+	if [[ "$wifi_drv" == iwlwifi ]]; then
+		line PASS "Wi-Fi driver" "$wifi_drv"
+	else
+		line FAIL "Wi-Fi driver" "${wifi_drv:-unknown}" "expected iwlwifi"
+	fi
+
+	missing="$(modules_loaded nvme nvme_core 2>/dev/null || true)"
+	[[ -z "$missing" ]] && line PASS "NVMe modules" "loaded" || line FAIL "NVMe modules" "missing $missing"
+
+	missing="$(modules_loaded thinkpad_acpi think_lmi intel_hid 2>/dev/null || true)"
+	[[ -z "$missing" ]] && line PASS "ThinkPad modules" "loaded" || line WARN "ThinkPad modules" "missing $missing"
+
+	missing="$(modules_loaded thunderbolt typec_ucsi ucsi_acpi typec 2>/dev/null || true)"
+	[[ -z "$missing" ]] && line PASS "USB-C/TB runtime" "loaded" || line WARN "USB-C/TB runtime" "missing $missing"
+
+	config_pass "USB-C DP altmode" TYPEC_DP_ALTMODE
+	config_pass "USB4 networking" USB4_NET
+	config_pass "SoundWire Intel" SOUNDWIRE_INTEL
+	config_pass "SOF Meteor Lake" SND_SOC_SOF_INTEL_MTL
+	config_pass "Lenovo HID" HID_LENOVO
+	config_pass "exFAT" EXFAT_FS
+	config_pass "NTFS3" NTFS3_FS
+
+	section "Memory And I/O"
+	thp="$(read_first /sys/kernel/mm/transparent_hugepage/enabled || true)"
+	if [[ "$thp" == *"[$EXPECT_THP]"* ]]; then
+		line PASS "Transparent HP" "$EXPECT_THP"
+	elif [[ -n "$thp" ]]; then
+		line WARN "Transparent HP" "$thp" "expected [$EXPECT_THP]"
+	else
+		line WARN "Transparent HP" "unknown"
+	fi
+
+	zram_alg="$(read_first /sys/block/zram0/comp_algorithm || true)"
+	if [[ "$zram_alg" == *"[$EXPECT_ZRAM_COMP]"* ]]; then
+		zram_size="$(read_first /sys/block/zram0/disksize || true)"
+		line PASS "zram compressor" "$EXPECT_ZRAM_COMP" "size $(human_bytes "${zram_size:-0}")"
+	elif [[ -n "$zram_alg" ]]; then
+		line WARN "zram compressor" "$zram_alg" "expected [$EXPECT_ZRAM_COMP]"
+	else
+		line WARN "zram" "not active"
+	fi
+
+	zswap_enabled="$(read_first /sys/module/zswap/parameters/enabled || true)"
+	if [[ "$zswap_enabled" == N || "$zswap_enabled" == 0 ]]; then
+		line PASS "zswap" "disabled"
+	elif [[ -n "$zswap_enabled" ]]; then
+		line WARN "zswap" "enabled" "usually unnecessary with zram swap"
+	else
+		line INFO "zswap" "unknown"
+	fi
+
+	section "Network"
+	tcp_cong="$(sysctl_get net.ipv4.tcp_congestion_control || true)"
+	if [[ "$tcp_cong" == bbr ]]; then
+		line PASS "TCP congestion" "$tcp_cong"
+	else
+		line WARN "TCP congestion" "${tcp_cong:-unknown}" "expected bbr"
+	fi
+
+	default_qdisc="$(sysctl_get net.core.default_qdisc || true)"
+	if [[ "$default_qdisc" == fq ]]; then
+		line PASS "Default qdisc" "$default_qdisc"
+	elif [[ -n "$default_qdisc" ]]; then
+		line WARN "Default qdisc" "$default_qdisc" "expected fq for BBR"
+	elif cfg_enabled DEFAULT_FQ; then
+		line PASS "Default qdisc config" "fq"
+	else
+		line INFO "Default qdisc" "not exposed"
+	fi
+
+	if cfg_available IWLWIFI_DEBUG || cfg_available IWLWIFI_DEVICE_TRACING; then
+		line WARN "Wi-Fi debug" "enabled" "adds overhead/noise"
+	else
+		line PASS "Wi-Fi debug" "disabled"
+	fi
+
+	section "VPN And Containers"
+	config_pass "TUN" TUN
+	config_pass "PPP generic" PPP
+	config_pass "PPP async" PPP_ASYNC
+	config_pass "PPP deflate" PPP_DEFLATE
+	config_pass "PPP MPPE" PPP_MPPE
+	config_optional "TAP" TAP "optional layer-2 tap"
+	config_pass "VETH" VETH
+	config_pass "OverlayFS" OVERLAY_FS
+	config_pass "nftables" NF_TABLES
+	config_pass "vhost-net" VHOST_NET
+
+	section "Boot Parameters"
+	for arg in intel_pstate=active zswap.enabled=0 nvme_load=YES mem_sleep_default=s2idle; do
+		if cmdline_has "$arg"; then
+			line PASS "cmdline $arg" "present"
+		else
+			line INFO "cmdline $arg" "not present"
+		fi
+	done
+
+	if cmdline_has processor.ignore_ppc=1; then
+		line INFO "cmdline processor.ignore_ppc=1" "present" "firmware power limits may be bypassed"
+	fi
+
+	if cmdline_has i915.enable_dc=0 || cmdline_has i915.enable_psr=0; then
+		line INFO "i915 power-saving args" "present" "only relevant when i915 drives the display"
+	fi
+
+	if [[ "$VERBOSE" == yes ]]; then
+		section "Verbose"
+		line INFO "Command line" "$(cat /proc/cmdline 2>/dev/null)"
+		line INFO "Loaded kernel" "$(uname -a)"
+		[[ -n "$(cfg_line DRM_XE_FORCE_PROBE || true)" ]] && line INFO "CONFIG_DRM_XE_FORCE_PROBE" "$(cfg_value DRM_XE_FORCE_PROBE)"
+		[[ -n "$(cfg_line DRM_I915_FORCE_PROBE || true)" ]] && line INFO "CONFIG_DRM_I915_FORCE_PROBE" "$(cfg_value DRM_I915_FORCE_PROBE)"
+	fi
+
+	printf '\n%sSummary%s\n' "$MT_BOLD" "$MT_NC"
+	printf '%bPASS%b %d   %bWARN%b %d   %bFAIL%b %d   INFO %d\n' \
+		"$MT_GREEN" "$MT_NC" "$PASS" "$MT_YELLOW" "$MT_NC" "$WARN" "$MT_RED" "$MT_NC" "$FAIL" "$INFO"
+
+	if ((FAIL > 0)); then
+		exit 1
+	fi
+	exit 0
+)
+
+# ==============================================================================
 # MAIN DISPATCHER
 # ==============================================================================
 main() {
@@ -1413,6 +2053,10 @@ main() {
 	profile-refresh)
 		shift
 		cmd_profile_refresh "$@"
+		;;
+	meteor)
+		shift
+		cmd_meteor "$@"
 		;;
 	help | -h | --help) show_help ;;
 	*)
