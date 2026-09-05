@@ -40,6 +40,9 @@ VALENT_PORT_RANGE="${VALENT_PORT_RANGE:-${KDECONNECT_PORT_RANGE:-1714:1764}}"
 VALENT_ALLOWED_SUBNETS="${VALENT_ALLOWED_SUBNETS:-${KDECONNECT_ALLOWED_SUBNETS:-}}"
 ALLOW_MDNS_PORT="${ALLOW_MDNS_PORT:-0}"
 MDNS_PORT="${MDNS_PORT:-5353}"
+ALLOW_AUDIOBOOKSHELF_PORT="${ALLOW_AUDIOBOOKSHELF_PORT:-0}"
+AUDIOBOOKSHELF_PORT="${AUDIOBOOKSHELF_PORT:-13378}"
+AUDIOBOOKSHELF_ALLOWED_SUBNETS="${AUDIOBOOKSHELF_ALLOWED_SUBNETS:-}"
 
 if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw --force reset
@@ -73,6 +76,18 @@ if command -v ufw >/dev/null 2>&1; then
     else
       ${SUDO} ufw allow "${VALENT_PORT_RANGE}/udp"
       ${SUDO} ufw allow "${VALENT_PORT_RANGE}/tcp"
+    fi
+  fi
+
+  if [ "${ALLOW_AUDIOBOOKSHELF_PORT}" = "1" ]; then
+    if [ -n "${AUDIOBOOKSHELF_ALLOWED_SUBNETS// /}" ]; then
+      IFS=', ' read -r -a abs_subnets <<< "${AUDIOBOOKSHELF_ALLOWED_SUBNETS}"
+      for subnet in "${abs_subnets[@]}"; do
+        [ -n "${subnet}" ] || continue
+        ${SUDO} ufw allow from "${subnet}" to any port "${AUDIOBOOKSHELF_PORT}" proto tcp
+      done
+    else
+      ${SUDO} ufw allow "${AUDIOBOOKSHELF_PORT}/tcp"
     fi
   fi
 
