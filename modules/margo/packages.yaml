@@ -4,6 +4,8 @@ packages:
   # Wayland base (was the wayland-env module, now folded into margo).
   - wayland
   - margo-git
+  # Ships mpris-proxy (Bluetooth AVRCP -> MPRIS bridge), enabled below.
+  - bluez-utils
   - uwsm
   - polkit-gnome
   - network-manager-applet

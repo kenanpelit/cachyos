@@ -98,8 +98,8 @@ bars:
     - Separator
     - ActiveWindow
     - Separator
-    - MediaPlayer
     center_widgets:
+    - Separator
     - Catwalk
     - Separator
     - Weather
@@ -111,6 +111,7 @@ bars:
     - HiddenBar
     - Separator
     - Lyrics
+    - Separator
     - VpnIndicator
     right_widgets:
     - !HiddenBarNamed right
@@ -147,25 +148,23 @@ bars:
     - Ai
     - Podman
   bottom_bar:
-    enabled: false
     minimum_height: 28
-    reveal_by_default: false
     left_widgets:
-    - Separator
     - !Spacer 8
-    - ActiveWindow
-    center_widgets:
     - Separator
     - !Spacer 8
     - MediaPlayer
     - !Spacer 8
     - Separator
+    center_widgets:
+    - Separator
     right_widgets:
-    - Power
+    - Separator
+    - !Spacer 8
+    - Mtune
     - !Spacer 8
     - Separator
-    - Tray
-    - Separator
+    - !Spacer 8
 menus:
   clipboard_menu:
     minimum_width: 720
@@ -220,6 +219,11 @@ menus:
   media_player_menu:
     position: TopLeft
     minimum_width: 460
+  mtune_menu:
+    minimum_width: 420
+  lyrics_menu:
+    minimum_width: 540
+    maximum_height: 0
   session_menu:
     position: Bottom
   margo_layout_menu:
@@ -376,6 +380,12 @@ launcher:
   - name: start-helium-tiktok
     enabled: false
     delay_secs: 20
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: mtune --hidden
+    enabled: true
+    delay_secs: 25
     trigger: LoginOnce
     args: ''
     working_dir: ''

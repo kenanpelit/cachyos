@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Debounce wrapper between margo's XF86Audio* keybinds and `mshellctl mtune`.
+#
+# The Bluetooth headset connected here is known to occasionally burst
+# duplicate AVRCP key events for a single physical button press (see the
+# comment above the XF86Audio binds in binds.conf). A real, deliberate
+# press is essentially never followed by another press of ANY media key
+# within this window, so a second event that arrives before it elapses is
+# treated as a spurious duplicate and dropped instead of being forwarded.
+set -euo pipefail
+
+cmd="${1:?usage: mtune-mediakey <mshellctl-mtune-subcommand>}"
+debounce_ms="${MTUNE_MEDIAKEY_DEBOUNCE_MS:-450}"
+stamp_file="${XDG_RUNTIME_DIR:-/tmp}/mtune-mediakey.stamp"
+
+now_ms=$(($(date +%s%N) / 1000000))
+last_ms=0
+if [ -f "$stamp_file" ]; then
+	last_ms=$(<"$stamp_file")
+fi
+
+if (( now_ms - last_ms < debounce_ms )); then
+	exit 0
+fi
+
+echo "$now_ms" >"$stamp_file"
+exec mshellctl mtune "$cmd"

@@ -28,6 +28,11 @@ fi
 
 if command -v systemctl >/dev/null 2>&1; then
 	run_as_user systemctl --user daemon-reload >/dev/null 2>&1 || true
+	# Bridges Bluetooth AVRCP media-key events to whichever MPRIS player(s)
+	# are running (Spotify etc). Independent of the XF86Audio binds below
+	# (those go compositor -> mtune-mediakey -> mshellctl directly, not
+	# through MPRIS), but was disabled and is generally useful to have on.
+	run_as_user systemctl --user enable --now mpris-proxy.service >/dev/null 2>&1 || true
 fi
 
 # Cursor defaults for the greeter / pre-session, written to /etc/environment.
