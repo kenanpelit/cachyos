@@ -17,7 +17,7 @@ general:
 theme:
   icons:
     app_icon_theme: kora
-  theme: Margo
+  theme: OneMargo
   apps:
     helium:
       enabled: true
@@ -110,8 +110,6 @@ bars:
     - Separator
     - HiddenBar
     - Separator
-    - Lyrics
-    - Separator
     - VpnIndicator
     right_widgets:
     - !HiddenBarNamed right
@@ -147,6 +145,7 @@ bars:
     - Keybinds
     - Ai
     - Podman
+    - Lyrics
   bottom_bar:
     minimum_height: 28
     left_widgets:
@@ -157,6 +156,8 @@ bars:
     - !Spacer 8
     - Separator
     center_widgets:
+    - Separator
+    - Lyrics
     - Separator
     right_widgets:
     - Separator
