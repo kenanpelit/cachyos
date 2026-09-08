@@ -20,6 +20,14 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- Disable LazyVim's default wrap_spell autocmd that enables spell in text/markdown files
+vim.api.nvim_create_autocmd("User", {
+  pattern = "LazyVimAutocmdsDefaults",
+  callback = function()
+    pcall(vim.api.nvim_del_augroup_by_name, "lazyvim_wrap_spell")
+  end,
+})
+
 -- =======================================================================
 -- Lazy.nvim Setup
 -- =======================================================================
@@ -121,6 +129,16 @@ opt.scrolloff = 8
 opt.signcolumn = "yes"
 opt.updatetime = 50
 opt.colorcolumn = "80"
+opt.spell = false
+
+-- Disable spell checking by default for text/markdown filetypes
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("disable_spell_check", { clear = true }),
+  pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
+  callback = function()
+    vim.opt_local.spell = false
+  end,
+})
 
 -- Desktop environment detection for clipboard
 local desktop_env = os.getenv("XDG_CURRENT_DESKTOP") or ""
