@@ -248,13 +248,13 @@ launcher:
   autostart_scripts:
   - name: start-kkenp
     enabled: true
-    delay_secs: 10
+    delay_secs: 5
     trigger: LoginOnce
     args: ''
     working_dir: ''
   - name: start-chrome-kenp
     enabled: true
-    delay_secs: 11
+    delay_secs: 6
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -272,7 +272,7 @@ launcher:
     working_dir: ''
   - name: start-chrome-ai
     enabled: true
-    delay_secs: 12
+    delay_secs: 7
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -290,7 +290,7 @@ launcher:
     working_dir: ''
   - name: start-chrome-compecta
     enabled: true
-    delay_secs: 13
+    delay_secs: 8
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -308,7 +308,7 @@ launcher:
     working_dir: ''
   - name: start-discord
     enabled: true
-    delay_secs: 14
+    delay_secs: 9
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -338,13 +338,13 @@ launcher:
     working_dir: ''
   - name: start-spotify
     enabled: true
-    delay_secs: 16
+    delay_secs: 10
     trigger: LoginOnce
     args: ''
     working_dir: ''
   - name: start-ferdium
     enabled: true
-    delay_secs: 17
+    delay_secs: 11
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -386,7 +386,7 @@ launcher:
     working_dir: ''
   - name: mtune --hidden
     enabled: true
-    delay_secs: 25
+    delay_secs: 15
     trigger: LoginOnce
     args: ''
     working_dir: ''
