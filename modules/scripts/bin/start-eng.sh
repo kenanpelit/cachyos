@@ -3,7 +3,7 @@
 # Öncelik: Chromium (uygulama) → Chrome kenp → Brave kenp (yeni pencere)
 set -euo pipefail
 
-readonly URL='http://127.0.0.1:8080'
+readonly URL='https://localhost:8443'
 readonly SERVICE='english.service'
 accent='' muted='' red='' reset=''
 if [[ -t 1 && -z "${NO_COLOR:-}" && "${TERM:-dumb}" != dumb ]]; then
@@ -24,7 +24,7 @@ Kullanım: start-eng.sh [tarayıcı parametreleri...]
   3. start-brave-kenp   Yeni Brave penceresi
 
 Site kapalıysa english.service başlatılır ve hazır olması beklenir.
-Adres: http://127.0.0.1:8080
+Adres: https://localhost:8443
 Renkleri kapatmak için NO_COLOR=1 kullanabilirsin.
 HELP
     exit 0
