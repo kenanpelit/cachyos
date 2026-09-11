@@ -43,6 +43,9 @@ MDNS_PORT="${MDNS_PORT:-5353}"
 ALLOW_AUDIOBOOKSHELF_PORT="${ALLOW_AUDIOBOOKSHELF_PORT:-0}"
 AUDIOBOOKSHELF_PORT="${AUDIOBOOKSHELF_PORT:-13378}"
 AUDIOBOOKSHELF_ALLOWED_SUBNETS="${AUDIOBOOKSHELF_ALLOWED_SUBNETS:-}"
+ALLOW_ENGLISH_HTTPS_PORT="${ALLOW_ENGLISH_HTTPS_PORT:-0}"
+ENGLISH_HTTPS_PORT="${ENGLISH_HTTPS_PORT:-8443}"
+ENGLISH_HTTPS_ALLOWED_SUBNETS="${ENGLISH_HTTPS_ALLOWED_SUBNETS:-}"
 
 if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw --force reset
@@ -88,6 +91,18 @@ if command -v ufw >/dev/null 2>&1; then
       done
     else
       ${SUDO} ufw allow "${AUDIOBOOKSHELF_PORT}/tcp"
+    fi
+  fi
+
+  if [ "${ALLOW_ENGLISH_HTTPS_PORT}" = "1" ]; then
+    if [ -n "${ENGLISH_HTTPS_ALLOWED_SUBNETS// /}" ]; then
+      IFS=', ' read -r -a eng_https_subnets <<< "${ENGLISH_HTTPS_ALLOWED_SUBNETS}"
+      for subnet in "${eng_https_subnets[@]}"; do
+        [ -n "${subnet}" ] || continue
+        ${SUDO} ufw allow from "${subnet}" to any port "${ENGLISH_HTTPS_PORT}" proto tcp
+      done
+    else
+      ${SUDO} ufw allow "${ENGLISH_HTTPS_PORT}/tcp"
     fi
   fi
 
