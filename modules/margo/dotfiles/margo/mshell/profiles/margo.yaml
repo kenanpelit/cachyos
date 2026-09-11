@@ -140,7 +140,6 @@ bars:
     - Notes
     - !Custom plugin:ambient-sound:ambient
     - !Custom plugin:breathing:breathing
-    - !Custom plugin:musiclyrics:lyrics
     - SystemUpdate
     - Keybinds
     - Ai
