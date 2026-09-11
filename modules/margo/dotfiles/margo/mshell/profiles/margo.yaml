@@ -389,6 +389,12 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
+  - name: start-eng
+    enabled: true
+    delay_secs: 15
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
   compact_rows: true
 dock:
   icon_overrides:
