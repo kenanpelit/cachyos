@@ -1,0 +1,28 @@
+[Unit]
+Description=English (Android/dev) - Vite geliştirme sunucusu
+Documentation=file:%h/Music/Eng/android/BUILDING.md
+After=network-online.target
+Wants=network-online.target
+# node_modules yoksa servis başlamaz (önce npm install çalıştırın)
+ConditionPathExists=%h/Music/Eng/android/node_modules/.bin/vite
+
+[Service]
+Type=exec
+WorkingDirectory=%h/Music/Eng/android
+
+# Port değiştirmek için  systemctl --user edit english-dev.service
+# ile bir drop-in ekleyip Environment satırını override edin.
+Environment=PORT=5174
+ExecStart=%h/Music/Eng/android/node_modules/.bin/vite --port ${PORT} --strictPort
+
+Restart=on-failure
+RestartSec=2
+
+# Dev sunucusu: node_modules/.vite cache'e ve HMR websocket'e yazma/ağ erişimi
+# gerekiyor — production servisindeki (english.service) ağır sandboxing burada
+# kasıtlı olarak uygulanmıyor.
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

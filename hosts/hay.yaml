@@ -1,85 +1,88 @@
 host: hay
+sops_key_path: null
+secrets: []
 description: CachyOS setup (ported from nixosc via mdots)
+import: []
 enabled_modules:
-  - base
-  - pacman
-  - paru
-  - makepkg
-  - xdg-dirs
-  - scripts
-  # - sops # disabled: requires manual creation of modules/sops/files/keys.txt.age before sync
-  - packages
-  - flatpak
-  - topgrade
-  - system-packages-hay
-  - admin
-  - logind
-  - tty
-  - logs
-  - kernel
-  - firewall
-  - wireless
-  - fail2ban
-  - blocky
-  - tcp
-  - oomd
-  - bash
-  - zsh
-  - starship
-  - git
-  - command-not-found
-  - bat
-  - btop
-  - fastfetch
-  - fzf
-  - rsync
-  - lazygit
-  - yazi
-  - nvim
-  - tmux
-  - sesh
-  - clipse
-  - cliphist
-  - kitty
-  - alacritty
-  - ghostty
-  - gtk
-  - qt
-  - pipewire-rt
-  - margo
-  - satty
-  - sessions
-  - sway
-  - xdg-portal
-  - rofi
-  - connect
-  - anydesk
-  - mpv
-  - vlc
-  - ytdlp
-  - mpd
-  - rmpc
-  - cava
-  - radio
-  - subliminal
-  - transmission
-  - brave
-  - browserpass
-  - helium
-  - firefox
-  #- handy
-  - webcord
-  - user-services
-  - ai
-  - xdg-mimes
-module_processing: sequential
+- base
+- pacman
+- paru
+- makepkg
+- xdg-dirs
+- scripts
+# - sops # disabled: requires manual creation of modules/sops/files/keys.txt.age before sync
+- packages
+- flatpak
+- topgrade
+- system-packages-hay
+- admin
+- logind
+- tty
+- logs
+- kernel
+- firewall
+- wireless
+- fail2ban
+- blocky
+- tcp
+- oomd
+- bash
+- zsh
+- starship
+- git
+- command-not-found
+- bat
+- btop
+- fastfetch
+- fzf
+- rsync
+- lazygit
+- yazi
+- nvim
+- tmux
+- sesh
+- clipse
+- cliphist
+- kitty
+- alacritty
+- ghostty
+- gtk
+- qt
+- pipewire-rt
+- margo
+- satty
+- sessions
+- sway
+- xdg-portal
+- rofi
+- connect
+- anydesk
+- mpv
+- vlc
+- ytdlp
+- mpd
+- rmpc
+- cava
+- radio
+- subliminal
+- transmission
+- brave
+- browserpass
+- helium
+- firefox
+#- handy
+- webcord
+- user-services
+- ai
+- xdg-mimes
+- english
+packages: []
+exclude: []
+additional_packages: []
 flatpak_scope: user
-aur_helper: paru
 auto_prune: false
-services:
-  enabled:
-    - bluetooth
-    - NetworkManager
+module_processing: sequential
+strict_package_order: false
 config_backups:
   enabled: true
   max_backups: 5
@@ -90,67 +93,97 @@ system_backups:
   tool: snapper
   snapper_config: root
   max_backups: 5
+services:
+  enabled:
+  - bluetooth
+  - NetworkManager
+  disabled: []
+  scope: system
+enabled_service_profiles: []
+update_hooks:
+  pre_update: null
+  post_update: null
+  behavior: ask
+  devel: false
+  run_as_user: false
 default_apps:
   scope: user
   browser: helium-kenp.desktop
   text_editor: kitty-nvim.desktop
   file_manager: nemo.desktop
   terminal: kitty.desktop
-  office: libreoffice-startcenter.desktop
-  pdf: org.pwmt.zathura.desktop
-  archive: nemo.desktop
-  video: mpv.desktop
-  music: mpv.desktop
-  image: imv-dir.desktop
-  discord: webcord.desktop
-  mpv_handler: open-in-mpv.desktop
+  video_player: null
+  audio_player: null
+  image_viewer: null
+  pdf_viewer: null
   mime_types:
-    text/html: helium-kenp.desktop
-    application/xhtml+xml: helium-kenp.desktop
-    x-scheme-handler/http: helium-kenp.desktop
-    x-scheme-handler/https: helium-kenp.desktop
-    x-scheme-handler/about: helium-kenp.desktop
-    x-scheme-handler/unknown: helium-kenp.desktop
+    application/pdf: org.pwmt.zathura.desktop
     text/plain: kitty-nvim.desktop
-    image/bmp: imv-dir.desktop
-    image/gif: imv-dir.desktop
     image/jpeg: imv-dir.desktop
+    video/x-matroska: mpv.desktop
+    application/vnd.oasis.opendocument.spreadsheet: libreoffice-calc.desktop
+    application/rtf: libreoffice-writer.desktop
+    application/xhtml+xml: helium-kenp.desktop
     image/jpg: imv-dir.desktop
+    image/vnd.microsoft.icon: imv-dir.desktop
+    application/msword: libreoffice-writer.desktop
+    video/webm: mpv.desktop
+    application/zip: nemo.desktop
+    x-scheme-handler/discord: webcord.desktop
+    video/mpeg: mpv.desktop
+    application/vnd.ms-excel: libreoffice-calc.desktop
+    application/*tar: nemo.desktop
+    audio/mpeg: mpv.desktop
+    audio/x-matroska: mpv.desktop
+    video/ogg: mpv.desktop
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: libreoffice-calc.desktop
+    x-scheme-handler/https: helium-kenp.desktop
+    application/vnd.openxmlformats-officedocument.presentationml.presentation: libreoffice-impress.desktop
+    x-scheme-handler/unknown: helium-kenp.desktop
+    audio/ogg: mpv.desktop
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document: libreoffice-writer.desktop
+    x-scheme-handler/http: helium-kenp.desktop
     image/png: imv-dir.desktop
     image/svg+xml: imv-dir.desktop
-    image/tiff: imv-dir.desktop
-    image/vnd.microsoft.icon: imv-dir.desktop
-    image/webp: imv-dir.desktop
-    audio/aac: mpv.desktop
-    audio/mpeg: mpv.desktop
-    audio/ogg: mpv.desktop
-    audio/opus: mpv.desktop
-    audio/wav: mpv.desktop
-    audio/webm: mpv.desktop
-    audio/x-matroska: mpv.desktop
     video/mp2t: mpv.desktop
-    video/mp4: mpv.desktop
-    video/mpeg: mpv.desktop
-    video/ogg: mpv.desktop
-    video/webm: mpv.desktop
-    video/x-flv: mpv.desktop
-    video/x-matroska: mpv.desktop
     video/x-msvideo: mpv.desktop
-    inode/directory: nemo.desktop
-    application/vnd.oasis.opendocument.text: libreoffice-writer.desktop
-    application/vnd.oasis.opendocument.spreadsheet: libreoffice-calc.desktop
-    application/vnd.oasis.opendocument.presentation: libreoffice-impress.desktop
-    application/vnd.openxmlformats-officedocument.wordprocessingml.document: libreoffice-writer.desktop
-    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: libreoffice-calc.desktop
-    application/vnd.openxmlformats-officedocument.presentationml.presentation: libreoffice-impress.desktop
-    application/msword: libreoffice-writer.desktop
-    application/vnd.ms-excel: libreoffice-calc.desktop
-    application/vnd.ms-powerpoint: libreoffice-impress.desktop
-    application/rtf: libreoffice-writer.desktop
-    application/pdf: org.pwmt.zathura.desktop
-    application/zip: nemo.desktop
-    application/rar: nemo.desktop
     application/7z: nemo.desktop
-    application/*tar: nemo.desktop
-    x-scheme-handler/discord: webcord.desktop
+    audio/webm: mpv.desktop
+    application/vnd.oasis.opendocument.text: libreoffice-writer.desktop
+    application/rar: nemo.desktop
+    image/webp: imv-dir.desktop
+    audio/opus: mpv.desktop
     x-scheme-handler/mpv: open-in-mpv.desktop
+    video/x-flv: mpv.desktop
+    video/mp4: mpv.desktop
+    x-scheme-handler/about: helium-kenp.desktop
+    text/html: helium-kenp.desktop
+    image/tiff: imv-dir.desktop
+    audio/aac: mpv.desktop
+    application/vnd.oasis.opendocument.presentation: libreoffice-impress.desktop
+    image/gif: imv-dir.desktop
+    image/bmp: imv-dir.desktop
+    audio/wav: mpv.desktop
+    inode/directory: nemo.desktop
+    application/vnd.ms-powerpoint: libreoffice-impress.desktop
+theming:
+  scope: user
+  cursor: null
+  icons: null
+  theme: null
+  dark_or_light: null
+  font: null
+  gtk: null
+  qt: null
+  env_vars: {}
+editor: null
+package_manager: null
+aur_helper: paru
+sync_sudo: false
+auto_commit: false
+nix:
+  enabled: false
+  home_manager_enabled: false
+  flake_enabled: false
+  nixpkgs_channel: nixpkgs-unstable
+  home_manager_channel: release-25.05

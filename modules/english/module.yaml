@@ -1,0 +1,10 @@
+tags:
+- tool
+description: English study app (Android/dev) — Vite dev server systemd user service
+depends_on:
+- base
+dotfiles:
+- source: dotfiles/systemd/user/english-dev.service
+  target: ~/.config/systemd/user/english-dev.service
+post_install_hook: scripts/install.sh
+post_hook_behavior: ask
