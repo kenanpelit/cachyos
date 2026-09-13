@@ -31,7 +31,7 @@ usage() {
 Usage: yt-cookies-youtube [options]
 
 Exports fresh YouTube cookies in Netscape format using yt-dlp's browser extraction.
-Helium/Chromium roots are tried first, then Brave roots as fallback.
+Helium/Chromium roots are tried first, then Chrome, then Brave as fallback.
 
 Options:
   --output PATH   Write cookies to PATH
@@ -183,6 +183,7 @@ declare -a CANDIDATES=(
   "chromium:$HOME/.helium/isolated/helium-youtube.com__-Default"
   "chromium:$HOME/.helium/isolated/Kenp"
   "chromium:$HOME/.config/net.imput.helium"
+  "chrome:$HOME/.chrome/kenp"
   "brave:$HOME/.brave/isolated/Kenp"
   "brave:$HOME/.config/BraveSoftware/Brave-Browser"
 )
@@ -222,7 +223,7 @@ trap 'rm -f "$tmp_cookie"' EXIT
 selected=""
 selected="$(find_browser_source || true)"
 
-[[ -n "$selected" ]] || die "could not extract valid YouTube cookies from Helium/Brave profiles"
+[[ -n "$selected" ]] || die "could not extract valid YouTube cookies from Helium/Chrome/Brave profiles"
 
 if [[ "$mode" == "source" ]]; then
   printf '%s\n' "$selected"
