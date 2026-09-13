@@ -11,19 +11,25 @@
 # ---------------------------------------------------------------------------
 # YouTube Client Settings
 # ---------------------------------------------------------------------------
-# YouTube player client seçimi (Temmuz 2026 durumu, VPN/Mullvad altında test edildi):
-# - android_vr: Captcha'sız ve DRM'siz tek client; PO token istemeden VP9 1080p
-#   + Opus veriyor. Cookie DESTEKLEMEZ (yaş kısıtlı videolarda tek başına yetmez).
-# - tv: Cookie destekli yedek (yaş kısıtı vb. için); ancak YouTube'un 2026 DRM
-#   yayılımı yüzünden birçok videoda "drm protected" diyor.
+# YouTube player client seçimi — ELDEN BIRAKILDI (Eylül 2026).
 #
-# Bilinçli olarak DIŞARIDA bırakılanlar:
-# - web/web_safari/mweb: VPN çıkış IP'lerinde "captcha challenge" ile bloklanıyor;
-#   VPN dışında da GVS PO token olmadan gerçek format vermiyor ("only images").
-#   PO token sağlayıcısı (bgutil-ytdlp-pot-provider) kurulursa tekrar eklenebilir.
-# - android_sdkless: Bu yt-dlp sürümünden kaldırıldı ("Skipping unsupported client").
-# - tv_simply: PO token'sız yalnızca format 18 (360p) veriyor.
---extractor-args "youtube:player_client=android_vr,tv"
+# Temmuz 2026'da burada `--extractor-args "youtube:player_client=android_vr,tv"`
+# sabitlenmişti (android_vr = captcha'sız/DRM'siz/PO tokensız VP9 1080p; tv =
+# cookie destekli yedek). yt-dlp 2026.08.19 sürümüyle YouTube android_vr için de
+# GVS PO Token istemeye başladı VE bu sürüm android_vr'ı zaten varsayılan client
+# listesinden çıkardı — sabit kombomuz ikisi de artık format vermiyordu
+# ("Requested format is not available").
+#
+# yt-dlp'nin KENDİ güncel varsayılanı (bu override olmadan) hâlâ Mullvad altında
+# ve cookie'yle sorunsuz çalışıyor — yeni eklenen `visionos` client'ı seçip
+# PO token/captcha/DRM olmadan 1080p+opus veriyor (doğrulandı). YouTube'un
+# client gereksinimleri ayda bir değiştiği için yt-dlp'nin kendi (aktif olarak
+# güncellenen) varsayılan seçimine güvenmek, burada sabit bir client listesini
+# elle takip etmekten daha sağlam — bir sonraki kırılmada yt-dlp güncellemesi
+# kendiliğinden düzeltiyor, bu dosyanın tekrar güncellenmesini beklemiyor.
+#
+# Yine de manuel override gerekirse (örn. PO token sağlayıcısı kurulursa "web"
+# tekrar denenebilir): --extractor-args "youtube:player_client=..."
 
 # YouTube extraction without a JS runtime has been deprecated; this avoids missing formats.
 --js-runtimes "deno"
