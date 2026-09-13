@@ -428,6 +428,8 @@ bluetooth:
   autoconnect_enabled: true
   autoconnect_delay_secs: 10
   devices:
+  - mac: 00:7F:1D:22:4C:18
+    name: SLP5
   - mac: F4:9D:8A:3D:CB:30
     name: SLP4
   - mac: E8:EE:CC:4D:29:00
