@@ -1,0 +1,4 @@
+description: English (Android/dev) — Vite dev server runtime
+packages:
+  - nodejs
+  - npm
