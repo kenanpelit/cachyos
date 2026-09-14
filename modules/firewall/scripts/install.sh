@@ -46,6 +46,9 @@ AUDIOBOOKSHELF_ALLOWED_SUBNETS="${AUDIOBOOKSHELF_ALLOWED_SUBNETS:-}"
 ALLOW_ENGLISH_HTTPS_PORT="${ALLOW_ENGLISH_HTTPS_PORT:-0}"
 ENGLISH_HTTPS_PORT="${ENGLISH_HTTPS_PORT:-8443}"
 ENGLISH_HTTPS_ALLOWED_SUBNETS="${ENGLISH_HTTPS_ALLOWED_SUBNETS:-}"
+ALLOW_LOCALSEND_PORT="${ALLOW_LOCALSEND_PORT:-0}"
+LOCALSEND_PORT="${LOCALSEND_PORT:-53317}"
+LOCALSEND_ALLOWED_SUBNETS="${LOCALSEND_ALLOWED_SUBNETS:-}"
 
 if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw --force reset
@@ -103,6 +106,20 @@ if command -v ufw >/dev/null 2>&1; then
       done
     else
       ${SUDO} ufw allow "${ENGLISH_HTTPS_PORT}/tcp"
+    fi
+  fi
+
+  if [ "${ALLOW_LOCALSEND_PORT}" = "1" ]; then
+    if [ -n "${LOCALSEND_ALLOWED_SUBNETS// /}" ]; then
+      IFS=', ' read -r -a localsend_subnets <<< "${LOCALSEND_ALLOWED_SUBNETS}"
+      for subnet in "${localsend_subnets[@]}"; do
+        [ -n "${subnet}" ] || continue
+        ${SUDO} ufw allow from "${subnet}" to any port "${LOCALSEND_PORT}" proto udp
+        ${SUDO} ufw allow from "${subnet}" to any port "${LOCALSEND_PORT}" proto tcp
+      done
+    else
+      ${SUDO} ufw allow "${LOCALSEND_PORT}/udp"
+      ${SUDO} ufw allow "${LOCALSEND_PORT}/tcp"
     fi
   fi
 
