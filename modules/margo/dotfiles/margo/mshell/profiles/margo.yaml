@@ -17,7 +17,7 @@ general:
 theme:
   icons:
     app_icon_theme: kora
-  theme: OneMargo
+  theme: Margo
   apps:
     helium:
       enabled: true
@@ -336,7 +336,7 @@ launcher:
     args: ''
     working_dir: ''
   - name: start-spotify
-    enabled: true
+    enabled: false
     delay_secs: 8
     trigger: LoginOnce
     args: ''
@@ -390,6 +390,12 @@ launcher:
     args: ''
     working_dir: ''
   - name: start-eng
+    enabled: false
+    delay_secs: 15
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
+  - name: start-eng pwa
     enabled: true
     delay_secs: 15
     trigger: LoginOnce
