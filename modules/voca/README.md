@@ -90,7 +90,9 @@ voca-doctor
 
 Kontroller: oturum/`wtype`/`input` grubu, pywhispercpp sağlayıcısı ve **AVX2/FMA sayısı**,
 Vulkan cihazı, `onnxruntime`, seçili model + dosya, **xe watchdog** olayları, vocalinux'un
-**boştaki CPU'su**. Sağlıklı sistemde beklenen: `sorun yok`.
+**boştaki CPU'su** ve **çalışan sürecin yüklediği modelin config'le uyuşup uyuşmadığı** (vocalinux config'i
+yalnızca başlarken okur; süreç çalışırken config'i değiştirmek sessizce boşa gider → `✗ … yeniden başlat`).
+Sağlıklı sistemde beklenen: `sorun yok`.
 
 Vocalinux logunda da şunları görmelisin (tray → Logs veya terminalden `vocalinux`):
 
@@ -147,7 +149,11 @@ voca-model save small   # ya da adını ver (yeni profil için: kendi adın)
 config'i geri yazdığı için) → **yalnızca 3 model anahtarını** (`model_size`,
 `whisper_cpp_model_size`, `whisper_cpp_model_variant`) canlı config'e işler; kısayol, ses aygıtı vb.
 ayarların olduğu gibi kalır → önceki config'i `config.json.bak-voca-model`'e yedekler → vocalinux'u
-yeniden başlatır (çıktısı `~/.local/state/voca/vocalinux.log`).
+yeniden başlatır ve **logdan gerçekten hangi modelin yüklendiğini yazar** (`yüklendi: …ggml-….bin`).
+
+Vocalinux boot'ta **systemd birimi** olarak çalışıyorsa (aşağıya bak) `voca-model` süreci `kill`
+etmek yerine `systemctl --user stop/start app-vocalinux@autostart.service` kullanır; elle
+başlatılmışsa süreci durdurup yeniden başlatır (çıktısı `~/.local/state/voca/vocalinux.log`).
 
 Yeni profil: vocalinux'ta modeli değiştirip ayarla, sonra `voca-model save <ad>`. Profillerde gizli
 bilgi yoktur (`remote_api_key` boş); uzak API anahtarı girersen o profili repoya alma.
@@ -168,6 +174,24 @@ süreler ve transkripti gösterir. Test kaydı: `espeak-ng` varsa Türkçe konu�
 sessizlik (yalnızca encoder). Kendi kaydınla: `--bench --clip kayit.wav MODEL…`; yalnızca Vulkan:
 `VOCA_BENCH_BACKENDS=vulkan voca-doctor --bench …` (CPU'da büyük modeller dakikalar sürer).
 
+## Boot'ta otomatik başlama
+
+Vocalinux ilk çalışmada kendi XDG autostart girdisini oluşturur (`~/.config/autostart/vocalinux.desktop`,
+`Exec=/usr/bin/vocalinux --start-minimized`). Bu oturumda uygulamaları margo'nun kendi autostart'ı
+(`margo-autostart-*.scope`) başlatır, ama XDG girdilerini **systemd** işler:
+`systemd-xdg-autostart-generator` girdiden `app-vocalinux@autostart.service` üretir.
+
+```bash
+systemctl --user status app-vocalinux@autostart.service      # durum
+journalctl --user -u app-vocalinux@autostart.service -f      # log
+systemctl --user restart app-vocalinux@autostart.service     # yeniden başlat
+```
+
+> **Tuzak (düzeltildi):** süreç `python /usr/bin/vocalinux --start-minimized` komut satırıyla çalışır.
+> Sonu `$` ile sabitlenmiş bir `pgrep -f '/usr/bin/vocalinux$'` bunu **kaçırır** ve script'ler
+> "çalışmıyor" sanıp config'e dokunurdu (vocalinux çıkışta config'i geri yazdığı için değişiklik
+> sessizce kaybolurdu). `scripts/lib.sh` → `voca_pid()` artık süreç adına (`pgrep -x vocalinux`) bakar.
+
 ## Bakım
 
 - **Python'un minör sürümü yükselince** (ör. 3.14 → 3.15) `_pywhispercpp.cpython-314-….so` ABI'si
@@ -186,6 +210,7 @@ sessizlik (yalnızca encoder). Kendi kaydınla: `--bench --clip kayit.wav MODEL�
 | `vk::Queue::submit: ErrorDeviceLost`, `journalctl -k` → `Timedout job` | iGPU watchdog'u; model çok ağır. `large-v3-turbo-q5_0` veya `small` kullan. |
 | Boşta %100+ CPU | Takılmış transkripsiyon ya da SIMD'siz derleme. `voca-doctor`; `voca-build --force`; vocalinux'u yeniden başlat. |
 | Sessizlikte "Altyazı M.K." / uydurma cümle | Neural VAD kapalı → `python-onnxruntime-cpu` kurulu mu? Logda `Using Silero neural VAD` görünmeli. |
+| `voca-model` "çalışmıyordu" diyor ama vocalinux çalışıyor | Eski sürüm süreci `--start-minimized` argümanı yüzünden bulamıyordu; düzeltildi (`voca_pid`). Güncel `voca-doctor` süreci ve yüklü modeli gösterir. |
 | Kısayol hiç tepki vermiyor | `input` grubu: `sudo usermod -aG input $USER` + yeniden giriş. Kısayol config'te `right_alt+right_alt` (push-to-talk). |
 | Metin yazılmıyor (Wayland) | `wtype` kurulu mu (`voca-doctor`)? Compositor `virtual-keyboard` protokolünü desteklemeli (margo destekliyor). |
 | `vulkaninfo found no devices` uyarısı | `vulkan-tools` + `vulkan-intel` kurulu olmalı. |

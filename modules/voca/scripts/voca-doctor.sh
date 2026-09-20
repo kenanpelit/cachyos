@@ -30,6 +30,7 @@ hdr()  { printf '\n%s== %s ==%s\n' "$C_DIM" "$*" "$C_RST"; }
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/vocalinux/config.json"
 MODELS="${XDG_DATA_HOME:-$HOME/.local/share}/vocalinux/models/whispercpp"
+RUN_LOG="${XDG_STATE_HOME:-$HOME/.local/state}/voca/vocalinux.log"
 
 # ── --bench ────────────────────────────────────────────────────────────────
 bench() {
@@ -180,15 +181,32 @@ fi
 
 # ── 6. Süreç ───────────────────────────────────────────────────────────────
 hdr "vocalinux süreci"
-pid="$(pgrep -f '/usr/bin/vocalinux$' | head -1 || true)"
+pid="$(voca_pid)"
 if [[ -z $pid ]]; then
-  say "  çalışmıyor (vocalinux ile başlat)"
+  say "  çalışmıyor (başlat: systemctl --user start $VOCA_UNIT  ya da  vocalinux)"
 else
+  voca_unit_active && say "  systemd birimi: $VOCA_UNIT (boot'ta autostart ile başlar)"
   cpu="$(top -b -n2 -d1 -p "$pid" 2>/dev/null | tail -1 | awk '{print int($9)}')"
   if (( ${cpu:-0} > 50 )); then
     bad "pid $pid boşta %${cpu} CPU yiyor — takılmış transkripsiyon ya da SIMD'siz derleme (yeniden başlat)"
   else
     ok "pid $pid boşta (%${cpu:-0} CPU)"
+  fi
+
+  # Çalışan süreç config'teki modeli mi yüklemiş? Vocalinux config'i yalnızca başlarken okur ve
+  # çıkışta geri yazar; süreç çalışırken config'i değiştirmek sessizce boşa gider (yeniden başlat).
+  loaded=""
+  if voca_unit_active; then
+    loaded="$(journalctl --user -u "$VOCA_UNIT" -b --no-pager 2>/dev/null | grep 'Using model=' | tail -1 | sed -E 's/.*Using model=([^ ]+).*/\1/')"
+  elif [[ -f $RUN_LOG ]]; then
+    loaded="$(grep 'Using model=' "$RUN_LOG" 2>/dev/null | tail -1 | sed -E 's/.*Using model=([^ ]+).*/\1/')"
+  fi
+  if [[ -n $loaded && -n ${model:-} ]]; then
+    if [[ $loaded == "$model" ]]; then
+      ok "çalışan süreç config'teki modeli yüklemiş ($loaded)"
+    else
+      bad "çalışan süreç '$loaded' yüklemiş ama config'te '$model' yazıyor → yeniden başlat: systemctl --user restart $VOCA_UNIT"
+    fi
   fi
 fi
 

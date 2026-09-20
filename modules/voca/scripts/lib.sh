@@ -4,6 +4,24 @@
 
 VOCA_PKG="python-pywhispercpp-vulkan"
 
+# Boot'ta vocalinux'u başlatan systemd birimi (XDG autostart → systemd-xdg-autostart-generator).
+VOCA_UNIT="app-vocalinux@autostart.service"
+
+# Çalışan vocalinux sürecinin pid'i (yoksa boş).
+# Komut satırından bağımsız olmalı: autostart `python /usr/bin/vocalinux --start-minimized`
+# ile başlatır, elle çalıştırınca argümansızdır; sonu `$` ile sabitlenmiş bir `pgrep -f`
+# deseni ilkini kaçırır (bu yüzden "çalışmıyor" sanılıp config'e dokunulmuştu).
+# Önce süreç adı (comm=vocalinux), olmazsa komut satırının başından eşleş.
+voca_pid() {
+  local p
+  p="$(pgrep -x vocalinux 2>/dev/null | head -1)"
+  [[ -n $p ]] || p="$(pgrep -f '^/usr/bin/python[0-9.]* /usr/bin/vocalinux( |$)' 2>/dev/null | head -1)"
+  printf '%s' "$p"
+}
+
+# vocalinux şu an systemd birimi olarak mı çalışıyor?
+voca_unit_active() { systemctl --user is-active --quiet "$VOCA_UNIT" 2>/dev/null; }
+
 # Symlink ile ~/.local/bin'e bağlansa bile modülün gerçek dizinini bul.
 voca_module_dir() {
   local src="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"

@@ -57,7 +57,7 @@ list_profiles() {
 
 stop_vocalinux() {
   local pid i
-  pid="$(pgrep -f '/usr/bin/vocalinux$' | head -1 || true)"
+  pid="$(voca_pid)"
   [[ -n $pid ]] || return 1
   info "vocalinux durduruluyor (pid $pid)…"
   kill "$pid"
@@ -66,6 +66,26 @@ stop_vocalinux() {
   kill -9 "$pid" 2>/dev/null || true
   sleep 1
   return 0
+}
+
+# Yeniden başlattıktan sonra vocalinux'un gerçekten hangi modeli yüklediğini logdan göster
+# (sessiz başarısızlığı yakalamak için). wait_model_loaded <managed:true|false> <since>
+wait_model_loaded() {
+  local managed="$1" since="$2" line i src
+  if [[ $managed == true ]]; then src="journalctl --user -u $VOCA_UNIT"; else src="$RUN_LOG"; fi
+  for i in $(seq 1 30); do
+    if [[ $managed == true ]]; then
+      line="$(journalctl --user -u "$VOCA_UNIT" --since "$since" --no-pager 2>/dev/null | grep -m1 'whisper.cpp model file:' || true)"
+    else
+      line="$(grep -m1 'whisper.cpp model file:' "$RUN_LOG" 2>/dev/null || true)"
+    fi
+    if [[ -n $line ]]; then
+      info "yüklendi: ${line##*model file: }"
+      return 0
+    fi
+    sleep 1
+  done
+  say "${C_WARN}!${C_RST} 30 sn içinde model yükleme satırı görünmedi; bak: $src" >&2
 }
 
 apply_profile() {
@@ -80,8 +100,16 @@ apply_profile() {
     exit 1
   fi
 
-  local was_running=false
-  stop_vocalinux && was_running=true
+  local was_running=false managed=false start_ts
+  if voca_unit_active; then
+    # Boot'ta autostart ile başlamış: birimi durdur/başlat (süreci kill edip setsid ile yeniden
+    # açmak birimi "ölü" bırakır ve `--start-minimized` gibi başlatma argümanlarını kaybettirir).
+    managed=true; was_running=true
+    info "vocalinux systemd birimiyle çalışıyor ($VOCA_UNIT) — durduruluyor…"
+    systemctl --user stop "$VOCA_UNIT"
+  elif stop_vocalinux; then
+    was_running=true
+  fi
 
   cp -f "$CONFIG" "$CONFIG.bak-voca-model"   # vocalinux çıkışta config'i yeniden yazar; durduktan SONRA düzenle
   python - "$CONFIG" "$pf" <<'PY'
@@ -95,11 +123,18 @@ PY
   say "${C_OK}✓${C_RST} profil uygulandı: $p → $m   (önceki config: $CONFIG.bak-voca-model)"
 
   if $was_running; then
-    mkdir -p "$(dirname "$RUN_LOG")"
-    setsid -f vocalinux >"$RUN_LOG" 2>&1
-    info "vocalinux yeniden başlatıldı; model yüklenirken birkaç sn sürer. Log: $RUN_LOG"
+    start_ts="$(date '+%Y-%m-%d %H:%M:%S')"
+    if $managed; then
+      systemctl --user start "$VOCA_UNIT"
+      info "vocalinux birimi başlatıldı; log: journalctl --user -u $VOCA_UNIT"
+    else
+      mkdir -p "$(dirname "$RUN_LOG")"
+      setsid -f vocalinux >"$RUN_LOG" 2>&1
+      info "vocalinux yeniden başlatıldı; log: $RUN_LOG"
+    fi
+    wait_model_loaded "$managed" "$start_ts"
   else
-    info "vocalinux çalışmıyordu; başlatmadım."
+    info "vocalinux çalışmıyordu; başlatmadım (başlat: systemctl --user start $VOCA_UNIT  ya da  vocalinux)."
   fi
 }
 
