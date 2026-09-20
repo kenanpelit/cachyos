@@ -8,7 +8,9 @@
 # --- Genel ayarlar (env ile override edilebilir) --------------------------------
 DEBUG=${DEBUG:-false}
 DEFAULT_VOLUME=${DEFAULT_VOLUME:-15}
-DEFAULT_MIC_VOLUME=${DEFAULT_MIC_VOLUME:-5}
+# %5 (−78 dB) dijital sıfıra iner: `init` her login'de mikrofonu buna çekince vocalinux
+# gibi sesle-yazma araçları hiçbir şey duymuyordu ("Max audio level was only 0.0%").
+DEFAULT_MIC_VOLUME=${DEFAULT_MIC_VOLUME:-50}
 VOLUME_STEP=${VOLUME_STEP:-5}
 NOTIFICATION_TIMEOUT=${NOTIFICATION_TIMEOUT:-3000}
 ENABLE_ICONS=${ENABLE_ICONS:-true}
