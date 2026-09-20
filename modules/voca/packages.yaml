@@ -1,0 +1,20 @@
+description: Vocalinux runtime + Vulkan/ses yazma bağımlılıkları (pywhispercpp modülün kendi PKGBUILD'inden derlenir)
+
+packages:
+  # Uygulama (AUR). python-pywhispercpp bağımlılığı, pre-install hook'unun
+  # önceden kurduğu python-pywhispercpp-vulkan (provides) ile karşılanır.
+  - vocalinux
+  # Vulkan çalışma zamanı — Intel Arc iGPU (vulkan-radeon: AMD için).
+  - vulkan-icd-loader
+  - vulkan-intel
+  - vulkan-tools
+  # Neural VAD (Silero). Sanal "python-onnxruntime" yerine açık -cpu varyantı:
+  # sanal paket pacman'da etkileşimli sağlayıcı seçtirir.
+  - python-onnxruntime-cpu
+  # Wayland'de metin yazma / pano + X11(XWayland) yedeği.
+  - wtype
+  - wl-clipboard
+  - xdotool
+  # voca-build (objdump) ve voca-doctor --bench (ffmpeg) için.
+  - binutils
+  - ffmpeg

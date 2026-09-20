@@ -76,6 +76,7 @@ enabled_modules:
 - ai
 - xdg-mimes
 - english
+- voca
 packages: []
 exclude: []
 additional_packages: []

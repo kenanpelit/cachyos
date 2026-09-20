@@ -1,0 +1,18 @@
+tags:
+- tool
+- ai
+description: Vocalinux (yerel sesle yazma) — Vulkan+AVX2 derlenmiş whisper.cpp ile
+depends_on:
+- base
+# Paketlerden ÖNCE: python-pywhispercpp-vulkan'ı derle/kur (vocalinux'un
+# python-pywhispercpp bağımlılığı AUR'un AVX2'siz -cpu paketiyle karşılanmasın).
+# İdempotent: zaten sağlıklıysa saniyeler içinde çıkar.
+pre_install_hook: scripts/install.sh
+pre_hook_behavior: always
+dotfiles:
+- source: scripts/build-pywhispercpp.sh
+  target: ~/.local/bin/voca-build
+- source: scripts/voca-doctor.sh
+  target: ~/.local/bin/voca-doctor
+- source: scripts/voca-model.sh
+  target: ~/.local/bin/voca-model

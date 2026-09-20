@@ -1,0 +1,97 @@
+# Maintainer: kenanpelit
+# Based on python-pywhispercpp-cpu (goodroot <hyprwhspr@goodroot.ca>) — AUR.
+#
+# Neden bu paket var?
+# -------------------
+# AUR'daki python-pywhispercpp-{cpu,cuda,rocm} paketleri makepkg altında
+# derlenince ggml'nin CPU çekirdekleri AVX2/FMA OLMADAN (jenerik SSE2) çıkıyor:
+#
+#   * ggml, ortamda SOURCE_DATE_EPOCH tanımlıysa GGML_NATIVE'i otomatik KAPATIR
+#     (reproducible build davranışı) ve makepkg SOURCE_DATE_EPOCH'u HER ZAMAN
+#     tanımlar. Yani /etc/makepkg.conf'taki -march=native fiilen işe yaramaz.
+#   * Sonuç: libggml-cpu.so içinde 0 adet ymm (AVX2) / vfmadd (FMA) komutu;
+#     "base" modeli 0.8 sn'lik kaydı ~27 sn'de çözüyor (normalde < 1 sn).
+#   * "cpu" paketinin Vulkan'ı yok; Intel Arc iGPU hiç kullanılmıyor.
+#
+# Bu PKGBUILD:
+#   1. -DGGML_NATIVE=ON  -> CPU çekirdeklerini bu makinenin ISA'sına (AVX2,
+#      AVX_VNNI, FMA, BMI2, F16C...) göre derler (SOURCE_DATE_EPOCH tuzağını aşar).
+#   2. -DGGML_VULKAN=ON  -> libggml-vulkan.so üretir. vocalinux backend'i
+#      "Vulkan -> CUDA -> CPU" sırasıyla seçtiği için iGPU otomatik kullanılır.
+#
+# Not: derleme bu makineye özeldir (-march=native). Paketi başka bir CPU'ya
+# taşıma; orada yeniden derle (voca-build).
+
+pkgname=python-pywhispercpp-vulkan
+pkgver=1.4.0
+pkgrel=1
+pkgdesc="Python bindings for whisper.cpp (Vulkan + native-CPU build)"
+arch=('x86_64')
+url="https://github.com/Absadiki/pywhispercpp"
+license=('MIT')
+options=('!strip')
+depends=(
+  'python'
+  'python-numpy'
+  'python-requests'
+  'python-tqdm'
+  'python-platformdirs'
+  'vulkan-icd-loader'
+)
+makedepends=(
+  'cmake'
+  'ninja'
+  'python-build'
+  'python-installer'
+  'python-wheel'
+  'python-setuptools'
+  'python-setuptools-scm'
+  'git'
+  'vulkan-headers'
+  'shaderc'
+  'spirv-headers'
+)
+optdepends=(
+  'vulkan-intel: Vulkan sürücüsü (Intel Arc / Xe iGPU)'
+  'vulkan-radeon: Vulkan sürücüsü (AMD)'
+  'vulkan-tools: vocalinux'"'"'un GPU seçimi için vulkaninfo'
+)
+provides=('python-pywhispercpp')
+conflicts=('python-pywhispercpp' 'python-pywhispercpp-cpu' 'python-pywhispercpp-cuda' 'python-pywhispercpp-rocm')
+# Commit sabit: vocalinux 0.17.x ile test edilen sürüm (pywhispercpp 1.4.x + whisper.cpp 1.8.2)
+source=("git+https://github.com/Absadiki/pywhispercpp.git#commit=4ab96165f84e8eb579077dfc3d0476fa5606affe")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$srcdir/pywhispercpp"
+  git submodule update --init --recursive
+
+  # CMake, izole build ortamının python'unu çalıştıramıyor: sistem python'unu zorla.
+  python << 'EOF'
+import re
+_system_python = "/usr/bin/python"
+with open("setup.py", "r") as f:
+    content = f.read()
+content = re.sub(
+    r'f"-DPYTHON_EXECUTABLE=\{sys\.executable\}"',
+    f'f"-DPYTHON_EXECUTABLE={_system_python}"',
+    content
+)
+with open("setup.py", "w") as f:
+    f.write(content)
+EOF
+}
+
+build() {
+  cd "$srcdir/pywhispercpp"
+  # GGML_VULKAN=1 -> pywhispercpp'in setup.py'si Vulkan backend'ini açar.
+  export GGML_VULKAN=1
+  # GGML_NATIVE=ON: SOURCE_DATE_EPOCH tuzağına karşı AÇIKÇA belirtilmeli (yukarı bak).
+  export CMAKE_ARGS="-DPYTHON_EXECUTABLE=/usr/bin/python -DPython3_EXECUTABLE=/usr/bin/python -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=ON -DGGML_VULKAN=ON"
+  python -m build --wheel
+}
+
+package() {
+  cd "$srcdir/pywhispercpp"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+}
