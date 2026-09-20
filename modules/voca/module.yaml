@@ -9,6 +9,13 @@ depends_on:
 # İdempotent: zaten sağlıklıysa saniyeler içinde çıkar.
 pre_install_hook: scripts/install.sh
 pre_hook_behavior: always
+# Paketlerden SONRA: kurulumu doğrula (voca-doctor özeti). Bilgilendirici; sync'i asla bozmaz.
+post_install_hook: scripts/post-install.sh
+post_hook_behavior: always
+# mdots hook'ları varsayılan olarak `sudo bash hook` (ROOT, HOME=/root) çalıştırır. Hook'larımız
+# kullanıcı bağlamı ister (makepkg root'ta çalışmaz; doctor kullanıcının gruplarını/config'ini
+# kontrol eder) → `sudo -u $USER bash hook`.
+run_hooks_as_user: true
 dotfiles:
 - source: scripts/build-pywhispercpp.sh
   target: ~/.local/bin/voca-build

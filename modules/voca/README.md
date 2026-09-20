@@ -20,6 +20,7 @@ modules/voca/
 ├── pkgbuild/python-pywhispercpp-vulkan/PKGBUILD   # Vulkan + native-CPU derleme tarifi
 ├── scripts/
 │   ├── install.sh                   # pre-install hook (idempotent; gerekirse derler)
+│   ├── post-install.sh              # post-install hook (voca-doctor özeti; sync'i bozmaz)
 │   ├── build-pywhispercpp.sh        # → ~/.local/bin/voca-build  (derle + doğrula + kur)
 │   ├── voca-doctor.sh               # → ~/.local/bin/voca-doctor (sağlık kontrolü + benchmark)
 │   ├── voca-model.sh                # → ~/.local/bin/voca-model  (model profilini değiştir/yedekle)
@@ -58,6 +59,14 @@ Akış (sıra önemli):
    kurulu olunca bağımlılık onunla sağlanır.
 2. `packages.yaml`: `vocalinux`, Vulkan çalışma zamanı, `python-onnxruntime-cpu`, `wtype` vb.
 3. `dotfiles`: `voca-build`, `voca-doctor` ve `voca-model` → `~/.local/bin`.
+4. **post-install hook** (`scripts/post-install.sh`): `voca-doctor`'ı çalıştırıp yalnızca sorun/uyarı
+   satırlarını ve özeti basar. Bilgilendiricidir, sync'i asla başarısız etmez. (mdots, `scripts/`
+   dizini olan modülde `post_install_hook` yoksa uyarı verir; bu hook aynı zamanda onu karşılar.)
+
+> **Hook'lar kullanıcı olarak çalışır** (`module.yaml` → `run_hooks_as_user: true`). mdots'un
+> varsayılanı `sudo bash hook` yani **root**'tur: `makepkg` root'ta çalışmaz, `voca-doctor` da root'un
+> `HOME`'una/gruplarına bakıp sahte alarm verirdi (`input grubunda değilsin`, `config yok`…).
+> `sudo -u` ortamı sıfırladığı için doctor oturum tipini `loginctl`'den de okuyabilir.
 
 ### Elle
 

@@ -91,7 +91,13 @@ fi
 
 # ── 1. Oturum ve kısayol/yazma izinleri ────────────────────────────────────
 hdr "Oturum"
-sess="${XDG_SESSION_TYPE:-?}"
+sess="${XDG_SESSION_TYPE:-}"
+if [[ -z $sess ]]; then
+  # mdots hook'u `sudo -u` ile çalışır ve ortamı sıfırlar; oturum tipini loginctl'den al.
+  sid="$(loginctl list-sessions --no-legend 2>/dev/null | awk -v u="$USER" '$3==u {print $1; exit}')"
+  [[ -n $sid ]] && sess="$(loginctl show-session "$sid" -p Type --value 2>/dev/null)"
+fi
+sess="${sess:-?}"
 say "  oturum: $sess"
 if [[ $sess == wayland ]]; then
   command -v wtype >/dev/null && ok "wtype var (Wayland metin yazma)" || bad "wtype yok — Wayland'de metin yazılamaz (pacman -S wtype)"
