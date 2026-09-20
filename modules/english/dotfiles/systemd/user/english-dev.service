@@ -1,19 +1,19 @@
 [Unit]
 Description=English (Android/dev) - Vite geliştirme sunucusu
-Documentation=file:%h/Music/Eng/android/BUILDING.md
+Documentation=file:%h/.eng/android/BUILDING.md
 After=network-online.target
 Wants=network-online.target
 # node_modules yoksa servis başlamaz (önce npm install çalıştırın)
-ConditionPathExists=%h/Music/Eng/android/node_modules/.bin/vite
+ConditionPathExists=%h/.eng/android/node_modules/.bin/vite
 
 [Service]
 Type=exec
-WorkingDirectory=%h/Music/Eng/android
+WorkingDirectory=%h/.eng/android
 
 # Port değiştirmek için  systemctl --user edit english-dev.service
 # ile bir drop-in ekleyip Environment satırını override edin.
 Environment=PORT=5174
-ExecStart=%h/Music/Eng/android/node_modules/.bin/vite --port ${PORT} --strictPort
+ExecStart=%h/.eng/android/node_modules/.bin/vite --port ${PORT} --strictPort
 
 Restart=on-failure
 RestartSec=2

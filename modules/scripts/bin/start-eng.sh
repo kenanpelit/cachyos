@@ -32,7 +32,7 @@ Kullanım: start-eng.sh [pwa] [tarayıcı parametreleri...]
 
 Site/sunucu kapalıysa ilgili systemd servisi başlatılır ve hazır olması
 beklenir. Servisler modüler kurulumla gelir: modules/english (dev) ve
-Eng/site/deploy (pwa).
+~/.eng/site/deploy (pwa).
 
 Renkleri kapatmak için NO_COLOR=1 kullanabilirsin.
 HELP
