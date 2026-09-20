@@ -22,7 +22,7 @@ modules/voca/
 │   ├── install.sh                   # pre-install hook (idempotent; gerekirse derler)
 │   ├── post-install.sh              # post-install hook (voca-doctor özeti; sync'i bozmaz)
 │   ├── build-pywhispercpp.sh        # → ~/.local/bin/voca-build  (derle + doğrula + kur)
-│   ├── voca-doctor.sh               # → ~/.local/bin/voca-doctor (sağlık kontrolü + benchmark)
+│   ├── voca-doctor.sh               # → ~/.local/bin/voca-doctor (sağlık kontrolü + mikrofon + benchmark)
 │   ├── voca-model.sh                # → ~/.local/bin/voca-model  (model profilini değiştir/yedekle)
 │   └── lib.sh                       # ortak yardımcılar
 └── README.md
@@ -89,7 +89,8 @@ voca-doctor
 ```
 
 Kontroller: oturum/`wtype`/`input` grubu, pywhispercpp sağlayıcısı ve **AVX2/FMA sayısı**,
-Vulkan cihazı, `onnxruntime`, seçili model + dosya, **xe watchdog** olayları, vocalinux'un
+Vulkan cihazı, `onnxruntime`, **mikrofon** (varsayılan giriş aygıtı, mute, seviye, sessiz kayıt
+oturumları — aşağıya bak), seçili model + dosya, **xe watchdog** olayları, vocalinux'un
 **boştaki CPU'su** ve **çalışan sürecin yüklediği modelin config'le uyuşup uyuşmadığı** (vocalinux config'i
 yalnızca başlarken okur; süreç çalışırken config'i değiştirmek sessizce boşa gider → `✗ … yeniden başlat`).
 Sağlıklı sistemde beklenen: `sorun yok`.
@@ -100,6 +101,35 @@ Vocalinux logunda da şunları görmelisin (tray → Logs veya terminalden `voca
 Using Silero neural VAD
 Using Vulkan GPU [0]: Intel(R) Arc(tm) Graphics (MTL)
 whisper.cpp model file: …/ggml-small.bin (465.0 MB)      # ya da ggml-large-v3-turbo-q5_0.bin (turbo profili)
+```
+
+## Mikrofon
+
+Vocalinux "system default" giriş aygıtını kullanır. Mikrofondan sinyal gelmezse **süreç sağlıklı
+görünür ama hiçbir şey yazılmaz**; tek iz logdaki şu satırdır:
+
+```
+WARNING - No speech detected during session. Max audio level was only 0.0%.
+```
+
+Bu makinede bunun nedeni **seviyeydi**: `margo-audio-init.service` → `osc-soundctl init` her login'de
+mikrofonu `%5`'e çekiyordu (`DEFAULT_MIC_VOLUME=5`). `%5` = **−78 dB**, 16-bit bir mikrofon sinyali
+bu seviyede dijital sıfıra iner. Elle yükseltmek reboot'a kadar işe yarar, sonra geri düşerdi.
+Varsayılan `modules/scripts/bin/osc-soundctl.sh` içinde **%50**'ye çıkarıldı (`init` ve mikrofon
+unmute yedeğinde kullanılır; env ile geçersiz kılınabilir: `DEFAULT_MIC_VOLUME=…`).
+
+`voca-doctor` artık şunları yakalar (`✗` = dikte çalışmaz):
+
+| Kontrol | Sonuç |
+|---------|-------|
+| Varsayılan giriş bir **monitör** (`….monitor`, hoparlör çıkışı) | ✗ mikrofon değil |
+| Mikrofon **muted** | ✗ |
+| Seviye **< %20** | ✗ sinyal dijital sıfıra iner |
+| Son 30 dk'da vocalinux `Max audio level 0.0%` ile biten oturumlar | ! uyarı |
+
+```bash
+voca-doctor --mic        # varsayılan mikrofonu aç (unmute) + %50
+voca-doctor --mic 70     # ya da istediğin yüzde (1-100)
 ```
 
 ## Model seçimi
@@ -211,6 +241,7 @@ systemctl --user restart app-vocalinux@autostart.service     # yeniden başlat
 | Boşta %100+ CPU | Takılmış transkripsiyon ya da SIMD'siz derleme. `voca-doctor`; `voca-build --force`; vocalinux'u yeniden başlat. |
 | Sessizlikte "Altyazı M.K." / uydurma cümle | Neural VAD kapalı → `python-onnxruntime-cpu` kurulu mu? Logda `Using Silero neural VAD` görünmeli. |
 | `voca-model` "çalışmıyordu" diyor ama vocalinux çalışıyor | Eski sürüm süreci `--start-minimized` argümanı yüzünden bulamıyordu; düzeltildi (`voca_pid`). Güncel `voca-doctor` süreci ve yüklü modeli gösterir. |
+| Dikte hiçbir şey yazmıyor; logda `Max audio level was only 0.0%` | Mikrofon seviyesi/mute/yanlış aygıt. `voca-doctor` (Mikrofon bölümü) → `voca-doctor --mic`. Reboot'ta tekrar düşüyorsa `osc-soundctl init` varsayılanına bak (`DEFAULT_MIC_VOLUME`, artık %50). |
 | Kısayol hiç tepki vermiyor | `input` grubu: `sudo usermod -aG input $USER` + yeniden giriş. Kısayol config'te `right_alt+right_alt` (push-to-talk). |
 | Metin yazılmıyor (Wayland) | `wtype` kurulu mu (`voca-doctor`)? Compositor `virtual-keyboard` protokolünü desteklemeli (margo destekliyor). |
 | `vulkaninfo found no devices` uyarısı | `vulkan-tools` + `vulkan-intel` kurulu olmalı. |

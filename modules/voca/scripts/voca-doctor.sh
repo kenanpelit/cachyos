@@ -3,6 +3,7 @@
 #
 # Kullanım:
 #   voca-doctor                        tüm kontroller
+#   voca-doctor --mic [YÜZDE]          varsayılan mikrofonu aç (unmute) ve seviyesini ayarla (varsayılan: 50)
 #   voca-doctor --model                model profillerini listele (voca-model'e devreder)
 #   voca-doctor --model small|turbo|large   profile geç (vocalinux yeniden başlar)
 #   voca-doctor --bench small large-v3-turbo-q5_0
@@ -13,8 +14,8 @@
 #   VOCA_BENCH_BACKENDS=vulkan voca-doctor --bench ...   yalnızca Vulkan (varsayılan: vulkan cpu)
 #
 # Kontroller: oturum/kısayol izinleri, pywhispercpp derlemesi (AVX2 + Vulkan),
-# Vulkan cihazı, neural VAD (onnxruntime), seçili model, iGPU watchdog hataları,
-# vocalinux'un boştaki CPU yükü. Çıkış kodu: ✗ varsa 1.
+# Vulkan cihazı, neural VAD (onnxruntime), MİKROFON (varsayılan giriş, mute, seviye, sessiz oturumlar),
+# seçili model, iGPU watchdog hataları, vocalinux'un boştaki CPU yükü. Çıkış kodu: ✗ varsa 1.
 set -uo pipefail
 
 SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
@@ -79,6 +80,22 @@ if [[ "${1:-}" == "--model" ]]; then
   exec "$SCRIPT_DIR/voca-model.sh" "$@"
 fi
 
+# --mic [YÜZDE]: varsayılan giriş aygıtını aç ve seviyesini ayarla.
+# (osc-soundctl init her login'de mikrofonu düşük bir değere çekiyorsa dikte sessiz kalır.)
+if [[ "${1:-}" == "--mic" ]]; then
+  target="${2:-50}"
+  if ! [[ $target =~ ^[0-9]+$ ]] || (( target < 1 || target > 100 )); then
+    say "${C_BAD}yüzde 1-100 arası bir sayı olmalı${C_RST}" >&2; exit 2
+  fi
+  command -v wpctl >/dev/null || { say "${C_BAD}wpctl yok (pipewire)${C_RST}" >&2; exit 1; }
+  wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 0 && wpctl set-volume @DEFAULT_AUDIO_SOURCE@ "${target}%" \
+    || { say "${C_BAD}mikrofon ayarlanamadı (PipeWire çalışıyor mu?)${C_RST}" >&2; exit 1; }
+  d="$(wpctl inspect @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | awk -F'"' '/node.description/ {print $2; exit}')"
+  say "${C_OK}✓${C_RST} mikrofon: ${d:-varsayılan giriş} → %${target}, açık"
+  say "  ${C_DIM}not: osc-soundctl init her login'de mikrofonu DEFAULT_MIC_VOLUME'a (varsayılan %50) ayarlar${C_RST}"
+  exit 0
+fi
+
 if [[ "${1:-}" == "--bench" ]]; then
   shift
   [[ $# -gt 0 ]] || set -- small large-v3-turbo-q5_0
@@ -86,7 +103,7 @@ if [[ "${1:-}" == "--bench" ]]; then
   exit 0
 fi
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-  sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  awk 'NR>1 && /^#/ {sub(/^# ?/,""); print; next} NR>1 {exit}' "${BASH_SOURCE[0]}"
   exit 0
 fi
 
@@ -143,6 +160,41 @@ if python -c 'import onnxruntime' 2>/dev/null; then
   ok "onnxruntime var (Silero neural VAD)"
 else
   warn "onnxruntime yok → kaba genlik VAD'i; sessizlikte halüsinasyon (\"Altyazı M.K.\") artar (pacman -S python-onnxruntime)"
+fi
+
+# ── 3b. Mikrofon (ses girişi) ──────────────────────────────────────────────
+# Vocalinux "system default" giriş aygıtını kullanır. Sinyal yoksa süreç sağlıklı görünür ama
+# hiçbir şey yazılmaz (log: "Max audio level was only 0.0%"): seviye çok düşük (−78 dB → dijital
+# sıfır), mute ya da yanlış aygıt (hoparlör monitörü) tipik nedenlerdir.
+hdr "Mikrofon"
+if command -v wpctl >/dev/null && wpctl get-volume @DEFAULT_AUDIO_SOURCE@ >/dev/null 2>&1; then
+  read -r _ mvol mflag < <(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)
+  mpct="$(awk -v v="$mvol" 'BEGIN{printf "%d", v*100+0.5}')"
+  minfo="$(wpctl inspect @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)"
+  mdesc="$(printf '%s\n' "$minfo" | awk -F'"' '/node.description/ {print $2; exit}')"
+  mnode="$(printf '%s\n' "$minfo" | awk -F'"' '/node.name/ {print $2; exit}')"
+  say "  varsayılan giriş: ${mdesc:-?}  (seviye %${mpct}${mflag:+ $mflag})"
+  if [[ $mnode == *.monitor ]]; then
+    bad "varsayılan giriş bir MONITÖR (hoparlör çıkışı), mikrofon değil → asıl mikrofonu varsayılan yap (wpctl set-default)"
+  elif [[ $mflag == *MUTED* ]]; then
+    bad "mikrofon KAPALI (muted) → voca-doctor --mic"
+  elif (( mpct < 20 )); then
+    bad "mikrofon seviyesi çok düşük (%${mpct}) — sinyal dijital sıfıra iner, dikte hiçbir şey duymaz → voca-doctor --mic"
+  else
+    ok "mikrofon açık ve seviye yeterli (%${mpct})"
+  fi
+else
+  warn "PipeWire/wpctl'ye ulaşılamadı — mikrofon seviyesi kontrol edilemedi"
+fi
+
+# Vocalinux logu: tamamen sessiz kalan kayıt oturumları (son 30 dk)
+if voca_unit_active; then
+  silent="$(journalctl --user -u "$VOCA_UNIT" --since '-30min' --no-pager 2>/dev/null | grep -c 'Max audio level was only 0\.0%' || true)"
+elif [[ -f $RUN_LOG ]]; then
+  silent="$(grep -c 'Max audio level was only 0\.0%' "$RUN_LOG" 2>/dev/null || true)"
+fi
+if (( ${silent:-0} > 0 )); then
+  warn "vocalinux'ta ${silent} kayıt oturumu tamamen SESSİZ bitti (Max audio level 0.0%) → mikrofon seviyesi/aygıt (voca-doctor --mic)"
 fi
 
 # ── 4. Model ───────────────────────────────────────────────────────────────

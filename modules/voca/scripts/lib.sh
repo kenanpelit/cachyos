@@ -2,6 +2,10 @@
 # voca modülü ortak yardımcıları — build-pywhispercpp.sh ve voca-doctor.sh kaynak alır.
 # Doğrudan çalıştırılmaz.
 
+# mdots hook'ları `sudo -u` ile çalışır ve ortamı sıfırlar: XDG_RUNTIME_DIR kaybolunca
+# `systemctl --user`, `journalctl --user` ve wpctl (PipeWire) kullanıcı oturumuna ulaşamaz.
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
 VOCA_PKG="python-pywhispercpp-vulkan"
 
 # Boot'ta vocalinux'u başlatan systemd birimi (XDG autostart → systemd-xdg-autostart-generator).
