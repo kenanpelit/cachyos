@@ -114,9 +114,16 @@ setup_wifi_tcpip_5555() {
   info "Setting up WiFi ADB (TCPIP 5555). Phone + PC must be on same network."
   pause
 
-  # Switch adbd to TCP mode on the device
+  # Switch adbd to TCP mode on the device. This restarts adbd, so the device
+  # drops off `adb devices` for a bit (observed ~2s on some phones/USB combos)
+  # before it re-enumerates. A flat `sleep 1` was too short and made the next
+  # `adb shell` come back empty, so wait until it's actually visible again.
   adb_cmd tcpip 5555 >/dev/null 2>&1 || true
-  sleep 1
+  if [[ -n "${ADB_SERIAL:-}" ]]; then
+    timeout 10 adb -s "$ADB_SERIAL" wait-for-device 2>/dev/null || sleep 1
+  else
+    timeout 10 adb wait-for-device 2>/dev/null || sleep 1
+  fi
 
   local ipadd
   ipadd="$(detect_phone_ip)"
