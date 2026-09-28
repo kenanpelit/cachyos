@@ -78,6 +78,56 @@ register_install() {
     INSTALL_UUIDS+=("$uuid")
 }
 
+# Find every OTHER CachyOS-style btrfs root on the system and register it,
+# regardless of whether anything happens to be mounted at $SECONDARY_ROOT.
+# Previously this only looked at $SECONDARY_ROOT, so the cross-GRUB entry
+# for a real secondary install silently disappeared on any run where that
+# fixed path wasn't already mounted (e.g. its fstab line was commented out,
+# or simply not mounted yet) — the entry should not depend on mount state.
+#
+# For each btrfs filesystem not already registered: mount it read-only at a
+# throwaway mountpoint just long enough to confirm it has a "@" subvolume
+# (the CachyOS/openSUSE-style root layout convention this repo uses), then
+# unmount. Read-only so this can never touch data on the other install.
+discover_other_cachyos_roots() {
+    local dev uuid tmp idx already devname
+
+    command -v blkid >/dev/null 2>&1 || return 0
+
+    while IFS= read -r dev; do
+        [ -n "$dev" ] || continue
+        # -s UUID -o value: exactly one field, one line — unlike the default
+        # or -t-filtered output, this can't also grab PARTUUID (which contains
+        # the literal substring `UUID="` too: "PART`UUID=`...") or UUID_SUB.
+        uuid="$(blkid -s UUID -o value "$dev" 2>/dev/null || true)"
+        [ -n "$uuid" ] || continue
+
+        already=0
+        for idx in "${!INSTALL_UUIDS[@]}"; do
+            if [ "${INSTALL_UUIDS[$idx]}" = "$uuid" ]; then
+                already=1
+                break
+            fi
+        done
+        [ "$already" -eq 1 ] && continue
+
+        tmp="$(mktemp -d)"
+        if mount -o ro,subvol=/ "$dev" "$tmp" 2>/dev/null; then
+            if [ -d "$tmp/@" ]; then
+                devname="${dev#/dev/}"
+                devname="${devname%%[*}"
+                [ -n "$devname" ] || devname="unknown"
+                INSTALL_ROOTS+=("$tmp")
+                INSTALL_DEVS+=("$devname")
+                INSTALL_UUIDS+=("$uuid")
+                echo "Discovered CachyOS root: ${devname} (UUID ${uuid}, via temporary read-only mount)"
+            fi
+            umount "$tmp" 2>/dev/null || true
+        fi
+        rmdir "$tmp" 2>/dev/null || true
+    done < <(blkid -t TYPE=btrfs -o device 2>/dev/null)
+}
+
 build_cross_entries_for_target() {
     local target_uuid="$1"
     local idx=""
@@ -201,7 +251,7 @@ ensure_disable_bootnext() {
 }
 
 register_install "/"
-register_install "$SECONDARY_ROOT"
+discover_other_cachyos_roots
 
 if [ "${#INSTALL_UUIDS[@]}" -eq 0 ]; then
     echo "No CachyOS btrfs roots detected from mounts; aborting." >&2
