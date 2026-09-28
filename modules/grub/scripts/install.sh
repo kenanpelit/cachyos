@@ -173,6 +173,33 @@ install_custom_for_root() {
     cleanup_generated_custom_cfg "$target_boot_grub"
 }
 
+ensure_disable_bootnext() {
+    local grub_default="/etc/default/grub"
+    [ -f "$grub_default" ] || return 0
+
+    if grep -qE '^GRUB_DISABLE_BOOTNEXT=true$' "$grub_default"; then
+        return 0
+    fi
+
+    if grep -qE '^GRUB_DISABLE_BOOTNEXT=' "$grub_default"; then
+        sed -i 's/^GRUB_DISABLE_BOOTNEXT=.*/GRUB_DISABLE_BOOTNEXT=true/' "$grub_default"
+        echo "Updated GRUB_DISABLE_BOOTNEXT=true in $grub_default"
+    else
+        {
+            echo ""
+            echo "# /etc/grub.d/31_efi_bootnext mirrors every NVRAM firmware boot entry"
+            echo "# (Lenovo diagnostics/recovery/PXE/MEBx/etc — ~30 of them) into the GRUB"
+            echo "# menu as one-shot BootNext targets. This var makes that script exit"
+            echo "# immediately (its own first check), so none of them show up. The single"
+            echo "# generic \"UEFI Firmware Settings\" entry (30_uefi-firmware) is a separate"
+            echo "# script and stays; NVRAM itself is untouched, those options are still"
+            echo "# reachable from the firmware's own one-time boot picker (F12/Fn+F1)."
+            echo "GRUB_DISABLE_BOOTNEXT=true"
+        } >>"$grub_default"
+        echo "Added GRUB_DISABLE_BOOTNEXT=true to $grub_default"
+    fi
+}
+
 register_install "/"
 register_install "$SECONDARY_ROOT"
 
@@ -183,6 +210,8 @@ fi
 
 echo "Installing custom GRUB entry for current system..."
 install_custom_for_root "/" "/etc/grub.d" "$CURRENT_BOOT_GRUB"
+
+ensure_disable_bootnext
 
 echo "Updating GRUB configuration..."
 if command -v update-grub >/dev/null 2>&1; then
