@@ -1,0 +1,88 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  TMUX KEYBINDING REFERENCE · Prefix: Ctrl-a                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+ SESSION
+   prefix + S        New session (in the current directory, and switch to it)
+   prefix + K        Rename session
+   prefix + Tab      Last session (sesh last)
+   prefix + Ctrl-t   Sesh switcher (fzf, preview)
+   prefix + s        tmux choose-tree (session tree, with preview)
+   prefix + o        anka switcher (live + snapshot + zoxide, 1-9 jump)
+   prefix + P        anka switcher (pick alias)
+   prefix + Ctrl-s   Save snapshot now (anka)
+   prefix + Ctrl-r   Restore snapshot (anka)
+   prefix + X        Kill session (anka)
+   prefix + @        Promote pane to a new session (anka)
+   prefix + g        Switch to session by name (anka)
+
+ WINDOW
+   prefix + c        New window (tm tmx layout 1)
+   prefix + 0        New window (tm tmx layout 3, multi-pane)
+   prefix + 1-9      Switch to window N
+   prefix + Ctrl-n   Next window
+   prefix + Ctrl-p   Previous window
+   prefix + A        Rename window
+   prefix + q        Kill window (confirm)
+   prefix + R        Reload config
+   prefix + w        Choose-tree (session + window picker)
+   prefix + Ctrl-a   Last window
+   prefix + a        Send a literal Ctrl-a to the app
+
+ PANE NAVIGATION
+   Ctrl + h/j/k      Vim/tmux-aware pane navigation (C-l = clear screen);
+                     passes through to the app in a single or zoomed pane
+   prefix + h/j/k/l  Move to left/down/up/right pane
+   prefix + ü        Show pane numbers (until a key is pressed)
+
+ PANE RESIZE & SWAP
+   prefix + H/J/K/L  Resize pane (repeatable)
+   prefix + {        Swap with the previous pane
+   prefix + }        Swap with the next pane
+   prefix + Shift+◀  Swap pane backward
+   prefix + Shift+▶  Swap pane forward
+
+ PANE CONTROLS
+   prefix + _        Vertical split (current directory)
+   prefix + -        Horizontal split (current directory)
+   prefix + z        Toggle zoom
+   prefix + x        Kill pane
+   prefix + Y        Toggle synchronize-panes
+
+ COPY MODE
+   prefix + Enter    Enter copy mode
+   v                 Begin selection (vi)
+   Ctrl-v            Rectangle selection
+   y / Enter         Copy (Wayland/X11 clipboard)
+   e/H/L/K/J         Word-end / line-start / line-end / 5 up / 5 down
+   2×/3× click       Copy word / line (also outside copy mode; mouse apps get the click)
+
+ BUFFER & CLIPBOARD
+   prefix + b        Buffer list
+   prefix + +        Delete buffer
+   prefix + Ctrl-v   Clipse (clipboard history popup)
+   prefix + > / <    Buffer to clipboard / paste from clipboard
+
+ POPUPS
+   prefix + e        Anote text note
+   prefix + E        Anote markdown
+   prefix + i        Anote snippet
+   prefix + N        Anote (general)
+   prefix + T        Large terminal popup (current directory)
+   prefix + B        tm buffer
+   prefix + V        tm clip
+   prefix + G        tm speed
+   Alt-?             Live keybinding dump
+
+ PLUGIN BINDINGS
+   prefix + u        URL picker → open in browser (anka url)
+   prefix + F        anka menu (command/keybinding/process/window/pane)
+   prefix + m        anka search (search scrollback → jump to line)
+   prefix + Space    anka grab (extract tokens → copy/paste/open)
+   prefix + I        TPM install
+   prefix + U        TPM update
+   F12               Suspend/Resume — pass keys to nested session (huma)
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    q to quit  ·  /pattern to search                        ║
+╚════════════════════════════════════════════════════════════════════════════╝
