@@ -63,7 +63,7 @@ _arguments "${_arguments_options[@]}" : \
         case $line[1] in
             (app-launcher)
 _arguments "${_arguments_options[@]}" : \
-'--tab=[Pre-select the named category tab (e.g. "Run", "Insert"). Unknown names fall back to "All"]:TAB:_default' \
+'--tab=[Pre-select the named category tab (e.g. "Apps", "Actions"). Unknown names fall back to "All"]:TAB:_default' \
 '(--tab)--list-tabs[List the known category tab names and exit without opening the launcher]' \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -202,12 +202,6 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
-(audio-route)
-_arguments "${_arguments_options[@]}" : \
-'-h[Print help]' \
-'--help[Print help]' \
-&& ret=0
-;;
 (system-update)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -304,6 +298,12 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
+(vpn-indicator)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
 (network)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -317,6 +317,12 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (media-player)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(mtune)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -519,10 +525,6 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
-(audio-route)
-_arguments "${_arguments_options[@]}" : \
-&& ret=0
-;;
 (system-update)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -587,6 +589,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(vpn-indicator)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (network)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -596,6 +602,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (media-player)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(mtune)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -1033,6 +1043,13 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
+(connect-number)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':number:_default' \
+&& ret=0
+;;
 (help)
 _arguments "${_arguments_options[@]}" : \
 ":: :_mshellctl__subcmd__bluetooth__subcmd__help_commands" \
@@ -1054,6 +1071,311 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (disconnect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(connect-number)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(mtune)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_mshellctl__subcmd__mtune_commands" \
+"*::: :->mtune" \
+&& ret=0
+
+    case $state in
+    (mtune)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-mtune-command-$line[1]:"
+        case $line[1] in
+            (play-pause)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(pause)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(next)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(previous)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(seek)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':pos:_default' \
+&& ret=0
+;;
+(volume)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::value:_default' \
+&& ret=0
+;;
+(rate)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::value:_default' \
+&& ret=0
+;;
+(repeat)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::mode:_default' \
+&& ret=0
+;;
+(repeat-count)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::value:_default' \
+&& ret=0
+;;
+(shuffle)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::state:_default' \
+&& ret=0
+;;
+(jump)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':index:_default' \
+&& ret=0
+;;
+(open)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':path:_default' \
+&& ret=0
+;;
+(library)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':path:_default' \
+&& ret=0
+;;
+(rescan)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(playlists)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(playlist-load)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+&& ret=0
+;;
+(playlist-save)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name:_default' \
+&& ret=0
+;;
+(status)
+_arguments "${_arguments_options[@]}" : \
+'--json[Emit JSON instead of a line of text]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(metadata)
+_arguments "${_arguments_options[@]}" : \
+'--json[]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(raise)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(toggle-window)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(quit)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(menu)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__mtune__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-mtune-help-command-$line[1]:"
+        case $line[1] in
+            (play-pause)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pause)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(next)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(previous)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(seek)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(volume)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rate)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(repeat)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(repeat-count)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(shuffle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(jump)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(open)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(library)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rescan)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(playlists)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(playlist-load)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(playlist-save)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(metadata)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(raise)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle-window)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(quit)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(menu)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -1970,6 +2292,18 @@ _arguments "${_arguments_options[@]}" : \
 '::editor -- Force a specific annotation editor (satty | swappy | gimp | krita). Implies `--edit`. Omit to use the default chain (`SCREENSHOT_EDITOR` env, then satty → swappy → gimp → krita):_default' \
 && ret=0
 ;;
+(repeat)
+_arguments "${_arguments_options[@]}" : \
+'-d+[Wait N seconds before capturing (catch menus / tooltips)]:DELAY:_default' \
+'--delay=[Wait N seconds before capturing (catch menus / tooltips)]:DELAY:_default' \
+'--copy[Copy to clipboard only (no file, no editor)]' \
+'--save[Save to file only (no clipboard, no editor)]' \
+'--edit[Open the editor (satty / swappy) → save]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::editor -- Force a specific annotation editor (satty | swappy | gimp | krita). Implies `--edit`. Omit to use the default chain (`SCREENSHOT_EDITOR` env, then satty → swappy → gimp → krita):_default' \
+&& ret=0
+;;
 (select-region)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -2001,6 +2335,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (full)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(repeat)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -2743,6 +3081,13 @@ _arguments "${_arguments_options[@]}" : \
 '::target -- What to play (omit to resume):_default' \
 && ret=0
 ;;
+(download)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::target -- The URL (omit to use the clipboard):_default' \
+&& ret=0
+;;
 (stop)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
@@ -2771,7 +3116,72 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-'*::args -- `start \[PATH\]` or `stop`:_default' \
+":: :_mshellctl__subcmd__play__subcmd__wallpaper_commands" \
+"*::: :->wallpaper" \
+&& ret=0
+
+    case $state in
+    (wallpaper)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-play-wallpaper-command-$line[1]:"
+        case $line[1] in
+            (start)
+_arguments "${_arguments_options[@]}" : \
+'--output=[Target output name (default\: all outputs)]:OUTPUT:_default' \
+'--scale=[Scale mode\: fit | fill | stretch]:SCALE:_default' \
+'--mute[Mute audio]' \
+'--no-loop[Play once instead of looping]' \
+'--daemon[Fork into the background]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::src -- Video file or URL (defaults to clipboard contents):_default' \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+'--output=[Target output name (default\: all)]:OUTPUT:_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-play-wallpaper-help-command-$line[1]:"
+        case $line[1] in
+            (start)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+;;
+(__ytdlp)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::args -- `trailing_var_arg` alone only stops swallowing hyphenated tokens as options once a prior positional value has already flipped clap into "trailing" mode — but `ytdl_hook` always passes `--no-warnings` as the very first argument, so without `allow_hyphen_values` clap rejects it as an unknown option before any value is ever consumed:_default' \
 && ret=0
 ;;
 (help)
@@ -2798,6 +3208,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(download)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (stop)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -2815,6 +3229,30 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (wallpaper)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper_commands" \
+"*::: :->wallpaper" \
+&& ret=0
+
+    case $state in
+    (wallpaper)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-play-help-wallpaper-command-$line[1]:"
+        case $line[1] in
+            (start)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(__ytdlp)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -2951,10 +3389,6 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
-(audio-route)
-_arguments "${_arguments_options[@]}" : \
-&& ret=0
-;;
 (system-update)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -3019,6 +3453,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(vpn-indicator)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (network)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -3028,6 +3466,10 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (media-player)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(mtune)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -3224,6 +3666,126 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (disconnect)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(connect-number)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(mtune)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__mtune_commands" \
+"*::: :->mtune" \
+&& ret=0
+
+    case $state in
+    (mtune)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-mtune-command-$line[1]:"
+        case $line[1] in
+            (play-pause)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(play)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(pause)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(next)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(previous)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(seek)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(volume)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rate)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(repeat)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(repeat-count)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(shuffle)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(jump)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(open)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(library)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rescan)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(playlists)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(playlist-load)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(playlist-save)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(status)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(metadata)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(raise)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(toggle-window)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(quit)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(menu)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -3599,6 +4161,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(repeat)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (select-region)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -3907,6 +4473,10 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
+(download)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
 (stop)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
@@ -3924,6 +4494,30 @@ _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
 (wallpaper)
+_arguments "${_arguments_options[@]}" : \
+":: :_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper_commands" \
+"*::: :->wallpaper" \
+&& ret=0
+
+    case $state in
+    (wallpaper)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:mshellctl-help-play-wallpaper-command-$line[1]:"
+        case $line[1] in
+            (start)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(stop)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(__ytdlp)
 _arguments "${_arguments_options[@]}" : \
 && ret=0
 ;;
@@ -3963,7 +4557,8 @@ _mshellctl_commands() {
 'hidden-bar:Control a Hidden Bar drawer widget. With no \`name\`, the verb reaches every drawer; pass a \`name\` to target one named drawer (a \`bars.widgets.hidden_bars\` entry, placed via \`!HiddenBarNamed <name>\`)' \
 'audio:Audio control — output/input volume, mute, and device switching' \
 'bluetooth:Bluetooth auto-connect engine\: toggle / connect / disconnect the configured device(s). Bind \`bluetooth toggle\` to F10 to replace the old bluetooth_toggle script' \
-'media:Control the active MPRIS media player — play/pause, next, previous' \
+'mtune:Control the native \`mtune\` music player — playback, speed, queue, library + playlists. Talks straight to mtune (no shell needed)' \
+'media:Control the active media player — play/pause, next, previous. Auto-picks across every MPRIS player and native MPD by a weighted score (playing beats paused, app/backend bonuses, last-used tie-break); an explicit target (\`spotify\`, \`browser\`, \`mpd\`) skips scoring and goes straight to that backend' \
 'brightness:Backlight brightness — raise, lower, or set a level' \
 'log:Shell file-logging controls (~/.local/state/margo/logs/mshell-*.log). \`level\`/\`enable\`/\`disable\` retune the running shell live' \
 'dock:Standalone mdock surface — toggle / show / hide' \
@@ -3986,7 +4581,7 @@ _mshellctl_commands() {
 'layout:Saved tiling-layout snapshots — list / set / next / prev / preview (proxied to \`mlayout\`)' \
 'osk:On-screen keyboard — show / hide / toggle (proxied to \`mkeys\`)' \
 'color:Pick a screen colour (proxied to \`mpicker\`) — prints the colour; use \`--copy\` / \`--notify\` / \`--format\`' \
-'play:mpv companion — play / toggle / stop / snapshot / video wallpaper (proxied to \`mplay\`)' \
+'play:mpv companion — window control, playback, yt-dlp downloads, and the native video-wallpaper engine' \
 'doctor:Health check — is the shell on the session bus, is it the same version as this \`mshellctl\`, are its key services up. Run \`mctl doctor\` for the compositor side' \
 'completions:Generate a shell-completion script (bash / zsh / fish / …) to stdout' \
 'help:Print this message or the help of the given subcommand(s)' \
@@ -4006,7 +4601,7 @@ _mshellctl__subcmd__audio_commands() {
 'input:Switch the default input — next | prev | INDEX | NAME fragment' \
 'switch:Cycle the default output to the next device (alias for \`output next\`)' \
 'switch-mic:Cycle the default input to the next device (alias for \`input next\`)' \
-'route-next:Cycle the default output like the Audio Route pill'\''s left-click\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
+'route-next:Cycle the default output to the next routable sink\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
 'mic-up:Increase the microphone volume by 5 percent' \
 'mic-down:Decrease the microphone volume by 5 percent' \
 'mic:Set the microphone volume to an absolute PERCENT (0–150)' \
@@ -4028,7 +4623,7 @@ _mshellctl__subcmd__audio__subcmd__help_commands() {
 'input:Switch the default input — next | prev | INDEX | NAME fragment' \
 'switch:Cycle the default output to the next device (alias for \`output next\`)' \
 'switch-mic:Cycle the default input to the next device (alias for \`input next\`)' \
-'route-next:Cycle the default output like the Audio Route pill'\''s left-click\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
+'route-next:Cycle the default output to the next routable sink\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
 'mic-up:Increase the microphone volume by 5 percent' \
 'mic-down:Decrease the microphone volume by 5 percent' \
 'mic:Set the microphone volume to an absolute PERCENT (0–150)' \
@@ -4282,6 +4877,7 @@ _mshellctl__subcmd__bluetooth_commands() {
 'toggle:Smart toggle\: power on + connect, or disconnect if already connected (replaces the old F10 bluetooth_toggle script)' \
 'connect:Connect the configured device(s), trying each in order' \
 'disconnect:Disconnect any connected configured device' \
+'connect-number:Connect the device assigned this quick-connect number (set from the Bluetooth menu) — for a stable keybind that doesn'\''t care which slot in the config'\''s device list this happens to be' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'mshellctl bluetooth commands' commands "$@"
@@ -4290,6 +4886,11 @@ _mshellctl__subcmd__bluetooth_commands() {
 _mshellctl__subcmd__bluetooth__subcmd__connect_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl bluetooth connect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__bluetooth__subcmd__connect-number_commands] )) ||
+_mshellctl__subcmd__bluetooth__subcmd__connect-number_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl bluetooth connect-number commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__bluetooth__subcmd__disconnect_commands] )) ||
 _mshellctl__subcmd__bluetooth__subcmd__disconnect_commands() {
@@ -4302,6 +4903,7 @@ _mshellctl__subcmd__bluetooth__subcmd__help_commands() {
 'toggle:Smart toggle\: power on + connect, or disconnect if already connected (replaces the old F10 bluetooth_toggle script)' \
 'connect:Connect the configured device(s), trying each in order' \
 'disconnect:Disconnect any connected configured device' \
+'connect-number:Connect the device assigned this quick-connect number (set from the Bluetooth menu) — for a stable keybind that doesn'\''t care which slot in the config'\''s device list this happens to be' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'mshellctl bluetooth help commands' commands "$@"
@@ -4310,6 +4912,11 @@ _mshellctl__subcmd__bluetooth__subcmd__help_commands() {
 _mshellctl__subcmd__bluetooth__subcmd__help__subcmd__connect_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl bluetooth help connect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__bluetooth__subcmd__help__subcmd__connect-number_commands] )) ||
+_mshellctl__subcmd__bluetooth__subcmd__help__subcmd__connect-number_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl bluetooth help connect-number commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__bluetooth__subcmd__help__subcmd__disconnect_commands] )) ||
 _mshellctl__subcmd__bluetooth__subcmd__help__subcmd__disconnect_commands() {
@@ -4642,7 +5249,8 @@ _mshellctl__subcmd__help_commands() {
 'hidden-bar:Control a Hidden Bar drawer widget. With no \`name\`, the verb reaches every drawer; pass a \`name\` to target one named drawer (a \`bars.widgets.hidden_bars\` entry, placed via \`!HiddenBarNamed <name>\`)' \
 'audio:Audio control — output/input volume, mute, and device switching' \
 'bluetooth:Bluetooth auto-connect engine\: toggle / connect / disconnect the configured device(s). Bind \`bluetooth toggle\` to F10 to replace the old bluetooth_toggle script' \
-'media:Control the active MPRIS media player — play/pause, next, previous' \
+'mtune:Control the native \`mtune\` music player — playback, speed, queue, library + playlists. Talks straight to mtune (no shell needed)' \
+'media:Control the active media player — play/pause, next, previous. Auto-picks across every MPRIS player and native MPD by a weighted score (playing beats paused, app/backend bonuses, last-used tie-break); an explicit target (\`spotify\`, \`browser\`, \`mpd\`) skips scoring and goes straight to that backend' \
 'brightness:Backlight brightness — raise, lower, or set a level' \
 'log:Shell file-logging controls (~/.local/state/margo/logs/mshell-*.log). \`level\`/\`enable\`/\`disable\` retune the running shell live' \
 'dock:Standalone mdock surface — toggle / show / hide' \
@@ -4665,7 +5273,7 @@ _mshellctl__subcmd__help_commands() {
 'layout:Saved tiling-layout snapshots — list / set / next / prev / preview (proxied to \`mlayout\`)' \
 'osk:On-screen keyboard — show / hide / toggle (proxied to \`mkeys\`)' \
 'color:Pick a screen colour (proxied to \`mpicker\`) — prints the colour; use \`--copy\` / \`--notify\` / \`--format\`' \
-'play:mpv companion — play / toggle / stop / snapshot / video wallpaper (proxied to \`mplay\`)' \
+'play:mpv companion — window control, playback, yt-dlp downloads, and the native video-wallpaper engine' \
 'doctor:Health check — is the shell on the session bus, is it the same version as this \`mshellctl\`, are its key services up. Run \`mctl doctor\` for the compositor side' \
 'completions:Generate a shell-completion script (bash / zsh / fish / …) to stdout' \
 'help:Print this message or the help of the given subcommand(s)' \
@@ -4685,7 +5293,7 @@ _mshellctl__subcmd__help__subcmd__audio_commands() {
 'input:Switch the default input — next | prev | INDEX | NAME fragment' \
 'switch:Cycle the default output to the next device (alias for \`output next\`)' \
 'switch-mic:Cycle the default input to the next device (alias for \`input next\`)' \
-'route-next:Cycle the default output like the Audio Route pill'\''s left-click\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
+'route-next:Cycle the default output to the next routable sink\: always skips HDMI/DP and, when \`audio.route_switch_microphone\` is on, moves the mic across the headset boundary too (unlike the plain \`switch\`)' \
 'mic-up:Increase the microphone volume by 5 percent' \
 'mic-down:Decrease the microphone volume by 5 percent' \
 'mic:Set the microphone volume to an absolute PERCENT (0–150)' \
@@ -4810,6 +5418,7 @@ _mshellctl__subcmd__help__subcmd__bluetooth_commands() {
 'toggle:Smart toggle\: power on + connect, or disconnect if already connected (replaces the old F10 bluetooth_toggle script)' \
 'connect:Connect the configured device(s), trying each in order' \
 'disconnect:Disconnect any connected configured device' \
+'connect-number:Connect the device assigned this quick-connect number (set from the Bluetooth menu) — for a stable keybind that doesn'\''t care which slot in the config'\''s device list this happens to be' \
     )
     _describe -t commands 'mshellctl help bluetooth commands' commands "$@"
 }
@@ -4817,6 +5426,11 @@ _mshellctl__subcmd__help__subcmd__bluetooth_commands() {
 _mshellctl__subcmd__help__subcmd__bluetooth__subcmd__connect_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help bluetooth connect commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__bluetooth__subcmd__connect-number_commands] )) ||
+_mshellctl__subcmd__help__subcmd__bluetooth__subcmd__connect-number_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help bluetooth connect-number commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__bluetooth__subcmd__disconnect_commands] )) ||
 _mshellctl__subcmd__help__subcmd__bluetooth__subcmd__disconnect_commands() {
@@ -5094,11 +5708,11 @@ _mshellctl__subcmd__help__subcmd__log__subcmd__path_commands() {
 (( $+functions[_mshellctl__subcmd__help__subcmd__media_commands] )) ||
 _mshellctl__subcmd__help__subcmd__media_commands() {
     local commands; commands=(
-'toggle:Play/pause — optionally a player name fragment (spotify, browser, vlc…)' \
-'next:Next track on the player (or the active one)' \
-'prev:Previous track on the player (or the active one)' \
-'status:The active player\: name, state, current track' \
-'list:Every MPRIS player, with state + which one is active' \
+'toggle:Play/pause — optionally a target\: a player name fragment (spotify, browser, vlc…) or \`mpd\`/\`mpc\` for native MPD. Omit for the best-scoring active player across every backend' \
+'next:Next track on the target player (or the best-scoring active one)' \
+'prev:Previous track on the target player (or the best-scoring active one)' \
+'status:The player a target-less command would act on\: name, state, track' \
+'list:Every player — MPRIS + native MPD — with state + which one is active' \
     )
     _describe -t commands 'mshellctl help media commands' commands "$@"
 }
@@ -5141,7 +5755,6 @@ _mshellctl__subcmd__help__subcmd__menu_commands() {
 'bluetooth:Toggle the Bluetooth menu (connect/disconnect/scan/pair)' \
 'cpu-dashboard:Toggle the CPU Dashboard menu (CPU, temp, RAM, load)' \
 'audio-dashboard:Toggle the Audio Dashboard menu (output + input mixer)' \
-'audio-route:Toggle the Audio Route picker menu (pick any output directly — the Audio Route pill'\''s right-click surface)' \
 'system-update:Toggle the System Updates menu (repo / AUR / Flatpak)' \
 'valent:Toggle the Valent Connect menu (phone status + actions)' \
 'keep-awake:Toggle the Keep Awake menu (duration grid + countdown)' \
@@ -5158,9 +5771,11 @@ _mshellctl__subcmd__help__subcmd__menu_commands() {
 'podman:Toggle the Podman menu' \
 'notes:Toggle the Notes Hub menu' \
 'ip:Toggle the Public IP menu' \
+'vpn-indicator:Toggle the generic-VPN detail menu (active OpenVPN / WireGuard tunnels)' \
 'network:Toggle the Network Console menu' \
 'power:Toggle the Power Profile (power) menu' \
 'media-player:Toggle the Media Player menu' \
+'mtune:Toggle the Tune (mtune folder-first music player) menu' \
 'lyrics:Toggle the Lyrics menu (synced lyrics of the now-playing track)' \
 'session:Toggle the session / power menu, or run a session action' \
 'mdash:Toggle the mdash dashboard menu — greeting header, calendar + weather, the quick-settings card stack, and a menu-shortcut grid' \
@@ -5188,11 +5803,6 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__app-launcher_commands() {
 _mshellctl__subcmd__help__subcmd__menu__subcmd__audio-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu audio-dashboard commands' commands "$@"
-}
-(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__audio-route_commands] )) ||
-_mshellctl__subcmd__help__subcmd__menu__subcmd__audio-route_commands() {
-    local commands; commands=()
-    _describe -t commands 'mshellctl help menu audio-route commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__bluetooth_commands] )) ||
 _mshellctl__subcmd__help__subcmd__menu__subcmd__bluetooth_commands() {
@@ -5263,6 +5873,11 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__mdash_commands() {
 _mshellctl__subcmd__help__subcmd__menu__subcmd__media-player_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu media-player commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__mtune_commands] )) ||
+_mshellctl__subcmd__help__subcmd__menu__subcmd__mtune_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help menu mtune commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__network_commands] )) ||
 _mshellctl__subcmd__help__subcmd__menu__subcmd__network_commands() {
@@ -5395,6 +6010,11 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__vpn_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu vpn commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__vpn-indicator_commands] )) ||
+_mshellctl__subcmd__help__subcmd__menu__subcmd__vpn-indicator_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help menu vpn-indicator commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__help__subcmd__menu__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__help__subcmd__menu__subcmd__wallpaper_commands() {
     local commands; commands=()
@@ -5404,6 +6024,162 @@ _mshellctl__subcmd__help__subcmd__menu__subcmd__wallpaper_commands() {
 _mshellctl__subcmd__help__subcmd__menu__subcmd__weather_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help menu weather commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune_commands() {
+    local commands; commands=(
+'play-pause:Toggle play / pause' \
+'play:Resume playback' \
+'pause:Pause playback' \
+'stop:Stop playback' \
+'next:Next track' \
+'previous:Previous track (or restart the current one)' \
+'seek:Seek\: \`90\` = to 0\:90, \`+30\` / \`-15\` = relative' \
+'volume:Set volume \`0.0\`–\`1.0\` (\`+0.1\` / \`-0.1\` relative); omit to print it' \
+'rate:Set playback speed \`0.5\`–\`2.0\` (\`up\` / \`down\` step ±0.1); omit to print it' \
+'repeat:Repeat mode\: \`off\` / \`all\` / \`one\` / \`each\` / \`cycle\`; omit to print it' \
+'repeat-count:Times to repeat each track under \`repeat each\` mode; omit to print it' \
+'shuffle:Shuffle\: \`on\` / \`off\` / \`toggle\`; omit to print it' \
+'jump:Jump to a queue position (0-based) and play it' \
+'open:Open a file, folder, or \`.m3u\` / \`.pls\` playlist (replaces the queue)' \
+'library:Point the library at a folder and start playing it' \
+'rescan:Rescan the configured library folders' \
+'playlists:List the saved playlists' \
+'playlist-load:Load a saved playlist by name' \
+'playlist-save:Save the current queue as a playlist' \
+'status:Now-playing summary' \
+'metadata:Full track metadata' \
+'raise:Raise the mtune window' \
+'toggle-window:Show the mtune window if hidden, hide it if visible (creates it after \`mtune --hidden\`). Handy on a keybind' \
+'quit:Quit mtune' \
+'menu:Open the shell'\''s Tune menu (needs mshell)' \
+    )
+    _describe -t commands 'mshellctl help mtune commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__jump_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__jump_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune jump commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__library_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__library_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune library commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__metadata_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__metadata_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune metadata commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__next_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune next commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__open_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune open commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__pause_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__play_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__play_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__play-pause_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__play-pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune play-pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__playlist-load_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__playlist-load_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune playlist-load commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__playlist-save_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__playlist-save_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune playlist-save commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__playlists_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__playlists_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune playlists commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__previous_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__previous_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune previous commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__quit_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__quit_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune quit commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__raise_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__raise_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune raise commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__rate_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__rate_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune rate commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__repeat_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__repeat_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune repeat commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__repeat-count_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__repeat-count_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune repeat-count commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__rescan_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__rescan_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune rescan commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__seek_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__seek_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune seek commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__shuffle_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__shuffle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune shuffle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__status_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune status commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune stop commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__toggle-window_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__toggle-window_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune toggle-window commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__mtune__subcmd__volume_commands] )) ||
+_mshellctl__subcmd__help__subcmd__mtune__subcmd__volume_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help mtune volume commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__notification_commands] )) ||
 _mshellctl__subcmd__help__subcmd__notification_commands() {
@@ -5469,15 +6245,27 @@ _mshellctl__subcmd__help__subcmd__osk__subcmd__toggle_commands() {
 _mshellctl__subcmd__help__subcmd__play_commands() {
     local commands; commands=(
 'start:Start the mpv companion window' \
-'toggle:Toggle the mpv window (show/hide)' \
-'play:Play a target (URL / path / clipboard, per mplay'\''s rules)' \
+'toggle:Toggle play/pause on the running mpv companion' \
+'play:Play a target (URL / path / clipboard; YouTube URLs auto-detected)' \
+'download:Download a YouTube URL (argument or clipboard) to ~/Downloads via yt-dlp' \
 'stop:Stop playback / close the window' \
-'snap:Snapshot the current frame' \
-'pin:Pin the window on top' \
-'focus:Focus the mpv window' \
-'wallpaper:Video-wallpaper engine — \`wallpaper start \[PATH\]\` / \`wallpaper stop\`' \
+'snap:Cycle the floating window to the next screen corner' \
+'pin:Pin the window on top (toggle sticky)' \
+'focus:Focus the mpv window (hop monitor + tag + focus stack)' \
+'wallpaper:Video-wallpaper engine — background layer surface, EGL + libmpv' \
+'__ytdlp:Hidden\: mpv'\''s \`ytdl_hook\` invokes this as its \`ytdl_path\` (wired up by \`control\:\:ensure_ytdl_shim\`) — not meant to be run by hand' \
     )
     _describe -t commands 'mshellctl help play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd____ytdlp_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd____ytdlp_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play __ytdlp commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__download_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__download_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play download commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__focus_commands] )) ||
 _mshellctl__subcmd__help__subcmd__play__subcmd__focus_commands() {
@@ -5516,8 +6304,21 @@ _mshellctl__subcmd__help__subcmd__play__subcmd__toggle_commands() {
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper_commands() {
-    local commands; commands=()
+    local commands; commands=(
+'start:Play a video wallpaper on the background layer' \
+'stop:Stop the video wallpaper' \
+    )
     _describe -t commands 'mshellctl help play wallpaper commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper__subcmd__start_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play wallpaper start commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__help__subcmd__play__subcmd__wallpaper__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help play wallpaper stop commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__plugin_commands] )) ||
 _mshellctl__subcmd__help__subcmd__plugin_commands() {
@@ -5621,6 +6422,7 @@ _mshellctl__subcmd__help__subcmd__screenshot_commands() {
 'window:Focused window → capture' \
 'output:Pick an output (monitor) → capture' \
 'full:Whole layout (every output) → capture' \
+'repeat:Re-capture the last selected region (no reselect). Falls back to a normal region select the first time it'\''s used' \
 'select-region:(internal) Open the in-shell area selector and print the chosen region as "X,Y WxH" (slurp format). Used by the \`mscreenshot\` CLI'\''s region bridge; not meant for direct use' \
     )
     _describe -t commands 'mshellctl help screenshot commands' commands "$@"
@@ -5639,6 +6441,11 @@ _mshellctl__subcmd__help__subcmd__screenshot__subcmd__output_commands() {
 _mshellctl__subcmd__help__subcmd__screenshot__subcmd__region_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl help screenshot region commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__help__subcmd__screenshot__subcmd__repeat_commands] )) ||
+_mshellctl__subcmd__help__subcmd__screenshot__subcmd__repeat_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl help screenshot repeat commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__help__subcmd__screenshot__subcmd__select-region_commands] )) ||
 _mshellctl__subcmd__help__subcmd__screenshot__subcmd__select-region_commands() {
@@ -6065,11 +6872,11 @@ _mshellctl__subcmd__log__subcmd__path_commands() {
 (( $+functions[_mshellctl__subcmd__media_commands] )) ||
 _mshellctl__subcmd__media_commands() {
     local commands; commands=(
-'toggle:Play/pause — optionally a player name fragment (spotify, browser, vlc…)' \
-'next:Next track on the player (or the active one)' \
-'prev:Previous track on the player (or the active one)' \
-'status:The active player\: name, state, current track' \
-'list:Every MPRIS player, with state + which one is active' \
+'toggle:Play/pause — optionally a target\: a player name fragment (spotify, browser, vlc…) or \`mpd\`/\`mpc\` for native MPD. Omit for the best-scoring active player across every backend' \
+'next:Next track on the target player (or the best-scoring active one)' \
+'prev:Previous track on the target player (or the best-scoring active one)' \
+'status:The player a target-less command would act on\: name, state, track' \
+'list:Every player — MPRIS + native MPD — with state + which one is active' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'mshellctl media commands' commands "$@"
@@ -6077,11 +6884,11 @@ _mshellctl__subcmd__media_commands() {
 (( $+functions[_mshellctl__subcmd__media__subcmd__help_commands] )) ||
 _mshellctl__subcmd__media__subcmd__help_commands() {
     local commands; commands=(
-'toggle:Play/pause — optionally a player name fragment (spotify, browser, vlc…)' \
-'next:Next track on the player (or the active one)' \
-'prev:Previous track on the player (or the active one)' \
-'status:The active player\: name, state, current track' \
-'list:Every MPRIS player, with state + which one is active' \
+'toggle:Play/pause — optionally a target\: a player name fragment (spotify, browser, vlc…) or \`mpd\`/\`mpc\` for native MPD. Omit for the best-scoring active player across every backend' \
+'next:Next track on the target player (or the best-scoring active one)' \
+'prev:Previous track on the target player (or the best-scoring active one)' \
+'status:The player a target-less command would act on\: name, state, track' \
+'list:Every player — MPRIS + native MPD — with state + which one is active' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'mshellctl media help commands' commands "$@"
@@ -6155,7 +6962,6 @@ _mshellctl__subcmd__menu_commands() {
 'bluetooth:Toggle the Bluetooth menu (connect/disconnect/scan/pair)' \
 'cpu-dashboard:Toggle the CPU Dashboard menu (CPU, temp, RAM, load)' \
 'audio-dashboard:Toggle the Audio Dashboard menu (output + input mixer)' \
-'audio-route:Toggle the Audio Route picker menu (pick any output directly — the Audio Route pill'\''s right-click surface)' \
 'system-update:Toggle the System Updates menu (repo / AUR / Flatpak)' \
 'valent:Toggle the Valent Connect menu (phone status + actions)' \
 'keep-awake:Toggle the Keep Awake menu (duration grid + countdown)' \
@@ -6172,9 +6978,11 @@ _mshellctl__subcmd__menu_commands() {
 'podman:Toggle the Podman menu' \
 'notes:Toggle the Notes Hub menu' \
 'ip:Toggle the Public IP menu' \
+'vpn-indicator:Toggle the generic-VPN detail menu (active OpenVPN / WireGuard tunnels)' \
 'network:Toggle the Network Console menu' \
 'power:Toggle the Power Profile (power) menu' \
 'media-player:Toggle the Media Player menu' \
+'mtune:Toggle the Tune (mtune folder-first music player) menu' \
 'lyrics:Toggle the Lyrics menu (synced lyrics of the now-playing track)' \
 'session:Toggle the session / power menu, or run a session action' \
 'mdash:Toggle the mdash dashboard menu — greeting header, calendar + weather, the quick-settings card stack, and a menu-shortcut grid' \
@@ -6203,11 +7011,6 @@ _mshellctl__subcmd__menu__subcmd__app-launcher_commands() {
 _mshellctl__subcmd__menu__subcmd__audio-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu audio-dashboard commands' commands "$@"
-}
-(( $+functions[_mshellctl__subcmd__menu__subcmd__audio-route_commands] )) ||
-_mshellctl__subcmd__menu__subcmd__audio-route_commands() {
-    local commands; commands=()
-    _describe -t commands 'mshellctl menu audio-route commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__bluetooth_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__bluetooth_commands() {
@@ -6258,7 +7061,6 @@ _mshellctl__subcmd__menu__subcmd__help_commands() {
 'bluetooth:Toggle the Bluetooth menu (connect/disconnect/scan/pair)' \
 'cpu-dashboard:Toggle the CPU Dashboard menu (CPU, temp, RAM, load)' \
 'audio-dashboard:Toggle the Audio Dashboard menu (output + input mixer)' \
-'audio-route:Toggle the Audio Route picker menu (pick any output directly — the Audio Route pill'\''s right-click surface)' \
 'system-update:Toggle the System Updates menu (repo / AUR / Flatpak)' \
 'valent:Toggle the Valent Connect menu (phone status + actions)' \
 'keep-awake:Toggle the Keep Awake menu (duration grid + countdown)' \
@@ -6275,9 +7077,11 @@ _mshellctl__subcmd__menu__subcmd__help_commands() {
 'podman:Toggle the Podman menu' \
 'notes:Toggle the Notes Hub menu' \
 'ip:Toggle the Public IP menu' \
+'vpn-indicator:Toggle the generic-VPN detail menu (active OpenVPN / WireGuard tunnels)' \
 'network:Toggle the Network Console menu' \
 'power:Toggle the Power Profile (power) menu' \
 'media-player:Toggle the Media Player menu' \
+'mtune:Toggle the Tune (mtune folder-first music player) menu' \
 'lyrics:Toggle the Lyrics menu (synced lyrics of the now-playing track)' \
 'session:Toggle the session / power menu, or run a session action' \
 'mdash:Toggle the mdash dashboard menu — greeting header, calendar + weather, the quick-settings card stack, and a menu-shortcut grid' \
@@ -6306,11 +7110,6 @@ _mshellctl__subcmd__menu__subcmd__help__subcmd__app-launcher_commands() {
 _mshellctl__subcmd__menu__subcmd__help__subcmd__audio-dashboard_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu help audio-dashboard commands' commands "$@"
-}
-(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__audio-route_commands] )) ||
-_mshellctl__subcmd__menu__subcmd__help__subcmd__audio-route_commands() {
-    local commands; commands=()
-    _describe -t commands 'mshellctl menu help audio-route commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__bluetooth_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__help__subcmd__bluetooth_commands() {
@@ -6386,6 +7185,11 @@ _mshellctl__subcmd__menu__subcmd__help__subcmd__mdash_commands() {
 _mshellctl__subcmd__menu__subcmd__help__subcmd__media-player_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu help media-player commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__mtune_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__help__subcmd__mtune_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu help mtune commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__network_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__help__subcmd__network_commands() {
@@ -6518,6 +7322,11 @@ _mshellctl__subcmd__menu__subcmd__help__subcmd__vpn_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu help vpn commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__vpn-indicator_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__help__subcmd__vpn-indicator_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu help vpn-indicator commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__menu__subcmd__help__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__help__subcmd__wallpaper_commands() {
     local commands; commands=()
@@ -6562,6 +7371,11 @@ _mshellctl__subcmd__menu__subcmd__mdash_commands() {
 _mshellctl__subcmd__menu__subcmd__media-player_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu media-player commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__menu__subcmd__mtune_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__mtune_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu mtune commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__menu__subcmd__network_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__network_commands() {
@@ -6774,6 +7588,11 @@ _mshellctl__subcmd__menu__subcmd__vpn_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu vpn commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__menu__subcmd__vpn-indicator_commands] )) ||
+_mshellctl__subcmd__menu__subcmd__vpn-indicator_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl menu vpn-indicator commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__menu__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__menu__subcmd__wallpaper_commands() {
     local commands; commands=()
@@ -6783,6 +7602,325 @@ _mshellctl__subcmd__menu__subcmd__wallpaper_commands() {
 _mshellctl__subcmd__menu__subcmd__weather_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl menu weather commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune_commands] )) ||
+_mshellctl__subcmd__mtune_commands() {
+    local commands; commands=(
+'play-pause:Toggle play / pause' \
+'play:Resume playback' \
+'pause:Pause playback' \
+'stop:Stop playback' \
+'next:Next track' \
+'previous:Previous track (or restart the current one)' \
+'seek:Seek\: \`90\` = to 0\:90, \`+30\` / \`-15\` = relative' \
+'volume:Set volume \`0.0\`–\`1.0\` (\`+0.1\` / \`-0.1\` relative); omit to print it' \
+'rate:Set playback speed \`0.5\`–\`2.0\` (\`up\` / \`down\` step ±0.1); omit to print it' \
+'repeat:Repeat mode\: \`off\` / \`all\` / \`one\` / \`each\` / \`cycle\`; omit to print it' \
+'repeat-count:Times to repeat each track under \`repeat each\` mode; omit to print it' \
+'shuffle:Shuffle\: \`on\` / \`off\` / \`toggle\`; omit to print it' \
+'jump:Jump to a queue position (0-based) and play it' \
+'open:Open a file, folder, or \`.m3u\` / \`.pls\` playlist (replaces the queue)' \
+'library:Point the library at a folder and start playing it' \
+'rescan:Rescan the configured library folders' \
+'playlists:List the saved playlists' \
+'playlist-load:Load a saved playlist by name' \
+'playlist-save:Save the current queue as a playlist' \
+'status:Now-playing summary' \
+'metadata:Full track metadata' \
+'raise:Raise the mtune window' \
+'toggle-window:Show the mtune window if hidden, hide it if visible (creates it after \`mtune --hidden\`). Handy on a keybind' \
+'quit:Quit mtune' \
+'menu:Open the shell'\''s Tune menu (needs mshell)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl mtune commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help_commands() {
+    local commands; commands=(
+'play-pause:Toggle play / pause' \
+'play:Resume playback' \
+'pause:Pause playback' \
+'stop:Stop playback' \
+'next:Next track' \
+'previous:Previous track (or restart the current one)' \
+'seek:Seek\: \`90\` = to 0\:90, \`+30\` / \`-15\` = relative' \
+'volume:Set volume \`0.0\`–\`1.0\` (\`+0.1\` / \`-0.1\` relative); omit to print it' \
+'rate:Set playback speed \`0.5\`–\`2.0\` (\`up\` / \`down\` step ±0.1); omit to print it' \
+'repeat:Repeat mode\: \`off\` / \`all\` / \`one\` / \`each\` / \`cycle\`; omit to print it' \
+'repeat-count:Times to repeat each track under \`repeat each\` mode; omit to print it' \
+'shuffle:Shuffle\: \`on\` / \`off\` / \`toggle\`; omit to print it' \
+'jump:Jump to a queue position (0-based) and play it' \
+'open:Open a file, folder, or \`.m3u\` / \`.pls\` playlist (replaces the queue)' \
+'library:Point the library at a folder and start playing it' \
+'rescan:Rescan the configured library folders' \
+'playlists:List the saved playlists' \
+'playlist-load:Load a saved playlist by name' \
+'playlist-save:Save the current queue as a playlist' \
+'status:Now-playing summary' \
+'metadata:Full track metadata' \
+'raise:Raise the mtune window' \
+'toggle-window:Show the mtune window if hidden, hide it if visible (creates it after \`mtune --hidden\`). Handy on a keybind' \
+'quit:Quit mtune' \
+'menu:Open the shell'\''s Tune menu (needs mshell)' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl mtune help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__jump_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__jump_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help jump commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__library_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__library_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help library commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__metadata_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__metadata_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help metadata commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__next_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help next commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__open_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help open commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__pause_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__play_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__play_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__play-pause_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__play-pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help play-pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__playlist-load_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__playlist-load_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help playlist-load commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__playlist-save_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__playlist-save_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help playlist-save commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__playlists_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__playlists_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help playlists commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__previous_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__previous_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help previous commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__quit_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__quit_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help quit commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__raise_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__raise_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help raise commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__rate_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__rate_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help rate commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__repeat_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__repeat_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help repeat commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__repeat-count_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__repeat-count_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help repeat-count commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__rescan_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__rescan_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help rescan commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__seek_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__seek_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help seek commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__shuffle_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__shuffle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help shuffle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__status_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help status commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help stop commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__toggle-window_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__toggle-window_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help toggle-window commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__help__subcmd__volume_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__help__subcmd__volume_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune help volume commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__jump_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__jump_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune jump commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__library_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__library_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune library commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__menu_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__menu_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune menu commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__metadata_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__metadata_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune metadata commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__next_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__next_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune next commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__open_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune open commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__pause_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__play_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__play_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__play-pause_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__play-pause_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune play-pause commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__playlist-load_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__playlist-load_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune playlist-load commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__playlist-save_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__playlist-save_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune playlist-save commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__playlists_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__playlists_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune playlists commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__previous_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__previous_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune previous commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__quit_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__quit_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune quit commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__raise_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__raise_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune raise commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__rate_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__rate_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune rate commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__repeat_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__repeat_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune repeat commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__repeat-count_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__repeat-count_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune repeat-count commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__rescan_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__rescan_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune rescan commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__seek_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__seek_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune seek commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__shuffle_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__shuffle_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune shuffle commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__status_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__status_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune status commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune stop commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__toggle-window_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__toggle-window_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune toggle-window commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__mtune__subcmd__volume_commands] )) ||
+_mshellctl__subcmd__mtune__subcmd__volume_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl mtune volume commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__notification_commands] )) ||
 _mshellctl__subcmd__notification_commands() {
@@ -6922,16 +8060,28 @@ _mshellctl__subcmd__osk__subcmd__toggle_commands() {
 _mshellctl__subcmd__play_commands() {
     local commands; commands=(
 'start:Start the mpv companion window' \
-'toggle:Toggle the mpv window (show/hide)' \
-'play:Play a target (URL / path / clipboard, per mplay'\''s rules)' \
+'toggle:Toggle play/pause on the running mpv companion' \
+'play:Play a target (URL / path / clipboard; YouTube URLs auto-detected)' \
+'download:Download a YouTube URL (argument or clipboard) to ~/Downloads via yt-dlp' \
 'stop:Stop playback / close the window' \
-'snap:Snapshot the current frame' \
-'pin:Pin the window on top' \
-'focus:Focus the mpv window' \
-'wallpaper:Video-wallpaper engine — \`wallpaper start \[PATH\]\` / \`wallpaper stop\`' \
+'snap:Cycle the floating window to the next screen corner' \
+'pin:Pin the window on top (toggle sticky)' \
+'focus:Focus the mpv window (hop monitor + tag + focus stack)' \
+'wallpaper:Video-wallpaper engine — background layer surface, EGL + libmpv' \
+'__ytdlp:Hidden\: mpv'\''s \`ytdl_hook\` invokes this as its \`ytdl_path\` (wired up by \`control\:\:ensure_ytdl_shim\`) — not meant to be run by hand' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'mshellctl play commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd____ytdlp_commands] )) ||
+_mshellctl__subcmd__play__subcmd____ytdlp_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play __ytdlp commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__download_commands] )) ||
+_mshellctl__subcmd__play__subcmd__download_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play download commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__play__subcmd__focus_commands] )) ||
 _mshellctl__subcmd__play__subcmd__focus_commands() {
@@ -6942,16 +8092,28 @@ _mshellctl__subcmd__play__subcmd__focus_commands() {
 _mshellctl__subcmd__play__subcmd__help_commands() {
     local commands; commands=(
 'start:Start the mpv companion window' \
-'toggle:Toggle the mpv window (show/hide)' \
-'play:Play a target (URL / path / clipboard, per mplay'\''s rules)' \
+'toggle:Toggle play/pause on the running mpv companion' \
+'play:Play a target (URL / path / clipboard; YouTube URLs auto-detected)' \
+'download:Download a YouTube URL (argument or clipboard) to ~/Downloads via yt-dlp' \
 'stop:Stop playback / close the window' \
-'snap:Snapshot the current frame' \
-'pin:Pin the window on top' \
-'focus:Focus the mpv window' \
-'wallpaper:Video-wallpaper engine — \`wallpaper start \[PATH\]\` / \`wallpaper stop\`' \
+'snap:Cycle the floating window to the next screen corner' \
+'pin:Pin the window on top (toggle sticky)' \
+'focus:Focus the mpv window (hop monitor + tag + focus stack)' \
+'wallpaper:Video-wallpaper engine — background layer surface, EGL + libmpv' \
+'__ytdlp:Hidden\: mpv'\''s \`ytdl_hook\` invokes this as its \`ytdl_path\` (wired up by \`control\:\:ensure_ytdl_shim\`) — not meant to be run by hand' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
     _describe -t commands 'mshellctl play help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd____ytdlp_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd____ytdlp_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help __ytdlp commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__download_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__download_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help download commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__focus_commands] )) ||
 _mshellctl__subcmd__play__subcmd__help__subcmd__focus_commands() {
@@ -6995,8 +8157,21 @@ _mshellctl__subcmd__play__subcmd__help__subcmd__toggle_commands() {
 }
 (( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper_commands() {
-    local commands; commands=()
+    local commands; commands=(
+'start:Play a video wallpaper on the background layer' \
+'stop:Stop the video wallpaper' \
+    )
     _describe -t commands 'mshellctl play help wallpaper commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper__subcmd__start_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help wallpaper start commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__play__subcmd__help__subcmd__wallpaper__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play help wallpaper stop commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__play__subcmd__pin_commands] )) ||
 _mshellctl__subcmd__play__subcmd__pin_commands() {
@@ -7030,8 +8205,46 @@ _mshellctl__subcmd__play__subcmd__toggle_commands() {
 }
 (( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper_commands] )) ||
 _mshellctl__subcmd__play__subcmd__wallpaper_commands() {
-    local commands; commands=()
+    local commands; commands=(
+'start:Play a video wallpaper on the background layer' \
+'stop:Stop the video wallpaper' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
     _describe -t commands 'mshellctl play wallpaper commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help_commands] )) ||
+_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help_commands() {
+    local commands; commands=(
+'start:Play a video wallpaper on the background layer' \
+'stop:Stop the video wallpaper' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'mshellctl play wallpaper help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help__subcmd__help_commands] )) ||
+_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play wallpaper help help commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help__subcmd__start_commands] )) ||
+_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play wallpaper help start commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__help__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play wallpaper help stop commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__start_commands] )) ||
+_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__start_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play wallpaper start commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__stop_commands] )) ||
+_mshellctl__subcmd__play__subcmd__wallpaper__subcmd__stop_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl play wallpaper stop commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__plugin_commands] )) ||
 _mshellctl__subcmd__plugin_commands() {
@@ -7246,6 +8459,7 @@ _mshellctl__subcmd__screenshot_commands() {
 'window:Focused window → capture' \
 'output:Pick an output (monitor) → capture' \
 'full:Whole layout (every output) → capture' \
+'repeat:Re-capture the last selected region (no reselect). Falls back to a normal region select the first time it'\''s used' \
 'select-region:(internal) Open the in-shell area selector and print the chosen region as "X,Y WxH" (slurp format). Used by the \`mscreenshot\` CLI'\''s region bridge; not meant for direct use' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
@@ -7263,6 +8477,7 @@ _mshellctl__subcmd__screenshot__subcmd__help_commands() {
 'window:Focused window → capture' \
 'output:Pick an output (monitor) → capture' \
 'full:Whole layout (every output) → capture' \
+'repeat:Re-capture the last selected region (no reselect). Falls back to a normal region select the first time it'\''s used' \
 'select-region:(internal) Open the in-shell area selector and print the chosen region as "X,Y WxH" (slurp format). Used by the \`mscreenshot\` CLI'\''s region bridge; not meant for direct use' \
 'help:Print this message or the help of the given subcommand(s)' \
     )
@@ -7288,6 +8503,11 @@ _mshellctl__subcmd__screenshot__subcmd__help__subcmd__region_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl screenshot help region commands' commands "$@"
 }
+(( $+functions[_mshellctl__subcmd__screenshot__subcmd__help__subcmd__repeat_commands] )) ||
+_mshellctl__subcmd__screenshot__subcmd__help__subcmd__repeat_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl screenshot help repeat commands' commands "$@"
+}
 (( $+functions[_mshellctl__subcmd__screenshot__subcmd__help__subcmd__select-region_commands] )) ||
 _mshellctl__subcmd__screenshot__subcmd__help__subcmd__select-region_commands() {
     local commands; commands=()
@@ -7307,6 +8527,11 @@ _mshellctl__subcmd__screenshot__subcmd__output_commands() {
 _mshellctl__subcmd__screenshot__subcmd__region_commands() {
     local commands; commands=()
     _describe -t commands 'mshellctl screenshot region commands' commands "$@"
+}
+(( $+functions[_mshellctl__subcmd__screenshot__subcmd__repeat_commands] )) ||
+_mshellctl__subcmd__screenshot__subcmd__repeat_commands() {
+    local commands; commands=()
+    _describe -t commands 'mshellctl screenshot repeat commands' commands "$@"
 }
 (( $+functions[_mshellctl__subcmd__screenshot__subcmd__select-region_commands] )) ||
 _mshellctl__subcmd__screenshot__subcmd__select-region_commands() {
