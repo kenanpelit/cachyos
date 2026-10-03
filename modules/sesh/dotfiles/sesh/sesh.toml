@@ -247,6 +247,12 @@ path            = "~/.podman/vpn"
 startup_command = "ytu-podman-up"
 preview_command = "podman ps -a --filter name=vpn-ytu"
 
+[[session]]
+name            = "EGE Podman 󰗀 "
+path            = "~/.podman/vpn"
+startup_command = "ege-podman-up"
+preview_command = "podman ps -a --filter name=vpn-ege"
+
 # ----- 4.7 Media -------------------------------------------------------------
 [[session]]
 name            = "Music 󰎈 "
