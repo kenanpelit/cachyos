@@ -182,6 +182,7 @@ declare -A INCOGNITO_BROWSERS=(
 
 # Applications - UPDATED
 declare -A APPS=(
+  ["gpt"]="chatgpt|--ozone-platform=wayland --force-device-scale-factor=1.25|3|secure|1|false"
   ["discord"]="discord|-m --class=discord --title=discord|5|secure|1|true"
   ["webcord"]="webcord|--class=WebCord --title=Webcord|5|secure|1|false"
   ["spotify"]="spotify|--class Spotify -T Spotify --enable-features=UseOzonePlatform --ozone-platform=wayland|8|bypass|1|false"
