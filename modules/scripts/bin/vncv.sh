@@ -21,6 +21,15 @@
 set -euo pipefail
 
 # --- java ---------------------------------------------------------------
+# TurboVNC 3.3+ ships a VncViewer.jar built for JDK 26+, while the system
+# default JDK (archlinux-java) may be older. Without JAVA_HOME, prefer the
+# newest JDK under /usr/lib/jvm rather than whatever `java` is on PATH.
+if [[ -z "${JAVA_HOME:-}" ]]; then
+	newest_jdk="$(find /usr/lib/jvm -mindepth 1 -maxdepth 1 -name 'java-*-openjdk' 2>/dev/null | sort -V | tail -n1)"
+	if [[ -n "$newest_jdk" && -x "$newest_jdk/bin/java" ]]; then
+		JAVA_HOME="$newest_jdk"
+	fi
+fi
 JAVA="${JAVA_HOME:+$JAVA_HOME/bin/}java"
 if ! command -v "$JAVA" >/dev/null 2>&1; then
 	echo "vncv: java not found (install a JRE, or set JAVA_HOME)." >&2
