@@ -660,12 +660,22 @@ case "$1" in
 "limit")
 	case "$2" in
 	"up")
-		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -u "$3"
-		echo -e "${Green}Upload limit: $3 KB/s${Color_Off}"
+		if [ "$3" = "0" ]; then
+			transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -U
+			echo -e "${Green}Upload limit: sınırsız${Color_Off}"
+		else
+			transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -u "$3"
+			echo -e "${Green}Upload limit: $3 KB/s${Color_Off}"
+		fi
 		;;
 	"down")
-		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -d "$3"
-		echo -e "${Green}Download limit: $3 KB/s${Color_Off}"
+		if [ "$3" = "0" ]; then
+			transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -D
+			echo -e "${Green}Download limit: sınırsız${Color_Off}"
+		else
+			transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -d "$3"
+			echo -e "${Green}Download limit: $3 KB/s${Color_Off}"
+		fi
 		;;
 	*)
 		echo -e "${Red}Kullanım: limit [up/down] [hız KB/s]${Color_Off}"
