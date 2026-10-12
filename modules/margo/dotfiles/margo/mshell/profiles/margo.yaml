@@ -145,6 +145,7 @@ bars:
     - Ai
     - Podman
     - Lyrics
+    - Translate
   bottom_bar:
     minimum_height: 28
     left_widgets:
@@ -216,6 +217,8 @@ menus:
     position: Top
   control_center_menu:
     maximum_height: 1080
+  translate_menu:
+    maximum_height: 640
   media_player_menu:
     position: TopLeft
     minimum_width: 460
