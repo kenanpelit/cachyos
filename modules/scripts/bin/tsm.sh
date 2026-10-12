@@ -660,11 +660,11 @@ case "$1" in
 "limit")
 	case "$2" in
 	"up")
-		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -as -u "$3"
+		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -u "$3"
 		echo -e "${Green}Upload limit: $3 KB/s${Color_Off}"
 		;;
 	"down")
-		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -as -d "$3"
+		transmission-remote "$HOST:$PORT" --auth "$USER:$PASS" -d "$3"
 		echo -e "${Green}Download limit: $3 KB/s${Color_Off}"
 		;;
 	*)
