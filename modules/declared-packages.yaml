@@ -1,17 +1,29 @@
 description: Packages installed manually on the system (auto-synced by mdots)
 packages:
-  - adw-gtk-theme
-  - blueman
-  - chromium
-  - cups
-  - foot
-  - google-chrome
-  - graphify
-  - playwright
-  - remmina-plugin-anydesk-git
-  - remmina-plugin-folder
-  - remmina-plugin-rustdesk
-  - shelly
+- adw-gtk-theme
+- anki
+- auth-tarball-from-git
+- blueman
+- chatgpt-desktop-bin
+- chromium
+- cups
+- euphonica-git
+- flatpak-builder
+- foot
+- google-chrome
+- gr-lora_sdr-git
+- graphify
+- herdr-bin
+- jdk21-openjdk
+- just
+- playwright
+- python-pywhispercpp-vulkan
+- remmina-plugin-anydesk-git
+- remmina-plugin-folder
+- remmina-plugin-rustdesk
+- sayonara-player
+- shelly
+- shelly-flatpak-backend
 exclude: []
 conflicts: []
 pre_install_hook: null
