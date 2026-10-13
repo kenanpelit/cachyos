@@ -49,6 +49,9 @@ ENGLISH_HTTPS_ALLOWED_SUBNETS="${ENGLISH_HTTPS_ALLOWED_SUBNETS:-}"
 ALLOW_LOCALSEND_PORT="${ALLOW_LOCALSEND_PORT:-0}"
 LOCALSEND_PORT="${LOCALSEND_PORT:-53317}"
 LOCALSEND_ALLOWED_SUBNETS="${LOCALSEND_ALLOWED_SUBNETS:-}"
+ALLOW_DEEPENGLISH_PORT="${ALLOW_DEEPENGLISH_PORT:-0}"
+DEEPENGLISH_PORT="${DEEPENGLISH_PORT:-8096}"
+DEEPENGLISH_ALLOWED_SUBNETS="${DEEPENGLISH_ALLOWED_SUBNETS:-}"
 
 if command -v ufw >/dev/null 2>&1; then
   ${SUDO} ufw --force reset
@@ -120,6 +123,18 @@ if command -v ufw >/dev/null 2>&1; then
     else
       ${SUDO} ufw allow "${LOCALSEND_PORT}/udp"
       ${SUDO} ufw allow "${LOCALSEND_PORT}/tcp"
+    fi
+  fi
+
+  if [ "${ALLOW_DEEPENGLISH_PORT}" = "1" ]; then
+    if [ -n "${DEEPENGLISH_ALLOWED_SUBNETS// /}" ]; then
+      IFS=', ' read -r -a deepenglish_subnets <<< "${DEEPENGLISH_ALLOWED_SUBNETS}"
+      for subnet in "${deepenglish_subnets[@]}"; do
+        [ -n "${subnet}" ] || continue
+        ${SUDO} ufw allow from "${subnet}" to any port "${DEEPENGLISH_PORT}" proto tcp
+      done
+    else
+      ${SUDO} ufw allow "${DEEPENGLISH_PORT}/tcp"
     fi
   fi
 
