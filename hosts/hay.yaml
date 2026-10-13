@@ -67,6 +67,7 @@ enabled_modules:
 - subliminal
 - transmission
 - brave
+- chrome
 - browserpass
 - helium
 - firefox
