@@ -184,10 +184,12 @@ launch_scrcpy() {
   fi
   [[ -n "${max_size:-}" ]] && scrcpy_cmd+=(--max-size "$max_size")
 
-  # Wayland-safe input: UHID
+  # Wayland-safe input. uhid mouse simulates a relative HID device, whose
+  # accel curve fights the host pointer's own and feels jittery/unstable;
+  # sdk maps window coordinates 1:1 (absolute), independent of host DPI.
   scrcpy_cmd+=(
     --window-title "Android Screen Mirror"
-    --mouse=uhid
+    --mouse=sdk
     --keyboard=uhid
     --disable-screensaver
   )
