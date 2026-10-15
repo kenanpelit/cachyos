@@ -83,7 +83,24 @@ if ! command -v mullvad >/dev/null 2>&1; then
 	exit 0
 fi
 
-if ! mullvad account get >/dev/null 2>&1; then
+# `account get` round-trips the daemon's own API call, not just local state.
+# Observed 2026-10-15: a WireGuard keepalive-ping failure triggered a
+# reconnect; during the firewall-policy transition every API access method
+# briefly returned "Connection refused", making a single `account get` fail
+# even though the account was never actually logged out. Retry a few times
+# before concluding it's a real logout — this check now ran periodically
+# (not just at boot), so a multi-second API hiccup is far more likely to be
+# sampled than it was as a one-shot boot check.
+account_ok() {
+	local tries=3 i
+	for ((i = 0; i < tries; i++)); do
+		mullvad account get >/dev/null 2>&1 && return 0
+		(( i < tries - 1 )) && sleep "$poll_sec"
+	done
+	return 1
+}
+
+if ! account_ok; then
 	echo "Mullvad account not logged in; enabling Blocky fallback."
 	mullvad_soft_disable
 	blocky_start
