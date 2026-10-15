@@ -91,21 +91,29 @@ usb_connect() {
 }
 
 # Detect phone IP from Android itself (not PC interfaces).
+# Retries a few times: right after `adb tcpip 5555` the device re-enumerates
+# over ADB before its network stack has settled, so the first `ip addr show`
+# query can come back empty even though WiFi is up.
 detect_phone_ip() {
-  local ipadd=""
+  local ipadd="" tries=5 i
 
-  # Most Android devices use wlan0; some may use wlan1.
-  for iface in wlan0 wlan1 wifi0; do
-    ipadd="$(adb_cmd shell ip -f inet addr show "$iface" 2>/dev/null |
-      awk '/inet /{print $2}' | cut -d/ -f1 | head -n1 || true)"
+  for ((i = 0; i < tries; i++)); do
+    # Most Android devices use wlan0; some may use wlan1.
+    for iface in wlan0 wlan1 wifi0; do
+      ipadd="$(adb_cmd shell ip -f inet addr show "$iface" 2>/dev/null |
+        awk '/inet /{print $2}' | cut -d/ -f1 | head -n1 || true)"
+      [[ -n "$ipadd" ]] && break
+    done
+
+    # Fallback: parse default route src
+    if [[ -z "$ipadd" ]]; then
+      ipadd="$(adb_cmd shell ip route 2>/dev/null |
+        awk '/src /{for(i=1;i<=NF;i++) if($i=="src") {print $(i+1); exit}}' || true)"
+    fi
+
     [[ -n "$ipadd" ]] && break
+    (( i < tries - 1 )) && sleep 1
   done
-
-  # Fallback: parse default route src
-  if [[ -z "$ipadd" ]]; then
-    ipadd="$(adb_cmd shell ip route 2>/dev/null |
-      awk '/src /{for(i=1;i<=NF;i++) if($i=="src") {print $(i+1); exit}}' || true)"
-  fi
 
   printf "%s" "$ipadd"
 }
