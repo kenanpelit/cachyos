@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Boot-time fail-safe:
+# Fail-safe, run at boot and then every 30s for the rest of the session
+# (osc-mullvad-boot-ensure.timer): login-net's own Mullvad/Blocky reconcile
+# only runs once at login, so nothing else catches a tunnel that drops and
+# gets stuck in Mullvad's Blocked/Error killswitch state mid-session.
 # - Mullvad healthy -> keep Blocky off.
 # - Mullvad disconnected/unhealthy/revoked -> enable Blocky fallback.
 

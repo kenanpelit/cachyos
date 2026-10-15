@@ -1,8 +1,13 @@
 [Unit]
-Description=Delayed Mullvad/Blocky DNS fail-safe reconcile
+Description=Delayed Mullvad/Blocky DNS fail-safe reconcile (boot + periodic re-check)
 
 [Timer]
 OnBootSec=5s
+# Re-arms after every run, not just at boot: if the tunnel drops mid-session
+# (e.g. a WireGuard re-key failure) and gets stuck in Mullvad's Blocked/Error
+# killswitch state, nothing else notices — login-net's own reconcile only
+# runs once, at login. This periodic re-check is the fallback's fallback.
+OnUnitActiveSec=30s
 AccuracySec=1s
 Unit=osc-mullvad-boot-ensure.service
 

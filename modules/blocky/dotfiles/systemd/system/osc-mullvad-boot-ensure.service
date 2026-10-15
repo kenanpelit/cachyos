@@ -1,5 +1,5 @@
 [Unit]
-Description=Ensure Mullvad/Blocky DNS fail-safe state on boot
+Description=Ensure Mullvad/Blocky DNS fail-safe state (boot + periodic re-check)
 Wants=network-online.target mullvad-daemon.service
 After=network-online.target NetworkManager.service mullvad-daemon.service
 
