@@ -416,6 +416,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `start-eng-deep`
+**Description:** Deep English • yerel çalışma alanı başlatıcısı
+
+**Usage:** `start-eng-deep`
+
+---
+
 ### 📂 `start-eng`
 **Description:** English • yerel çalışma alanı başlatıcısı
 

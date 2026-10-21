@@ -140,6 +140,7 @@ declare -A CHROME_BROWSERS=(
   ["chrome-nil"]="profile_chrome|nil --separate --restore-last-session|1|secure|2|false"
   ["chrome-ai"]="profile_chrome|ai --separate --restore-last-session|3|secure|2|false"
   ["chrome-compecta"]="profile_chrome|compecta --separate --restore-last-session|4|secure|2|false"
+  ["chrome-compecta-chat"]="profile_chrome|compecta --separate --app=https://chat.google.com/ --title GoogleChat|4|secure|1|false"
   ["chrome-block"]="profile_chrome|block --separate --restore-last-session|1|secure|2|false"
   ["chrome-whats"]="profile_chrome|kenp --separate --app-id=hnpfjngllnobngcgfapefoaidbinmjnm|9|secure|1|false"
   ["chrome-exclude"]="profile_chrome|kenp --separate --class=exclude --title=exclude --restore-last-session|6|bypass|1|false"
