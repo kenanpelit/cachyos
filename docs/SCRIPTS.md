@@ -325,6 +325,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `osc-ytplay`
+**Description:** Play a geo-restricted YouTube URL (arg or clipboard) with mpv,
+
+**Usage:** `osc-ytplay`
+
+---
+
 ### 📂 `pdfkes`
 **Description:** Advanced PDF file management and splitting utility (OSC PDF Splitter)
 
