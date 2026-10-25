@@ -11,13 +11,14 @@ general:
       name: Atasehir
       country: TR
   weather_poll_minutes: 180
+  network_osd_enabled: true
   media_large_album_art: true
   settings_panel_width: 1440
   settings_panel_height: 1080
 theme:
   icons:
     app_icon_theme: kora
-  theme: Margo
+  theme: Default
   apps:
     helium:
       enabled: true
@@ -296,6 +297,12 @@ launcher:
     trigger: LoginOnce
     args: ''
     working_dir: ''
+  - name: start-chrome-compecta-chat
+    enabled: true
+    delay_secs: 6
+    trigger: LoginOnce
+    args: ''
+    working_dir: ''
   - name: start-brave-compecta
     enabled: false
     delay_secs: 13
@@ -394,13 +401,13 @@ launcher:
     working_dir: ''
   - name: start-eng
     enabled: false
-    delay_secs: 15
+    delay_secs: 11
     trigger: LoginOnce
     args: ''
     working_dir: ''
-  - name: start-eng pwa
+  - name: start-eng-deep
     enabled: true
-    delay_secs: 15
+    delay_secs: 12
     trigger: LoginOnce
     args: ''
     working_dir: ''
@@ -432,7 +439,7 @@ alarm:
 login_network:
   enabled: true
   wifi_connection: Ken_5
-  delay_secs: 6
+  delay_secs: 5
 bluetooth:
   autoconnect_enabled: true
   autoconnect_delay_secs: 10
