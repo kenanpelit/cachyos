@@ -4,7 +4,7 @@
 
  SESSION
    prefix + S        New session (in the current directory, and switch to it)
-   prefix + K        Rename session
+   prefix + $        Rename session
    prefix + Tab      Last session (sesh last)
    prefix + Ctrl-t   Sesh switcher (fzf, preview)
    prefix + s        tmux choose-tree (session tree, with preview)
@@ -48,6 +48,7 @@
    prefix + z        Toggle zoom
    prefix + x        Kill pane
    prefix + Y        Toggle synchronize-panes
+   (copy mode)       Scrollbar appears while scrolling back
 
  COPY MODE
    prefix + Enter    Enter copy mode
@@ -69,6 +70,7 @@
    prefix + i        Anote snippet
    prefix + N        Anote (general)
    prefix + T        Large terminal popup (current directory)
+   prefix + Shift-Tab Floating pane (persistent, bottom-centre; tmux 3.8)
    prefix + B        tm buffer
    prefix + V        tm clip
    prefix + G        tm speed
