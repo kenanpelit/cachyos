@@ -1,40 +1,38 @@
 # Subliminal Configuration File (template)
 # Fill credentials manually (do NOT commit secrets).
+# Schema matches subliminal 2.8.0 CLI (`subliminal --help` / `subliminal download --help`).
+# NOTE: table names are singular ("provider"/"refiner"), not plural — subliminal
+# silently drops the whole file on any TOML syntax error, so keep arrays comma-clean.
 
-[providers.addic7ed]
-username = ""
-password = ""
-
-[providers.opensubtitles]
-username = ""
-password = ""
-
-[providers.opensubtitlescom]
-username = ""
-password = ""
-
-[refiners]
-omdb_api_key = ""
-
+[default]
 cache_dir = "~/.cache/subliminal"
 
-languages = [
-  "tur",
-  "tr",
-  "eng",
-]
+[provider.addic7ed]
+username = ""
+password = ""
 
-[providers.enabled]
-addic7ed = true
-opensubtitles = true
-opensubtitlescom = true
-legendastv = false
-shooter = false
-thesubdb = true
-tvsubtitles = true
+[provider.opensubtitles]
+username = ""
+password = ""
+
+[provider.opensubtitlescom]
+username = ""
+password = ""
+
+[refiner.omdb]
+apikey = ""
 
 [download]
+# Default languages (used when -l/--language isn't passed explicitly)
+language = ["tur", "tr", "eng"]
 min_score = 0
-max_subtitles = 1
-hearing_impaired = false
+# Subtitle category preference order (n=normal, fo=foreign-only, hi=hearing-impaired);
+# replaces the deprecated "hearing_impaired" boolean
+subtitle_categories = "n,fo,hi"
 force = false
+# No provider/ignore_provider/extend_provider list here on purpose: subliminal
+# 2.8.0 already defaults to every provider except the three that need a paid
+# VIP account (bsplayer, opensubtitlesvip, opensubtitlescomvip). That already
+# covers addic7ed, gestdown, napiprojekt, opensubtitles, opensubtitlescom,
+# podnapisi, subtis, subtitulamos, tvsubtitles. Add `extend_provider = [...]`
+# here to pull in a VIP one once you have an account for it.
