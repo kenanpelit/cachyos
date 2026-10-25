@@ -30,9 +30,15 @@ min_score = 0
 # replaces the deprecated "hearing_impaired" boolean
 subtitle_categories = "n,fo,hi"
 force = false
-# No provider/ignore_provider/extend_provider list here on purpose: subliminal
-# 2.8.0 already defaults to every provider except the three that need a paid
-# VIP account (bsplayer, opensubtitlesvip, opensubtitlescomvip). That already
-# covers addic7ed, gestdown, napiprojekt, opensubtitles, opensubtitlescom,
-# podnapisi, subtis, subtitulamos, tvsubtitles. Add `extend_provider = [...]`
-# here to pull in a VIP one once you have an account for it.
+# opensubtitles (opensubtitles.org, legacy XML-RPC API — distinct from the
+# newer opensubtitlescom) is ignored: its terminate() calls self.server.close()
+# on an xmlrpc.client.ServerProxy, which has no real close() method, so the
+# call gets forwarded as a bogus RPC to the server and always errors out with
+# a noisy traceback on every successful run. Harmless (the subtitle is already
+# saved by then) but silenced here since opensubtitlescom covers the same site.
+ignore_provider = ["opensubtitles"]
+# No other provider/extend_provider list here on purpose: subliminal 2.8.0
+# already defaults to every remaining provider except the three that need a
+# paid VIP account (bsplayer, opensubtitlesvip, opensubtitlescomvip). Add
+# `extend_provider = [...]` here to pull one of those in once you have an
+# account for it.
