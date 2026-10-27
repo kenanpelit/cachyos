@@ -1865,3 +1865,6 @@ export PATH
 
 # kimi-code
 export PATH="$HOME/.kimi-code/bin:$PATH"
+
+# Hermes Agent command
+case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac
