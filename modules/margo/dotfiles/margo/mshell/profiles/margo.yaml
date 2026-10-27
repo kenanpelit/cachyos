@@ -18,7 +18,7 @@ general:
 theme:
   icons:
     app_icon_theme: kora
-  theme: Default
+  theme: Margo
   apps:
     helium:
       enabled: true
@@ -475,4 +475,4 @@ control_center:
   - color_picker
 toasts:
   position: TopLeft
-config_version: 3
+config_version: 4
