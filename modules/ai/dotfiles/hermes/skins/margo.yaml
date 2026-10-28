@@ -11,7 +11,7 @@ colors:
   banner_text: '#bac2de'
   ui_text: '#bac2de'
   ui_label: '#abb2bf'
-  banner_dim: '#9ba1ba'
+  banner_dim: '#bac2de'
   banner_border: '#44475a'
   ui_border: '#44475a'
   ui_ok: '#50fa7b'
@@ -21,8 +21,8 @@ colors:
   input_rule: '#bd93f9'
   response_border: '#6272a4'
   status_bar_bg: '#21222c'
-  status_bar_text: '#abb2bf'
-  status_bar_good: '#50fa7b'
+  status_bar_text: '#bac2de'
+  status_bar_good: '#bd93f9'
   status_bar_warn: '#ffb86c'
   status_bar_bad: '#ff79c6'
   status_bar_critical: '#ff5555'
@@ -39,6 +39,8 @@ colors:
   completion_menu_bg: '#21222c'
   completion_menu_current_bg: '#44475a'
   completion_menu_meta_bg: '#21222c'
+  status_bar_strong: '#8be9fd'
+  status_bar_dim: '#7f849c'
 branding:
   agent_name: Hermes Agent
   prompt_symbol: ❯
