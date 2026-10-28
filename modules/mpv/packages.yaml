@@ -4,3 +4,4 @@ packages:
   - mpv
   - yt-dlp
   - deno
+  - mpv-mpris

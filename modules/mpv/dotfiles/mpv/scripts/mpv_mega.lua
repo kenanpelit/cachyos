@@ -118,9 +118,30 @@ mp.add_key_binding("Ctrl+s", "screenshot-timestamp", screenshot_timestamp)
 ----------------------------------------------------------------
 -- 2) AUDIO’DA OSC’Yİ HER ZAMAN GÖSTER
 ----------------------------------------------------------------
+-- Videoda OSC'nin moduna dokunulmaz (margo-osc.conf'taki visibility ya da Delete ile seçilen kalır); yalnız ses dosyasında
+-- "always" yapılır ve ardından gelen ilk videoda margo-osc.conf'taki moda geri dönülür.
+local function osc_conf_visibility()
+	local path = mp.find_config_file("script-opts/margo-osc.conf")
+	local f = path and io.open(path, "r")
+	if not f then return "auto" end
+	local mode = "auto"
+	for line in f:lines() do
+		local value = line:match("^%s*visibility%s*=%s*(%a+)%s*$")
+		if value then mode = value end
+	end
+	f:close()
+	return mode
+end
+local osc_forced_always = false
 mp.register_event("file-loaded", function()
 	local hasvid = (mp.get_property_osd("video") or "") ~= "no"
-	mp.commandv("script-message", "osc-visibility", (hasvid and "auto" or "always"), "no-osd")
+	if not hasvid then
+		mp.commandv("script-message", "osc-visibility", "always", "no-osd")
+		osc_forced_always = true
+	elseif osc_forced_always then
+		mp.commandv("script-message", "osc-visibility", osc_conf_visibility(), "no-osd")
+		osc_forced_always = false
+	end
 	-- İstemezsen aşağıdaki satırı kaldır:
 	mp.commandv("set", "options/osd-bar", (hasvid and "yes" or "no"))
 end)

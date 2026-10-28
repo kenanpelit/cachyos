@@ -65,3 +65,7 @@ modules/xdg-mimes/dotfiles/applications/helium-*.desktop
 
 # graphify generated knowledge-graph output (any module + repo root)
 graphify-out/
+
+# mpv_sponsorblock writes its user id and database next to the script
+modules/mpv/dotfiles/mpv/scripts/sponsorblock_shared/sponsorblock.txt
+modules/mpv/dotfiles/mpv/scripts/sponsorblock_shared/sponsorblock.db

@@ -2750,23 +2750,21 @@ local function osc_init()
     ne.visible = (osc_param.playresx >= visible_min_width)
     ne.content = function ()
         if not cache_enabled() then return "" end
-        local dmx_cache = state.cache_state["cache-duration"]
-        local thresh = math.min(state.dmx_cache * 0.05, 5)  -- 5% or 5s
-        if dmx_cache and math.abs(dmx_cache - state.dmx_cache) >= thresh then
-            state.dmx_cache = dmx_cache
-        else
-            dmx_cache = state.dmx_cache
+        local cache_state = state.cache_state and state.cache_state["cache-duration"]
+        local thresh = math.min(state.dmx_cache * 0.05, 5) -- 5% or 5s
+        if cache_state and math.abs(cache_state - state.dmx_cache) >= thresh then
+            state.dmx_cache = cache_state
         end
+        local dmx_cache = state.dmx_cache
         local min = math.floor(dmx_cache / 60)
-        local sec = math.floor(dmx_cache % 60) -- don't round e.g. 59.9 to 60
-        local cache_time = (min > 0 and string.format("%sm%02.0fs", min, sec) or string.format("%3.0fs", sec))
-
-        local dmx_speed = state.cache_state["raw-input-rate"] or 0
+        local sec = math.floor(dmx_cache % 60)
+        local cache_time = (min > 0 and string.format("%sm%02ds", min, sec) or string.format("%3ds", sec))
+        local dmx_speed = state.cache_state and state.cache_state["raw-input-rate"] or 0
         local cache_speed = utils.format_bytes_humanized(dmx_speed)
         local number, unit = cache_speed:match("([%d%.]+)%s*(%S+)")
-        local cache_info = state.buffering and locale.buffering .. ": " .. mp.get_property("cache-buffering-state") .. "%" or cache_time
-        local cache_info_speed = string.format("%8s %4s/s", number, unit)
-
+        local percent = mp.get_property("cache-buffering-state") or "0"
+        local cache_info = state.buffering and (locale.buffering .. ": " .. percent .. "%") or cache_time
+        local cache_info_speed = string.format("%8s %4s/s", (number or 0), (unit or "B"))
         return user_opts.cache_info_speed and cache_info .. "\\N" .. cache_info_speed or cache_info
     end
     ne.tooltip_style = osc_styles.tooltip
@@ -2849,14 +2847,22 @@ local function osc_init()
     end
     ne.eventresponder["mbtn_left_down"] = function (element)
         element.state.mbtnleft = true
+        state.playing_and_seeking = false  -- clear state
         mp.commandv("seek", get_slider_value(element), "absolute-percent+exact")
     end
     ne.eventresponder["shift+mbtn_left_down"] = function (element)
         element.state.mbtnleft = true
+        state.playing_and_seeking = false
         mp.commandv("seek", get_slider_value(element), "absolute-percent")
     end
     ne.eventresponder["mbtn_left_up"] = function (element)
         element.state.mbtnleft = false
+        if state.playing_and_seeking then
+            if mp.get_property("eof-reached") == "no" and user_opts.mouse_seek_pause then
+                mp.commandv("cycle", "pause")
+            end
+            state.playing_and_seeking = false
+        end
     end
     ne.eventresponder["mbtn_right_down"] = function (element)
         local chapter
@@ -2876,12 +2882,6 @@ local function osc_init()
     end
     ne.eventresponder["reset"] = function (element)
         element.state.lastseek = nil
-        if state.playing_and_seeking then
-            if mp.get_property("eof-reached") == "no" and user_opts.mouse_seek_pause then
-                mp.commandv("cycle", "pause")
-            end
-            state.playing_and_seeking = false
-        end
     end
     ne.eventresponder["wheel_up_press"] = function () mp.commandv("seek", 10) end
     ne.eventresponder["wheel_down_press"] = function () mp.commandv("seek", -10) end
@@ -3076,7 +3076,7 @@ end
 local function mouse_leave()
     state.touchtime = nil
 
-    if get_hidetimeout() >= 0 and get_touchtimeout() <= 0 then
+    if get_hidetimeout() >= 0 and get_touchtimeout() <= 0 and state.showtime ~= nil then
         local elapsed_time = mp.get_time() - state.showtime
 
         if elapsed_time >= (get_hidetimeout() / 1000) then
@@ -3152,12 +3152,21 @@ local function process_event(source, what)
         state.mouse_in_window = true
 
         local mouseX, mouseY = get_virt_mouse_pos()
+        if mouseX ~= -1 and mouseY ~= -1 then
+            if state.last_mouseX == nil or state.last_mouseY == nil then
+                state.last_mouseX, state.last_mouseY = mouseX, mouseY
+            end
+        end
+
         if user_opts.minmousemove == 0 or
             ((state.last_mouseX ~= nil and state.last_mouseY ~= nil) and
                 ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
                     or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
                 )
             ) then
+                if mouseX ~= -1 and mouseY ~= -1 then
+                    state.last_mouseX, state.last_mouseY = mouseX, mouseY
+                end
                 if user_opts.bottomhover then -- if enabled, only show osc if mouse is hovering at the bottom of the screen (where the UI elements are)
                     local top_hover = window_controls_enabled() and (user_opts.window_title or user_opts.window_controls)
                     if mouseY > osc_param.playresy - (user_opts.bottomhover_zone or 130)
@@ -3166,7 +3175,7 @@ local function process_event(source, what)
                     else
                         state.touchtime = nil
 
-                        if get_hidetimeout() >= 0 and get_touchtimeout() <= 0 then
+                        if get_hidetimeout() >= 0 and get_touchtimeout() <= 0 and state.showtime ~= nil then
                             local elapsed_time = mp.get_time() - state.showtime
 
                             if elapsed_time >= (get_hidetimeout() / 1000) then
@@ -3178,7 +3187,6 @@ local function process_event(source, what)
                     show_osc()
                 end
         end
-        state.last_mouseX, state.last_mouseY = mouseX, mouseY
 
         local n = state.active_element
         if element_has_action(elements[n], action) then
@@ -3244,7 +3252,7 @@ local function render()
 
         -- store initial mouse position
         if (state.last_mouseX == nil or state.last_mouseY == nil)
-            and not (mouseX == nil or mouseY == nil) then
+            and not (mouseX == nil or mouseY == nil or mouseX == -1 or mouseY == -1) then
 
             state.last_mouseX, state.last_mouseY = mouseX, mouseY
         end
@@ -3520,6 +3528,11 @@ mp.observe_property("chapter-list", "native", function(_, list)
     update_duration_watch()
     request_init()
 end)
+mp.register_event("seek", function()
+    if user_opts.osc_on_seek then
+        show_osc()
+    end
+end)
 mp.observe_property("seeking", "native", function(_, seeking)
     if user_opts.seek_resets_hidetimeout then
         reset_timeout()
@@ -3528,12 +3541,6 @@ mp.observe_property("seeking", "native", function(_, seeking)
     if state.new_file_flag then
         state.new_file_flag = false
         return
-    end
-
-    if seeking and user_opts.osc_on_seek then
-        mp.register_event("seek", show_osc) -- show OSC while seeking
-    else
-        mp.unregister_event(show_osc) -- remove event when seeking stops
     end
 end)
 mp.observe_property("fullscreen", "bool", function(_, val)
@@ -3570,6 +3577,7 @@ mp.observe_property("osd-dimensions", "native", function()
 end)
 mp.observe_property("osd-scale-by-window", "native", request_init_resize)
 mp.observe_property("touch-pos", "native", handle_touch)
+mp.observe_property("volume", "number", request_tick)
 mp.observe_property("mute", "bool", function(_, val)
     state.mute = val
     request_tick()
@@ -3836,7 +3844,9 @@ opt.read_options(user_opts, "margo-osc", function(changed)
         set_tick_delay("display_fps", mp.get_property_number("display_fps"))
     end
     request_tick()
-    visibility_mode(user_opts.visibility, true)
+    if changed.visibility then
+        visibility_mode(user_opts.visibility, true)
+    end
     update_duration_watch()
     request_init()
 end)

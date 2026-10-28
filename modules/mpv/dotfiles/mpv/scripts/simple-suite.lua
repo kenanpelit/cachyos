@@ -2135,12 +2135,16 @@ function history_blacklist_check()
 		msg.info(blacklist_msg)
 		return invertable_return[1]
 	elseif not starts_protocol(protocols, filePath) then
-		if has_value(history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'), nil) or 
-		has_value(history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'):gsub('\\$', ''), nil) then
+		-- A path with no extension (an extensionless file, an unknown protocol such as av://) has no folder or extension
+		-- to match: those checks are skipped instead of indexing nil.
+		local folder = filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$')
+		local extension = filePath:match('%.([^%.]+)$')
+		if folder and (has_value(history_blacklist, folder, nil) or
+		has_value(history_blacklist, (folder:gsub('\\$', '')), nil)) then
 			msg.info(blacklist_msg)
 			return invertable_return[1]
-		elseif has_value(history_blacklist, filePath:match('%.([^%.]+)$'), nil) or
-		has_value(history_blacklist, "."..filePath:match('%.([^%.]+)$'), nil) then
+		elseif extension and (has_value(history_blacklist, extension, nil) or
+		has_value(history_blacklist, "."..extension, nil)) then
 			msg.info(blacklist_msg)
 			return invertable_return[1]
 		else --1.1.2# check to add any subfolder after /* to blacklist. issue #70
