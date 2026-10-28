@@ -10,7 +10,6 @@ packages:
 - euphonica-git
 - flatpak-builder
 - foot
-- google-chrome
 - gr-lora_sdr-git
 - graphify
 - herdr-bin

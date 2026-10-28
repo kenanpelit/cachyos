@@ -1,0 +1,5 @@
+description: Google Chrome packages
+
+packages:
+  - jq # profile_chrome / chromectl
+  - google-chrome
