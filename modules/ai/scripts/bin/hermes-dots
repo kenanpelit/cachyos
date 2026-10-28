@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+# hermes-dots — keep Hermes Agent's config in the ai module, its important files sops-encrypted (as subliminal does).
+#
+#   hermes-dots capture          live ~/.hermes  -> repo   (encrypts the secret files; only rewrites what changed)
+#   hermes-dots restore [-f]     repo -> live ~/.hermes    (fills in what is missing; -f overwrites, keeping a .bak copy)
+#   hermes-dots status           which files differ between the repo and the live install
+#
+# Encrypted (modules/ai/secrets/hermes/*.sops): config.yaml, .env (API keys), auth.json (OAuth tokens), memories/MEMORY.md,
+# memories/USER.md. Plain (modules/ai/dotfiles/hermes/): SOUL.md, skins/*.yaml.
+#
+# Files are copied, never symlinked: Hermes rewrites config.yaml, auth.json (token refresh) and the active skin in place, and a
+# rewrite would silently replace a symlink. That is also why restore does not overwrite by default: a live auth.json is newer
+# than the repo's copy. Run `capture` after changing Hermes' settings, then commit.
+set -euo pipefail
+
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+MODULE_DIR="$(cd "$(dirname "$SELF")/../.." && pwd)"   # modules/ai
+SECRETS_DIR="$MODULE_DIR/secrets/hermes"
+PLAIN_DIR="$MODULE_DIR/dotfiles/hermes"
+
+if [[ -n "${SUDO_USER:-}" ]]; then
+  TARGET_USER="$SUDO_USER"
+  USER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
+else
+  TARGET_USER="$(id -un)"
+  USER_HOME="$HOME"
+fi
+HERMES_DIR="${HERMES_HOME:-$USER_HOME/.hermes}"
+
+KEY_FILE="${DCLI_SOPS_KEY_PATH:-$USER_HOME/.config/sops/age/keys.txt}"
+KEY_FILE="${KEY_FILE/#\~/$USER_HOME}"
+# The age recipient every secret in this repo is encrypted to (the public half of the sops module's key).
+AGE_RECIPIENT="${HERMES_DOTS_AGE_RECIPIENT:-age1wwh5yf2j0jygr8p3z44j32hsf7l6x08sr0gmqzzmfq3wrrfw6v7sxq2fyp}"
+
+# live path (relative to ~/.hermes) : encrypted file name
+SECRET_FILES=(
+  "config.yaml:config.yaml.sops"
+  ".env:env.sops"
+  "auth.json:auth.json.sops"
+  "memories/MEMORY.md:MEMORY.md.sops"
+  "memories/USER.md:USER.md.sops"
+)
+PLAIN_FILES=("SOUL.md")
+
+die() { echo "hermes-dots: $*" >&2; exit 1; }
+log() { echo "hermes-dots: $*"; }
+
+sops_run() {
+  if [[ -f "$KEY_FILE" ]]; then SOPS_AGE_KEY_FILE="$KEY_FILE" sops "$@"; else sops "$@"; fi
+}
+decrypt() { sops_run -d --input-type json --output-type binary "$1"; }
+
+own() {
+  chown "$TARGET_USER:$TARGET_USER" "$@" 2>/dev/null || true
+}
+
+# The skins live in PLAIN_DIR/skins and ~/.hermes/skins: every *.yaml in either.
+plain_list() {
+  local f
+  for f in "${PLAIN_FILES[@]}"; do echo "$f"; done
+  { find "$PLAIN_DIR/skins" "$HERMES_DIR/skins" -maxdepth 1 -name '*.yaml' -printf 'skins/%f\n' 2>/dev/null || true; } | sort -u
+}
+
+# Writes stdin to `dest` atomically (temp file beside it, then rename), mode 600.
+install_from_stdin() {
+  local dest="$1" tmp
+  mkdir -p "$(dirname "$dest")"
+  own "$(dirname "$dest")"
+  tmp="$(mktemp "$dest.hermes-dots.XXXXXX")"
+  if ! cat >"$tmp"; then rm -f "$tmp"; return 1; fi
+  chmod 600 "$tmp"
+  own "$tmp"
+  mv -f "$tmp" "$dest"
+}
+
+capture() {
+  command -v sops >/dev/null 2>&1 || die "sops not found"
+  mkdir -p "$SECRETS_DIR" "$PLAIN_DIR/skins"
+  local entry live enc tmp changed=0
+  for entry in "${SECRET_FILES[@]}"; do
+    live="$HERMES_DIR/${entry%%:*}"; enc="$SECRETS_DIR/${entry##*:}"
+    [[ -f "$live" ]] || { log "skip ${entry%%:*} (not in $HERMES_DIR)"; continue; }
+    # sops output differs on every run: re-encrypt only when the content changed, so an unchanged file leaves no git diff.
+    if [[ -f "$enc" ]] && cmp -s <(decrypt "$enc") "$live"; then continue; fi
+    tmp="$(mktemp "$enc.XXXXXX")"
+    if ! sops_run -e --age "$AGE_RECIPIENT" --input-type binary --output-type json "$live" >"$tmp"; then
+      rm -f "$tmp"; die "could not encrypt ${entry%%:*}"
+    fi
+    mv -f "$tmp" "$enc"
+    log "encrypted ${entry%%:*} -> secrets/hermes/${entry##*:}"
+    changed=1
+  done
+  local rel
+  while IFS= read -r rel; do
+    [[ -f "$HERMES_DIR/$rel" ]] || continue
+    cmp -s "$HERMES_DIR/$rel" "$PLAIN_DIR/$rel" 2>/dev/null && continue
+    mkdir -p "$(dirname "$PLAIN_DIR/$rel")"
+    cp -f "$HERMES_DIR/$rel" "$PLAIN_DIR/$rel"
+    log "copied $rel -> dotfiles/hermes/$rel"
+    changed=1
+  done < <(plain_list)
+  (( changed )) || log "repo already matches $HERMES_DIR"
+}
+
+restore() {
+  local force=0
+  [[ "${1:-}" == "-f" || "${1:-}" == "--force" ]] && force=1
+  local entry live enc rel src
+  mkdir -p "$HERMES_DIR"; chmod 700 "$HERMES_DIR"; own "$HERMES_DIR"
+  if command -v sops >/dev/null 2>&1; then
+    for entry in "${SECRET_FILES[@]}"; do
+      live="$HERMES_DIR/${entry%%:*}"; enc="$SECRETS_DIR/${entry##*:}"
+      [[ -f "$enc" ]] || continue
+      if [[ -f "$live" ]]; then
+        (( force )) || continue
+        cmp -s <(decrypt "$enc") "$live" && continue
+        cp -p "$live" "$live.bak"
+      fi
+      decrypt "$enc" | install_from_stdin "$live" || die "could not decrypt secrets/hermes/${entry##*:}"
+      log "restored ${entry%%:*}"
+    done
+  else
+    log "sops not found; skipping the encrypted files"
+  fi
+  while IFS= read -r rel; do
+    src="$PLAIN_DIR/$rel"; live="$HERMES_DIR/$rel"
+    [[ -f "$src" ]] || continue
+    if [[ -f "$live" ]]; then
+      (( force )) || continue
+      cmp -s "$src" "$live" && continue
+      cp -p "$live" "$live.bak"
+    fi
+    install_from_stdin "$live" <"$src"
+    log "restored $rel"
+  done < <(plain_list)
+}
+
+status() {
+  local entry live enc rel state
+  for entry in "${SECRET_FILES[@]}"; do
+    live="$HERMES_DIR/${entry%%:*}"; enc="$SECRETS_DIR/${entry##*:}"
+    if [[ ! -f "$enc" ]]; then state="not in repo"
+    elif [[ ! -f "$live" ]]; then state="missing live"
+    elif cmp -s <(decrypt "$enc") "$live"; then state="same"
+    else state="differs"; fi
+    printf '  %-22s %s (encrypted)\n' "${entry%%:*}" "$state"
+  done
+  while IFS= read -r rel; do
+    if [[ ! -f "$PLAIN_DIR/$rel" ]]; then state="not in repo"
+    elif [[ ! -f "$HERMES_DIR/$rel" ]]; then state="missing live"
+    elif cmp -s "$PLAIN_DIR/$rel" "$HERMES_DIR/$rel"; then state="same"
+    else state="differs"; fi
+    printf '  %-22s %s\n' "$rel" "$state"
+  done < <(plain_list)
+}
+
+case "${1:-}" in
+  capture) capture ;;
+  restore) shift; restore "${1:-}" ;;
+  status) status ;;
+  *) sed -n '2,8p' "$SELF" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

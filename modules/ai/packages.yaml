@@ -6,3 +6,4 @@ packages:
   - npm
   - python
   - python-pipx
+  - sops # hermes-dots: Hermes' encrypted config
