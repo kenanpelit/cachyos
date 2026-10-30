@@ -2238,6 +2238,8 @@ end
 local function osc_visible(visible)
     if state.osc_visible ~= visible then
         state.osc_visible = visible
+        -- margo-progressbar.lua steps aside while the controls are on screen
+        mp.set_property_native("user-data/osc/visible", visible)
         update_margins()
         adjust_subtitles(true)
     end
@@ -3051,6 +3053,7 @@ local function hide_osc()
         -- typically hide happens at render() from tick(), but now tick() is
         -- no-op and won't render again to remove the osc, so do that manually.
         state.osc_visible = false
+        mp.set_property_native("user-data/osc/visible", false) -- margo-progressbar.lua comes back
         adjust_subtitles(false)
         render_wipe()
     elseif user_opts.fadeduration > 0 then
