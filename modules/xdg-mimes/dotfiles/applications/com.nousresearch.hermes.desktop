@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hermes
+GenericName=Hermes Desktop
+Comment=Launch Hermes Desktop
+Exec=/home/kenan/.local/bin/hermes desktop --skip-build
+Icon=hermes
+Terminal=false
+Categories=Utility;
+StartupNotify=true
+StartupWMClass=com.nousresearch.hermes
