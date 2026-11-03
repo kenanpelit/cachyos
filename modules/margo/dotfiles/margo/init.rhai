@@ -47,18 +47,12 @@ on_window_open(|| {
     }
 });
 
-// ── 2) Uygulamaya göre LAYOUT ───────────────────────────────────────────────
-// Görsel/video açılınca o tag'i monocle'a al (tam ekran tek pencere hissi);
-// terminal/editör açılınca scroller'a dön. (Mevcut tag'i değiştirir, pencereyi
-// taşımaz — sarsıcı değil.)
-on_window_open(|| {
-    let app = focused_appid();
-    if app == "imv" || app == "mpv" || app.contains("feh") {
-        dispatch("setlayout", ["monocle"]);
-    } else if app == "kitty" || app.contains("Code") {
-        dispatch("setlayout", ["scroller"]);
-    }
-});
+// ── 2) Uygulamaya göre LAYOUT — kaldırıldı (2026-11-03) ───────────────────────
+// mpv/imv/feh açılınca tag'i monocle'a, kitty/Code açılınca scroller'a alıyordu.
+// mpv windowrule ile zaten yüzen (floating) bir pencere olduğu için her video
+// açılışında arkadaki düzen bozuluyordu; kitty dalı da tag 9'un `tile`
+// düzenini scroller'a çeviriyordu. Tag başına düzen artık conf.d/taglayouts.conf
+// (Settings → Tiling Layout) ile yönetiliyor.
 
 // ── 3) Belirli bir uygulamayı kendi TAG'ine yönlendir (opsiyonel) ────────────
 // Klasik "Spotify hep 8. tag'e" kuralı. `tag` pencereyi taşır ama görünümde
@@ -79,9 +73,8 @@ on_output_change(|name| {
 });
 
 // ── 5) Pencere kapanınca (parametre ALAN hook örneği) ────────────────────────
-// Son pencere de kapanıp masaüstü boşaldıysa scroller'a dön.
-on_window_close(|appid, title| {
-    if client_count() <= 1 {
-        dispatch("setlayout", ["scroller"]);
-    }
-});
+// Önceden son pencere kapanınca tag'i scroller'a alıyordu; 2) ile birlikte
+// kaldırıldı — tag'in kendi düzenini (taglayouts.conf) eziyordu.
+// on_window_close(|appid, title| {
+//     dispatch("spawn", ["notify-send 'kapandı' '" + appid + "'"]);
+// });
