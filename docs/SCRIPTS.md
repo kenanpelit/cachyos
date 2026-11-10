@@ -381,6 +381,13 @@ These scripts are located in `modules/scripts/bin` and are symlinked to `~/.loca
 
 ---
 
+### 📂 `router-reboot.py`
+**Description:** No description provided.
+
+**Usage:** `router-reboot.py`
+
+---
+
 ### 📂 `runbg`
 **Description:** Background command runner wrapper (nohup-like)
 
