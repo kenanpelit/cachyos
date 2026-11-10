@@ -23,5 +23,12 @@ if (( now_ms - last_ms < debounce_ms )); then
 	exit 0
 fi
 
+# Media keys only steer a running mtune. When the phone shares this
+# Bluetooth headset, a message tone makes the headset send Pause then Play;
+# with no mtune running that must not start one (or its music).
+if ! busctl --user status org.mpris.MediaPlayer2.org.margo.Tune >/dev/null 2>&1; then
+	exit 0
+fi
+
 echo "$now_ms" >"$stamp_file"
 exec mshellctl mtune "$cmd"
