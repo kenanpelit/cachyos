@@ -2,6 +2,7 @@ description: Packages installed manually on the system (auto-synced by mdots)
 packages:
 - adw-gtk-theme
 - anki
+- arch-audit
 - auth-tarball-from-git
 - blueman
 - chatgpt-desktop-bin
@@ -13,8 +14,12 @@ packages:
 - gr-lora_sdr-git
 - graphify
 - herdr-bin
+- hermes-one-bin
+- intel-compute-runtime
 - jdk21-openjdk
 - just
+- level-zero-loader
+- noise-suppression-for-voice
 - playwright
 - python-pywhispercpp-vulkan
 - remmina-plugin-anydesk-git
@@ -23,6 +28,7 @@ packages:
 - sayonara-player
 - shelly
 - shelly-flatpak-backend
+- tesseract-data-tur
 exclude: []
 conflicts: []
 pre_install_hook: null
