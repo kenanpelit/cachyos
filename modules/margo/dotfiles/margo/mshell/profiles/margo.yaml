@@ -74,6 +74,9 @@ bars:
     system_update:
       check_interval_minutes: 720
       check_flatpak: false
+    cpu_dashboard:
+      show_gpu: true
+      show_ram: true
     hidden_bars:
     - name: right
       widgets:
@@ -139,14 +142,21 @@ bars:
     - AlarmClock
     - KeepAwake
     - Notes
+    - Github
+    - Podman
+    - SystemUpdate
+    - Ai
+    - Translate
+    - Usb
+    - Lyrics
     - !Custom plugin:ambient-sound:ambient
     - !Custom plugin:breathing:breathing
-    - SystemUpdate
-    - Keybinds
-    - Ai
-    - Podman
-    - Lyrics
-    - Translate
+    - !Custom plugin:qr-generator:qr
+    - Countdown
+    - Lock
+    - RecordingIndicator
+    - Scratchpads
+    - Agents
   bottom_bar:
     minimum_height: 28
     left_widgets:
@@ -191,6 +201,9 @@ menus:
   vpn_menu:
     minimum_width: 520
   ai_menu:
+    minimum_width: 640
+    maximum_height: 1080
+  agents_menu:
     minimum_width: 640
     maximum_height: 1080
   notes_menu:
@@ -456,6 +469,12 @@ audio:
   default_output_volume: 30
   default_input_volume: 5
 control_center:
+  mirror: true
+  hotspot: true
+  mic_denoise: true
+  thinkpad_led: true
+  custom_shortcut: true
+  internal_keyboard: true
   tile_order:
   - wifi
   - bluetooth
@@ -473,6 +492,9 @@ control_center:
   - dnd
   - dark_mode
   - color_picker
+  - mic_denoise
+  - mirror
+  - hotspot
 toasts:
   position: TopLeft
 config_version: 4
