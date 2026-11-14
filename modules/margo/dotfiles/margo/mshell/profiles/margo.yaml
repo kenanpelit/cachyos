@@ -96,14 +96,12 @@ bars:
   top_bar:
     minimum_height: 36
     left_widgets:
-    - MargoTags
-    - Separator
     - MargoLayoutSwitcher
     - Separator
+    - MargoTags
+    - Separator
     - ActiveWindow
-    - Separator
     center_widgets:
-    - Separator
     - Catwalk
     - Separator
     - Weather
@@ -112,8 +110,9 @@ bars:
     - Separator
     - Notifications
     - Separator
-    - HiddenBar
+    - Agents
     - Separator
+    - HiddenBar
     - VpnIndicator
     right_widgets:
     - !HiddenBarNamed right
@@ -243,6 +242,25 @@ menus:
     maximum_height: 920
   session_menu:
     position: Bottom
+  mdash_menu:
+    position: Top
+    widgets:
+    - !Dashboard
+      tabs:
+      - tab: Today
+        visible: true
+        hidden_cards: []
+      - tab: Controls
+        visible: true
+        hidden_cards: []
+      - tab: System
+        visible: true
+        hidden_cards: []
+      - tab: Tools
+        visible: true
+        hidden_cards: []
+    minimum_width: 1080
+    maximum_height: 0
   margo_layout_menu:
     position: TopLeft
 notifications:
