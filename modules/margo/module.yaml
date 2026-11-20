@@ -62,7 +62,5 @@ dotfiles:
     target: ~/.config/systemd/user/mpower.service
   - source: dotfiles/systemd/user/mshell.service.d/10-margo-session.conf
     target: ~/.config/systemd/user/mshell.service.d/10-margo-session.conf
-  - source: dotfiles/systemd/user/mshell.service.d/20-intel-noccs.conf
-    target: ~/.config/systemd/user/mshell.service.d/20-intel-noccs.conf
 post_install_hook: scripts/install.sh
 post_hook_behavior: always
