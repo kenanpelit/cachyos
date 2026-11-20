@@ -269,6 +269,7 @@ wallpaper:
   wallpaper_dir: /home/kenan/Pictures/wallpapers/others
   rotation_enabled: true
   daily_wallpaper_source: nasa
+  brightness_percent: 50
 idle:
   dim_timeout_minutes: 20
   lock_timeout_minutes: 25
